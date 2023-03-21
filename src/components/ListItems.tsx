@@ -2,31 +2,31 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { useEffect, useState } from "react";
 import styled from 'styled-components'
 import { getContentModel, listModel } from "../client";
+import { useDispatch } from "react-redux";
+import { setModelId } from "../store/slice";
+import { Link } from "react-router-dom";
 
 const ListItems = ({header, arr }:ListItemsProp) => { 
   const [showList, setShowList] = useState(false)
-  useEffect(()=>{
-    console.log({showList})
-  },[showList])
+  
+  const dispatch = useDispatch()
 
-  const toggleList = () => {
-    console.log("clicked")
+  
+    const toggleList = () => {
     setShowList(!showList)
   }
 
-  const getModelFields = async(modelId: string) => {
-    console.log(modelId[modelId.length -1] !== "s" ? modelId + "s" : modelId )
+  const selectModelId = (modelId: string) => {
     const modelIdFormatted = modelId[modelId.length -1] !== "s" ? modelId + "s" : modelId
 
-    const data = await getContentModel(modelId)
-    console.log(await listModel(modelId, data))
+    dispatch(setModelId(modelIdFormatted))
   }
 
   return (
     <ListItemsStyles>
       <label onClick={toggleList} className={`${showList ? 'active' : ""}`}>{header}</label> 
    <ListGroup  className={`group ${showList ? 'active' : ''}`}>
-      {!!arr && arr.map(item=><ListGroup.Item onClick={()=>getModelFields(item.modelId)} className={`group__item ${showList ? 'active' : ""}`}>{item.name}</ListGroup.Item>)}
+      {!!arr && arr.map(item=><ListGroup.Item onClick={()=>selectModelId(item.modelId)} className={`group__item ${showList ? 'active' : ""}`}><Link to="/model">{item.name}</Link></ListGroup.Item>)}
     </ListGroup>
     </ListItemsStyles>
   )

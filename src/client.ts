@@ -7,22 +7,13 @@ const webinyApi = axios.create({
   },
 });
 
-export const listModel = async (modelId: string, data: any) => {
+export const listModel = async (modelId: string, fields: any) => {
   // const arr1 = arr.map(el=> !!el.settings.models && el.settings?.models.find(model=>model.modelId)  )
   // const arr2 = arr1.map((el) => el.fieldId).join(" ");
-  const refInputField = data.fields.filter(el => el.renderer.name === "ref-input")
+  const refInputField = fields.filter(el => el.renderer.name === "ref-input")
  
-  const fieldss = []
 
-  const array =  refInputField.map(async field=>{
-    const refModel = await getContentModel(field.settings.models.find(model=>model.modelId).modelId)
-    return `${field.fieldId}{${refModel.titleFieldId}}`
-  })
-
-  console.log(await Promise.all(array))
-  
-
-  const arrMap =await Promise.all(data.fields.map(async field=> {
+  const arrMap =await Promise.all(fields.map(async field=> {
     const findRefModel = (field) => {return field.settings?.models?.find(model=>model?.modelId)?.modelId}
     const objFields = field?.settings?.fields
 
@@ -30,15 +21,16 @@ export const listModel = async (modelId: string, data: any) => {
 
     if (findRefModel(field)) {  
       const refModel = await getContentModel(findRefModel(field))
-    return `${field.fieldId}{${refModel.titleFieldId}}`    }
+      return `${field.fieldId}{${refModel.titleFieldId}}`
+    }
     else if(objFields) {
       console.log({objFields})
-      const objFieldsIds =await Promise.all(objFields.map(async el=>{ 
-        if(findRefModel(field)) {
-          const objFieldRefModel = await getContentModel(findRefModel(el))
-          
+      const objFieldsIds = await Promise.all(objFields.map(async el=>{ 
+        if(findRefModel(el)) {
+          const objFieldRefModel = await getContentModel(findRefModel(el)) 
+          return `${el.fieldId}{${objFieldRefModel.titleFieldId}}` 
         }
-        return el.fieldId
+        return `${el.fieldId}`
       }))
       return `${field.fieldId}{${objFieldsIds}}`
     }
@@ -47,13 +39,7 @@ export const listModel = async (modelId: string, data: any) => {
     }
   }))
 
-  console.log(arrMap)
-
-
-
-
-  
-  
+ 
   const modelIdFormatted = modelId[modelId.length -1] !== "s" ? modelId + "s" : modelId
 
   const res = await webinyApi.post("cms/read/en-US", {
@@ -77,8 +63,7 @@ export const listModel = async (modelId: string, data: any) => {
 }
 `,
   });
-  console.log(res);
-
+  return res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`].data; 
 };
 
 export const getContentModel = async (modelId: string) => {
@@ -128,7 +113,7 @@ titleFieldId
 `,
   });
   const { data } = res.data.data.getContentModel;
-  console.log(data);
+  console.log(data)
   return data;
   // listModel(modelId, fields);
 };
