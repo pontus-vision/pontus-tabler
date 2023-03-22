@@ -19,7 +19,7 @@ const ListItems = ({header, arr }:ListItemsProp) => {
   const selectModelId = (modelId: string) => {
     const modelIdFormatted = modelId[modelId.length -1] !== "s" ? modelId + "s" : modelId
 
-    dispatch(setModelId(modelIdFormatted))
+    dispatch(setModelId(modelId))
   }
 
   return (

@@ -118,6 +118,83 @@ titleFieldId
   // listModel(modelId, fields);
 };
 
+export const cmsGetContentModel = async (modelId: string) => {
+  // modelId = modelId[modelId.length-1] === "s" ? modelId.slice(0,-1) : modelId
+  console.log(modelId)
+
+  const data = webinyApi.post("cms/manage/en-US", {
+    
+    query: `query CmsGetContentModel($modelId: ID!) {
+  getContentModel(modelId: $modelId) {
+    data {
+      name
+      group {
+        id
+        name
+        __typename
+      }
+      description
+      modelId
+      savedOn
+      titleFieldId
+      lockedFields
+      layout
+      fields {
+        id
+        fieldId
+        storageId
+        type
+        label
+        placeholderText
+        helpText
+        predefinedValues {
+          enabled
+          values {
+            label
+            value
+            selected
+            __typename
+          }
+          __typename
+        }
+        multipleValues
+        renderer {
+          name
+          __typename
+        }
+        validation {
+          name
+          settings
+          message
+          __typename
+        }
+        listValidation {
+          name
+          settings
+          message
+          __typename
+        }
+        settings
+        __typename
+      }
+      __typename
+    }
+    error {
+      message
+      code
+      data
+      __typename
+    }
+    __typename
+  }
+}`,
+    variables: {
+      modelId
+    }
+  })
+  return data
+}
+
 export const getModels = async () => {
   const data = webinyApi.post("cms/read/en-US", {
     query: `{

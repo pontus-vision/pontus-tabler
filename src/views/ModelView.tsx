@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { getContentModel, listModel } from "../client";
+import { cmsGetContentModel, getContentModel, listModel } from "../client";
 
 const ModelView = () => {
   const {modelId} = useSelector(state => state.model)
-  const [modelList, setModelList] = useState<any[]>()
+  const [entriesList, setEntriesList] = useState<any[]>()
   const [headersList, setHeadersList] = useState<any[]>()
 
   const getModelFields = async(modelId: string) => {
     const contentModel = await getContentModel(modelId)
-   console.log(contentModel, modelId) 
+    
+    
+    const cmsContentModel = await cmsGetContentModel(modelId)
 
-    const modelContentList = await listModel(modelId, contentModel.fields) 
+    const {fields} = cmsContentModel.data.data.getContentModel.data
 
+
+    const modelContentList = await listModel(modelId, fields) 
+    setEntriesList(modelContentList)
     
    // setHeadersList(modelContentList.map(model=>{
    //    const {createdOn, createdBy, id, ownedBy, savedOn, entryId, ...rest} = model
    //    return rest
    //  }))
-    setHeadersList(contentModel.fields)
+    setHeadersList(fields)
 
     
   } 
@@ -28,6 +33,10 @@ const ModelView = () => {
     
 
   },[modelId])
+
+  useEffect(()=>{
+    console.log(entriesList)
+  },[entriesList])
 
   useEffect(()=>{
     console.log(headersList)
@@ -39,11 +48,13 @@ const ModelView = () => {
     <table className="table table-striped">
       <thead>
         <tr>
-            {!!headersList && headersList.map(key=><th>{key.label}</th>)}
+            {!!headersList && headersList.map(key=><th scope="col">{key.label}</th>)}
         </tr>
       </thead>
       <tbody>
-        
+        {!!entriesList && !!headersList && entriesList.map(entry=><tr>
+            {headersList.map(col=> <td>{typeof entry[col.fieldId] !== 'object' ? entry[col.fieldId] : ""}</td>)}
+          </tr>)}
       </tbody>
     </table>
     </>
