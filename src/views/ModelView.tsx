@@ -5,9 +5,9 @@ import { cmsGetContentModel, listModel } from "../client";
 import PVGridWebiny2 from "../pv-react/PVGridWebiny2";
 
 const ModelView = () => {
-  const { modelId } = useSelector((state) => state.model);
-  const [entriesList, setEntriesList] = useState<any[]>();
-  const [headersList, setHeadersList] = useState<any[]>();
+  const {model} = useSelector((state) => state.model);
+  const [entriesList, setEntriesList] = useState<any[]>([]);
+  const [headersList, setHeadersList] = useState<any[]>([]);
 
   const getModelFields = async (modelId: string) => {
     const cmsContentModel = await cmsGetContentModel(modelId);
@@ -25,8 +25,9 @@ const ModelView = () => {
     setHeadersList(fields);
   };
   useEffect(() => {
-    getModelFields(modelId);
-  }, [modelId]);
+    console.log(model, model.modelId)
+    getModelFields(model.modelId);
+  }, [model]);
 
   useEffect(() => {
     console.log(entriesList);
@@ -38,7 +39,7 @@ const ModelView = () => {
 
   return (
     <ModelViewStyles>
-      <h1>{modelId}</h1>
+      <h1>{model.name}</h1>
      <PVGridWebiny2 headers={headersList} rows={entriesList}/>
     </ModelViewStyles>
   );
