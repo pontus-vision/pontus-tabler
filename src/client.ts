@@ -27,8 +27,9 @@ export const listModel = async (modelId: string, fields: any) => {
       console.log({objFields})
       const objFieldsIds = await Promise.all(objFields.map(async el=>{ 
         if(findRefModel(el)) {
-          const objFieldRefModel = await getContentModel(findRefModel(el)) 
-          return `${el.fieldId}{${objFieldRefModel.titleFieldId}}` 
+          const objFieldRefModel = await cmsGetContentModel(findRefModel(el))
+          console.log({objFieldRefModel}) 
+            return `${el.fieldId}{${objFieldRefModel.data.data.getContentModel.data.titleFieldId}}` 
         }
         return `${el.fieldId}`
       }))
@@ -120,7 +121,7 @@ titleFieldId
 
 export const cmsGetContentModel = async (modelId: string) => {
   // modelId = modelId[modelId.length-1] === "s" ? modelId.slice(0,-1) : modelId
-  console.log(modelId)
+  
 
   const data = webinyApi.post("cms/manage/en-US", {
     
@@ -192,6 +193,8 @@ export const cmsGetContentModel = async (modelId: string) => {
       modelId
     }
   })
+
+  console.log(data)
   return data
 }
 

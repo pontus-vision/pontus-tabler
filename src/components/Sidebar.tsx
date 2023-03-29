@@ -49,7 +49,7 @@ const SidebarStyles = styled.div`
   display: flex;
   flex-direction: column; 
   gap: 1rem;
-  background-color: #ffffff73;
+  background-color: #ffffffeb;
   overflow-y: auto; 
   height: calc(100% - 3rem);
   translate: -100%;
