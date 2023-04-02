@@ -7,18 +7,16 @@ const webinyApi = axios.create({
   },
 });
 
-export const listModel = async (modelId: string, fields: any) => {
+export const listModel = async (modelId: string, fields: any, limit: number, after: string | null) => {
   // const arr1 = arr.map(el=> !!el.settings.models && el.settings?.models.find(model=>model.modelId)  )
   // const arr2 = arr1.map((el) => el.fieldId).join(" ");
   const refInputField = fields.filter(el => el.renderer.name === "ref-input")
  
+  console.log({after})
 
   const arrMap =await Promise.all(fields.map(async field=> {
     const findRefModel = (field) => {return field.settings?.models?.find(model=>model?.modelId)?.modelId}
     const objFields = field?.settings?.fields
-
-
-
     if (findRefModel(field)) {  
       const refModel = await getContentModel(findRefModel(field))
       return `${field.fieldId}{${refModel.titleFieldId}}`
@@ -45,26 +43,32 @@ export const listModel = async (modelId: string, fields: any) => {
 
   const res = await webinyApi.post("cms/read/en-US", {
     query: `
-{
-  list${capitalizeFirstLetter(modelIdFormatted)} {
-    data {
-      id
-      entryId
-      createdOn
-      savedOn
-      createdBy {
-        displayName
+    {
+      list${capitalizeFirstLetter(modelIdFormatted)} (limit: ${limit}, after: "${after}") {
+
+        data {
+          id
+          entryId
+          createdOn
+          savedOn
+          createdBy {
+            displayName
+          }
+          ownedBy {
+            displayName
+          } 
+          ${arrMap}
+        }
+        meta{
+          cursor
+          totalCount
+        }
       }
-      ownedBy {
-        displayName
-      } 
-      ${arrMap}
     }
-  }
-}
 `,
   });
-  return res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`].data; 
+  console.log(res)
+  return res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`]; 
 };
 
 export const getContentModel = async (modelId: string) => {

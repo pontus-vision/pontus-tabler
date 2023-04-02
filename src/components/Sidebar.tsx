@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import styled from 'styled-components'
 import { getModels } from "../client";
 import ListItems from "./ListItems";
@@ -7,6 +8,7 @@ const Sidebar = ({openedSidebar}:any) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false)
   const [showConfig, setShowConfig] = useState(false)
+  const dispatch = useDispatch()
 
   const fetchModels = async () => {
     const { data } = await getModels();
@@ -18,10 +20,10 @@ const Sidebar = ({openedSidebar}:any) => {
           acc[key].push(cur);
 
         return acc;
-      }, {})
+    }, {})
 
     const listModelsGroupedArr = Object.entries(listModelsGrouped)
-    console.log(listModelsGroupedArr)
+    
     setModels(listModelsGroupedArr);
     return data;
   };
@@ -34,6 +36,10 @@ const Sidebar = ({openedSidebar}:any) => {
   useEffect(()=>{
     console.log(openedSidebar)
   },[openedSidebar])
+
+  useEffect(()=>{
+    // dispatch(setModels(models))
+  },[models])
 
   return (
     <SidebarStyles className={`${openedSidebar ? "active" : ""}`}>

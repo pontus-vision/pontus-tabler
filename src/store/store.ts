@@ -3,7 +3,8 @@ import modelReducer  from './slice'
 
 export const store = configureStore({
   reducer: {
-    model: modelReducer
+    model: modelReducer,
+
   },
 })
 
