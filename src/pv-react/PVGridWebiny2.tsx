@@ -8,6 +8,8 @@ import { ColDef, ColumnApi, GridApi, IGroupCellRendererParams, IServerSideDataso
 import { useSelector } from "react-redux";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 import { current } from "immer";
+import Spinner from 'react-bootstrap/Spinner';
+import { Button } from "semantic-ui-react";
 
 type Props = {
   headers: any[]
@@ -21,7 +23,7 @@ const PVGridWebiny2 = ({headers, rows, getModelFields}:Props) => {
   const [modelChanged, setModelChanged] = useState<boolean>(false)
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalCount, setTotalCount] = useState<number>(0)
-  const [perPage, setPerPage] = useState<number>(2)
+  const [perPage, setPerPage] = useState<number>(10)
   const [pages, setPages] = useState<Set<string> | Set<null>>(new Set([null]))
   const {model} = useSelector(state=> state.model) 
   const totalPages = Math.ceil(totalCount / perPage)
@@ -130,6 +132,7 @@ const PVGridWebiny2 = ({headers, rows, getModelFields}:Props) => {
   return (
     <PVGridWebinyStyles>
       <div className="ag-theme-alpine">
+        {!isLoaded && <div className="lds-dual-ring"></div>}
         <AgGridReact  
           groupSelectsChildren={true} 
           rowGroupPanelShow={'always'} 
@@ -137,6 +140,7 @@ const PVGridWebiny2 = ({headers, rows, getModelFields}:Props) => {
           rowData={rowData}
           defaultColDef={defaultColDef}
           columnDefs={columnDefs}></AgGridReact>
+        {!isLoaded && <div className="white"></div>}
       </div>
       {!modelChanged && <div className="pagination-panel">
         <button onClick={()=> changePage('DECREASE') } ><i className="fa-solid fa-angle-left"></i></button>
@@ -152,7 +156,50 @@ const PVGridWebinyStyles = styled.div`
     max-width: 90%;
     height: 477px;
     margin-inline: auto;
+    position: relative;
+    .white{
+      width: 100%;
+      height: 100%;
+      background-color: white;
+      position: absolute;
+      z-index:1;
+      top: 0;
+    }
   }
+.lds-dual-ring {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  transform: translate(-50%,-50%);
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  z-index: 2;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid blue;
+  border-color: blue transparent blue transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 `
 
 export default PVGridWebiny2;
