@@ -7,68 +7,81 @@ const webinyApi = axios.create({
   },
 });
 
-export const listModel = async (modelId: string, fields: any, limit: number, after: string | null) => {
+export const listModel = async (
+  modelId: string,
+  fields: any,
+  limit: number,
+  after: string | null
+) => {
   // const arr1 = arr.map(el=> !!el.settings.models && el.settings?.models.find(model=>model.modelId)  )
   // const arr2 = arr1.map((el) => el.fieldId).join(" ");
-  const refInputField = fields.filter(el => el.renderer.name === "ref-input")
- 
-  console.log({after})
+  const refInputField = fields.filter((el) => el.renderer.name === "ref-input");
 
-  const arrMap =await Promise.all(fields.map(async field=> {
-    const findRefModel = (field) => {return field.settings?.models?.find(model=>model?.modelId)?.modelId}
-    const objFields = field?.settings?.fields
-    if (findRefModel(field)) {  
-      const refModel = await getContentModel(findRefModel(field))
-      return `${field.fieldId}{${refModel.titleFieldId}}`
-    }
-    else if(objFields) {
-      console.log({objFields})
-      const objFieldsIds = await Promise.all(objFields.map(async el=>{ 
-        if(findRefModel(el)) {
-          const objFieldRefModel = await cmsGetContentModel(findRefModel(el))
-          console.log({objFieldRefModel}) 
-            return `${el.fieldId}{${objFieldRefModel.data.data.getContentModel.data.titleFieldId}}` 
-        }
-        return `${el.fieldId}`
-      }))
-      return `${field.fieldId}{${objFieldsIds}}`
-    }
-    else {
-      return field.fieldId
-    }
-  }))
+  const arrMap = await Promise.all(
+    fields.map(async (field) => {
+      const findRefModel = (field) => {
+        return field.settings?.models?.find((model) => model?.modelId)?.modelId;
+      };
+      const objFields = field?.settings?.fields;
+      if (findRefModel(field)) {
+        const refModel = await getContentModel(findRefModel(field));
+        return `${field.fieldId}{${refModel.titleFieldId}}`;
+      } else if (objFields) {
+        console.log({ objFields });
+        const objFieldsIds = await Promise.all(
+          objFields.map(async (el) => {
+            if (findRefModel(el)) {
+              const objFieldRefModel = await cmsGetContentModel(
+                findRefModel(el)
+              );
+              console.log({ objFieldRefModel });
+              return `${el.fieldId}{${objFieldRefModel.data.data.getContentModel.data.titleFieldId}}`;
+            }
+            return `${el.fieldId}`;
+          })
+        );
+        return `${field.fieldId}{${objFieldsIds}}`;
+      } else {
+        return field.fieldId;
+      }
+    })
+  );
 
- 
-  const modelIdFormatted = modelId[modelId.length -1] !== "s" ? modelId + "s" : modelId
-
-  const res = await webinyApi.post("cms/read/en-US", {
-    query: `
-    {
-      list${capitalizeFirstLetter(modelIdFormatted)} (limit: ${limit}, after: "${after}") {
-
-        data {
-          id
-          entryId
-          createdOn
-          savedOn
-          createdBy {
-            displayName
+  const modelIdFormatted =
+    modelId[modelId.length - 1] !== "s" ? modelId + "s" : modelId;
+  try {
+    const res = await webinyApi.post("cms/read/en-US", {
+      query: `
+      {
+        list${capitalizeFirstLetter(
+          modelIdFormatted
+        )} (limit: ${limit}, after: "${after}") {
+          data {
+            id
+            entryId
+            createdOn
+            savedOn
+            createdBy {
+              displayName
+            }
+            ownedBy {
+              displayName
+            } 
+            ${arrMap}
           }
-          ownedBy {
-            displayName
-          } 
-          ${arrMap}
-        }
-        meta{
-          cursor
-          totalCount
+          meta{
+            cursor
+            totalCount
+          }
         }
       }
-    }
-`,
-  });
-  console.log(res)
-  return res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`]; 
+    `,
+    });
+    console.log(res);
+    return res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`];
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const getContentModel = async (modelId: string) => {
@@ -118,19 +131,17 @@ titleFieldId
 `,
   });
   const { data } = res.data.data.getContentModel;
-  console.log(data)
+  console.log(data);
   return data;
   // listModel(modelId, fields);
 };
 
 export const cmsGetContentModel = async (modelId: string) => {
   // modelId = modelId[modelId.length-1] === "s" ? modelId.slice(0,-1) : modelId
-  
 
   const data = webinyApi.post("cms/manage/en-US", {
-    
     query: `query CmsGetContentModel($modelId: ID!) {
-  getContentModel(modelId: $modelId) {
+    getContentModel(modelId: $modelId) {
     data {
       name
       group {
@@ -194,13 +205,13 @@ export const cmsGetContentModel = async (modelId: string) => {
   }
 }`,
     variables: {
-      modelId
-    }
-  })
+      modelId,
+    },
+  });
 
-  console.log(data)
-  return data
-}
+  console.log(data);
+  return data;
+};
 
 export const getModels = async () => {
   const data = webinyApi.post("cms/read/en-US", {
