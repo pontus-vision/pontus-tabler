@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { cmsGetContentModel, listModel } from "../client";
 import PVGridWebiny2 from "../pv-react/PVGridWebiny2";
+import { Routes, Route, Outlet } from "react-router-dom";
 import AggridExample from "../components/Aggrid-teste";
 import {
   ModelContentList,
@@ -10,6 +11,9 @@ import {
   ModelContentListData,
   Meta,
 } from "../types";
+import Form from "../components/Form";
+import { useParams } from "react-router-dom";
+import GridExample from "../components/Aggrid-teste";
 
 export type GetModelFieldsReturn = {
   columnNames: ModelColName[];
@@ -21,21 +25,25 @@ const ModelView = () => {
   const { model } = useSelector((state) => state.model);
   const [entriesList, setEntriesList] = useState<any[]>([]);
   const [headersList, setHeadersList] = useState<any[]>([]);
+  const { modelId } = useParams();
+  const [isFormLoaded, setIsFormLoaded] = useState(false);
 
-  const getModelFields: Promise<GetModelFieldsReturn> = async (
+  const getModelFields = async (
     modelId: string,
     limit: number,
-    after: string | null
+    after: string | null,
+    fieldsSearches = null
   ) => {
     const cmsContentModel = await cmsGetContentModel(modelId);
-    console.log({modelId, cmsContentModel})
+    console.log({ modelId, cmsContentModel });
     const { fields: columnNames } =
       cmsContentModel.data.data.getContentModel.data;
     const { data: modelContentListData, meta } = await listModel(
       modelId,
       columnNames,
       limit,
-      after
+      after,
+      fieldsSearches
     );
 
     console.log({ columnNames });
@@ -44,9 +52,9 @@ const ModelView = () => {
   };
 
   useEffect(() => {
-    // console.log(model, model.modelId)
+    console.log(modelId);
     // getModelFields(model.modelId, 9, n);
-  }, [model]);
+  }, [modelId]);
 
   useEffect(() => {
     console.log(entriesList);
@@ -59,12 +67,16 @@ const ModelView = () => {
   return (
     <ModelViewStyles>
       <h1>{model.name}</h1>
-      <PVGridWebiny2
-        headers={headersList}
-        rows={entriesList}
-        getModelFields={getModelFields}
-      />
-      {/* <AggridExample />  */}
+      <label onClick={() => setIsFormLoaded(true)}>Nova Entrada</label>
+      {!isFormLoaded && (
+        <PVGridWebiny2
+          headers={headersList}
+          rows={entriesList}
+          getModelFields={getModelFields}
+        />
+      )}
+      {isFormLoaded && <Form />}
+      {/* <Outlet  /> */}
     </ModelViewStyles>
   );
 };

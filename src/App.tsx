@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { Routes, Route } from 'react-router-dom';
 import ModelView from './views/ModelView';
+import Form from './components/Form'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -16,7 +17,8 @@ function App() {
      <Header setOpenedSidebar={setOpenedSidebar} openedSidebar={openedSidebar} /> 
       <Sidebar openedSidebar={openedSidebar} /> 
       <Routes>
-        <Route path="/model" element={<ModelView modelId={modelId} />}/>
+        <Route path="/model/:modelId" element={<ModelView />}/>
+        <Route path="/model/:modelId/form" element={<Form />}/>
       </Routes>
     </>
   )

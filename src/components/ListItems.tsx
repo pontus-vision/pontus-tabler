@@ -22,11 +22,12 @@ const ListItems = ({header, arr }:ListItemsProp) => {
     dispatch(setModel(model))
   }
 
+  useEffect(()=>{console.log(arr)},[arr])
   return (
     <ListItemsStyles>
       <label onClick={toggleList} className={`${showList ? 'active' : ""}`}>{header}</label> 
      <ListGroup  className={`group ${showList ? 'active' : ''}`}>
-      {!!arr && arr.map(item=><ListGroup.Item onClick={()=>selectModelId(item)} className={`group__item ${showList ? 'active' : ""}`}><Link to="/model">{item.name}</Link></ListGroup.Item>)}
+      {!!arr && arr.map(item=><ListGroup.Item onClick={()=>selectModelId(item)} className={`group__item ${showList ? 'active' : ""}`}><Link to={`/model/${item.modelId}`}>{item.name}</Link></ListGroup.Item>)}
     </ListGroup>
     </ListItemsStyles>
   )
