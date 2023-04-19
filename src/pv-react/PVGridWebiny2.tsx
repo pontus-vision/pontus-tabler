@@ -42,6 +42,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
   const [cursors, setCursors] = useState(new Set([null]));
   const [indexPage, setIndexPage] = useState<number>(0);
   const [gridApi, setGridApi] = useState(null);
+  const [showGrid, setShowGrid] = useState(true)
   const { modelId } = useParams();
   const gridStyle = useMemo(() => ({ height: "30rem", width: "100%" }), []);
   const { model } = useSelector((state: any) => state.model);
@@ -53,6 +54,8 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
   const getDataSource = () => {
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
+        if(!showGrid) return
+
         try {
           const pageSize = params.endRow - params.startRow;
 
@@ -150,6 +153,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
     };
     return datasource;
   };
+
   function onFirstDataRendered(params) {
     gridRef.current = params.api;
   }
@@ -162,7 +166,10 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
   }
 
   useEffect(() => {
-    resetFilters()
+    setShowGrid(false)
+    setTimeout(()=>{
+      setShowGrid(true) 
+    },10)
   }, [modelId]);
 
   const gridOptions: GridOptions = {
@@ -190,7 +197,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
 
   return (
     <PVGridWebinyStyles>
-      <div style={gridStyle} className="ag-theme-alpine">
+      {showGrid && <div style={gridStyle} className="ag-theme-alpine">
         <AgGridReact
           enableRangeSelection={true}
           paginationAutoPageSize={true}
@@ -203,7 +210,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
           // maxConcurrentDatasourceRequests={1}
           columnDefs={columnDefs}
         ></AgGridReact>
-      </div>
+      </div>}
     </PVGridWebinyStyles>
   );
 };

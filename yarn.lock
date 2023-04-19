@@ -1858,6 +1858,11 @@ find-root@^1.1.0:
   resolved "https://registry.yarnpkg.com/find-root/-/find-root-1.1.0.tgz#abcfc8ba76f708c42a97b3d685b7e9450bfb9ce4"
   integrity sha512-NKfW6bec6GfKc0SGx1e07QZY9PE99u0Bft/0rzSD5k3sO/vwkVUpDUKVm5Gpp5Ue3YfShPFTX2070tDs5kB9Ng==
 
+flexlayout-react@^0.7.7:
+  version "0.7.7"
+  resolved "https://registry.yarnpkg.com/flexlayout-react/-/flexlayout-react-0.7.7.tgz#4f2fcb39e4d8e042c507e809c89cff8ab7171bde"
+  integrity sha512-BOS+lueEBdLVsrB2Jekr/z4WIuerMhkDhYcT+3E56o/ZHz6xkmv8YEkB9qimrGxRt2uAnozzH5VPUnxXMQCu0Q==
+
 follow-redirects@^1.15.0:
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
@@ -1955,6 +1960,11 @@ globals@^11.1.0:
   version "11.12.0"
   resolved "https://registry.yarnpkg.com/globals/-/globals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
   integrity sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==
+
+golden-layout@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/golden-layout/-/golden-layout-2.6.0.tgz#aff90f77262c7fd6b6d8fbe2a2d222e24999b9a9"
+  integrity sha512-sIVQCiRWOymHbVD1Aw/T9/ijbPYAVGBlgGYd1N9MRKfcyBNSpjr87Vg9nSHm+RCT8ELrvK8IJYJV0QRJuVUkCQ==
 
 gopd@^1.0.1:
   version "1.0.1"

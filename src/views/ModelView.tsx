@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { cmsGetContentModel, listModel } from "../client";
@@ -14,6 +14,8 @@ import {
 import Form from "../components/Form";
 import { useParams } from "react-router-dom";
 import GridExample from "../components/Aggrid-teste";
+import ReactDOM from "react-dom";
+import GoldenLayout from "golden-layout";
 
 export type GetModelFieldsReturn = {
   columnNames: ModelColName[];
@@ -27,6 +29,8 @@ const ModelView = () => {
   const [headersList, setHeadersList] = useState<any[]>([]);
   const { modelId } = useParams();
   const [isFormLoaded, setIsFormLoaded] = useState(false);
+  const [showGrid, setShowGrid] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getModelFields = async (
     modelId: string,
@@ -63,18 +67,75 @@ const ModelView = () => {
   useEffect(() => {
     console.log(headersList);
   }, [headersList]);
+  useEffect(() => {
+    setShowGrid(false);
+    setTimeout(() => {
+      setShowGrid(true);
+    }, 1);
+  }, [modelId]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const config: GoldenLayout.Config = {
+        content: [
+          {
+            type: "row",
+            content: [
+              {
+                type: "component",
+                componentName: "MyComponent",
+                title: "Component 1",
+                componentState: { title: "Component 1" },
+              },
+              {
+                type: "component",
+                componentName: "MyComponent",
+                title: "Component 2",
+                componentState: { title: "Component 2" },
+              },
+            ],
+          },
+        ],
+      };
+
+      const layout = new GoldenLayout(config, containerRef.current);
+
+      layout.registerComponent("MyComponent", (container, state) => {
+        container.getElement().html(`<div id="${state.title}"></div>`);
+        const el = document.getElementById(state.title);
+        if (el) {
+          ReactDOM.render(
+            <PVGridWebiny2
+              headers={headersList}
+              rows={entriesList}
+              getModelFields={getModelFields}
+            />,
+            el
+          );
+        }
+      });
+
+      layout.init();
+
+      return () => {
+        layout.destroy();
+      };
+    }
+  }, []);
 
   return (
     <ModelViewStyles>
       <h1>{model.name}</h1>
       <label onClick={() => setIsFormLoaded(true)}>Nova Entrada</label>
-      {!isFormLoaded && (
+      {showGrid && (
         <PVGridWebiny2
           headers={headersList}
           rows={entriesList}
           getModelFields={getModelFields}
         />
       )}
+      <div ref={containerRef} style={{ width: "100%", height: "100vh" }}></div>
+
       {isFormLoaded && <Form />}
       {/* <Outlet  /> */}
     </ModelViewStyles>
