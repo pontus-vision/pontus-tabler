@@ -1,4 +1,12 @@
-import { Children, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Children,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AgGridReact } from "ag-grid-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "ag-grid-community/styles/ag-grid.css";
@@ -32,29 +40,40 @@ import {
 } from "../client";
 
 type Props = {
-  headers: any[];
-  rows: ModelContentListData[];
+  title: string;
+  onValueChange: (title: string, value: number) => void;
   getModelFields: any;
 };
 
-const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
+const PVGridWebiny2 = ({
+  title,
+  onValueChange,
+  lastState,
+  getModelFields,
+}: Props) => {
+  const [columnState, setColumnState] = useState(null);
+  const [filterState, setFilterState] = useState(null);
+  const [columnApi, setColumnApi] = useState(null);
   const [columnDefs, setColumnDefs] = useState<SetStateAction<any>>([]);
   const [cursors, setCursors] = useState(new Set([null]));
   const [indexPage, setIndexPage] = useState<number>(0);
   const [gridApi, setGridApi] = useState(null);
-  const [showGrid, setShowGrid] = useState(true)
+  const [showGrid, setShowGrid] = useState(true);
   const { modelId } = useParams();
-  const gridStyle = useMemo(() => ({ height: "30rem", width: "100%" }), []);
+  const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
   const { model } = useSelector((state: any) => state.model);
   const [rowData, setRowData] = useState([]);
-  const gridRef = useRef()
+  const gridRef = useRef(null);
 
-  useEffect(() => {}, [modelId]);
+  useEffect(() => {
+    if (!columnState) return;
+    onValueChange(title, columnState);
+  }, [columnState, title, onValueChange]);
 
   const getDataSource = () => {
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
-        if(!showGrid) return
+        if (!showGrid) return;
 
         try {
           const pageSize = params.endRow - params.startRow;
@@ -63,7 +82,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
 
           const filter = params.filterModel;
 
-          console.log(filter);
+          // console.log(filter);
 
           if (Object.values(filter)[0]) {
             const fieldId = Object.keys(filter)[0];
@@ -71,7 +90,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
             console.log({ filter });
             const filterInput = filter[fieldId].filter;
 
-            console.log({ modelId, pageSize, cursors, filterInput, fieldId });
+            // console.log({ modelId, pageSize, cursors, filterInput, fieldId });
 
             const data = (await getModelFields(
               modelId,
@@ -79,7 +98,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
               [...cursors][index],
               filter
             )) as GetModelFieldsReturn;
-            console.log(data);
+            // console.log(data);
 
             const rows = data.modelContentListData.map((row) => {
               const {
@@ -112,12 +131,12 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
 
           const { startRow, endRow } = params;
 
-          console.log({ cursors, startRow, endRow, index, pageSize });
+          // console.log({ cursors, startRow, endRow, index, pageSize });
 
           setCursors((previousState) => previousState.add(data.meta.cursor));
 
           const { totalCount } = data.meta;
-          console.log(params.startRow, params.endRow);
+          // console.log(params.startRow, params.endRow);
 
           const rows = data.modelContentListData.map((row) => {
             const {
@@ -132,7 +151,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
             return rest;
           });
 
-          console.log({ rowData, rows });
+          // console.log({ rowData, rows });
 
           setColumnDefs(
             data.columnNames.map((field) => {
@@ -144,7 +163,7 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
               };
             })
           );
-          console.log({ rowData });
+          // console.log({ rowData });
           params.successCallback(rows, totalCount);
         } catch (error) {
           console.error(error);
@@ -154,33 +173,57 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
     return datasource;
   };
 
-  function onFirstDataRendered(params) {
-    gridRef.current = params.api;
-  }
-
-  function resetFilters() {
-    if (gridRef.current) {
-      gridRef?.current?.api?.setFilterModel(null);
-      console.log({gridRef})
+  function onGridReady(params) {
+    setGridApi(params.api);
+    setColumnApi(params.columnApi);
+    if (gridApi) {
+      gridApi.setFilterModel(null);
     }
   }
 
-  useEffect(() => {
-    setShowGrid(false)
-    setTimeout(()=>{
-      setShowGrid(true) 
-    },10)
-  }, [modelId]);
+  function onFilterChanged() {
+    if (gridApi) {
+      setFilterState(gridApi.getFilterModel());
+    }
+  }
+
+  function onColumnMoved() {
+    if (columnApi) {
+      setColumnState(columnApi.getColumnState());
+    }
+  }
+
+  const handleGridStateChanged = () => {
+    onColumnMoved();
+    onFilterChanged();
+  };
+
+  function onFirstDataRendered(params) {
+    setTimeout(() => {
+      console.log("settimeout");
+      restoreGridColumnStates();
+    }, 1000);
+  }
+
+  // useEffect(() => {
+  //   const restoreColumnStatesWithDelay = async () => {
+  //     if (gridApi && columnApi) {
+  //       await new Promise((resolve) => setTimeout(resolve, 500));
+  //       restoreGridColumnStates();
+  //     }
+  //   };
+
+  //   restoreColumnStatesWithDelay();
+  // }, [gridApi, columnApi]);
 
   const gridOptions: GridOptions = {
     rowModelType: "infinite",
-    onPaginationChanged: (e: PaginationChangedEvent) => {
-      console.log(
-        `Pagination Event: ${JSON.stringify(e.api.getLastDisplayedRow())}`
-      );
-    },
+    // onPaginationChanged: (e: PaginationChangedEvent) => {
+    //   // console.log(
+    //   //   `Pagination Event: ${JSON.stringify(e.api.getLastDisplayedRow())}`
+    //   // );
+    // },
     cacheBlockSize: 100,
-
   };
 
   const defaultColDef = useMemo<ColDef>(() => {
@@ -195,26 +238,45 @@ const PVGridWebiny2 = ({ headers, rows, getModelFields }: Props) => {
     return getDataSource();
   }, [modelId]);
 
+  function restoreGridColumnStates() {
+    console.log("restoreGridColumnStates called:\n ", { columnApi, lastState });
+
+    if (columnApi) {
+      console.log({ columnApi, lastState });
+      columnApi.applyColumnState({ state: lastState });
+    }
+  }
+
   return (
-    <PVGridWebinyStyles>
-      {showGrid && <div style={gridStyle} className="ag-theme-alpine">
-        <AgGridReact
-          enableRangeSelection={true}
-          paginationAutoPageSize={true}
-          defaultColDef={defaultColDef}
-          ref={gridRef}
-          onFirstDataRendered={onFirstDataRendered}
-          pagination={true}
-          gridOptions={gridOptions}
-          datasource={datasource}
-          // maxConcurrentDatasourceRequests={1}
-          columnDefs={columnDefs}
-        ></AgGridReact>
-      </div>}
-    </PVGridWebinyStyles>
+    <>
+      {showGrid && (
+        <div style={gridStyle} className="ag-theme-alpine">
+          <button onClick={restoreGridColumnStates}>
+            Restore Grid Column States
+          </button>
+          <AgGridReact
+            enableRangeSelection={true}
+            paginationAutoPageSize={true}
+            defaultColDef={defaultColDef}
+            ref={gridRef}
+            onGridReady={onGridReady}
+            onFilterChanged={handleGridStateChanged}
+            onColumnMoved={handleGridStateChanged}
+            onColumnResized={handleGridStateChanged}
+            onColumnPinned={handleGridStateChanged}
+            onColumnVisible={handleGridStateChanged}
+            onSortChanged={handleGridStateChanged}
+            onFirstDataRendered={onFirstDataRendered}
+            pagination={true}
+            gridOptions={gridOptions}
+            datasource={datasource}
+            // maxConcurrentDatasourceRequests={1}
+            columnDefs={columnDefs}
+          ></AgGridReact>
+        </div>
+      )}
+    </>
   );
 };
-
-const PVGridWebinyStyles = styled.div``;
 
 export default PVGridWebiny2;
