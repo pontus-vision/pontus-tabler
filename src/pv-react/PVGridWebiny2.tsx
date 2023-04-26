@@ -15,8 +15,10 @@ import styled from "styled-components";
 import {
   ColDef,
   ColumnApi,
+  ColumnState,
   GridApi,
   GridOptions,
+  GridReadyEvent,
   IDatasource,
   IGetRowsParams,
   IGroupCellRendererParams,
@@ -28,6 +30,7 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { GetModelFieldsReturn } from "../views/ModelView";
 import {
+  AgGrigFirstDataRenderedEvent,
   CmsEntriesList,
   CmsEntriesListContent,
   ModelContentListData,
@@ -41,8 +44,9 @@ import {
 
 type Props = {
   title: string;
-  onValueChange: (title: string, value: number) => void;
+  onValueChange: (title: string, value: ColumnState[]) => void;
   getModelFields: any;
+  lastState?: ColumnState[];
 };
 
 const PVGridWebiny2 = ({
@@ -51,19 +55,24 @@ const PVGridWebiny2 = ({
   lastState,
   getModelFields,
 }: Props) => {
-  const [columnState, setColumnState] = useState(null);
-  const [filterState, setFilterState] = useState(null);
-  const [columnApi, setColumnApi] = useState(null);
-  const [columnDefs, setColumnDefs] = useState<SetStateAction<any>>([]);
+  const [columnState, setColumnState] = useState<ColumnState[]>();
+  const [filterState, setFilterState] = useState(undefined);
+  const [columnApi, setColumnApi] = useState<ColumnApi>();
+  const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>();
   const [cursors, setCursors] = useState(new Set([null]));
   const [indexPage, setIndexPage] = useState<number>(0);
-  const [gridApi, setGridApi] = useState(null);
+  const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
   const { modelId } = useParams();
   const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
   const { model } = useSelector((state: any) => state.model);
   const [rowData, setRowData] = useState([]);
-  const gridRef = useRef(null);
+
+  useEffect(() => {
+    if (columnApi) {
+      columnApi.applyColumnState({ state: lastState });
+    }
+  }, []);
 
   useEffect(() => {
     if (!columnState) return;
@@ -119,7 +128,6 @@ const PVGridWebiny2 = ({
             setCursors((previousState) => previousState.add(data.meta.cursor));
 
             params.successCallback(rows, data.meta.totalCount);
-            // console.log({data}, modelId, fieldId, filterModel[fieldId].filter)
             return;
           }
 
@@ -129,14 +137,9 @@ const PVGridWebiny2 = ({
             [...cursors][index]
           )) as GetModelFieldsReturn;
 
-          const { startRow, endRow } = params;
-
-          // console.log({ cursors, startRow, endRow, index, pageSize });
-
           setCursors((previousState) => previousState.add(data.meta.cursor));
 
           const { totalCount } = data.meta;
-          // console.log(params.startRow, params.endRow);
 
           const rows = data.modelContentListData.map((row) => {
             const {
@@ -151,8 +154,6 @@ const PVGridWebiny2 = ({
             return rest;
           });
 
-          // console.log({ rowData, rows });
-
           setColumnDefs(
             data.columnNames.map((field) => {
               return {
@@ -163,7 +164,6 @@ const PVGridWebiny2 = ({
               };
             })
           );
-          // console.log({ rowData });
           params.successCallback(rows, totalCount);
         } catch (error) {
           console.error(error);
@@ -173,13 +173,17 @@ const PVGridWebiny2 = ({
     return datasource;
   };
 
-  function onGridReady(params) {
+  useEffect(() => {
+    restoreGridColumnStates();
+  }, [columnApi]);
+
+  const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
     setColumnApi(params.columnApi);
     if (gridApi) {
       gridApi.setFilterModel(null);
     }
-  }
+  };
 
   function onFilterChanged() {
     if (gridApi) {
@@ -198,23 +202,7 @@ const PVGridWebiny2 = ({
     onFilterChanged();
   };
 
-  function onFirstDataRendered(params) {
-    setTimeout(() => {
-      console.log("settimeout");
-      restoreGridColumnStates();
-    }, 1000);
-  }
-
-  // useEffect(() => {
-  //   const restoreColumnStatesWithDelay = async () => {
-  //     if (gridApi && columnApi) {
-  //       await new Promise((resolve) => setTimeout(resolve, 500));
-  //       restoreGridColumnStates();
-  //     }
-  //   };
-
-  //   restoreColumnStatesWithDelay();
-  // }, [gridApi, columnApi]);
+  function onFirstDataRendered(params: AgGrigFirstDataRenderedEvent) {}
 
   const gridOptions: GridOptions = {
     rowModelType: "infinite",
@@ -247,6 +235,13 @@ const PVGridWebiny2 = ({
     }
   }
 
+  useEffect(() => {
+    setShowGrid(false);
+    setTimeout(() => {
+      setShowGrid(true);
+    }, 50);
+  }, [modelId]);
+
   return (
     <>
       {showGrid && (
@@ -258,7 +253,6 @@ const PVGridWebiny2 = ({
             enableRangeSelection={true}
             paginationAutoPageSize={true}
             defaultColDef={defaultColDef}
-            ref={gridRef}
             onGridReady={onGridReady}
             onFilterChanged={handleGridStateChanged}
             onColumnMoved={handleGridStateChanged}
