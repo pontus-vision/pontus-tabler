@@ -1,17 +1,7 @@
-import {
-  Children,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import styled from "styled-components";
 import {
   ColDef,
   ColumnApi,
@@ -21,50 +11,34 @@ import {
   GridReadyEvent,
   IDatasource,
   IGetRowsParams,
-  IGroupCellRendererParams,
-  IServerSideDatasource,
-  PaginationChangedEvent,
-  SideBarDef,
 } from "ag-grid-community";
-import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
 import { GetModelFieldsReturn } from "../views/AdminView";
-import {
-  AgGrigFirstDataRenderedEvent,
-  CmsEntriesList,
-  CmsEntriesListContent,
-  ModelContentListData,
-} from "../types";
-import {
-  cmsGetContentModel,
-  getEntry,
-  listModel,
-  searchEntries,
-} from "../client";
+import { AgGrigFirstDataRenderedEvent } from "../types";
+import { cmsGetContentModel, listModel } from "../client";
+import { useSelector } from "react-redux";
 
 type FilterState = {
   [key: string]: any;
 };
 
 type Props = {
-  title: string;
-  onValueChange: (title: string, value: ColumnState[]) => void;
+  id: string;
+  onValueChange: (id: string, value: ColumnState[]) => void;
   modelId: string;
   lastState?: ColumnState[];
 };
 
-const PVGridWebiny2 = ({ title, onValueChange, lastState, modelId }: Props) => {
+const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   const [columnState, setColumnState] = useState<ColumnState[]>();
   const [filterState, setFilterState] = useState<FilterState>();
   const [columnApi, setColumnApi] = useState<ColumnApi>();
   const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>();
   const [cursors, setCursors] = useState(new Set([null]));
-  const [indexPage, setIndexPage] = useState<number>(0);
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
   const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
-  const { model } = useSelector((state: any) => state.model);
   const [rowData, setRowData] = useState([]);
+  const state = useSelector((state) => state);
 
   const getModelFields = async (
     modelId: string,
@@ -96,8 +70,9 @@ const PVGridWebiny2 = ({ title, onValueChange, lastState, modelId }: Props) => {
 
   useEffect(() => {
     if (!columnState) return;
-    onValueChange(title, columnState);
-  }, [columnState, title, onValueChange]);
+    onValueChange(id, columnState);
+    console.log({ columnState, id });
+  }, [columnState, id, onValueChange]);
 
   const getDataSource = () => {
     const datasource: IDatasource = {
@@ -248,7 +223,6 @@ const PVGridWebiny2 = ({ title, onValueChange, lastState, modelId }: Props) => {
 
   function restoreGridColumnStates() {
     console.log("restoreGridColumnStates called:\n ", { columnApi, lastState });
-
     if (columnApi) {
       console.log({ columnApi, lastState });
       columnApi.applyColumnState({ state: lastState });

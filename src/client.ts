@@ -37,7 +37,6 @@ export const listModel = async (
               const objFieldRefModel = await cmsGetContentModel(
                 findRefModel(el)
               );
-              console.log({ objFieldRefModel });
               return `${el.fieldId}{${objFieldRefModel.data.data.getContentModel.data.titleFieldId}}`;
             }
             return `${el.fieldId}`;
@@ -60,8 +59,6 @@ export const listModel = async (
         console.log({ key, value });
         return key + "_contains: " + '"' + value.filter + '"';
       });
-
-    console.log({ containsSearches });
 
     const res = await webinyApi.post("cms/read/en-US", {
       query: `
@@ -93,7 +90,6 @@ export const listModel = async (
       }
     `,
     });
-    console.log(res);
     return res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`];
   } catch (error) {
     console.error(error);
@@ -255,7 +251,7 @@ export const searchEntries = async (
   after: string
 ) => {
   const modelIdCapitalized = capitalizeFirstLetter(modelId);
-  console.log({ modelId, fieldId, entry });
+
   try {
     const data = await webinyApi.post("cms/manage/en-US", {
       query: `  
@@ -304,7 +300,6 @@ export const searchEntries = async (
         after: after,
       },
     });
-    console.log(data);
 
     return data.data.data.content;
   } catch (error) {
@@ -327,7 +322,6 @@ export const getEntry = async (id: string, modelId: string) => {
       `;
     }
     if (field.type === "object") {
-      console.log({ field });
       const objFields = field?.settings?.fields?.map((el: ModelColName) => {
         if (el.type === "ref") {
           return `${el.fieldId} {
@@ -344,8 +338,6 @@ export const getEntry = async (id: string, modelId: string) => {
     }
     return `${field.fieldId}`;
   });
-
-  console.log({ fieldsFormatted });
 
   try {
     const modelIdCapitalized = capitalizeFirstLetter(modelId);
