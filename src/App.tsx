@@ -1,27 +1,34 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import "./App.css";
 import "tabler-react/dist/Tabler.css";
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import { Routes, Route } from 'react-router-dom';
-import ModelView from './views/ModelView';
-import Form from './components/Form'
+import Sidebar from "./components/Sidebar";
+import Header from "./components/Header";
+import { Routes, Route } from "react-router-dom";
+import AdminView from "./views/AdminView";
+import Form from "./components/Form";
+import DashboardView from "./views/DashboardView";
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [openedSidebar, setOpenedSidebar] = useState(false)
-  const [modelId, setModelId] = useState<string>()
+  const [count, setCount] = useState(0);
+  const [openedSidebar, setOpenedSidebar] = useState(false);
+  const [dashboardId, setDashboardId] = useState<string>();
   return (
     <>
-     <Header setOpenedSidebar={setOpenedSidebar} openedSidebar={openedSidebar} /> 
-      <Sidebar openedSidebar={openedSidebar} /> 
+      <Header
+        setOpenedSidebar={setOpenedSidebar}
+        openedSidebar={openedSidebar}
+      />
+      <Sidebar setDashboardId={setDashboardId} openedSidebar={openedSidebar} />
       <Routes>
-        <Route path="/model/:modelId" element={<ModelView />}/>
-        <Route path="/model/:modelId/form" element={<Form />}/>
+        <Route path="/admin" element={<AdminView />} />
+        <Route
+          path="/dashboard"
+          element={<DashboardView dashboardId={dashboardId} />}
+        />
       </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

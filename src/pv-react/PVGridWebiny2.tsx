@@ -28,7 +28,7 @@ import {
 } from "ag-grid-community";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { GetModelFieldsReturn } from "../views/ModelView";
+import { GetModelFieldsReturn } from "../views/AdminView";
 import {
   AgGrigFirstDataRenderedEvent,
   CmsEntriesList,
@@ -42,32 +42,52 @@ import {
   searchEntries,
 } from "../client";
 
+type FilterState = {
+  [key: string]: any;
+};
+
 type Props = {
   title: string;
   onValueChange: (title: string, value: ColumnState[]) => void;
-  getModelFields: any;
+  modelId: string;
   lastState?: ColumnState[];
 };
 
-const PVGridWebiny2 = ({
-  title,
-  onValueChange,
-  lastState,
-  getModelFields,
-}: Props) => {
+const PVGridWebiny2 = ({ title, onValueChange, lastState, modelId }: Props) => {
   const [columnState, setColumnState] = useState<ColumnState[]>();
-  const [filterState, setFilterState] = useState(undefined);
+  const [filterState, setFilterState] = useState<FilterState>();
   const [columnApi, setColumnApi] = useState<ColumnApi>();
   const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>();
   const [cursors, setCursors] = useState(new Set([null]));
   const [indexPage, setIndexPage] = useState<number>(0);
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
-  const { modelId } = useParams();
   const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
   const { model } = useSelector((state: any) => state.model);
   const [rowData, setRowData] = useState([]);
 
+  const getModelFields = async (
+    modelId: string,
+    limit: number,
+    after: string | null,
+    fieldsSearches = null
+  ) => {
+    const cmsContentModel = await cmsGetContentModel(modelId);
+
+    const { fields: columnNames } =
+      cmsContentModel.data.data.getContentModel.data;
+    const { data: modelContentListData, meta } = await listModel(
+      modelId,
+      columnNames,
+      limit,
+      after,
+      fieldsSearches
+    );
+
+    // console.log({ columnNames });
+
+    return { columnNames, modelContentListData, meta };
+  };
   useEffect(() => {
     if (columnApi) {
       columnApi.applyColumnState({ state: lastState });
@@ -91,7 +111,7 @@ const PVGridWebiny2 = ({
 
           const filter = params.filterModel;
 
-          // console.log(filter);
+          if (!modelId) return;
 
           if (Object.values(filter)[0]) {
             const fieldId = Object.keys(filter)[0];
@@ -235,40 +255,32 @@ const PVGridWebiny2 = ({
     }
   }
 
-  useEffect(() => {
-    setShowGrid(false);
-    setTimeout(() => {
-      setShowGrid(true);
-    }, 50);
-  }, [modelId]);
-
   return (
     <>
-      {showGrid && (
-        <div style={gridStyle} className="ag-theme-alpine">
-          <button onClick={restoreGridColumnStates}>
-            Restore Grid Column States
-          </button>
-          <AgGridReact
-            enableRangeSelection={true}
-            paginationAutoPageSize={true}
-            defaultColDef={defaultColDef}
-            onGridReady={onGridReady}
-            onFilterChanged={handleGridStateChanged}
-            onColumnMoved={handleGridStateChanged}
-            onColumnResized={handleGridStateChanged}
-            onColumnPinned={handleGridStateChanged}
-            onColumnVisible={handleGridStateChanged}
-            onSortChanged={handleGridStateChanged}
-            onFirstDataRendered={onFirstDataRendered}
-            pagination={true}
-            gridOptions={gridOptions}
-            datasource={datasource}
-            // maxConcurrentDatasourceRequests={1}
-            columnDefs={columnDefs}
-          ></AgGridReact>
-        </div>
-      )}
+      <div style={gridStyle} className="ag-theme-alpine">
+        <button onClick={restoreGridColumnStates}>
+          Restore Grid Column States
+        </button>
+        <AgGridReact
+          enableRangeSelection={true}
+          paginationAutoPageSize={true}
+          defaultColDef={defaultColDef}
+          onGridReady={onGridReady}
+          onFilterChanged={handleGridStateChanged}
+          onColumnMoved={handleGridStateChanged}
+          onColumnResized={handleGridStateChanged}
+          onColumnPinned={handleGridStateChanged}
+          onColumnVisible={handleGridStateChanged}
+          onSortChanged={handleGridStateChanged}
+          onFirstDataRendered={onFirstDataRendered}
+          pagination={true}
+          gridOptions={gridOptions}
+          datasource={datasource}
+          // maxConcurrentDatasourceRequests={1}
+          columnDefs={columnDefs}
+        ></AgGridReact>
+      </div>
+      ￼
     </>
   );
 };

@@ -1,47 +1,45 @@
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useEffect, Dispatch } from "react";
+import Button from "react-bootstrap/esm/Button";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getModels } from "../client";
+import { RootState } from "../store/store";
 import ListItems from "./ListItems";
 
-const Sidebar = ({ openedSidebar }: any) => {
+type Props = {
+  openedSidebar: boolean;
+  setDashboardId: Dispatch<React.SetStateAction<string | undefined>>;
+};
+
+const Sidebar = ({ openedSidebar, setDashboardId }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const dispatch = useDispatch();
-
-  const fetchModels = async () => {
-    const { data } = await getModels();
-    const listModels = data.data.listContentModels.data;
-    const listModelsGrouped = listModels.reduce((acc, cur) => {
-      const key = cur.group.name;
-
-      acc[key] = acc[key] || [];
-      acc[key].push(cur);
-
-      return acc;
-    }, {});
-
-    const listModelsGroupedArr = Object.entries(listModelsGrouped);
-
-    setModels(listModelsGroupedArr);
-    return data;
-  };
+  const navigate = useNavigate();
+  const { value: dashboards } = useSelector((state: RootState) => {
+    return state.dashboards;
+  });
 
   useEffect(() => {
-    // setModels(await fetchModels())
-    fetchModels();
-  }, []);
-
-  useEffect(() => {
-    console.log(openedSidebar);
-  }, [openedSidebar]);
+    console.log({ dashboards });
+  }, [dashboards]);
 
   return (
     <SidebarStyles className={`${openedSidebar ? "active" : ""}`}>
-      {!!models &&
-        models.map((entry: any, index: number) => (
-          <ListItems key={index} header={entry[0]} arr={entry[1]} />
+      <Button onClick={() => navigate("/admin")}>Admin Panel</Button>
+      {dashboards &&
+        dashboards.map((dashboard) => (
+          <label
+            onClick={() => {
+              navigate("/dashboard");
+              setDashboardId(dashboard.id);
+            }}
+            key={dashboard.id}
+          >
+            {dashboard.name}
+          </label>
         ))}
     </SidebarStyles>
   );

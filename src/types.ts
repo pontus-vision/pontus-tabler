@@ -1,4 +1,5 @@
 import { ColumnApi, GridApi } from "ag-grid-community";
+import { IJsonModel } from "flexlayout-react";
 
 export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Index of the first rendered row
@@ -97,4 +98,21 @@ export interface CmsEntriesListContentMeta {
   hasMoreItems: boolean;
   totalCount: number;
   __typename: string;
+}
+
+export interface WebinyModel {
+  name: string;
+  modelId: string;
+  group: WebinyModelGroup;
+}
+
+export interface WebinyModelGroup {
+  name: string;
+  id: string;
+}
+
+export interface Dashboard {
+  gridState: IJsonModel;
+  id: string;
+  name: string;
 }
