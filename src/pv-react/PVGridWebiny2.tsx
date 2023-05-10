@@ -72,7 +72,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
     if (!columnState) return;
     onValueChange(id, columnState);
     console.log({ columnState, id });
-  }, [columnState, id, onValueChange]);
+  }, [columnState, id]);
 
   const getDataSource = () => {
     const datasource: IDatasource = {
