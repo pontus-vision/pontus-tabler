@@ -9,6 +9,7 @@ import {
   Meta,
   WebinyModel,
   Dashboard,
+  FlexLayoutCmp,
 } from "../types";
 import { getModels } from "../client";
 import Form from "../components/Form";
@@ -20,6 +21,7 @@ import PVFlexLayout from "../pv-react/PVFlexLayout";
 import Button from "react-bootstrap/esm/Button";
 import { setDashboards } from "../store/sliceDashboards";
 import FormDashboard from "../components/FormDashboard";
+import PVDoughnutChart2 from "../pv-react/PVDoughnutChart2";
 
 export type GetModelFieldsReturn = {
   columnNames: ModelColName[];
@@ -30,7 +32,7 @@ export type GetModelFieldsReturn = {
 const AdminView = () => {
   const [gridState, setGridState] = useState<IJsonModel>();
   const [models, setModels] = useState<WebinyModel[]>();
-  const [selectedModel, setSelectedModel] = useState<WebinyModel>();
+  const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const [showDashboardForm, setShowDashboardForm] = useState(false);
 
   const dispatch = useDispatch();
@@ -66,22 +68,44 @@ const AdminView = () => {
   return (
     <>
       <ModelViewStyles>
-        <BootstrapForm.Select
-          onChange={(e) => setSelectedModel(JSON.parse(e.target.value))}
-          size="lg"
-        >
-          {models &&
-            models.map((model, index) => (
-              <option key={index} value={JSON.stringify(model)}>
-                {model.name}
-              </option>
-            ))}
-        </BootstrapForm.Select>
+        <div className="dropdown-panels">
+          <div className="dropdown-panels__tables">
+            Tabelas
+            <BootstrapForm.Select
+              onChange={(e) => {
+                const cmp: FlexLayoutCmp = {
+                  componentName: "PVGridWebiny2",
+                  cmp: JSON.parse(e.target.value),
+                };
+                setSelectedCmp(cmp);
+              }}
+              size="lg"
+            >
+              {models &&
+                models.map((model, index) => (
+                  <option key={index} value={JSON.stringify(model)}>
+                    {model.name}
+                  </option>
+                ))}
+            </BootstrapForm.Select>
+          </div>
+          <div className="dropdown-panels__charts">
+            Graficos
+            <BootstrapForm.Select
+              onChange={(e) => {
+                const cmp: FlexLayoutCmp = {
+                  componentName: "PVDoughnutChart2",
+                };
+                setSelectedCmp(cmp);
+              }}
+            >
+              <option></option>
+              <option>Grafico</option>
+            </BootstrapForm.Select>
+          </div>
+        </div>
         <div className="layout">
-          <PVFlexLayout
-            setGridState={setGridState}
-            selectedModel={selectedModel}
-          />
+          <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
         </div>
         {showDashboardForm && (
           <FormDashboard
@@ -107,6 +131,22 @@ const ModelViewStyles = styled.div`
     top: 0rem;
     height: 30rem;
     width: 90%;
+  }
+  .dropdown-panels {
+    display: flex;
+    gap: 1rem;
+
+    &__tables {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    &__charts {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
   }
 `;
 

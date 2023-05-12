@@ -100,6 +100,11 @@ export interface CmsEntriesListContentMeta {
   __typename: string;
 }
 
+export interface FlexLayoutCmp {
+  componentName: string;
+  cmp?: WebinyModel;
+}
+
 export interface WebinyModel {
   name: string;
   modelId: string;

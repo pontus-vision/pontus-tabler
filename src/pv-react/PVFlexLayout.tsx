@@ -21,15 +21,16 @@ import {
 import "flexlayout-react/style/light.css";
 import PVGridWebiny2 from "./PVGridWebiny2";
 import { ColumnState } from "ag-grid-community";
-import { WebinyModel } from "../types";
+import { FlexLayoutCmp, WebinyModel } from "../types";
+import PVDoughnutChart2 from "./PVDoughnutChart2";
 
 type Props = {
   gridState?: IJsonModel;
-  selectedModel?: WebinyModel;
+  selectedCmp?: FlexLayoutCmp;
   setGridState?: Dispatch<SetStateAction<IJsonModel | undefined>>;
 };
 
-const PVFlexLayout = ({ selectedModel, setGridState, gridState }: Props) => {
+const PVFlexLayout = ({ selectedCmp, setGridState, gridState }: Props) => {
   const initialJson: IJsonModel = {
     global: {},
     borders: [],
@@ -45,27 +46,31 @@ const PVFlexLayout = ({ selectedModel, setGridState, gridState }: Props) => {
     const component = node.getComponent();
     const config = node.getConfig();
     const id = node.getId();
-    console.log("LastState: ", config.lastState, model.toJson());
     if (component === "PVGridWebiny2") {
+      const lastState = findTabById(gridState?.layout, id)?.config?.lastState;
       return (
         <PVGridWebiny2
           id={id}
-          lastState={config.lastState}
+          lastState={lastState || config.lastState}
           onValueChange={handleValueChange}
           modelId={config.modelId}
         />
       );
     }
+    if (component === "PVDoughnutChart2") {
+      return <PVDoughnutChart2 />;
+    }
+
     return null;
   };
 
   const findTabById = (layout: any, id: string): any => {
     console.log({ layout });
-    if (layout.type === "tab" && layout.id === id) {
+    if (layout?.type === "tab" && layout.id === id) {
       return layout;
     }
 
-    if (layout.children) {
+    if (layout?.children) {
       for (const child of layout.children) {
         const result = findTabById(child, id);
         if (result) {
@@ -94,14 +99,14 @@ const PVFlexLayout = ({ selectedModel, setGridState, gridState }: Props) => {
     setGridState(model.toJson());
   };
 
-  const addComponent = (cmp: WebinyModel) => {
+  const addComponent = (entry: FlexLayoutCmp) => {
     const aggridCmp: IJsonTabNode = {
       type: "tab",
-      name: cmp.name,
-      component: "PVGridWebiny2",
+      name: entry.cmp?.name || entry.componentName,
+      component: entry.componentName,
       config: {
-        title: cmp.name,
-        modelId: cmp.modelId,
+        title: entry.cmp?.name,
+        modelId: entry.cmp?.modelId,
         lastState: [],
       },
     };
@@ -123,24 +128,26 @@ const PVFlexLayout = ({ selectedModel, setGridState, gridState }: Props) => {
     const lastGridState = JSON.parse(localStorage.getItem("layoutState") || "");
 
     if (lastGridState) {
+      console.log({ lastGridState });
       setModel(Model.fromJson(lastGridState));
     }
   }, []);
 
   useEffect(() => {
-    if (!selectedModel) return;
-    addComponent(selectedModel);
-  }, [selectedModel]);
+    if (!selectedCmp) return;
+    console.log({ selectedCmp });
+    addComponent(selectedCmp);
+  }, [selectedCmp]);
 
   useEffect(() => {
     if (!setGridState) return;
     setGridState(model.toJson());
   }, [model]);
 
-  // useEffect(() => {
-  //   if (!gridState) return;
-  //   setModel(Model.fromJson(gridState));
-  // }, [gridState]);
+  useEffect(() => {
+    if (!gridState) return;
+    setModel(Model.fromJson(gridState));
+  }, [gridState]);
 
   return (
     <div className="PVFlexLayout">
