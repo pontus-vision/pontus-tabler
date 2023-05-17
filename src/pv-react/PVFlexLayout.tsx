@@ -1,19 +1,9 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-// import './App.css';
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
   Actions,
   DockLocation,
   IJsonModel,
   IJsonTabNode,
-  IJsonTabSetNode,
-  ILayoutProps,
-  ILayoutState,
   Layout,
   Model,
   TabNode,
@@ -21,16 +11,25 @@ import {
 import "flexlayout-react/style/light.css";
 import PVGridWebiny2 from "./PVGridWebiny2";
 import { ColumnState } from "ag-grid-community";
-import { FlexLayoutCmp, WebinyModel } from "../types";
+import { FlexLayoutCmp } from "../types";
 import PVDoughnutChart2 from "./PVDoughnutChart2";
+import { useDispatch } from "react-redux";
 
 type Props = {
   gridState?: IJsonModel;
   selectedCmp?: FlexLayoutCmp;
+  setIsEditing?: Dispatch<React.SetStateAction<boolean>>;
+  dashboardId?: string;
   setGridState?: Dispatch<SetStateAction<IJsonModel | undefined>>;
 };
 
-const PVFlexLayout = ({ selectedCmp, setGridState, gridState }: Props) => {
+const PVFlexLayout = ({
+  selectedCmp,
+  setGridState,
+  gridState,
+  setIsEditing,
+  dashboardId,
+}: Props) => {
   const initialJson: IJsonModel = {
     global: {},
     borders: [],
@@ -40,6 +39,7 @@ const PVFlexLayout = ({ selectedCmp, setGridState, gridState }: Props) => {
     },
   };
 
+  const dispatch = useDispatch();
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
 
   const factory = (node: TabNode) => {
@@ -65,7 +65,6 @@ const PVFlexLayout = ({ selectedCmp, setGridState, gridState }: Props) => {
   };
 
   const findTabById = (layout: any, id: string): any => {
-    console.log({ layout });
     if (layout?.type === "tab" && layout.id === id) {
       return layout;
     }
@@ -95,13 +94,17 @@ const PVFlexLayout = ({ selectedCmp, setGridState, gridState }: Props) => {
   };
 
   const onModelChange = () => {
-    if (!setGridState) return;
-    setGridState(model.toJson());
+    if (setIsEditing) {
+      setIsEditing(true);
+    }
+    if (setGridState) {
+      setGridState(model.toJson());
+    }
   };
 
   const addComponent = (entry: FlexLayoutCmp) => {
     const aggridCmp: IJsonTabNode = {
-      type: "tab",
+      type: entry.componentName === "PVDoughnutChart2" ? "row" : "tab",
       name: entry.cmp?.name || entry.componentName,
       component: entry.componentName,
       config: {
@@ -118,24 +121,27 @@ const PVFlexLayout = ({ selectedCmp, setGridState, gridState }: Props) => {
 
     if (firstTabsetNode) {
       model.doAction(
-        Actions.addNode(aggridCmp, firstTabsetNode.getId(), DockLocation.TOP, 0)
+        Actions.addNode(
+          aggridCmp,
+          firstTabsetNode.getId(),
+          DockLocation.RIGHT,
+          0
+        )
       );
       setModel(Model.fromJson(model.toJson()));
     }
   };
 
-  useEffect(() => {
-    const lastGridState = JSON.parse(localStorage.getItem("layoutState") || "");
+  // useEffect(() => {
+  //   const lastGridState = JSON.parse(localStorage.getItem("layoutState") || "");
 
-    if (lastGridState) {
-      console.log({ lastGridState });
-      setModel(Model.fromJson(lastGridState));
-    }
-  }, []);
+  //   if (lastGridState) {
+  //     setModel(Model.fromJson(lastGridState));
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (!selectedCmp) return;
-    console.log({ selectedCmp });
     addComponent(selectedCmp);
   }, [selectedCmp]);
 

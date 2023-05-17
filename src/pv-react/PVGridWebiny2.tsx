@@ -71,7 +71,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   useEffect(() => {
     if (!columnState) return;
     onValueChange(id, columnState);
-    console.log({ columnState, id });
   }, [columnState, id]);
 
   const getDataSource = () => {
@@ -222,7 +221,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   }, [modelId]);
 
   function restoreGridColumnStates() {
-    console.log("restoreGridColumnStates called:\n ", { columnApi, lastState });
     if (columnApi) {
       console.log({ columnApi, lastState });
       columnApi.applyColumnState({ state: lastState });

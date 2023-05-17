@@ -1,27 +1,19 @@
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import styled from "styled-components";
-import BootstrapForm from "react-bootstrap/Form";
+
 import {
-  ModelContentList,
   ModelColName,
   ModelContentListData,
   Meta,
-  WebinyModel,
   Dashboard,
   FlexLayoutCmp,
 } from "../types";
-import { getModels } from "../client";
-import Form from "../components/Form";
-import { useParams } from "react-router-dom";
-import GridExample from "../components/Aggrid-teste";
-import ReactDOM from "react-dom";
-import { Layout, Model, TabNode, IJsonModel } from "flexlayout-react";
+import { IJsonModel } from "flexlayout-react";
 import PVFlexLayout from "../pv-react/PVFlexLayout";
-import Button from "react-bootstrap/esm/Button";
 import { setDashboards } from "../store/sliceDashboards";
 import FormDashboard from "../components/FormDashboard";
-import PVDoughnutChart2 from "../pv-react/PVDoughnutChart2";
+import CmpPanel from "../components/CmpPanel";
 
 export type GetModelFieldsReturn = {
   columnNames: ModelColName[];
@@ -31,23 +23,10 @@ export type GetModelFieldsReturn = {
 
 const AdminView = () => {
   const [gridState, setGridState] = useState<IJsonModel>();
-  const [models, setModels] = useState<WebinyModel[]>();
-  const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const [showDashboardForm, setShowDashboardForm] = useState(false);
+  const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
 
   const dispatch = useDispatch();
-
-  const fetchModels = async () => {
-    const { data } = await getModels();
-    const listModels = data.data.listContentModels.data;
-
-    setModels(listModels);
-    return data;
-  };
-
-  useEffect(() => {
-    fetchModels();
-  }, []);
 
   useEffect(() => {
     console.log({ gridState });
@@ -68,42 +47,7 @@ const AdminView = () => {
   return (
     <>
       <ModelViewStyles>
-        <div className="dropdown-panels">
-          <div className="dropdown-panels__tables">
-            Tabelas
-            <BootstrapForm.Select
-              onChange={(e) => {
-                const cmp: FlexLayoutCmp = {
-                  componentName: "PVGridWebiny2",
-                  cmp: JSON.parse(e.target.value),
-                };
-                setSelectedCmp(cmp);
-              }}
-              size="lg"
-            >
-              {models &&
-                models.map((model, index) => (
-                  <option key={index} value={JSON.stringify(model)}>
-                    {model.name}
-                  </option>
-                ))}
-            </BootstrapForm.Select>
-          </div>
-          <div className="dropdown-panels__charts">
-            Graficos
-            <BootstrapForm.Select
-              onChange={(e) => {
-                const cmp: FlexLayoutCmp = {
-                  componentName: "PVDoughnutChart2",
-                };
-                setSelectedCmp(cmp);
-              }}
-            >
-              <option></option>
-              <option>Grafico</option>
-            </BootstrapForm.Select>
-          </div>
-        </div>
+        <CmpPanel setSelectedCmp={setSelectedCmp} />
         <div className="layout">
           <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
         </div>
@@ -131,22 +75,6 @@ const ModelViewStyles = styled.div`
     top: 0rem;
     height: 30rem;
     width: 90%;
-  }
-  .dropdown-panels {
-    display: flex;
-    gap: 1rem;
-
-    &__tables {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    &__charts {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
   }
 `;
 
