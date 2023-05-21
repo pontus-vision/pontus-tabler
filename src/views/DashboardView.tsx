@@ -2,10 +2,11 @@ import { IJsonModel } from "flexlayout-react";
 import { useEffect, useState } from "react";
 import Button from "react-bootstrap/esm/Button";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import CmpPanel from "../components/CmpPanel";
 import PVFlexLayout from "../pv-react/PVFlexLayout";
-import { updateDashboard } from "../store/sliceDashboards";
+import { deleteDashboard, updateDashboard } from "../store/sliceDashboards";
 import { RootState } from "../store/store";
 import { Dashboard, FlexLayoutCmp } from "../types";
 
@@ -22,6 +23,9 @@ const DashboardView = ({ dashboardId }: Props) => {
   const [dashboard, setDashboard] = useState<Dashboard>();
   const [gridState, setGridState] = useState<IJsonModel>();
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
+  const [deleteModal, setDeleteModal] = useState(false);
+  const navigate = useNavigate();
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -45,25 +49,46 @@ const DashboardView = ({ dashboardId }: Props) => {
     }
   };
 
+  const delDashboard = () => {
+    console.log({ dashboardId });
+    dispatch(deleteDashboard({ id: dashboardId }));
+    navigate("/");
+  };
+
   return (
     <DashboardViewStyles>
       <h1 className="title">{dashboard?.name}</h1>
-      {addCmp && <CmpPanel setSelectedCmp={setSelectedCmp} />}
-      {!addCmp && (
-        <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
-      )}
-      <div className="layout">
-        <PVFlexLayout
-          selectedCmp={selectedCmp}
-          setGridState={setGridState}
-          gridState={dashboard?.gridState}
-          setIsEditing={setIsEditing}
-        />
+      <div className="actions-panel">
+        {addCmp && <CmpPanel setSelectedCmp={setSelectedCmp} />}
+        {!addCmp && (
+          <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
+        )}
+        <Button onClick={() => setDeleteModal(true)}>Apagar Dashboard</Button>
+        {deleteModal && (
+          <div className="delete-dashboard-modal">
+            <label>{dashboard?.name}</label>
+            <label>Deseja mesmo apagar?</label>
+            <div className="delete-dashboard-modal_options">
+              <button onClick={() => delDashboard()}>Sim</button>
+              <Button onClick={() => setDeleteModal(false)}>Não</Button>
+            </div>
+          </div>
+        )}
+        {isEditing && (
+          <Button className="actions-panel__save" onClick={() => saveEdition()}>
+            Salvar Edição
+          </Button>
+        )}
       </div>
+      {/* <div className="flex-layout-wrapper"> */}
+      <PVFlexLayout
+        selectedCmp={selectedCmp}
+        setGridState={setGridState}
+        gridState={dashboard?.gridState}
+        setIsEditing={setIsEditing}
+      />
+      {/* </div> */}
       <div className="shadow"></div>
-      {isEditing && (
-        <Button onClick={() => saveEdition()}>Salvar Edição</Button>
-      )}
     </DashboardViewStyles>
   );
 };
@@ -73,13 +98,13 @@ const DashboardViewStyles = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem;
 
   & .title {
     margin: 0;
   }
   & .layout {
-    height: 30rem;
+    min-height: 30rem;
     position: relative;
     width: 90%;
   }
@@ -91,6 +116,45 @@ const DashboardViewStyles = styled.div`
   & .fa-plus {
     font-size: 3rem;
     border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+  }
+
+  & .actions-panel {
+    display: flex;
+    width: 90%;
+    justify-content: space-around;
+    &__save {
+      background-color: #8d8b01;
+    }
+  }
+  & .delete-dashboard-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    height: 30%;
+    width: 30%;
+    background-color: blue;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    transform: translate(-50%, -50%);
+    & label {
+      font-size: 1.5rem;
+    }
+  }
+  & .flex-layout-wrapper {
+    height: 30rem;
+    width: fit-content;
+    overflow-y: auto;
   }
 `;
 

@@ -36,13 +36,20 @@ export const dashboardSlice = createSlice({
         return el;
       });
     },
-    deleteDashboard: (state, action: PayloadAction<string>) => {
-      state.value = state.value.filter((el) => el.id !== action.payload);
+    deleteDashboard: (state, action: PayloadAction<{ id: string }>) => {
+      const index = state.value.findIndex(
+        (obj) => obj.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.value.splice(index, 1);
+      }
+      console.log({ index });
     },
   },
 });
 
-export const { setDashboards, updateDashboard } = dashboardSlice.actions;
+export const { setDashboards, updateDashboard, deleteDashboard } =
+  dashboardSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectCount = (state: RootState) => state.dashboards.value;

@@ -36,7 +36,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   const [cursors, setCursors] = useState(new Set([null]));
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
-  const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
+  const gridStyle = useMemo(() => ({ height: "30rem", width: "100%" }), []);
   const [rowData, setRowData] = useState([]);
   const state = useSelector((state) => state);
 
@@ -130,6 +130,8 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
             pageSize,
             [...cursors][index]
           )) as GetModelFieldsReturn;
+
+          console.log({ data });
 
           setCursors((previousState) => previousState.add(data.meta.cursor));
 

@@ -4,6 +4,7 @@ import {
   DockLocation,
   IJsonModel,
   IJsonTabNode,
+  IJsonTabSetNode,
   Layout,
   Model,
   TabNode,
@@ -41,6 +42,7 @@ const PVFlexLayout = ({
 
   const dispatch = useDispatch();
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
+  const [containerHeight, setContainerHeight] = useState(30);
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
@@ -81,6 +83,10 @@ const PVFlexLayout = ({
   };
 
   const handleValueChange = (id: string, newValue: ColumnState[]) => {
+    if (setIsEditing) {
+      setIsEditing(true);
+    }
+
     const json = model.toJson();
 
     const jsonCopy = JSON.parse(JSON.stringify(json));
@@ -93,6 +99,8 @@ const PVFlexLayout = ({
     }
   };
 
+  const [childrenNum, setChildrenNum] = useState<number>();
+
   const onModelChange = () => {
     if (setIsEditing) {
       setIsEditing(true);
@@ -100,11 +108,21 @@ const PVFlexLayout = ({
     if (setGridState) {
       setGridState(model.toJson());
     }
+    const rootNode = model.getRoot();
+
+    const childrenNum = rootNode.toJson().children[0].children.length;
+    setChildrenNum(childrenNum);
+
+    if (!!childrenNum && childrenNum > 0) {
+      setContainerHeight(childrenNum * 30); // Increase height by 200px
+    }
+
+    console.log(model.toJson());
   };
 
   const addComponent = (entry: FlexLayoutCmp) => {
     const aggridCmp: IJsonTabNode = {
-      type: entry.componentName === "PVDoughnutChart2" ? "row" : "tab",
+      type: "tab",
       name: entry.cmp?.name || entry.componentName,
       component: entry.componentName,
       config: {
@@ -113,20 +131,12 @@ const PVFlexLayout = ({
         lastState: [],
       },
     };
-    // model.doAction(Actions.addNode(aggridCmp, "1", DockLocation.CENTER, 0));
     const rootNode = model.getRoot();
-    const firstTabsetNode = rootNode
-      .getChildren()
-      .find((child) => child.getType() === "tabset");
 
-    if (firstTabsetNode) {
+    console.log({ childrenNum });
+    if (rootNode) {
       model.doAction(
-        Actions.addNode(
-          aggridCmp,
-          firstTabsetNode.getId(),
-          DockLocation.RIGHT,
-          0
-        )
+        Actions.addNode(aggridCmp, rootNode.getId(), DockLocation.BOTTOM, 0)
       );
       setModel(Model.fromJson(model.toJson()));
     }
@@ -156,8 +166,23 @@ const PVFlexLayout = ({
   }, [gridState]);
 
   return (
-    <div className="PVFlexLayout">
-      <Layout onModelChange={onModelChange} model={model} factory={factory} />
+    <div
+      className="flex-layout-wrapper"
+      style={{ height: "30rem", width: "90%", overflowY: "auto" }}
+    >
+      <div
+        className="PVFlexLayout"
+        style={{
+          height: `${containerHeight}rem`,
+          width: "100%",
+          position: "relative",
+          overflowY: "auto",
+          flexGrow: 1,
+          flexDirection: "column",
+        }}
+      >
+        <Layout onModelChange={onModelChange} model={model} factory={factory} />
+      </div>
     </div>
   );
 };

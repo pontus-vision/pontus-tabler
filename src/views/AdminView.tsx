@@ -48,9 +48,9 @@ const AdminView = () => {
     <>
       <ModelViewStyles>
         <CmpPanel setSelectedCmp={setSelectedCmp} />
-        <div className="layout">
-          <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
-        </div>
+
+        <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
+
         {showDashboardForm && (
           <FormDashboard
             saveDashboard={saveDashboard}
