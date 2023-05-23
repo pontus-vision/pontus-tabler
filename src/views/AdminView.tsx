@@ -29,7 +29,7 @@ const AdminView = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log({ gridState });
+    // console.log({ gridState });
   }, [gridState]);
 
   const saveDashboard = (name: string) => {

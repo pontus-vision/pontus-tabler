@@ -36,7 +36,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   const [cursors, setCursors] = useState(new Set([null]));
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
-  const gridStyle = useMemo(() => ({ height: "30rem", width: "100%" }), []);
+  const gridStyle = useMemo(() => ({ height: "27rem", width: "100%" }), []);
   const [rowData, setRowData] = useState([]);
   const state = useSelector((state) => state);
 
@@ -131,8 +131,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
             [...cursors][index]
           )) as GetModelFieldsReturn;
 
-          console.log({ data });
-
           setCursors((previousState) => previousState.add(data.meta.cursor));
 
           const { totalCount } = data.meta;
@@ -224,7 +222,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
 
   function restoreGridColumnStates() {
     if (columnApi) {
-      console.log({ columnApi, lastState });
       columnApi.applyColumnState({ state: lastState });
     }
   }
@@ -232,9 +229,9 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   return (
     <>
       <div style={gridStyle} className="ag-theme-alpine">
-        <button onClick={restoreGridColumnStates}>
+        {/* <button onClick={restoreGridColumnStates}>
           Restore Grid Column States
-        </button>
+        </button> */}
         <AgGridReact
           enableRangeSelection={true}
           paginationAutoPageSize={true}
@@ -254,7 +251,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
           columnDefs={columnDefs}
         ></AgGridReact>
       </div>
-      ￼
     </>
   );
 };

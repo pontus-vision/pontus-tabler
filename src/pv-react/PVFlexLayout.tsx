@@ -1,13 +1,16 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
+  Action,
   Actions,
   DockLocation,
   IJsonModel,
+  IJsonRowNode,
   IJsonTabNode,
   IJsonTabSetNode,
   Layout,
   Model,
   TabNode,
+  TabSetNode,
 } from "flexlayout-react";
 import "flexlayout-react/style/light.css";
 import PVGridWebiny2 from "./PVGridWebiny2";
@@ -42,14 +45,15 @@ const PVFlexLayout = ({
 
   const dispatch = useDispatch();
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
-  const [containerHeight, setContainerHeight] = useState(30);
+  const [containerHeight, setContainerHeight] = useState();
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
     const config = node.getConfig();
     const id = node.getId();
     if (component === "PVGridWebiny2") {
-      const lastState = findTabById(gridState?.layout, id)?.config?.lastState;
+      const lastState = findChildById(gridState?.layout, id, "tab")?.config
+        ?.lastState;
       return (
         <PVGridWebiny2
           id={id}
@@ -66,14 +70,14 @@ const PVFlexLayout = ({
     return null;
   };
 
-  const findTabById = (layout: any, id: string): any => {
-    if (layout?.type === "tab" && layout.id === id) {
+  const findChildById = (layout: any, id: string, type: string): any => {
+    if (layout?.type === type && layout.id === id) {
       return layout;
     }
 
     if (layout?.children) {
       for (const child of layout.children) {
-        const result = findTabById(child, id);
+        const result = findChildById(child, id, type);
         if (result) {
           return result;
         }
@@ -91,7 +95,7 @@ const PVFlexLayout = ({
 
     const jsonCopy = JSON.parse(JSON.stringify(json));
 
-    const tab = findTabById(jsonCopy.layout, id);
+    const tab = findChildById(jsonCopy.layout, id, "tab");
 
     if (tab) {
       tab.config.lastState = newValue;
@@ -99,7 +103,18 @@ const PVFlexLayout = ({
     }
   };
 
-  const [childrenNum, setChildrenNum] = useState<number>();
+  const filterComponentsPerType = (layout, type) => {
+    if (layout?.children && layout.children.length > 0) {
+      if (layout.children[0].type === type) {
+        console.log(layout.children);
+        return layout.children;
+      } else if (layout.children[0].type !== type) {
+        console.log(layout.children);
+        return filterComponentsPerType(layout.children[0], type);
+      }
+    }
+    return null;
+  };
 
   const onModelChange = () => {
     if (setIsEditing) {
@@ -110,14 +125,24 @@ const PVFlexLayout = ({
     }
     const rootNode = model.getRoot();
 
-    const childrenNum = rootNode.toJson().children[0].children.length;
-    setChildrenNum(childrenNum);
+    const tabsets = filterComponentsPerType(rootNode.toJson(), "tabset");
 
-    if (!!childrenNum && childrenNum > 0) {
-      setContainerHeight(childrenNum * 30); // Increase height by 200px
-    }
+    const children = rootNode.toJson().children[0].children;
 
-    console.log(model.toJson());
+    const childrenNum = children.length;
+
+    // console.log({ children, childrenNum });
+
+    setContainerHeight(tabsets.length * 30 + "rem"); // Increase height by 200px
+    // setContainerHeight(
+    //   model.getRoot().getChildren()[0].getRect().height + "px"
+    // );
+
+    console.log(
+      containerHeight,
+      tabsets.length,
+      rootNode.getChildren()[0].getRect().height
+    );
   };
 
   const addComponent = (entry: FlexLayoutCmp) => {
@@ -131,15 +156,34 @@ const PVFlexLayout = ({
         lastState: [],
       },
     };
+
     const rootNode = model.getRoot();
 
-    console.log({ childrenNum });
     if (rootNode) {
       model.doAction(
         Actions.addNode(aggridCmp, rootNode.getId(), DockLocation.BOTTOM, 0)
       );
       setModel(Model.fromJson(model.toJson()));
     }
+
+    const json = model.toJson();
+
+    const jsonCopy = JSON.parse(JSON.stringify(json));
+
+    jsonCopy.layout.children.forEach((row) => {
+      row.weight = 100;
+      const { type } = row;
+      // console.log({ type });
+      row.children.forEach((tabset, index) => {
+        const { type } = tabset;
+        // console.log({ type });
+        tabset.weight = 100;
+      });
+    });
+
+    // console.log({ jsonCopy, newJson });
+
+    setModel(Model.fromJson(jsonCopy));
   };
 
   // useEffect(() => {
@@ -163,6 +207,7 @@ const PVFlexLayout = ({
   useEffect(() => {
     if (!gridState) return;
     setModel(Model.fromJson(gridState));
+    console.log({ model, gridState });
   }, [gridState]);
 
   return (
@@ -173,7 +218,7 @@ const PVFlexLayout = ({
       <div
         className="PVFlexLayout"
         style={{
-          height: `${containerHeight}rem`,
+          height: `${containerHeight}`,
           width: "100%",
           position: "relative",
           overflowY: "auto",
