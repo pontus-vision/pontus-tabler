@@ -45,7 +45,7 @@ const PVFlexLayout = ({
 
   const dispatch = useDispatch();
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
-  const [containerHeight, setContainerHeight] = useState();
+  const [containerHeight, setContainerHeight] = useState("30rem");
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
@@ -131,7 +131,7 @@ const PVFlexLayout = ({
 
     const childrenNum = children.length;
 
-    // console.log({ children, childrenNum });
+    console.log({ tabsets });
 
     setContainerHeight(tabsets.length * 30 + "rem"); // Increase height by 200px
     // setContainerHeight(
