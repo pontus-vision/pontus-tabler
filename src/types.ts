@@ -121,3 +121,81 @@ export interface Dashboard {
   id: string;
   name: string;
 }
+
+
+export interface ICmsGetContentModel {
+  data:       ICmsGetContentModelData;
+  error:      null;
+  __typename: string;
+}
+
+export interface ICmsGetContentModelData {
+  name:         string;
+  group:        ICmsGetContentModelDataGroup;
+  description:  string;
+  modelId:      string;
+  savedOn:      null;
+  titleFieldId: string;
+  lockedFields: null;
+  layout:       Array<string[]>;
+  fields:       ICmsGetContentModelDataField[];
+  __typename:   string;
+}
+
+export interface ICmsGetContentModelDataField {
+  id:               string;
+  fieldId:          string;
+  storageId:        string;
+  type:             string;
+  label:            string;
+  placeholderText:  null | string;
+  helpText:         null | string;
+  predefinedValues: ICmsGetContentModelDataFieldPredefinedValues | null;
+  multipleValues:   null;
+  renderer:         Renderer;
+  validation:       Validation[];
+  listValidation:   null;
+  settings:         null;
+  __typename:       string;
+}
+
+export interface ICmsGetContentModelDataFieldPredefinedValues {
+  enabled:    boolean;
+  values:     Value[];
+  __typename: string;
+}
+
+export interface Value {
+  label:      string;
+  value:      string;
+  selected:   null;
+  __typename: Typename;
+}
+
+export enum Typename {
+  CMSPredefinedValue = "CmsPredefinedValue",
+}
+
+export interface Renderer {
+  name:       string;
+  __typename: string;
+}
+
+export interface ICmsGetContentModelDataFieldValidation {
+  name:       string;
+  settings:   ICmsGetContentModelDataFieldSettings | null;
+  message:    string;
+  __typename: string;
+}
+
+export interface ICmsGetContentModelDataFieldSettings {
+  flags?: boolean;
+  preset: string;
+  regex:  boolean | string;
+}
+
+export interface ICmsGetContentModelDataGroup {
+  id:         string;
+  name:       string;
+  __typename: string;
+}

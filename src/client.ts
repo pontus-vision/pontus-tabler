@@ -151,7 +151,7 @@ titleFieldId
 export const cmsGetContentModel = async (modelId: string) => {
   // modelId = modelId[modelId.length-1] === "s" ? modelId.slice(0,-1) : modelId
 
-  const data = webinyApi.post("cms/manage/en-US", {
+  const data = await webinyApi.post("cms/manage/en-US", {
     query: `query CmsGetContentModel($modelId: ID!) {
     getContentModel(modelId: $modelId) {
     data {
@@ -222,7 +222,7 @@ export const cmsGetContentModel = async (modelId: string) => {
   });
 
   // console.log(data);
-  return data;
+  return data.data.data.getContentModel;
 };
 
 export const getModels = async () => {
