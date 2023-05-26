@@ -14,6 +14,7 @@ import PVFlexLayout from "../pv-react/PVFlexLayout";
 import { setDashboards } from "../store/sliceDashboards";
 import FormDashboard from "../components/FormDashboard";
 import CmpPanel from "../components/CmpPanel";
+import { useTranslation } from "react-i18next";
 
 export type GetModelFieldsReturn = {
   columnNames: ModelColName[];
@@ -25,12 +26,9 @@ const AdminView = () => {
   const [gridState, setGridState] = useState<IJsonModel>();
   const [showDashboardForm, setShowDashboardForm] = useState(false);
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
+  const { t, i18n } = useTranslation();
 
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    // console.log({ gridState });
-  }, [gridState]);
 
   const saveDashboard = (name: string) => {
     if (!gridState) return;
@@ -46,7 +44,7 @@ const AdminView = () => {
 
   return (
     <>
-      <ModelViewStyles>
+      <AdminViewStyles>
         <CmpPanel setSelectedCmp={setSelectedCmp} />
 
         <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
@@ -57,18 +55,20 @@ const AdminView = () => {
             setShowDashboardForm={setShowDashboardForm}
           />
         )}
-        <button onClick={() => setShowDashboardForm(true)}>save state</button>
-      </ModelViewStyles>
+        <button onClick={() => setShowDashboardForm(true)}>{t("save-state")}</button>
+      </AdminViewStyles>
     </>
   );
 };
 
-const ModelViewStyles = styled.div`
+const AdminViewStyles = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding-top: 2rem;
+  gap: 1rem;
+  height: 100%;
 
   .layout {
     position: relative;

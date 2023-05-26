@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { getModels } from "../client";
 import { RootState } from "../store/store";
 import ListItems from "./ListItems";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   openedSidebar: boolean;
@@ -21,6 +22,7 @@ const Sidebar = ({ openedSidebar, setDashboardId }: Props) => {
   const { value: dashboards } = useSelector((state: RootState) => {
     return state.dashboards;
   });
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     console.log({ dashboards });
@@ -28,7 +30,7 @@ const Sidebar = ({ openedSidebar, setDashboardId }: Props) => {
 
   return (
     <SidebarStyles className={`${openedSidebar ? "active" : ""}`}>
-      <Button onClick={() => navigate("/admin")}>Admin Panel</Button>
+      <Button onClick={() => navigate("/admin")}>{t("admin-panel")}</Button>
       {dashboards &&
         dashboards.map((dashboard) => (
           <label

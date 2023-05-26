@@ -1,0 +1,13 @@
+{
+    "tables": "Tables",
+    "graphics":"Graphics",
+    "graphic": "Graphic",
+    "admin-panel": "Admin Panel",
+    "delete-dashboard": "Delete Dashboard",
+    "confirm-delete": "Do you really want to delete it?",
+    "save-edition": "Save Edition",
+    "save-state": "Save State",
+    "yes": "Yes",
+    "no": "No",
+    "donut-chart": "Doughnut Chart"
+}

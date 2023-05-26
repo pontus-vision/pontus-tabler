@@ -9,6 +9,7 @@ import PVFlexLayout from "../pv-react/PVFlexLayout";
 import { deleteDashboard, updateDashboard } from "../store/sliceDashboards";
 import { RootState } from "../store/store";
 import { Dashboard, FlexLayoutCmp } from "../types";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   dashboardId: string;
@@ -25,7 +26,7 @@ const DashboardView = ({ dashboardId }: Props) => {
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const [deleteModal, setDeleteModal] = useState(false);
   const navigate = useNavigate();
-
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -63,31 +64,29 @@ const DashboardView = ({ dashboardId }: Props) => {
         {!addCmp && (
           <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
         )}
-        <Button onClick={() => setDeleteModal(true)}>Apagar Dashboard</Button>
+        <Button onClick={() => setDeleteModal(true)}>{t("delete-dashboard")}</Button>
         {deleteModal && (
           <div className="delete-dashboard-modal">
             <label>{dashboard?.name}</label>
-            <label>Deseja mesmo apagar?</label>
-            <div className="delete-dashboard-modal_options">
-              <button onClick={() => delDashboard()}>Sim</button>
-              <Button onClick={() => setDeleteModal(false)}>Não</Button>
+            <label>{t("confirm-delete")}</label>
+            <div className="delete-dashboard-modal__options">
+              <button onClick={() => delDashboard()}>{t("yes")}</button>
+              <Button onClick={() => setDeleteModal(false)}>{t("no")}</Button>
             </div>
           </div>
         )}
         {isEditing && (
           <Button className="actions-panel__save" onClick={() => saveEdition()}>
-            Salvar Edição
+            {t("save-state")}
           </Button>
         )}
       </div>
-      {/* <div className="flex-layout-wrapper"> */}
       <PVFlexLayout
         selectedCmp={selectedCmp}
         setGridState={setGridState}
         gridState={dashboard?.gridState}
         setIsEditing={setIsEditing}
       />
-      {/* </div> */}
       <div className="shadow"></div>
     </DashboardViewStyles>
   );

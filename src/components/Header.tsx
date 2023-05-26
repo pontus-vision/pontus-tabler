@@ -1,12 +1,26 @@
 import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
   const navigate = useNavigate()
 
+    const { i18n } = useTranslation();
+  
+    const handleLanguageChange = (event) => {
+      const selectedLanguage = event.target.value;
+      i18n.changeLanguage(selectedLanguage);
+    };
+  
+
   return (
     <HeaderStyles>
+      <select className="language-selector" onChange={handleLanguageChange}>
+        <option value="en">English</option>
+        <option value="ptBr">Português</option>
+        {/* Add more language options */}
+      </select>
       <label className={`hamburguer-menu ${openedSidebar ? "active" : ""}`}>
         <input
           onClick={(e: any) => setOpenedSidebar(e.target.checked)}
@@ -95,6 +109,10 @@ const HeaderStyles = styled.div`
   .hamburguer-menu input:checked {
     opacity: 0;
     width: 0;
+  }
+  .language-selector{
+    right: 2rem;
+    position: absolute;
   }
 
   display: flex;

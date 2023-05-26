@@ -213,7 +213,7 @@ const PVFlexLayout = ({
   return (
     <div
       className="flex-layout-wrapper"
-      style={{ height: "30rem", width: "90%", overflowY: "auto" }}
+      style={{ height: "75vh", width: "90%", overflowY: "auto" }}
     >
       <div
         className="PVFlexLayout"

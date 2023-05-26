@@ -3,6 +3,7 @@ import { FlexLayoutCmp, WebinyModel } from "../types";
 import BootstrapForm from "react-bootstrap/Form";
 import { getModels } from "../client";
 import styled from "styled-components";
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   setSelectedCmp: Dispatch<React.SetStateAction<FlexLayoutCmp | undefined>>;
@@ -10,6 +11,7 @@ type Props = {
 
 const CmpPanel = ({ setSelectedCmp }: Props) => {
   const [models, setModels] = useState<WebinyModel[]>();
+  const { t, i18n } = useTranslation();
 
   const fetchModels = async () => {
     const { data } = await getModels();
@@ -27,7 +29,7 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
     <CmpPanelStyles>
       <div className="dropdown-panels">
         <div className="dropdown-panels__tables">
-          Tabelas
+          {t("tables")}
           <BootstrapForm.Select
             onChange={(e) => {
               const cmp: FlexLayoutCmp = {
@@ -47,7 +49,7 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
           </BootstrapForm.Select>
         </div>
         <div className="dropdown-panels__charts">
-          Graficos
+          {t("graphics")}
           <BootstrapForm.Select
             onChange={(e) => {
               const cmp: FlexLayoutCmp = {
@@ -57,7 +59,7 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
             }}
           >
             <option></option>
-            <option>Grafico</option>
+            <option>{t("donut-chart")}</option>
           </BootstrapForm.Select>
         </div>
       </div>
