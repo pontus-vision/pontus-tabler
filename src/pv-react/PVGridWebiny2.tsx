@@ -48,8 +48,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   ) => {
     const cmsContentModel = await cmsGetContentModel(modelId);
 
-    const { fields: columnNames } =
-      cmsContentModel.data.data.getContentModel.data;
+    const { fields: columnNames } = cmsContentModel.data;
     const { data: modelContentListData, meta } = await listModel(
       modelId,
       columnNames,

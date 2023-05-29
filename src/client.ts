@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ModelColName } from "./types";
+import { ICmsGetContentModel, ModelColName } from "./types";
 import { CmsEntriesList } from "./types";
 
 const webinyApi = axios.create({
@@ -30,14 +30,14 @@ export const listModel = async (
         const refModel = await getContentModel(findRefModel(field));
         return `${field.fieldId}{${refModel.titleFieldId}}`;
       } else if (objFields) {
-        // console.log({ objFields });
         const objFieldsIds = await Promise.all(
           objFields.map(async (el) => {
             if (findRefModel(el)) {
               const objFieldRefModel = await cmsGetContentModel(
                 findRefModel(el)
               );
-              return `${el.fieldId}{${objFieldRefModel.data.data.getContentModel.data.titleFieldId}}`;
+              console.log({ objFieldRefModel });
+              return `${el.fieldId}{${objFieldRefModel.data.titleFieldId}}`;
             }
             return `${el.fieldId}`;
           })
@@ -148,7 +148,9 @@ titleFieldId
   // listModel(modelId, fields);
 };
 
-export const cmsGetContentModel = async (modelId: string) => {
+export const cmsGetContentModel = async (
+  modelId: string
+): Promise<ICmsGetContentModel> => {
   // modelId = modelId[modelId.length-1] === "s" ? modelId.slice(0,-1) : modelId
 
   const data = await webinyApi.post("cms/manage/en-US", {
@@ -221,8 +223,8 @@ export const cmsGetContentModel = async (modelId: string) => {
     },
   });
 
-  // console.log(data);
-  return data.data.data.getContentModel;
+  const result = data.data.data.getContentModel as ICmsGetContentModel;
+  return result;
 };
 
 export const getModels = async () => {
@@ -309,8 +311,7 @@ export const searchEntries = async (
 
 export const getEntry = async (id: string, modelId: string) => {
   const cmsContentModel = await cmsGetContentModel(modelId);
-  const fields = cmsContentModel.data.data.getContentModel.data
-    .fields as ModelColName[];
+  const fields = cmsContentModel.data.fields;
 
   const fieldsFormatted = fields.map((field) => {
     if (field.type === "ref") {

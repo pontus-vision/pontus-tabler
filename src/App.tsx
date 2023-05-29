@@ -8,7 +8,7 @@ import { Routes, Route } from "react-router-dom";
 import AdminView from "./views/AdminView";
 import Form from "./components/Form";
 import DashboardView from "./views/DashboardView";
-import NewEntryView from "./views/NewEntry";
+import NewEntryView from "./views/NewEntryView";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -27,7 +27,7 @@ function App() {
           path="/dashboard"
           element={<DashboardView dashboardId={dashboardId} />}
         />
-        {/* <Route path="/NewEntry/:modelId" element={<NewEntryView />}/> */}
+        <Route path="/NewEntry/:modelId" element={<NewEntryView />} />
       </Routes>
     </>
   );
