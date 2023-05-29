@@ -27,7 +27,7 @@ function App() {
           path="/dashboard"
           element={<DashboardView dashboardId={dashboardId} />}
         />
-        <Route path="/NewEntry/:modelId" element={<NewEntryView />}/>
+        {/* <Route path="/NewEntry/:modelId" element={<NewEntryView />}/> */}
       </Routes>
     </>
   );
