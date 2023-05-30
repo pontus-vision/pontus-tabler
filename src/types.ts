@@ -1,5 +1,6 @@
 import { ColumnApi, GridApi } from "ag-grid-community";
 import { IJsonModel } from "flexlayout-react";
+import { P } from "vitest/dist/types-5872e574";
 
 export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Index of the first rendered row
@@ -122,53 +123,56 @@ export interface Dashboard {
   name: string;
 }
 
-
 export interface ICmsGetContentModel {
-  data:       ICmsGetContentModelData;
-  error:      null;
+  data: ICmsGetContentModelData;
+  error: null;
   __typename: string;
 }
 
 export interface ICmsGetContentModelData {
-  name:         string;
-  group:        ICmsGetContentModelDataGroup;
-  description:  string;
-  modelId:      string;
-  savedOn:      null;
+  name: string;
+  group: ICmsGetContentModelDataGroup;
+  description: string;
+  modelId: string;
+  savedOn: null;
   titleFieldId: string;
   lockedFields: null;
-  layout:       Array<string[]>;
-  fields:       ICmsGetContentModelDataField[];
-  __typename:   string;
+  layout: Array<string[]>;
+  fields: ICmsGetContentModelDataField[];
+  __typename: string;
 }
 
 export interface ICmsGetContentModelDataField {
-  id:               string;
-  fieldId:          string;
-  storageId:        string;
-  type:             string;
-  label:            string;
-  placeholderText:  null | string;
-  helpText:         null | string;
-  predefinedValues: ICmsGetContentModelDataFieldPredefinedValues | null;
-  multipleValues:   null;
-  renderer:         Renderer;
-  validation:       Validation[];
-  listValidation:   null;
-  settings:         null;
-  __typename:       string;
+  id: string;
+  fieldId: string;
+  storageId: string;
+  type: string;
+  label: string;
+  placeholderText: null | string;
+  helpText: null | string;
+  predefinedValues: ICmsGetContentModelFieldPredefinedValues | null;
+  multipleValues: null;
+  renderer: Renderer;
+  validation: Validation[];
+  listValidation: null;
+  settings?: {
+    models: {
+      modelId: string;
+    }[];
+  };
+  __typename: string;
 }
 
-export interface ICmsGetContentModelDataFieldPredefinedValues {
-  enabled:    boolean;
-  values:     Value[];
+export interface ICmsGetContentModelFieldPredefinedValues {
+  enabled: boolean;
+  values: Value[];
   __typename: string;
 }
 
 export interface Value {
-  label:      string;
-  value:      string;
-  selected:   null;
+  label: string;
+  value: string;
+  selected: null;
   __typename: Typename;
 }
 
@@ -177,25 +181,25 @@ export enum Typename {
 }
 
 export interface Renderer {
-  name:       string;
+  name: string;
   __typename: string;
 }
 
 export interface ICmsGetContentModelDataFieldValidation {
-  name:       string;
-  settings:   ICmsGetContentModelDataFieldSettings | null;
-  message:    string;
+  name: string;
+  settings: ICmsGetContentModelDataFieldSettings | null;
+  message: string;
   __typename: string;
 }
 
 export interface ICmsGetContentModelDataFieldSettings {
   flags?: boolean;
   preset: string;
-  regex:  boolean | string;
+  regex: boolean | string;
 }
 
 export interface ICmsGetContentModelDataGroup {
-  id:         string;
-  name:       string;
+  id: string;
+  name: string;
   __typename: string;
 }

@@ -1,5 +1,9 @@
 import axios from "axios";
-import { ICmsGetContentModel, ModelColName } from "./types";
+import {
+  ICmsGetContentModel,
+  ICmsGetContentModelDataField,
+  ModelColName,
+} from "./types";
 import { CmsEntriesList } from "./types";
 
 const webinyApi = axios.create({
@@ -11,7 +15,7 @@ const webinyApi = axios.create({
 
 export const listModel = async (
   modelId: string,
-  fields: any,
+  fields: ICmsGetContentModelDataField[],
   limit: number,
   after: string | null,
   fieldSearches = null
@@ -22,8 +26,11 @@ export const listModel = async (
 
   const arrMap = await Promise.all(
     fields.map(async (field) => {
-      const findRefModel = (field) => {
-        return field.settings?.models?.find((model) => model?.modelId)?.modelId;
+      const findRefModel = (field: ICmsGetContentModelDataField) => {
+        if (field.settings) {
+          return field.settings.models?.find((model) => model?.modelId)
+            ?.modelId;
+        }
       };
       const objFields = field?.settings?.fields;
       if (findRefModel(field)) {
@@ -36,7 +43,6 @@ export const listModel = async (
               const objFieldRefModel = await cmsGetContentModel(
                 findRefModel(el)
               );
-              console.log({ objFieldRefModel });
               return `${el.fieldId}{${objFieldRefModel.data.titleFieldId}}`;
             }
             return `${el.fieldId}`;

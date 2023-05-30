@@ -11,7 +11,7 @@ const NewEntryView = () => {
   const getModelContent = async (modelId: string) => {
     try {
       const { data } = await cmsGetContentModel(modelId);
-      console.log(data);
+      console.log(data.fields.map((field) => field));
       setContentModel(data);
     } catch (error) {
       console.error(error);
@@ -20,6 +20,7 @@ const NewEntryView = () => {
 
   useEffect(() => {
     if (modelId) {
+      console.log({ modelId });
       getModelContent(modelId);
     }
   }, [modelId]);
