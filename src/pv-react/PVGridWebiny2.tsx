@@ -94,12 +94,12 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
 
             // console.log({ modelId, pageSize, cursors, filterInput, fieldId });
 
-            const data = (await getModelFields(
+            const data = await getModelFields(
               modelId,
               pageSize,
               [...cursors][index],
               filter
-            )) as GetModelFieldsReturn;
+            );
             // console.log(data);
 
             const rows = data.modelContentListData.map((row) => {
@@ -124,11 +124,11 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
             return;
           }
 
-          const data = (await getModelFields(
+          const data = await getModelFields(
             modelId,
             pageSize,
             [...cursors][index]
-          )) as GetModelFieldsReturn;
+          );
 
           setCursors((previousState) => previousState.add(data.meta.cursor));
 

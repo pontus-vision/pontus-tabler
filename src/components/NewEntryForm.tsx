@@ -6,10 +6,32 @@ import {
 } from "../types";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { cmsGetContentModel } from "../client";
+import { cmsGetContentModel, listModel } from "../client";
 
 type Props = {
   contentModel: ICmsGetContentModelData;
+};
+
+const getModelFieldsContent = async (
+  modelId: string,
+  limit: number,
+  after: string | null,
+  fieldsSearches = null
+) => {
+  const cmsContentModel = await cmsGetContentModel(modelId);
+
+  const { fields: columnNames } = cmsContentModel.data;
+  const { data: modelContentListData, meta } = await listModel(
+    modelId,
+    columnNames,
+    limit,
+    after,
+    fieldsSearches
+  );
+
+  // console.log({ columnNames });
+
+  return { columnNames, modelContentListData, meta };
 };
 
 const NewEntryForm = ({ contentModel }: Props) => {
@@ -55,14 +77,14 @@ const NewEntryForm = ({ contentModel }: Props) => {
       if (field.renderer.name === "ref-input") {
         const refs = field?.settings?.models;
 
-        refs?.forEach((model) =>
-          cmsGetContentModel(model.modelId).then((res) => console.log(res))
-        );
+        console.log(refs);
+
+        const options = getModelFieldsContent(model.modelId, 5, null);
 
         if (!refs) return;
         return (
           <>
-            <Form.Label>{field.label}</Form.Label>
+            <Form.Label>ref{field.label}</Form.Label>
             <Typeahead
               id={field.fieldId}
               labelKey="option"
