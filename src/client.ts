@@ -2,6 +2,7 @@ import axios from "axios";
 import {
   ICmsGetContentModel,
   ICmsGetContentModelDataField,
+  IListModelResponse,
   ModelColName,
 } from "./types";
 import { CmsEntriesList } from "./types";
@@ -19,7 +20,7 @@ export const listModel = async (
   limit: number,
   after: string | null,
   fieldSearches = null
-) => {
+): Promise<IListModelResponse | undefined> => {
   // const arr1 = arr.map(el=> !!el.settings.models && el.settings?.models.find(model=>model.modelId)  )
   // const arr2 = arr1.map((el) => el.fieldId).join(" ");
   const refInputField = fields.filter((el) => el.renderer.name === "ref-input");
@@ -96,7 +97,9 @@ export const listModel = async (
       }
     `,
     });
-    return res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`];
+    const data = res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`] as IListModelResponse
+    return data
+    
   } catch (error) {
     console.error(error);
   }

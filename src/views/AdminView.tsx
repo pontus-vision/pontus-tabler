@@ -68,7 +68,7 @@ const AdminViewStyles = styled.div`
   align-items: center;
   padding-top: 2rem;
   gap: 1rem;
-  height: 100%;
+  height: 92%;
 
   .layout {
     position: relative;

@@ -22,14 +22,23 @@ export interface ModelContentList {
   meta: Meta;
 }
 
-export interface ModelContentListData {
-  id: string;
-  entryId: string;
-  createdOn: Date;
-  savedOn: Date;
-  createdBy: string;
-  ownedBy: string;
-  subsistemaReferencia: string;
+export interface IListModelResponse {
+  data: IListModelResponseData[]
+  meta: Meta 
+}
+
+export interface IListModelResponseData {
+    id: string;
+    entryId: string;
+    createdOn: string;
+    savedOn: string;
+    createdBy: {
+      displayName: string;
+    };
+    ownedBy: {
+      displayName: string;
+    };
+    [key: string]: unknown;
 }
 
 export interface Meta {
@@ -104,6 +113,11 @@ export interface CmsEntriesListContentMeta {
 export interface FlexLayoutCmp {
   componentName: string;
   cmp?: WebinyModel;
+}
+
+export interface WebinyRefInput {
+  modelId: string;
+  id: string
 }
 
 export interface WebinyModel {

@@ -11,7 +11,11 @@ const NewEntryView = () => {
   const getModelContent = async (modelId: string) => {
     try {
       const { data } = await cmsGetContentModel(modelId);
-      console.log(data.fields.map((field) => field));
+      console.log(data.fields.reduce((acc, cur)=> {
+        (acc[cur.renderer.name] = acc[cur.renderer.name] || []).push(cur)
+      
+        return acc
+      },{}));
       setContentModel(data);
     } catch (error) {
       console.error(error);

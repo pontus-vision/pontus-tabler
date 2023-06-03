@@ -98,6 +98,7 @@ const DashboardViewStyles = styled.div`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  height: 92%;
 
   & .title {
     margin: 0;
