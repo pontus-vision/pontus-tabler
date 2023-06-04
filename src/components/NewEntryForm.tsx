@@ -3,18 +3,14 @@ import Form from "react-bootstrap/Form";
 import {
   ICmsGetContentModelData,
   ICmsGetContentModelDataField,
-  IListModelResponseData,
-  WebinyModel,
   WebinyRefInput,
 } from "../types";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
 import { cmsEntriesCreateModel, cmsGetContentModel, listModel } from "../client";
 import FloatingLabel from "react-bootstrap/esm/FloatingLabel";
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { TypeaheadProps } from "react-bootstrap-typeahead/types/types";
-import Button from "react-bootstrap/esm/Button";
+import { useTranslation } from "react-i18next";
+
 
 type Props = {
   contentModel: ICmsGetContentModelData;
@@ -46,6 +42,7 @@ const getModelFieldsContent = async (
 
 const NewEntryForm = ({ contentModel }: Props) => {
   const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
+  const { t } = useTranslation();
 
   const renderField = (field: ICmsGetContentModelDataField) => {
     if (field.type === "text") {
@@ -108,9 +105,12 @@ const NewEntryForm = ({ contentModel }: Props) => {
 
         useEffect(() => {
           const fetchData = async () => {
+            if (!refs || refs.length === 0) return
             const res = await getModelFieldsContent(refs[0].modelId, 5, null);
-           
             
+
+            if(!res) return
+
             setOptions(
               res.modelContentListData.map((el) => {
                 const {
@@ -161,15 +161,14 @@ const NewEntryForm = ({ contentModel }: Props) => {
         <Typeahead
           id={field.fieldId}
           onChange={e=>{
-            const ref:WebinyRefInput[] = e.map(el=>{
+            const refInputs:WebinyRefInput[] = e.map((el)=>{
               const ref = {
                 modelId: refs[0].modelId,
                 id: el.id
-            }
-            return ref
+              }
+              return ref
             })
-            console.log({ref,e});
-            e.length !== 0 && setFormInputs(prevState=> ({...prevState, [`${field.fieldId}`]:ref}))
+            e.length !== 0 && setFormInputs(prevState=> ({...prevState, [`${field.fieldId}`]:refInputs}))
           
           }}
           labelKey={(option)=> headers.map(el=> option[el]).join(" ")}
@@ -235,7 +234,7 @@ const NewEntryForm = ({ contentModel }: Props) => {
           return renderField(field);
         })}
       </Form.Group>
-      <button>Submit</button>
+      <button>{t("submit-form")}</button>
     </Form>
   );
 };

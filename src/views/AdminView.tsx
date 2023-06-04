@@ -4,10 +4,10 @@ import styled from "styled-components";
 
 import {
   ModelColName,
-  ModelContentListData,
   Meta,
   Dashboard,
   FlexLayoutCmp,
+  IListModelResponseData,
 } from "../types";
 import { IJsonModel } from "flexlayout-react";
 import PVFlexLayout from "../pv-react/PVFlexLayout";
@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 
 export type GetModelFieldsReturn = {
   columnNames: ModelColName[];
-  modelContentListData: ModelContentListData[];
+  modelContentListData: IListModelResponseData[];
   meta: Meta;
 };
 
