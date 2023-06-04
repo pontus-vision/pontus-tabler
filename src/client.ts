@@ -4,11 +4,13 @@ import {
   ICmsGetContentModelDataField,
   IListModelResponse,
   ModelColName,
+  UnknownKey,
 } from "./types";
 import { CmsEntriesList } from "./types";
 
 const webinyApi = axios.create({
   baseURL: `https://d2ekewy9aiz800.cloudfront.net/`,
+  
   headers: {
     Authorization: `Bearer ${import.meta.env.VITE_WEBINY_API_TOKEN}`,
   },
@@ -396,4 +398,33 @@ export const getEntry = async (id: string, modelId: string) => {
 
 function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+export const cmsEntriesCreateModel = async(modelId: string, dataInput: UnknownKey, keys: any) => {
+  const modelIdCapitalized = capitalizeFirstLetter(modelId)
+  
+
+
+  try {  
+    const query= `mutation CmsEntriesCreate${modelIdCapitalized}($data: ${modelIdCapitalized}Input!) {
+      content: create${modelIdCapitalized}(data: $data) {
+        data {
+          ${keys}
+        }
+      }
+    }
+    `
+
+    const post = {
+      query, variables: {data:dataInput}
+    }
+
+    const {data: res} = await webinyApi.post(`/cms/manage/en-US`, post)
+
+    console.log({res, post})
+
+    return res
+  } catch (error) {
+    console.error(error)
+  }
 }

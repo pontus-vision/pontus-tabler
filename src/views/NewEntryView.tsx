@@ -15,7 +15,7 @@ const NewEntryView = () => {
         (acc[cur.renderer.name] = acc[cur.renderer.name] || []).push(cur)
       
         return acc
-      },{}));
+      },{} as any));
       setContentModel(data);
     } catch (error) {
       console.error(error);

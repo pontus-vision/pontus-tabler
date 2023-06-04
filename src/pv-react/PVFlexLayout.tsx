@@ -210,10 +210,14 @@ const PVFlexLayout = ({
     console.log({ model, gridState });
   }, [gridState]);
 
+  useEffect(()=>{
+    console.log({containerHeight})
+  },[containerHeight])
+
   return (
     <div
       className="flex-layout-wrapper"
-      style={{ height: "75vh", width: "90%", overflowY: "auto" }}
+      style={{  width: "90%", overflowY: "auto" }}
     >
       <div
         className="PVFlexLayout"

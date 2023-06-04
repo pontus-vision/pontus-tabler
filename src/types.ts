@@ -17,11 +17,6 @@ export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   type: string;
 }
 
-export interface ModelContentList {
-  data: ModelContentListData[];
-  meta: Meta;
-}
-
 export interface IListModelResponse {
   data: IListModelResponseData[]
   meta: Meta 
@@ -41,6 +36,10 @@ export interface IListModelResponseData {
     [key: string]: unknown;
 }
 
+export interface UnknownKey {
+  [key: string]: unknown;
+}
+
 export interface Meta {
   cursor: null;
   totalCount: number;
@@ -57,7 +56,7 @@ export interface ModelColName {
   predefinedValues: null;
   multipleValues: null;
   renderer: Renderer;
-  validation: Validation[];
+  validation?: Validation[];
   listValidation: null;
   settings: null;
   __typename: string;
@@ -170,9 +169,10 @@ export interface ICmsGetContentModelDataField {
   validation: Validation[];
   listValidation: null;
   settings?: {
-    models: {
+    models?: {
       modelId: string;
     }[];
+    fields?: ICmsGetContentModelDataField[] 
   };
   __typename: string;
 }

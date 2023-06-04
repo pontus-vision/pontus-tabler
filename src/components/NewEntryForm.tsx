@@ -9,9 +9,12 @@ import {
 } from "../types";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { cmsGetContentModel, listModel } from "../client";
-import { ModelColName } from "../types";
+import { cmsEntriesCreateModel, cmsGetContentModel, listModel } from "../client";
 import FloatingLabel from "react-bootstrap/esm/FloatingLabel";
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { TypeaheadProps } from "react-bootstrap-typeahead/types/types";
+import Button from "react-bootstrap/esm/Button";
 
 type Props = {
   contentModel: ICmsGetContentModelData;
@@ -42,24 +45,31 @@ const getModelFieldsContent = async (
 };
 
 const NewEntryForm = ({ contentModel }: Props) => {
-  const [formInputs, setFormInputs] = useState<any>({});
+  const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
 
   const renderField = (field: ICmsGetContentModelDataField) => {
     if (field.type === "text") {
       if (field.renderer.name === "checkboxes") {
+        const arr = []
+
         return field.predefinedValues?.values.map((value) => (
           <Form.Check
             type="checkbox"
             id={value.value}
             label={value.label}
-            onChange={(e) =>
-              setFormInputs((prevState: any) => ({
-                ...prevState,
-                [`${field.fieldId}`]: {
-                  ...prevState[`${field.fieldId}`],
-                  [`${value.label}`]: value.value,
-                },
-              }))
+            onChange={(e) =>{
+                arr.push(value.value)
+
+              if(Array.isArray(formInputs[field.fieldId])) {
+                setFormInputs(prevState=> ({...prevState, [field.fieldId]: [...prevState[field.fieldId], value.value]}))
+              }  else{
+                setFormInputs(prevState=> ({...prevState, [field.fieldId]: arr}))
+              }
+            
+            
+            
+              }
+            
             }
           >
             {/* <Form.Check.Input  /> */}
@@ -69,7 +79,7 @@ const NewEntryForm = ({ contentModel }: Props) => {
         return (
         <>
         <Form.Label>{field.label}</Form.Label>
-        <Form.Select>
+        <Form.Select onChange={(e)=>setFormInputs(prevState=>({...prevState,[field.fieldId]:e.target.value}))}>
           {field.predefinedValues?.values.map(el=> <option value={el.value}>{el.label}</option>)}
         </Form.Select>
         </>
@@ -91,13 +101,15 @@ const NewEntryForm = ({ contentModel }: Props) => {
       );
     } else if (field.type === "ref") {
       const refs = field?.settings?.models;
-      const [options, setOptions] = useState<{ [key: string]: unknown; id: string; }[]>();
+    
+
+      const [options, setOptions] = useState<any>();
         const [headers, setHeaders] = useState<string[]>()
 
         useEffect(() => {
           const fetchData = async () => {
             const res = await getModelFieldsContent(refs[0].modelId, 5, null);
-            if(res) {
+           
             
             setOptions(
               res.modelContentListData.map((el) => {
@@ -118,16 +130,8 @@ const NewEntryForm = ({ contentModel }: Props) => {
             
             if (refs && refs.length > 0) {
               fetchData();
-            }}
+            }
           }, [refs]);
-          
-          if(options) {
-            console.log()
-        }
-
-        useEffect(()=>{
-          console.log(options)
-        },[options])
         
         if (!refs || !headers || !options) return;
         if (field.renderer.name === "ref-input") {
@@ -136,13 +140,13 @@ const NewEntryForm = ({ contentModel }: Props) => {
           <>
             <Form.Label>{field.label}</Form.Label>
             <Typeahead
-            onChange={e=>{
+            onChange={(e:any)=>{
               const ref:WebinyRefInput = {
                 modelId: refs[0].modelId,
-                id: e[0].id
+                id: e[0]?.id 
               }
               console.log(ref);
-              (setFormInputs(prevState=> ({...prevState, [`${field.fieldId}`]: ref})))
+              (setFormInputs((prevState)=> ({...prevState, [`${field.fieldId}`]: ref})))
             }}
               id={field.fieldId}
               labelKey={(option: any)=> headers?.map((el:any)=> option[el]).join(" ")}
@@ -168,7 +172,7 @@ const NewEntryForm = ({ contentModel }: Props) => {
             e.length !== 0 && setFormInputs(prevState=> ({...prevState, [`${field.fieldId}`]:ref}))
           
           }}
-          labelKey={option=> headers.map(el=> option[el]).join(" ")}
+          labelKey={(option)=> headers.map(el=> option[el]).join(" ")}
           multiple
           options={options}
         />
@@ -191,18 +195,47 @@ const NewEntryForm = ({ contentModel }: Props) => {
       }
     }
   };
+  const onSubmit = async(dataInput: { [key: string]: unknown;}) => {
+    
+    const func = (field: any) => {
+      if(field.type === "text") {
+        return `${field.fieldId}`
+      }
+      else if(field.type === "ref") {
+        return `${field.fieldId} {
+          modelId
+          id
+          __typename
+        }`
+      }else if (field.type === "object" && field?.settings) {
+        return `${field.fieldId} {
+          ${field.settings.fields?.map(field=> func(field)).join("\n")}
+        }`
+      }
+    }
+
+    
+    const data = await cmsEntriesCreateModel(contentModel.modelId, dataInput, contentModel.fields.map(field=>
+      func(field)
+      ).join("\n"))
+
+  };
 
   useEffect(()=>{
+
     console.log({formInputs})
   },[formInputs])
 
   return (
-    <Form>
+    <Form onSubmit={(e)=>{
+      e.preventDefault()
+      onSubmit(formInputs)}}>
       <Form.Group className="mb-3" controlId="formBasicEmail">
         {contentModel.fields.map((field) => {
           return renderField(field);
         })}
       </Form.Group>
+      <button>Submit</button>
     </Form>
   );
 };
