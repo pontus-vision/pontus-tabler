@@ -10,6 +10,7 @@ import { deleteDashboard, updateDashboard } from "../store/sliceDashboards";
 import { RootState } from "../store/store";
 import { Dashboard, FlexLayoutCmp } from "../types";
 import { useTranslation } from "react-i18next";
+import NewEntryView from "./NewEntryView";
 
 type Props = {
   dashboardId: string;
@@ -25,6 +26,8 @@ const DashboardView = ({ dashboardId }: Props) => {
   const [gridState, setGridState] = useState<IJsonModel>();
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const [deleteModal, setDeleteModal] = useState(false);
+  const [modelId, setModelId] = useState<string | undefined>()
+
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
@@ -37,7 +40,7 @@ const DashboardView = ({ dashboardId }: Props) => {
     console.log({ dashboard });
   }, [dashboard]);
 
-  useEffect(() => {}, [gridState]);
+  useEffect(() => {console.log(modelId)}, [modelId]);
 
   useEffect(() => {
     console.log({ isEditing });
@@ -82,12 +85,15 @@ const DashboardView = ({ dashboardId }: Props) => {
         )}
       </div>
       <PVFlexLayout
+        setModelId={setModelId}
         selectedCmp={selectedCmp}
         setGridState={setGridState}
         gridState={dashboard?.gridState}
         setIsEditing={setIsEditing}
       />
       <div className="shadow"></div>
+      
+        {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
     </DashboardViewStyles>
   );
 };
@@ -99,6 +105,7 @@ const DashboardViewStyles = styled.div`
   justify-content: center;
   gap: 0.5rem;
   height: 92%;
+
 
   & .title {
     margin: 0;

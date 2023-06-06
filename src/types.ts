@@ -45,22 +45,22 @@ export interface Meta {
   totalCount: number;
 }
 
-export interface ModelColName {
-  id: string;
-  fieldId: string;
-  storageId: string;
-  type: string;
-  label: string;
-  placeholderText: string;
-  helpText: null;
-  predefinedValues: null;
-  multipleValues: null;
-  renderer: Renderer;
-  validation?: Validation[];
-  listValidation: null;
-  settings: null;
-  __typename: string;
-}
+// export interface ModelColName {
+//   id: string;
+//   fieldId: string;
+//   storageId: string;
+//   type: string;
+//   label: string;
+//   placeholderText: string;
+//   helpText: null;
+//   predefinedValues: null;
+//   multipleValues: null;
+//   renderer: Renderer;
+//   validation?: Validation[];
+//   listValidation: null;
+//   settings: null;
+//   __typename: string;
+// }
 
 export interface Renderer {
   name: string;
@@ -69,9 +69,15 @@ export interface Renderer {
 
 export interface Validation {
   name: string;
-  settings: null;
+  settings?: ValidationSettings;
   message: string;
   __typename: string;
+}
+
+export interface ValidationSettings {
+    flags: boolean,
+    preset: string,
+    regex?: boolean
 }
 
 export interface CmsEntriesList {
@@ -166,7 +172,7 @@ export interface ICmsGetContentModelDataField {
   predefinedValues: ICmsGetContentModelFieldPredefinedValues | null;
   multipleValues: null;
   renderer: Renderer;
-  validation: Validation[];
+  validation?: Validation[];
   listValidation: null;
   settings?: {
     models?: {

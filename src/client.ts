@@ -402,8 +402,7 @@ function capitalizeFirstLetter(string: string) {
 
 export const cmsEntriesCreateModel = async(modelId: string, dataInput: UnknownKey, keys: any) => {
   const modelIdCapitalized = capitalizeFirstLetter(modelId)
-  
-
+    console.log({modelId, dataInput, keys})
 
   try {  
     const query= `mutation CmsEntriesCreate${modelIdCapitalized}($data: ${modelIdCapitalized}Input!) {
@@ -423,7 +422,7 @@ export const cmsEntriesCreateModel = async(modelId: string, dataInput: UnknownKe
 
     console.log({res, post})
 
-    return res
+    return res.data.content
   } catch (error) {
     console.error(error)
   }

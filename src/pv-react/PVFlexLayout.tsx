@@ -18,6 +18,7 @@ import { ColumnState } from "ag-grid-community";
 import { FlexLayoutCmp } from "../types";
 import PVDoughnutChart2 from "./PVDoughnutChart2";
 import { useDispatch } from "react-redux";
+import NewEntryView from "../views/NewEntryView";
 
 type Props = {
   gridState?: IJsonModel;
@@ -25,6 +26,7 @@ type Props = {
   setIsEditing?: Dispatch<React.SetStateAction<boolean>>;
   dashboardId?: string;
   setGridState?: Dispatch<SetStateAction<IJsonModel | undefined>>;
+  setModelId: Dispatch<SetStateAction<string| undefined>> 
 };
 
 const PVFlexLayout = ({
@@ -33,6 +35,7 @@ const PVFlexLayout = ({
   gridState,
   setIsEditing,
   dashboardId,
+  setModelId
 }: Props) => {
   const initialJson: IJsonModel = {
     global: {},
@@ -54,13 +57,19 @@ const PVFlexLayout = ({
     if (component === "PVGridWebiny2") {
       const lastState = findChildById(gridState?.layout, id, "tab")?.config
         ?.lastState;
+      
       return (
+        <>
+        <i style={{fontSize: "3rem"}} className="fa-solid fa-plus"
+          onClick={()=> setModelId(prevState=> prevState = config.modelId)}
+          ></i>
         <PVGridWebiny2
           id={id}
           lastState={lastState || config.lastState}
           onValueChange={handleValueChange}
           modelId={config.modelId}
-        />
+          />
+          </>
       );
     }
     if (component === "PVDoughnutChart2") {
@@ -103,7 +112,7 @@ const PVFlexLayout = ({
     }
   };
 
-  const filterComponentsPerType = (layout, type) => {
+  const filterComponentsPerType = (layout:any, type: string):any => {
     if (layout?.children && layout.children.length > 0) {
       if (layout.children[0].type === type) {
         console.log(layout.children);
@@ -217,7 +226,7 @@ const PVFlexLayout = ({
   return (
     <div
       className="flex-layout-wrapper"
-      style={{  width: "90%", overflowY: "auto" }}
+      style={{ height: "65vh", width: "90%", overflowY: "auto" }}
     >
       <div
         className="PVFlexLayout"

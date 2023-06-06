@@ -16,6 +16,7 @@ import { GetModelFieldsReturn } from "../views/AdminView";
 import { AgGrigFirstDataRenderedEvent } from "../types";
 import { cmsGetContentModel, listModel } from "../client";
 import { useSelector } from "react-redux";
+import NewEntryView from "../views/NewEntryView";
 
 type FilterState = {
   [key: string]: any;
@@ -66,6 +67,8 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
       columnApi.applyColumnState({ state: lastState });
     }
   }, []);
+
+  
 
   useEffect(() => {
     if (!columnState) return;
@@ -224,6 +227,8 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
       columnApi.applyColumnState({ state: lastState });
     }
   }
+  const [openForm, setOpenForm] = useState<boolean>(false)
+
 
   return (
     <>
@@ -231,6 +236,14 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
         {/* <button onClick={restoreGridColumnStates}>
           Restore Grid Column States
         </button> */}
+        {/* <i style={{fontSize: ".rem"}} className="fa-solid fa-plus"
+          onClick={()=>{ 
+            console.log("hey")
+            setOpenForm(true)
+          }
+          }
+          ></i>
+        {openForm && <NewEntryView />} */}
         <AgGridReact
           enableRangeSelection={true}
           paginationAutoPageSize={true}

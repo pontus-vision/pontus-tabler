@@ -10,6 +10,10 @@ import "react-bootstrap-typeahead/css/Typeahead.css";
 import { cmsEntriesCreateModel, cmsGetContentModel, listModel } from "../client";
 import FloatingLabel from "react-bootstrap/esm/FloatingLabel";
 import { useTranslation } from "react-i18next";
+import { z } from 'zod';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { validateCPF } from "../SchemasValidation";
 
 
 type Props = {
@@ -43,14 +47,54 @@ const getModelFieldsContent = async (
 const NewEntryForm = ({ contentModel }: Props) => {
   const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
   const { t } = useTranslation();
+  
+
+
+  const validationTypes = ["cpf", "email"];
+
+  
+
+  useEffect(()=>{
+    console.log({contentModel})
+  },[contentModel])
+
+  const createValidationSchema = (rules) => {
+    let schema = z.string();
+
+    if (rules.includes("required")) {
+      schema = schema.nonempty({ message: "Field is required" });
+    }
+
+    if (rules.includes("cpf")) {
+      schema = schema.refine(
+        (value) => {
+          validateCPF(value)
+        },
+        { message: "CPF inválido" }
+      );
+    }
+
+    return schema;
+  };
 
   const renderField = (field: ICmsGetContentModelDataField) => {
+    const validationRules = field.validation?.map(valid=> valid.settings?.preset)
+    
+    const validationSchema = validationRules && createValidationSchema(validationRules);
+    
+
+    const { handleSubmit, register, formState: {errors} } = useForm({
+      resolver: zodResolver(validationSchema),
+    });
+
     if (field.type === "text") {
       if (field.renderer.name === "checkboxes") {
         const arr = []
 
         return field.predefinedValues?.values.map((value) => (
+          <>
           <Form.Check
+            key={field.fieldId}
             type="checkbox"
             id={value.value}
             label={value.label}
@@ -62,21 +106,19 @@ const NewEntryForm = ({ contentModel }: Props) => {
               }  else{
                 setFormInputs(prevState=> ({...prevState, [field.fieldId]: arr}))
               }
-            
-            
-            
-              }
-            
             }
+            
+          }
           >
             {/* <Form.Check.Input  /> */}
           </Form.Check>
+          </>
         ));
       }else if(field.renderer.name === "select-box") {
         return (
         <>
-        <Form.Label>{field.label}</Form.Label>
-        <Form.Select onChange={(e)=>setFormInputs(prevState=>({...prevState,[field.fieldId]:e.target.value}))}>
+        <Form.Label key={field.fieldId}>{field.label}</Form.Label>
+        <Form.Select key={field.fieldId} onChange={(e)=>setFormInputs(prevState=>({...prevState,[field.fieldId]:e.target.value}))}>
           {field.predefinedValues?.values.map(el=> <option value={el.value}>{el.label}</option>)}
         </Form.Select>
         </>
@@ -84,7 +126,7 @@ const NewEntryForm = ({ contentModel }: Props) => {
       }
       return (
         <>
-          <Form.Label>{field.label}</Form.Label>
+          <Form.Label key={field.fieldId}>{field.label}</Form.Label>
           <Form.Control
             key={field.fieldId}
             onChange={(e) =>
@@ -108,9 +150,9 @@ const NewEntryForm = ({ contentModel }: Props) => {
             if (!refs || refs.length === 0) return
             const res = await getModelFieldsContent(refs[0].modelId, 5, null);
             
-
+            
+            
             if(!res) return
-
             setOptions(
               res.modelContentListData.map((el) => {
                 const {
@@ -138,8 +180,9 @@ const NewEntryForm = ({ contentModel }: Props) => {
 
         return (
           <>
-            <Form.Label>{field.label}</Form.Label>
+            <Form.Label key={field.fieldId}>{field.label}</Form.Label>
             <Typeahead
+            key={field.fieldId}
             onChange={(e:any)=>{
               const ref:WebinyRefInput = {
                 modelId: refs[0].modelId,
@@ -157,8 +200,9 @@ const NewEntryForm = ({ contentModel }: Props) => {
         );
       }else if(field.renderer.name === "ref-inputs") {
         return <>
-        <Form.Label>{field.label}</Form.Label>
+        <Form.Label key={field.fieldId}>{field.label}</Form.Label>
         <Typeahead
+        key={field.fieldId}
           id={field.fieldId}
           onChange={e=>{
             const refInputs:WebinyRefInput[] = e.map((el)=>{
@@ -181,9 +225,9 @@ const NewEntryForm = ({ contentModel }: Props) => {
       if(field.renderer.name === "long-text-text-area") {
         return (
         <>
-          <Form.Label>{field.label}</Form.Label>
-          <FloatingLabel controlId="floatingTextarea2" label={field.helpText}>
-            <Form.Control onChange={(e)=> setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))}
+          <Form.Label key={field.fieldId}>{field.label}</Form.Label>
+          <FloatingLabel key={field.fieldId} controlId="floatingTextarea2" label={field.helpText}>
+            <Form.Control key={field.fieldId} onChange={(e)=> setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))}
               as="textarea"
               placeholder="Leave a comment here"
               style={{ height: '100px' }}
@@ -212,11 +256,17 @@ const NewEntryForm = ({ contentModel }: Props) => {
         }`
       }
     }
+    try {
+      const data = await cmsEntriesCreateModel(contentModel.modelId, dataInput, contentModel.fields.map(field=>
+        func(field)
+        ).join("\n"))
+      console.log({data})
 
+      
+    } catch (error) {
+      console.error(error)
+    }
     
-    const data = await cmsEntriesCreateModel(contentModel.modelId, dataInput, contentModel.fields.map(field=>
-      func(field)
-      ).join("\n"))
 
   };
 
@@ -226,11 +276,12 @@ const NewEntryForm = ({ contentModel }: Props) => {
   },[formInputs])
 
   return (
-    <Form onSubmit={(e)=>{
+    <Form className="new-entry__form" onSubmit={(e)=>{
       e.preventDefault()
       onSubmit(formInputs)}}>
       <Form.Group className="mb-3" controlId="formBasicEmail">
         {contentModel.fields.map((field) => {
+          console.log({field})
           return renderField(field);
         })}
       </Form.Group>
