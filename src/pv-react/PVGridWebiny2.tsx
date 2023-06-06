@@ -227,7 +227,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
       columnApi.applyColumnState({ state: lastState });
     }
   }
-  const [openForm, setOpenForm] = useState<boolean>(false)
 
 
   return (

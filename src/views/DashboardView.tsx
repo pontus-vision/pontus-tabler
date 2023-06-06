@@ -83,7 +83,11 @@ const DashboardView = ({ dashboardId }: Props) => {
             {t("save-state")}
           </Button>
         )}
-      </div>
+      </div>  
+      {modelId && <div className="shadow" onClick={()=>{
+        console.log("hey")
+        setModelId("")
+        }}></div>}
       <PVFlexLayout
         setModelId={setModelId}
         selectedCmp={selectedCmp}
@@ -91,7 +95,6 @@ const DashboardView = ({ dashboardId }: Props) => {
         gridState={dashboard?.gridState}
         setIsEditing={setIsEditing}
       />
-      <div className="shadow"></div>
       
         {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
     </DashboardViewStyles>
@@ -105,7 +108,15 @@ const DashboardViewStyles = styled.div`
   justify-content: center;
   gap: 0.5rem;
   height: 92%;
-
+  .shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100vw;
+    height: 100vh;
+    background-color: #0000004b
+  }
 
   & .title {
     margin: 0;
@@ -115,10 +126,7 @@ const DashboardViewStyles = styled.div`
     position: relative;
     width: 90%;
   }
-  & .shadow {
-    height: 100%;
-    width: 100%;
-  }
+  
 
   & .fa-plus {
     font-size: 3rem;

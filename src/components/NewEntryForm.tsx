@@ -48,11 +48,8 @@ const NewEntryForm = ({ contentModel }: Props) => {
   const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
   const { t } = useTranslation();
   
-
-
   const validationTypes = ["cpf", "email"];
 
-  
 
   useEffect(()=>{
     console.log({contentModel})
@@ -91,10 +88,10 @@ const NewEntryForm = ({ contentModel }: Props) => {
       if (field.renderer.name === "checkboxes") {
         const arr = []
 
-        return field.predefinedValues?.values.map((value) => (
+        return field.predefinedValues?.values.map((value, index) => (
           <>
           <Form.Check
-            key={field.fieldId}
+            key={index}
             type="checkbox"
             id={value.value}
             label={value.label}
@@ -117,18 +114,17 @@ const NewEntryForm = ({ contentModel }: Props) => {
       }else if(field.renderer.name === "select-box") {
         return (
         <>
-        <Form.Label key={field.fieldId}>{field.label}</Form.Label>
-        <Form.Select key={field.fieldId} onChange={(e)=>setFormInputs(prevState=>({...prevState,[field.fieldId]:e.target.value}))}>
+        <Form.Label>{field.label}</Form.Label>
+        <Form.Select  onChange={(e)=>setFormInputs(prevState=>({...prevState,[field.fieldId]:e.target.value}))}>
           {field.predefinedValues?.values.map(el=> <option value={el.value}>{el.label}</option>)}
         </Form.Select>
         </>
         )
-      }
+      } else if(field.renderer.name === "text-input"){
       return (
         <>
-          <Form.Label key={field.fieldId}>{field.label}</Form.Label>
+          <Form.Label>{field.label}</Form.Label>
           <Form.Control
-            key={field.fieldId}
             onChange={(e) =>
               setFormInputs((prevState) => ({
                 ...prevState,
@@ -137,7 +133,7 @@ const NewEntryForm = ({ contentModel }: Props) => {
             }
           ></Form.Control>
         </>
-      );
+      )}
     } else if (field.type === "ref") {
       const refs = field?.settings?.models;
     
@@ -154,7 +150,7 @@ const NewEntryForm = ({ contentModel }: Props) => {
             
             if(!res) return
             setOptions(
-              res.modelContentListData.map((el) => {
+              res.modelContentListData.map((el, value) => {
                 const {
                   createdBy,
                   createdOn,
@@ -180,9 +176,8 @@ const NewEntryForm = ({ contentModel }: Props) => {
 
         return (
           <>
-            <Form.Label key={field.fieldId}>{field.label}</Form.Label>
+            <Form.Label>{field.label}</Form.Label>
             <Typeahead
-            key={field.fieldId}
             onChange={(e:any)=>{
               const ref:WebinyRefInput = {
                 modelId: refs[0].modelId,
@@ -200,9 +195,8 @@ const NewEntryForm = ({ contentModel }: Props) => {
         );
       }else if(field.renderer.name === "ref-inputs") {
         return <>
-        <Form.Label key={field.fieldId}>{field.label}</Form.Label>
+        <Form.Label>{field.label}</Form.Label>
         <Typeahead
-        key={field.fieldId}
           id={field.fieldId}
           onChange={e=>{
             const refInputs:WebinyRefInput[] = e.map((el)=>{
@@ -225,9 +219,9 @@ const NewEntryForm = ({ contentModel }: Props) => {
       if(field.renderer.name === "long-text-text-area") {
         return (
         <>
-          <Form.Label key={field.fieldId}>{field.label}</Form.Label>
-          <FloatingLabel key={field.fieldId} controlId="floatingTextarea2" label={field.helpText}>
-            <Form.Control key={field.fieldId} onChange={(e)=> setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))}
+          <Form.Label key={index}>{field.label}</Form.Label>
+          <FloatingLabel key={index} controlId="floatingTextarea2" label={field.helpText}>
+            <Form.Control key={index} onChange={(e)=> setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))}
               as="textarea"
               placeholder="Leave a comment here"
               style={{ height: '100px' }}

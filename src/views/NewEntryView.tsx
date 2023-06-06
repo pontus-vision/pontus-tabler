@@ -34,7 +34,9 @@ const NewEntryView = ({modelId, setModelId}:Props) => {
     }
   }, [modelId]);
 
-  return <NewEntryViewStyles onClick={()=>setModelId("")}>{contentModel && <NewEntryForm contentModel={contentModel} />}</NewEntryViewStyles>;
+  return <NewEntryViewStyles >
+    
+    {contentModel && <NewEntryForm contentModel={contentModel} />}</NewEntryViewStyles>;
 };
 
 const NewEntryViewStyles = styled.div`
@@ -45,6 +47,7 @@ const NewEntryViewStyles = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   overflow-y: auto;
+  z-index:3;
   .new-entry__form {
     background: #e4e4e4;
     margin: auto;
