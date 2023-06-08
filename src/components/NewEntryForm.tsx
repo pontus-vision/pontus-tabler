@@ -1,23 +1,27 @@
-import { useEffect, useState } from "react";
+import { Dispatch, ReactElement, SetStateAction, useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import {
   ICmsGetContentModelData,
   ICmsGetContentModelDataField,
+  UnknownKey,
   WebinyRefInput,
 } from "../types";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { cmsEntriesCreateModel, cmsGetContentModel, listModel } from "../client";
+import { cmsPublishModelId, cmsEntriesCreateModel, cmsGetContentModel, listModel } from "../client";
 import FloatingLabel from "react-bootstrap/esm/FloatingLabel";
 import { useTranslation } from "react-i18next";
 import { z } from 'zod';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { validateCPF } from "../SchemasValidation";
+import styled from "styled-components";
+import Alert from 'react-bootstrap/Alert';
 
 
 type Props = {
   contentModel: ICmsGetContentModelData;
+  setSuccessMsg: Dispatch<SetStateAction<string | undefined>>
 };
 
 const getModelFieldsContent = async (
@@ -44,19 +48,23 @@ const getModelFieldsContent = async (
     }
 };
 
-const NewEntryForm = ({ contentModel }: Props) => {
+const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
   const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
-  const { t } = useTranslation();
+  const [formObjField, setFormObjField] = useState<{[key: string]: unknown;}>({});
+  const [formObjFieldName, setFormObjFieldName] = useState<string>();
+  const [isLoading, setIsLoading] = useState(false)
   
-  const validationTypes = ["cpf", "email"];
+  const { t } = useTranslation();
 
-
+  useEffect(()=>{console.log({formInputs})},[formInputs])
+  
+  
   useEffect(()=>{
     console.log({contentModel})
   },[contentModel])
 
-  const createValidationSchema = (rules) => {
-    let schema = z.string();
+  const createValidationSchema = (rules: string []) => {
+    let schema = z.string() 
 
     if (rules.includes("required")) {
       schema = schema.nonempty({ message: "Field is required" });
@@ -74,11 +82,24 @@ const NewEntryForm = ({ contentModel }: Props) => {
     return schema;
   };
 
-  const renderField = (field: ICmsGetContentModelDataField) => {
+  const renderField = (field: ICmsGetContentModelDataField, objFieldId: string | null = null) : ReactElement<any, any> | undefined => {
+
+    
+    // if(objFieldId) {
+
+    //   useEffect(()=>{
+        
+    //     setFormInputs((prevState) => ({...prevState, [objFieldId]: formObjField})) 
+        
+    //     console.log({formObjField})
+    //   },[formObjField])
+    // }
+
     const validationRules = field.validation?.map(valid=> valid.settings?.preset)
     
     const validationSchema = validationRules && createValidationSchema(validationRules);
     
+
 
     const { handleSubmit, register, formState: {errors} } = useForm({
       resolver: zodResolver(validationSchema),
@@ -86,53 +107,76 @@ const NewEntryForm = ({ contentModel }: Props) => {
 
     if (field.type === "text") {
       if (field.renderer.name === "checkboxes") {
-        const arr = []
-
-        return field.predefinedValues?.values.map((value, index) => (
-          <>
+        const arr = [] as string[]
+        return (<div className="field form__checkboxes">
+          <Form.Label>{field.label}</Form.Label>
+         {field.predefinedValues?.values.map((value, index) => (
           <Form.Check
             key={index}
             type="checkbox"
             id={value.value}
             label={value.label}
             onChange={(e) =>{
-                arr.push(value.value)
-
-              if(Array.isArray(formInputs[field.fieldId])) {
-                setFormInputs(prevState=> ({...prevState, [field.fieldId]: [...prevState[field.fieldId], value.value]}))
-              }  else{
-                setFormInputs(prevState=> ({...prevState, [field.fieldId]: arr}))
+              if(objFieldId) {
+                if(Array.isArray(formInputs[objFieldId][field.fieldId])) {
+                  // setFormInputs((prevState) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: value.value }}))
+                  console.log({objFieldId})
+                  setFormInputs((prevState:{ [key: string]: unknown | any })=> ({...prevState, [objFieldId]:{...prevState[objFieldId], [field.fieldId]: [...prevState[objFieldId][field.fieldId], value.value]}}))
+                } else{
+                  arr.push(value.value)
+                  setFormInputs(prevState=> ({...prevState, [objFieldId]:{...prevState[objFieldId], [field.fieldId]: arr}}))
+                }
+              } else {
+                if(Array.isArray(formInputs[field.fieldId])) {
+                  setFormInputs((prevState: { [key: string]: unknown | any } )=> ({...prevState, [field.fieldId]: [...prevState[field.fieldId], value.value]}))
+                } else{
+                  arr.push(value.value)
+                  setFormInputs(prevState=> ({...prevState, [field.fieldId]: arr}))
+                }
               }
             }
-            
           }
           >
-            {/* <Form.Check.Input  /> */}
           </Form.Check>
-          </>
-        ));
+        ))}
+          </div >)
       }else if(field.renderer.name === "select-box") {
         return (
-        <>
+        <div className="field form__select-box">
         <Form.Label>{field.label}</Form.Label>
-        <Form.Select  onChange={(e)=>setFormInputs(prevState=>({...prevState,[field.fieldId]:e.target.value}))}>
+        <Form.Select  onChange={(e)=>{
+          if(objFieldId) {
+            setFormInputs((prevState) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
+          } else {
+            setFormInputs((prevState) => ({
+              ...prevState,
+              [`${field.fieldId}`]: e.target.value,
+            }))
+          }
+        }
+        }>
           {field.predefinedValues?.values.map(el=> <option value={el.value}>{el.label}</option>)}
         </Form.Select>
-        </>
+        </div>
         )
       } else if(field.renderer.name === "text-input"){
       return (
-        <>
+        <div className="field form__text-input">
           <Form.Label>{field.label}</Form.Label>
           <Form.Control
-            onChange={(e) =>
-              setFormInputs((prevState) => ({
-                ...prevState,
-                [`${field.fieldId}`]: e.target.value,
-              }))
+            onChange={(e) =>{
+              if(objFieldId) {
+                setFormInputs((prevState) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
+              } else {
+                setFormInputs((prevState) => ({
+                  ...prevState,
+                  [`${field.fieldId}`]: e.target.value,
+                }))
+              }
+            }
             }
           ></Form.Control>
-        </>
+        </div>
       )}
     } else if (field.type === "ref") {
       const refs = field?.settings?.models;
@@ -145,8 +189,6 @@ const NewEntryForm = ({ contentModel }: Props) => {
           const fetchData = async () => {
             if (!refs || refs.length === 0) return
             const res = await getModelFieldsContent(refs[0].modelId, 5, null);
-            
-            
             
             if(!res) return
             setOptions(
@@ -175,7 +217,7 @@ const NewEntryForm = ({ contentModel }: Props) => {
         if (field.renderer.name === "ref-input") {
 
         return (
-          <>
+          <div className="field form__ref-input">
             <Form.Label>{field.label}</Form.Label>
             <Typeahead
             onChange={(e:any)=>{
@@ -183,59 +225,86 @@ const NewEntryForm = ({ contentModel }: Props) => {
                 modelId: refs[0].modelId,
                 id: e[0]?.id 
               }
-              console.log(ref);
-              (setFormInputs((prevState)=> ({...prevState, [`${field.fieldId}`]: ref})))
+              if (objFieldId) {
+                (setFormObjField((prevState)=> ({...prevState, [`${field.fieldId}`]: ref})))
+              }else{
+                (setFormInputs((prevState)=> ({...prevState, [`${field.fieldId}`]: ref})))
+              }
             }}
               id={field.fieldId}
               labelKey={(option: any)=> headers?.map((el:any)=> option[el]).join(" ")}
               
               options={options}
             />
-          </>
+          </div>
         );
       }else if(field.renderer.name === "ref-inputs") {
-        return <>
+        return <div className="field form__ref-inputs">
         <Form.Label>{field.label}</Form.Label>
         <Typeahead
+          placeholder={t("select-inputs") as string}
           id={field.fieldId}
           onChange={e=>{
-            const refInputs:WebinyRefInput[] = e.map((el)=>{
+            const refInputs = e.map((el: any)=>{
               const ref = {
                 modelId: refs[0].modelId,
                 id: el.id
               }
               return ref
             })
-            e.length !== 0 && setFormInputs(prevState=> ({...prevState, [`${field.fieldId}`]:refInputs}))
+            if(e.length === 0) return
+            if(objFieldId){
+              setFormObjField(prevState=> ({...prevState, [`${field.fieldId}`]:refInputs}))
+            }else{
+              setFormInputs(prevState=> ({...prevState, [`${field.fieldId}`]:refInputs}))
+            }
           
           }}
-          labelKey={(option)=> headers.map(el=> option[el]).join(" ")}
+          labelKey={(option: any)=> headers.map(el=> option[el]).join(" ")}
           multiple
           options={options}
         />
-      </>
+      </div>
       }
     } else if (field.type === "long-text") {
       if(field.renderer.name === "long-text-text-area") {
         return (
-        <>
-          <Form.Label key={index}>{field.label}</Form.Label>
-          <FloatingLabel key={index} controlId="floatingTextarea2" label={field.helpText}>
-            <Form.Control key={index} onChange={(e)=> setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))}
+        <div className="field form__long-text">
+          <Form.Label >{field.label}</Form.Label>
+          <FloatingLabel controlId="floatingTextarea2" label={field.helpText}>
+            <Form.Control onChange={(e)=> {
+              if (objFieldId) {
+                setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))
+                // setFormInputs(prevState => ({...prevState, [`${objFieldId}`]: prevState[`${objFieldId}`], [`${field.fieldId}`]: e.target.value}))
+              }else{
+                setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))}
+              }
+              }
+            
               as="textarea"
               placeholder="Leave a comment here"
               style={{ height: '100px' }}
               />
           </FloatingLabel>
-        </>
+        </div>
       )
       }
+    }else if (field.type === "object" && field?.settings) {
+      const objFieldId = field.fieldId
+      // setFormObjFieldName(objFieldId)
+      return (
+        <>
+          <Form.Label>{field.label}</Form.Label>
+          {field.settings.fields?.map(field=> renderField(field, objFieldId))}
+        </>
+        )
+      
     }
   };
   const onSubmit = async(dataInput: { [key: string]: unknown;}) => {
     
-    const func = (field: any) => {
-      if(field.type === "text") {
+    const createMutationStr = (field: ICmsGetContentModelDataField): string | undefined => {
+      if(field.type === "text" || field.type === "long-text") {
         return `${field.fieldId}`
       }
       else if(field.type === "ref") {
@@ -246,42 +315,110 @@ const NewEntryForm = ({ contentModel }: Props) => {
         }`
       }else if (field.type === "object" && field?.settings) {
         return `${field.fieldId} {
-          ${field.settings.fields?.map(field=> func(field)).join("\n")}
+          ${field.settings.fields?.map(field=> createMutationStr(field)).join("\n")}
         }`
       }
     }
     try {
-      const data = await cmsEntriesCreateModel(contentModel.modelId, dataInput, contentModel.fields.map(field=>
-        func(field)
+      const {data} = await cmsEntriesCreateModel(contentModel.modelId, dataInput, contentModel.fields.map(field=>
+        createMutationStr(field)
         ).join("\n"))
-      console.log({data})
-
-      
+    
+        if(data.id) {
+          const {data: publishedData} = await cmsPublishModelId(contentModel.modelId, data.id)
+          
+          if(!!publishedData){
+            setSuccessMsg(t("entry-registered") as string) 
+          } 
+        }
+        
     } catch (error) {
       console.error(error)
     }
-    
-
   };
 
-  useEffect(()=>{
-
-    console.log({formInputs})
-  },[formInputs])
 
   return (
-    <Form className="new-entry__form" onSubmit={(e)=>{
+    <NewEntryFormStyles>
+     
+    <Form className="new-entry new-entry-form" onSubmit={(e)=>{
       e.preventDefault()
       onSubmit(formInputs)}}>
-      <Form.Group className="mb-3" controlId="formBasicEmail">
-        {contentModel.fields.map((field) => {
-          console.log({field})
+      <Form.Group className="new-entry-form__group mb-3">
+        {contentModel.fields.map((field, index, arr) => {
           return renderField(field);
         })}
       </Form.Group>
       <button>{t("submit-form")}</button>
-    </Form>
+      </Form>
+      </NewEntryFormStyles>
   );
 };
+
+const NewEntryFormStyles = styled.div`
+  position: relative;
+  overflow-y: auto;
+  margin-inline:auto;
+  width: fit-content;
+  z-index: 3;
+  ::-webkit-scrollbar {
+  z-index: 1;
+}
+  .new-entry-form{
+    padding: 1rem;
+    width: 40em;
+    background-color: white;
+    &__group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+  .form{
+    &__checkboxes{
+      border: 1px solid black;
+      padding: .3rem;
+    }
+  }
+  
+  .skimmer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &__line {
+      height: 10px;
+      width: 100%;
+      background-color: lightgray;
+      border-radius: 5px;
+    }
+  }
+
+  ::-webkit-scrollbar {
+  width: 8px;
+  right: 3rem 
+}
+
+/* Style the scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+/* Change the color of the scrollbar thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* Allow dragging of the scrollbar thumb */
+::-webkit-scrollbar-thumb:active {
+  background-color: #333;
+}
+
+/* Select the scrollbar track on hover */
+::-webkit-scrollbar-track:hover {
+  background-color: #f1f1f10;
+}
+`
 
 export default NewEntryForm;

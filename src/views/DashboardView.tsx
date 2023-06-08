@@ -113,8 +113,8 @@ const DashboardViewStyles = styled.div`
     top: 0;
     left: 0;
     z-index: 1;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background-color: #0000004b
   }
 

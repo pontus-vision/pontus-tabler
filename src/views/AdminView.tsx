@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
 import {
-  ModelColName,
   Meta,
   Dashboard,
   FlexLayoutCmp,
@@ -15,9 +14,11 @@ import { setDashboards } from "../store/sliceDashboards";
 import FormDashboard from "../components/FormDashboard";
 import CmpPanel from "../components/CmpPanel";
 import { useTranslation } from "react-i18next";
+import NewEntryView from "./NewEntryView";
+import { ICmsGetContentModelDataField } from "../types";
 
 export type GetModelFieldsReturn = {
-  columnNames: ModelColName[];
+  columnNames: ICmsGetContentModelDataField[];
   modelContentListData: IListModelResponseData[];
   meta: Meta;
 };
@@ -27,6 +28,7 @@ const AdminView = () => {
   const [showDashboardForm, setShowDashboardForm] = useState(false);
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const { t, i18n } = useTranslation();
+  const [modelId, setModelId] = useState<string | undefined>()
 
   const dispatch = useDispatch();
 
@@ -46,15 +48,9 @@ const AdminView = () => {
     <>
       <AdminViewStyles>
         <CmpPanel setSelectedCmp={setSelectedCmp} />
-
-        <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
-
-        {showDashboardForm && (
-          <FormDashboard
-            saveDashboard={saveDashboard}
-            setShowDashboardForm={setShowDashboardForm}
-          />
-        )}
+        <PVFlexLayout setModelId={setModelId} setGridState={setGridState} selectedCmp={selectedCmp} />
+        {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
+        
         <button onClick={() => setShowDashboardForm(true)}>{t("save-state")}</button>
       </AdminViewStyles>
     </>
@@ -69,6 +65,16 @@ const AdminViewStyles = styled.div`
   padding-top: 2rem;
   gap: 1rem;
   height: 92%;
+
+  .shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: #0000004b
+  }
 
   .layout {
     position: relative;

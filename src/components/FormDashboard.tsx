@@ -46,7 +46,7 @@ const FormDashboardStyles = styled.div`
   position: absolute;
   background-color: blue;
   padding: 3rem 5rem;
-  z-index: 4;
+  /* z-index: 4; */
   label {
     color: white;
   }

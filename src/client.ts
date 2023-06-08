@@ -408,6 +408,7 @@ export const cmsEntriesCreateModel = async(modelId: string, dataInput: UnknownKe
     const query= `mutation CmsEntriesCreate${modelIdCapitalized}($data: ${modelIdCapitalized}Input!) {
       content: create${modelIdCapitalized}(data: $data) {
         data {
+          id
           ${keys}
         }
       }
@@ -426,4 +427,47 @@ export const cmsEntriesCreateModel = async(modelId: string, dataInput: UnknownKe
   } catch (error) {
     console.error(error)
   }
+}
+
+export const cmsPublishModelId = async(modelId: string, id: string) => {
+  const modelIdCapitalized = capitalizeFirstLetter(modelId)
+
+  const query = `
+  mutation CmsPublish${modelIdCapitalized}($revision: ID!) {
+    content: publish${modelIdCapitalized}(revision: $revision) {
+    data {
+      id
+      meta {
+        title
+        publishedOn
+        version
+        locked
+        status
+        __typename
+      }
+      __typename
+    }
+    error {
+      message
+      code
+      data
+      __typename
+    }
+    __typename
+    }
+    }
+`
+
+    const post = {query, variables: {revision: id}}
+
+  try {
+    const published = await webinyApi.post("cms/manage/en-US", post)
+
+    
+    console.log({published, query, post})
+
+    return published.data.data.content
+} catch (error) {
+    console.error(error)
+}
 }
