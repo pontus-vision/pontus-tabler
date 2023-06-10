@@ -60,16 +60,15 @@ const PVFlexLayout = ({
       
       return (
         <>
-        <i style={{fontSize: "3rem"}} className="fa-solid fa-plus"
-          onClick={()=> setModelId(prevState=> prevState = config.modelId)}
-          ></i>
-        <PVGridWebiny2
-          id={id}
-          lastState={lastState || config.lastState}
-          onValueChange={handleValueChange}
-          modelId={config.modelId}
+          <i style={{fontSize: "3rem"}} className="fa-solid fa-plus"
+            onClick={()=> setModelId(prevState=> prevState = config.modelId)}></i>
+          <PVGridWebiny2
+            id={id}
+            lastState={lastState || config.lastState}
+            onValueChange={handleValueChange}
+            modelId={config.modelId}
           />
-          </>
+        </>
       );
     }
     if (component === "PVDoughnutChart2") {

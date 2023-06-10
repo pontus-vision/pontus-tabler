@@ -34,7 +34,7 @@ const FormDashboard = ({ setShowDashboardForm, saveDashboard }: Props) => {
           Salvar
         </Button>
       </Form>
-      <div className="shadow"></div>
+      <div className="shadow-form-dash"></div>
       <div className="exit-btn" onClick={() => setShowDashboardForm(false)}>
         X
       </div>
@@ -44,6 +44,7 @@ const FormDashboard = ({ setShowDashboardForm, saveDashboard }: Props) => {
 
 const FormDashboardStyles = styled.div`
   position: absolute;
+  
   background-color: blue;
   padding: 3rem 5rem;
   /* z-index: 4; */
@@ -64,6 +65,11 @@ const FormDashboardStyles = styled.div`
     justify-content: center;
     align-items: center;
     cursor: pointer;
+  }
+
+  .shadow-form-dash{
+    width: 100%;
+    height: 100%;
   }
 `;
 

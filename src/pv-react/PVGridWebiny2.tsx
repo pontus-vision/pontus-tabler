@@ -12,11 +12,11 @@ import {
   IDatasource,
   IGetRowsParams,
 } from "ag-grid-community";
-import { GetModelFieldsReturn } from "../views/AdminView";
 import { AgGrigFirstDataRenderedEvent } from "../types";
 import { cmsGetContentModel, listModel } from "../client";
 import { useSelector } from "react-redux";
 import NewEntryView from "../views/NewEntryView";
+import PVAggridColumnSelector from "../components/PVAggridColumnSelector";
 
 type FilterState = {
   [key: string]: any;
@@ -39,7 +39,11 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   const [showGrid, setShowGrid] = useState(true);
   const gridStyle = useMemo(() => ({ height: "27rem", width: "100%" }), []);
   const [rowData, setRowData] = useState([]);
-  const state = useSelector((state) => state);
+  const [showColumnSelector, setShowColumnSelector] = useState<boolean>(
+    false
+  );
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+
 
   const getModelFields = async (
     modelId: string,
@@ -62,16 +66,25 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
 
     return { columnNames, modelContentListData, meta };
   };
-  useEffect(() => {
-    if (columnApi) {
-      columnApi.applyColumnState({ state: lastState });
-    }
-  }, []);
-
+  // useEffect(() => {
+  //   let columnApiInitialized = false;
   
+  //   if (columnApi) {
+  //     columnApiInitialized = true;
+  //     setColumnState(columnApi.getColumnState());
+  //   }
+  
+  //   if (columnApiInitialized && lastState) {
+  //     const update = columnApi.applyColumnState({ state: lastState });
+  //     console.log({ lastState, update, columnState });
+  //   }
+  // }, [columnApi, lastState]);
+
+ 
 
   useEffect(() => {
     if (!columnState) return;
+    console.log(columnState)
     onValueChange(id, columnState);
   }, [columnState, id]);
 
@@ -169,9 +182,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
     return datasource;
   };
 
-  useEffect(() => {
-    restoreGridColumnStates();
-  }, [columnApi]);
+  
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
@@ -198,7 +209,30 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
     onFilterChanged();
   };
 
+  const handleColumnSelect = (selectedColumns: string[]) => {
+    setSelectedColumns(selectedColumns);
+    setShowColumnSelector(false);
+  };
+
+  useEffect(() => {
+    if (columnApi && columnDefs) {
+      columnDefs.forEach((columnDef) => {
+        if(!columnDef.field) return
+
+        if (selectedColumns.includes(columnDef.field)) {
+          columnApi.setColumnVisible(columnDef.field, true);
+        } else {
+          columnApi.setColumnVisible(columnDef.field, false);
+        }
+      });
+    }
+  }, [columnApi, selectedColumns]);
+
   function onFirstDataRendered(params: AgGrigFirstDataRenderedEvent) {}
+
+  const savedState = columnApi?.getColumnState(); 
+
+ 
 
   const gridOptions: GridOptions = {
     rowModelType: "infinite",
@@ -223,10 +257,17 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   }, [modelId]);
 
   function restoreGridColumnStates() {
-    if (columnApi) {
+    if (columnApi && lastState) {
       columnApi.applyColumnState({ state: lastState });
     }
   }
+
+  useEffect(()=>{
+      
+        restoreGridColumnStates()
+
+    console.log({columnState})
+  },[columnDefs])
 
 
   return (
@@ -237,12 +278,15 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
         </button> */}
         {/* <i style={{fontSize: ".rem"}} className="fa-solid fa-plus"
           onClick={()=>{ 
-            console.log("hey")
             setOpenForm(true)
           }
           }
           ></i>
         {openForm && <NewEntryView />} */}
+        <button onClick={()=> {
+          console.log({columnState, columnApi})
+          setShowColumnSelector(true)}}>Select Columns</button>
+        {columnDefs && <PVAggridColumnSelector columnState={columnState} setShowColumnSelector={setShowColumnSelector} showColumnSelector={showColumnSelector} onColumnSelect={handleColumnSelect} columns={columnDefs} />}
         <AgGridReact
           enableRangeSelection={true}
           paginationAutoPageSize={true}

@@ -293,10 +293,10 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
       const objFieldId = field.fieldId
       // setFormObjFieldName(objFieldId)
       return (
-        <>
+        <div className="field form__object">
           <Form.Label>{field.label}</Form.Label>
           {field.settings.fields?.map(field=> renderField(field, objFieldId))}
-        </>
+        </div>
         )
       
     }
@@ -363,10 +363,12 @@ const NewEntryFormStyles = styled.div`
   z-index: 3;
   ::-webkit-scrollbar {
   z-index: 1;
-}
+  }
+  border-radius: .3rem;
   .new-entry-form{
     padding: 1rem;
     width: 40em;
+    border-radius: .3rem;
     background-color: white;
     &__group {
       display: flex;
@@ -376,8 +378,17 @@ const NewEntryFormStyles = styled.div`
   }
   .form{
     &__checkboxes{
-      border: 1px solid black;
+      border: 1px solid #00000063;
       padding: .3rem;
+      border-radius: .5rem;
+    }
+    &__object{
+
+      border: 1px solid black;
+      padding: .5rem .5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
   }
   
@@ -390,14 +401,8 @@ const NewEntryFormStyles = styled.div`
       height: 10px;
       width: 100%;
       background-color: lightgray;
-      border-radius: 5px;
     }
   }
-
-  ::-webkit-scrollbar {
-  width: 8px;
-  right: 3rem 
-}
 
 /* Style the scrollbar thumb */
 ::-webkit-scrollbar-thumb {

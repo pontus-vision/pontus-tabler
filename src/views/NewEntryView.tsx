@@ -66,6 +66,7 @@ const NewEntryViewStyles = styled.div`
     margin: auto;
     width: 35rem;
     z-index: 5;
+    border-radius: .3rem;
     &__title {
       background: white;
       width: fit-content;
@@ -82,17 +83,18 @@ const NewEntryViewStyles = styled.div`
     position: absolute;
     width: 30rem;
     text-align: right:
-    z-index: 3;
+    
+    z-index: 5;
+    bottom: 5rem;
   }
   .shadow {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 3;
+    z-index: 1;
     width: 100%;
     height: 100%;
     background-color: #0000004b;
-    /* pointer-events: none;  */
   }
    
   .skimmer {
