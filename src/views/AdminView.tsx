@@ -28,7 +28,7 @@ const AdminView = () => {
   const [showDashboardForm, setShowDashboardForm] = useState(false);
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const { t, i18n } = useTranslation();
-  const [modelId, setModelId] = useState<string | undefined>()
+  
 
   const dispatch = useDispatch();
 
@@ -48,8 +48,8 @@ const AdminView = () => {
     <>
       <AdminViewStyles>
         <CmpPanel setSelectedCmp={setSelectedCmp} />
-        <PVFlexLayout setModelId={setModelId} setGridState={setGridState} selectedCmp={selectedCmp} />
-        {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
+        <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
+        
         {showDashboardForm && (
           <FormDashboard
             saveDashboard={saveDashboard}

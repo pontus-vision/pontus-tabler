@@ -1,16 +1,12 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
-  Action,
   Actions,
   DockLocation,
   IJsonModel,
-  IJsonRowNode,
   IJsonTabNode,
-  IJsonTabSetNode,
   Layout,
   Model,
   TabNode,
-  TabSetNode,
 } from "flexlayout-react";
 import "flexlayout-react/style/light.css";
 import PVGridWebiny2 from "./PVGridWebiny2";
@@ -26,7 +22,7 @@ type Props = {
   setIsEditing?: Dispatch<React.SetStateAction<boolean>>;
   dashboardId?: string;
   setGridState?: Dispatch<SetStateAction<IJsonModel | undefined>>;
-  setModelId: Dispatch<SetStateAction<string| undefined>> 
+  
 };
 
 const PVFlexLayout = ({
@@ -34,8 +30,7 @@ const PVFlexLayout = ({
   setGridState,
   gridState,
   setIsEditing,
-  dashboardId,
-  setModelId
+  dashboardId
 }: Props) => {
   const initialJson: IJsonModel = {
     global: {},
@@ -49,19 +44,29 @@ const PVFlexLayout = ({
   const dispatch = useDispatch();
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
   const [containerHeight, setContainerHeight] = useState("30rem");
+  const [modelId, setModelId] = useState<string | undefined>()
+  const [flexModelId, setFlexModelId] = useState<string>()
+  const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>()
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
     const config = node.getConfig();
     const id = node.getId();
+    
     if (component === "PVGridWebiny2") {
       const lastState = findChildById(gridState?.layout, id, "tab")?.config
-        ?.lastState;
+      ?.lastState;
+      
       
       return (
         <>
           <i style={{fontSize: "3rem"}} className="fa-solid fa-plus"
-            onClick={()=> setModelId(prevState=> prevState = config.modelId)}></i>
+            onClick={()=> {
+              setFlexModelId(id)
+              const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
+              setAGGridColumnsState(colState)
+              setModelId(prevState=> prevState = config.modelId)
+            }}></i>
           <PVGridWebiny2
             id={id}
             lastState={lastState || config.lastState}
@@ -98,6 +103,8 @@ const PVFlexLayout = ({
     if (setIsEditing) {
       setIsEditing(true);
     }
+
+    // setAGGridColumnsState(newValue)
 
     const json = model.toJson();
 
@@ -202,6 +209,13 @@ const PVFlexLayout = ({
   //   }
   // }, []);
 
+  const filterColumns = (cols: ColumnState[]) => {
+
+    const colsFiltered = contentModel?.fields.filter(field => !cols.some(col=> col.colId === field.fieldId))
+    console.log(colsFiltered)
+  
+  }
+
   useEffect(() => {
     if (!selectedCmp) return;
     addComponent(selectedCmp);
@@ -222,7 +236,17 @@ const PVFlexLayout = ({
     console.log({containerHeight})
   },[containerHeight])
 
+  useEffect(()=>{
+    if(!flexModelId) return
+    const flexModel = findChildById(model.toJson().layout , flexModelId, "tab")
+    
+    console.log(flexModel)
+  },[flexModelId])
+
   return (
+    <>
+    {modelId && <NewEntryView aggridColumnsState={aggridColumnsState} columnsState={flexModelId} setModelId={setModelId} modelId={modelId} />}
+
     <div
       className="flex-layout-wrapper"
       style={{ height: "65vh", width: "90%", overflowY: "auto" }}
@@ -237,10 +261,11 @@ const PVFlexLayout = ({
           flexGrow: 1,
           flexDirection: "column",
         }}
-      >
+        >
         <Layout onModelChange={onModelChange} model={model} factory={factory} />
       </div>
     </div>
+        </>
   );
 };
 

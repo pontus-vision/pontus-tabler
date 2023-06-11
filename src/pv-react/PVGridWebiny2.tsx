@@ -42,7 +42,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   const [showColumnSelector, setShowColumnSelector] = useState<boolean>(
     false
   );
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<Array<string | undefined>>([]);
 
 
   const getModelFields = async (
@@ -209,7 +209,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
     onFilterChanged();
   };
 
-  const handleColumnSelect = (selectedColumns: string[]) => {
+  const handleColumnSelect = (selectedColumns: Array<string | undefined>) => {
     setSelectedColumns(selectedColumns);
     setShowColumnSelector(false);
   };

@@ -7,17 +7,24 @@ import styled from "styled-components";
 import Form from "react-bootstrap/esm/Form";
 import Alert from "react-bootstrap/esm/Alert";
 import NewEntryFormSkeleton from "../components/skeleton/NewEntryFormSkeleton";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import { ColumnState } from "ag-grid-community";
 
 type Props = {
   modelId: string
+  flexModelId?: string
   setModelId: Dispatch<SetStateAction<string | undefined>>
+  aggridColumnsState: ColumnState[] | undefined
 }
 
-const NewEntryView = ({modelId, setModelId}:Props) => {
+const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState}:Props) => {
   const [contentModel, setContentModel] = useState<ICmsGetContentModelData>();
   const [successMsg, setSuccessMsg] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
-  
+  const { value: dashboards } = useSelector((state: RootState) => {
+    return state.dashboards;
+  });
 
   const getModelContent = async (modelId: string) => {
     try {
@@ -29,11 +36,27 @@ const NewEntryView = ({modelId, setModelId}:Props) => {
       
         return acc
       },{} as any));
-      setContentModel(data);
+
+      
+        const filteredFields = data?.fields.filter(field=> !aggridColumnsState?.some(col=> !field?.validation?.some(valid=> valid.name === 'required') &&  col.colId === field.fieldId && col.hide))
+        
+        const newContentModel = {
+          ...data,
+          name: data?.name,
+          fields: filteredFields 
+        }
+        setContentModel(newContentModel)
+     
+
     } catch (error) {
       console.error(error);
     }
   };
+
+  useEffect(()=> {
+    if(!aggridColumnsState) return
+    
+  },[aggridColumnsState])
 
   useEffect(() => {
     if (modelId) {
@@ -42,12 +65,16 @@ const NewEntryView = ({modelId, setModelId}:Props) => {
     }
   }, [modelId]);
 
-  return <NewEntryViewStyles >
-    {modelId && <div className="shadow" onClick={()=>setModelId("")}></div>}
-    {contentModel && <Form.Label className="new-entry new-entry-form__title">{contentModel?.name}</Form.Label>}
-    {isLoading ? <NewEntryFormSkeleton /> : (contentModel && <NewEntryForm contentModel={contentModel} setSuccessMsg={setSuccessMsg} />)}
-      {successMsg && <Alert className="success-msg" variant="success"> {successMsg} </Alert>}
-    </NewEntryViewStyles>;
+
+
+  return (
+      <NewEntryViewStyles>
+        {modelId && <div className="shadow" onClick={()=>setModelId("")}></div>}
+        {contentModel && <Form.Label className="new-entry new-entry-form__title">{contentModel?.name}</Form.Label>}
+        {isLoading ? <NewEntryFormSkeleton /> : (contentModel && <NewEntryForm contentModel={contentModel} setSuccessMsg={setSuccessMsg} />)}
+        {successMsg && <Alert className="success-msg" variant="success"> {successMsg} </Alert>}
+      </NewEntryViewStyles>
+    )
 };
 
 const NewEntryViewStyles = styled.div`
