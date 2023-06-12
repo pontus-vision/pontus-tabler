@@ -128,7 +128,7 @@ const DashboardViewStyles = styled.div`
   }
   
 
-  & .fa-plus {
+  & .fa-light {
     font-size: 3rem;
     border: 1px solid black;
     display: flex;

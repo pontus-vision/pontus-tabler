@@ -70,7 +70,7 @@ const PVFlexLayout = ({
         
       return (
         <>
-          <i style={{fontSize: "3rem"}} className="fa-solid fa-plus"
+          <i style={{ cursor: "pointer", fontSize: "2rem", position: "absolute", left: "8rem"}} className="fa-solid fa-plus"
             onClick={()=> {
               setFlexModelId(id)
               const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
