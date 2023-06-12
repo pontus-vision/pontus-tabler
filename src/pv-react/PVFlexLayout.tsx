@@ -48,16 +48,26 @@ const PVFlexLayout = ({
   const [flexModelId, setFlexModelId] = useState<string>()
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>()
 
+  const [updatedGrid, setUpdatedGrid] = useState<{modelId: string, key: number}>()
+
   const factory = (node: TabNode) => {
     const component = node.getComponent();
     const config = node.getConfig();
     const id = node.getId();
+    const [gridKey, setGridKey] = useState(0)
+
+    
     
     if (component === "PVGridWebiny2") {
       const lastState = findChildById(gridState?.layout, id, "tab")?.config
       ?.lastState;
-      
-      
+
+      useEffect(()=>{
+        if(updatedGrid?.modelId === config.modelId) {
+          setGridKey(prevState=> prevState + 1)
+        }
+      },[updatedGrid])
+        
       return (
         <>
           <i style={{fontSize: "3rem"}} className="fa-solid fa-plus"
@@ -67,7 +77,11 @@ const PVFlexLayout = ({
               setAGGridColumnsState(colState)
               setModelId(prevState=> prevState = config.modelId)
             }}></i>
+            <button onClick={()=>{
+              setGridKey(prevState=> prevState + 1)
+            }}>restore</button>
           <PVGridWebiny2
+            key={gridKey}
             id={id}
             lastState={lastState || config.lastState}
             onValueChange={handleValueChange}
@@ -245,7 +259,7 @@ const PVFlexLayout = ({
 
   return (
     <>
-    {modelId && <NewEntryView aggridColumnsState={aggridColumnsState} columnsState={flexModelId} setModelId={setModelId} modelId={modelId} />}
+    {modelId && <NewEntryView setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
 
     <div
       className="flex-layout-wrapper"
@@ -262,7 +276,7 @@ const PVFlexLayout = ({
           flexDirection: "column",
         }}
         >
-        <Layout onModelChange={onModelChange} model={model} factory={factory} />
+        <Layout  onModelChange={onModelChange} model={model} factory={factory} />
       </div>
     </div>
         </>

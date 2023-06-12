@@ -16,9 +16,13 @@ type Props = {
   flexModelId?: string
   setModelId: Dispatch<SetStateAction<string | undefined>>
   aggridColumnsState: ColumnState[] | undefined
+  setUpdatedGrid: Dispatch<React.SetStateAction<{
+    modelId: string;
+    key: number;
+}>>
 }
 
-const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState}:Props) => {
+const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState, setUpdatedGrid}:Props) => {
   const [contentModel, setContentModel] = useState<ICmsGetContentModelData>();
   const [successMsg, setSuccessMsg] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
@@ -53,6 +57,10 @@ const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState}:Pro
     }
   };
 
+  const handleUpdatedGrid = () => {
+    setUpdatedGrid(prevState => prevState = {modelId, key: prevState?.key + 1 || 0})
+  }
+
   useEffect(()=> {
     if(!aggridColumnsState) return
     
@@ -69,9 +77,12 @@ const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState}:Pro
 
   return (
       <NewEntryViewStyles>
-        {modelId && <div className="shadow" onClick={()=>setModelId("")}></div>}
+        {modelId && <div className="shadow" onClick={()=>{
+          setModelId("")
+          // handleUpdatedGrid()
+         }}></div>}
         {contentModel && <Form.Label className="new-entry new-entry-form__title">{contentModel?.name}</Form.Label>}
-        {isLoading ? <NewEntryFormSkeleton /> : (contentModel && <NewEntryForm contentModel={contentModel} setSuccessMsg={setSuccessMsg} />)}
+        {isLoading ? <NewEntryFormSkeleton /> : (contentModel && <NewEntryForm  contentModel={contentModel} setSuccessMsg={setSuccessMsg} />)}
         {successMsg && <Alert className="success-msg" variant="success"> {successMsg} </Alert>}
       </NewEntryViewStyles>
     )

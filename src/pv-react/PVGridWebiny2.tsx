@@ -66,21 +66,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
 
     return { columnNames, modelContentListData, meta };
   };
-  // useEffect(() => {
-  //   let columnApiInitialized = false;
-  
-  //   if (columnApi) {
-  //     columnApiInitialized = true;
-  //     setColumnState(columnApi.getColumnState());
-  //   }
-  
-  //   if (columnApiInitialized && lastState) {
-  //     const update = columnApi.applyColumnState({ state: lastState });
-  //     console.log({ lastState, update, columnState });
-  //   }
-  // }, [columnApi, lastState]);
-
- 
 
   useEffect(() => {
     if (!columnState) return;
@@ -230,24 +215,13 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
 
   function onFirstDataRendered(params: AgGrigFirstDataRenderedEvent) {}
 
-  const savedState = columnApi?.getColumnState(); 
-
- 
-
   const gridOptions: GridOptions = {
     rowModelType: "infinite",
-    // onPaginationChanged: (e: PaginationChangedEvent) => {
-    //   // console.log(
-    //   //   `Pagination Event: ${JSON.stringify(e.api.getLastDisplayedRow())}`
-    //   // );
-    // },
     cacheBlockSize: 100,
   };
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
-      // flex: 1,
-      // sortable: true,
       filter: true,
     };
   }, []);
@@ -263,26 +237,50 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
   }
 
   useEffect(()=>{
-      
-        restoreGridColumnStates()
-
-    console.log({columnState})
+    restoreGridColumnStates()
   },[columnDefs])
+
+  // const [updatedRows, setUpdatedRows] = useState()
+
+  // const handleUpdate = async() => {
+  //   const data = await getModelFields(
+  //     modelId,
+  //     1,
+  //     null
+  //   );
+  //   // console.log(data);
+
+  //   const rows = data.modelContentListData.map((row) => {
+  //     const {
+  //       createdBy,
+  //       createdOn,
+  //       entryId,
+  //       id,
+  //       ownedBy,
+  //       savedOn,
+  //       ...rest
+  //     } = row;
+  //     return rest;
+  //   });
+
+  //   setUpdatedRows(rows)
+
+  // }
+  // useEffect(()=>{
+  //   if(!updatedRows) return
+  //   setRowData(updatedRows);
+  //   console.log({updatedRows, rowData})
+
+  // },[updatedRows])
 
 
   return (
     <>
       <div style={gridStyle} className="ag-theme-alpine">
-        {/* <button onClick={restoreGridColumnStates}>
+        {/* <button onClick={() => handleUpdate()}>
           Restore Grid Column States
         </button> */}
-        {/* <i style={{fontSize: ".rem"}} className="fa-solid fa-plus"
-          onClick={()=>{ 
-            setOpenForm(true)
-          }
-          }
-          ></i>
-        {openForm && <NewEntryView />} */}
+        
         <button onClick={()=> {
           console.log({columnState, columnApi})
           setShowColumnSelector(true)}}>Select Columns</button>
@@ -302,7 +300,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
           pagination={true}
           gridOptions={gridOptions}
           datasource={datasource}
-          // maxConcurrentDatasourceRequests={1}
           columnDefs={columnDefs}
         ></AgGridReact>
       </div>
