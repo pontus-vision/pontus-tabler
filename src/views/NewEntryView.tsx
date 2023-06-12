@@ -108,10 +108,10 @@ const NewEntryViewStyles = styled.div`
   }
   .success-msg{
     position: absolute;
-    width: 30rem;
-    text-align: right:
+    width: 15rem;
+    text-align: right;
     
-    z-index: 5;
+    z-index: 1;
     bottom: 5rem;
   }
   .shadow {

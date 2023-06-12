@@ -146,7 +146,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
         <Form.Label>{field.label}</Form.Label>
         <Form.Select  onChange={(e)=>{
           if(objFieldId) {
-            setFormInputs((prevState) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
+            setFormInputs((prevState: { [key: string]: unknown | {[key: string] : unknown} }) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
           } else {
             setFormInputs((prevState) => ({
               ...prevState,
@@ -166,7 +166,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
           <Form.Control
             onChange={(e) =>{
               if(objFieldId) {
-                setFormInputs((prevState) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
+                setFormInputs((prevState: { [key: string]: unknown } ) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
               } else {
                 setFormInputs((prevState) => ({
                   ...prevState,
