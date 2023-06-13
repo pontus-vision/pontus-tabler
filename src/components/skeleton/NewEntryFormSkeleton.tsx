@@ -3,12 +3,16 @@ import "react-bootstrap-typeahead/css/Typeahead.css";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 
-const NewEntryFormSkeleton = () => {
+type Props = {
+  isLoading: boolean
+}
+
+const NewEntryFormSkeleton = ({isLoading}:Props) => {
 
   const { t } = useTranslation();
 
   return (
-    <NewEntryFormStyles>  
+    <NewEntryFormStyles style={{display: isLoading ? "block" : "none"}}>  
         <Form className="new-entry new-entry-form">
             <Form.Group className="new-entry-form__group mb-3">
                 <div className="skeleton">

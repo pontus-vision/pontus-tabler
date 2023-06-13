@@ -75,7 +75,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
 
   useEffect(() => {
     if (!columnState) return;
-    console.log(columnState)
     onValueChange(id, columnState);
   }, [columnState, id]);
 
@@ -153,15 +152,16 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
             return rest;
           });
 
-          setColumnDefs([{
-            headerName: 'Actions',
+          setColumnDefs([
+          {
+            headerName: '',
             field: 'actions',
-            width: 120,
+            width: 30,
             colId: 'delete-mode',
             sortable: false,
             filter: false,
             hide: true,
-            suppressMovable: true // Prevent the column from being draggable in delete mode
+            suppressMovable: true 
           },
             ...data.columnNames.map((field) => {
               return {
@@ -183,7 +183,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
   const handleRowClicked = (event: RowClickedEvent) => {
     const rowData = event.data; // Access the data of the clicked row
     // Handle row click event
-    console.log("Row Clicked:", rowData);
+    console.log("Row Clicked:", rowData, {modelId, rowId: rowData.id, rowState: rowData});
 
     // rowToBeEdited(modelId, rowData.id)
 

@@ -28,19 +28,21 @@ const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState, set
   const [contentModel, setContentModel] = useState<ICmsGetContentModelData>();
   const [successMsg, setSuccessMsg] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
-  const { rowState } = useSelector((state: RootState) => state.updateRow);
+  const { rowState, modelId:updateModelId, rowId } = useSelector((state: RootState) => state.updateRow);
   const dispatch = useDispatch()
+
+  const [fieldsRendered, setFieldsRendered] = useState(false)
 
   const getModelContent = async (modelId: string) => {
     try {
       setIsLoading(true)
       const { data } = await cmsGetContentModel(modelId);
       setIsLoading(false)
-      console.log(data.fields.reduce((acc, cur)=> {
-        (acc[cur.renderer.name] = acc[cur.renderer.name] || []).push(cur)
+      // console.log(data.fields.reduce((acc, cur)=> {
+      //   (acc[cur.renderer.name] = acc[cur.renderer.name] || []).push(cur)
       
-        return acc
-      },{} as any));
+      //   return acc
+      // },{} as any));
 
       
         const filteredFields = data?.fields.filter(field=> !aggridColumnsState?.some(col=> !field?.validation?.some(valid=> valid.name === 'required') &&  col.colId === field.fieldId && col.hide))
@@ -62,23 +64,20 @@ const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState, set
     setUpdatedGrid(prevState => prevState = {modelId, key: prevState ? prevState?.key + 1 : 0})
   }
 
-  
-
   useEffect(()=> {
     if(!aggridColumnsState) return
     
   },[aggridColumnsState])
 
+  
   useEffect(() => {
-    if (modelId) {
-      console.log({ modelId });
+
+    if (modelId ) {
       getModelContent(modelId);
     }
   }, [modelId]);
 
-  useEffect(()=>{
-    console.log({rowState})
-  },[rowState])
+  
 
   return (
       <NewEntryViewStyles>
@@ -87,8 +86,10 @@ const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState, set
           dispatch(newRowState({modelId: undefined, rowId: undefined, rowState: undefined}))
          }}></div>}
         {contentModel && <Form.Label className="new-entry new-entry-form__title">{contentModel?.name}</Form.Label>}
-        {isLoading ? <NewEntryFormSkeleton /> : (contentModel  && <NewEntryForm handleUpdatedGrid={handleUpdatedGrid}  contentModel={contentModel} setSuccessMsg={setSuccessMsg} />)}
+        
+        {(contentModel  && <NewEntryForm isLoading={isLoading} setIsloading={setIsLoading} handleUpdatedGrid={handleUpdatedGrid}  contentModel={contentModel} setSuccessMsg={setSuccessMsg} />)}
         {successMsg && <Alert className="success-msg" variant="success"> {successMsg} </Alert>}
+        <NewEntryFormSkeleton isLoading={isLoading} />
       </NewEntryViewStyles>
     )
 };

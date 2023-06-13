@@ -65,7 +65,7 @@ export const listModel = async (
     const containsSearches =
       fieldSearches &&
       Object.entries(fieldSearches).map(([key, value]) => {
-        console.log({ key, value });
+        
         return key + "_contains: " + '"' + value.filter + '"';
       });
 
@@ -414,7 +414,6 @@ export const cmsEntriesCreateModel = async(modelId: string, dataInput: UnknownKe
       }
     }
     `
-
     const post = {
       query, variables: {data:dataInput}
     }
@@ -433,41 +432,89 @@ export const cmsPublishModelId = async(modelId: string, id: string) => {
   const modelIdCapitalized = capitalizeFirstLetter(modelId)
 
   const query = `
-  mutation CmsPublish${modelIdCapitalized}($revision: ID!) {
-    content: publish${modelIdCapitalized}(revision: $revision) {
-    data {
-      id
-      meta {
-        title
-        publishedOn
-        version
-        locked
-        status
+    mutation CmsPublish${modelIdCapitalized}($revision: ID!) {
+      content: publish${modelIdCapitalized}(revision: $revision) {
+      data {
+        id
+        meta {
+          title
+          publishedOn
+          version
+          locked
+          status
+          __typename
+        }
+        __typename
+      }
+      error {
+        message
+        code
+        data
         __typename
       }
       __typename
-    }
-    error {
-      message
-      code
-      data
-      __typename
-    }
-    __typename
-    }
-    }
-`
+      }
+      }
+  `
 
     const post = {query, variables: {revision: id}}
 
   try {
-    const published = await webinyApi.post("cms/manage/en-US", post)
+    const {data} = await webinyApi.post("/cms/manage/en-US", post)
 
     
-    console.log({published, query, post})
+    console.log({data, post})
 
-    return published.data.data.content
+    return data.data.content
 } catch (error) {
     console.error(error)
 }
+}
+
+export const cmsCreateModelFrom = async(modelId: string, entryValues: {[key: string]: unknown}, keys: string, id: string) => {
+  const modelIdCapitalized = capitalizeFirstLetter(modelId)
+
+
+  const query = `
+  mutation CmsCreate${modelIdCapitalized}From($revision: ID!, $data: ${modelIdCapitalized}Input) {
+    content: create${modelIdCapitalized}From(revision: $revision, data: $data) {
+      data {
+        id
+        savedOn
+        ${keys}
+        meta {
+          title
+          publishedOn
+          version
+          locked
+          status
+          __typename
+        }
+        __typename
+      }
+      error {
+        message
+        code
+        data
+        __typename
+      }
+      __typename
+    }
+  }
+  `
+
+  const post = {
+    query, variables: {data: entryValues, revision: id}
+  }
+
+  try {
+    const {data: res} = await webinyApi.post("/cms/manage/en-US", post )
+
+    
+
+    return res.data.content
+    
+  } catch (error) {
+    console.error(error)
+  }
 }

@@ -8,7 +8,7 @@ import {
 } from "../types";
 import { Typeahead } from "react-bootstrap-typeahead";
 import "react-bootstrap-typeahead/css/Typeahead.css";
-import { cmsPublishModelId, cmsEntriesCreateModel, cmsGetContentModel, listModel } from "../client";
+import { cmsPublishModelId, cmsEntriesCreateModel, cmsGetContentModel, listModel, cmsCreateModelFrom } from "../client";
 import FloatingLabel from "react-bootstrap/esm/FloatingLabel";
 import { useTranslation } from "react-i18next";
 import { z } from 'zod';
@@ -19,11 +19,14 @@ import styled from "styled-components";
 import Alert from 'react-bootstrap/Alert';
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
+import NewEntryFormSkeleton from "./skeleton/NewEntryFormSkeleton";
 
 
 type Props = {
+  setIsloading: Dispatch<SetStateAction<boolean>>
   contentModel: ICmsGetContentModelData;
   updateModelId: string;
+  isLoading: boolean
   handleUpdatedGrid : () => void;
   setSuccessMsg: Dispatch<SetStateAction<string | undefined>>
 };
@@ -52,14 +55,14 @@ const getModelFieldsContent = async (
     }
 };
 
-const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateModelId }: Props) => {
+const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateModelId, setIsloading, isLoading }: Props) => {
   const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
   const [formObjField, setFormObjField] = useState<{[key: string]: unknown;}>({});
   const [formObjFieldName, setFormObjFieldName] = useState<string>();
-  const [isLoading, setIsLoading] = useState(false)
+
 
   
-  const { rowState, rowId, modelId:UpdateRowModelId } = useSelector((state: RootState) => state.updateRow);
+  const { rowState, rowId, modelId:updateRowModelId } = useSelector((state: RootState) => state.updateRow);
   
   
   const { t } = useTranslation();
@@ -90,23 +93,15 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
     return schema;
   };
 
+  
+
+  
+
   const renderField = (field: ICmsGetContentModelDataField, objFieldId: string | null = null) : ReactElement<any, any> | undefined => {
-
-    
-    // if(objFieldId) {
-
-    //   useEffect(()=>{
-        
-    //     setFormInputs((prevState) => ({...prevState, [objFieldId]: formObjField})) 
-        
-    //     console.log({formObjField})
-    //   },[formObjField])
-    // }
 
     const validationRules = field.validation?.map(valid=> valid.settings?.preset)
     
     const validationSchema = validationRules && createValidationSchema(validationRules);
-
 
     const { handleSubmit, register, formState: {errors} } = useForm({
       resolver: zodResolver(validationSchema),
@@ -120,7 +115,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
          {field.predefinedValues?.values.map((value, index) => (
           <Form.Check
           defaultValue={
-            rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+            rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
           }
             key={index}
             type="checkbox"
@@ -156,7 +151,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
         <Form.Label>{field.label}</Form.Label>
         <Form.Select 
         defaultValue={
-          rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+          rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
         }
         onChange={(e)=>{
           if(objFieldId) {
@@ -174,12 +169,14 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
         </div>
         )
       } else if(field.renderer.name === "text-input"){
+
+      const defaultValue = rowState?.[objFieldId]?.[field.fieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState?.[field.fieldId] ? rowState?.[field.fieldId] : undefined 
       return (
         <div className="field form__text-input">
           <Form.Label>{field.label}</Form.Label>
           <Form.Control
             defaultValue={
-              rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+              defaultValue 
             }
             onChange={(e) =>{
               if(objFieldId) {
@@ -238,7 +235,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
             <Form.Label>{field.label}</Form.Label>
             <Typeahead
             defaultValue={
-              rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+              rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? "" : undefined 
             }
             onChange={(e:any)=>{
               const ref:WebinyRefInput = {
@@ -292,12 +289,17 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
         <div className="field form__long-text">
           <Form.Label >{field.label}</Form.Label>
           <FloatingLabel controlId="floatingTextarea2" label={field.helpText}>
-            <Form.Control onChange={(e)=> {
-              if (objFieldId) {
-                setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))
-                // setFormInputs(prevState => ({...prevState, [`${objFieldId}`]: prevState[`${objFieldId}`], [`${field.fieldId}`]: e.target.value}))
-              }else{
-                setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))}
+            <Form.Control 
+              defaultValue={
+                rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
+              }
+              onChange={(e)=> {
+                if (objFieldId) {
+                  setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))
+                  // setFormInputs(prevState => ({...prevState, [`${objFieldId}`]: prevState[`${objFieldId}`], [`${field.fieldId}`]: e.target.value}))
+                }else{
+                  setFormInputs(prevState => ({...prevState, [`${field.fieldId}`]: e.target.value}))
+                }
               }
               }
             
@@ -320,59 +322,103 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
         )
       
     }
-  };
-  const onSubmit = async(dataInput: { [key: string]: unknown;}) => {
+
     
-    const createMutationStr = (field: ICmsGetContentModelDataField): string | undefined => {
-      if(field.type === "text" || field.type === "long-text") {
-        return `${field.fieldId}`
-      }
-      else if(field.type === "ref") {
-        return `${field.fieldId} {
+  };
+
+  const onSubmit = async(dataInput: { [key: string]: unknown;}) => { 
+
+    const createMutationStr = (fields: ICmsGetContentModelDataField[]): string  => {
+      let str = ""
+
+      fields.forEach(field=>{
+        if(field.type === "text" || field.type === "long-text") {
+          str += `${field.fieldId}\n`
+        }
+        else if(field.type === "ref") {
+          str += `${field.fieldId} {
           modelId
           id
           __typename
-        }`
-      }else if (field.type === "object" && field?.settings) {
-        return `${field.fieldId} {
-          ${field.settings.fields?.map(field=> createMutationStr(field)).join("\n")}
-        }`
-      }
+        }\n`
+        }else if (field.type === "object" && field?.settings) {
+          const objFields = field.settings.fields
+
+          if(!objFields) return
+          str += `${field.fieldId} {
+            ${createMutationStr(objFields)}
+          }\n`
+        }
+      })
+
+      return str
     }
-    try {
-      const {data} = await cmsEntriesCreateModel(contentModel.modelId, dataInput, contentModel.fields.map(field=>
-        createMutationStr(field)
-        ).join("\n"))
+
+    const fieldsKeysStr = createMutationStr(contentModel.fields) 
     
+    
+    try {
+      let idToBePublished = ''
+
+      if(rowState && rowId && updateRowModelId) {
+        const {data} = await cmsCreateModelFrom(updateRowModelId, {...rowState, ...formInputs}, fieldsKeysStr, rowId )
+        
+        console.log({data})
         if(data.id) {
           const {data: publishedData} = await cmsPublishModelId(contentModel.modelId, data.id)
           
           if(!!publishedData){
             handleUpdatedGrid()
-            setSuccessMsg(t("entry-registered") as string) 
+            setSuccessMsg(t("entry-updated") as string) 
           } 
         }
+        
+        return
+      } 
+      const {data} = await cmsEntriesCreateModel(contentModel.modelId, dataInput, fieldsKeysStr)
+      console.log({data})
+      if(data.id) {
+        const {data: publishedData} = await cmsPublishModelId(contentModel.modelId, data.id)
+        
+        if(!!publishedData){
+          handleUpdatedGrid()
+          setSuccessMsg(t("entry-registered") as string) 
+        } 
+      }
         
     } catch (error) {
       console.error(error)
     }
+  
   };
 
+  const fields = () => {
+    let num = 0
+    if(num === contentModel.fields.length + 1) {
+      setIsloading(false)
+    }
+    return contentModel.fields.map((field, index, arr) => {
+
+      return renderField(field);
+    })
+  }
 
   return (
-    <NewEntryFormStyles>
-     
-    <Form className="new-entry new-entry-form" onSubmit={(e)=>{
-      e.preventDefault()
-      onSubmit(formInputs)}}>
-      <Form.Group className="new-entry-form__group mb-3">
-        {contentModel.fields.map((field, index, arr) => {
-          return renderField(field);
-        })}
-      </Form.Group>
-      <button>{t("submit-form")}</button>
-      </Form>
+    <>
+      <NewEntryFormStyles style={{display: isLoading ? "none" : "block"}}>
+        <Form  className="new-entry new-entry-form" onSubmit={(e)=>{
+        e.preventDefault()
+        onSubmit(formInputs)}}>
+        <Form.Group className="new-entry-form__group mb-3">
+          {contentModel.fields.map((field, index, arr) => {
+            return renderField(field);
+          })}
+        </Form.Group>
+        <button>{t("submit-form")}</button>
+        </Form>
       </NewEntryFormStyles>
+      
+    </>
   );
 };
 

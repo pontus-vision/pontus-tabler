@@ -42,7 +42,7 @@ const PVFlexLayout = ({
     },
   };
 
-  const { rowState, rowId, modelId:UpdateRowModelId } = useSelector((state: RootState) => state.updateRow);
+  const { rowState, rowId, modelId:updateRowModelId } = useSelector((state: RootState) => state.updateRow);
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
   const [containerHeight, setContainerHeight] = useState("30rem");
   const [modelId, setModelId] = useState<string | undefined>()
@@ -53,8 +53,8 @@ const PVFlexLayout = ({
   const [updatedGrid, setUpdatedGrid] = useState<{modelId: string, key: number}>()
 
   useEffect(()=>{
-    setModelId(UpdateRowModelId)
-  },[UpdateRowModelId, rowId])
+    setModelId(updateRowModelId)
+  },[updateRowModelId, rowId])
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
@@ -73,6 +73,12 @@ const PVFlexLayout = ({
       );
 
       useEffect(()=>{
+        const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
+        setAGGridColumnsState(colState)
+        console.log({colState})
+      },[model])
+
+      useEffect(()=>{
         if(updatedGrid?.modelId === config.modelId) {
           setGridKey(prevState=> prevState + 1)
         }
@@ -84,13 +90,11 @@ const PVFlexLayout = ({
           <i style={{ cursor: "pointer", fontSize: "2rem",  left: "8rem"}} className="fa-solid fa-plus"
             onClick={()=> {
               setFlexModelId(id)
-              const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
-              setAGGridColumnsState(colState)
-              setModelId(prevState=> prevState = config.modelId)
+              setModelId(prevState=> updateRowModelId ? prevState = updateRowModelId : prevState = config.modelId)
             }}></i>
             <button onClick={()=>{
               setGridKey(prevState=> prevState + 1)
-            }}>restore</button>
+            }}>restore</button> 
             <button onClick={()=> {
               setShowColumnSelector(true)}}>Select Columns</button>
             <button onClick={()=>setDeleteMode(!deleteMode)}>Delete Mode</button>

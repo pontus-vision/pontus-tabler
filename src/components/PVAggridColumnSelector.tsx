@@ -19,7 +19,7 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   columnState
 }) => {
   const [selectedColumns, setSelectedColumns] = useState<Array<string | undefined>>([]);
-  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
+  const [columnsVisible, setColumnsVisible] = useState<Array<ColDef | undefined>>([]);
   
   const handleColumnToggle = (column: string | undefined) => {
     if (selectedColumns.includes(column)) {
@@ -30,7 +30,6 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   };
 
   const handleApply = () => {
-    
     onColumnSelect(selectedColumns);
   };
 
@@ -39,23 +38,33 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   };
 
   useEffect(()=>{
+    console.log({columnState})
     if(columnState) {
-      console.log({columnState})
       setSelectedColumns(columnState.filter(col=> !col.hide).map(el=> el.colId))
     } else {
-      setSelectedColumns(prevState=> (columns.map(col=> col?.field)))
+      setSelectedColumns(columns.map(col=> col?.field))
     }
-  },[columnState])
+  },[columnsVisible])
+
+  useEffect(()=>{
+    console.log({columnState})
+    if(columnState) {
+      setSelectedColumns(columnState.filter(col=> !col.hide).map(el=> el.colId))
+    } else {
+      setSelectedColumns(columns.map(col=> col?.field))
+    }
+  },[])
+
+  useEffect(()=>{
+    setColumnsVisible(prevState=> columns.filter(col=>col?.colId !== 'delete-mode'))
+    console.log({columnsVisible})
+  },[columns])
   
 
   useEffect(()=>{
-    console.log({columnState, selectedColumns})
-  },[columnState])
-
-  useEffect(()=>{
     // setSelectedColumns(prevState=> ([...columns.map(col=> col.field)]))
-
-  },[columns])
+    console.log({selectedColumns, columnState})
+  },[selectedColumns, columnState])
 
   return (
     <div style={{
@@ -68,7 +77,7 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
         top: 0, left: "5rem", 
         display: showColumnSelector ? "" : "none"}}>
       <div>
-        {columns.map((column, index) => {
+        {columnsVisible.map((column, index) => {
             if(!column) return
             return(
             <div key={index}>
