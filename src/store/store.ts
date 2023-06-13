@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import modelReducer from "./slice";
 import dashboardsReducer from "./sliceDashboards";
+import updateRowReducer from "./sliceGridUpdate"
 
 export const store = configureStore({
   reducer: {
     model: modelReducer,
     dashboards: dashboardsReducer,
+    updateRow: updateRowReducer
   },
 });
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Dispatch, useEffect, useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -11,12 +11,14 @@ import {
   GridReadyEvent,
   IDatasource,
   IGetRowsParams,
+  RowClickedEvent,
 } from "ag-grid-community";
 import { AgGrigFirstDataRenderedEvent } from "../types";
 import { cmsGetContentModel, listModel } from "../client";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import NewEntryView from "../views/NewEntryView";
 import PVAggridColumnSelector from "../components/PVAggridColumnSelector";
+import { newRowState } from "../store/sliceGridUpdate";
 
 type FilterState = {
   [key: string]: any;
@@ -27,21 +29,25 @@ type Props = {
   onValueChange: (id: string, value: ColumnState[]) => void;
   modelId: string;
   lastState?: ColumnState[];
+  showColumnSelector: boolean
+  setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>
+  deleteMode: boolean
 };
 
-const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
+const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelector, setShowColumnSelector, deleteMode }: Props) => {
   const [columnState, setColumnState] = useState<ColumnState[]>();
   const [filterState, setFilterState] = useState<FilterState>();
   const [columnApi, setColumnApi] = useState<ColumnApi>();
-  const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>();
+ 
+  const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>([
+    
+  ]);
   const [cursors, setCursors] = useState(new Set([null]));
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
   const gridStyle = useMemo(() => ({ height: "27rem", width: "100%" }), []);
   const [rowData, setRowData] = useState([]);
-  const [showColumnSelector, setShowColumnSelector] = useState<boolean>(
-    false
-  );
+  const dispatch = useDispatch()
   const [selectedColumns, setSelectedColumns] = useState<Array<string | undefined>>([]);
 
 
@@ -140,7 +146,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
               createdBy,
               createdOn,
               entryId,
-              id,
               ownedBy,
               savedOn,
               ...rest
@@ -148,15 +153,24 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
             return rest;
           });
 
-          setColumnDefs(
-            data.columnNames.map((field) => {
+          setColumnDefs([{
+            headerName: 'Actions',
+            field: 'actions',
+            width: 120,
+            colId: 'delete-mode',
+            sortable: false,
+            filter: false,
+            hide: true,
+            suppressMovable: true // Prevent the column from being draggable in delete mode
+          },
+            ...data.columnNames.map((field) => {
               return {
                 headerName: field.label,
                 field: field.fieldId,
                 filter: "agTextColumnFilter",
                 filterParams: { apply: true, newRowsAction: "keep" },
               };
-            })
+            })]
           );
           params.successCallback(rows, totalCount);
         } catch (error) {
@@ -166,8 +180,21 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
     };
     return datasource;
   };
+  const handleRowClicked = (event: RowClickedEvent) => {
+    const rowData = event.data; // Access the data of the clicked row
+    // Handle row click event
+    console.log("Row Clicked:", rowData);
 
-  
+    // rowToBeEdited(modelId, rowData.id)
+
+    dispatch(newRowState({modelId, rowId: rowData.id, rowState: rowData}))
+  };
+
+  useEffect(() => {
+    if (gridApi) {
+      gridApi.addEventListener("rowClicked", handleRowClicked);
+    }
+  }, [gridApi]);
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
@@ -198,6 +225,14 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
     setSelectedColumns(selectedColumns);
     setShowColumnSelector(false);
   };
+
+  useEffect(()=>{
+    if(deleteMode) {
+      columnApi?.setColumnVisible('delete-mode', true)
+    } else {
+      columnApi?.setColumnVisible('delete-mode', false)
+    }
+  },[deleteMode])
 
   useEffect(() => {
     if (columnApi && columnDefs) {
@@ -240,50 +275,10 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId }: Props) => {
     restoreGridColumnStates()
   },[columnDefs])
 
-  // const [updatedRows, setUpdatedRows] = useState()
-
-  // const handleUpdate = async() => {
-  //   const data = await getModelFields(
-  //     modelId,
-  //     1,
-  //     null
-  //   );
-  //   // console.log(data);
-
-  //   const rows = data.modelContentListData.map((row) => {
-  //     const {
-  //       createdBy,
-  //       createdOn,
-  //       entryId,
-  //       id,
-  //       ownedBy,
-  //       savedOn,
-  //       ...rest
-  //     } = row;
-  //     return rest;
-  //   });
-
-  //   setUpdatedRows(rows)
-
-  // }
-  // useEffect(()=>{
-  //   if(!updatedRows) return
-  //   setRowData(updatedRows);
-  //   console.log({updatedRows, rowData})
-
-  // },[updatedRows])
-
 
   return (
     <>
       <div style={gridStyle} className="ag-theme-alpine">
-        {/* <button onClick={() => handleUpdate()}>
-          Restore Grid Column States
-        </button> */}
-        
-        <button onClick={()=> {
-          console.log({columnState, columnApi})
-          setShowColumnSelector(true)}}>Select Columns</button>
         {columnDefs && <PVAggridColumnSelector columnState={columnState} setShowColumnSelector={setShowColumnSelector} showColumnSelector={showColumnSelector} onColumnSelect={handleColumnSelect} columns={columnDefs} />}
         <AgGridReact
           enableRangeSelection={true}

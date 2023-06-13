@@ -13,8 +13,9 @@ import PVGridWebiny2 from "./PVGridWebiny2";
 import { ColumnState } from "ag-grid-community";
 import { FlexLayoutCmp } from "../types";
 import PVDoughnutChart2 from "./PVDoughnutChart2";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import NewEntryView from "../views/NewEntryView";
+import { RootState } from "../store/store";
 
 type Props = {
   gridState?: IJsonModel;
@@ -41,26 +42,35 @@ const PVFlexLayout = ({
     },
   };
 
-  const dispatch = useDispatch();
+  const { rowState, rowId, modelId:UpdateRowModelId } = useSelector((state: RootState) => state.updateRow);
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
   const [containerHeight, setContainerHeight] = useState("30rem");
   const [modelId, setModelId] = useState<string | undefined>()
   const [flexModelId, setFlexModelId] = useState<string>()
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>()
 
+
   const [updatedGrid, setUpdatedGrid] = useState<{modelId: string, key: number}>()
+
+  useEffect(()=>{
+    setModelId(UpdateRowModelId)
+  },[UpdateRowModelId, rowId])
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
     const config = node.getConfig();
     const id = node.getId();
     const [gridKey, setGridKey] = useState(0)
-
     
     
     if (component === "PVGridWebiny2") {
       const lastState = findChildById(gridState?.layout, id, "tab")?.config
       ?.lastState;
+
+      const [deleteMode, setDeleteMode] = useState(false);
+      const [showColumnSelector, setShowColumnSelector] = useState<boolean>(
+        false
+      );
 
       useEffect(()=>{
         if(updatedGrid?.modelId === config.modelId) {
@@ -70,7 +80,8 @@ const PVFlexLayout = ({
         
       return (
         <>
-          <i style={{ cursor: "pointer", fontSize: "2rem", position: "absolute", left: "8rem"}} className="fa-solid fa-plus"
+        <div className="tab-actions-panel" style={{display: "flex", alignItems: "center", gap: ".7rem", paddingLeft: ".7rem"}}>
+          <i style={{ cursor: "pointer", fontSize: "2rem",  left: "8rem"}} className="fa-solid fa-plus"
             onClick={()=> {
               setFlexModelId(id)
               const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
@@ -80,7 +91,14 @@ const PVFlexLayout = ({
             <button onClick={()=>{
               setGridKey(prevState=> prevState + 1)
             }}>restore</button>
+            <button onClick={()=> {
+              setShowColumnSelector(true)}}>Select Columns</button>
+            <button onClick={()=>setDeleteMode(!deleteMode)}>Delete Mode</button>
+        </div>
           <PVGridWebiny2
+            deleteMode={deleteMode}
+            setShowColumnSelector={setShowColumnSelector}
+            showColumnSelector={showColumnSelector}
             key={gridKey}
             id={id}
             lastState={lastState || config.lastState}
@@ -260,7 +278,6 @@ const PVFlexLayout = ({
   return (
     <>
     {modelId && <NewEntryView setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
-
     <div
       className="flex-layout-wrapper"
       style={{ height: "65vh", width: "90%", overflowY: "auto" }}
@@ -276,7 +293,7 @@ const PVFlexLayout = ({
           flexDirection: "column",
         }}
         >
-        <Layout  onModelChange={onModelChange} model={model} factory={factory} />
+        <Layout onModelChange={onModelChange} model={model} factory={factory} />
       </div>
     </div>
         </>

@@ -17,10 +17,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { validateCPF } from "../SchemasValidation";
 import styled from "styled-components";
 import Alert from 'react-bootstrap/Alert';
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 
 type Props = {
   contentModel: ICmsGetContentModelData;
+  updateModelId: string;
+  handleUpdatedGrid : () => void;
   setSuccessMsg: Dispatch<SetStateAction<string | undefined>>
 };
 
@@ -48,11 +52,15 @@ const getModelFieldsContent = async (
     }
 };
 
-const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
+const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateModelId }: Props) => {
   const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
   const [formObjField, setFormObjField] = useState<{[key: string]: unknown;}>({});
   const [formObjFieldName, setFormObjFieldName] = useState<string>();
   const [isLoading, setIsLoading] = useState(false)
+
+  
+  const { rowState, rowId, modelId:UpdateRowModelId } = useSelector((state: RootState) => state.updateRow);
+  
   
   const { t } = useTranslation();
 
@@ -98,7 +106,6 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
     const validationRules = field.validation?.map(valid=> valid.settings?.preset)
     
     const validationSchema = validationRules && createValidationSchema(validationRules);
-    
 
 
     const { handleSubmit, register, formState: {errors} } = useForm({
@@ -112,6 +119,9 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
           <Form.Label>{field.label}</Form.Label>
          {field.predefinedValues?.values.map((value, index) => (
           <Form.Check
+          defaultValue={
+            rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+          }
             key={index}
             type="checkbox"
             id={value.value}
@@ -144,7 +154,11 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
         return (
         <div className="field form__select-box">
         <Form.Label>{field.label}</Form.Label>
-        <Form.Select  onChange={(e)=>{
+        <Form.Select 
+        defaultValue={
+          rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+        }
+        onChange={(e)=>{
           if(objFieldId) {
             setFormInputs((prevState: { [key: string]: unknown | {[key: string] : unknown} }) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
           } else {
@@ -164,6 +178,9 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
         <div className="field form__text-input">
           <Form.Label>{field.label}</Form.Label>
           <Form.Control
+            defaultValue={
+              rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+            }
             onChange={(e) =>{
               if(objFieldId) {
                 setFormInputs((prevState: { [key: string]: unknown } ) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
@@ -220,6 +237,9 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
           <div className="field form__ref-input">
             <Form.Label>{field.label}</Form.Label>
             <Typeahead
+            defaultValue={
+              rowState[objFieldId] ? rowState[objFieldId][field.fieldId] : rowState ? rowState[field.fieldId] : undefined 
+            }
             onChange={(e:any)=>{
               const ref:WebinyRefInput = {
                 modelId: refs[0].modelId,
@@ -328,6 +348,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg }: Props) => {
           const {data: publishedData} = await cmsPublishModelId(contentModel.modelId, data.id)
           
           if(!!publishedData){
+            handleUpdatedGrid()
             setSuccessMsg(t("entry-registered") as string) 
           } 
         }
