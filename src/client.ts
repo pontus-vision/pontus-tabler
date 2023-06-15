@@ -26,34 +26,33 @@ export const listModel = async (
   // const arr2 = arr1.map((el) => el.fieldId).join(" ");
   const refInputField = fields.filter((el) => el.renderer.name === "ref-input");
 
-  const arrMap: string[] = await Promise.all(
+  const arrMap = await Promise.all(
     fields.map(async (field) => {
-      const findRefModel = (field: ICmsGetContentModelDataField) : string | undefined => {
+      const findRefModel = (field: ICmsGetContentModelDataField) => {
         if (field.settings) {
           return field.settings.models?.find((model) => model?.modelId)
             ?.modelId;
         }
       };
       const objFields = field?.settings?.fields;
-      const refModel = findRefModel(field)
-      if (refModel) {
-        const refModelContent = await getContentModel(refModel);
-        return `${field.fieldId}{${refModelContent.titleFieldId}}\n`;
+      if (findRefModel(field)) {
+        const refModel = await getContentModel(findRefModel(field));
+        return `${field.fieldId}{${refModel.titleFieldId}}`;
       } else if (objFields) {
         const objFieldsIds = await Promise.all(
           objFields.map(async (el) => {
-            if (refModel) {
+            if (findRefModel(el)) {
               const objFieldRefModel = await cmsGetContentModel(
-                refModel
+                findRefModel(el)
               );
-              return `${el.fieldId}{${objFieldRefModel.data.titleFieldId}}\n`;
+              return `${el.fieldId}{${objFieldRefModel.data.titleFieldId}}`;
             }
-            return `${el.fieldId}\n`;
+            return `${el.fieldId}`;
           })
         );
-        return `${field.fieldId}{${objFieldsIds}}\n`;
+        return `${field.fieldId}{${objFieldsIds}}`;
       } else {
-        return field.fieldId + "\n";
+        return field.fieldId;
       }
     })
   );
@@ -69,9 +68,8 @@ export const listModel = async (
         return key + "_contains: " + '"' + value.filter + '"';
       });
 
-      
-
-    const query = `
+    const res = await webinyApi.post("cms/read/en-US", {
+      query: `
       {
         list${capitalizeFirstLetter(
           modelIdFormatted
@@ -98,12 +96,8 @@ export const listModel = async (
           }
         }
       }
-    `
-
-    const res = await webinyApi.post("cms/read/en-US", {
-      query
+    `,
     });
-    console.log({res, query, arrMap})
     const data = res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`] as IListModelResponse
     return data
     
