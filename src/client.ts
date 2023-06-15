@@ -3,7 +3,6 @@ import {
   ICmsGetContentModel,
   ICmsGetContentModelDataField,
   IListModelResponse,
-  ModelColName,
   UnknownKey,
 } from "./types";
 import { CmsEntriesList } from "./types";
@@ -27,33 +26,34 @@ export const listModel = async (
   // const arr2 = arr1.map((el) => el.fieldId).join(" ");
   const refInputField = fields.filter((el) => el.renderer.name === "ref-input");
 
-  const arrMap = await Promise.all(
+  const arrMap: string[] = await Promise.all(
     fields.map(async (field) => {
-      const findRefModel = (field: ICmsGetContentModelDataField) => {
+      const findRefModel = (field: ICmsGetContentModelDataField) : string | undefined => {
         if (field.settings) {
           return field.settings.models?.find((model) => model?.modelId)
             ?.modelId;
         }
       };
       const objFields = field?.settings?.fields;
-      if (findRefModel(field)) {
-        const refModel = await getContentModel(findRefModel(field));
-        return `${field.fieldId}{${refModel.titleFieldId}}`;
+      const refModel = findRefModel(field)
+      if (refModel) {
+        const refModelContent = await getContentModel(refModel);
+        return `${field.fieldId}{${refModelContent.titleFieldId}}\n`;
       } else if (objFields) {
         const objFieldsIds = await Promise.all(
           objFields.map(async (el) => {
-            if (findRefModel(el)) {
+            if (refModel) {
               const objFieldRefModel = await cmsGetContentModel(
-                findRefModel(el)
+                refModel
               );
-              return `${el.fieldId}{${objFieldRefModel.data.titleFieldId}}`;
+              return `${el.fieldId}{${objFieldRefModel.data.titleFieldId}}\n`;
             }
-            return `${el.fieldId}`;
+            return `${el.fieldId}\n`;
           })
         );
-        return `${field.fieldId}{${objFieldsIds}}`;
+        return `${field.fieldId}{${objFieldsIds}}\n`;
       } else {
-        return field.fieldId;
+        return field.fieldId + "\n";
       }
     })
   );
@@ -69,8 +69,7 @@ export const listModel = async (
         return key + "_contains: " + '"' + value.filter + '"';
       });
 
-    const res = await webinyApi.post("cms/read/en-US", {
-      query: `
+      const query = `
       {
         list${capitalizeFirstLetter(
           modelIdFormatted
@@ -97,8 +96,12 @@ export const listModel = async (
           }
         }
       }
-    `,
+    `
+
+    const res = await webinyApi.post("cms/read/en-US", {
+      query
     });
+    console.log({res, query})
     const data = res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`] as IListModelResponse
     return data
     
@@ -473,7 +476,7 @@ export const cmsPublishModelId = async(modelId: string, id: string) => {
 
 export const cmsCreateModelFrom = async(modelId: string, entryValues: {[key: string]: unknown}, keys: string, id: string) => {
   const modelIdCapitalized = capitalizeFirstLetter(modelId)
-
+  console.log({modelId, entryValues, keys, id})
 
   const query = `
   mutation CmsCreate${modelIdCapitalized}From($revision: ID!, $data: ${modelIdCapitalized}Input) {
@@ -511,10 +514,41 @@ export const cmsCreateModelFrom = async(modelId: string, entryValues: {[key: str
     const {data: res} = await webinyApi.post("/cms/manage/en-US", post )
 
     
-
+    console.log({res, post})
     return res.data.content
     
   } catch (error) {
     console.error(error)
   }
+}
+
+export const cmsDeleteEntry = async(modelId: string, id: string) => {
+
+  const query = `
+  mutation CmsEntriesDeleteMapeamentoDeProcessos($revision: ID!) {
+    content: deleteMapeamentoDeProcessos(revision: $revision) {
+      data
+      error {
+        message
+        code
+        data
+        __typename
+      }
+      __typename
+    }
+  }
+  `
+  const post = {query, variables: {revision: id}}
+
+  try {
+    const {data: res} = await webinyApi.post("/cms/manage/en-US", post)
+
+    console.log({res, post})
+
+    return res
+
+  } catch (error) {
+    console.error(error)
+  }
+
 }

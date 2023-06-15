@@ -56,13 +56,13 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   },[])
 
   useEffect(()=>{
-    setColumnsVisible(prevState=> columns.filter(col=>col?.colId !== 'delete-mode'))
+    setColumnsVisible(prevState=> columns.filter(col=>col?.colId !== 'delete-mode' && col?.colId !== "update-mode"))
+    
     console.log({columnsVisible})
   },[columns])
   
 
   useEffect(()=>{
-    // setSelectedColumns(prevState=> ([...columns.map(col=> col.field)]))
     console.log({selectedColumns, columnState})
   },[selectedColumns, columnState])
 

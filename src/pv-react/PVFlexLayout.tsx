@@ -16,6 +16,8 @@ import PVDoughnutChart2 from "./PVDoughnutChart2";
 import { useDispatch, useSelector } from "react-redux";
 import NewEntryView from "../views/NewEntryView";
 import { RootState } from "../store/store";
+import styled from "styled-components";
+import { cmsDeleteEntry } from "../client";
 
 type Props = {
   gridState?: IJsonModel;
@@ -44,7 +46,7 @@ const PVFlexLayout = ({
 
   const { rowState, rowId, modelId:updateRowModelId } = useSelector((state: RootState) => state.updateRow);
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
-  const [containerHeight, setContainerHeight] = useState("30rem");
+  const [containerHeight, setContainerHeight] = useState("32rem");
   const [modelId, setModelId] = useState<string | undefined>()
   const [flexModelId, setFlexModelId] = useState<string>()
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>()
@@ -68,9 +70,11 @@ const PVFlexLayout = ({
       ?.lastState;
 
       const [deleteMode, setDeleteMode] = useState(false);
+      const [updateMode, setUpdateMode] = useState(false);
       const [showColumnSelector, setShowColumnSelector] = useState<boolean>(
         false
       );
+      const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<string[]>() 
 
       useEffect(()=>{
         const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
@@ -83,21 +87,43 @@ const PVFlexLayout = ({
           setGridKey(prevState=> prevState + 1)
         }
       },[updatedGrid])
+
+      const deleteEntries = () => {
+        console.log({entriesToBeDeleted, modelId})
+        if(!entriesToBeDeleted || !config.modelId) return
+
+        entriesToBeDeleted.forEach(async entry=> {
+          const {data} = await cmsDeleteEntry(config.modelId, entry)
+          console.log(data)
+        })
+        setGridKey(prevState=> prevState + 1)
+      }
+
+    
         
       return (
         <>
         <div className="tab-actions-panel" style={{display: "flex", alignItems: "center", gap: ".7rem", paddingLeft: ".7rem"}}>
-          <i style={{ cursor: "pointer", fontSize: "2rem",  left: "8rem"}} className="fa-solid fa-plus"
+          {deleteMode || updateMode || <label className="tab-actions-panel__btn" style={{ display:  "flex", alignItems: "center", padding: 0, cursor: "pointer", height: "2rem", fontSize: "4rem",  left: "8rem"}} 
             onClick={()=> {
               setFlexModelId(id)
               setModelId(prevState=> updateRowModelId ? prevState = updateRowModelId : prevState = config.modelId)
-            }}></i>
-            <button onClick={()=>{
+            }}>+</label>}
+            {updateMode || deleteMode ||<button onClick={()=>{
               setGridKey(prevState=> prevState + 1)
-            }}>restore</button> 
-            <button onClick={()=> {
-              setShowColumnSelector(true)}}>Select Columns</button>
-            <button onClick={()=>setDeleteMode(!deleteMode)}>Delete Mode</button>
+            }}>restore</button>} 
+            {updateMode || deleteMode ||<button onClick={()=> {
+              setShowColumnSelector(true)}}>Select Columns</button>}
+            {updateMode || deleteMode || <button onClick={()=>setDeleteMode(!deleteMode)}>Delete Mode</button>}
+            {updateMode || deleteMode || <button onClick={()=>{setUpdateMode(!updateMode)}}>Update Mode</button>}
+
+            {deleteMode && <div style={{gap:"1rem" ,height: "2.65rem", display: "flex", alignItems: "center"}} className="tab-actions-panel__delete-actions">
+              <i className="fa-solid fa-trash" onClick={()=>deleteEntries()} style={{fontSize: "1.8rem", color: "#b53737", cursor: "pointer"}}></i>
+              <i className="fa-solid fa-x" style={{fontSize: "1.8rem", cursor: "pointer"}} onClick={()=> setDeleteMode(false)}></i>         
+            </div>}
+            {updateMode && <div className="tab-actions-panel__update-actions">
+              <i className="fa-solid fa-x" style={{fontSize: "1.8rem", cursor: "pointer", height: "2.65rem", display: "flex", alignItems: "center"}} onClick={()=> setUpdateMode(false)}></i>         
+            </div>}
         </div>
           <PVGridWebiny2
             deleteMode={deleteMode}
@@ -108,6 +134,8 @@ const PVFlexLayout = ({
             lastState={lastState || config.lastState}
             onValueChange={handleValueChange}
             modelId={config.modelId}
+            updateMode={updateMode}
+            setEntriesToBeDeleted={setEntriesToBeDeleted}
           />
         </>
       );
@@ -157,10 +185,8 @@ const PVFlexLayout = ({
   const filterComponentsPerType = (layout:any, type: string):any => {
     if (layout?.children && layout.children.length > 0) {
       if (layout.children[0].type === type) {
-        console.log(layout.children);
         return layout.children;
       } else if (layout.children[0].type !== type) {
-        console.log(layout.children);
         return filterComponentsPerType(layout.children[0], type);
       }
     }
@@ -184,16 +210,8 @@ const PVFlexLayout = ({
 
     console.log({ tabsets });
 
-    setContainerHeight(tabsets.length * 30 + "rem"); // Increase height by 200px
-    // setContainerHeight(
-    //   model.getRoot().getChildren()[0].getRect().height + "px"
-    // );
-
-    console.log(
-      containerHeight,
-      tabsets.length,
-      rootNode.getChildren()[0].getRect().height
-    );
+    setContainerHeight(tabsets.length * 32 + "rem"); // Increase height by 200px
+   
   };
 
   const addComponent = (entry: FlexLayoutCmp) => {

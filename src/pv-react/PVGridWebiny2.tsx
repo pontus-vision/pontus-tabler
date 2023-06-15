@@ -9,9 +9,12 @@ import {
   GridApi,
   GridOptions,
   GridReadyEvent,
+  ICellRendererParams,
   IDatasource,
   IGetRowsParams,
+  IRowNode,
   RowClickedEvent,
+  SelectionChangedEvent,
 } from "ag-grid-community";
 import { AgGrigFirstDataRenderedEvent } from "../types";
 import { cmsGetContentModel, listModel } from "../client";
@@ -19,6 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import NewEntryView from "../views/NewEntryView";
 import PVAggridColumnSelector from "../components/PVAggridColumnSelector";
 import { newRowState } from "../store/sliceGridUpdate";
+import { _isClickEvent } from "chart.js/dist/helpers/helpers.core";
 
 type FilterState = {
   [key: string]: any;
@@ -32,16 +36,26 @@ type Props = {
   showColumnSelector: boolean
   setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>
   deleteMode: boolean
+  updateMode: boolean
+  setEntriesToBeDeleted:  Dispatch<React.SetStateAction<string[] | undefined>>
 };
 
-const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelector, setShowColumnSelector, deleteMode }: Props) => {
+const CustomCellRenderer = ({ rowData, handleIconClick }) => {
+  const handleClick = () => {
+    handleIconClick(rowData);
+  };
+
+  return (
+    <i className="fa-solid fa-pen-to-square" onClick={handleClick}></i>
+  );
+};
+
+const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelector, setShowColumnSelector, deleteMode, updateMode, setEntriesToBeDeleted }: Props) => {
   const [columnState, setColumnState] = useState<ColumnState[]>();
   const [filterState, setFilterState] = useState<FilterState>();
   const [columnApi, setColumnApi] = useState<ColumnApi>();
- 
-  const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>([
-    
-  ]);
+  const [selectedRows, setSelectedRows] = useState<IRowNode<any>[]>([])
+  const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>([]);
   const [cursors, setCursors] = useState(new Set([null]));
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
@@ -78,6 +92,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
     onValueChange(id, columnState);
   }, [columnState, id]);
 
+
   const getDataSource = () => {
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
@@ -94,8 +109,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
 
           if (Object.values(filter)[0]) {
             const fieldId = Object.keys(filter)[0];
-
-            console.log({ filter });
             const filterInput = filter[fieldId].filter;
 
             // console.log({ modelId, pageSize, cursors, filterInput, fieldId });
@@ -150,18 +163,39 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
               ...rest
             } = row;
             return rest;
-          });
+          })
 
           setColumnDefs([
           {
             headerName: '',
-            field: 'actions',
+            field: 'delete',
+            headerCheckboxSelection: true,
+            checkboxSelection: true,
             width: 30,
             colId: 'delete-mode',
             sortable: false,
             filter: false,
             hide: true,
-            suppressMovable: true 
+            suppressMovable: true,
+            // cellRendererParams: {onChange: handleCheckboxChange,}
+          },
+          {
+            headerName: '',
+            field: 'update',
+            cellStyle: {
+              display: 'flex',
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: '1.3rem',
+            },
+            width: 30,
+            colId: 'update-mode',
+            sortable: false,
+            filter: false,
+            hide: true,
+            suppressMovable: true,
+            cellRenderer: () => <i className="fa-solid fa-pen-to-square"></i>,
+            onCellClicked: handleUpdateIconClick
           },
             ...data.columnNames.map((field) => {
               return {
@@ -180,21 +214,21 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
     };
     return datasource;
   };
-  const handleRowClicked = (event: RowClickedEvent) => {
-    const rowData = event.data; // Access the data of the clicked row
-    // Handle row click event
-    console.log("Row Clicked:", rowData, {modelId, rowId: rowData.id, rowState: rowData});
 
-    // rowToBeEdited(modelId, rowData.id)
+  const handleUpdateIconClick = (params) => {
+    const {data: rowData} = params
 
-    dispatch(newRowState({modelId, rowId: rowData.id, rowState: rowData}))
+    const {id, ...rest} = rowData
+
+    dispatch(newRowState({modelId, rowId: rowData.id, rowState: rest}))
   };
 
-  useEffect(() => {
-    if (gridApi) {
-      gridApi.addEventListener("rowClicked", handleRowClicked);
-    }
-  }, [gridApi]);
+  const handleRowClicked = (event: RowClickedEvent) => {
+
+    console.log({event})
+    
+  }; 
+
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
@@ -227,12 +261,25 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
   };
 
   useEffect(()=>{
+    console.log({deleteMode})
     if(deleteMode) {
       columnApi?.setColumnVisible('delete-mode', true)
     } else {
       columnApi?.setColumnVisible('delete-mode', false)
+      selectedRows.forEach(row=>{
+        row.setSelected(false)
+      })
     }
   },[deleteMode])
+
+  useEffect(()=>{
+    console.log({updateMode})
+    if(updateMode) {
+      columnApi?.setColumnVisible('update-mode', true)
+    } else {
+      columnApi?.setColumnVisible('update-mode', false)
+    }
+  },[updateMode])
 
   useEffect(() => {
     if (columnApi && columnDefs) {
@@ -253,6 +300,13 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
   const gridOptions: GridOptions = {
     rowModelType: "infinite",
     cacheBlockSize: 100,
+    suppressRowClickSelection: true,
+    onCellClicked: (e) => {
+      console.log(e.column.getColId())
+        // if (e.column.getColId() !== 'delete-mode') { 
+        //     e.node.setSelected(true);
+        // }
+    }
   };
 
   const defaultColDef = useMemo<ColDef>(() => {
@@ -275,12 +329,20 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
     restoreGridColumnStates()
   },[columnDefs])
 
+  const onSelectionChanged = (event: SelectionChangedEvent): void => {
+    const selectedRows = event.api.getSelectedNodes();
+    setEntriesToBeDeleted(selectedRows.map(row=> row.data.id))
+    setSelectedRows(selectedRows)
+  };
+
+
 
   return (
     <>
       <div style={gridStyle} className="ag-theme-alpine">
         {columnDefs && <PVAggridColumnSelector columnState={columnState} setShowColumnSelector={setShowColumnSelector} showColumnSelector={showColumnSelector} onColumnSelect={handleColumnSelect} columns={columnDefs} />}
         <AgGridReact
+          gridOptions={gridOptions}
           enableRangeSelection={true}
           paginationAutoPageSize={true}
           defaultColDef={defaultColDef}
@@ -293,9 +355,11 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
           onSortChanged={handleGridStateChanged}
           onFirstDataRendered={onFirstDataRendered}
           pagination={true}
-          gridOptions={gridOptions}
           datasource={datasource}
           columnDefs={columnDefs}
+          rowSelection="multiple"
+          onSelectionChanged={onSelectionChanged}
+          // getRowId={getRowId}
         ></AgGridReact>
       </div>
     </>

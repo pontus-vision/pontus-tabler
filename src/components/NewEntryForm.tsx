@@ -67,7 +67,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
   
   const { t } = useTranslation();
 
-  useEffect(()=>{console.log({formInputs})},[formInputs])
+  useEffect(()=>{console.log({...formInputs, ...rowState})},[formInputs])
   
   
   useEffect(()=>{
@@ -92,10 +92,6 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
 
     return schema;
   };
-
-  
-
-  
 
   const renderField = (field: ICmsGetContentModelDataField, objFieldId: string | null = null) : ReactElement<any, any> | undefined => {
 
@@ -361,6 +357,8 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
       let idToBePublished = ''
 
       if(rowState && rowId && updateRowModelId) {
+
+        
         const {data} = await cmsCreateModelFrom(updateRowModelId, {...rowState, ...formInputs}, fieldsKeysStr, rowId )
         
         console.log({data})

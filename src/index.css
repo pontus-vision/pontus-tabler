@@ -19,6 +19,10 @@
 
 }
 
+label {
+  margin: 0;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
