@@ -69,7 +69,9 @@ export const listModel = async (
         return key + "_contains: " + '"' + value.filter + '"';
       });
 
-      const query = `
+      
+
+    const query = `
       {
         list${capitalizeFirstLetter(
           modelIdFormatted
@@ -101,7 +103,7 @@ export const listModel = async (
     const res = await webinyApi.post("cms/read/en-US", {
       query
     });
-    console.log({res, query})
+    console.log({res, query, arrMap})
     const data = res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`] as IListModelResponse
     return data
     
