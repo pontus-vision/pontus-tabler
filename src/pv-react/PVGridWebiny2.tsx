@@ -69,7 +69,8 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
     modelId: string,
     limit: number,
     after: string | null,
-    fieldsSearches = null
+    fieldsSearches = null,
+    sorting?: string
   ) => {
     const cmsContentModel = await cmsGetContentModel(modelId);
 
@@ -79,7 +80,8 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
       columnNames,
       limit,
       after,
-      fieldsSearches
+      fieldsSearches,
+      sorting
     );
 
     // console.log({ columnNames });
@@ -105,53 +107,35 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
 
           const filter = params.filterModel;
 
-          if (!modelId) return;
-
-          if (Object.values(filter)[0]) {
-            const fieldId = Object.keys(filter)[0];
-            const filterInput = filter[fieldId].filter;
-
-            // console.log({ modelId, pageSize, cursors, filterInput, fieldId });
-
-            const data = await getModelFields(
-              modelId,
-              pageSize,
-              [...cursors][index],
-              filter
-            );
-            // console.log(data);
-
-            const rows = data.modelContentListData.map((row) => {
-              const {
-                createdBy,
-                createdOn,
-                entryId,
-                id,
-                ownedBy,
-                savedOn,
-                ...rest
-              } = row;
-              return rest;
-            });
-
-            setCursors(new Set([null]));
-            setRowData([]);
-
-            setCursors((previousState) => previousState.add(data.meta.cursor));
-
-            params.successCallback(rows, data.meta.totalCount);
-            return;
+          let sorting;
+          console.log(params.sortModel)
+          if(params.sortModel.length > 0)
+          { 
+            const colId = params?.sortModel[0].colId
+            const sort = params?.sortModel[0].sort
+            sorting = `${colId}_${sort.toUpperCase()}`
           }
+          console.log({sorting})
+          
 
+          if (!modelId) return;
+          
+          
           const data = await getModelFields(
             modelId,
             pageSize,
-            [...cursors][index]
+            [...cursors][index],
+            filter,
+            sorting
           );
 
           setCursors((previousState) => previousState.add(data.meta.cursor));
 
           const { totalCount } = data.meta;
+
+          const objFields = data.columnNames.filter(col=> col.type === "object")
+          
+          const refFields = data.columnNames.filter(col=> col.type === "ref")
 
           const rows = data.modelContentListData.map((row) => {
             const {
@@ -164,6 +148,35 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
             } = row;
             return rest;
           })
+
+          const rows2 = rows.map(row=>{
+            
+            const flattenObj = (ob) => {
+              let result = {};
+              for (const i in ob) {
+                  if ((typeof ob[i]) === 'object' && !Array.isArray(ob[i]) && objFields.some(field=> field.fieldId === i)) {
+                    
+                      const temp = flattenObj(ob[i]);
+                      for (const j in temp) {
+           
+                          // Store temp in result
+                          result[j] = temp[j];
+                      }
+                  }else if(refFields.some(field=> field.fieldId === i)){
+                    
+                    console.log(Object.values(ob[i]))
+                  }
+                  else {
+                      result[i] = ob[i];
+                  }
+              }
+              return result;
+            };
+
+            return flattenObj(row)
+          })
+
+          console.log({rows2, rows})
 
           setColumnDefs([
           {
@@ -198,15 +211,20 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
             onCellClicked: handleUpdateIconClick
           },
             ...data.columnNames.map((field) => {
+              if(field.type === "object" && field.settings?.fields) {
+                return {
+                  headerName: field.label,
+                  children: field.settings?.fields.map(field=>{ return{field: field.fieldId, headerName: field.label}})
+                }
+              }
               return {
-                headerName: field.label,
                 field: field.fieldId,
                 filter: "agTextColumnFilter",
                 filterParams: { apply: true, newRowsAction: "keep" },
               };
-            })]
-          );
-          params.successCallback(rows, totalCount);
+            })
+          ]);
+          params.successCallback(rows2, totalCount);
         } catch (error) {
           console.error(error);
         }
@@ -312,6 +330,8 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
   const defaultColDef = useMemo<ColDef>(() => {
     return {
       filter: true,
+      sortable: true,
+      resizable: true
     };
   }, []);
 

@@ -20,7 +20,8 @@ export const listModel = async (
   fields: ICmsGetContentModelDataField[],
   limit: number,
   after: string | null,
-  fieldSearches = null
+  fieldSearches = null,
+  sorting?: string
 ): Promise<IListModelResponse | undefined> => {
   // const arr1 = arr.map(el=> !!el.settings.models && el.settings?.models.find(model=>model.modelId)  )
   // const arr2 = arr1.map((el) => el.fieldId).join(" ");
@@ -61,6 +62,8 @@ export const listModel = async (
     modelId[modelId.length - 1] !== "s" ? modelId + "s" : modelId;
 
   try {
+
+    console.log(sorting)
     const containsSearches =
       fieldSearches &&
       Object.entries(fieldSearches).map(([key, value]) => {
@@ -68,14 +71,13 @@ export const listModel = async (
         return key + "_contains: " + '"' + value.filter + '"';
       });
 
-    const res = await webinyApi.post("cms/read/en-US", {
-      query: `
+      const query = `
       {
         list${capitalizeFirstLetter(
           modelIdFormatted
         )} (limit: ${limit}, after: "${after}" ${
-        fieldSearches ? ", where:" + "{" + containsSearches + "}" : ""
-      }) 
+        fieldSearches ? ", where:" + "{" + containsSearches + "}" : "" 
+      } ${sorting ? "sort: " + sorting : ""}) 
       {
           data {
             id
@@ -96,8 +98,13 @@ export const listModel = async (
           }
         }
       }
-    `,
+    `
+
+    const res = await webinyApi.post("cms/read/en-US", {
+      query 
     });
+
+    console.log({query})
     const data = res.data.data[`list${capitalizeFirstLetter(modelIdFormatted)}`] as IListModelResponse
     return data
     
