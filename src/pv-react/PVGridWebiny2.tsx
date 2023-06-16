@@ -223,6 +223,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
               if(field.type === "object" && field.settings?.fields) {
                 return {
                   headerName: field.label,
+                  field: field.fieldId,
                   children: field.settings?.fields.map(field=>{ return{ sortable: false, field: field.fieldId, headerName: field.label}})
                 }
               }else if(field.type === "ref"){
@@ -248,6 +249,19 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
     };
     return datasource;
   };
+
+  useEffect(()=>{
+    const objects = columnDefs.filter(el=> el?.children)
+
+    const checkHiddenObjects = objects.map(obj=> 
+      obj.children.some(child=> columnState?.some(col=> child.field === col.colId && col.hide))).every(el => el === true)
+
+    
+    if(checkHiddenObjects) {
+       setColumnDefs(prevState=> prevState = prevState?.filter(col=> !objects.some(obj=> obj === col)))
+    }
+    
+  },[columnState])
 
   const handleUpdateIconClick = (params) => {
     const {data: rowData} = params

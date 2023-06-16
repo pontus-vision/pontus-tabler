@@ -13,11 +13,12 @@ import PVGridWebiny2 from "./PVGridWebiny2";
 import { ColumnState } from "ag-grid-community";
 import { FlexLayoutCmp } from "../types";
 import PVDoughnutChart2 from "./PVDoughnutChart2";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import NewEntryView from "../views/NewEntryView";
 import { RootState } from "../store/store";
-import styled from "styled-components";
 import { cmsDeleteEntry } from "../client";
+import { useTranslation } from "react-i18next";
+import DeleteEntriesModal from "../components/DeleteEntriesModal";
 
 type Props = {
   gridState?: IJsonModel;
@@ -50,9 +51,19 @@ const PVFlexLayout = ({
   const [modelId, setModelId] = useState<string | undefined>()
   const [flexModelId, setFlexModelId] = useState<string>()
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>()
+  const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<string[]>()
+  const [deletion, setDeletion] = useState(false)
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [updateMode, setUpdateMode] = useState(false);
+  const [createNewMode, setCreateNewMode] = useState(false)
+  
 
+  const { t } = useTranslation()
 
-  const [updatedGrid, setUpdatedGrid] = useState<{modelId: string, key: number}>()
+  const [updatedGrid, setUpdatedGrid] = useState<{modelId: string, key: number}>({
+    modelId: "", 
+    key: 0
+  })
 
   useEffect(()=>{
     setModelId(updateRowModelId)
@@ -62,19 +73,18 @@ const PVFlexLayout = ({
     const component = node.getComponent();
     const config = node.getConfig();
     const id = node.getId();
-    const [gridKey, setGridKey] = useState(0)
     
     
     if (component === "PVGridWebiny2") {
       const lastState = findChildById(gridState?.layout, id, "tab")?.config
       ?.lastState;
 
-      const [deleteMode, setDeleteMode] = useState(false);
-      const [updateMode, setUpdateMode] = useState(false);
+      
       const [showColumnSelector, setShowColumnSelector] = useState<boolean>(
         false
       );
-      const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<string[]>() 
+      const [gridKey, setGridKey] = useState(0)
+      
 
       useEffect(()=>{
         const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
@@ -84,21 +94,11 @@ const PVFlexLayout = ({
 
       useEffect(()=>{
         if(updatedGrid?.modelId === config.modelId) {
-          setGridKey(prevState=> prevState + 1)
+          setGridKey(prevState=> prevState = updatedGrid.key)
         }
       },[updatedGrid])
 
-      const deleteEntries = () => {
-        console.log({entriesToBeDeleted, modelId})
-        if(!entriesToBeDeleted || !config.modelId) return
-
-        entriesToBeDeleted.forEach(async entry=> {
-          const {data} = await cmsDeleteEntry(config.modelId, entry)
-          console.log(data)
-        })
-        setGridKey(prevState=> prevState + 1)
-      }
-
+    
     
         
       return (
@@ -118,12 +118,15 @@ const PVFlexLayout = ({
             {updateMode || deleteMode || <button onClick={()=>{setUpdateMode(!updateMode)}}>Update Mode</button>}
 
             {deleteMode && <div style={{gap:"1rem" ,height: "2.65rem", display: "flex", alignItems: "center"}} className="tab-actions-panel__delete-actions">
-              <i className="fa-solid fa-trash" onClick={()=>deleteEntries()} style={{fontSize: "1.8rem", color: "#b53737", cursor: "pointer"}}></i>
+              <i className="fa-solid fa-trash" onClick={()=> {
+                setModelId(config.modelId)
+                entriesToBeDeleted && entriesToBeDeleted.length > 0 && setDeletion(true)}}  style={{fontSize: "1.8rem", color: "#b53737", cursor: "pointer"}}></i>
               <i className="fa-solid fa-x" style={{fontSize: "1.8rem", cursor: "pointer"}} onClick={()=> setDeleteMode(false)}></i>         
             </div>}
             {updateMode && <div className="tab-actions-panel__update-actions">
               <i className="fa-solid fa-x" style={{fontSize: "1.8rem", cursor: "pointer", height: "2.65rem", display: "flex", alignItems: "center"}} onClick={()=> setUpdateMode(false)}></i>         
             </div>}
+              
         </div>
           <PVGridWebiny2
             deleteMode={deleteMode}
@@ -299,7 +302,8 @@ const PVFlexLayout = ({
 
   return (
     <>
-    {modelId && <NewEntryView setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
+    {modelId && !deletion && updateMode && <NewEntryView setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
+    {deletion && entriesToBeDeleted && <DeleteEntriesModal setDeletion={setDeletion} entries={entriesToBeDeleted} modelId={modelId} updateGridKey={setUpdatedGrid}/>}
     <div
       className="flex-layout-wrapper"
       style={{ height: "65vh", width: "90%", overflowY: "auto" }}
