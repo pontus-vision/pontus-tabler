@@ -225,8 +225,15 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
                   headerName: field.label,
                   children: field.settings?.fields.map(field=>{ return{ sortable: false, field: field.fieldId, headerName: field.label}})
                 }
+              }else if(field.type === "ref"){
+                return {
+                  headerName: field.label,
+                  field: field.fieldId,
+                  sortable: false
+                }
               }
               return {
+                headerName: field.label,
                 field: field.fieldId,
                 filter: "agTextColumnFilter",
                 filterParams: { apply: true, newRowsAction: "keep" },
