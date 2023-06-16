@@ -133,12 +133,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
 
           const { totalCount } = data.meta;
 
-          const objFields = data.columnNames.filter(col=> col.type === "object")
-          
-          const refInputFields = data.columnNames.filter(col=> col.renderer.name === "ref-input")
-
-          const refInputsFields = data.columnNames.filter(col=> col.renderer.name === "ref-inputs")
-
+         
           const rows = data.modelContentListData.map((row) => {
             const {
               createdBy,
@@ -151,8 +146,15 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
             return rest;
           })
 
-          const rows2 = rows.map(row=>{
-            
+          const objFields = data.columnNames.filter(col=> col.type === "object")
+          
+          const refInputFields = data.columnNames.filter(col=> col.renderer.name === "ref-input")
+
+          const refInputsFields = data.columnNames.filter(col=> col.renderer.name === "ref-inputs")
+
+
+          const rows2 = rows.map(row=>{   
+
             const flattenObj = (ob) => {
               let result = {};
               for (const i in ob) {
@@ -184,8 +186,6 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
 
             return flattenObj(row)
           })
-
-          console.log({rows2, rows})
 
           setColumnDefs([
           {
@@ -223,7 +223,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
               if(field.type === "object" && field.settings?.fields) {
                 return {
                   headerName: field.label,
-                  children: field.settings?.fields.map(field=>{ return{field: field.fieldId, headerName: field.label}})
+                  children: field.settings?.fields.map(field=>{ return{ sortable: false, field: field.fieldId, headerName: field.label}})
                 }
               }
               return {
