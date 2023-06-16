@@ -135,7 +135,7 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
 
           const objFields = data.columnNames.filter(col=> col.type === "object")
           
-          const refFields = data.columnNames.filter(col=> col.type === "ref")
+          const refInputFields = data.columnNames.filter(col=> col.renderer.name === "ref-input")
 
           const rows = data.modelContentListData.map((row) => {
             const {
@@ -162,9 +162,11 @@ const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelect
                           // Store temp in result
                           result[j] = temp[j];
                       }
-                  }else if(refFields.some(field=> field.fieldId === i)){
+                  }else if(refInputFields.some(field=> field.fieldId === i)){
+                    if(!!ob[i]){
+                      result[i] = Object.values(ob[i])[0]
+                    } 
                     
-                    console.log(Object.values(ob[i]))
                   }
                   else {
                       result[i] = ob[i];
