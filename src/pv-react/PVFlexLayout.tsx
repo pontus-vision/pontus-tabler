@@ -45,7 +45,7 @@ const PVFlexLayout = ({
     },
   };
 
-  const { rowState, rowId, modelId:updateRowModelId } = useSelector((state: RootState) => state.updateRow);
+  const { rowState, rowId, modelId:updateModelId } = useSelector((state: RootState) => state.updateRow);
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
   const [containerHeight, setContainerHeight] = useState("32rem");
   const [modelId, setModelId] = useState<string | undefined>()
@@ -55,9 +55,8 @@ const PVFlexLayout = ({
   const [deletion, setDeletion] = useState(false)
   const [deleteMode, setDeleteMode] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
-  const [createNewMode, setCreateNewMode] = useState(false)
+  const [openNewEntryView, setOpenNewEntryView] = useState(false)
   
-
   const { t } = useTranslation()
 
   const [updatedGrid, setUpdatedGrid] = useState<{modelId: string, key: number}>({
@@ -65,9 +64,11 @@ const PVFlexLayout = ({
     key: 0
   })
 
+  useEffect(()=>{setOpenNewEntryView(true)},[updateModelId])
+
   useEffect(()=>{
-    setModelId(updateRowModelId)
-  },[updateRowModelId, rowId])
+    setModelId(updateModelId)
+  },[updateModelId, rowId])
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
@@ -99,7 +100,6 @@ const PVFlexLayout = ({
       },[updatedGrid])
 
     
-    
         
       return (
         <>
@@ -107,7 +107,8 @@ const PVFlexLayout = ({
           {deleteMode || updateMode || <label className="tab-actions-panel__btn" style={{ display:  "flex", alignItems: "center", padding: 0, cursor: "pointer", height: "2rem", fontSize: "4rem",  left: "8rem"}} 
             onClick={()=> {
               setFlexModelId(id)
-              setModelId(prevState=> updateRowModelId ? prevState = updateRowModelId : prevState = config.modelId)
+              setOpenNewEntryView(true)
+              setModelId(prevState=> updateModelId ? prevState = updateModelId : prevState = config.modelId)
             }}>+</label>}
             {updateMode || deleteMode ||<button onClick={()=>{
               setGridKey(prevState=> prevState + 1)
@@ -300,9 +301,11 @@ const PVFlexLayout = ({
     console.log(flexModel)
   },[flexModelId])
 
+  
+
   return (
     <>
-    {modelId && !deletion && updateMode && <NewEntryView setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
+    {modelId && openNewEntryView && <NewEntryView setOpenNewEntryView={setOpenNewEntryView} setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
     {deletion && entriesToBeDeleted && <DeleteEntriesModal setDeletion={setDeletion} entries={entriesToBeDeleted} modelId={modelId} updateGridKey={setUpdatedGrid}/>}
     <div
       className="flex-layout-wrapper"

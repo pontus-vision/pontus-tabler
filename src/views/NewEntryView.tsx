@@ -22,14 +22,17 @@ type Props = {
     modelId: string;
     key: number;
   } | undefined>>
+  setOpenNewEntryView: Dispatch<React.SetStateAction<boolean>>
 }
 
-const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState, setUpdatedGrid}:Props) => {
+const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState, setUpdatedGrid, setOpenNewEntryView}:Props) => {
   const [contentModel, setContentModel] = useState<ICmsGetContentModelData>();
   const [successMsg, setSuccessMsg] = useState<string>()
   const [isLoading, setIsLoading] = useState(false)
-  const { rowState, modelId:updateModelId, rowId } = useSelector((state: RootState) => state.updateRow);
+  const { rowState, modelId: updateModelId, rowId } = useSelector((state: RootState) => state.updateRow);
   const dispatch = useDispatch()
+
+  
 
   const [fieldsRendered, setFieldsRendered] = useState(false)
 
@@ -82,7 +85,7 @@ const NewEntryView = ({modelId, setModelId, flexModelId, aggridColumnsState, set
   return (
       <NewEntryViewStyles>
         {modelId && <div className="shadow" onClick={()=>{
-          setModelId("")
+          setOpenNewEntryView(false)
           dispatch(newRowState({modelId: undefined, rowId: undefined, rowState: undefined}))
          }}></div>}
         {contentModel && <Form.Label className="new-entry new-entry-form__title">{contentModel?.name}</Form.Label>}
