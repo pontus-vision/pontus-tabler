@@ -257,11 +257,13 @@ import { UnknownKey } from "../types";
 
     useEffect(()=>{
       const objects = columnDefs?.filter((el: {[key: string]: any})=> el?.children)
-
-      const checkHiddenObj = objects && objects.length > 0 && objects.map((obj: {[key: string]: any})=> obj.children.some((child: {[key: string]: unknown})=> columnState?.some(col=> child.field === col.colId && col.hide))).every(el => el === true)
+      
+      console.log({columnState, columnDefs, objects})
+      const checkHiddenObj = objects && objects.length > 0 && objects.map((obj: {[key: string]: any})=> obj.children.every((child: {[key: string]: unknown})=> columnState?.some(col=> child.field === col.colId && col.hide))).every(el => el === true)
       
       checkHiddenObj && setCheckHiddenObjects(true)
 
+      console.log({checkHiddenObj})
       if(checkHiddenObj) {
         console.log({checkHiddenObj, checkHiddenObjects})
         
