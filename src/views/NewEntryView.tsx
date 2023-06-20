@@ -21,7 +21,7 @@ type Props = {
   setUpdatedGrid: Dispatch<React.SetStateAction<{
     modelId: string;
     key: number;
-  } | undefined>>
+  }>>
   setOpenNewEntryView: Dispatch<React.SetStateAction<boolean>>
 }
 

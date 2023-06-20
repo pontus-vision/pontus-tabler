@@ -38,8 +38,10 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
               };
               setSelectedCmp(cmp);
             }}
+            defaultValue={"option"}
             size="lg"
           >
+            <option value="option"></option>
             {models &&
               models.map((model, index) => (
                 <option key={index} value={JSON.stringify(model)}>

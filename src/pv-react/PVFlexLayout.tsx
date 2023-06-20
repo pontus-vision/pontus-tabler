@@ -3,6 +3,7 @@ import {
   Actions,
   DockLocation,
   IJsonModel,
+  IJsonRowNode,
   IJsonTabNode,
   Layout,
   Model,
@@ -243,7 +244,7 @@ const PVFlexLayout = ({
 
     const jsonCopy = JSON.parse(JSON.stringify(json));
 
-    jsonCopy.layout.children.forEach((row) => {
+    jsonCopy.layout.children.forEach((row: IJsonRowNode) => {
       row.weight = 100;
       const { type } = row;
       // console.log({ type });
@@ -258,21 +259,6 @@ const PVFlexLayout = ({
 
     setModel(Model.fromJson(jsonCopy));
   };
-
-  // useEffect(() => {
-  //   const lastGridState = JSON.parse(localStorage.getItem("layoutState") || "");
-
-  //   if (lastGridState) {
-  //     setModel(Model.fromJson(lastGridState));
-  //   }
-  // }, []);
-
-  const filterColumns = (cols: ColumnState[]) => {
-
-    const colsFiltered = contentModel?.fields.filter(field => !cols.some(col=> col.colId === field.fieldId))
-    console.log(colsFiltered)
-  
-  }
 
   useEffect(() => {
     if (!selectedCmp) return;
@@ -306,7 +292,7 @@ const PVFlexLayout = ({
   return (
     <>
     {modelId && openNewEntryView && <NewEntryView setOpenNewEntryView={setOpenNewEntryView} setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
-    {deletion && entriesToBeDeleted && <DeleteEntriesModal setDeletion={setDeletion} entries={entriesToBeDeleted} modelId={modelId} updateGridKey={setUpdatedGrid}/>}
+    {deletion && entriesToBeDeleted && modelId &&  <DeleteEntriesModal setDeletion={setDeletion} entries={entriesToBeDeleted} modelId={modelId} updateGridKey={setUpdatedGrid}/>}
     <div
       className="flex-layout-wrapper"
       style={{ height: "65vh", width: "90%", overflowY: "auto" }}

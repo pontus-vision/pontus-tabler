@@ -25,7 +25,6 @@ import NewEntryFormSkeleton from "./skeleton/NewEntryFormSkeleton";
 type Props = {
   setIsloading: Dispatch<SetStateAction<boolean>>
   contentModel: ICmsGetContentModelData;
-  updateModelId: string;
   isLoading: boolean
   handleUpdatedGrid : () => void;
   setSuccessMsg: Dispatch<SetStateAction<string | undefined>>
@@ -55,8 +54,8 @@ const getModelFieldsContent = async (
     }
 };
 
-const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateModelId, setIsloading, isLoading }: Props) => {
-  const [formInputs, setFormInputs] = useState<{[key: string]: unknown;}>({});
+const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, setIsloading, isLoading }: Props) => {
+  const [formInputs, setFormInputs] = useState<{[key: string]: any;}>({});
   const [formObjField, setFormObjField] = useState<{[key: string]: unknown;}>({});
   const [formObjFieldName, setFormObjFieldName] = useState<string>();
 
@@ -74,34 +73,34 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
     console.log({contentModel})
   },[contentModel])
 
-  const createValidationSchema = (rules: string []) => {
-    let schema = z.string() 
+  // const createValidationSchema = (rules: string []) => {
+  //   let schema = z.string() 
 
-    if (rules.includes("required")) {
-      schema = schema.nonempty({ message: "Field is required" });
-    }
+  //   if (rules.includes("required")) {
+  //     schema = schema.nonempty({ message: "Field is required" });
+  //   }
 
-    if (rules.includes("cpf")) {
-      schema = schema.refine(
-        (value) => {
-          validateCPF(value)
-        },
-        { message: "CPF inválido" }
-      );
-    }
+  //   if (rules.includes("cpf")) {
+  //     schema = schema.refine(
+  //       (value) => {
+  //         validateCPF(value)
+  //       },
+  //       { message: "CPF inválido" }
+  //     );
+  //   }
 
-    return schema;
-  };
+  //   return schema;
+  // };
 
   const renderField = (field: ICmsGetContentModelDataField, objFieldId: string | null = null) : ReactElement<any, any> | undefined => {
 
-    const validationRules = field.validation?.map(valid=> valid.settings?.preset)
+    // const validationRules = field.validation?.map(valid=> valid.settings?.preset)
     
-    const validationSchema = validationRules && createValidationSchema(validationRules);
+    // const validationSchema = validationRules && createValidationSchema(validationRules);
 
-    const { handleSubmit, register, formState: {errors} } = useForm({
-      resolver: zodResolver(validationSchema),
-    });
+    // const { handleSubmit, register, formState: {errors} } = useForm({
+    //   resolver: zodResolver(validationSchema),
+    // });
 
     if (field.type === "text") {
       if (field.renderer.name === "checkboxes") {
@@ -111,7 +110,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
          {field.predefinedValues?.values.map((value, index) => (
           <Form.Check
           defaultValue={
-            rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
+            objFieldId && rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
           }
             key={index}
             type="checkbox"
@@ -147,11 +146,11 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
         <Form.Label>{field.label}</Form.Label>
         <Form.Select 
         defaultValue={
-          rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
+          objFieldId && rowState && rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
         }
         onChange={(e)=>{
           if(objFieldId) {
-            setFormInputs((prevState: { [key: string]: unknown | {[key: string] : unknown} }) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
+            setFormInputs((prevState: { [key: string]: {[key: string] : unknown} }) => ({ ...prevState, [`${objFieldId}`]: {...prevState[objFieldId], [field.fieldId]: e.target.value }}))
           } else {
             setFormInputs((prevState) => ({
               ...prevState,
@@ -231,7 +230,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
             <Form.Label>{field.label}</Form.Label>
             <Typeahead
             defaultValue={
-              rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? "" : undefined 
+              objFieldId && rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? "" : undefined 
             }
             onChange={(e:any)=>{
               const ref:WebinyRefInput = {
@@ -287,7 +286,7 @@ const NewEntryForm = ({ contentModel, setSuccessMsg, handleUpdatedGrid, updateMo
           <FloatingLabel controlId="floatingTextarea2" label={field.helpText}>
             <Form.Control 
               defaultValue={
-                rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
+                objFieldId && rowState?.[objFieldId] ? rowState?.[objFieldId]?.[field.fieldId] : rowState ? rowState?.[field.fieldId] : undefined 
               }
               onChange={(e)=> {
                 if (objFieldId) {

@@ -3,6 +3,7 @@
   import "ag-grid-community/styles/ag-grid.css";
   import "ag-grid-community/styles/ag-theme-alpine.css";
   import {
+    CellClickedEvent,
     ColDef,
     ColumnApi,
     ColumnState,
@@ -16,13 +17,15 @@
     RowClickedEvent,
     SelectionChangedEvent,
   } from "ag-grid-community";
-  import { AgGrigFirstDataRenderedEvent } from "../types";
+  import { AgGrigFirstDataRenderedEvent, ICmsGetContentModelDataField, IListModelResponse } from "../types";
   import { cmsGetContentModel, listModel } from "../client";
   import { useDispatch, useSelector } from "react-redux";
   import NewEntryView from "../views/NewEntryView";
   import PVAggridColumnSelector from "../components/PVAggridColumnSelector";
   import { newRowState } from "../store/sliceGridUpdate";
   import { _isClickEvent } from "chart.js/dist/helpers/helpers.core";
+import { IListModelResponseData } from "../types";
+import { UnknownKey } from "../types";
 
   type FilterState = {
     [key: string]: any;
@@ -37,6 +40,7 @@
     setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>
     deleteMode: boolean
     updateMode: boolean
+    setEntriesToBeDeleted: Dispatch<React.SetStateAction<string[] | undefined>>
   };
 
 
@@ -67,7 +71,7 @@
       const cmsContentModel = await cmsGetContentModel(modelId);
 
       const { fields: columnNames } = cmsContentModel.data;
-      const { data: modelContentListData, meta } = await listModel(
+      const data = await listModel(
         modelId,
         columnNames,
         limit,
@@ -76,7 +80,9 @@
         sorting
       );
 
-      // console.log({ columnNames });
+      if (!data) return
+
+      const { data: modelContentListData, meta } = data
 
       return { columnNames, modelContentListData, meta };
     };
@@ -121,12 +127,14 @@
               sorting
             );
 
+            if(!data) return
+
             setCursors((previousState) => previousState.add(data.meta.cursor));
 
             const { totalCount } = data.meta;
 
           
-            const rows = data.modelContentListData.map((row) => {
+            const rows = data.modelContentListData.map((row: IListModelResponseData) : {[key: string]: unknown} => {
               const {
                 createdBy,
                 createdOn,
@@ -139,6 +147,8 @@
             })
 
             const objFields = data.columnNames.filter(col=> col.type === "object")
+
+            
             
             const refInputFields = data.columnNames.filter(col=> col.renderer.name === "ref-input")
 
@@ -147,8 +157,8 @@
 
             const rows2 = rows.map(row=>{   
 
-              const flattenObj = (ob) => {
-                let result = {};
+              const flattenObj = (ob: {[key: string]: any}) => {
+                let result = {} as any
                 for (const i in ob) {
                     if ((typeof ob[i]) === 'object' && !Array.isArray(ob[i]) && objFields.some(field=> field.fieldId === i)) {
                       
@@ -165,7 +175,7 @@
                       
                     }else if (refInputsFields.some(field=> field.fieldId === i)) {
                       if(ob[i]) {
-                        const values =  ob[i].map(el=> Object.values(el)[0])
+                        const values =  ob[i].map((el: {[key: string]: unknown})=> Object.values(el)[0])
                         result[i] = values.length > 1 ? values.join(", ") : values
                       } 
                     }
@@ -246,17 +256,14 @@
     
 
     useEffect(()=>{
-      const objects = columnDefs.filter(el=> el?.children)
+      const objects = columnDefs?.filter((el: {[key: string]: any})=> el?.children)
 
-      const checkHiddenObj = objects.length > 0 && objects.map(obj=> obj.children.some(child=> columnState?.some(col=> child.field === col.colId && col.hide))).every(el => el === true)
+      const checkHiddenObj = objects && objects.length > 0 && objects.map((obj: {[key: string]: any})=> obj.children.some((child: {[key: string]: unknown})=> columnState?.some(col=> child.field === col.colId && col.hide))).every(el => el === true)
       
       checkHiddenObj && setCheckHiddenObjects(true)
 
       if(checkHiddenObj) {
-        
-      
-      
-      console.log({checkHiddenObj, checkHiddenObjects})
+        console.log({checkHiddenObj, checkHiddenObjects})
         
         setColumnDefs(prevState=> prevState = prevState?.filter(col=> !objects.some(obj=> obj === col)))
       }
@@ -267,18 +274,13 @@
       console.log({checkHiddenObjects})
     },[checkHiddenObjects])
 
-
-
-    const handleUpdateIconClick = (params) => {
+    const handleUpdateIconClick = (params: CellClickedEvent<any, any>) => {
       const {data: rowData} = params
 
       const {id, ...rest} = rowData
 
       dispatch(newRowState({modelId, rowId: rowData.id, rowState: rest}))
     };
-
-
-
 
     const onGridReady = (params: GridReadyEvent<any>): void => {
       setGridApi(params.api);

@@ -4,13 +4,13 @@ import { RootState } from './store';
 interface GridUpdateState {
   modelId: string | undefined;
   rowId: string | undefined;
-  rowState: { [key: string]: unknown } | undefined;
+  rowState: { [key: string]: { [key: string]: unknown } } ;
 }
 
 const initialState: GridUpdateState = {
   modelId: undefined,
   rowId: undefined,
-  rowState: undefined,
+  rowState: {},
 };
 
 const gridUpdateSlice = createSlice({

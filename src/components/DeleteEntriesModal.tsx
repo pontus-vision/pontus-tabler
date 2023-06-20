@@ -9,7 +9,7 @@ type Props = {
     updateGridKey: Dispatch<React.SetStateAction<{
         modelId: string;
         key: number;
-    } | undefined>>
+    } >>
     setDeletion:Dispatch<React.SetStateAction<boolean>>
 }
 
