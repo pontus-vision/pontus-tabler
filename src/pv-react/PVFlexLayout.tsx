@@ -139,6 +139,7 @@ const PVFlexLayout = ({
             lastState={lastState || config.lastState}
             onValueChange={handleValueChange}
             modelId={config.modelId}
+            containerHeight={containerHeight}
             updateMode={updateMode}
             setEntriesToBeDeleted={setEntriesToBeDeleted}
           />

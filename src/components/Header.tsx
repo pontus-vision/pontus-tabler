@@ -16,10 +16,9 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
 
   return (
     <HeaderStyles>
-      <select className="language-selector" onChange={handleLanguageChange}>
+      <select className="language-selector" defaultValue="en" onChange={handleLanguageChange}>
         <option value="en">English</option>
         <option value="ptBr">Português</option>
-        {/* Add more language options */}
       </select>
       <label className={`hamburguer-menu ${openedSidebar ? "active" : ""}`}>
         <input
