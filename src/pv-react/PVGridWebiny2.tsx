@@ -341,7 +341,7 @@ import { UnknownKey } from "../types";
       }
     }, [columnApi, selectedColumns]);
   
-    const gridStyle = useMemo(() => ({ height: "33rem", width: "100%" }), []);
+    // const gridStyle = useMemo(() => ({ height: "25rem", width: "100%" }), []);
 
     const gridOptions: GridOptions = {
       rowModelType: "infinite",
@@ -382,12 +382,13 @@ import { UnknownKey } from "../types";
 
     return (
       <>
-        <div style={gridStyle} className="ag-theme-alpine">
+        <div  className="ag-theme-alpine">
           {columnDefs && <PVAggridColumnSelector columnState={columnState} setShowColumnSelector={setShowColumnSelector} showColumnSelector={showColumnSelector} onColumnSelect={handleColumnSelect} columns={columnDefs} />}
           <AgGridReact
             gridOptions={gridOptions}
             enableRangeSelection={true}
-            paginationAutoPageSize={true}
+            // paginationAutoPageSize={true}
+            paginationPageSize={6}
             defaultColDef={defaultColDef}
             onGridReady={onGridReady}
             onFilterChanged={handleGridStateChanged}

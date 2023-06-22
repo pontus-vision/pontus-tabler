@@ -54,8 +54,6 @@ const PVFlexLayout = ({
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>()
   const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<string[]>()
   const [deletion, setDeletion] = useState(false)
-  const [deleteMode, setDeleteMode] = useState(false);
-  const [updateMode, setUpdateMode] = useState(false);
   const [openNewEntryView, setOpenNewEntryView] = useState(false)
   
   const { t } = useTranslation()
@@ -81,11 +79,10 @@ const PVFlexLayout = ({
       const lastState = findChildById(gridState?.layout, id, "tab")?.config
       ?.lastState;
 
-      
-      const [showColumnSelector, setShowColumnSelector] = useState<boolean>(
-        false
-      );
+      const [showColumnSelector, setShowColumnSelector] = useState<boolean>(false);
       const [gridKey, setGridKey] = useState(0)
+      const [deleteMode, setDeleteMode] = useState(false);
+      const [updateMode, setUpdateMode] = useState(false);
       
 
       useEffect(()=>{
@@ -104,8 +101,8 @@ const PVFlexLayout = ({
         
       return (
         <>
-        <div className="tab-actions-panel" style={{display: "flex", alignItems: "center", gap: ".7rem", paddingLeft: ".7rem"}}>
-          {deleteMode || updateMode || <label className="tab-actions-panel__btn" style={{ display:  "flex", alignItems: "center", padding: 0, cursor: "pointer", height: "2rem", fontSize: "4rem",  left: "8rem"}} 
+        <div className="tab-actions-panel" >
+          {deleteMode || updateMode || <label className="tab-actions-panel__plus-btn" style={{ display:  "flex", alignItems: "center", padding: 0, cursor: "pointer", height: "2rem", fontSize: "4rem",  left: "8rem"}} 
             onClick={()=> {
               setFlexModelId(id)
               setOpenNewEntryView(true)
@@ -299,8 +296,9 @@ const PVFlexLayout = ({
       style={{ height: "65vh", width: "90%", overflowY: "auto" }}
     >
       <div
-        className="PVFlexLayout"
+        className="pv-flex-layout"
         style={{
+          display: 'flex', 
           height: `${containerHeight}`,
           width: "100%",
           position: "relative",
@@ -315,5 +313,6 @@ const PVFlexLayout = ({
         </>
   );
 };
+
 
 export default PVFlexLayout;

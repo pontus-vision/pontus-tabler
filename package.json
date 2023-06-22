@@ -67,6 +67,7 @@
     "react-to-print": "^2.14.7",
     "redux": "^4.0.5",
     "reflexbox": "^4.0.6",
+    "sass": "^1.63.6",
     "semantic-ui-react": "^2.0.3",
     "slickgrid": "^2.4.34",
     "styled-components": "^5.3.9",

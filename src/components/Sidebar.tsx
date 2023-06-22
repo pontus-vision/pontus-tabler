@@ -29,7 +29,7 @@ const Sidebar = ({ openedSidebar, setDashboardId }: Props) => {
   }, [dashboards]);
 
   return (
-    <SidebarStyles className={`${openedSidebar ? "active" : ""}`}>
+    <div className={`${openedSidebar ? "active" : ""}` + " sidebar"}>
       <Button onClick={() => navigate("/admin")}>{t("admin-panel")}</Button>
       {dashboards &&
         dashboards.map((dashboard) => (
@@ -43,7 +43,7 @@ const Sidebar = ({ openedSidebar, setDashboardId }: Props) => {
             {dashboard.name}
           </label>
         ))}
-    </SidebarStyles>
+    </div>
   );
 };
 
@@ -91,6 +91,16 @@ const SidebarStyles = styled.div`
   ::-webkit-scrollbar-thumb:hover {
     background: #555;
   }
+
+  @media only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 667px) 
+  and (orientation: portrait) {
+    .sidebar {
+        width: 100%;
+        background-color: red;
+    }
+}
 `;
 
 export default Sidebar;

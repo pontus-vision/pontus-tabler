@@ -108,6 +108,7 @@ const DashboardViewStyles = styled.div`
   justify-content: center;
   gap: 0.5rem;
   height: 92%;
+  width: 100%;
   .shadow {
     position: absolute;
     top: 0;
