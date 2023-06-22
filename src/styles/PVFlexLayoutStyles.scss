@@ -1,0 +1,38 @@
+.tab-actions-panel{
+    display: flex; 
+    align-items: center; 
+    gap: .7rem; 
+    padding-left: .7rem;
+}
+
+/* Target iPhone */
+@media only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 667px) 
+  and (orientation: portrait) {
+    .tab-actions-panel{
+        display: none;
+    }
+}
+
+@media only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 667px) 
+  and (orientation: landscape) {
+    /* CSS styles for iPhone landscape mode */
+}
+
+/* Target iPad */
+@media only screen 
+  and (min-device-width: 768px) 
+  and (max-device-width: 1024px) 
+  and (orientation: portrait) {
+    /* CSS styles for iPad portrait mode */
+}
+
+@media only screen 
+  and (min-device-width: 768px) 
+  and (max-device-width: 1024px) 
+  and (orientation: landscape) {
+    /* CSS styles for iPad landscape mode */
+}

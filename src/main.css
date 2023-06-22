@@ -1,0 +1,126 @@
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  /* CSS styles for iPhone portrait mode */
+  .dropdown-panels {
+    justify-content: center;
+  }
+  .dropdown-panels__tables {
+    width: 30%;
+  }
+  .dropdown-panels__tables .form-select {
+    width: 100%;
+  }
+  .flex-layout-wrapper {
+    height: 15vh;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.tab-actions-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-left: 0.7rem;
+}
+
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .tab-actions-panel {
+    display: none;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.sidebar {
+  width: 14rem;
+  position: absolute;
+  padding: 0.3rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: rgba(255, 255, 255, 0.9215686275);
+  overflow-y: auto;
+  height: calc(100% - 3rem);
+  translate: -100%;
+  transition: translate 100ms ease-in-out;
+  z-index: 2;
+  /* width */
+  /* Track */
+  /* Handle */
+  /* Handle on hover */
+}
+.sidebar::before {
+  content: "";
+  background-color: white;
+}
+.sidebar.active {
+  translate: 0;
+}
+.sidebar ::-webkit-scrollbar {
+  width: 4px;
+  position: absolute;
+}
+.sidebar ::-webkit-scrollbar-track {
+  position: absolute;
+  background: #f1f1f1;
+}
+.sidebar ::-webkit-scrollbar-thumb {
+  position: absolute;
+  background: #888;
+}
+.sidebar ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .sidebar {
+    width: 100%;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .logo {
+    left: 3.5rem;
+  }
+  .language-selector {
+    display: none;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+
+/*# sourceMappingURL=main.css.map */

@@ -1,0 +1,76 @@
+.sidebar{
+    width: 14rem;
+    position: absolute;
+    padding: 0.3rem 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background-color: #ffffffeb;
+    overflow-y: auto;
+    height: calc(100% - 3rem);
+    translate: -100%;
+    transition: translate 100ms ease-in-out;
+    z-index: 2;
+  
+    &::before {
+      content: "";
+      background-color: white;
+    }
+  
+    &.active {
+      translate: 0;
+    }
+    /* width */
+    ::-webkit-scrollbar {
+      width: 4px;
+      position: absolute;
+    }
+  
+    /* Track */
+    ::-webkit-scrollbar-track {
+      position: absolute;
+      background: #f1f1f1;
+    }
+  
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      position: absolute;
+      background: #888;
+    }
+  
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+}
+
+@media only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 667px) 
+  and (orientation: portrait) {
+    .sidebar {
+        width: 100%;
+    }
+}
+
+@media only screen 
+  and (min-device-width: 375px) 
+  and (max-device-width: 667px) 
+  and (orientation: landscape) {
+    /* CSS styles for iPhone landscape mode */
+}
+
+/* Target iPad */
+@media only screen 
+  and (min-device-width: 768px) 
+  and (max-device-width: 1024px) 
+  and (orientation: portrait) {
+    /* CSS styles for iPad portrait mode */
+}
+
+@media only screen 
+  and (min-device-width: 768px) 
+  and (max-device-width: 1024px) 
+  and (orientation: landscape) {
+    /* CSS styles for iPad landscape mode */
+}
