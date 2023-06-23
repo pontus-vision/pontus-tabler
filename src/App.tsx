@@ -1,7 +1,6 @@
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
-import "tabler-react/dist/Tabler.css";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import { Routes, Route } from "react-router-dom";
@@ -20,7 +19,7 @@ function App() {
         setOpenedSidebar={setOpenedSidebar}
         openedSidebar={openedSidebar}
       />
-      <Sidebar setDashboardId={setDashboardId} openedSidebar={openedSidebar} />
+      <Sidebar setDashboardId={setDashboardId} setOpenedSidebar={setOpenedSidebar} openedSidebar={openedSidebar} />
       <Routes>
         <Route path="/admin" element={<AdminView />} />
         <Route

@@ -1,4 +1,4 @@
-import { useState, useEffect, Dispatch } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import Button from "react-bootstrap/esm/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,10 +10,11 @@ import { useTranslation } from "react-i18next";
 
 type Props = {
   openedSidebar: boolean;
-  setDashboardId: Dispatch<React.SetStateAction<string | undefined>>;
+  setOpenedSidebar: Dispatch<SetStateAction<boolean>>;
+  setDashboardId: Dispatch<SetStateAction<string | undefined>>;
 };
 
-const Sidebar = ({ openedSidebar, setDashboardId }: Props) => {
+const Sidebar = ({ openedSidebar, setDashboardId, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
@@ -28,9 +29,34 @@ const Sidebar = ({ openedSidebar, setDashboardId }: Props) => {
     console.log({ dashboards });
   }, [dashboards]);
 
+  
+
+  const onItemClicked = (endpoint: string) =>{
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    // Perform actions based on device dimensions
+    if (width < 768) {
+      setOpenedSidebar(false)
+      console.log("Small device");
+      // Perform specific actions for small devices
+    } else if (width >= 768 && width < 1024) {
+      // Medium devices (e.g., tablets)
+      console.log("Medium device");
+      // Perform specific actions for medium devices
+    } else {
+      // Large devices (e.g., desktops)
+      console.log("Large device");
+      // Perform specific actions for large devices
+    }
+
+    navigate(endpoint)
+  }
+
   return (
     <div className={`${openedSidebar ? "active" : ""}` + " sidebar"}>
-      <Button onClick={() => navigate("/admin")}>{t("admin-panel")}</Button>
+      <button className="sidebar__admin-btn" type="button" onClick={() => onItemClicked("/admin") }>{t("admin-panel")}</button>
+      
       {dashboards &&
         dashboards.map((dashboard) => (
           <label
