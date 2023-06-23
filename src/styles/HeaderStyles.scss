@@ -81,7 +81,7 @@
   align-items: center;
   width: 100%;
   height: 3rem;
-  background-color: blue;
+  background-color: #52b6cd;
 }
 
 /* Target iPhone */
@@ -91,13 +91,13 @@
   and (orientation: portrait) {
     .header{
       &__hamburguer-menu.active{
-        left: 20rem
+        left: 21rem
       }
       
       &__logo{
-        left: 4.5rem;
+        left: 5rem;
         &.active{
-          left: 1.5rem;
+          left: 2.5rem;
         }
       }
       

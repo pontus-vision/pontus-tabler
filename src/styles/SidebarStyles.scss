@@ -1,9 +1,9 @@
 .sidebar{
     width: 14rem;
     position: absolute;
-    padding: 0.3rem 0.4rem;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1rem;
     background-color: #ffffffeb;
     overflow-y: auto;
@@ -11,6 +11,13 @@
     translate: -100%;
     transition: translate 100ms ease-in-out;
     z-index: 2;
+    
+
+    &__admin-btn{
+      background-color: #52b6cd;
+      width: 100%;
+      color: white;
+    }
   
     &::before {
       content: "";
@@ -50,6 +57,10 @@
   and (orientation: portrait) {
     .sidebar {
         width: 100%;
+        &__admin-btn{
+          margin-inline: auto;
+          width: 90%;
+        }
     }
 }
 

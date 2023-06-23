@@ -45,11 +45,9 @@ const AdminView = () => {
   };
 
   return (
-  
       <AdminViewStyles>
         <CmpPanel setSelectedCmp={setSelectedCmp} />
         <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
-        
         {showDashboardForm && (
           <FormDashboard
             saveDashboard={saveDashboard}
@@ -58,7 +56,6 @@ const AdminView = () => {
         )}
         <button onClick={() => setShowDashboardForm(true)}>{t("save-state")}</button>
       </AdminViewStyles>
-   
   );
 };
 

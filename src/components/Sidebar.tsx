@@ -56,7 +56,7 @@ const Sidebar = ({ openedSidebar, setDashboardId, setOpenedSidebar }: Props) => 
   return (
     <div className={`${openedSidebar ? "active" : ""}` + " sidebar"}>
       <button className="sidebar__admin-btn" type="button" onClick={() => onItemClicked("/admin") }>{t("admin-panel")}</button>
-      
+     
       {dashboards &&
         dashboards.map((dashboard) => (
           <label

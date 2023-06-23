@@ -50,9 +50,9 @@
 .sidebar {
   width: 14rem;
   position: absolute;
-  padding: 0.3rem 0.4rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1rem;
   background-color: rgba(255, 255, 255, 0.9215686275);
   overflow-y: auto;
@@ -64,6 +64,11 @@
   /* Track */
   /* Handle */
   /* Handle on hover */
+}
+.sidebar__admin-btn {
+  background-color: #52b6cd;
+  width: 100%;
+  color: white;
 }
 .sidebar::before {
   content: "";
@@ -92,6 +97,10 @@
   .sidebar {
     width: 100%;
   }
+  .sidebar__admin-btn {
+    margin-inline: auto;
+    width: 90%;
+  }
 }
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
@@ -116,7 +125,7 @@
   align-items: center;
   width: 100%;
   height: 3rem;
-  background-color: blue;
+  background-color: #52b6cd;
 }
 .header__logo {
   position: relative;
@@ -182,13 +191,13 @@
 /* Target iPhone */
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
   .header__hamburguer-menu.active {
-    left: 20rem;
+    left: 21rem;
   }
   .header__logo {
-    left: 4.5rem;
+    left: 5rem;
   }
   .header__logo.active {
-    left: 1.5rem;
+    left: 2.5rem;
   }
   .header__language-selector {
     display: none;

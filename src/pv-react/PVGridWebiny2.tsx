@@ -1,4 +1,4 @@
-  import { Dispatch, useCallback, useEffect, useMemo, useState } from "react";
+  import { Dispatch, useCallback, useEffect, useMemo, useRef, useState } from "react";
   import { AgGridReact } from "ag-grid-react";
   import "ag-grid-community/styles/ag-grid.css";
   import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -41,12 +41,13 @@ import { UnknownKey } from "../types";
     deleteMode: boolean
     containerHeight: string
     updateMode: boolean
+    setGridHeight: Dispatch<React.SetStateAction<undefined>>
     setEntriesToBeDeleted: Dispatch<React.SetStateAction<string[] | undefined>>
   };
 
 
 
-  const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelector, setShowColumnSelector, deleteMode, updateMode, setEntriesToBeDeleted, containerHeight }: Props) => {
+  const PVGridWebiny2 = ({ id, onValueChange, lastState, modelId, showColumnSelector, setShowColumnSelector, deleteMode, updateMode, setEntriesToBeDeleted, setGridHeight }: Props) => {
     const [columnState, setColumnState] = useState<ColumnState[]>();
     const [filterState, setFilterState] = useState<FilterState>();
     const [columnApi, setColumnApi] = useState<ColumnApi>();
@@ -55,6 +56,7 @@ import { UnknownKey } from "../types";
     const [cursors, setCursors] = useState(new Set([null]));
     const [gridApi, setGridApi] = useState<GridApi>();
     const [showGrid, setShowGrid] = useState(true);
+    
     const [checkHiddenObjects, setCheckHiddenObjects] = useState(false); 
     
     const dispatch = useDispatch()
@@ -107,15 +109,13 @@ import { UnknownKey } from "../types";
             const filter = params.filterModel;
 
             let sorting;
-            console.log(params.sortModel)
+            
             if(params.sortModel.length > 0)
             { 
               const colId = params?.sortModel[0].colId
               const sort = params?.sortModel[0].sort
               sorting = `${colId}_${sort.toUpperCase()}`
             }
-            console.log({sorting})
-            
 
             if (!modelId) return;
             
@@ -278,11 +278,36 @@ import { UnknownKey } from "../types";
 
     const onGridReady = (params: GridReadyEvent<any>): void => {
       setGridApi(params.api);
+      console.log("hey")
+      
       setColumnApi(params.columnApi);
       if (gridApi) {
         gridApi.setFilterModel(null);
       }
+      
     };
+
+    const gridOptions: GridOptions = {
+      rowModelType: "infinite",
+      cacheBlockSize: 100,
+      suppressRowClickSelection: true,
+      
+      onCellClicked: (e) => {
+        console.log(e.column.getColId())
+      }
+    };
+
+    const defaultColDef = useMemo<ColDef>(() => {
+      return {
+        filter: true,
+        sortable: true,
+        resizable: true
+      };
+    }, []);
+
+    const datasource = useMemo<IDatasource>(() => {
+      return getDataSource();
+    }, [modelId]);
 
     function onFilterChanged() {
       if (gridApi) {
@@ -343,26 +368,7 @@ import { UnknownKey } from "../types";
   
     // const gridStyle = useMemo(() => ({ height: "25rem", width: "100%" }), []);
 
-    const gridOptions: GridOptions = {
-      rowModelType: "infinite",
-      cacheBlockSize: 100,
-      suppressRowClickSelection: true,
-      onCellClicked: (e) => {
-        console.log(e.column.getColId())
-      }
-    };
-
-    const defaultColDef = useMemo<ColDef>(() => {
-      return {
-        filter: true,
-        sortable: true,
-        resizable: true
-      };
-    }, []);
-
-    const datasource = useMemo<IDatasource>(() => {
-      return getDataSource();
-    }, [modelId]);
+    
 
     function restoreGridColumnStates() {
       if (columnApi && lastState) {
@@ -372,6 +378,7 @@ import { UnknownKey } from "../types";
 
     useEffect(()=>{
       restoreGridColumnStates()
+      updateGridHeight();
     },[columnDefs])
 
     const onSelectionChanged = (event: SelectionChangedEvent): void => {
@@ -380,9 +387,40 @@ import { UnknownKey } from "../types";
       setSelectedRows(selectedRows)
     };
 
+    const gridContainerRef = useRef(null);
+
+    const updateGridHeight = () => {
+      const gridElement = document.querySelector(`.${gridId}.ag-theme-alpine`);
+      if (gridElement) {
+        const gridHeight = gridElement.offsetHeight;
+        console.log({gridId, gridElement, gridHeight})
+        console.log(gridHeight)
+        setGridHeight(gridHeight);
+      }
+    };
+
+    const [gridId, setGridId] = useState<string>() 
+
+    useEffect(()=>{
+      function generateRandomString(length) {
+        let result = '';
+        const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const charactersLength = characters.length;
+        
+        for (let i = 0; i < length; i++) {
+          const randomIndex = Math.floor(Math.random() * charactersLength);
+          result += characters.charAt(randomIndex);
+        }
+        
+        return result;
+      }
+      setGridId(generateRandomString(16))
+    },[])
+    
+
     return (
       <>
-        <div  className="ag-theme-alpine">
+        <div className={"ag-theme-alpine" + " " + gridId}>
           {columnDefs && <PVAggridColumnSelector columnState={columnState} setShowColumnSelector={setShowColumnSelector} showColumnSelector={showColumnSelector} onColumnSelect={handleColumnSelect} columns={columnDefs} />}
           <AgGridReact
             gridOptions={gridOptions}
@@ -401,6 +439,7 @@ import { UnknownKey } from "../types";
             pagination={true}
             datasource={datasource}
             columnDefs={columnDefs}
+            ref={gridContainerRef}
             rowSelection="multiple"
             onSelectionChanged={onSelectionChanged}
           ></AgGridReact>
