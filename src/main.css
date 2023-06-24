@@ -101,6 +101,9 @@
     margin-inline: auto;
     width: 90%;
   }
+  .sidebar__language-selector.form-select {
+    width: 9rem;
+  }
 }
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
@@ -135,6 +138,9 @@
 }
 .header__logo.active {
   left: 15rem;
+}
+.header__language-selector.form-select {
+  width: fit-content;
 }
 .header__hamburguer-menu {
   --x-width: calc(var(--hamburguer-height) * 1.41421);
@@ -199,7 +205,7 @@
   .header__logo.active {
     left: 2.5rem;
   }
-  .header__language-selector {
+  .header__language-selector.form-select {
     display: none;
   }
 }

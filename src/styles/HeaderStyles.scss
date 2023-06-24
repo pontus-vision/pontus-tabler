@@ -17,6 +17,10 @@
     }
   }
 
+  &__language-selector.form-select{
+    width: fit-content;
+  }
+
   &__hamburguer-menu {
     --x-width: calc(var(--hamburguer-height) * 1.41421);
     display: flex;
@@ -101,7 +105,7 @@
         }
       }
       
-      &__language-selector{
+      &__language-selector.form-select{
         display: none;
       }
     }

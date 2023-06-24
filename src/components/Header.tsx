@@ -2,6 +2,9 @@ import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import Form from "react-bootstrap/esm/Form";
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
   const navigate = useNavigate()
@@ -16,10 +19,10 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
 
   return (
     <div className="header">
-      <select className="header__language-selector" defaultValue="en" onChange={handleLanguageChange}>
+      <Form.Select className="header__language-selector" defaultValue="en" onChange={handleLanguageChange}>
         <option value="en">English</option>
         <option value="ptBr">Português</option>
-      </select>
+      </Form.Select>
       <label className={`header__hamburguer-menu ${openedSidebar ? "active" : ""}`}>
       
         <input

@@ -228,28 +228,23 @@ const PVFlexLayout = ({
 
     const tabsets = filterComponentsPerType(jsonCopy.layout, "tabset")
 
-    tabsets.forEach((tabset, index) => {
+    // tabsets.forEach((tabset, index) => {
 
-      // if(index === 0) {
-      //   tabset.height=100
-      // }else if(index === 1) {
-      //   tabset.height=200
-      // }else if(index === 2) {
-      //   tabset.height=300
-      // }else if(index === 3) {
-      //   tabset.height=400
-      // }else if(index === 4) {
-      //   tabset.height=500
-      // }
+    //   const tabsetSelected = tabset?.selected
+    //   if(tabsetSelected){
+    //     tabset.height = tabset.children[tabsetSelected].config.height
+    //   } else if(!tabsetSelected) {
+    //     tabset.height = tabset.children[0].config.height
+    //   }
 
-      tabset.weight = 100 / tabsets.length
-    })
+    //   tabset.weight = 100 / tabsets.length
+    // })
 
     
     
     console.log(tabsets )
     
-    setModel(Model.fromJson(jsonCopy));
+    // setModel(Model.fromJson(jsonCopy));
     
     // setContainerHeight(calcContainerHeight); // Increase height by 200px
   };
@@ -282,6 +277,51 @@ const PVFlexLayout = ({
    
   }
 
+  // const addComponent = (entry: FlexLayoutCmp) => {
+  //   const aggridCmp: IJsonTabNode = {
+  //     type: "tab",
+  //     name: entry.cmp?.name || entry.componentName,
+  //     component: entry.componentName,
+  //     config: {
+  //       title: entry.cmp?.name,
+  //       modelId: entry.cmp?.modelId,
+  //       lastState: []
+  //     },
+  //   };
+
+    
+    
+
+    
+  //   const rootNode = model.getRoot();
+    
+  //   if (rootNode) {
+  //       model.doAction(
+  //       Actions.addNode(aggridCmp, rootNode.getId(), DockLocation.BOTTOM, 0)
+  //       )
+  //       setModel(Model.fromJson(model.toJson()));
+  //   }
+
+  //   const json = model.toJson();
+
+  //   const jsonCopy = JSON.parse(JSON.stringify(json));
+
+  //   // jsonCopy.layout.children.forEach((row: IJsonRowNode) => {
+  //   //   row.weight = 100;
+  //   //   const { type } = row;
+  //   //   // console.log({ type });
+  //   //   row.children.forEach((tabset, index) => {
+  //   //     const { type } = tabset;
+  //   //     // console.log({ type });
+  //   //     tabset.weight = 100;
+  //   //   });
+  //   // });
+
+  //   // console.log({ jsonCopy, newJson });
+
+  //   setModel(Model.fromJson(jsonCopy));
+  // };
+
   const addComponent = (entry: FlexLayoutCmp) => {
     const aggridCmp: IJsonTabNode = {
       type: "tab",
@@ -290,41 +330,55 @@ const PVFlexLayout = ({
       config: {
         title: entry.cmp?.name,
         modelId: entry.cmp?.modelId,
-        lastState: []
+        lastState: [],
+        height: "100%", // Set initial height to fill available space
       },
     };
-
-    
-    
-
-    
+  
     const rootNode = model.getRoot();
-    
+  
     if (rootNode) {
+      const tabsetNode = findTabsetNode(rootNode);
+  
+      if (tabsetNode) {
+        const availableHeight = calculateAvailableHeight(tabsetNode);
+        aggridCmp.config.height = availableHeight;
+  
         model.doAction(
-        Actions.addNode(aggridCmp, rootNode.getId(), DockLocation.BOTTOM, 0)
-        )
-        setModel(Model.fromJson(model.toJson()));
+          Actions.addNode(aggridCmp, tabsetNode.getId(), DockLocation.CENTER, 0)
+        );
+      }
     }
-
-    const json = model.toJson();
-
-    const jsonCopy = JSON.parse(JSON.stringify(json));
-
-    // jsonCopy.layout.children.forEach((row: IJsonRowNode) => {
-    //   row.weight = 100;
-    //   const { type } = row;
-    //   // console.log({ type });
-    //   row.children.forEach((tabset, index) => {
-    //     const { type } = tabset;
-    //     // console.log({ type });
-    //     tabset.weight = 100;
-    //   });
-    // });
-
-    // console.log({ jsonCopy, newJson });
-
-    setModel(Model.fromJson(jsonCopy));
+  
+    setModel(Model.fromJson(model.toJson()));
+  };
+  
+  const calculateAvailableHeight = (tabsetNode: TabSetNode): string => {
+    const tabsetHeight = tabsetNode.getRect().height;
+    const tabHeaderHeight = tabsetNode.getTabStripHeight();
+  
+    // Subtract tab header height to get available content height
+    const availableHeight = tabsetHeight - tabHeaderHeight;
+  
+    return `${availableHeight}px`;
+  };
+  
+  const findTabsetNode = (node: TabNode): TabSetNode | undefined => {
+    if (node.getType() === "tabset") {
+      return node as TabSetNode;
+    }
+  
+    if (node.getChildren().length > 0) {
+      for (const child of node.getChildren()) {
+        const tabsetNode = findTabsetNode(child);
+  
+        if (tabsetNode) {
+          return tabsetNode;
+        }
+      }
+    }
+  
+    return undefined;
   };
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import { getModels } from "../client";
 import { RootState } from "../store/store";
 import ListItems from "./ListItems";
 import { useTranslation } from "react-i18next";
+import Form from "react-bootstrap/esm/Form";
 
 type Props = {
   openedSidebar: boolean;
@@ -28,10 +29,14 @@ const Sidebar = ({ openedSidebar, setDashboardId, setOpenedSidebar }: Props) => 
   useEffect(() => {
     console.log({ dashboards });
   }, [dashboards]);
-
+  
+    const handleLanguageChange = (event) => {
+      const selectedLanguage = event.target.value;
+      i18n.changeLanguage(selectedLanguage);
+    };
   
 
-  const onItemClicked = (endpoint: string) =>{
+  const onClickNavigate = (endpoint: string) =>{
     var width = window.innerWidth;
     var height = window.innerHeight;
 
@@ -53,10 +58,39 @@ const Sidebar = ({ openedSidebar, setDashboardId, setOpenedSidebar }: Props) => 
     navigate(endpoint)
   }
 
+  const[deviceSize, setDeviceSize] = useState<string>()
+  var width = window.innerWidth;
+
+  useEffect(()=>{
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    if (width < 768) {
+      setDeviceSize("sm");
+      // Perform specific actions for small devices
+    } else if (width >= 768 && width < 1024) {
+      // Medium devices (e.g., tablets)
+      setDeviceSize("md");
+      // Perform specific actions for medium devices
+    } else {
+      // Large devices (e.g., desktops)
+      setDeviceSize("lg");
+      // Perform specific actions for large devices
+    }
+  }, [width])
+
+  useEffect(()=>{
+    console.log(deviceSize)
+  },[deviceSize])
+
   return (
     <div className={`${openedSidebar ? "active" : ""}` + " sidebar"}>
-      <button className="sidebar__admin-btn" type="button" onClick={() => onItemClicked("/admin") }>{t("admin-panel")}</button>
-     
+      {deviceSize === "sm" && <Form.Select className="sidebar__language-selector" defaultValue="en" onChange={handleLanguageChange}>
+        <option value="en">English</option>
+        <option value="ptBr">Português</option>
+      </Form.Select>}
+      <button className="sidebar__admin-btn" type="button" onClick={() => onClickNavigate("/admin") }>{t("admin-panel")}</button>
+
       {dashboards &&
         dashboards.map((dashboard) => (
           <label
