@@ -7,6 +7,7 @@ import {
   IJsonModel,
   IJsonRowNode,
   IJsonTabNode,
+  IJsonTabSetNode,
   ITabSetRenderValues,
   Layout,
   Model,
@@ -220,7 +221,35 @@ const PVFlexLayout = ({
     if (setGridState) {
       setGridState(model.toJson());
     }
+
+    const json = model.toJson();
+
+    const jsonCopy = JSON.parse(JSON.stringify(json));
+
+    const tabsets = filterComponentsPerType(jsonCopy.layout, "tabset")
+
+    tabsets.forEach((tabset, index) => {
+
+      // if(index === 0) {
+      //   tabset.height=100
+      // }else if(index === 1) {
+      //   tabset.height=200
+      // }else if(index === 2) {
+      //   tabset.height=300
+      // }else if(index === 3) {
+      //   tabset.height=400
+      // }else if(index === 4) {
+      //   tabset.height=500
+      // }
+
+      tabset.weight = 100 / tabsets.length
+    })
+
     
+    
+    console.log(tabsets )
+    
+    setModel(Model.fromJson(jsonCopy));
     
     // setContainerHeight(calcContainerHeight); // Increase height by 200px
   };
@@ -265,19 +294,17 @@ const PVFlexLayout = ({
       },
     };
 
-    const rootNode = model.getRoot();
+    
+    
 
+    
+    const rootNode = model.getRoot();
+    
     if (rootNode) {
-      model.doAction(Actions.updateModelAttributes({
-        splitterSize:40,
-        tabSetHeaderHeight:40,
-        
-        tabSetTabStripHeight:40
-      }));
-      model.doAction(
+        model.doAction(
         Actions.addNode(aggridCmp, rootNode.getId(), DockLocation.BOTTOM, 0)
-      );
-      setModel(Model.fromJson(model.toJson()));
+        )
+        setModel(Model.fromJson(model.toJson()));
     }
 
     const json = model.toJson();
@@ -354,7 +381,7 @@ const PVFlexLayout = ({
           flexDirection: "column",
         }}
         >
-        <Layout tabSetHeight onRenderTabSet={onRenderTabSet} realtimeResize={true}  onModelChange={onModelChange} model={model} factory={factory} />
+        <Layout onRenderTabSet={onRenderTabSet} realtimeResize={true}  onModelChange={onModelChange} model={model} factory={factory} />
       </div>
     </div>
         </>
