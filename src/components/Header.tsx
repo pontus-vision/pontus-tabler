@@ -19,7 +19,7 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
 
   return (
     <div className="header">
-      <Form.Select className="header__language-selector" defaultValue="en" onChange={handleLanguageChange}>
+      <Form.Select data-testid="language-select" className="header__language-selector" defaultValue="en" onChange={handleLanguageChange}>
         <option value="en">English</option>
         <option value="ptBr">Português</option>
       </Form.Select>
