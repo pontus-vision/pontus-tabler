@@ -302,6 +302,9 @@ const PVFlexLayout = ({
     console.log(flexModel)
   },[flexModelId])
 
+  useEffect(()=>{
+    console.log({model: model.toJson()})
+  },[model])
   
 
   return (
