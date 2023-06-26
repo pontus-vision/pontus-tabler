@@ -1,22 +1,17 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
-  Action,
   Actions,
-  BorderNode,
   DockLocation,
   IJsonModel,
   IJsonRowNode,
   IJsonTabNode,
-  IJsonTabSetNode,
-  ITabSetRenderValues,
   Layout,
   Model,
   TabNode,
-  TabSetNode,
 } from "flexlayout-react";
 import "flexlayout-react/style/light.css";
 import PVGridWebiny2 from "./PVGridWebiny2";
-import { ColumnState, GridApi } from "ag-grid-community";
+import { ColumnState } from "ag-grid-community";
 import { FlexLayoutCmp } from "../types";
 import PVDoughnutChart2 from "./PVDoughnutChart2";
 import { useSelector } from "react-redux";
@@ -32,6 +27,7 @@ type Props = {
   setIsEditing?: Dispatch<React.SetStateAction<boolean>>;
   dashboardId?: string;
   setGridState?: Dispatch<SetStateAction<IJsonModel | undefined>>;
+  
 };
 
 const PVFlexLayout = ({
@@ -60,8 +56,6 @@ const PVFlexLayout = ({
   const [deletion, setDeletion] = useState(false)
   const [openNewEntryView, setOpenNewEntryView] = useState(false)
   
-
-  
   const { t } = useTranslation()
 
   const [updatedGrid, setUpdatedGrid] = useState<{modelId: string, key: number}>({
@@ -81,11 +75,27 @@ const PVFlexLayout = ({
     const id = node.getId();
     
     
-    
     if (component === "PVGridWebiny2") {
       const lastState = findChildById(gridState?.layout, id, "tab")?.config
       ?.lastState;
+
+      const [showColumnSelector, setShowColumnSelector] = useState<boolean>(false);
+      const [gridKey, setGridKey] = useState(0)
+      const [deleteMode, setDeleteMode] = useState(false);
+      const [updateMode, setUpdateMode] = useState(false);
+      
       const [gridHeight, setGridHeight] = useState()
+      useEffect(()=>{
+        const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
+        setAGGridColumnsState(colState)
+        console.log({colState})
+      },[model])
+
+      useEffect(()=>{
+        if(updatedGrid?.modelId === config.modelId) {
+          setGridKey(prevState=> prevState = updatedGrid.key)
+        }
+      },[updatedGrid])
 
       useEffect(()=>{
         console.log({gridHeight})
@@ -96,32 +106,12 @@ const PVFlexLayout = ({
         const tab = findChildById(jsonCopy.layout, id, "tab");
 
         if (tab) {
-          tab.config.height = gridHeight;
-          setModel(Model.fromJson(jsonCopy));
+        tab.config.height = gridHeight;
+        setModel(Model.fromJson(jsonCopy));
         }
 
         // setContainerHeight(calcContainerHeight())
-      },[gridHeight])
-
-      const [showColumnSelector, setShowColumnSelector] = useState<boolean>(false);
-      const [gridKey, setGridKey] = useState(0)
-      const [deleteMode, setDeleteMode] = useState(false);
-      const [updateMode, setUpdateMode] = useState(false);
-      
-      
-
-      useEffect(()=>{
-        const colState = findChildById(model.toJson().layout, id, "tab").config.lastState
-        setAGGridColumnsState(colState)
-        console.log({colState})
-        
-      },[model])
-
-      useEffect(()=>{
-        if(updatedGrid?.modelId === config.modelId) {
-          setGridKey(prevState=> prevState = updatedGrid.key)
-        }
-      },[updatedGrid])
+    },[gridHeight])
         
       return (
         <>
@@ -191,8 +181,6 @@ const PVFlexLayout = ({
     return null;
   };
 
-
-
   const handleValueChange = (id: string, newValue: ColumnState[]) => {
     if (setIsEditing) {
       setIsEditing(true);
@@ -223,6 +211,8 @@ const PVFlexLayout = ({
     return null;
   };
 
+  
+
   const onModelChange = () => {
     if (setIsEditing) {
       setIsEditing(true);
@@ -230,60 +220,19 @@ const PVFlexLayout = ({
     if (setGridState) {
       setGridState(model.toJson());
     }
-
-    const json = model.toJson();
-
-    const jsonCopy = JSON.parse(JSON.stringify(json));
-
-    const tabsets = filterComponentsPerType(jsonCopy.layout, "tabset")
-
-    // tabsets.forEach((tabset, index) => {
-
-    //   const tabsetSelected = tabset?.selected
-    //   if(tabsetSelected){
-    //     tabset.height = tabset.children[tabsetSelected].config.height
-    //   } else if(!tabsetSelected) {
-    //     tabset.height = tabset.children[0].config.height
-    //   }
-
-    //   tabset.weight = 100 / tabsets.length
-    // })
-
-    
-    
-    console.log(tabsets )
-    
-    // setModel(Model.fromJson(jsonCopy));
-    
-    setContainerHeight(calcContainerHeight); // Increase height by 200px
-  };
-
-  const calcContainerHeight = () => {
-    if(!model) return
-
     const rootNode = model.getRoot();
+
     const tabsets = filterComponentsPerType(rootNode.toJson(), "tabset");
 
-    const tabsetsHeight = tabsets.map(tabset=> {
+    const children = rootNode.toJson().children[0].children;
 
-    const tabsetSelected = tabset?.selected
-      if(tabsetSelected){
-        return tabset.children[tabsetSelected]?.config?.height
-      } else if(!tabsetSelected) {
-        return tabset.children[0]?.config?.height
-      }
-    })
+    const childrenNum = children.length;
 
-    const totalHeight = tabsetsHeight.reduce((acc, cur)=>{
-      acc +=cur
-      return acc
-    },0)
+    console.log({ tabsets });
 
-    console.log({tabsets, totalHeight, tabsetsHeight}, (tabsets.length * 100) + totalHeight + "px");
-    
-    return (tabsets.length * 120) + totalHeight + "px"
+    setContainerHeight(tabsets.length * 32 + "rem"); // Increase height by 200px
    
-  }
+  };
 
   const addComponent = (entry: FlexLayoutCmp) => {
     const aggridCmp: IJsonTabNode = {
@@ -294,49 +243,36 @@ const PVFlexLayout = ({
         title: entry.cmp?.name,
         modelId: entry.cmp?.modelId,
         lastState: [],
-        height: "100%", // Set initial height to fill available space
       },
     };
-  
+
     const rootNode = model.getRoot();
-  
+
     if (rootNode) {
-      
-      console.log(rootNode, rootNode.getId(), aggridCmp)
-  
-        model.doAction(
-          Actions.addNode(aggridCmp, rootNode.getId(), DockLocation.CENTER, 0)
-        );
+      model.doAction(
+        Actions.addNode(aggridCmp, rootNode.getId(), DockLocation.BOTTOM, 0)
+      );
+      setModel(Model.fromJson(model.toJson()));
     }
-  
-    setModel(Model.fromJson(model.toJson()));
-  };
-  
-  const calculateAvailableHeight = (tabsetNode: TabSetNode): string => {
-    const tabsetHeight = tabsetNode.getRect().height;
-    const tabHeaderHeight = tabsetNode.getTabStripHeight();
-  
-    const availableHeight = tabsetHeight - tabHeaderHeight;
-  
-    return `${availableHeight}px`;
-  };
-  
-  const findTabsetNode = (node: TabNode): TabSetNode | undefined => {
-    if (node.getType() === "tabset") {
-      return node as TabSetNode;
-    }
-  
-    if (node.getChildren().length > 0) {
-      for (const child of node.getChildren()) {
-        const tabsetNode = findTabsetNode(child);
-  
-        if (tabsetNode) {
-          return tabsetNode;
-        }
-      }
-    }
-  
-    return undefined;
+
+    const json = model.toJson();
+
+    const jsonCopy = JSON.parse(JSON.stringify(json));
+
+    jsonCopy.layout.children.forEach((row: IJsonRowNode) => {
+      row.weight = 100;
+      const { type } = row;
+      // console.log({ type });
+      row.children.forEach((tabset, index) => {
+        const { type } = tabset;
+        // console.log({ type });
+        tabset.weight = 100;
+      });
+    });
+
+    // console.log({ jsonCopy, newJson });
+
+    setModel(Model.fromJson(jsonCopy));
   };
 
   useEffect(() => {
@@ -347,7 +283,6 @@ const PVFlexLayout = ({
   useEffect(() => {
     if (!setGridState) return;
     setGridState(model.toJson());
-    console.log(model.toJson())
   }, [model]);
 
   useEffect(() => {
@@ -367,12 +302,8 @@ const PVFlexLayout = ({
     console.log(flexModel)
   },[flexModelId])
 
-  const  onRenderTabSet = (tabSetNode: TabSetNode | BorderNode, renderValues: ITabSetRenderValues) => {
-    
-  }
-
-
   
+
   return (
     <>
     {modelId && openNewEntryView && <NewEntryView setOpenNewEntryView={setOpenNewEntryView} setUpdatedGrid={setUpdatedGrid} aggridColumnsState={aggridColumnsState} flexModelId={flexModelId} setModelId={setModelId} modelId={modelId} />}
@@ -388,12 +319,12 @@ const PVFlexLayout = ({
           height: `${containerHeight}`,
           width: "100%",
           position: "relative",
-          // overflowY: "auto",
+          overflowY: "auto",
           flexGrow: 1,
           flexDirection: "column",
         }}
         >
-        <Layout onRenderTabSet={onRenderTabSet} realtimeResize={true}  onModelChange={onModelChange} model={model} factory={factory} />
+        <Layout onModelChange={onModelChange} model={model} factory={factory} />
       </div>
     </div>
         </>
