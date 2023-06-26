@@ -1,6 +1,8 @@
+@use '../sass/variables';
+
 .dashboard-confirm-modal{
   position: absolute;
-  background-color: $primaryColor;
+  background-color: variables.$primaryColor;
   padding: 3rem 5rem;
   label {
     color: white;

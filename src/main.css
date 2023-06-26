@@ -24,97 +24,6 @@
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
   /* CSS styles for iPad landscape mode */
 }
-.tab-actions-panel {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding-left: 0.7rem;
-}
-
-/* Target iPhone */
-@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
-  .tab-actions-panel {
-    display: none;
-  }
-}
-@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
-  /* CSS styles for iPhone landscape mode */
-}
-/* Target iPad */
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
-  /* CSS styles for iPad portrait mode */
-}
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
-  /* CSS styles for iPad landscape mode */
-}
-.sidebar {
-  width: 14rem;
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  background-color: rgba(255, 255, 255, 0.9215686275);
-  overflow-y: auto;
-  height: calc(100% - 3rem);
-  translate: -100%;
-  transition: translate 100ms ease-in-out;
-  z-index: 2;
-  /* width */
-  /* Track */
-  /* Handle */
-  /* Handle on hover */
-}
-.sidebar__admin-btn {
-  background-color: #52b6cd;
-  width: 90%;
-  color: white;
-}
-.sidebar::before {
-  content: "";
-  background-color: white;
-}
-.sidebar.active {
-  translate: 0;
-}
-.sidebar ::-webkit-scrollbar {
-  width: 4px;
-  position: absolute;
-}
-.sidebar ::-webkit-scrollbar-track {
-  position: absolute;
-  background: #f1f1f1;
-}
-.sidebar ::-webkit-scrollbar-thumb {
-  position: absolute;
-  background: #888;
-}
-.sidebar ::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
-  .sidebar {
-    width: 100%;
-  }
-  .sidebar__admin-btn {
-    margin-inline: auto;
-    width: 90%;
-  }
-  .sidebar__language-selector.form-select {
-    width: 9rem;
-  }
-}
-@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
-  /* CSS styles for iPhone landscape mode */
-}
-/* Target iPad */
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
-  /* CSS styles for iPad portrait mode */
-}
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
-  /* CSS styles for iPad landscape mode */
-}
 .header {
   --bar-width: 35px;
   --bar-height: 4px;
@@ -218,6 +127,123 @@
 }
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
   /* CSS styles for iPad landscape mode */
+}
+.tab-actions-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-left: 0.7rem;
+}
+
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .tab-actions-panel {
+    display: none;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.sidebar {
+  width: 14rem;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background-color: rgba(255, 255, 255, 0.9215686275);
+  overflow-y: auto;
+  height: calc(100% - 3rem);
+  translate: -100%;
+  transition: translate 100ms ease-in-out;
+  z-index: 2;
+  /* width */
+  /* Track */
+  /* Handle */
+  /* Handle on hover */
+}
+.sidebar__admin-btn {
+  background-color: #52b6cd;
+  width: 90%;
+  color: white;
+}
+.sidebar::before {
+  content: "";
+  background-color: white;
+}
+.sidebar.active {
+  translate: 0;
+}
+.sidebar ::-webkit-scrollbar {
+  width: 4px;
+  position: absolute;
+}
+.sidebar ::-webkit-scrollbar-track {
+  position: absolute;
+  background: #f1f1f1;
+}
+.sidebar ::-webkit-scrollbar-thumb {
+  position: absolute;
+  background: #888;
+}
+.sidebar ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .sidebar {
+    width: 100%;
+  }
+  .sidebar__admin-btn {
+    margin-inline: auto;
+    width: 90%;
+  }
+  .sidebar__language-selector.form-select {
+    width: 9rem;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.dashboard-confirm-modal {
+  position: absolute;
+  background-color: #52b6cd;
+  padding: 3rem 5rem;
+}
+.dashboard-confirm-modal label {
+  color: white;
+}
+.dashboard-confirm-modal .exit-btn {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 5rem;
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  background-color: white;
+  box-shadow: 0 0 2px black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.dashboard-confirm-modal .shadow-form-dash {
+  width: 100%;
+  height: 100%;
 }
 
 /*# sourceMappingURL=main.css.map */

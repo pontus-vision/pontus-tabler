@@ -106,11 +106,9 @@ const PVFlexLayout = ({
         const tab = findChildById(jsonCopy.layout, id, "tab");
 
         if (tab) {
-        tab.config.height = gridHeight;
-        setModel(Model.fromJson(jsonCopy));
+          tab.config.height = gridHeight;
+          setModel(Model.fromJson(jsonCopy));
         }
-
-        // setContainerHeight(calcContainerHeight())
     },[gridHeight])
         
       return (
@@ -199,6 +197,64 @@ const PVFlexLayout = ({
       setModel(Model.fromJson(jsonCopy));
     }
   };
+
+  const calcCmpWeight = () => {
+    if(!model) return
+
+    const rootNode = model.getRoot();
+    const tabsets = filterComponentsPerType(rootNode.toJson(), "tabset");
+
+    const tabsetsHeight = tabsets.map(tabset=> {
+      const tabsetSelected = tabset?.selected
+        if(tabsetSelected){
+          return tabset.children[tabsetSelected]?.config?.height
+        } else if(!tabsetSelected) {
+          return tabset.children[0]?.config?.height
+        }
+    })
+
+    const totalHeight = tabsetsHeight.reduce((acc, cur)=>{
+      acc +=cur
+      return acc
+    },0)
+
+    const jsonCopy = JSON.parse(JSON.stringify(model.toJson()))
+
+    console.log({tabsets, totalHeight, tabsetsHeight}, (tabsets.length * 100) + totalHeight + "px");
+    
+    return (tabsets.length * 100) + totalHeight + "px"
+  }
+
+  const calcContainerHeight = () => {
+    if(!model) return
+
+    const rootNode = model.getRoot();
+    const tabsets = filterComponentsPerType(rootNode.toJson(), "tabset");
+
+    const tabsetsHeight = tabsets.map(tabset=> {
+
+    const tabsetSelected = tabset?.selected
+      if(tabsetSelected){
+        return tabset.children[tabsetSelected]?.config?.height
+      } else if(!tabsetSelected) {
+        return tabset.children[0]?.config?.height
+      }
+    })
+
+    const totalHeight = tabsetsHeight.reduce((acc, cur)=>{
+      acc +=cur
+      return acc
+    },0)
+
+    console.log({tabsets, totalHeight, tabsetsHeight}, (tabsets.length * 100) + totalHeight + "px");
+    
+    return (tabsets.length * 100) + totalHeight + "px"
+   
+  }
+
+  useEffect(()=>{
+    setContainerHeight(calcContainerHeight())
+  },[model])
 
   const filterComponentsPerType = (layout:any, type: string):any => {
     if (layout?.children && layout.children.length > 0) {
