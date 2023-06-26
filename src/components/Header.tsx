@@ -26,8 +26,9 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
       <label className={`header__hamburguer-menu ${openedSidebar ? "active" : ""}`}>
       
         <input
-          defaultChecked={openedSidebar}
-          onClick={(e: any) => setOpenedSidebar(e.target.checked)}
+          checked={openedSidebar}
+          onClick={(e: any) => {
+            setOpenedSidebar(e.target.checked)}}
           type="checkbox"
         />
       </label>

@@ -56,6 +56,7 @@ const Sidebar = ({ openedSidebar, setDashboardId, setOpenedSidebar }: Props) => 
     }
 
     navigate(endpoint)
+    setOpenedSidebar(false)
   }
 
   const[deviceSize, setDeviceSize] = useState<string>()

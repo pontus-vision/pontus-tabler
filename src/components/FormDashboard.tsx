@@ -1,6 +1,7 @@
 import { Dispatch, useState } from "react";
 import Button from "react-bootstrap/esm/Button";
 import Form from "react-bootstrap/esm/Form";
+import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 
 type Props = {
@@ -10,12 +11,13 @@ type Props = {
 
 const FormDashboard = ({ setShowDashboardForm, saveDashboard }: Props) => {
   const [name, setName] = useState<string>();
+  const {t} = useTranslation()
 
   return (
-    <FormDashboardStyles>
+    <div className="dashboard-confirm-modal">
       <Form>
         <Form.Group className="mb-3" controlId="formBasicEmail">
-          <Form.Label>Insira um nome para o dashboard</Form.Label>
+          <Form.Label>{t("enter-dashboard-name")}</Form.Label>
           <Form.Control
             onChange={(e) => setName(e.target.value)}
             type="text"
@@ -31,14 +33,14 @@ const FormDashboard = ({ setShowDashboardForm, saveDashboard }: Props) => {
             name && saveDashboard(name);
           }}
         >
-          Salvar
+          {t("save")}
         </Button>
       </Form>
       <div className="shadow-form-dash"></div>
       <div className="exit-btn" onClick={() => setShowDashboardForm(false)}>
         X
       </div>
-    </FormDashboardStyles>
+    </div>
   );
 };
 

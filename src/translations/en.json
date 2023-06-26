@@ -7,6 +7,7 @@
   "confirm-delete": "Do you really want to delete it?",
   "save-edition": "Save Edition",
   "save-state": "Save State",
+  "save": "Save",
   "yes": "Yes",
   "no": "No",
   "donut-chart": "Doughnut Chart",
@@ -14,6 +15,7 @@
   "entry-registered": "Entry registered!",
   "select-inputs": "Select inputs",
   "entry-updated": "Entry Updated!",
+  "enter-dashboard-name": "Enter the dashboard name",
 
   "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES": "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES",
   "Consent": "Consent",

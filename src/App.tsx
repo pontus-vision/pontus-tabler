@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
 import Sidebar from "./components/Sidebar";
@@ -13,6 +13,11 @@ function App() {
   const [count, setCount] = useState(0);
   const [openedSidebar, setOpenedSidebar] = useState(false);
   const [dashboardId, setDashboardId] = useState<string>();
+
+  useEffect(()=>{
+    console.log({openedSidebar})
+  },[openedSidebar])
+
   return (
     <>
       <Header
