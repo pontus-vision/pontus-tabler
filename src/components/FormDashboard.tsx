@@ -14,6 +14,8 @@ const FormDashboard = ({ setShowDashboardForm, saveDashboard }: Props) => {
   const {t} = useTranslation()
 
   return (
+    <>
+    <div className="shadow"></div>
     <div className="dashboard-confirm-modal">
       <Form>
         <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -32,15 +34,16 @@ const FormDashboard = ({ setShowDashboardForm, saveDashboard }: Props) => {
             e.preventDefault();
             name && saveDashboard(name);
           }}
-        >
+          >
           {t("save")}
         </Button>
       </Form>
       <div className="shadow-form-dash"></div>
       <div className="exit-btn" onClick={() => setShowDashboardForm(false)}>
-        X
+          <img className="xmark-icon" src="/src/assets/xmark-solid.svg" alt="xmark" />
       </div>
     </div>
+          </>
   );
 };
 

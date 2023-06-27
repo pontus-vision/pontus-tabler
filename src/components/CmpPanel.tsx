@@ -39,7 +39,6 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
               setSelectedCmp(cmp);
             }}
             defaultValue={"option"}
-            size="lg"
           >
             <option value="option"></option>
             {models &&

@@ -63,7 +63,7 @@
   align-items: center;
   margin: 0;
   position: absolute;
-  z-index: 4;
+  z-index: 1;
   transition: left 100ms ease-in-out;
 }
 .header__hamburguer-menu.active {
@@ -223,6 +223,9 @@
   position: absolute;
   background-color: #52b6cd;
   padding: 3rem 5rem;
+  z-index: 1;
+  /* Target iPhone */
+  /* Target iPad */
 }
 .dashboard-confirm-modal label {
   color: white;
@@ -241,9 +244,56 @@
   align-items: center;
   cursor: pointer;
 }
+.dashboard-confirm-modal .exit-btn .xmark-icon {
+  height: 2rem;
+}
 .dashboard-confirm-modal .shadow-form-dash {
   width: 100%;
   height: 100%;
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .dashboard-confirm-modal {
+    width: 100%;
+    height: 53%;
+    padding: 3rem 3rem;
+  }
+  .dashboard-confirm-modal form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    gap: 4rem;
+  }
+  .dashboard-confirm-modal form input {
+    height: 3rem;
+    font-size: 1.5rem;
+    font-size: 1.38rem;
+  }
+  .dashboard-confirm-modal form button {
+    width: 7rem;
+    height: 3.5rem;
+    font-size: 1.8rem;
+  }
+  .dashboard-confirm-modal .exit-btn {
+    right: 1rem;
+    height: 3rem;
+    width: 3rem;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  .dashboard-confirm-modal {
+    /* CSS styles for iPhone landscape mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  .dashboard-confirm-modal {
+    /* CSS styles for iPad portrait mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  .dashboard-confirm-modal {
+    /* CSS styles for iPad landscape mode */
+  }
 }
 
 /*# sourceMappingURL=main.css.map */

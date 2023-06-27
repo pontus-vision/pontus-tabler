@@ -35,7 +35,7 @@
     align-items: center;
     margin: 0;
     position: absolute;
-    z-index: 4;
+    z-index: 1;
     transition: left 100ms ease-in-out;
     &.active{
       left: 11.5rem
