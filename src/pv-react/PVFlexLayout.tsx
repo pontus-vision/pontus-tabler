@@ -5,6 +5,7 @@ import {
   IJsonModel,
   IJsonRowNode,
   IJsonTabNode,
+  IJsonTabSetNode,
   Layout,
   Model,
   TabNode,
@@ -48,7 +49,7 @@ const PVFlexLayout = ({
 
   const { rowState, rowId, modelId:updateModelId } = useSelector((state: RootState) => state.updateRow);
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
-  const [containerHeight, setContainerHeight] = useState(500);
+  const [containerHeight, setContainerHeight] = useState(320);
   const [modelId, setModelId] = useState<string | undefined>()
   const [flexModelId, setFlexModelId] = useState<string>()
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>()
@@ -204,32 +205,51 @@ const PVFlexLayout = ({
     const rootNode = model.getRoot();
     const tabsets = filterComponentsPerType(rootNode.toJson(), "tabset");
 
-    const tabsetsWeighted = tabsets.map(tabset=> {
+    const tabsetsHeight = tabsets.map(tabset=> {
       const tabsetSelected = tabset?.selected
         if(tabsetSelected){
-          const weight = tabset.children[tabsetSelected]?.config?.height / containerHeight * 100
-          return {id: tabset.id, weight}
-          
+          return tabset.children[tabsetSelected]?.config?.height
         } else if(!tabsetSelected) {
-          const weight = tabset.children[0]?.config?.height / containerHeight * 100
-          return {id: tabset.id, weight}
+          return tabset.children[0]?.config?.height
         }
     })
 
+    const totalHeight = tabsetsHeight.reduce((acc, cur)=>{
+      acc +=cur
+      return acc
+    },0)
+
+    const tabsetsWeighted = tabsets.map(tabset=> {
+      const tabsetSelected = tabset?.selected
+        if(tabsetSelected){
+          const weight = tabset.children[tabsetSelected]?.config?.height / totalHeight * 100
+          console.log({tabset, containerHeight, weight})
+          return {
+            ...tabset,
+            weight
+          }
+        } else if(!tabsetSelected) {
+          const weight = tabset.children[0]?.config?.height / totalHeight * 100
+          console.log({tabset, containerHeight, weight})
+          return {
+            ...tabset,
+            weight
+          }
+        }
+    })
+
+    console.log(tabsetsWeighted)
+
     const jsonCopy = JSON.parse(JSON.stringify(model.toJson()))
 
-    // tabsetsWeighted.forEach((tabsetW)=>{
+    tabsetsWeighted.forEach(tabsetW=> {
+      const tabset = findChildById(jsonCopy.layout, tabsetW.id, "tabset")
+      if(tabset) {
+        tabset.weight = tabsetW.weight
+        setModel(Model.fromJson(jsonCopy))
+      }
 
-    //   const tabset = findChildById(jsonCopy.layout, tabsetW.id, "tabset");
-    //   console.log({tabset})
-    //   if (tabset) {
-    //     tabset.weight = tabsetW.weight 
-    //     setModel(Model.fromJson(jsonCopy));
-    //     console.log(model.toJson().layout)
-    //   }
-      
-    // })
-
+    })
    
   }
 
@@ -239,33 +259,89 @@ const PVFlexLayout = ({
     const rootNode = model.getRoot();
     const tabsets = filterComponentsPerType(rootNode.toJson(), "tabset");
 
-    const tabsetsHeight = tabsets.map(tabset=> {
-
-    const tabsetSelected = tabset?.selected
+    const tabsetsHeight = tabsets.map((tabset:IJsonTabSetNode) => {
+      const tabsetSelected = tabset?.selected
       if(tabsetSelected){
-        return tabset.children[tabsetSelected]?.config?.height
-      } else if(!tabsetSelected) {
-        return tabset.children[0]?.config?.height
-      }
+          console.log(tabset.children[tabsetSelected]?.config?.height)
+          return {
+            height: tabset.children[tabsetSelected]?.config?.height,
+            id: tabset.id
+          }
+        } else if(!tabsetSelected) {
+          console.log(tabset.children[0]?.config?.height)
+          return {
+            height: tabset.children[0]?.config?.height,
+            id: tabset.id
+          }
+        }
     })
 
+    const jsonCopy = JSON.parse(JSON.stringify(model.toJson()))
+
+    
+    // tabsetsHeight.forEach(tabsetH=> {
+    //   const tabset: IJsonTabSetNode = findChildById(jsonCopy.layout, tabsetH.id, "tabset")
+
+    //   if(tabset) {
+    //     // tabset.minHeight = tabsetH.height 
+    //     tabset.height = tabsetH.height
+    //     console.log({tabset, jsonCopy})
+    //     setModel(Model.fromJson(jsonCopy))
+    //   }
+    // })
+
     const totalHeight = tabsetsHeight.reduce((acc, cur)=>{
-      acc +=cur
+      console.log({cur})
+      acc += cur.height
       return acc
     },0)
 
     console.log({tabsets, totalHeight, tabsetsHeight}, (tabsets.length * 100) + totalHeight + "px");
     
-    return (tabsets.length * 83) + totalHeight 
+    return (tabsets.length * 100) + totalHeight   
    
   }
 
   useEffect(()=>{
-    const contHeight = calcContainerHeight()
-    if(!contHeight) return
-    setContainerHeight(contHeight)
-    calcCmpWeight(containerHeight)
+    // setContainerHeight(calcContainerHeight())
+    
   },[model])
+
+  useEffect(()=>{
+    const rootNode = model.getRoot();
+    const tabsets = filterComponentsPerType(rootNode.toJson(), "tabset");
+
+    const tabsetsHeight = tabsets.map((tabset:IJsonTabSetNode) => {
+      const tabsetSelected = tabset?.selected
+      if(tabsetSelected){
+          console.log(tabset.children[tabsetSelected]?.config?.height)
+          return {
+            height: tabset.children[tabsetSelected]?.config?.height,
+            id: tabset.id
+          }
+        } else if(!tabsetSelected) {
+          console.log(tabset.children[0]?.config?.height)
+          return {
+            height: tabset.children[0]?.config?.height,
+            id: tabset.id
+          }
+        }
+    })
+
+    const jsonCopy = JSON.parse(JSON.stringify(model.toJson()))
+
+    
+    tabsetsHeight.forEach(tabsetH=> {
+      const tabset: IJsonTabSetNode = findChildById(jsonCopy.layout, tabsetH.id, "tabset")
+
+      if(tabset) {
+        // tabset.minHeight = tabsetH.height 
+        tabset.height = tabsetH.height
+        console.log({tabset, jsonCopy})
+        setModel(Model.fromJson(jsonCopy))
+      }
+    })
+  },[containerHeight])
 
   const filterComponentsPerType = (layout:any, type: string):any => {
     if (layout?.children && layout.children.length > 0) {
@@ -298,10 +374,8 @@ const PVFlexLayout = ({
     console.log({ tabsets });
 
     // setContainerHeight(tabsets.length * 32 + "rem"); // Increase height by 200px
-    const contHeight = calcContainerHeight()
-    if(!contHeight) return
-    setContainerHeight(contHeight)
-    calcCmpWeight(containerHeight)
+    // setContainerHeight(calcContainerHeight())
+    // calcCmpWeight(containerHeight)
   };
 
   const addComponent = (entry: FlexLayoutCmp) => {
@@ -341,8 +415,8 @@ const PVFlexLayout = ({
     });
 
     // console.log({ jsonCopy, newJson });
-
     setModel(Model.fromJson(jsonCopy));
+    
   };
 
   useEffect(() => {
@@ -353,6 +427,7 @@ const PVFlexLayout = ({
   useEffect(() => {
     if (!setGridState) return;
     setGridState(model.toJson());
+    setContainerHeight(calcContainerHeight())
   }, [model]);
 
   useEffect(() => {
