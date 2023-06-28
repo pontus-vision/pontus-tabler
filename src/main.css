@@ -139,7 +139,11 @@
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
   .grid-actions-panel {
     position: absolute;
-    display: grid;
+    padding-inline: 3px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
     grid-template-columns: repeat(2, 1fr);
     top: 0;
     z-index: 1;
@@ -152,21 +156,27 @@
   }
   .grid-actions-panel__restore-btn {
     grid-row: 2;
+    width: 100%;
   }
   .grid-actions-panel__delete-btn {
     grid-row: 2;
+    width: 100%;
   }
   .grid-actions-panel__update-btn {
     grid-row: 3;
+    width: 100%;
   }
   .grid-actions-panel__delete-actions {
     top: 5px;
+    left: 5px;
+    position: absolute;
   }
   .grid-actions-panel__update-actions {
     grid-row: 2;
   }
   .grid-actions-panel__select-btn {
     grid-row: 3;
+    width: 100%;
   }
 }
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
