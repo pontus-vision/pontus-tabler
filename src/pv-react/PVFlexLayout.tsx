@@ -21,6 +21,7 @@ import { RootState } from "../store/store";
 import { cmsDeleteEntry } from "../client";
 import { useTranslation } from "react-i18next";
 import DeleteEntriesModal from "../components/DeleteEntriesModal";
+import GridActionsPanel from "../components/GridActionsPanel";
 
 type Props = {
   gridState?: IJsonModel;
@@ -114,32 +115,7 @@ const PVFlexLayout = ({
         
       return (
         <>
-        <div className="tab-actions-panel" >
-          {deleteMode || updateMode || <label className="tab-actions-panel__plus-btn" style={{ display:  "flex", alignItems: "center", padding: 0, cursor: "pointer", height: "2rem", fontSize: "4rem",  left: "8rem"}} 
-            onClick={()=> {
-              setFlexModelId(id)
-              setOpenNewEntryView(true)
-              setModelId(prevState=> updateModelId ? prevState = updateModelId : prevState = config.modelId)
-            }}>+</label>}
-            {updateMode || deleteMode ||<button onClick={()=>{
-              setGridKey(prevState=> prevState + 1)
-            }}>restore</button>} 
-            {updateMode || deleteMode ||<button onClick={()=> {
-              setShowColumnSelector(true)}}>Select Columns</button>}
-            {updateMode || deleteMode || <button onClick={()=>setDeleteMode(!deleteMode)}>Delete Mode</button>}
-            {updateMode || deleteMode || <button onClick={()=>{setUpdateMode(!updateMode)}}>Update Mode</button>}
-
-            {deleteMode && <div style={{gap:"1rem" ,height: "2.65rem", display: "flex", alignItems: "center"}} className="tab-actions-panel__delete-actions">
-              <i className="fa-solid fa-trash" onClick={()=> {
-                setModelId(config.modelId)
-                entriesToBeDeleted && entriesToBeDeleted.length > 0 && setDeletion(true)}}  style={{fontSize: "1.8rem", color: "#b53737", cursor: "pointer"}}></i>
-              <i className="fa-solid fa-x" style={{fontSize: "1.8rem", cursor: "pointer"}} onClick={()=> setDeleteMode(false)}></i>         
-            </div>}
-            {updateMode && <div className="tab-actions-panel__update-actions">
-              <i className="fa-solid fa-x" style={{fontSize: "1.8rem", cursor: "pointer", height: "2.65rem", display: "flex", alignItems: "center"}} onClick={()=> setUpdateMode(false)}></i>         
-            </div>}
-              
-        </div>
+        <GridActionsPanel key={id} configModelId={config.modelId} deleteMode={deleteMode} updateMode={updateMode} setDeleteMode={setDeleteMode} setUpdateMode={setUpdateMode} entriesToBeDeleted={entriesToBeDeleted} setDeletion={setDeletion} setGridKey={setGridKey} updateModelId={updateModelId} setFlexModelId={setFlexModelId} setModelId={setModelId} id={id} setOpenNewEntryView={setOpenNewEntryView} setShowColumnSelector={setShowColumnSelector} />
           <PVGridWebiny2
             setGridHeight={setGridHeight}
             deleteMode={deleteMode}

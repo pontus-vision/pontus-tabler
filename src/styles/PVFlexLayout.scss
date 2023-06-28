@@ -1,4 +1,6 @@
-.tab-actions-panel{
+@use '../sass/variables';
+
+.grid-actions-panel{
     display: flex; 
     align-items: center; 
     gap: .7rem; 
@@ -10,8 +12,41 @@
   and (min-device-width: 375px) 
   and (max-device-width: 667px) 
   and (orientation: portrait) {
-    .tab-actions-panel{
-        display: none;
+    .grid-actions-panel{
+        position: absolute;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        top: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        background-color: variables.$primaryTransparent;
+      &__burguer-menu{
+        // padding: 3px;
+        scale: .6;
+      }
+      
+      &__plus-btn{
+
+      }
+      &__restore-btn{
+        grid-row: 2;
+      }
+      &__delete-btn{
+        grid-row: 2;
+      }
+      &__update-btn{
+        grid-row: 3;
+      }
+      &__delete-actions{
+        top: 5px;
+      }
+      &__update-actions{
+        grid-row: 2;
+      }
+      &__select-btn{
+        grid-row: 3;
+      }
     }
 }
 

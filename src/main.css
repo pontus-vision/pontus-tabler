@@ -128,7 +128,7 @@
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
   /* CSS styles for iPad landscape mode */
 }
-.tab-actions-panel {
+.grid-actions-panel {
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -137,8 +137,36 @@
 
 /* Target iPhone */
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
-  .tab-actions-panel {
-    display: none;
+  .grid-actions-panel {
+    position: absolute;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    top: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(82, 182, 205, 0.527);
+  }
+  .grid-actions-panel__burguer-menu {
+    scale: 0.6;
+  }
+  .grid-actions-panel__restore-btn {
+    grid-row: 2;
+  }
+  .grid-actions-panel__delete-btn {
+    grid-row: 2;
+  }
+  .grid-actions-panel__update-btn {
+    grid-row: 3;
+  }
+  .grid-actions-panel__delete-actions {
+    top: 5px;
+  }
+  .grid-actions-panel__update-actions {
+    grid-row: 2;
+  }
+  .grid-actions-panel__select-btn {
+    grid-row: 3;
   }
 }
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
@@ -219,13 +247,27 @@
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
   /* CSS styles for iPad landscape mode */
 }
+.select-cmp-panel .dropdown-panels {
+  display: flex;
+  gap: 1rem;
+}
+.select-cmp-panel .dropdown-panels__tables {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.select-cmp-panel .dropdown-panels__charts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .dashboard-confirm-modal {
   position: absolute;
   background-color: #52b6cd;
   padding: 3rem 5rem;
   z-index: 1;
   /* Target iPhone */
-  /* Target iPad */
 }
 .dashboard-confirm-modal label {
   color: white;
@@ -251,6 +293,46 @@
   width: 100%;
   height: 100%;
 }
+
+.hamburguer-menu {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 8px;
+  width: max-content;
+  z-index: 2;
+}
+.hamburguer-menu::after, .hamburguer-menu input, .hamburguer-menu::before {
+  content: "";
+  width: 60px;
+  height: 8px;
+  border-radius: 6px;
+  background-color: #333;
+  transform-origin: left center;
+  transition: opacity 200ms ease-in-out, width 200ms ease-in-out;
+}
+.hamburguer-menu input {
+  appearance: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  pointer-events: none;
+}
+.hamburguer-menu input:checked {
+  opacity: 0;
+  width: 0;
+}
+.hamburguer-menu:has(input:checked)::before {
+  rotate: 45deg;
+  width: 56.568542496px;
+  translate: 0 -4px;
+}
+.hamburguer-menu:has(input:checked)::after {
+  rotate: -45deg;
+  width: 56.568542496px;
+  translate: 0 4px;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
   .dashboard-confirm-modal {
     width: 100%;
@@ -281,19 +363,14 @@
   }
 }
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
-  .dashboard-confirm-modal {
-    /* CSS styles for iPhone landscape mode */
-  }
+  /* CSS styles for iPhone landscape mode */
 }
+/* Target iPad */
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
-  .dashboard-confirm-modal {
-    /* CSS styles for iPad portrait mode */
-  }
+  /* CSS styles for iPad portrait mode */
 }
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
-  .dashboard-confirm-modal {
-    /* CSS styles for iPad landscape mode */
-  }
+  /* CSS styles for iPad landscape mode */
 }
 
 /*# sourceMappingURL=main.css.map */
