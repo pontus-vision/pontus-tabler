@@ -14,7 +14,7 @@ import {
 } from '../types';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { getModelFields, postNewEntry } from '../client';
+import { getModelFields, postNewEntry, updateEntry } from '../client';
 import FloatingLabel from 'react-bootstrap/esm/FloatingLabel';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -48,7 +48,11 @@ const NewEntryForm = ({
   );
   const [formObjFieldName, setFormObjFieldName] = useState<string>();
 
-  const { updateRow } = useSelector((state: RootState) => state);
+  const {
+    modelId: updateModelId,
+    rowId,
+    rowState,
+  } = useSelector((state: RootState) => state.updateRow);
 
   const { t } = useTranslation();
 
@@ -371,10 +375,6 @@ const NewEntryForm = ({
     }
   };
 
-  useEffect(() => {
-    console.log(updateRow);
-  }, [updateRow]);
-
   const onSubmit = async (
     dataInput: {
       [key: string]: unknown;
@@ -384,17 +384,17 @@ const NewEntryForm = ({
   ) => {
     try {
       const formNewInputs = { ...rowState, ...formInputs };
-      if (updateRow) {
-        const publishData = await postNewEntry(formNewInputs);
+      if (updateModelId) {
+        const publishData = await updateEntry(formNewInputs, );
         if (!!publishData) {
           handleUpdatedGrid();
           setSuccessMsg(t('entry-updated') as string);
         }
       } else {
-        // const publishData = await postNewEntry(formNewInputs, contentModel.fields, updateRow.);
+        const publishData = await postNewEntry(formNewInputs, contentModel.fields, updateRow.);
         if (!!publishData) {
           handleUpdatedGrid();
-          // setSuccessMsg(t('entry-created') as string);
+          setSuccessMsg(t('entry-created') as string);
         }
       }
     } catch (error) {}

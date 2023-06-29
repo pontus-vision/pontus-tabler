@@ -65,23 +65,21 @@ export const updateEntry = async (
   },
   fields: ICmsGetContentModelDataField[],
   modelId: string,
-  update: GridUpdateState,
+  rowId: string,
 ) => {
   const fieldsKeysStr = createMutationStr(fields);
 
-  if (rowState && rowId && updateRowModelId) {
-    const { data } = await cmsCreateModelFrom(
-      updateRowModelId,
-      dataInput,
-      fieldsKeysStr,
-      rowId,
-    );
+  const { data } = await cmsCreateModelFrom(
+    modelId,
+    dataInput,
+    fieldsKeysStr,
+    rowId,
+  );
 
-    if (data.id) {
-      const { data: publishedData } = await cmsPublishModelId(modelId, data.id);
+  if (data.id) {
+    const { data: publishedData } = await cmsPublishModelId(modelId, data.id);
 
-      return publishedData;
-    }
+    return publishedData;
   }
 };
 
