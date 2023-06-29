@@ -246,7 +246,6 @@ const GridActionsPanel = ({
         <button
           className="grid-actions-panel__delete-btn"
           onClick={() => {
-            changeBurguerMenuValue(false, 'none');
             setDeleteMode(!deleteMode);
           }}
         >
@@ -257,7 +256,6 @@ const GridActionsPanel = ({
         <button
           className="grid-actions-panel__update-btn"
           onClick={() => {
-            changeBurguerMenuValue(false, 'none');
             setUpdateMode(!updateMode);
           }}
         >
@@ -278,7 +276,6 @@ const GridActionsPanel = ({
           <i
             className="fa-solid fa-trash"
             onClick={() => {
-              changeBurguerMenuValue(true, 'flex');
               setModelId(configModelId);
               entriesToBeDeleted &&
                 entriesToBeDeleted.length > 0 &&
@@ -290,7 +287,6 @@ const GridActionsPanel = ({
             className="fa-solid fa-x"
             style={{ fontSize: '1.8rem', cursor: 'pointer' }}
             onClick={() => {
-              changeBurguerMenuValue(true, 'flex');
               setDeleteMode(false);
             }}
           ></i>
@@ -308,7 +304,6 @@ const GridActionsPanel = ({
               alignItems: 'center',
             }}
             onClick={() => {
-              changeBurguerMenuValue(true, 'flex');
               setUpdateMode(false);
             }}
           ></i>

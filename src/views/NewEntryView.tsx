@@ -11,6 +11,7 @@ import { RootState } from '../store/store';
 import { ColumnState } from 'ag-grid-community';
 import { selectCount } from '../store/slice';
 import { newRowState, selectRowState } from '../store/sliceGridUpdate';
+import { cmsGetContentModel } from '../webinyApi';
 
 type Props = {
   modelId: string;

@@ -375,23 +375,26 @@ const NewEntryForm = ({
     }
   };
 
-  const onSubmit = async (
-    dataInput: {
-      [key: string]: unknown;
-    },
-    fields: ICmsGetContentModelDataField[],
-    modelId: string,
-  ) => {
+  const onSubmit = async () => {
     try {
       const formNewInputs = { ...rowState, ...formInputs };
-      if (updateModelId) {
-        const publishData = await updateEntry(formNewInputs, );
+      if (updateModelId && rowId) {
+        const publishData = await updateEntry(
+          formNewInputs,
+          contentModel.fields,
+          updateModelId,
+          rowId,
+        );
         if (!!publishData) {
           handleUpdatedGrid();
           setSuccessMsg(t('entry-updated') as string);
         }
       } else {
-        const publishData = await postNewEntry(formNewInputs, contentModel.fields, updateRow.);
+        const publishData = await postNewEntry(
+          formNewInputs,
+          contentModel.fields,
+          contentModel.modelId,
+        );
         if (!!publishData) {
           handleUpdatedGrid();
           setSuccessMsg(t('entry-created') as string);
@@ -420,7 +423,7 @@ const NewEntryForm = ({
           className="new-entry "
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit(formInputs);
+            onSubmit();
           }}
         >
           <Form.Group className="new-entry-form__group mb-3">
