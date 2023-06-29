@@ -1,8 +1,8 @@
-import { Dispatch, useEffect, useState } from "react";
-import { FlexLayoutCmp, WebinyModel } from "../types";
-import BootstrapForm from "react-bootstrap/Form";
-import { getModels } from "../client";
-import styled from "styled-components";
+import { Dispatch, useEffect, useState } from 'react';
+import { FlexLayoutCmp, WebinyModel } from '../types';
+import BootstrapForm from 'react-bootstrap/Form';
+import { getModels } from '../webinyApi';
+import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 
 type Props = {
@@ -29,16 +29,16 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
     <CmpPanelStyles>
       <div className="dropdown-panels">
         <div className="dropdown-panels__tables">
-          {t("tables")}
+          {t('tables')}
           <BootstrapForm.Select
             onChange={(e) => {
               const cmp: FlexLayoutCmp = {
-                componentName: "PVGridWebiny2",
+                componentName: 'PVGridWebiny2',
                 cmp: JSON.parse(e.target.value),
               };
               setSelectedCmp(cmp);
             }}
-            defaultValue={"option"}
+            defaultValue={'option'}
           >
             <option value="option"></option>
             {models &&
@@ -50,17 +50,17 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
           </BootstrapForm.Select>
         </div>
         <div className="dropdown-panels__charts">
-          {t("graphics")}
+          {t('graphics')}
           <BootstrapForm.Select
             onChange={(e) => {
               const cmp: FlexLayoutCmp = {
-                componentName: "PVDoughnutChart2",
+                componentName: 'PVDoughnutChart2',
               };
               setSelectedCmp(cmp);
             }}
           >
             <option></option>
-            <option>{t("donut-chart")}</option>
+            <option>{t('donut-chart')}</option>
           </BootstrapForm.Select>
         </div>
       </div>

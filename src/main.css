@@ -142,17 +142,31 @@
     padding-inline: 3px;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
     align-items: center;
     grid-template-columns: repeat(2, 1fr);
-    top: 0;
+    left: -100%;
     z-index: 1;
     width: 100%;
-    height: 100%;
-    background-color: rgba(82, 182, 205, 0.527);
+    height: calc(100% - 3rem);
+    background-color: white;
+    transition: left 200ms ease-in-out;
+  }
+  .grid-actions-panel__toolbar {
+    height: 3rem;
+    display: flex;
+    align-items: center;
   }
   .grid-actions-panel__burguer-menu {
-    scale: 0.6;
+    scale: 0.7;
+  }
+  .grid-actions-panel.active {
+    left: 0;
+  }
+  .grid-actions-panel .btn {
+    height: 3rem;
+  }
+  .grid-actions-panel__plus-btn {
+    width: 100%;
   }
   .grid-actions-panel__restore-btn {
     grid-row: 2;
@@ -169,7 +183,6 @@
   .grid-actions-panel__delete-actions {
     top: 5px;
     left: 5px;
-    position: absolute;
   }
   .grid-actions-panel__update-actions {
     grid-row: 2;
@@ -310,7 +323,7 @@
   position: relative;
   gap: 8px;
   width: max-content;
-  z-index: 2;
+  z-index: 1;
 }
 .hamburguer-menu::after, .hamburguer-menu input, .hamburguer-menu::before {
   content: "";
@@ -381,6 +394,145 @@
 }
 @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
   /* CSS styles for iPad landscape mode */
+}
+.new-entry-form {
+  position: relative;
+  overflow-y: auto;
+  margin-inline: auto;
+  width: fit-content;
+  z-index: 3;
+  border-radius: 0.3rem;
+  /* Style the scrollbar thumb */
+  /* Change the color of the scrollbar thumb on hover */
+  /* Allow dragging of the scrollbar thumb */
+  /* Select the scrollbar track on hover */
+  /* Target iPhone */
+  /* Target iPad */
+}
+.new-entry-form__title {
+  background: white;
+  width: fit-content;
+  z-index: 3;
+  padding-inline: 1rem;
+  margin-inline: auto;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+}
+.new-entry-form ::-webkit-scrollbar {
+  z-index: 1;
+}
+.new-entry-form .new-entry {
+  padding: 1rem;
+  width: 40em;
+  border-radius: 0.3rem;
+  background-color: white;
+}
+.new-entry-form .new-entry__group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.new-entry-form .form__checkboxes {
+  border: 1px solid rgba(0, 0, 0, 0.3882352941);
+  padding: 0.3rem;
+  border-radius: 0.5rem;
+}
+.new-entry-form .form__object {
+  border: 1px solid black;
+  padding: 0.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.new-entry-form .skimmer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.new-entry-form .skimmer__line {
+  height: 10px;
+  width: 100%;
+  background-color: lightgray;
+}
+.new-entry-form ::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+.new-entry-form ::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+.new-entry-form ::-webkit-scrollbar-thumb:active {
+  background-color: #333;
+}
+.new-entry-form ::-webkit-scrollbar-track:hover {
+  background-color: #f1f1f1;
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .new-entry-form {
+    /* CSS styles for iPhone portrait mode */
+    width: 100%;
+  }
+  .new-entry-form .new-entry {
+    width: 100%;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  .new-entry-form {
+    /* CSS styles for iPhone landscape mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  .new-entry-form {
+    /* CSS styles for iPad portrait mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  .new-entry-form {
+    /* CSS styles for iPad landscape mode */
+  }
+}
+
+.new-entry-view {
+  position: absolute;
+  display: flex;
+  padding: 2rem 0;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+.new-entry-view .success-msg {
+  position: absolute;
+  width: 15rem;
+  text-align: right;
+  z-index: 1;
+  bottom: 5rem;
+}
+.new-entry-view .shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2941176471);
+}
+.new-entry-view .skimmer {
+  position: relative;
+  padding: 1rem;
+  margin: auto;
+  width: 25rem;
+  z-index: 5;
+}
+.new-entry-view .skimmer__line {
+  height: 10px;
+  width: 100%;
+  background-color: lightgray;
+  border-radius: 5px;
 }
 
 /*# sourceMappingURL=main.css.map */

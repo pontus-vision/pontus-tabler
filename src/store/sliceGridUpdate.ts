@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from './store';
 
-interface GridUpdateState {
+export interface GridUpdateState {
   modelId: string | undefined;
   rowId: string | undefined;
-  rowState: { [key: string]: { [key: string]: unknown } } ;
+  rowState: { [key: string]: { [key: string]: unknown } };
 }
 
 const initialState: GridUpdateState = {

@@ -1,6 +1,6 @@
 @use '../sass/variables';
 
-.select-cmp-panel{
+.select-cmp-panel {
   .dropdown-panels {
     display: flex;
     gap: 1rem;
@@ -10,7 +10,7 @@
       flex-direction: column;
       align-items: center;
     }
-    
+
     &__charts {
       display: flex;
       flex-direction: column;
@@ -19,7 +19,7 @@
   }
 }
 
-.dashboard-confirm-modal{
+.dashboard-confirm-modal {
   position: absolute;
   background-color: variables.$primaryColor;
   padding: 3rem 5rem;
@@ -40,11 +40,11 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    .xmark-icon{
+    .xmark-icon {
       height: 2rem;
     }
   }
-  .shadow-form-dash{
+  .shadow-form-dash {
     width: 100%;
     height: 100%;
   }
@@ -52,7 +52,7 @@
   /* Target iPhone */
 }
 
-.hamburguer-menu{
+.hamburguer-menu {
   $foreground-color: #333;
   $bar-width: 60px;
   $bar-height: 8px;
@@ -67,9 +67,11 @@
   position: relative;
   gap: $hamburguer-gap;
   width: max-content;
-  z-index: 2;
-  &::after,& input,&::before{
-    content: "";
+  z-index: 1;
+  &::after,
+  & input,
+  &::before {
+    content: '';
     width: $bar-width;
     height: $bar-height;
     border-radius: 6px;
@@ -77,13 +79,13 @@
     transform-origin: left center;
     transition: opacity $animation-timing, width $animation-timing;
   }
-  & input{
+  & input {
     appearance: none;
     padding: 0;
     margin: 0;
     outline: none;
     pointer-events: none;
-    &:checked{
+    &:checked {
       opacity: 0;
       width: 0;
     }
@@ -110,31 +112,28 @@
 //   transition: opacity 50ms ease-in-out, width 50ms ease-in-out;
 // }
 
-@media only screen 
-and (min-device-width: 375px) 
-and (max-device-width: 667px) 
-and (orientation: portrait) {
-    .dashboard-confirm-modal{
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .dashboard-confirm-modal {
     width: 100%;
     height: 53%;
     padding: 3rem 3rem;
 
-    form{
+    form {
       display: flex;
       flex-direction: column;
       justify-content: space-around;
       align-items: center;
       gap: 4rem;
-      
-      input{
+
+      input {
         height: 3rem;
         font-size: 1.5rem;
         font-size: 1.38rem;
       }
-      button{
+      button {
         width: 7rem;
         height: 3.5rem;
-        font-size: 1.8rem
+        font-size: 1.8rem;
       }
     }
 
@@ -146,24 +145,15 @@ and (orientation: portrait) {
   }
 }
 
-@media only screen 
-and (min-device-width: 375px) 
-and (max-device-width: 667px) 
-and (orientation: landscape) {
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }
 
 /* Target iPad */
-@media only screen 
-and (min-device-width: 768px) 
-and (max-device-width: 1024px) 
-and (orientation: portrait) {
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
   /* CSS styles for iPad portrait mode */
 }
 
-@media only screen 
-and (min-device-width: 768px) 
-and (max-device-width: 1024px) 
-and (orientation: landscape) {
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
   /* CSS styles for iPad landscape mode */
 }
