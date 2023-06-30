@@ -15,7 +15,7 @@ import {
   IRowNode,
   SelectionChangedEvent,
 } from 'ag-grid-community';
-import { getModelFields } from '../client';
+import { getModelData } from '../client';
 import { useDispatch } from 'react-redux';
 import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
@@ -95,7 +95,7 @@ const PVGridWebiny2 = ({
 
           if (!modelId) return;
 
-          const data = await getModelFields(
+          const data = await getModelData(
             modelId,
             pageSize,
             [...cursors][index],
@@ -248,6 +248,10 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
+    console.log(selectedRows);
+  }, [selectedRows]);
+
+  useEffect(() => {
     const objects = columnDefs?.filter(
       (el: { [key: string]: any }) => el?.children,
     );
@@ -391,9 +395,14 @@ const PVGridWebiny2 = ({
 
   const onSelectionChanged = (event: SelectionChangedEvent): void => {
     const selectedRows = event.api.getSelectedNodes();
-    setEntriesToBeDeleted(selectedRows.map((row) => row.data.id));
+    console.log(selectedRows);
     setSelectedRows(selectedRows);
   };
+
+  useEffect(() => {
+    console.log(selectedRows);
+    setEntriesToBeDeleted(selectedRows.map((row) => row.data.id));
+  }, [selectedRows]);
 
   const gridContainerRef = useRef(null);
 
@@ -427,6 +436,7 @@ const PVGridWebiny2 = ({
 
   return (
     <>
+      <button onClick={() => console.log(selectedRows)}>Entries</button>
       <div className={'ag-theme-alpine' + ' ' + gridId}>
         {columnDefs && (
           <PVAggridColumnSelector

@@ -4,7 +4,7 @@ import { RootState } from './store';
 export interface GridUpdateState {
   modelId: string | undefined;
   rowId: string | undefined;
-  rowState: { [key: string]: { [key: string]: unknown } };
+  rowState: { [key: string]: { [key: string]: unknown } } | undefined;
 }
 
 const initialState: GridUpdateState = {

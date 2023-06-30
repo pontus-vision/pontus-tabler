@@ -1,11 +1,10 @@
 import { Dispatch } from 'react';
-import { cmsDeleteEntry } from '../webinyApi';
 import { useTranslation } from 'react-i18next';
+import { deleteEntry } from '../client';
 
 type Props = {
   entries: string[];
   modelId: string;
-  setGridKey: Dispatch<React.SetStateAction<number>>;
   updateGridKey: Dispatch<
     React.SetStateAction<{
       modelId: string;
@@ -18,7 +17,6 @@ type Props = {
 const DeleteEntriesModal = ({
   entries,
   modelId,
-  setGridKey,
   updateGridKey,
   setDeletion,
 }: Props) => {
@@ -28,14 +26,15 @@ const DeleteEntriesModal = ({
     if (!entries || !modelId) return;
 
     entries.forEach(async (entry) => {
-      const { data } = await cmsDeleteEntry(modelId, entry);
-      console.log(data);
+      const { data } = await deleteEntry(modelId, entry);
+
       updateGridKey((prevState) => ({
         key: prevState?.key + 1,
-        modelId: modelId,
       }));
     });
   };
+
+  if ((entries.length = 0)) return;
 
   return (
     <>
@@ -50,30 +49,17 @@ const DeleteEntriesModal = ({
           width: '100%',
         }}
       ></div>
-      <div
-        className="delete-modal"
-        onClick={() => deleteEntries()}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          transform: 'translate(-50%,-50%)',
-          position: 'absolute',
-          background: 'red',
-          zIndex: 10,
-          width: '50%',
-          height: '30%',
-          top: '50%',
-          left: '50%',
-        }}
-      >
-        <label htmlFor="delete-button">{t('confirm-delete-entries')}</label>
+      <div className="delete-modal" onClick={() => deleteEntries()}>
+        <label htmlFor="delete-button">
+          {entries.length > 1
+            ? t('confirm-delete-entries')
+            : t('confirm-delete-entry')}
+        </label>
         <div
           style={{ display: 'flex', gap: '1rem' }}
           className="delete-modal_btns"
         >
-          <button id="delete-button" onClick={() => deleteEntries}>
+          <button id="delete-button" onClick={() => deleteEntries()}>
             {t('yes')}
           </button>
           <button id="cancel-delete-button" onClick={() => setDeletion(false)}>

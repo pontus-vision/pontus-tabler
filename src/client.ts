@@ -1,18 +1,21 @@
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
+  ICmsGetContentModel,
+  ICmsGetContentModelData,
   ICmsGetContentModelDataField,
   IListModelResponseData,
   Meta,
 } from './types';
 import {
   cmsCreateModelFrom,
+  cmsDeleteEntry,
   cmsEntriesCreateModel,
   cmsGetContentModel,
   cmsPublishModelId,
   listModel,
 } from './webinyApi';
 
-export const getModelFields = async (
+export const getModelData = async (
   modelId: string,
   limit: number,
   after: string | null,
@@ -43,6 +46,28 @@ export const getModelFields = async (
   const { data: modelContentListData, meta } = data;
 
   return { columnNames, modelContentListData, meta };
+};
+
+export const getModelFields = async (
+  modelId: string,
+): Promise<ICmsGetContentModelData | undefined> => {
+  try {
+    const { data } = await cmsGetContentModel(modelId);
+
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const deleteEntry = async (modelId: string, entryId: string) => {
+  try {
+    const { data } = await cmsDeleteEntry(modelId, entryId);
+
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const postNewEntry = async (

@@ -9,23 +9,15 @@ import Form from 'react-bootstrap/Form';
 import {
   ICmsGetContentModelData,
   ICmsGetContentModelDataField,
-  UnknownKey,
   WebinyRefInput,
 } from '../types';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { getModelFields, postNewEntry, updateEntry } from '../client';
+import { getModelData, postNewEntry, updateEntry } from '../client';
 import FloatingLabel from 'react-bootstrap/esm/FloatingLabel';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { validateCPF } from '../SchemasValidation';
-import styled from 'styled-components';
-import Alert from 'react-bootstrap/Alert';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
-import NewEntryFormSkeleton from './skeleton/NewEntryFormSkeleton';
 
 type Props = {
   setIsloading: Dispatch<SetStateAction<boolean>>;
@@ -225,7 +217,7 @@ const NewEntryForm = ({
       useEffect(() => {
         const fetchData = async () => {
           if (!refs || refs.length === 0) return;
-          const res = await getModelFields(refs[0].modelId, 5, null);
+          const res = await getModelData(refs[0].modelId, 5, null);
 
           if (!res) return;
           setOptions(

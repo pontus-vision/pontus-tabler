@@ -18,7 +18,6 @@ import PVDoughnutChart2 from './PVDoughnutChart2';
 import { useSelector } from 'react-redux';
 import NewEntryView from '../views/NewEntryView';
 import { RootState } from '../store/store';
-import { cmsDeleteEntry } from '../client';
 import { useTranslation } from 'react-i18next';
 import DeleteEntriesModal from '../components/DeleteEntriesModal';
 import GridActionsPanel from '../components/GridActionsPanel';
@@ -121,6 +120,10 @@ const PVFlexLayout = ({
           setModel(Model.fromJson(jsonCopy));
         }
       }, [gridHeight]);
+
+      useEffect(() => {
+        console.log({ entriesToBeDeleted, deletion });
+      }, [entriesToBeDeleted, deletion]);
 
       return (
         <>
@@ -399,6 +402,10 @@ const PVFlexLayout = ({
   useEffect(() => {
     console.log({ model: model.toJson() });
   }, [model]);
+
+  useEffect(() => {
+    console.log({ modelId, openNewEntryView });
+  }, [modelId, openNewEntryView]);
 
   return (
     <>

@@ -16,6 +16,8 @@
   "select-inputs": "Select inputs",
   "entry-updated": "Entry Updated!",
   "enter-dashboard-name": "Enter the dashboard name",
+  "confirm-delete-entries": "Are you sure you want to delete those entries?",
+  "confirm-delete-entry": "Are you sure you want to delete this entry?",
 
   "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES": "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES",
   "Consent": "Consent",

@@ -12,6 +12,7 @@ import { ColumnState } from 'ag-grid-community';
 import { selectCount } from '../store/slice';
 import { newRowState, selectRowState } from '../store/sliceGridUpdate';
 import { cmsGetContentModel } from '../webinyApi';
+import { getModelFields } from '../client';
 
 type Props = {
   modelId: string;
@@ -50,13 +51,11 @@ const NewEntryView = ({
   const getModelContent = async (modelId: string) => {
     try {
       setIsLoading(true);
-      const { data } = await cmsGetContentModel(modelId);
-      setIsLoading(false);
-      // console.log(data.fields.reduce((acc, cur)=> {
-      //   (acc[cur.renderer.name] = acc[cur.renderer.name] || []).push(cur)
+      const data = await getModelFields(modelId);
 
-      //   return acc
-      // },{} as any));
+      if (!data) throw new Error();
+
+      setIsLoading(false);
 
       const filteredFields = data?.fields.filter(
         (field) =>
@@ -68,7 +67,7 @@ const NewEntryView = ({
           ),
       );
 
-      const newContentModel = {
+      const newContentModel: ICmsGetContentModelData = {
         ...data,
         name: data?.name,
         fields: filteredFields,
