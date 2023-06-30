@@ -436,7 +436,6 @@ const PVGridWebiny2 = ({
 
   return (
     <>
-      <button onClick={() => console.log(selectedRows)}>Entries</button>
       <div className={'ag-theme-alpine' + ' ' + gridId}>
         {columnDefs && (
           <PVAggridColumnSelector

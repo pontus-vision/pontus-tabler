@@ -389,7 +389,7 @@ const NewEntryForm = ({
         );
         if (!!publishData) {
           handleUpdatedGrid();
-          setSuccessMsg(t('entry-created') as string);
+          setSuccessMsg(t('entry-registered') as string);
         }
       }
     } catch (error) {}

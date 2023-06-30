@@ -127,12 +127,13 @@ const NewEntryView = ({
           setSuccessMsg={setSuccessMsg}
         />
       )}
-      {successMsg && (
-        <Alert className="success-msg" variant="success">
-          {' '}
-          {successMsg}{' '}
-        </Alert>
-      )}
+
+      <Alert
+        className={`success-msg ${successMsg ? 'active' : ''}`}
+        variant="success"
+      >
+        {successMsg}
+      </Alert>
       <NewEntryFormSkeleton isLoading={isLoading} />
     </div>
   );

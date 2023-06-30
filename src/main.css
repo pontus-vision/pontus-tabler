@@ -530,10 +530,15 @@
 }
 .new-entry-view .success-msg {
   position: absolute;
-  width: 15rem;
+  width: 18rem;
   text-align: right;
+  left: -100%;
   z-index: 1;
   bottom: 5rem;
+  transition: left 300ms ease-in-out;
+}
+.new-entry-view .success-msg.active {
+  left: -1rem;
 }
 .new-entry-view .shadow {
   position: absolute;
