@@ -1,5 +1,9 @@
 import { GridUpdateState } from './store/sliceGridUpdate';
-import { ICmsGetContentModelDataField } from './types';
+import {
+  ICmsGetContentModelDataField,
+  IListModelResponseData,
+  Meta,
+} from './types';
 import {
   cmsCreateModelFrom,
   cmsEntriesCreateModel,
@@ -14,7 +18,14 @@ export const getModelFields = async (
   after: string | null,
   fieldsSearches = null,
   sorting?: string,
-) => {
+): Promise<
+  | {
+      columnNames: ICmsGetContentModelDataField[];
+      modelContentListData: IListModelResponseData[];
+      meta: Meta;
+    }
+  | undefined
+> => {
   const cmsContentModel = await cmsGetContentModel(modelId);
 
   const { fields: columnNames } = cmsContentModel.data;
