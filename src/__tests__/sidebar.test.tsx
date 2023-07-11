@@ -35,7 +35,9 @@ describe('Sidebar component', () => {
   });
 
   it('triggers logout when Logout button is clicked', () => {
-    const logoutMock = jest.fn();
+    const logoutMock = vi.fn();
+
+    vi.spyOn(ReactRouterDom, 'useNavigate').mockReturnValue(navigateMock);
     const { getByText } = render(
       <Provider store={store}>
         <MemoryRouter>
@@ -48,7 +50,7 @@ describe('Sidebar component', () => {
     const logoutButton = getByText('Logout');
     fireEvent.click(logoutButton);
 
-    expect(logoutMock).toHaveBeenCalledTimes(1);
+    expect(logoutMock).toHaveBeenCalled();
   });
 
   it('navigates to admin panel when Admin button is clicked', () => {

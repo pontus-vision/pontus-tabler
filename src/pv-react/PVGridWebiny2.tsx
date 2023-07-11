@@ -60,7 +60,6 @@ const PVGridWebiny2 = ({
   const [cursors, setCursors] = useState(new Set([null]));
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
-
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
 
   const dispatch = useDispatch();

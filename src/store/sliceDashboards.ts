@@ -22,6 +22,9 @@ export const dashboardSlice = createSlice({
     // Use the PayloadAction type to declare the contents of `action.payload`
     setDashboards: (state, action: PayloadAction<Dashboard>) => {
       state.value = [...state.value, action.payload];
+
+      localStorage.setItem('dashboards', JSON.stringify(state.value));
+
       console.log(state.value);
     },
     updateDashboard: (

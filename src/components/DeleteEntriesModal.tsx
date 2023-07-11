@@ -30,6 +30,7 @@ const DeleteEntriesModal = ({
 
       updateGridKey((prevState) => ({
         key: prevState?.key + 1,
+        modelId,
       }));
     });
   };

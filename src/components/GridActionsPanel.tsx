@@ -77,24 +77,9 @@ const GridActionsPanel = ({
               }}
               className="grid-actions-panel__delete-actions"
             >
-              {/* <i
-                className="fa-so lid fa-trash"
-                onClick={() => {
-                  setModelId(configModelId);
-                  entriesToBeDeleted &&
-                    entriesToBeDeleted.length > 0 &&
-                    setDeletion(true);
-                }}
-                style={{
-                  fontSize: '1.8rem',
-                  color: '#b53737',
-                  cursor: 'pointer',
-                }}
-              ></i> */}
               <BsFillTrash2Fill
                 onClick={() => {
                   setModelId(configModelId);
-                  console.log(entriesToBeDeleted);
                   entriesToBeDeleted &&
                     entriesToBeDeleted.length > 0 &&
                     setDeletion(true);
