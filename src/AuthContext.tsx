@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { useLocalStorage } from './UseLocalStorage';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,8 +28,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = (role: string) => {
     setIsAuthenticated(true);
     setUserRole(role);
-    navigate('/admin');
   };
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      navigate('/admin');
+    } else if (userRole === 'user') {
+      navigate('/dashboard');
+    }
+  }, [userRole]);
 
   const logout = () => {
     setIsAuthenticated(false);

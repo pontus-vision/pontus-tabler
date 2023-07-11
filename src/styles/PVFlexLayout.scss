@@ -61,8 +61,19 @@
       svg {
         font-size: 2rem;
       }
+      i {
+        cursor: pointer;
+        font-size: 1.8rem;
+      }
     }
     &__update-actions {
+      i {
+        font-size: 2rem;
+        cursor: pointer;
+        height: 2.65rem;
+        display: flex;
+        align-items: center;
+      }
       grid-row: 2;
     }
     &__select-btn {

@@ -102,7 +102,6 @@ const GridActionsPanel = ({
               />
               <i
                 className="fa-solid fa-x"
-                style={{ fontSize: '1.8rem', cursor: 'pointer' }}
                 onClick={() => {
                   changeBurguerMenuValue(true, 'flex');
                   setDeleteMode(false);
@@ -114,13 +113,6 @@ const GridActionsPanel = ({
             <div className="grid-actions-panel__update-actions">
               <i
                 className="fa-solid fa-x"
-                style={{
-                  fontSize: '1.8rem',
-                  cursor: 'pointer',
-                  height: '2.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
                 onClick={() => {
                   changeBurguerMenuValue(true, 'flex');
                   setUpdateMode(false);

@@ -12,6 +12,7 @@ const LoginPage = () => {
   const location = useLocation();
 
   const handleLogin = () => {
+    console.log('click');
     login(role);
   };
 
@@ -20,7 +21,7 @@ const LoginPage = () => {
   }, [role]);
 
   return (
-    <div>
+    <div className="login-form">
       <h2>Login Page</h2>
       <select onChange={(e) => setRole(e.target.value)}>
         <option value="admin">Admin</option>
