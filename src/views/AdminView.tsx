@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -16,6 +16,8 @@ import CmpPanel from '../components/CmpPanel';
 import { useTranslation } from 'react-i18next';
 import NewEntryView from './NewEntryView';
 import { ICmsGetContentModelDataField } from '../types';
+import { AuthContext } from '../AuthContext';
+import Unauthorized from './Unauthorized';
 
 export type getModelDataReturn = {
   columnNames: ICmsGetContentModelDataField[];
@@ -28,6 +30,8 @@ const AdminView = () => {
   const [showDashboardForm, setShowDashboardForm] = useState(false);
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const { t, i18n } = useTranslation();
+
+  const context = useContext(AuthContext);
 
   const dispatch = useDispatch();
 
@@ -45,17 +49,21 @@ const AdminView = () => {
 
   return (
     <AdminViewStyles>
-      <CmpPanel setSelectedCmp={setSelectedCmp} />
-      <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
-      {showDashboardForm && (
-        <FormDashboard
-          saveDashboard={saveDashboard}
-          setShowDashboardForm={setShowDashboardForm}
-        />
-      )}
-      <button onClick={() => setShowDashboardForm(true)}>
-        {t('save-state')}
-      </button>
+      {
+        <>
+          <CmpPanel setSelectedCmp={setSelectedCmp} />
+          <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
+          {showDashboardForm && (
+            <FormDashboard
+              saveDashboard={saveDashboard}
+              setShowDashboardForm={setShowDashboardForm}
+            />
+          )}
+          <button onClick={() => setShowDashboardForm(true)}>
+            {t('save-state')}
+          </button>
+        </>
+      }
     </AdminViewStyles>
   );
 };

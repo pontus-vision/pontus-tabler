@@ -1,24 +1,25 @@
-import { IJsonModel } from "flexlayout-react";
-import { useEffect, useState } from "react";
-import Button from "react-bootstrap/esm/Button";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import CmpPanel from "../components/CmpPanel";
-import PVFlexLayout from "../pv-react/PVFlexLayout";
-import { deleteDashboard, updateDashboard } from "../store/sliceDashboards";
-import { RootState } from "../store/store";
-import { Dashboard, FlexLayoutCmp } from "../types";
-import { useTranslation } from "react-i18next";
-import NewEntryView from "./NewEntryView";
+import { IJsonModel } from 'flexlayout-react';
+import { useEffect, useState } from 'react';
+import Button from 'react-bootstrap/esm/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import CmpPanel from '../components/CmpPanel';
+import PVFlexLayout from '../pv-react/PVFlexLayout';
+import { deleteDashboard, updateDashboard } from '../store/sliceDashboards';
+import { RootState } from '../store/store';
+import { Dashboard, FlexLayoutCmp } from '../types';
+import { useTranslation } from 'react-i18next';
+import NewEntryView from './NewEntryView';
+import { useAuth } from '../AuthContext';
 
 type Props = {
   dashboardId: string;
 };
 
-const DashboardView = ({ dashboardId }: Props) => {
-  const { value: dashboards } = useSelector(
-    (state: RootState) => state.dashboards
+const DashboardView = () => {
+  const { value: dashboards, dashboardId } = useSelector(
+    (state: RootState) => state.dashboards,
   );
   const [isEditing, setIsEditing] = useState(false);
   const [addCmp, setAddCmp] = useState(false);
@@ -26,7 +27,9 @@ const DashboardView = ({ dashboardId }: Props) => {
   const [gridState, setGridState] = useState<IJsonModel>();
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const [deleteModal, setDeleteModal] = useState(false);
-  const [modelId, setModelId] = useState<string | undefined>()
+  const [modelId, setModelId] = useState<string | undefined>();
+
+  const { userRole } = useAuth();
 
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -40,7 +43,9 @@ const DashboardView = ({ dashboardId }: Props) => {
     console.log({ dashboard });
   }, [dashboard]);
 
-  useEffect(() => {console.log(modelId)}, [modelId]);
+  useEffect(() => {
+    console.log(modelId);
+  }, [modelId]);
 
   useEffect(() => {
     console.log({ isEditing });
@@ -56,38 +61,50 @@ const DashboardView = ({ dashboardId }: Props) => {
   const delDashboard = () => {
     console.log({ dashboardId });
     dispatch(deleteDashboard({ id: dashboardId }));
-    navigate("/");
+    navigate('/');
   };
 
   return (
     <DashboardViewStyles>
       <h1 className="title">{dashboard?.name}</h1>
-      <div className="actions-panel">
-        {addCmp && <CmpPanel setSelectedCmp={setSelectedCmp} />}
-        {!addCmp && (
-          <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
-        )}
-        <Button onClick={() => setDeleteModal(true)}>{t("delete-dashboard")}</Button>
-        {deleteModal && (
-          <div className="delete-dashboard-modal">
-            <label>{dashboard?.name}</label>
-            <label>{t("confirm-delete")}</label>
-            <div className="delete-dashboard-modal__options">
-              <button onClick={() => delDashboard()}>{t("yes")}</button>
-              <Button onClick={() => setDeleteModal(false)}>{t("no")}</Button>
-            </div>
-          </div>
-        )}
-        {isEditing && (
-          <Button className="actions-panel__save" onClick={() => saveEdition()}>
-            {t("save-state")}
+      {userRole === 'admin' && (
+        <div className="actions-panel">
+          {addCmp && <CmpPanel setSelectedCmp={setSelectedCmp} />}
+          {!addCmp && (
+            <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
+          )}
+          <Button onClick={() => setDeleteModal(true)}>
+            {t('delete-dashboard')}
           </Button>
-        )}
-      </div>  
-      {modelId && <div className="shadow" onClick={()=>{
-        console.log("hey")
-        setModelId("")
-        }}></div>}
+          {deleteModal && (
+            <div className="delete-dashboard-modal">
+              <label>{dashboard?.name}</label>
+              <label>{t('confirm-delete')}</label>
+              <div className="delete-dashboard-modal__options">
+                <button onClick={() => delDashboard()}>{t('yes')}</button>
+                <Button onClick={() => setDeleteModal(false)}>{t('no')}</Button>
+              </div>
+            </div>
+          )}
+          {isEditing && (
+            <Button
+              className="actions-panel__save"
+              onClick={() => saveEdition()}
+            >
+              {t('save-state')}
+            </Button>
+          )}
+        </div>
+      )}
+      {modelId && (
+        <div
+          className="shadow"
+          onClick={() => {
+            console.log('hey');
+            setModelId('');
+          }}
+        ></div>
+      )}
       <PVFlexLayout
         setModelId={setModelId}
         selectedCmp={selectedCmp}
@@ -95,8 +112,8 @@ const DashboardView = ({ dashboardId }: Props) => {
         gridState={dashboard?.gridState}
         setIsEditing={setIsEditing}
       />
-      
-        {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
+
+      {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
     </DashboardViewStyles>
   );
 };
@@ -116,7 +133,7 @@ const DashboardViewStyles = styled.div`
     z-index: 1;
     width: 100%;
     height: 100%;
-    background-color: #0000004b
+    background-color: #0000004b;
   }
 
   & .title {
@@ -127,7 +144,6 @@ const DashboardViewStyles = styled.div`
     position: relative;
     width: 90%;
   }
-  
 
   & .fa-light {
     font-size: 3rem;

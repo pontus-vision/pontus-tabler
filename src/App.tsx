@@ -1,39 +1,42 @@
-import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import "./App.css";
-import Sidebar from "./components/Sidebar";
-import Header from "./components/Header";
-import { Routes, Route } from "react-router-dom";
-import AdminView from "./views/AdminView";
-import Form from "./components/Form";
-import DashboardView from "./views/DashboardView";
-import NewEntryView from "./views/NewEntryView";
+import { useContext, useEffect, useState } from 'react';
+import reactLogo from './assets/react.svg';
+import './App.css';
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import { Routes, Route } from 'react-router-dom';
+import AdminView from './views/AdminView';
+import Form from './components/Form';
+import DashboardView from './views/DashboardView';
+import NewEntryView from './views/NewEntryView';
+import Login from './views/Login';
+import { AuthContext, AuthProvider } from './AuthContext';
+import ProtectedLayout from './ProtectedLayout';
+import PrivateRoute from './PrivateRoutes';
+import Unauthorized from './views/Unauthorized';
 
 function App() {
   const [count, setCount] = useState(0);
-  const [openedSidebar, setOpenedSidebar] = useState(false);
+
+  const {} = useContext(AuthContext);
+
   const [dashboardId, setDashboardId] = useState<string>();
 
-  useEffect(()=>{
-    console.log({openedSidebar})
-  },[openedSidebar])
-
   return (
-    <>
-      <Header
-        setOpenedSidebar={setOpenedSidebar}
-        openedSidebar={openedSidebar}
-      />
-      <Sidebar setDashboardId={setDashboardId} setOpenedSidebar={setOpenedSidebar} openedSidebar={openedSidebar} />
-      <Routes>
-        <Route path="/admin" element={<AdminView />} />
-        <Route
-          path="/dashboard"
-          element={<DashboardView dashboardId={dashboardId} />}
-        />
-        <Route path="/NewEntry/:modelId" element={<NewEntryView />} />
-      </Routes>
-    </>
+    <AuthProvider>
+      <>
+        <Routes>
+          <Route path="unauthorized" element={<Unauthorized />} />
+          <Route element={<ProtectedLayout allowedRoles={['user', 'admin']} />}>
+            <Route path="/dashboard" element={<DashboardView />} />
+            <Route path="/NewEntry/:modelId" element={<NewEntryView />} />
+          </Route>
+          <Route element={<ProtectedLayout allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<AdminView />} />
+          </Route>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </>
+    </AuthProvider>
   );
 }
 

@@ -1,39 +1,52 @@
-import React from "react";
-import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import Form from "react-bootstrap/esm/Form";
+import React from 'react';
+import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import Form from 'react-bootstrap/esm/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import Button from 'react-bootstrap/esm/Button';
+import { useAuth } from '../AuthContext';
 
 const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-    const { i18n } = useTranslation();
-  
-    const handleLanguageChange = (event) => {
-      const selectedLanguage = event.target.value;
-      i18n.changeLanguage(selectedLanguage);
-    };
-  
+  const { i18n } = useTranslation();
+
+  const handleLanguageChange = (event) => {
+    const selectedLanguage = event.target.value;
+    i18n.changeLanguage(selectedLanguage);
+  };
 
   return (
     <div className="header">
-      <Form.Select data-testid="language-select" className="header__language-selector" defaultValue="en" onChange={handleLanguageChange}>
+      <Form.Select
+        data-testid="language-select"
+        className="header__language-selector"
+        defaultValue="en"
+        onChange={handleLanguageChange}
+      >
         <option value="en">English</option>
         <option value="ptBr">Português</option>
       </Form.Select>
-      <label  className={`header__hamburguer-menu ${openedSidebar ? "active" : ""}`}>
+      <label
+        className={`header__hamburguer-menu ${openedSidebar ? 'active' : ''}`}
+      >
         <input
-        data-testid="toggle-input"
+          data-testid="toggle-input"
           checked={openedSidebar}
           onClick={(e: any) => {
-            setOpenedSidebar(e.target.checked)}}
+            setOpenedSidebar(e.target.checked);
+          }}
           type="checkbox"
         />
       </label>
-      <img data-testid="header-logo" className={`header__logo ${openedSidebar ? "active" : ""}`} onClick={()=>navigate("/")} src="/src/assets/pontus-logo.png" />    
-      </div>
+      <img
+        data-testid="header-logo"
+        className={`header__logo ${openedSidebar ? 'active' : ''}`}
+        onClick={() => navigate('/')}
+        src="/src/assets/pontus-logo.png"
+      />
+    </div>
   );
 };
 
@@ -51,12 +64,12 @@ const HeaderStyles = styled.div`
   --animation-timing: 100ms ease-in-out;
   --hamburguer-height: calc(var(--bar-height) * 3 + var(--hamburguer-gap) * 2);
 
-  .logo{
+  .logo {
     position: relative;
     left: 5rem;
     cursor: pointer;
     transition: left 100ms ease-in-out;
-    &.active{
+    &.active {
       left: 15rem;
     }
   }
@@ -75,15 +88,15 @@ const HeaderStyles = styled.div`
     position: absolute;
     z-index: 4;
     transition: left 100ms ease-in-out;
-    &.active{
-      left: 11.5rem
+    &.active {
+      left: 11.5rem;
     }
   }
 
   .hamburguer-menu::before,
   .hamburguer-menu input,
   .hamburguer-menu::after {
-    content: "";
+    content: '';
     width: var(--bar-width);
     height: var(--bar-height);
     background-color: var(--foreground);
@@ -115,7 +128,7 @@ const HeaderStyles = styled.div`
     opacity: 0;
     width: 0;
   }
-  .language-selector{
+  .language-selector {
     right: 2rem;
     position: absolute;
   }

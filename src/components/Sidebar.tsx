@@ -6,23 +6,22 @@ import styled from 'styled-components';
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';
+import { Dashboard } from '../types';
+import { setDashboardId } from '../store/sliceDashboards';
+import { useAuth } from '../AuthContext';
 
 type Props = {
   openedSidebar: boolean;
   setOpenedSidebar: Dispatch<SetStateAction<boolean>>;
-  setDashboardId: Dispatch<SetStateAction<string | undefined>>;
 };
 
-const Sidebar = ({
-  openedSidebar,
-  setDashboardId,
-  setOpenedSidebar,
-}: Props) => {
+const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const { value: dashboards } = useSelector((state: RootState) => {
     return state.dashboards;
   });
@@ -97,6 +96,7 @@ const Sidebar = ({
           <option value="ptBr">Português</option>
         </Form.Select>
       )}
+      <Button onClick={() => logout()}>Logout</Button>
       <Button
         className="sidebar__admin-btn"
         type="button"
@@ -106,11 +106,11 @@ const Sidebar = ({
       </Button>
 
       {dashboards &&
-        dashboards.map((dashboard) => (
+        dashboards.map((dashboard: Dashboard) => (
           <label
             onClick={() => {
               navigate('/dashboard');
-              setDashboardId(dashboard.id);
+              dispatch(setDashboardId({ id: dashboard.id }));
             }}
             key={dashboard.id}
           >
