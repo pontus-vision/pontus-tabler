@@ -203,35 +203,35 @@ const PVFlexLayout = ({
     }
   };
 
-  const calcCmpWeight = () => {
-    if (!model) return;
+  // const calcCmpWeight = () => {
+  //   if (!model) return;
 
-    const rootNode = model.getRoot();
-    const tabsets = filterComponentsPerType(rootNode.toJson(), 'tabset');
+  //   const rootNode = model.getRoot();
+  //   const tabsets = filterComponentsPerType(rootNode.toJson(), 'tabset');
 
-    const tabsetsHeight = tabsets.map((tabset) => {
-      const tabsetSelected = tabset?.selected;
-      if (tabsetSelected) {
-        return tabset.children[tabsetSelected]?.config?.height;
-      } else if (!tabsetSelected) {
-        return tabset.children[0]?.config?.height;
-      }
-    });
+  //   const tabsetsHeight = tabsets.map((tabset) => {
+  //     const tabsetSelected = tabset?.selected;
+  //     if (tabsetSelected) {
+  //       return tabset.children[tabsetSelected]?.config?.height;
+  //     } else if (!tabsetSelected) {
+  //       return tabset.children[0]?.config?.height;
+  //     }
+  //   });
 
-    const totalHeight = tabsetsHeight.reduce((acc, cur) => {
-      acc += cur;
-      return acc;
-    }, 0);
+  //   const totalHeight = tabsetsHeight.reduce((acc, cur) => {
+  //     acc += cur;
+  //     return acc;
+  //   }, 0);
 
-    const jsonCopy = JSON.parse(JSON.stringify(model.toJson()));
+  //   const jsonCopy = JSON.parse(JSON.stringify(model.toJson()));
 
-    console.log(
-      { tabsets, totalHeight, tabsetsHeight },
-      tabsets.length * 100 + totalHeight + 'px',
-    );
+  //   console.log(
+  //     { tabsets, totalHeight, tabsetsHeight },
+  //     tabsets.length * 100 + totalHeight + 'px',
+  //   );
 
-    return tabsets.length * 100 + totalHeight + 'px';
-  };
+  //   return tabsets.length * 100 + totalHeight + 'px';
+  // };
 
   const calcContainerHeight = () => {
     if (!model) return;
@@ -262,7 +262,7 @@ const PVFlexLayout = ({
   };
 
   useEffect(() => {
-    setContainerHeight(calcContainerHeight());
+    setContainerHeight(calcContainerHeight() || '400px');
   }, [model]);
 
   const filterComponentsPerType = (layout: any, type: string): any => {
@@ -293,7 +293,7 @@ const PVFlexLayout = ({
 
     console.log({ tabsets });
 
-    setContainerHeight(calcContainerHeight());
+    setContainerHeight(calcContainerHeight() || '400px');
   };
 
   const addComponent = (entry: FlexLayoutCmp) => {
@@ -370,14 +370,17 @@ const PVFlexLayout = ({
           modelId={modelId}
         />
       )}
-      {deletion && entriesToBeDeleted && modelId && (
-        <DeleteEntriesModal
-          setDeletion={setDeletion}
-          entries={entriesToBeDeleted}
-          modelId={modelId}
-          updateGridKey={setUpdatedGrid}
-        />
-      )}
+      {deletion &&
+        entriesToBeDeleted &&
+        entriesToBeDeleted.length &&
+        modelId && (
+          <DeleteEntriesModal
+            setDeletion={setDeletion}
+            entries={entriesToBeDeleted}
+            modelId={modelId}
+            updateGridKey={setUpdatedGrid}
+          />
+        )}
       <div
         className="flex-layout-wrapper"
         style={{ height: '65vh', width: '90%', overflowY: 'auto' }}

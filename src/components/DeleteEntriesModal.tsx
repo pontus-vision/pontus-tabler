@@ -35,8 +35,6 @@ const DeleteEntriesModal = ({
     });
   };
 
-  if (entries.length === 0) return;
-
   return (
     <>
       <div

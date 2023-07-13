@@ -17,6 +17,11 @@ export const store = configureStore({
   preloadedState: initialState,
 });
 
+store.subscribe(() => {
+  const state = store.getState();
+  localStorage.setItem('dashboards', JSON.stringify(state.dashboards.value));
+});
+
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
