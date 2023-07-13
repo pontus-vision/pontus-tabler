@@ -624,7 +624,7 @@
   .login-page .login-form {
     height: 90%;
     flex-direction: column;
-    padding: 1rem;
+    padding: 2rem 1rem;
   }
   .login-page .login-form .welcome-msg {
     gap: 0;
