@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import modelReducer from './slice';
 import dashboardsReducer from './sliceDashboards';
 import updateRowReducer from './sliceGridUpdate';
+import tokenReducer from './sliceToken';
 
 const storedDashboards = localStorage.getItem('dashboards');
 const initialState = {
@@ -13,8 +14,8 @@ export const store = configureStore({
     model: modelReducer,
     dashboards: dashboardsReducer,
     updateRow: updateRowReducer,
+    token: tokenReducer,
   },
-  preloadedState: initialState,
 });
 
 store.subscribe(() => {

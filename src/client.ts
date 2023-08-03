@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
   ICmsGetContentModel,
@@ -12,8 +13,13 @@ import {
   cmsEntriesCreateModel,
   cmsGetContentModel,
   cmsPublishModelId,
+  listApiKeys,
   listModel,
 } from './webinyApi';
+import {
+  Configuration,
+  DefaultApiFetchParamCreator,
+} from './pontus-api/typescript-fetch-client-generated';
 
 export const getModelData = async (
   modelId: string,
@@ -29,6 +35,7 @@ export const getModelData = async (
     }
   | undefined
 > => {
+  console.log('hyuih');
   const cmsContentModel = await cmsGetContentModel(modelId);
 
   const { fields: columnNames } = cmsContentModel.data;
@@ -47,6 +54,20 @@ export const getModelData = async (
 
   return { columnNames, modelContentListData, meta };
 };
+
+const api = axios.create({
+  baseURL: 'http://localhost:8080/PontusTest/1.0.0/',
+  headers: {
+    Authorization: 'Bearer 123456',
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  },
+});
+
+(async () => {
+  console.log(await api.post('/table/data/read', {}));
+})();
 
 export const getModelFields = async (
   modelId: string,
@@ -142,4 +163,10 @@ const createMutationStr = (fields: ICmsGetContentModelDataField[]): string => {
   });
 
   return str;
+};
+
+export const getApiKeys = async () => {
+  const data = await listApiKeys();
+
+  return data;
 };

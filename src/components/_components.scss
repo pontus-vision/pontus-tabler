@@ -16,7 +16,12 @@
   left: 50%;
 }
 
-.select-cmp-panel {
+.cmp-panel {
+  // display: flex;
+  // flex-direction: column;
+  &__title {
+    display: none;
+  }
   .dropdown-panels {
     display: flex;
     gap: 1rem;
@@ -162,6 +167,12 @@
 
   .delete-modal {
     width: 95%;
+  }
+
+  .dropdown-panels {
+    &__title {
+      display: block;
+    }
   }
 }
 

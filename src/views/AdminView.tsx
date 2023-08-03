@@ -47,6 +47,10 @@ const AdminView = () => {
     dispatch(setDashboards(dashboard));
   };
 
+  useEffect(() => {
+    console.log(import.meta.env.VITE_WEBINY_API_TOKEN);
+  }, []);
+
   return (
     <AdminViewStyles>
       {

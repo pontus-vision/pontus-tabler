@@ -26,11 +26,10 @@ function App() {
       <>
         <Routes>
           <Route path="unauthorized" element={<Unauthorized />} />
-          <Route element={<ProtectedLayout allowedRoles={['user', 'admin']} />}>
+          <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
             <Route path="/dashboard" element={<DashboardView />} />
-            <Route path="/NewEntry/:modelId" element={<NewEntryView />} />
           </Route>
-          <Route element={<ProtectedLayout allowedRoles={['admin']} />}>
+          <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
             <Route path="/admin" element={<AdminView />} />
           </Route>
           <Route path="/login" element={<Login />} />

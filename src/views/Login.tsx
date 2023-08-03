@@ -3,10 +3,16 @@ import { useAuth } from '../AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select } from 'semantic-ui-react';
 import FormSelect from 'react-bootstrap/esm/FormSelect';
+import { listApiKeys } from '../webinyApi';
+import { useDispatch } from 'react-redux';
+import { defineConfig } from 'vite';
+import { getApiKeys } from '../client';
 
 const LoginPage = () => {
   const { login } = useAuth();
-  const [role, setRole] = useState('admin');
+  const [role, setRole] = useState('Admin');
+  const [apiKeys, setApiKeys] = useState();
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,6 +21,22 @@ const LoginPage = () => {
     e.preventDefault();
     console.log('click');
     login(role);
+  };
+
+  useEffect(() => {
+    const func = async () => {
+      const { data } = await getApiKeys();
+      console.log({ data });
+      setApiKeys(data);
+    };
+    func();
+  }, []);
+
+  const setSelectedApiKey = (apiKey: string) => {
+    apiKey = JSON.parse(apiKey);
+    setRole(apiKey.name);
+    import.meta.env.VITE_WEBINY_API_TOKEN = apiKey.token;
+    console.log(import.meta.env.VITE_WEBINY_API_TOKEN);
   };
 
   useEffect(() => {
@@ -33,9 +55,13 @@ const LoginPage = () => {
           </p>
         </section>
         <section className="form">
-          <select onChange={(e) => setRole(e.target.value)}>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
+          <select onChange={(e) => setSelectedApiKey(e.target.value)}>
+            {apiKeys &&
+              apiKeys.map((api) => (
+                <option value={JSON.stringify(api)}>{api.name}</option>
+              ))}
+            <option value="Admin">Admin</option>
+            <option value="User">User</option>
           </select>
           <form onSubmit={handleLogin}>
             <h3>Sign In</h3>

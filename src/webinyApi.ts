@@ -6,6 +6,8 @@ import {
   UnknownKey,
 } from './types';
 import { CmsEntriesList } from './types';
+import { useSelector } from 'react-redux';
+import { RootState } from './store/store';
 
 const webinyApi = axios.create({
   baseURL: `https://d2ekewy9aiz800.cloudfront.net/`,
@@ -13,6 +15,13 @@ const webinyApi = axios.create({
   headers: {
     Authorization: `Bearer ${import.meta.env.VITE_WEBINY_API_TOKEN}`,
   },
+});
+
+const COGNITO_BEARER_TOKEN = `
+Bearer eyJraWQiOiJKYjZsaXpRaEtOZlpYbndIUU9IbDRMSnlHMEp6dzNQRTBtNDhDQjRkU3I4PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI4ZTlmN2JkNS1jMzQ3LTQ5YTAtOThjMC1kZGI1YzFlMzMzMzMiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnNhLWVhc3QtMS5hbWF6b25hd3MuY29tXC9zYS1lYXN0LTFfZW04WW9EQnQ0IiwiY29nbml0bzp1c2VybmFtZSI6ImFkbWluQHBvbnR1c3Zpc2lvbi5jb20iLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbkBwb250dXN2aXNpb24uY29tIiwiZ2l2ZW5fbmFtZSI6ImFkbWluIiwib3JpZ2luX2p0aSI6Ijg0Y2Q0NzNkLTgwYTItNDM1OC04MjYxLTBiMTdlODk1Mzc4NyIsImF1ZCI6IjVlajFoODh0cWxyOTFpMWU1cHZtM2M1ZGV2IiwiZXZlbnRfaWQiOiJiMGQxOGYyZC0wZGZiLTRmZTQtYTY1Ni0xNTkxZjlmMmRjMWMiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY4OTI4Njk2MSwiZXhwIjoxNjg5MzU4MTMwLCJpYXQiOjE2ODkzNTQ1MzAsImZhbWlseV9uYW1lIjoiYWRtaW4iLCJqdGkiOiJhZWE1OGQxOC03OGMxLTQ3NGEtYjg2NC1iMjgwYTJhY2NlNmUiLCJlbWFpbCI6ImFkbWluQHBvbnR1c3Zpc2lvbi5jb20ifQ.K39ZZrP4pE1fn-XcOFg7xbt458_NgfBNN57C3BFzP_xL_UKihgbkpHYVK-K_vj3d43Fsx8tzwgMYixDRQQgAUnnCm1oPzGnZv-XPvmU9MaD3a-ZcIG41PqMwFUExkKcPzXHFujYGcxF7sedWJX5jrIZ3-KFW6lHBGNqwIPVOmMHe1h64C5570sCFdViW2mod-tI8EG9oF4oUy10rsv3Zf0A_9YZS9zkshVBl2ZmLhsQBwmb8sljkUMkQEM80ZIHTTEBQ0LqALfQku5fwLqEaKT6FE6j8pW0GYRoLu0xSmCkBV6QM8iAC_11UVu7IREndJaaYmaMJEQ_pD8F6_2UKeg`;
+
+const cloudfrontGraphQl = axios.create({
+  baseURL: 'https://d2ekewy9aiz800.cloudfront.net/graphql',
 });
 
 export const listModel = async (
@@ -110,6 +119,118 @@ export const listModel = async (
   } catch (error) {
     console.error(error);
   }
+};
+
+export const login = async () => {
+  const query = `mutation Login {
+    security {
+      login {
+        data {
+          ... on AdminUserIdentity {
+            id
+            displayName
+            type
+            permissions
+            profile {
+              email
+              firstName
+              lastName
+              avatar
+              gravatar
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        error {
+          code
+          message
+          data
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+  }
+  `;
+};
+
+export const listApiKeys = async () => {
+  const query = `query ListApiKeys {
+    security {
+      apiKeys: listApiKeys {
+        data {
+          id
+          name
+          description
+          token
+          permissions
+          createdOn
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+  }
+  `;
+
+  const res = await cloudfrontGraphQl.post(
+    '',
+    {
+      query,
+    },
+    {
+      headers: {
+        Authorization: COGNITO_BEARER_TOKEN,
+      },
+    },
+  );
+
+  return res.data.data.security.apiKeys;
+};
+
+export const getApiKey = async (id: string) => {
+  const query = `query GetApiKey($id: ID!) {
+    security {
+      apiKey: getApiKey(id: $id) {
+        data {
+          id
+          name
+          description
+          token
+          permissions
+          createdOn
+          __typename
+        }
+        error {
+          code
+          message
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+  }
+  `;
+
+  const res = await cloudfrontGraphQl.post(
+    '',
+    {
+      query,
+      variables: {
+        id: `${id}`,
+      },
+    },
+    {
+      headers: {
+        Authorization: COGNITO_BEARER_TOKEN,
+      },
+    },
+  );
 };
 
 export const getContentModel = async (modelId: string) => {

@@ -26,7 +26,8 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
   }, []);
 
   return (
-    <CmpPanelStyles>
+    <div className="cmp-panel">
+      <label className="cmp-panel__title">{t('add-component')}</label>
       <div className="dropdown-panels">
         <div className="dropdown-panels__tables">
           {t('tables')}
@@ -64,7 +65,7 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
           </BootstrapForm.Select>
         </div>
       </div>
-    </CmpPanelStyles>
+    </div>
   );
 };
 

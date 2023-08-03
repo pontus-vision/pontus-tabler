@@ -65,10 +65,11 @@ const DashboardView = () => {
   };
 
   return (
-    <DashboardViewStyles>
+    <div className="dashboard-view">
       <h1 className="title">{dashboard?.name}</h1>
-      {userRole === 'admin' && (
+      {userRole === 'Admin' && (
         <div className="actions-panel">
+          {addCmp && <div className="shadow-mobile"></div>}
           {addCmp && <CmpPanel setSelectedCmp={setSelectedCmp} />}
           {!addCmp && (
             <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
@@ -114,80 +115,8 @@ const DashboardView = () => {
       />
 
       {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
-    </DashboardViewStyles>
+    </div>
   );
 };
-
-const DashboardViewStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  height: 92%;
-  width: 100%;
-  .shadow {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    background-color: #0000004b;
-  }
-
-  & .title {
-    margin: 0;
-  }
-  & .layout {
-    min-height: 30rem;
-    position: relative;
-    width: 90%;
-  }
-
-  & .fa-light {
-    font-size: 3rem;
-    border: 1px solid black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    width: 3rem;
-    height: 3rem;
-    cursor: pointer;
-  }
-
-  & .actions-panel {
-    display: flex;
-    width: 90%;
-    justify-content: space-around;
-    &__save {
-      background-color: #8d8b01;
-    }
-  }
-  & .delete-dashboard-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    height: 30%;
-    width: 30%;
-    background-color: blue;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    transform: translate(-50%, -50%);
-    & label {
-      font-size: 1.5rem;
-    }
-  }
-  & .flex-layout-wrapper {
-    height: 30rem;
-    width: fit-content;
-    overflow-y: auto;
-  }
-`;
 
 export default DashboardView;

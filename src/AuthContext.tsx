@@ -23,6 +23,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [token, setToken] = useState();
   const navigate = useNavigate();
 
   const login = (role: string) => {
@@ -31,9 +32,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    if (userRole === 'admin') {
+    if (userRole === 'Admin') {
       navigate('/admin');
-    } else if (userRole === 'user') {
+    } else if (userRole === 'User') {
       navigate('/dashboard');
     }
   }, [userRole]);
