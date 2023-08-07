@@ -51,6 +51,7 @@ const PVFlexLayout = ({
     rowId,
     modelId: updateModelId,
   } = useSelector((state: RootState) => state.updateRow);
+
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
   const [containerHeight, setContainerHeight] = useState('32rem');
   const [modelId, setModelId] = useState<string | undefined>();
@@ -125,6 +126,10 @@ const PVFlexLayout = ({
         console.log({ entriesToBeDeleted, deletion });
       }, [entriesToBeDeleted, deletion]);
 
+      useEffect(() => {
+        console.log({ modelId });
+      }, [modelId]);
+
       return (
         <>
           <GridActionsPanel
@@ -153,7 +158,7 @@ const PVFlexLayout = ({
             id={id}
             lastState={lastState || config.lastState}
             onValueChange={handleValueChange}
-            modelId={config.modelId}
+            modelId={selectedCmp?.cmp?.tableId}
             containerHeight={containerHeight}
             updateMode={updateMode}
             setEntriesToBeDeleted={setEntriesToBeDeleted}
@@ -202,36 +207,6 @@ const PVFlexLayout = ({
       setModel(Model.fromJson(jsonCopy));
     }
   };
-
-  // const calcCmpWeight = () => {
-  //   if (!model) return;
-
-  //   const rootNode = model.getRoot();
-  //   const tabsets = filterComponentsPerType(rootNode.toJson(), 'tabset');
-
-  //   const tabsetsHeight = tabsets.map((tabset) => {
-  //     const tabsetSelected = tabset?.selected;
-  //     if (tabsetSelected) {
-  //       return tabset.children[tabsetSelected]?.config?.height;
-  //     } else if (!tabsetSelected) {
-  //       return tabset.children[0]?.config?.height;
-  //     }
-  //   });
-
-  //   const totalHeight = tabsetsHeight.reduce((acc, cur) => {
-  //     acc += cur;
-  //     return acc;
-  //   }, 0);
-
-  //   const jsonCopy = JSON.parse(JSON.stringify(model.toJson()));
-
-  //   console.log(
-  //     { tabsets, totalHeight, tabsetsHeight },
-  //     tabsets.length * 100 + totalHeight + 'px',
-  //   );
-
-  //   return tabsets.length * 100 + totalHeight + 'px';
-  // };
 
   const calcContainerHeight = () => {
     if (!model) return;
@@ -303,10 +278,11 @@ const PVFlexLayout = ({
       component: entry.componentName,
       config: {
         title: entry.cmp?.name,
-        modelId: entry.cmp?.modelId,
+        modelId: entry.cmp?.tableId,
         lastState: [],
       },
     };
+    console.log({ entry, aggridCmp });
 
     const rootNode = model.getRoot();
 
@@ -333,6 +309,8 @@ const PVFlexLayout = ({
     // console.log({ jsonCopy, newJson });
 
     setModel(Model.fromJson(jsonCopy));
+
+    console.log({ model: model.toJson().layout.children[0].children[0] });
   };
 
   useEffect(() => {

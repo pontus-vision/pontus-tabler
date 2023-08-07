@@ -1,23 +1,27 @@
 import { Dispatch, useEffect, useState } from 'react';
 import { FlexLayoutCmp, WebinyModel } from '../types';
 import BootstrapForm from 'react-bootstrap/Form';
-import { getModels } from '../webinyApi';
+import { getModelsWebiny } from '../webinyApi';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { getModels } from '../client';
+import {
+  GetTablesResponse,
+  Table,
+} from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   setSelectedCmp: Dispatch<React.SetStateAction<FlexLayoutCmp | undefined>>;
 };
 
 const CmpPanel = ({ setSelectedCmp }: Props) => {
-  const [models, setModels] = useState<WebinyModel[]>();
+  const [tables, setTables] = useState<Table[]>();
   const { t, i18n } = useTranslation();
 
   const fetchModels = async () => {
-    const { data } = await getModels();
-    const listModels = data.data.listContentModels.data;
-
-    setModels(listModels);
+    const data = await getModels();
+    console.log(data.tables);
+    setTables(data.tables);
     return data;
   };
 
@@ -42,10 +46,10 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
             defaultValue={'option'}
           >
             <option value="option"></option>
-            {models &&
-              models.map((model, index) => (
-                <option key={index} value={JSON.stringify(model)}>
-                  {model.name}
+            {tables &&
+              tables.map((table, index) => (
+                <option key={index} value={JSON.stringify(table)}>
+                  {table.name}
                 </option>
               ))}
           </BootstrapForm.Select>

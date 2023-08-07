@@ -364,7 +364,7 @@ export const cmsGetContentModel = async (
   return result;
 };
 
-export const getModels = async () => {
+export const getModelsWebiny = async () => {
   const data = webinyApi.post('cms/read/en-US', {
     query: `{
     listContentModels {
@@ -379,6 +379,7 @@ export const getModels = async () => {
     }
   }`,
   });
+  console.log({ data });
   return data;
 };
 

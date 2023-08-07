@@ -13,12 +13,15 @@ import {
   cmsEntriesCreateModel,
   cmsGetContentModel,
   cmsPublishModelId,
+  getModelsWebiny,
   listApiKeys,
   listModel,
 } from './webinyApi';
 import {
   Configuration,
   DefaultApiFetchParamCreator,
+  GetTablesResponse,
+  Table,
 } from './pontus-api/typescript-fetch-client-generated';
 
 export const getModelData = async (
@@ -35,9 +38,7 @@ export const getModelData = async (
     }
   | undefined
 > => {
-  console.log('hyuih');
   const cmsContentModel = await cmsGetContentModel(modelId);
-
   const { fields: columnNames } = cmsContentModel.data;
   const data = await listModel(
     modelId,
@@ -47,11 +48,10 @@ export const getModelData = async (
     fieldsSearches,
     sorting,
   );
-
   if (!data) return;
-
   const { data: modelContentListData, meta } = data;
 
+  // console.log({ modelContentListData });
   return { columnNames, modelContentListData, meta };
 };
 
@@ -66,19 +66,37 @@ const api = axios.create({
 });
 
 (async () => {
-  console.log(await api.post('/table/data/read', {}));
+  console.log(await api.post('/tables/read', {}), await getModelsWebiny());
+  console.log(
+    await api.post('/tables/read', {}),
+    await cmsGetContentModel('titulares'),
+  );
 })();
 
-export const getModelFields = async (
-  modelId: string,
-): Promise<ICmsGetContentModelData | undefined> => {
-  try {
-    const { data } = await cmsGetContentModel(modelId);
+export const getModels = async (): Promise<GetTablesResponse> => {
+  const { data } = await api.post('/tables/read', {});
+  // const listModels = data.data.listContentModels.data;
 
-    return data;
-  } catch (error) {
-    console.error(error);
-  }
+  return data;
+};
+
+export const getModelFields = async (
+  tableId: string,
+): Promise<Table | undefined> => {
+  // try {
+  //   const { data } = await cmsGetContentModel(modelId);
+
+  //   console.log({ data });
+  //   return data;
+  // } catch (error) {
+  //   console.error(error);
+  // }
+
+  const data = await api.post('/table/read', { tableId });
+
+  console.log({ data });
+
+  return data;
 };
 
 export const deleteEntry = async (modelId: string, entryId: string) => {

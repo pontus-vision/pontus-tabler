@@ -25,7 +25,7 @@ function App() {
     <AuthProvider>
       <>
         <Routes>
-          <Route path="unauthorized" element={<Unauthorized />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
           <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
             <Route path="/dashboard" element={<DashboardView />} />
           </Route>
@@ -36,6 +36,8 @@ function App() {
         </Routes>
       </>
     </AuthProvider>
+
+    // <AdminView />
   );
 }
 

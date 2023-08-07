@@ -1,6 +1,7 @@
-import { ColumnApi, GridApi } from "ag-grid-community";
-import { IJsonModel } from "flexlayout-react";
-import { P } from "vitest/dist/types-5872e574";
+import { ColumnApi, GridApi } from 'ag-grid-community';
+import { IJsonModel } from 'flexlayout-react';
+import { P } from 'vitest/dist/types-5872e574';
+import { Table } from './pontus-api/typescript-fetch-client-generated';
 
 export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Index of the first rendered row
@@ -18,22 +19,22 @@ export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
 }
 
 export interface IListModelResponse {
-  data: IListModelResponseData[]
-  meta: Meta 
+  data: IListModelResponseData[];
+  meta: Meta;
 }
 
 export interface IListModelResponseData {
-    id: string;
-    entryId: string;
-    createdOn: string;
-    savedOn: string;
-    createdBy: {
-      displayName: string;
-    };
-    ownedBy: {
-      displayName: string;
-    };
-    [key: string]: unknown;
+  id: string;
+  entryId: string;
+  createdOn: string;
+  savedOn: string;
+  createdBy: {
+    displayName: string;
+  };
+  ownedBy: {
+    displayName: string;
+  };
+  [key: string]: unknown;
 }
 
 export interface UnknownKey {
@@ -75,9 +76,9 @@ export interface Validation {
 }
 
 export interface ValidationSettings {
-    flags: boolean,
-    preset: string,
-    regex?: boolean
+  flags: boolean;
+  preset: string;
+  regex?: boolean;
 }
 
 export interface CmsEntriesList {
@@ -117,12 +118,12 @@ export interface CmsEntriesListContentMeta {
 
 export interface FlexLayoutCmp {
   componentName: string;
-  cmp?: WebinyModel;
+  cmp?: Table;
 }
 
 export interface WebinyRefInput {
   modelId: string;
-  id: string
+  id: string;
 }
 
 export interface WebinyModel {
@@ -178,7 +179,7 @@ export interface ICmsGetContentModelDataField {
     models?: {
       modelId: string;
     }[];
-    fields?: ICmsGetContentModelDataField[] 
+    fields?: ICmsGetContentModelDataField[];
   };
   __typename: string;
 }
@@ -197,7 +198,7 @@ export interface Value {
 }
 
 export enum Typename {
-  CMSPredefinedValue = "CmsPredefinedValue",
+  CMSPredefinedValue = 'CmsPredefinedValue',
 }
 
 export interface Renderer {

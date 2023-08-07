@@ -15,7 +15,7 @@ import {
   IRowNode,
   SelectionChangedEvent,
 } from 'ag-grid-community';
-import { getModelData } from '../client';
+import { getModelData, getModelFields } from '../client';
 import { useDispatch } from 'react-redux';
 import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
@@ -92,86 +92,92 @@ const PVGridWebiny2 = ({
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
 
+          console.log({ modelId });
+
+          const { data } = await getModelFields(modelId);
+
+          console.log({ data });
+
           if (!modelId) return;
 
-          const data = await getModelData(
-            modelId,
-            pageSize,
-            [...cursors][index],
-            filter,
-            sorting,
-          );
+          // const data = await getModelData(
+          //   modelId,
+          //   pageSize,
+          //   [...cursors][index],
+          //   filter,
+          //   sorting,
+          // );
 
-          if (!data) return;
+          // if (!data) return;
 
-          setCursors((previousState) => previousState.add(data.meta.cursor));
+          // setCursors((previousState) => previousState.add(data.meta.cursor));
 
-          const { totalCount } = data.meta;
+          // const { totalCount } = data.meta;
 
-          const rows = data.modelContentListData.map(
-            (row: IListModelResponseData): { [key: string]: unknown } => {
-              const {
-                createdBy,
-                createdOn,
-                entryId,
-                ownedBy,
-                savedOn,
-                ...rest
-              } = row;
-              return rest;
-            },
-          );
+          // const rows = data.modelContentListData.map(
+          //   (row: IListModelResponseData): { [key: string]: unknown } => {
+          //     const {
+          //       createdBy,
+          //       createdOn,
+          //       entryId,
+          //       ownedBy,
+          //       savedOn,
+          //       ...rest
+          //     } = row;
+          //     return rest;
+          //   },
+          // );
 
-          const objFields = data.columnNames.filter(
-            (col) => col.type === 'object',
-          );
+          // const objFields = data.columnNames.filter(
+          //   (col) => col.type === 'object',
+          // );
 
-          const refInputFields = data.columnNames.filter(
-            (col) => col.renderer.name === 'ref-input',
-          );
+          // const refInputFields = data.columnNames.filter(
+          //   (col) => col.renderer.name === 'ref-input',
+          // );
 
-          const refInputsFields = data.columnNames.filter(
-            (col) => col.renderer.name === 'ref-inputs',
-          );
+          // const refInputsFields = data.columnNames.filter(
+          //   (col) => col.renderer.name === 'ref-inputs',
+          // );
 
-          const rows2 = rows.map((row) => {
-            const flattenObj = (ob: { [key: string]: any }) => {
-              let result = {} as any;
-              for (const i in ob) {
-                if (
-                  typeof ob[i] === 'object' &&
-                  !Array.isArray(ob[i]) &&
-                  objFields.some((field) => field.fieldId === i)
-                ) {
-                  const temp = flattenObj(ob[i]);
-                  for (const j in temp) {
-                    // Store temp in result
-                    result[j] = temp[j];
-                  }
-                } else if (
-                  refInputFields.some((field) => field.fieldId === i)
-                ) {
-                  if (!!ob[i]) {
-                    result[i] = Object.values(ob[i])[0];
-                  }
-                } else if (
-                  refInputsFields.some((field) => field.fieldId === i)
-                ) {
-                  if (ob[i]) {
-                    const values = ob[i].map(
-                      (el: { [key: string]: unknown }) => Object.values(el)[0],
-                    );
-                    result[i] = values.length > 1 ? values.join(', ') : values;
-                  }
-                } else {
-                  result[i] = ob[i];
-                }
-              }
-              return result;
-            };
+          // const rows2 = rows.map((row) => {
+          //   const flattenObj = (ob: { [key: string]: any }) => {
+          //     let result = {} as any;
+          //     for (const i in ob) {
+          //       if (
+          //         typeof ob[i] === 'object' &&
+          //         !Array.isArray(ob[i]) &&
+          //         objFields.some((field) => field.fieldId === i)
+          //       ) {
+          //         const temp = flattenObj(ob[i]);
+          //         for (const j in temp) {
+          //           // Store temp in result
+          //           result[j] = temp[j];
+          //         }
+          //       } else if (
+          //         refInputFields.some((field) => field.fieldId === i)
+          //       ) {
+          //         if (!!ob[i]) {
+          //           result[i] = Object.values(ob[i])[0];
+          //         }
+          //       } else if (
+          //         refInputsFields.some((field) => field.fieldId === i)
+          //       ) {
+          //         if (ob[i]) {
+          //           const values = ob[i].map(
+          //             (el: { [key: string]: unknown }) => Object.values(el)[0],
+          //           );
+          //           result[i] = values.length > 1 ? values.join(', ') : values;
+          //         }
+          //       } else {
+          //         result[i] = ob[i];
+          //       }
+          //     }
+          //     return result;
+          //   };
 
-            return flattenObj(row);
-          });
+          //   return flattenObj(row);
+          // });
 
           setColumnDefs([
             {
@@ -205,39 +211,41 @@ const PVGridWebiny2 = ({
               cellRenderer: () => <i className="fa-solid fa-pen-to-square"></i>,
               onCellClicked: handleUpdateIconClick,
             },
-            ...data.columnNames.map((field) => {
-              if (
-                field.type === 'object' &&
-                field.settings?.fields &&
-                checkHiddenObjects === false
-              ) {
-                return {
-                  headerName: field.label,
-                  field: field.fieldId,
-                  children: field.settings?.fields.map((field) => {
-                    return {
-                      sortable: false,
-                      field: field.fieldId,
-                      headerName: field.label,
-                    };
-                  }),
-                };
-              } else if (field.type === 'ref') {
-                return {
-                  headerName: field.label,
-                  field: field.fieldId,
-                  sortable: false,
-                };
-              }
-              return {
-                headerName: field.label,
-                field: field.fieldId,
-                filter: 'agTextColumnFilter',
-                filterParams: { apply: true, newRowsAction: 'keep' },
-              };
-            }),
+            // ...data.columnNames.map((field) => {
+            //   if (
+            //     field.type === 'object' &&
+            //     field.settings?.fields &&
+            //     checkHiddenObjects === false
+            //   ) {
+            //     return {
+            //       headerName: field.label,
+            //       field: field.fieldId,
+            //       children: field.settings?.fields.map((field) => {
+            //         return {
+            //           sortable: false,
+            //           field: field.fieldId,
+            //           headerName: field.label,
+            //         };
+            //       }),
+            //     };
+            //   } else if (field.type === 'ref') {
+            //     return {
+            //       headerName: field.label,
+            //       field: field.fieldId,
+            //       sortable: false,
+            //     };
+            //   }
+            //   return {
+            //     headerName: field.label,
+            //     field: field.fieldId,
+            //     filter: 'agTextColumnFilter',
+            //     filterParams: { apply: true, newRowsAction: 'keep' },
+            //   };
+            // }),
+            ...data?.cols,
           ]);
-          params.successCallback(rows2, totalCount);
+          console.log({ cols: data?.cols });
+          // params.successCallback(rows2, totalCount);
         } catch (error) {
           console.error(error);
         }
@@ -287,7 +295,13 @@ const PVGridWebiny2 = ({
 
     const { id, ...rest } = rowData;
 
-    dispatch(newRowState({ modelId, rowId: rowData.id, rowState: rest }));
+    dispatch(
+      newRowState({
+        modelId: modelId,
+        rowId: rowData.id,
+        rowState: rest,
+      }),
+    );
   };
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
