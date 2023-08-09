@@ -13,6 +13,8 @@ import { AuthContext, AuthProvider } from './AuthContext';
 import ProtectedLayout from './ProtectedLayout';
 import PrivateRoute from './PrivateRoutes';
 import Unauthorized from './views/Unauthorized';
+import CreateNewTable from './views/CreateNewTable';
+import UpdateTable from './views/UpdateTable';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -33,11 +35,13 @@ function App() {
             <Route path="/admin" element={<AdminView />} />
           </Route>
           <Route path="/login" element={<Login />} />
+          <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
+            <Route path="/table/create" element={<CreateNewTable />} />
+            <Route path="/table/update" element={<UpdateTable />} />
+          </Route>
         </Routes>
       </>
     </AuthProvider>
-
-    // <AdminView />
   );
 }
 

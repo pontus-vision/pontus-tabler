@@ -39,10 +39,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [userRole]);
 
+  useEffect(() => {
+    if (userRole) {
+      localStorage.setItem('userRole', JSON.stringify(userRole));
+    }
+  }, [userRole]);
+
   const logout = () => {
     setIsAuthenticated(false);
     setUserRole(null);
     navigate('/login');
+
+    localStorage.removeItem('userRole');
   };
 
   return (

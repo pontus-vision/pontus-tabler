@@ -4,7 +4,7 @@ import BootstrapForm from 'react-bootstrap/Form';
 import { getModelsWebiny } from '../webinyApi';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { getModels } from '../client';
+import { getTables } from '../client';
 import {
   GetTablesResponse,
   Table,
@@ -19,7 +19,7 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
   const { t, i18n } = useTranslation();
 
   const fetchModels = async () => {
-    const data = await getModels();
+    const data = await getTables();
     console.log(data.tables);
     setTables(data.tables);
     return data;

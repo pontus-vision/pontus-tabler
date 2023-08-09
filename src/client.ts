@@ -21,7 +21,9 @@ import {
   Configuration,
   DefaultApiFetchParamCreator,
   GetTablesResponse,
+  NewTable,
   Table,
+  UpdateTable,
 } from './pontus-api/typescript-fetch-client-generated';
 
 export const getModelData = async (
@@ -73,7 +75,7 @@ const api = axios.create({
   );
 })();
 
-export const getModels = async (): Promise<GetTablesResponse> => {
+export const getTables = async (): Promise<GetTablesResponse> => {
   const { data } = await api.post('/tables/read', {});
   // const listModels = data.data.listContentModels.data;
 
@@ -104,6 +106,29 @@ export const deleteEntry = async (modelId: string, entryId: string) => {
     const { data } = await cmsDeleteEntry(modelId, entryId);
 
     return data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const createTable = async (data: NewTable) => {
+  try {
+    console.log({ data });
+    const { data: res } = await api.post('/table/create', data);
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const updateTable = async (
+  data: UpdateTable,
+): Promise<Table | undefined> => {
+  try {
+    const { data: res } = await api.post('table/update', data);
+
+    return res;
   } catch (error) {
     console.error(error);
   }

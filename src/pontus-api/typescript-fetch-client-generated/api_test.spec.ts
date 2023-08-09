@@ -38,7 +38,7 @@ describe("DefaultApi", () => {
     return expect(instance.authGroupUpdatePost(body, {})).resolves.toBe(null)
   })
   test("authGroupsReadPost", () => {
-    const body: api.ReadGroups = undefined
+    const body: api.ReadPaginationFilter = undefined
     return expect(instance.authGroupsReadPost(body, {})).resolves.toBe(null)
   })
   test("authUserCreatePost", () => {
@@ -58,7 +58,7 @@ describe("DefaultApi", () => {
     return expect(instance.authUserUpdatePost(body, {})).resolves.toBe(null)
   })
   test("authUsersReadPost", () => {
-    const body: api.ReadUsers = undefined
+    const body: api.ReadPaginationFilter = undefined
     return expect(instance.authUsersReadPost(body, {})).resolves.toBe(null)
   })
   test("dashboardCreatePost", () => {
@@ -151,7 +151,6 @@ describe("DefaultApi", () => {
     const body: api.NewTable = {
   "value" : {
     "name" : "Person Natural",
-    "tableId" : "Person_Natural",
     "cols" : [ {
       "field" : "Person_Natural_Full_Name",
       "filter" : true,

@@ -1,7 +1,7 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
@@ -86,24 +86,37 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
 
   return (
     <div className={`${openedSidebar ? 'active' : ''}` + ' sidebar'}>
-      {deviceSize === 'sm' && (
-        <Form.Select
-          className="sidebar__language-selector"
-          defaultValue="en"
-          onChange={handleLanguageChange}
-        >
-          <option value="en">English</option>
-          <option value="ptBr">Português</option>
-        </Form.Select>
-      )}
-      <Button onClick={() => logout()}>Logout</Button>
-      <Button
-        className="sidebar__admin-btn"
-        type="button"
-        onClick={() => onClickNavigate('/admin')}
-      >
-        {t('admin-panel')}
-      </Button>
+      <ul className="list-none p-0 m-0">
+        {deviceSize === 'sm' && (
+          <li>
+            <Form.Select
+              className="sidebar__language-selector"
+              defaultValue="en"
+              onChange={handleLanguageChange}
+            >
+              <option value="en">English</option>
+              <option value="ptBr">Português</option>
+            </Form.Select>
+          </li>
+        )}
+        <li>
+          <Button onClick={() => logout()}>Logout</Button>
+        </li>
+        <li>
+          <Button
+            className="sidebar__admin-btn"
+            type="button"
+            onClick={() => onClickNavigate('/admin')}
+          >
+            {t('admin-panel')}
+          </Button>
+        </li>
+        <li>
+          <Link to="/table/create">
+            <Button>Nova Entrada</Button>
+          </Link>
+        </li>
+      </ul>
 
       {dashboards &&
         dashboards.map((dashboard: Dashboard) => (

@@ -6,28 +6,36 @@ import Sidebar from './components/Sidebar';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from './store/store';
 
-const ProtectedLayout = ({ allowedRoles }) => {
-  const { userRole, isAuthenticated } = useAuth();
+type Props = {
+  allowedRoles: string[];
+};
+
+const ProtectedLayout = ({ allowedRoles }: Props) => {
+  const { isAuthenticated } = useAuth();
   const [openedSidebar, setOpenedSidebar] = useState(false);
+
+  const [userRole, setUserRole] = useState(() => {
+    // Initialize auth state from localStorage (if available)
+    const storedAuth = localStorage.getItem('userRole');
+    return storedAuth ? JSON.parse(storedAuth) : null;
+  });
 
   useEffect(() => {
     console.log({ userRole: allowedRoles?.includes(userRole) });
   }, [userRole]);
 
   return allowedRoles?.includes(userRole) ? (
-    <div>
-      <>
-        <Header
-          setOpenedSidebar={setOpenedSidebar}
-          openedSidebar={openedSidebar}
-        />
-        <Sidebar
-          setOpenedSidebar={setOpenedSidebar}
-          openedSidebar={openedSidebar}
-        />
-      </>
+    <>
+      <Header
+        setOpenedSidebar={setOpenedSidebar}
+        openedSidebar={openedSidebar}
+      />
+      <Sidebar
+        setOpenedSidebar={setOpenedSidebar}
+        openedSidebar={openedSidebar}
+      />
       <Outlet />
-    </div>
+    </>
   ) : userRole ? (
     <Navigate to="/unauthorized" />
   ) : (
