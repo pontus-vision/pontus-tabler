@@ -31,7 +31,6 @@ type Props = {
   onValueChange: (id: string, value: ColumnState[]) => void;
   modelId: string;
   lastState?: ColumnState[];
-  data?: 
   showColumnSelector: boolean;
   setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>;
   deleteMode: boolean;
