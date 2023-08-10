@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
   ICmsGetContentModel,
@@ -25,6 +25,7 @@ import {
   Table,
   UpdateTable,
 } from './pontus-api/typescript-fetch-client-generated';
+import { useTranslation } from 'react-i18next';
 
 export const getModelData = async (
   modelId: string,
@@ -75,11 +76,51 @@ const api = axios.create({
   );
 })();
 
-export const getTables = async (): Promise<GetTablesResponse> => {
-  const { data } = await api.post('/tables/read', {});
-  // const listModels = data.data.listContentModels.data;
+export const getTables = async (): Promise<GetTablesResponse | undefined> => {
+  try {
+    const { data } = await api.post('/tables/read', {});
 
-  return data;
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+  // const listModels = data.data.listContentModels.data;
+};
+
+export const createTable = async (
+  data: NewTable,
+): Promise<AxiosResponse<GetTablesResponse, any> | undefined> => {
+  try {
+    const res = await api.post('/table/create', data);
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const updateTable = async (
+  data: UpdateTable,
+): Promise<AxiosResponse<Table, any> | undefined> => {
+  try {
+    const res = await api.post('table/update', data);
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const deleteTable = async (
+  tableId: string,
+): Promise<AxiosResponse<string, any> | undefined> => {
+  try {
+    const res = await api.post('table/delete', { tableId });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const getModelFields = async (
@@ -106,29 +147,6 @@ export const deleteEntry = async (modelId: string, entryId: string) => {
     const { data } = await cmsDeleteEntry(modelId, entryId);
 
     return data;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-export const createTable = async (data: NewTable) => {
-  try {
-    console.log({ data });
-    const { data: res } = await api.post('/table/create', data);
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-export const updateTable = async (
-  data: UpdateTable,
-): Promise<Table | undefined> => {
-  try {
-    const { data: res } = await api.post('table/update', data);
-
-    return res;
   } catch (error) {
     console.error(error);
   }

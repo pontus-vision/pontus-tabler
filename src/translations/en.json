@@ -24,6 +24,9 @@
   "filter": "filter",
   "sortable": "sortable",
   "table-name": "Table name",
+  "select-table-to-be-updated": "Select table to be updated",
+  "table": "table",
+  "created-successfully": "created successfully",
 
   "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES": "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES",
   "Consent": "Consent",

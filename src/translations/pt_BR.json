@@ -23,6 +23,9 @@
   "filter": "filtro",
   "sortable": "ordenável",
   "table-name": "Nome da tabela",
+  "select-table-to-be-updated": "Selecione a tabela a ser atualizada",
+  "table": "tabela",
+  "created-successfully": "criada com sucesso",
 
   "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES": "CLIQUE NO GRID PARA OBTER OS ITENS RELACIONADOS DA SÉRIE TEMPORAL",
   "Consent": "Consentimento",

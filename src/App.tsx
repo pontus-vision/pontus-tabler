@@ -15,6 +15,7 @@ import PrivateRoute from './PrivateRoutes';
 import Unauthorized from './views/Unauthorized';
 import CreateNewTable from './views/CreateNewTable';
 import UpdateTable from './views/UpdateTable';
+import DeleteTableView from './views/DeleteTableView';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -38,6 +39,7 @@ function App() {
           <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
             <Route path="/table/create" element={<CreateNewTable />} />
             <Route path="/table/update" element={<UpdateTable />} />
+            <Route path="/table/delete" element={<DeleteTableView />} />
           </Route>
         </Routes>
       </>

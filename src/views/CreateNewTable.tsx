@@ -3,6 +3,7 @@ import NewTableCol from '../components/NewTable/Column';
 import { useEffect, useState } from 'react';
 import { NewTableColumn } from '../pontus-api/typescript-fetch-client-generated';
 import { createTable } from '../client';
+import { capitalizeFirstLetter } from '../webinyApi';
 
 const CreateNewTable = () => {
   const { t, i18n } = useTranslation();
@@ -23,8 +24,7 @@ const CreateNewTable = () => {
       },
     ],
   );
-
-  const deleteCol = () => {};
+  const [successMessage, setSuccessMessage] = useState('');
 
   function generateUniqueId() {
     const timestamp = new Date().getTime();
@@ -33,11 +33,14 @@ const CreateNewTable = () => {
   }
 
   const create = async () => {
-    const data = await createTable({
+    const res = await createTable({
       name,
       cols: cols.map((col) => col.colDef),
     });
-    console.log(data);
+
+    if (res?.statusText === 'OK') {
+      setSuccessMessage(`${t('table')} ${name} ${t('created-successfully')}.`);
+    }
   };
 
   useEffect(() => {
@@ -106,6 +109,27 @@ const CreateNewTable = () => {
         Create
         <div className="absolute inset-0 h-full w-full scale-0 rounded-2xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/30"></div>
       </button>
+      {successMessage && (
+        <div
+          className="flex items-center p-4 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
+          role="alert"
+        >
+          <svg
+            className="flex-shrink-0 inline w-4 h-4 mr-3"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+          </svg>
+          <span className="sr-only">Info</span>
+          <div>
+            <span className="font-medium">Success alert!</span>{' '}
+            {capitalizeFirstLetter(successMessage)}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

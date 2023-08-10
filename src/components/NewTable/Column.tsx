@@ -55,12 +55,12 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
 
   return (
     <tr className="border-b border-gray-200 bg-gray-50 hover:bg-gray-100">
-      <td className="py-3 px-6 text-left">
-        <div className="flex items-center">
+      <td className=" px-6 text-left py-0">
+        <div className="flex items-center h-3/4">
           <input
             onChange={(e) => setHeader(e.target.value)}
             type="text"
-            className="bg-transparent"
+            className="bg-transparent border-2 font-normal"
             defaultValue={colDef?.headerName ? colDef?.headerName : ''}
           />
         </div>
