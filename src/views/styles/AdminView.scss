@@ -1,0 +1,29 @@
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  /* CSS styles for iPhone portrait mode */
+  .dropdown-panels {
+    justify-content: center;
+    &__tables {
+      width: 30%;
+      .form-select {
+        width: 100%;
+      }
+    }
+  }
+  .flex-layout-wrapper {
+    height: 15vh;
+  }
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
