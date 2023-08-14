@@ -1,4 +1,11 @@
-import { Dispatch, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
@@ -21,24 +28,33 @@ import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
 import { _isClickEvent } from 'chart.js/dist/helpers/helpers.core';
 import { IListModelResponseData } from '../types';
+import {
+  AgGridOutput,
+  ReadPaginationFilter,
+} from '../pontus-api/typescript-fetch-client-generated';
 
 type FilterState = {
   [key: string]: any;
 };
 
 type Props = {
-  id: string;
-  onValueChange: (id: string, value: ColumnState[]) => void;
-  modelId: string;
+  id?: string;
+  onValueChange?: (id: string, value: ColumnState[]) => void;
+  modelId?: string;
   lastState?: ColumnState[];
-  showColumnSelector: boolean;
-  setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>;
-  deleteMode: boolean;
-  containerHeight: string;
-  updateMode: boolean;
-  cols: ColDef[];
-  setGridHeight: Dispatch<React.SetStateAction<undefined>>;
-  setEntriesToBeDeleted: Dispatch<React.SetStateAction<string[] | undefined>>;
+  showColumnSelector?: boolean;
+  setShowColumnSelector?: Dispatch<React.SetStateAction<boolean>>;
+  deleteMode?: boolean;
+  containerHeight?: string;
+  updateMode?: boolean;
+  cols?: ColDef[];
+  rows?: { [key: string]: unknown }[];
+  totalCount?: number;
+  setFilters?: Dispatch<SetStateAction<ReadPaginationFilter | undefined>>;
+  setFrom?: Dispatch<SetStateAction<number | undefined>>;
+  setTo?: Dispatch<SetStateAction<number | undefined>>;
+  setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
+  setEntriesToBeDeleted?: Dispatch<React.SetStateAction<string[] | undefined>>;
 };
 
 const PVGridWebiny2 = ({
@@ -48,6 +64,10 @@ const PVGridWebiny2 = ({
   modelId,
   showColumnSelector,
   setShowColumnSelector,
+  cols,
+  rows,
+  totalCount,
+  setFilters,
   deleteMode,
   updateMode,
   setEntriesToBeDeleted,
@@ -69,7 +89,7 @@ const PVGridWebiny2 = ({
   >([]);
 
   useEffect(() => {
-    if (!columnState) return;
+    if (!columnState || !onValueChange || !id) return;
     onValueChange(id, columnState);
   }, [columnState, id]);
 
@@ -95,11 +115,7 @@ const PVGridWebiny2 = ({
 
           console.log({ modelId });
 
-          const { data } = await getModelFields(modelId);
-
-          console.log({ data });
-
-          if (!modelId) return;
+          setFilters && setFilters(filter);
 
           // const data = await getModelData(
           //   modelId,
@@ -243,10 +259,10 @@ const PVGridWebiny2 = ({
             //     filterParams: { apply: true, newRowsAction: 'keep' },
             //   };
             // }),
-            ...data?.cols,
+            ...cols,
           ]);
-          console.log({ cols: data?.cols });
-          // params.successCallback(rows2, totalCount);
+          console.log({ rows, totalCount });
+          params.successCallback(rows, totalCount);
         } catch (error) {
           console.error(error);
         }
@@ -356,7 +372,7 @@ const PVGridWebiny2 = ({
 
   const handleColumnSelect = (selectedColumns: Array<string | undefined>) => {
     setSelectedColumns(selectedColumns);
-    setShowColumnSelector(false);
+    setShowColumnSelector && setShowColumnSelector(false);
   };
 
   useEffect(() => {
@@ -381,17 +397,16 @@ const PVGridWebiny2 = ({
   }, [updateMode]);
 
   useEffect(() => {
-    if (columnApi && columnDefs) {
-      columnDefs.forEach((columnDef) => {
-        if (!columnDef.field) return;
-
-        if (selectedColumns.includes(columnDef.field)) {
-          columnApi.setColumnVisible(columnDef.field, true);
-        } else {
-          columnApi.setColumnVisible(columnDef.field, false);
-        }
-      });
-    }
+    // if (columnApi && columnDefs) {
+    //   columnDefs.forEach((columnDef) => {
+    //     if (!columnDef.field) return;
+    //     if (selectedColumns.includes(columnDef.field)) {
+    //       columnApi.setColumnVisible(columnDef.field, true);
+    //     } else {
+    //       columnApi.setColumnVisible(columnDef.field, false);
+    //     }
+    //   });
+    // }
   }, [columnApi, selectedColumns]);
 
   // const gridStyle = useMemo(() => ({ height: "25rem", width: "100%" }), []);
@@ -415,7 +430,8 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     console.log(selectedRows);
-    setEntriesToBeDeleted(selectedRows.map((row) => row.data.id));
+    setEntriesToBeDeleted &&
+      setEntriesToBeDeleted(selectedRows.map((row) => row.data.id));
   }, [selectedRows]);
 
   const gridContainerRef = useRef(null);
@@ -426,7 +442,7 @@ const PVGridWebiny2 = ({
       const gridHeight = gridElement.offsetHeight;
       console.log({ gridId, gridElement, gridHeight });
       console.log(gridHeight);
-      setGridHeight(gridHeight);
+      setGridHeight && setGridHeight(gridHeight);
     }
   };
 

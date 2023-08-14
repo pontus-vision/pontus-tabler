@@ -16,6 +16,7 @@ import Unauthorized from './views/Unauthorized';
 import CreateNewTable from './views/CreateNewTable';
 import UpdateTable from './views/UpdateTable';
 import DeleteTableView from './views/DeleteTableView';
+import TablesReadView from './views/tables/read';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -40,6 +41,7 @@ function App() {
             <Route path="/table/create" element={<CreateNewTable />} />
             <Route path="/table/update" element={<UpdateTable />} />
             <Route path="/table/delete" element={<DeleteTableView />} />
+            <Route path="/tables/read" element={<TablesReadView />} />
           </Route>
         </Routes>
       </>

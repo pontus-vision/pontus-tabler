@@ -78,9 +78,11 @@ const api = axios.create({
   );
 })();
 
-export const getTables = async (): Promise<GetTablesResponse | undefined> => {
+export const getTables = async (): Promise<
+  AxiosResponse<GetTablesResponse> | undefined
+> => {
   try {
-    const { data } = await api.post('/tables/read', {});
+    const data = await api.post('/tables/read', {});
 
     return data;
   } catch (error) {
@@ -103,13 +105,14 @@ export const createTable = async (
 
 export const readTable = async (
   body: AgGridInput,
-): Promise<AxiosResponse<AgGridOutput> | undefined> => {
+): Promise<AxiosResponse<AgGridOutput>> => {
   try {
     const res = await api.post('/table/data/read');
 
     return res;
   } catch (error) {
     console.error(error);
+    return error;
   }
 };
 
