@@ -36,6 +36,7 @@ type Props = {
   deleteMode: boolean;
   containerHeight: string;
   updateMode: boolean;
+  cols: ColDef[];
   setGridHeight: Dispatch<React.SetStateAction<undefined>>;
   setEntriesToBeDeleted: Dispatch<React.SetStateAction<string[] | undefined>>;
 };

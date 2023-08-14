@@ -131,10 +131,12 @@ const PVFlexLayout = ({
       useEffect(() => {
         const fetchTable = async () => {
           const input: AgGridInput = {
-            cols: 
-          }
-          const data = await readTable()
-        }
+            // cols:
+          };
+          const data = await readTable(input);
+
+          console.log({ data });
+        };
       }, [config]);
 
       return (
