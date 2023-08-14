@@ -1,0 +1,780 @@
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  /* CSS styles for iPhone portrait mode */
+  .dropdown-panels {
+    justify-content: center;
+  }
+  .dropdown-panels__tables {
+    width: 30%;
+  }
+  .dropdown-panels__tables .form-select {
+    width: 100%;
+  }
+  .flex-layout-wrapper {
+    height: 15vh;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.header {
+  --bar-width: 35px;
+  --bar-height: 4px;
+  --hamburguer-gap: 6px;
+  --foreground: white;
+  --background: white;
+  --animation-timing: 100ms ease-in-out;
+  --hamburguer-height: calc(var(--bar-height) * 3 + var(--hamburguer-gap) * 2);
+  display: flex;
+  flex: 1;
+  align-items: center;
+  width: 100%;
+  height: 3rem;
+  background-color: #52b6cd;
+}
+.header__logo {
+  position: relative;
+  left: 5rem;
+  cursor: pointer;
+  transition: left 100ms ease-in-out;
+}
+.header__logo.active {
+  left: 15rem;
+}
+.header__language-selector.form-select {
+  width: fit-content;
+}
+.header__hamburguer-menu {
+  --x-width: calc(var(--hamburguer-height) * 1.41421);
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  gap: var(--hamburguer-gap);
+  height: 2rem;
+  left: 8px;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  position: absolute;
+  z-index: 1;
+  transition: left 100ms ease-in-out;
+}
+.header__hamburguer-menu.active {
+  left: 11.5rem;
+}
+.header__hamburguer-menu::before, .header__hamburguer-menu input, .header__hamburguer-menu::after {
+  content: "";
+  width: var(--bar-width);
+  height: var(--bar-height);
+  background-color: var(--foreground);
+  transform-origin: left center;
+  transition: opacity var(--animation-timing), width var(--animation-timing), rotate var(--animation-timing);
+}
+.header__hamburguer-menu input {
+  appearance: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  pointer-events: none;
+}
+.header__hamburguer-menu:has(input:checked)::before {
+  rotate: 45deg;
+  translate: 0 calc(var(--bar-height) / -1.8);
+  border-radius: 9999px;
+}
+.header__hamburguer-menu:has(input:checked)::after {
+  rotate: -45deg;
+  translate: 0 calc(var(--bar-height) / 1.8);
+  border-radius: 9999px;
+}
+.header__hamburguer-menu input:checked {
+  opacity: 0;
+  width: 0;
+}
+.header__language-selector {
+  right: 2rem;
+  position: absolute;
+}
+
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .header__hamburguer-menu.active {
+    left: 21rem;
+  }
+  .header__logo {
+    left: 5rem;
+  }
+  .header__logo.active {
+    left: 2.5rem;
+  }
+  .header__language-selector.form-select {
+    display: none;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.grid-actions-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding-left: 0.7rem;
+}
+
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .grid-actions-panel {
+    position: absolute;
+    padding-inline: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    grid-template-columns: repeat(2, 1fr);
+    left: -100%;
+    z-index: 1;
+    width: 100%;
+    height: calc(100% - 3rem);
+    background-color: white;
+    transition: left 200ms ease-in-out;
+  }
+  .grid-actions-panel__toolbar {
+    height: 3rem;
+    display: flex;
+    align-items: center;
+  }
+  .grid-actions-panel__burguer-menu {
+    scale: 0.7;
+  }
+  .grid-actions-panel.active {
+    left: 0;
+  }
+  .grid-actions-panel .btn {
+    height: 3rem;
+  }
+  .grid-actions-panel__plus-btn {
+    width: 100%;
+  }
+  .grid-actions-panel__restore-btn {
+    grid-row: 2;
+    width: 100%;
+  }
+  .grid-actions-panel__delete-btn {
+    grid-row: 2;
+    width: 100%;
+  }
+  .grid-actions-panel__update-btn {
+    grid-row: 3;
+    width: 100%;
+  }
+  .grid-actions-panel__delete-actions {
+    top: 5px;
+    left: 5px;
+  }
+  .grid-actions-panel__delete-actions svg {
+    font-size: 2rem;
+  }
+  .grid-actions-panel__delete-actions i {
+    cursor: pointer;
+    font-size: 1.8rem;
+  }
+  .grid-actions-panel__update-actions {
+    grid-row: 2;
+  }
+  .grid-actions-panel__update-actions i {
+    font-size: 2rem;
+    cursor: pointer;
+    height: 2.65rem;
+    display: flex;
+    align-items: center;
+  }
+  .grid-actions-panel__select-btn {
+    grid-row: 3;
+    width: 100%;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.sidebar {
+  width: 14rem;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background-color: rgba(255, 255, 255, 0.9215686275);
+  overflow-y: auto;
+  height: calc(100% - 3rem);
+  translate: -100%;
+  transition: translate 100ms ease-in-out;
+  z-index: 2;
+  /* width */
+  /* Track */
+  /* Handle */
+  /* Handle on hover */
+}
+.sidebar__admin-btn {
+  background-color: #52b6cd;
+  width: 90%;
+  color: white;
+}
+.sidebar::before {
+  content: "";
+  background-color: white;
+}
+.sidebar.active {
+  translate: 0;
+}
+.sidebar ::-webkit-scrollbar {
+  width: 4px;
+  position: absolute;
+}
+.sidebar ::-webkit-scrollbar-track {
+  position: absolute;
+  background: #f1f1f1;
+}
+.sidebar ::-webkit-scrollbar-thumb {
+  position: absolute;
+  background: #888;
+}
+.sidebar ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .sidebar {
+    width: 100%;
+  }
+  .sidebar__admin-btn {
+    margin-inline: auto;
+    width: 90%;
+  }
+  .sidebar__language-selector.form-select {
+    width: 9rem;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.delete-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background: white;
+  z-index: 10;
+  width: 50%;
+  border-radius: 5px;
+  height: 30%;
+  top: 50%;
+  left: 50%;
+}
+
+.cmp-panel__title {
+  display: none;
+}
+.cmp-panel .dropdown-panels {
+  display: flex;
+  gap: 1rem;
+}
+.cmp-panel .dropdown-panels__tables {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cmp-panel .dropdown-panels__charts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dashboard-confirm-modal {
+  position: absolute;
+  background-color: #52b6cd;
+  padding: 3rem 5rem;
+  z-index: 1;
+  /* Target iPhone */
+}
+.dashboard-confirm-modal label {
+  color: white;
+}
+.dashboard-confirm-modal .exit-btn {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 5rem;
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  background-color: white;
+  box-shadow: 0 0 2px black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.dashboard-confirm-modal .exit-btn .xmark-icon {
+  height: 2rem;
+}
+.dashboard-confirm-modal .shadow-form-dash {
+  width: 100%;
+  height: 100%;
+}
+
+.hamburguer-menu {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 8px;
+  width: max-content;
+  z-index: 1;
+}
+.hamburguer-menu::after, .hamburguer-menu input, .hamburguer-menu::before {
+  content: "";
+  width: 60px;
+  height: 8px;
+  border-radius: 6px;
+  background-color: #333;
+  transform-origin: left center;
+  transition: opacity 200ms ease-in-out, width 200ms ease-in-out;
+}
+.hamburguer-menu input {
+  appearance: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  pointer-events: none;
+}
+.hamburguer-menu input:checked {
+  opacity: 0;
+  width: 0;
+}
+.hamburguer-menu:has(input:checked)::before {
+  rotate: 45deg;
+  width: 56.568542496px;
+  translate: 0 -4px;
+}
+.hamburguer-menu:has(input:checked)::after {
+  rotate: -45deg;
+  width: 56.568542496px;
+  translate: 0 4px;
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .dashboard-confirm-modal {
+    width: 100%;
+    height: 53%;
+    padding: 3rem 3rem;
+  }
+  .dashboard-confirm-modal form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    gap: 4rem;
+  }
+  .dashboard-confirm-modal form input {
+    height: 3rem;
+    font-size: 1.5rem;
+    font-size: 1.38rem;
+  }
+  .dashboard-confirm-modal form button {
+    width: 7rem;
+    height: 3.5rem;
+    font-size: 1.8rem;
+  }
+  .dashboard-confirm-modal .exit-btn {
+    right: 1rem;
+    height: 3rem;
+    width: 3rem;
+  }
+  .delete-modal {
+    width: 95%;
+  }
+  .dropdown-panels__title {
+    display: block;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.new-entry-form {
+  position: relative;
+  overflow-y: auto;
+  margin-inline: auto;
+  width: fit-content;
+  z-index: 3;
+  border-radius: 0.3rem;
+  /* Style the scrollbar thumb */
+  /* Change the color of the scrollbar thumb on hover */
+  /* Allow dragging of the scrollbar thumb */
+  /* Select the scrollbar track on hover */
+  /* Target iPhone */
+  /* Target iPad */
+}
+.new-entry-form__title {
+  background: white;
+  width: fit-content;
+  z-index: 3;
+  padding-inline: 1rem;
+  margin-inline: auto;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+}
+.new-entry-form ::-webkit-scrollbar {
+  z-index: 1;
+}
+.new-entry-form .new-entry {
+  padding: 1rem;
+  width: 40em;
+  border-radius: 0.3rem;
+  background-color: white;
+}
+.new-entry-form .new-entry__group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.new-entry-form .form__checkboxes {
+  border: 1px solid rgba(0, 0, 0, 0.3882352941);
+  padding: 0.3rem;
+  border-radius: 0.5rem;
+}
+.new-entry-form .form__object {
+  border: 1px solid black;
+  padding: 0.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.new-entry-form .skimmer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.new-entry-form .skimmer__line {
+  height: 10px;
+  width: 100%;
+  background-color: lightgray;
+}
+.new-entry-form ::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+.new-entry-form ::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+.new-entry-form ::-webkit-scrollbar-thumb:active {
+  background-color: #333;
+}
+.new-entry-form ::-webkit-scrollbar-track:hover {
+  background-color: #f1f1f1;
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .new-entry-form {
+    /* CSS styles for iPhone portrait mode */
+    width: 100%;
+  }
+  .new-entry-form .new-entry {
+    width: 100%;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  .new-entry-form {
+    /* CSS styles for iPhone landscape mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  .new-entry-form {
+    /* CSS styles for iPad portrait mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  .new-entry-form {
+    /* CSS styles for iPad landscape mode */
+  }
+}
+
+.new-entry-view {
+  position: absolute;
+  display: flex;
+  padding: 2rem 0;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+.new-entry-view .success-msg {
+  position: absolute;
+  width: 18rem;
+  text-align: right;
+  left: -100%;
+  z-index: 1;
+  bottom: 5rem;
+  transition: left 300ms ease-in-out;
+}
+.new-entry-view .success-msg.active {
+  left: -1rem;
+}
+.new-entry-view .shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2941176471);
+}
+.new-entry-view .skimmer {
+  position: relative;
+  padding: 1rem;
+  margin: auto;
+  width: 25rem;
+  z-index: 5;
+}
+.new-entry-view .skimmer__line {
+  height: 10px;
+  width: 100%;
+  background-color: lightgray;
+  border-radius: 5px;
+}
+
+.login-page {
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #299ab5;
+}
+.login-page .login-form {
+  width: fit-content;
+  max-width: 80%;
+  margin: auto;
+  padding: 5rem;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  box-shadow: 0 0 5px black;
+  background-color: #52b6cd;
+}
+.login-page .login-form .welcome-msg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+.login-page .login-form .welcome-msg h1 {
+  font-size: 2rem;
+}
+.login-page .login-form .form {
+  flex: 1;
+  display: flex;
+  gap: 3rem;
+  flex-direction: column;
+  align-items: center;
+}
+.login-page .login-form img {
+  height: 2rem;
+}
+
+/* Target iPhone */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  /* CSS styles for iPhone portrait mode */
+  .login-page {
+    width: 100%;
+    padding: 2rem 0;
+  }
+  .login-page .login-form {
+    height: 90%;
+    flex-direction: column;
+    padding: 2rem 1rem;
+  }
+  .login-page .login-form .welcome-msg {
+    gap: 0;
+    flex: 0;
+  }
+  .login-page .login-form .welcome-msg h1 {
+    text-align: center;
+    display: none;
+  }
+  .login-page .login-form .welcome-msg p {
+    display: none;
+  }
+  .login-page .login-form .form {
+    gap: 0;
+    justify-content: space-around;
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
+.dashboard-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 92%;
+  width: 100%;
+  /* Target iPhone */
+  /* Target iPad */
+}
+.dashboard-view .shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2941176471);
+}
+.dashboard-view .title {
+  margin: 0;
+}
+.dashboard-view .layout {
+  min-height: 30rem;
+  position: relative;
+  width: 90%;
+}
+.dashboard-view .fa-light {
+  font-size: 3rem;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer;
+}
+.dashboard-view .actions-panel {
+  display: flex;
+  width: 90%;
+  justify-content: space-around;
+}
+.dashboard-view .actions-panel__save {
+  background-color: #8d8b01;
+}
+.dashboard-view .delete-dashboard-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  height: 30%;
+  width: 30%;
+  background-color: blue;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  transform: translate(-50%, -50%);
+}
+.dashboard-view .delete-dashboard-modal label {
+  font-size: 1.5rem;
+}
+.dashboard-view .flex-layout-wrapper {
+  height: 30rem;
+  width: fit-content;
+  overflow-y: auto;
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .dashboard-view {
+    /* CSS styles for iPhone portrait mode */
+  }
+  .dashboard-view .actions-panel .dropdown-panels {
+    position: absolute;
+    background-color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    height: 30vh;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+  }
+  .dashboard-view .actions-panel .dropdown-panels__tables {
+    width: 100%;
+  }
+  .dashboard-view .actions-panel .shadow-mobile {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2941176471);
+  }
+}
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  .dashboard-view {
+    /* CSS styles for iPhone landscape mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  .dashboard-view {
+    /* CSS styles for iPad portrait mode */
+  }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  .dashboard-view {
+    /* CSS styles for iPad landscape mode */
+  }
+}
+
+#root {
+  height: 100%;
+}
+
+/*# sourceMappingURL=main.css.map */

@@ -1,0 +1,48 @@
+.new-entry-view {
+  position: absolute;
+  display: flex;
+  padding: 2rem 0;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  .success-msg {
+    position: absolute;
+    width: 18rem;
+    text-align: right;
+    left: -100%;
+    z-index: 1;
+    bottom: 5rem;
+    transition: left 300ms ease-in-out;
+    &.active {
+      left: -1rem;
+    }
+  }
+  .shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: #0000004b;
+  }
+
+  .skimmer {
+    position: relative;
+    padding: 1rem;
+    margin: auto;
+    width: 25rem;
+    z-index: 5;
+
+    &__line {
+      height: 10px;
+      width: 100%;
+      background-color: lightgray;
+      border-radius: 5px;
+    }
+  }
+}

@@ -1,0 +1,190 @@
+@use '../sass/variables';
+
+.delete-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background: white;
+  z-index: 10;
+  width: 50%;
+  border-radius: 5px;
+  height: 30%;
+  top: 50%;
+  left: 50%;
+}
+
+.cmp-panel {
+  // display: flex;
+  // flex-direction: column;
+  &__title {
+    display: none;
+  }
+  .dropdown-panels {
+    display: flex;
+    gap: 1rem;
+
+    &__tables {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    &__charts {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+}
+
+.dashboard-confirm-modal {
+  position: absolute;
+  background-color: variables.$primaryColor;
+  padding: 3rem 5rem;
+  z-index: 1;
+  label {
+    color: white;
+  }
+  .exit-btn {
+    height: 2rem;
+    width: 2rem;
+    border-radius: 5rem;
+    position: absolute;
+    top: -1rem;
+    right: -1rem;
+    background-color: white;
+    box-shadow: 0 0 2px black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    .xmark-icon {
+      height: 2rem;
+    }
+  }
+  .shadow-form-dash {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Target iPhone */
+}
+
+.hamburguer-menu {
+  $foreground-color: #333;
+  $bar-width: 60px;
+  $bar-height: 8px;
+  $hamburguer-gap: 8px;
+  $hamburguer-margin: 8px;
+  $animation-timing: 200ms ease-in-out;
+  $hamburguer-height: calc($bar-height * 3 + $hamburguer-gap * 2);
+  $x-width: calc($hamburguer-height * 1.4142135624);
+
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: $hamburguer-gap;
+  width: max-content;
+  z-index: 1;
+  &::after,
+  & input,
+  &::before {
+    content: '';
+    width: $bar-width;
+    height: $bar-height;
+    border-radius: 6px;
+    background-color: $foreground-color;
+    transform-origin: left center;
+    transition: opacity $animation-timing, width $animation-timing;
+  }
+  & input {
+    appearance: none;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    pointer-events: none;
+    &:checked {
+      opacity: 0;
+      width: 0;
+    }
+  }
+  &:has(input:checked)::before {
+    rotate: 45deg;
+    width: $x-width;
+    translate: 0 calc($bar-height / -2);
+  }
+  &:has(input:checked)::after {
+    rotate: -45deg;
+    width: $x-width;
+    translate: 0 calc($bar-height / 2);
+  }
+}
+
+// .hamburguer-menu::before,
+// .hamburguer-menu input,
+// .hamburguer-menu::after{
+//   content: "";
+//   width: 60px;
+//   height: 8px;
+//   background-color: #333;
+//   transition: opacity 50ms ease-in-out, width 50ms ease-in-out;
+// }
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .dashboard-confirm-modal {
+    width: 100%;
+    height: 53%;
+    padding: 3rem 3rem;
+
+    form {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      gap: 4rem;
+
+      input {
+        height: 3rem;
+        font-size: 1.5rem;
+        font-size: 1.38rem;
+      }
+      button {
+        width: 7rem;
+        height: 3.5rem;
+        font-size: 1.8rem;
+      }
+    }
+
+    .exit-btn {
+      right: 1rem;
+      height: 3rem;
+      width: 3rem;
+    }
+  }
+
+  .delete-modal {
+    width: 95%;
+  }
+
+  .dropdown-panels {
+    &__title {
+      display: block;
+    }
+  }
+}
+
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
+}
+
+/* Target iPad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
+}
+
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
+}
