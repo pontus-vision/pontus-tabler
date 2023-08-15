@@ -54,7 +54,7 @@ const PVFlexLayout = ({
   const {
     rowState,
     rowId,
-    modelId: updateModelId,
+    tableId: updateTableId,
   } = useSelector((state: RootState) => state.updateRow);
 
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
@@ -76,13 +76,18 @@ const PVFlexLayout = ({
     key: 0,
   });
 
-  // useEffect(() => {
-  //   setOpenNewEntryView(true)
-  // }, [updateModelId]);
+  useEffect(() => {
+    if (!updateTableId) return;
+    setOpenNewEntryView(true);
+  }, [updateTableId]);
 
   useEffect(() => {
-    setTableId(updateModelId);
-  }, [updateModelId, rowId]);
+    console.log({ openNewEntryView });
+  }, [openNewEntryView]);
+
+  useEffect(() => {
+    setTableId(updateTableId);
+  }, [updateTableId, rowId]);
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
@@ -176,7 +181,7 @@ const PVFlexLayout = ({
               entriesToBeDeleted={entriesToBeDeleted}
               setDeletion={setDeletion}
               setGridKey={setGridKey}
-              updateModelId={updateModelId}
+              updateModelId={updateTableId}
               setFlexModelId={setFlexModelId}
               setModelId={setTableId}
               id={id}
@@ -375,12 +380,12 @@ const PVFlexLayout = ({
   }, [flexModelId]);
 
   useEffect(() => {
-    console.log({ tableId });
-  }, [tableId]);
+    console.log({ tableId, updateModelId: updateTableId, openNewEntryView });
+  }, [tableId, openNewEntryView]);
 
   return (
     <>
-      {tableId && openNewEntryView && (
+      {(tableId || updateTableId) && openNewEntryView && (
         <NewEntryView
           setOpenNewEntryView={setOpenNewEntryView}
           setUpdatedGrid={setUpdatedGrid}

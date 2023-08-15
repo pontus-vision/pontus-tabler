@@ -22,10 +22,13 @@ import {
   AgGridOutput,
   Configuration,
   DefaultApiFetchParamCreator,
+  DeleteTableRow,
   GetTablesResponse,
   NewTable,
+  NewTableRow,
   Table,
   UpdateTable,
+  UpdateTableRow,
 } from './pontus-api/typescript-fetch-client-generated/';
 import { useTranslation } from 'react-i18next';
 
@@ -138,16 +141,48 @@ export const deleteTable = async (
     console.error(error);
   }
 };
+
+export const createDataTable = async (body: NewTableRow) => {
+  try {
+    const res = await api.post('/table/data/create', { body });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const readDataTable = async (
   body: AgGridInput,
-): Promise<AxiosResponse<AgGridOutput>> => {
+): Promise<AxiosResponse<AgGridOutput> | undefined> => {
   try {
     const res = await api.post('/table/data/read', {});
 
     return res;
   } catch (error) {
     console.error(error);
-    return error;
+  }
+};
+
+export const updateDataTableRow = async (body: UpdateTableRow) => {
+  try {
+    const res = await api.post('/table/data/update');
+
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteDataTableRow = async (
+  body: DeleteTableRow,
+): Promise<AxiosResponse<string> | undefined> => {
+  try {
+    const res = await api.post('/table/data/delete', { ...body });
+
+    return res;
+  } catch (error) {
+    console.error(error);
   }
 };
 

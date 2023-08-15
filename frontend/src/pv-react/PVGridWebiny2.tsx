@@ -316,9 +316,11 @@ const PVGridWebiny2 = ({
 
     const { id, ...rest } = rowData;
 
+    console.log('hey');
+
     dispatch(
       newRowState({
-        modelId: modelId,
+        tableId: modelId,
         rowId: rowData.id,
         rowState: rest,
       }),

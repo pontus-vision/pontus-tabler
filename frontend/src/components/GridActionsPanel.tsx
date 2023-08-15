@@ -258,6 +258,7 @@ const GridActionsPanel = ({
             className="fa-solid fa-trash"
             onClick={() => {
               setModelId(configTableId);
+              console.log('delete');
               entriesToBeDeleted &&
                 entriesToBeDeleted.length > 0 &&
                 setDeletion(true);

@@ -45,7 +45,7 @@ const NewEntryView = ({
   const [isLoading, setIsLoading] = useState(false);
   const {
     rowState,
-    modelId: updateModelId,
+    tableId: updateModelId,
     rowId,
   } = useSelector((state: RootState) => state.updateRow);
   const dispatch = useDispatch();
@@ -108,7 +108,7 @@ const NewEntryView = ({
             setOpenNewEntryView(false);
             dispatch(
               newRowState({
-                modelId: undefined,
+                tableId: undefined,
                 rowId: undefined,
                 rowState: undefined,
               }),
