@@ -15,7 +15,7 @@ type Props = {
   setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>;
   setDeleteMode: Dispatch<React.SetStateAction<boolean>>;
   setUpdateMode: Dispatch<React.SetStateAction<boolean>>;
-  configModelId: string;
+  configTableId: string;
   entriesToBeDeleted: string[] | undefined;
 };
 
@@ -32,7 +32,7 @@ const GridActionsPanel = ({
   setShowColumnSelector,
   setDeleteMode,
   setUpdateMode,
-  configModelId,
+  configTableId,
   entriesToBeDeleted,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
@@ -79,7 +79,8 @@ const GridActionsPanel = ({
             >
               <BsFillTrash2Fill
                 onClick={() => {
-                  setModelId(configModelId);
+                  setModelId(configTableId);
+                  console.log('whatever');
                   entriesToBeDeleted &&
                     entriesToBeDeleted.length > 0 &&
                     setDeletion(true);
@@ -120,7 +121,7 @@ const GridActionsPanel = ({
                 setModelId((prevState) =>
                   updateModelId
                     ? (prevState = updateModelId)
-                    : (prevState = configModelId),
+                    : (prevState = configTableId),
                 );
               }}
             >
@@ -195,7 +196,7 @@ const GridActionsPanel = ({
             setModelId((prevState) =>
               updateModelId
                 ? (prevState = updateModelId)
-                : (prevState = configModelId),
+                : (prevState = configTableId),
             );
           }}
         >
@@ -256,7 +257,7 @@ const GridActionsPanel = ({
           <i
             className="fa-solid fa-trash"
             onClick={() => {
-              setModelId(configModelId);
+              setModelId(configTableId);
               entriesToBeDeleted &&
                 entriesToBeDeleted.length > 0 &&
                 setDeletion(true);

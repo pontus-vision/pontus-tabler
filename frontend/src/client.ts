@@ -91,6 +91,18 @@ export const getTables = async (): Promise<
   // const listModels = data.data.listContentModels.data;
 };
 
+export const getTable = async (
+  tableId: string,
+): Promise<AxiosResponse<Table> | undefined> => {
+  try {
+    const res = await api.post('/table/read', { tableId });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const createTable = async (
   data: NewTable,
 ): Promise<AxiosResponse<GetTablesResponse, any> | undefined> => {
@@ -100,19 +112,6 @@ export const createTable = async (
     return res;
   } catch (error) {
     console.error(error);
-  }
-};
-
-export const readTable = async (
-  body: AgGridInput,
-): Promise<AxiosResponse<AgGridOutput>> => {
-  try {
-    const res = await api.post('/table/data/read');
-
-    return res;
-  } catch (error) {
-    console.error(error);
-    return error;
   }
 };
 
@@ -137,6 +136,18 @@ export const deleteTable = async (
     return res;
   } catch (error) {
     console.error(error);
+  }
+};
+export const readDataTable = async (
+  body: AgGridInput,
+): Promise<AxiosResponse<AgGridOutput>> => {
+  try {
+    const res = await api.post('/table/data/read', {});
+
+    return res;
+  } catch (error) {
+    console.error(error);
+    return error;
   }
 };
 

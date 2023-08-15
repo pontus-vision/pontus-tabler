@@ -196,6 +196,9 @@ const PVGridWebiny2 = ({
           //   return flattenObj(row);
           // });
 
+          console.log({ cols, rows, totalCount });
+          if (!cols) return;
+
           setColumnDefs([
             {
               headerName: '',
@@ -261,8 +264,9 @@ const PVGridWebiny2 = ({
             // }),
             ...cols,
           ]);
-          console.log({ rows, totalCount });
-          params.successCallback(rows, totalCount);
+          if (rows) {
+            params.successCallback(rows, totalCount);
+          }
         } catch (error) {
           console.error(error);
         }

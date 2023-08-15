@@ -12,7 +12,7 @@ import {
 } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import PVGridWebiny2 from './PVGridWebiny2';
-import { ColumnState } from 'ag-grid-community';
+import { ColDef, ColumnState } from 'ag-grid-community';
 import { FlexLayoutCmp } from '../types';
 import PVDoughnutChart2 from './PVDoughnutChart2';
 import { useSelector } from 'react-redux';
@@ -21,8 +21,11 @@ import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import DeleteEntriesModal from '../components/DeleteEntriesModal';
 import GridActionsPanel from '../components/GridActionsPanel';
-import { readTable } from '../client';
-import { AgGridInput } from '../pontus-api/typescript-fetch-client-generated';
+import { getTable, readDataTable } from '../client';
+import {
+  AgGridInput,
+  ReadPaginationFilter,
+} from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   gridState?: IJsonModel;
@@ -56,7 +59,7 @@ const PVFlexLayout = ({
 
   const [model, setModel] = useState<Model>(Model.fromJson(initialJson));
   const [containerHeight, setContainerHeight] = useState('32rem');
-  const [modelId, setModelId] = useState<string | undefined>();
+  const [tableId, setTableId] = useState<string | undefined>();
   const [flexModelId, setFlexModelId] = useState<string>();
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>();
   const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<string[]>();
@@ -78,7 +81,7 @@ const PVFlexLayout = ({
   // }, [updateModelId]);
 
   useEffect(() => {
-    setModelId(updateModelId);
+    setTableId(updateModelId);
   }, [updateModelId, rowId]);
 
   const factory = (node: TabNode) => {
@@ -97,6 +100,12 @@ const PVFlexLayout = ({
       const [updateMode, setUpdateMode] = useState(false);
       const [gridHeight, setGridHeight] = useState();
 
+      const [cols, setCols] = useState<ColDef[]>([]);
+      const [rows, setRows] = useState<{ [key: string]: unknown }[]>();
+      const [filters, setFilters] = useState<ReadPaginationFilter>();
+      const [from, setFrom] = useState<number>();
+      const [to, setTo] = useState<number>();
+      const [totalCount, setTotalCount] = useState<number>();
       useEffect(() => {
         const colState = findChildById(model.toJson().layout, id, 'tab').config
           .lastState;
@@ -133,47 +142,67 @@ const PVFlexLayout = ({
           const input: AgGridInput = {
             // cols:
           };
-          const data = await readTable(input);
+          const { data: colsRes } = await getTable(config.tableId);
+
+          const { data } = await readDataTable(input);
+
+          // setRows(data.records?.map((record) => JSON?.parse(record)));
+          colsRes.cols && setCols(colsRes.cols);
+          data.records &&
+            // setRows(data.records?.map((record) => JSON?.parse(record)));
+            setRows(
+              data.records.map((rec) => {
+                return { field: rec };
+              }),
+            );
+          setTotalCount(data.totalAvailable || 2);
 
           console.log({ data });
         };
+
+        fetchTable();
       }, [config]);
 
-      return (
-        <>
-          <GridActionsPanel
-            key={id}
-            configModelId={config.modelId}
-            deleteMode={deleteMode}
-            updateMode={updateMode}
-            setDeleteMode={setDeleteMode}
-            setUpdateMode={setUpdateMode}
-            entriesToBeDeleted={entriesToBeDeleted}
-            setDeletion={setDeletion}
-            setGridKey={setGridKey}
-            updateModelId={updateModelId}
-            setFlexModelId={setFlexModelId}
-            setModelId={setModelId}
-            id={id}
-            setOpenNewEntryView={setOpenNewEntryView}
-            setShowColumnSelector={setShowColumnSelector}
-          />
-          <PVGridWebiny2
-            setGridHeight={setGridHeight}
-            deleteMode={deleteMode}
-            setShowColumnSelector={setShowColumnSelector}
-            showColumnSelector={showColumnSelector}
-            key={gridKey}
-            id={id}
-            lastState={lastState || config.lastState}
-            onValueChange={handleValueChange}
-            modelId={selectedCmp?.cmp?.tableId}
-            containerHeight={containerHeight}
-            updateMode={updateMode}
-            setEntriesToBeDeleted={setEntriesToBeDeleted}
-          />
-        </>
-      );
+      if (cols.length > 0) {
+        return (
+          <>
+            <GridActionsPanel
+              key={id}
+              configTableId={config.tableId}
+              deleteMode={deleteMode}
+              updateMode={updateMode}
+              setDeleteMode={setDeleteMode}
+              setUpdateMode={setUpdateMode}
+              entriesToBeDeleted={entriesToBeDeleted}
+              setDeletion={setDeletion}
+              setGridKey={setGridKey}
+              updateModelId={updateModelId}
+              setFlexModelId={setFlexModelId}
+              setModelId={setTableId}
+              id={id}
+              setOpenNewEntryView={setOpenNewEntryView}
+              setShowColumnSelector={setShowColumnSelector}
+            />
+            <PVGridWebiny2
+              setGridHeight={setGridHeight}
+              deleteMode={deleteMode}
+              setShowColumnSelector={setShowColumnSelector}
+              showColumnSelector={showColumnSelector}
+              key={gridKey}
+              id={id}
+              cols={cols}
+              totalCount={totalCount}
+              rows={rows}
+              lastState={lastState || config.lastState}
+              onValueChange={handleValueChange}
+              modelId={selectedCmp?.cmp?.tableId}
+              containerHeight={containerHeight}
+              updateMode={updateMode}
+              setEntriesToBeDeleted={setEntriesToBeDeleted}
+            />
+          </>
+        );
+      }
     }
     if (component === 'PVDoughnutChart2') {
       return <PVDoughnutChart2 />;
@@ -345,26 +374,30 @@ const PVFlexLayout = ({
     console.log(flexModel);
   }, [flexModelId]);
 
+  useEffect(() => {
+    console.log({ tableId });
+  }, [tableId]);
+
   return (
     <>
-      {modelId && openNewEntryView && (
+      {tableId && openNewEntryView && (
         <NewEntryView
           setOpenNewEntryView={setOpenNewEntryView}
           setUpdatedGrid={setUpdatedGrid}
           aggridColumnsState={aggridColumnsState}
           flexModelId={flexModelId}
-          setModelId={setModelId}
-          modelId={modelId}
+          setModelId={setTableId}
+          modelId={tableId}
         />
       )}
       {deletion &&
         entriesToBeDeleted &&
         entriesToBeDeleted.length &&
-        modelId && (
+        tableId && (
           <DeleteEntriesModal
             setDeletion={setDeletion}
             entries={entriesToBeDeleted}
-            modelId={modelId}
+            modelId={tableId}
             updateGridKey={setUpdatedGrid}
           />
         )}

@@ -18,6 +18,7 @@ import FloatingLabel from 'react-bootstrap/esm/FloatingLabel';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
+import { TableColumn } from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   setIsloading: Dispatch<SetStateAction<boolean>>;
@@ -57,7 +58,7 @@ const NewEntryForm = ({
   }, [contentModel]);
 
   const renderField = (
-    field: ICmsGetContentModelDataField,
+    field: TableColumn,
     objFieldId: string | null = null,
   ): ReactElement<any, any> | undefined => {
     // const validationRules = field.validation?.map(valid=> valid.settings?.preset)
@@ -67,8 +68,32 @@ const NewEntryForm = ({
     // const { handleSubmit, register, formState: {errors} } = useForm({
     //   resolver: zodResolver(validationSchema),
     // });
+    return (
+      <div className="field form__text-input">
+        <Form.Label>{field.name}</Form.Label>
+        <Form.Control
+          // defaultValue={defaultValue}
+          onChange={(e) => {
+            if (objFieldId) {
+              setFormInputs((prevState: { [key: string]: unknown }) => ({
+                ...prevState,
+                [`${objFieldId}`]: {
+                  ...prevState[objFieldId],
+                  [field.fieldId]: e.target.value,
+                },
+              }));
+            } else {
+              setFormInputs((prevState) => ({
+                ...prevState,
+                [`${field.field}`]: e.target.value,
+              }));
+            }
+          }}
+        ></Form.Control>
+      </div>
+    );
 
-    if (field.type === 'text') {
+    if (field?.type === 'text') {
       if (field.renderer.name === 'checkboxes') {
         const arr = [] as string[];
         return (
@@ -208,7 +233,7 @@ const NewEntryForm = ({
           </div>
         );
       }
-    } else if (field.type === 'ref') {
+    } else if (field?.type === 'ref') {
       const refs = field?.settings?.models;
 
       const [options, setOptions] = useState<any>();
@@ -317,7 +342,7 @@ const NewEntryForm = ({
           </div>
         );
       }
-    } else if (field.type === 'long-text') {
+    } else if (field?.type === 'long-text') {
       if (field.renderer.name === 'long-text-text-area') {
         return (
           <div className="field form__long-text">
@@ -353,7 +378,7 @@ const NewEntryForm = ({
           </div>
         );
       }
-    } else if (field.type === 'object' && field?.settings) {
+    } else if (field?.type === 'object' && field?.settings) {
       const objFieldId = field.fieldId;
       // setFormObjFieldName(objFieldId)
       return (
