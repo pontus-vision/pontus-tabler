@@ -22,16 +22,12 @@ import {
   IRowNode,
   SelectionChangedEvent,
 } from 'ag-grid-community';
-import { getModelData, getModelFields } from '../client';
 import { useDispatch } from 'react-redux';
 import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
 import { _isClickEvent } from 'chart.js/dist/helpers/helpers.core';
-import { IListModelResponseData } from '../types';
-import {
-  AgGridOutput,
-  ReadPaginationFilter,
-} from '../pontus-api/typescript-fetch-client-generated';
+
+import { ReadPaginationFilterFilters } from '../pontus-api/typescript-fetch-client-generated';
 
 type FilterState = {
   [key: string]: any;
@@ -50,7 +46,9 @@ type Props = {
   cols?: ColDef[];
   rows?: { [key: string]: unknown }[];
   totalCount?: number;
-  setFilters?: Dispatch<SetStateAction<ReadPaginationFilter | undefined>>;
+  setFilters?: Dispatch<
+    SetStateAction<ReadPaginationFilterFilters | undefined>
+  >;
   setFrom?: Dispatch<SetStateAction<number | undefined>>;
   setTo?: Dispatch<SetStateAction<number | undefined>>;
   setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
@@ -82,6 +80,16 @@ const PVGridWebiny2 = ({
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
+  const [dataRows, setDataRows] = useState();
+
+  useEffect(() => {
+    console.log(rows);
+    setDataRows(rows);
+  }, [rows]);
+
+  useEffect(() => {
+    console.log({ dataRows });
+  }, [dataRows]);
 
   const dispatch = useDispatch();
   const [selectedColumns, setSelectedColumns] = useState<
@@ -93,10 +101,15 @@ const PVGridWebiny2 = ({
     onValueChange(id, columnState);
   }, [columnState, id]);
 
+  // useEffect(() => {
+  //   setColumnDefs(cols);
+  // }, [cols]);
+
   const getDataSource = () => {
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
         if (!showGrid) return;
+        console.log('datasource', { rows });
 
         try {
           const pageSize = params.endRow - params.startRow;
@@ -113,7 +126,7 @@ const PVGridWebiny2 = ({
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
 
-          console.log({ modelId });
+          console.log({ filter });
 
           setFilters && setFilters(filter);
 
@@ -264,8 +277,9 @@ const PVGridWebiny2 = ({
             // }),
             ...cols,
           ]);
-          if (rows) {
-            params.successCallback(rows, totalCount);
+          console.log({ dataRows, totalCount });
+          if (dataRows) {
+            params.successCallback(dataRows, totalCount);
           }
         } catch (error) {
           console.error(error);

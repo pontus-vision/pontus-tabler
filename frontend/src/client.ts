@@ -26,6 +26,8 @@ import {
   GetTablesResponse,
   NewTable,
   NewTableRow,
+  ReadDashboardsRes,
+  ReadPaginationFilter,
   Table,
   UpdateTable,
   UpdateTableRow,
@@ -179,6 +181,18 @@ export const deleteDataTableRow = async (
 ): Promise<AxiosResponse<string> | undefined> => {
   try {
     const res = await api.post('/table/data/delete', { ...body });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getAllDashboards = async (
+  body: ReadPaginationFilter,
+): Promise<AxiosResponse<ReadDashboardsRes> | undefined> => {
+  try {
+    const res = await api.post('/dashboards/read', { body });
 
     return res;
   } catch (error) {

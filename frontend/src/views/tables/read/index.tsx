@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import PVFlexLayout from '../../../pv-react/PVFlexLayout';
 import PVGridWebiny2 from '../../../pv-react/PVGridWebiny2';
-import { ReadPaginationFilter } from '../../../pontus-api/typescript-fetch-client-generated';
+import {
+  ReadPaginationFilter,
+  ReadPaginationFilterFilters,
+} from '../../../pontus-api/typescript-fetch-client-generated';
 import { getTables } from '../../../client';
 import { ColDef } from 'ag-grid-community';
 
@@ -11,7 +14,7 @@ const TablesReadView = () => {
     { headerName: 'Cols', field: 'cols', filter: true },
   ]);
   const [rows, setRows] = useState<{ [key: string]: unknown }[]>();
-  const [filters, setFilters] = useState<ReadPaginationFilter>();
+  const [filters, setFilters] = useState<ReadPaginationFilterFilters>();
   const [from, setFrom] = useState<number>();
   const [to, setTo] = useState<number>();
   const [totalCount, setTotalCount] = useState<number>();
@@ -34,9 +37,20 @@ const TablesReadView = () => {
     fetchTables();
   }, []);
 
+  useEffect(() => {
+    console.log({ filters });
+  }, [filters]);
+
   if (!totalCount) return;
 
-  return <PVGridWebiny2 totalCount={totalCount} cols={cols} rows={rows} />;
+  return (
+    <PVGridWebiny2
+      setFilters={setFilters}
+      totalCount={totalCount}
+      cols={cols}
+      rows={rows}
+    />
+  );
 };
 
 export default TablesReadView;

@@ -569,6 +569,25 @@ export interface DeleteTableColumn {
 /**
  *
  * @export
+ * @interface DeleteTableRow
+ */
+export interface DeleteTableRow {
+  /**
+   *
+   * @type {string}
+   * @memberof DeleteTableRow
+   */
+  tableId?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DeleteTableRow
+   */
+  rowId?: string;
+}
+/**
+ *
+ * @export
  * @interface DeleteUser
  */
 export interface DeleteUser {
@@ -646,19 +665,19 @@ export interface GroupReadBody {
 /**
  *
  * @export
- * @interface InlineResponse200
+ * @interface ReadDashboardsRes
  */
-export interface InlineResponse200 {
+export interface ReadDashboardsRes {
   /**
    *
    * @type {number}
-   * @memberof InlineResponse200
+   * @memberof ReadDashboardsRes
    */
   totalDashboards?: number;
   /**
    *
    * @type {Array<Dashboard>}
-   * @memberof InlineResponse200
+   * @memberof ReadDashboardsRes
    */
   dashboards?: Array<Dashboard>;
 }
@@ -840,25 +859,6 @@ export interface NewTableColumn {
 /**
  *
  * @export
- * @interface DeleteTableRow
- */
-export interface DeleteTableRow {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableRow
-   */
-  tableId?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableRow
-   */
-  rowId?: string;
-}
-/**
- *
- * @export
  * @interface NewTableRow
  */
 export interface NewTableRow {
@@ -1000,6 +1000,44 @@ export interface ReadPaginationFilter {
    * @memberof ReadPaginationFilter
    */
   filters?: Array<ReadPaginationFilterFilters>;
+}
+/**
+ *
+ * @export
+ * @interface ReadPaginationFilter2
+ */
+export interface ReadPaginationFilter2 {
+  /**
+   *
+   * @type {number}
+   * @memberof ReadPaginationFilter2
+   */
+  from?: number;
+  /**
+   *
+   * @type {number}
+   * @memberof ReadPaginationFilter2
+   */
+  to?: number;
+  /**
+   *
+   * @type {ReadPaginationFilter2Filters}
+   * @memberof ReadPaginationFilter2
+   */
+  filters?: ReadPaginationFilter2Filters;
+}
+/**
+ *
+ * @export
+ * @interface ReadPaginationFilter2Filters
+ */
+export interface ReadPaginationFilter2Filters {
+  /**
+   *
+   * @type {ReadPaginationFilterFilters}
+   * @memberof ReadPaginationFilter2Filters
+   */
+  colId?: ReadPaginationFilterFilters;
 }
 /**
  *
@@ -2365,12 +2403,12 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
+     * @param {ReadPaginationFilter2} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     dashboardsReadPost(
-      body: ReadPaginationFilter,
+      body: ReadPaginationFilter2,
       options: any = {},
     ): FetchArgs {
       // verify required parameter 'body' is not null or undefined
@@ -2404,7 +2442,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'ReadPaginationFilter' !== 'string' ||
+        <any>'ReadPaginationFilter2' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2551,7 +2589,7 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Update a row data, by using key/value pair for each column.
      * @summary Update a row
-     * @param {UpdateTableRow} body
+     * @param {DeleteTableRow} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2587,7 +2625,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'UpdateTableRow' !== 'string' ||
+        <any>'DeleteTableRow' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -3400,12 +3438,12 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
+     * @param {ReadPaginationFilter2} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     dashboardsReadPost(
-      body: ReadPaginationFilter,
+      body: ReadPaginationFilter2,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse200> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3519,12 +3557,12 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Update a row data, by using key/value pair for each column.
      * @summary Update a row
-     * @param {UpdateTableRow} body
+     * @param {DeleteTableRow} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableDataDeletePost(
-      body: UpdateTableRow,
+      body: DeleteTableRow,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3946,11 +3984,11 @@ export const DefaultApiFactory = function (
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
+     * @param {ReadPaginationFilter2} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
+    dashboardsReadPost(body: ReadPaginationFilter2, options?: any) {
       return DefaultApiFp(configuration).dashboardsReadPost(body, options)(
         fetch,
         basePath,
@@ -3997,11 +4035,11 @@ export const DefaultApiFactory = function (
     /**
      * Update a row data, by using key/value pair for each column.
      * @summary Update a row
-     * @param {UpdateTableRow} body
+     * @param {DeleteTableRow} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDataDeletePost(body: UpdateTableRow, options?: any) {
+    tableDataDeletePost(body: DeleteTableRow, options?: any) {
       return DefaultApiFp(configuration).tableDataDeletePost(body, options)(
         fetch,
         basePath,
@@ -4355,12 +4393,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Retrieve all dashboards with pagination and search
    * @summary Get all dashboards
-   * @param {ReadPaginationFilter} body
+   * @param {ReadPaginationFilter2} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
+  public dashboardsReadPost(body: ReadPaginationFilter2, options?: any) {
     return DefaultApiFp(this.configuration).dashboardsReadPost(body, options)(
       this.fetch,
       this.basePath,
@@ -4414,12 +4452,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Update a row data, by using key/value pair for each column.
    * @summary Update a row
-   * @param {UpdateTableRow} body
+   * @param {DeleteTableRow} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableDataDeletePost(body: UpdateTableRow, options?: any) {
+  public tableDataDeletePost(body: DeleteTableRow, options?: any) {
     return DefaultApiFp(this.configuration).tableDataDeletePost(body, options)(
       this.fetch,
       this.basePath,
