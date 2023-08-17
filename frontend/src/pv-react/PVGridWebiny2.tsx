@@ -20,6 +20,7 @@ import {
   IDatasource,
   IGetRowsParams,
   IRowNode,
+  RowEvent,
   SelectionChangedEvent,
 } from 'ag-grid-community';
 import { useDispatch } from 'react-redux';
@@ -43,6 +44,7 @@ type Props = {
   deleteMode?: boolean;
   containerHeight?: string;
   updateMode?: boolean;
+  setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
   cols?: ColDef[];
   rows?: { [key: string]: unknown }[];
   totalCount?: number;
@@ -51,6 +53,7 @@ type Props = {
   >;
   setFrom?: Dispatch<SetStateAction<number | undefined>>;
   setTo?: Dispatch<SetStateAction<number | undefined>>;
+
   setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<string[] | undefined>>;
 };
@@ -62,10 +65,13 @@ const PVGridWebiny2 = ({
   modelId,
   showColumnSelector,
   setShowColumnSelector,
+  setRowClicked,
   cols,
   rows,
   totalCount,
   setFilters,
+  setFrom,
+  setTo,
   deleteMode,
   updateMode,
   setEntriesToBeDeleted,
@@ -80,16 +86,6 @@ const PVGridWebiny2 = ({
   const [gridApi, setGridApi] = useState<GridApi>();
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
-  const [dataRows, setDataRows] = useState();
-
-  useEffect(() => {
-    console.log(rows);
-    setDataRows(rows);
-  }, [rows]);
-
-  useEffect(() => {
-    console.log({ dataRows });
-  }, [dataRows]);
 
   const dispatch = useDispatch();
   const [selectedColumns, setSelectedColumns] = useState<
@@ -127,6 +123,9 @@ const PVGridWebiny2 = ({
           }
 
           console.log({ filter });
+
+          setTo && setTo(params.endRow);
+          setFrom && setFrom(params.startRow);
 
           setFilters && setFilters(filter);
 
@@ -210,7 +209,7 @@ const PVGridWebiny2 = ({
           // });
 
           console.log({ cols, rows, totalCount });
-          if (!cols) return;
+          // if (!cols) return;
 
           setColumnDefs([
             {
@@ -277,9 +276,9 @@ const PVGridWebiny2 = ({
             // }),
             ...cols,
           ]);
-          console.log({ dataRows, totalCount });
-          if (dataRows) {
-            params.successCallback(dataRows, totalCount);
+          console.log({ rows, totalCount });
+          if (rows) {
+            params.successCallback(rows, totalCount);
           }
         } catch (error) {
           console.error(error);
@@ -340,6 +339,10 @@ const PVGridWebiny2 = ({
       }),
     );
   };
+  useEffect(() => {
+    console.log(rows);
+    gridApi?.refreshInfiniteCache();
+  }, [rows]);
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
@@ -353,11 +356,14 @@ const PVGridWebiny2 = ({
 
   const gridOptions: GridOptions = {
     rowModelType: 'infinite',
-    cacheBlockSize: 100,
+    cacheBlockSize: 1,
     suppressRowClickSelection: true,
 
-    onCellClicked: (e) => {
-      console.log(e.column.getColId());
+    onRowClicked: (e) => {
+      if (setRowClicked) {
+        console.log(e.data);
+        setRowClicked(e.data);
+      }
     },
   };
 
