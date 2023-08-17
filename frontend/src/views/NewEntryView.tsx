@@ -12,7 +12,8 @@ import { ColumnState } from 'ag-grid-community';
 import { selectCount } from '../store/slice';
 import { newRowState, selectRowState } from '../store/sliceGridUpdate';
 import { cmsGetContentModel } from '../webinyApi';
-import { getModelFields } from '../client';
+import { getModelFields, getTable } from '../client';
+import { TableColumn } from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   modelId: string;
@@ -36,12 +37,15 @@ const NewEntryView = ({
   setUpdatedGrid,
   setOpenNewEntryView,
 }: Props) => {
-  const [contentModel, setContentModel] = useState<ICmsGetContentModelData>();
+  const [contentModel, setContentModel] = useState<{
+    name: string;
+    fields: TableColumn[];
+  }>();
   const [successMsg, setSuccessMsg] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
   const {
     rowState,
-    modelId: updateModelId,
+    tableId: updateModelId,
     rowId,
   } = useSelector((state: RootState) => state.updateRow);
   const dispatch = useDispatch();
@@ -51,26 +55,26 @@ const NewEntryView = ({
   const getModelContent = async (modelId: string) => {
     try {
       setIsLoading(true);
-      const data = await getModelFields(modelId);
+      const data = await getTable(modelId);
+      console.log({ data });
 
-      if (!data) throw new Error();
+      if (!data?.data.cols) return;
 
       setIsLoading(false);
 
-      const filteredFields = data?.fields.filter(
-        (field) =>
-          !aggridColumnsState?.some(
-            (col) =>
-              !field?.validation?.some((valid) => valid.name === 'required') &&
-              col.colId === field.fieldId &&
-              col.hide,
-          ),
-      );
+      // const filteredFields = data?.fields.filter(
+      //   (field) =>
+      //     !aggridColumnsState?.some(
+      //       (col) =>
+      //         !field?.validation?.some((valid) => valid.name === 'required') &&
+      //         col.colId === field.fieldId &&
+      //         col.hide,
+      //     ),
+      // );
 
-      const newContentModel: ICmsGetContentModelData = {
-        ...data,
-        name: data?.name,
-        fields: filteredFields,
+      const newContentModel: { name: string; fields: TableColumn[] } = {
+        name: modelId,
+        fields: data.data.cols,
       };
       setContentModel(newContentModel);
     } catch (error) {
@@ -104,7 +108,7 @@ const NewEntryView = ({
             setOpenNewEntryView(false);
             dispatch(
               newRowState({
-                modelId: undefined,
+                tableId: undefined,
                 rowId: undefined,
                 rowState: undefined,
               }),

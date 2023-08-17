@@ -18,13 +18,18 @@ import {
   listModel,
 } from './webinyApi';
 import {
+  AgGridInput,
+  AgGridOutput,
   Configuration,
   DefaultApiFetchParamCreator,
+  DeleteTableRow,
   GetTablesResponse,
   NewTable,
+  NewTableRow,
   Table,
   UpdateTable,
-} from './pontus-api/typescript-fetch-client-generated';
+  UpdateTableRow,
+} from './pontus-api/typescript-fetch-client-generated/';
 import { useTranslation } from 'react-i18next';
 
 export const getModelData = async (
@@ -76,15 +81,29 @@ const api = axios.create({
   );
 })();
 
-export const getTables = async (): Promise<GetTablesResponse | undefined> => {
+export const getTables = async (): Promise<
+  AxiosResponse<GetTablesResponse> | undefined
+> => {
   try {
-    const { data } = await api.post('/tables/read', {});
+    const data = await api.post('/tables/read', {});
 
     return data;
   } catch (error) {
     console.error(error);
   }
   // const listModels = data.data.listContentModels.data;
+};
+
+export const getTable = async (
+  tableId: string,
+): Promise<AxiosResponse<Table> | undefined> => {
+  try {
+    const res = await api.post('/table/read', { tableId });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const createTable = async (
@@ -116,6 +135,50 @@ export const deleteTable = async (
 ): Promise<AxiosResponse<string, any> | undefined> => {
   try {
     const res = await api.post('table/delete', { tableId });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const createDataTable = async (body: NewTableRow) => {
+  try {
+    const res = await api.post('/table/data/create', { body });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const readDataTable = async (
+  body: AgGridInput,
+): Promise<AxiosResponse<AgGridOutput> | undefined> => {
+  try {
+    const res = await api.post('/table/data/read', {});
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const updateDataTableRow = async (body: UpdateTableRow) => {
+  try {
+    const res = await api.post('/table/data/update');
+
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const deleteDataTableRow = async (
+  body: DeleteTableRow,
+): Promise<AxiosResponse<string> | undefined> => {
+  try {
+    const res = await api.post('/table/data/delete', { ...body });
 
     return res;
   } catch (error) {

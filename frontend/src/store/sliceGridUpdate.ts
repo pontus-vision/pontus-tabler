@@ -2,13 +2,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from './store';
 
 export interface GridUpdateState {
-  modelId: string | undefined;
+  tableId: string | undefined;
   rowId: string | undefined;
   rowState: { [key: string]: { [key: string]: unknown } } | undefined;
 }
 
 const initialState: GridUpdateState = {
-  modelId: undefined,
+  tableId: undefined,
   rowId: undefined,
   rowState: {},
 };
@@ -18,7 +18,7 @@ const gridUpdateSlice = createSlice({
   initialState,
   reducers: {
     newRowState: (state, action: PayloadAction<GridUpdateState>) => {
-      state.modelId = action.payload.modelId;
+      state.tableId = action.payload.tableId;
       state.rowId = action.payload.rowId;
       state.rowState = action.payload.rowState;
     },

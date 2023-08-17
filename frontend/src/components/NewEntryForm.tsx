@@ -13,11 +13,22 @@ import {
 } from '../types';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { getModelData, postNewEntry, updateEntry } from '../client';
+import {
+  createDataTable,
+  getModelData,
+  postNewEntry,
+  updateDataTableRow,
+  updateEntry,
+} from '../client';
 import FloatingLabel from 'react-bootstrap/esm/FloatingLabel';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
+import {
+  NewTableRow,
+  TableColumn,
+  UpdateTableRow,
+} from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   setIsloading: Dispatch<SetStateAction<boolean>>;
@@ -41,7 +52,7 @@ const NewEntryForm = ({
   const [formObjFieldName, setFormObjFieldName] = useState<string>();
 
   const {
-    modelId: updateModelId,
+    tableId: updateTableId,
     rowId,
     rowState,
   } = useSelector((state: RootState) => state.updateRow);
@@ -56,8 +67,16 @@ const NewEntryForm = ({
     console.log({ contentModel });
   }, [contentModel]);
 
+  useEffect(() => {
+    console.log({
+      updateModelId: updateTableId,
+      rowId,
+      inputs: { ...formInputs, ...rowState },
+    });
+  }, [updateTableId, rowId, rowState]);
+
   const renderField = (
-    field: ICmsGetContentModelDataField,
+    field: TableColumn,
     objFieldId: string | null = null,
   ): ReactElement<any, any> | undefined => {
     // const validationRules = field.validation?.map(valid=> valid.settings?.preset)
@@ -67,8 +86,32 @@ const NewEntryForm = ({
     // const { handleSubmit, register, formState: {errors} } = useForm({
     //   resolver: zodResolver(validationSchema),
     // });
+    return (
+      <div className="field form__text-input">
+        <Form.Label>{field.name}</Form.Label>
+        <Form.Control
+          defaultValue={{ ...formInputs, ...rowState }[field?.field || '']}
+          onChange={(e) => {
+            if (objFieldId) {
+              setFormInputs((prevState: { [key: string]: unknown }) => ({
+                ...prevState,
+                [`${objFieldId}`]: {
+                  ...prevState[objFieldId],
+                  [field.fieldId]: e.target.value,
+                },
+              }));
+            } else {
+              setFormInputs((prevState) => ({
+                ...prevState,
+                [`${field.field}`]: e.target.value,
+              }));
+            }
+          }}
+        ></Form.Control>
+      </div>
+    );
 
-    if (field.type === 'text') {
+    if (field?.type === 'text') {
       if (field.renderer.name === 'checkboxes') {
         const arr = [] as string[];
         return (
@@ -208,7 +251,7 @@ const NewEntryForm = ({
           </div>
         );
       }
-    } else if (field.type === 'ref') {
+    } else if (field?.type === 'ref') {
       const refs = field?.settings?.models;
 
       const [options, setOptions] = useState<any>();
@@ -317,7 +360,7 @@ const NewEntryForm = ({
           </div>
         );
       }
-    } else if (field.type === 'long-text') {
+    } else if (field?.type === 'long-text') {
       if (field.renderer.name === 'long-text-text-area') {
         return (
           <div className="field form__long-text">
@@ -353,7 +396,7 @@ const NewEntryForm = ({
           </div>
         );
       }
-    } else if (field.type === 'object' && field?.settings) {
+    } else if (field?.type === 'object' && field?.settings) {
       const objFieldId = field.fieldId;
       // setFormObjFieldName(objFieldId)
       return (
@@ -370,29 +413,34 @@ const NewEntryForm = ({
   const onSubmit = async () => {
     try {
       const formNewInputs = { ...rowState, ...formInputs };
-      if (updateModelId && rowId) {
-        const publishData = await updateEntry(
-          formNewInputs,
-          contentModel.fields,
-          updateModelId,
+      if (updateTableId && rowId) {
+        const body: UpdateTableRow = {
           rowId,
-        );
+          cols: formNewInputs,
+          tableId: updateTableId,
+        };
+
+        const publishData = await updateDataTableRow(body);
         if (!!publishData) {
           handleUpdatedGrid();
           setSuccessMsg(t('entry-updated') as string);
         }
       } else {
-        const publishData = await postNewEntry(
-          formNewInputs,
-          contentModel.fields,
-          contentModel.modelId,
-        );
+        const obj: NewTableRow = {
+          cols: formInputs,
+          tableId: contentModel.name,
+        };
+
+        const publishData = await createDataTable(obj);
         if (!!publishData) {
           handleUpdatedGrid();
           setSuccessMsg(t('entry-registered') as string);
         }
       }
-    } catch (error) {}
+      console.log({ formInputs, updateModelId: updateTableId });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const fields = () => {

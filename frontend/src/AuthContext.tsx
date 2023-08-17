@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useLocalStorage } from './UseLocalStorage';
-import { useNavigate } from 'react-router-dom';
+import { redirect, useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   isAuthenticated: boolean;

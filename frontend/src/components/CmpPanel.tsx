@@ -19,8 +19,10 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
   const { t, i18n } = useTranslation();
 
   const fetchModels = async () => {
-    const data = await getTables();
-    console.log(data.tables);
+    const res = await getTables();
+
+    const data = res?.data;
+    if (!data) return;
     setTables(data.tables);
     return data;
   };
