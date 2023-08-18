@@ -12,3 +12,16 @@
 #root {
   height: 100%;
 }
+
+.success-msg {
+  position: absolute;
+  width: 18rem;
+  text-align: right;
+  left: -100%;
+  z-index: 1;
+  bottom: 5rem;
+  transition: left 300ms ease-in-out;
+  &.active {
+    left: -1rem;
+  }
+}

@@ -9,18 +9,7 @@
   top: 0;
   left: 0;
   z-index: 2;
-  .success-msg {
-    position: absolute;
-    width: 18rem;
-    text-align: right;
-    left: -100%;
-    z-index: 1;
-    bottom: 5rem;
-    transition: left 300ms ease-in-out;
-    &.active {
-      left: -1rem;
-    }
-  }
+
   .shadow {
     position: absolute;
     top: 0;

@@ -7,8 +7,14 @@ import {
 import { ColDef, RowEvent } from 'ag-grid-community';
 import { getAllDashboards } from '../../client';
 import { capitalizeFirstLetter } from '../../webinyApi';
+import { useDispatch } from 'react-redux';
+import { setDashboardId } from '../../store/sliceDashboards';
+import { redirect, useNavigate } from 'react-router-dom';
+import PVFlexLayout from '../../pv-react/PVFlexLayout';
+import DashboardView from '../DashboardView';
 
 const Dashboards = () => {
+  const dispatch = useDispatch();
   const [cols, setCols] = useState<ColDef[]>([
     {
       headerName: 'Owner',
@@ -46,8 +52,11 @@ const Dashboards = () => {
   const [from, setFrom] = useState<number>();
   const [to, setTo] = useState<number>();
   const [totalCount, setTotalCount] = useState<number>(2);
-
+  const navigate = useNavigate();
   const [rowClicked, setRowClicked] = useState<RowEvent>();
+  const [newDashboardName, setNewDashboardName] = useState<string>();
+
+  const [newDashboard, setNewDashboard] = useState(false);
 
   useEffect(() => {
     const fetchDashboars = async () => {
@@ -90,24 +99,52 @@ const Dashboards = () => {
     console.log({ from, to });
   }, [from, to]);
 
-  useEffect(() => {
+  const setDashboard = async () => {
+    if (!rowClicked) return;
     console.log({ rowClicked });
-  }, [rowClicked]);
+    dispatch(setDashboardId(rowClicked.id));
 
+    navigate(`/dashboard/${rowClicked.id}`);
+  };
+
+  useEffect(() => {
+    setDashboard();
+  }, [rowClicked]);
   if (!rows) return;
 
   return (
     <>
-      <PVGridWebiny2
-        totalCount={totalCount}
-        rows={rows}
-        cols={cols}
-        setFilters={setFilters}
-        setFrom={setFrom}
-        setTo={setTo}
-        setRowClicked={setRowClicked}
-      />
-      {/* <ul>{rows.map((row) => row)}</ul> */}
+      {!newDashboard && (
+        <>
+          <PVGridWebiny2
+            totalCount={totalCount}
+            rows={rows}
+            cols={cols}
+            setFilters={setFilters}
+            setFrom={setFrom}
+            setTo={setTo}
+            setRowClicked={setRowClicked}
+          />
+
+          <button
+            onClick={() => setNewDashboard(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow-sm hover:shadow-md"
+          >
+            Add New Dashboard
+          </button>
+        </>
+      )}
+
+      {newDashboard && (
+        <>
+          <label htmlFor="">Dashboard Name: </label>
+          <input
+            type="text"
+            onChange={(e) => setNewDashboardName(e.target.value)}
+          />
+          <DashboardView createMode={true} dashboardName={newDashboardName} />
+        </>
+      )}
     </>
   );
 };

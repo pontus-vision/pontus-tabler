@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
+  Dashboard,
   ICmsGetContentModel,
   ICmsGetContentModelData,
   ICmsGetContentModelDataField,
@@ -24,11 +25,13 @@ import {
   DefaultApiFetchParamCreator,
   DeleteTableRow,
   GetTablesResponse,
+  NewDashboard,
   NewTable,
   NewTableRow,
   ReadDashboardsRes,
   ReadPaginationFilter,
   Table,
+  UpdateDashboard,
   UpdateTable,
   UpdateTableRow,
 } from './pontus-api/typescript-fetch-client-generated/';
@@ -197,6 +200,54 @@ export const getAllDashboards = async (
     return res;
   } catch (error) {
     console.error(error);
+  }
+};
+
+export const createDashboard = async (
+  body: NewDashboard,
+): Promise<AxiosResponse<Dashboard> | undefined> => {
+  try {
+    const res = await api.post('/dashboard/create', {});
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getDashboard = async (
+  dashboardId: string,
+): Promise<AxiosResponse<Dashboard> | undefined> => {
+  try {
+    const res = await api.post('/dashboard/read', { dashboardId });
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const updateDashboard = async (
+  body: UpdateDashboard,
+): Promise<AxiosResponse<string> | undefined> => {
+  try {
+    const res = await api.post('/dashboard/update', { body });
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteDashboard = async (
+  dashboardId: string,
+): Promise<AxiosResponse<string> | undefined> => {
+  try {
+    const res = await api.post('/dashboard/delete', { dashboardId });
+
+    return res;
+  } catch (error) {
+    throw error;
   }
 };
 

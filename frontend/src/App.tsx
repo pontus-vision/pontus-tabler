@@ -44,6 +44,7 @@ function App() {
             <Route path="/table/delete" element={<DeleteTableView />} />
             <Route path="/tables/read" element={<TablesReadView />} />
             <Route path="/dashboards/read" element={<Dashboards />} />
+            <Route path="/dashboard/:id" element={<DashboardView />} />
           </Route>
         </Routes>
       </>
