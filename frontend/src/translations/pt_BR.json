@@ -26,6 +26,10 @@
   "select-table-to-be-updated": "Selecione a tabela a ser atualizada",
   "table": "tabela",
   "created-successfully": "criada com sucesso",
+  "Register": "Registrar",
+  "Register new user": "Registrar novo usuário",
+  "Name": "Nome",
+  "Select Group": "Selecione o Grupo",
 
   "CLICK ON THE GRID TO GET THE RELATED ITEMS TIME SERIES": "CLIQUE NO GRID PARA OBTER OS ITENS RELACIONADOS DA SÉRIE TEMPORAL",
   "Consent": "Consentimento",
@@ -606,7 +610,6 @@
   "Union Membership": "Membro de Sindicato",
   "Church Membership": "Membro de Igreja",
   "Metadata Type Event Subject Access Request": "Classificação",
-  "Name": "Propriedade",
   "Match Weight": "Peso da Propriedade",
   "Exclude From Search": "Excluída da Pesquisa",
   "Exclude From Subsequence Search": "Propriedade Não Obrigatória",

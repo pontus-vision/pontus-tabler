@@ -25,15 +25,20 @@ import {
   DefaultApiFetchParamCreator,
   DeleteTableRow,
   GetTablesResponse,
+  Group,
+  GroupReadBody,
   NewDashboard,
   NewTable,
   NewTableRow,
+  NewUser,
   ReadDashboardsRes,
+  ReadGroupsRes,
   ReadPaginationFilter,
   Table,
   UpdateDashboard,
   UpdateTable,
   UpdateTableRow,
+  User,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 
@@ -244,6 +249,30 @@ export const deleteDashboard = async (
 ): Promise<AxiosResponse<string> | undefined> => {
   try {
     const res = await api.post('/dashboard/delete', { dashboardId });
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const readAuthGroups = async (
+  body: ReadPaginationFilter,
+): Promise<AxiosResponse<ReadGroupsRes> | undefined> => {
+  try {
+    const res = await api.post('/auth/groups/read', { body });
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createUser = async (
+  body: NewUser,
+): Promise<AxiosResponse<User> | undefined> => {
+  try {
+    const res = await api.post('/auth/user/create', { body });
 
     return res;
   } catch (error) {

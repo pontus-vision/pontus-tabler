@@ -14,10 +14,10 @@ servers:
   - url: http://localhost:8080/PontusTest/1.0.0
     description: SwaggerHub API Auto Mocking
 tags:
-  - name: admins
-    description: Secured Admin-only calls
-  - name: developers
-    description: Operations available to regular developers
+- name: admins
+  description: Secured Admin-only calls
+- name: developers
+  description: Operations available to regular developers
 paths:
   /table/create:
     post:
@@ -28,38 +28,37 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewTable"
+              $ref: '#/components/schemas/NewTable'
             examples:
               example-0001:
                 value:
                   name: Person Natural
-                  tableId: Person_Natural
                   cols:
-                    - field: Person_Natural_Full_Name
-                      filter: true
-                      headerName: Full Name
-                      id: Person_Natural_Full_Name
-                      name: Full Name
-                      sortable: true
-                    - field: Person_Natural_Customer_ID
-                      filter: true
-                      headerName: Customer ID
-                      id: Person_Natural_Customer_ID
-                      name: Customer ID
-                      sortable: true
+                  - field: Person_Natural_Full_Name
+                    filter: true
+                    headerName: Full Name
+                    id: Person_Natural_Full_Name
+                    name: Full Name
+                    sortable: true
+                  - field: Person_Natural_Customer_ID
+                    filter: true
+                    headerName: Customer ID
+                    id: Person_Natural_Customer_ID
+                    name: Customer ID
+                    sortable: true
       responses:
         "201":
           description: Table created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Table"
+                $ref: '#/components/schemas/Table'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /table/read:
     post:
@@ -70,7 +69,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GetTable"
+              $ref: '#/components/schemas/GetTable'
             examples:
               example-0001:
                 value:
@@ -82,115 +81,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Table"
+                $ref: '#/components/schemas/Table'
               examples:
                 example-01:
                   value:
                     tableId: mapeamentoDeProcessos
                     name: Mapeamento de Processos
                     cols:
-                      - field: Person_Natural_Full_Name
-                        filter: true
-                        headerName: Full Name
-                        id: Person_Natural_Full_Name
-                        name: Full Name
-                        sortable: true
-                      - field: Person_Natural_Customer_ID
-                        filter: true
-                        headerName: Customer ID
-                        id: Person_Natural_Customer_ID
-                        name: Customer ID
-                        sortable: true
-        "400":
-          description: Bad request
-        "500":
-          description: Internal server error
-      security:
-        - bearerAuth: []
-      x-swagger-router-controller: Default
-  /table/update:
-    post:
-      summary: Update table by ID
-      description: Update table properties and associated columns by ID
-      operationId: tableUpdatePOST
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateTable"
-        required: true
-      responses:
-        "204":
-          description: Table updated successfully
-        "400":
-          description: Bad request
-        "404":
-          description: Table not found
-        "500":
-          description: Internal server error
-      security:
-        - bearerAuth: []
-      x-swagger-router-controller: Default
-  /table/delete:
-    post:
-      summary: Delete a table
-      description: Delete a table by ID
-      operationId: tableDeletePOST
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/DeleteTable"
-        required: true
-      responses:
-        "204":
-          description: Table deleted successfully
-        "404":
-          description: Table not found
-        "500":
-          description: Internal server error
-      security:
-        - bearerAuth: []
-      x-swagger-router-controller: Default
-  /tables/read:
-    post:
-      summary: Get all tables
-      description: Retrieve all tables with pagination and search
-      operationId: tablesReadPOST
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ReadPaginationFilter"
-        required: true
-      responses:
-        "200":
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GetTablesResponse"
-        "400":
-          description: Bad request
-        "500":
-          description: Internal server error
-      security:
-        - bearerAuth: []
-      x-swagger-router-controller: Default
-  /table/data/read:
-    post:
-      description: ""
-      operationId: get-table-data
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/agGridInput"
-            examples:
-              example-0001:
-                value:
-                  cols:
                     - field: Person_Natural_Full_Name
                       filter: true
                       headerName: Full Name
@@ -203,34 +100,123 @@ paths:
                       id: Person_Natural_Customer_ID
                       name: Customer ID
                       sortable: true
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      x-swagger-router-controller: Default
+  /table/update:
+    post:
+      summary: Update table by ID
+      description: Update table properties and associated columns by ID
+      operationId: tableUpdatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTable'
+        required: true
+      responses:
+        "204":
+          description: Table updated successfully
+        "400":
+          description: Bad request
+        "404":
+          description: Table not found
+        "500":
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      x-swagger-router-controller: Default
+  /table/delete:
+    post:
+      summary: Delete a table
+      description: Delete a table by ID
+      operationId: tableDeletePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteTable'
+        required: true
+      responses:
+        "204":
+          description: Table deleted successfully
+        "404":
+          description: Table not found
+        "500":
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      x-swagger-router-controller: Default
+  /tables/read:
+    post:
+      summary: Get all tables
+      description: Retrieve all tables with pagination and search
+      operationId: tablesReadPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadPaginationFilter'
+        required: true
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTablesResponse'
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      x-swagger-router-controller: Default
+  /table/data/read:
+    post:
+      description: ""
+      operationId: get-table-data
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/agGridInput'
+            examples:
+              example-0001:
+                value:
                   dataType: Person_Natural
                   filters:
-                    - colId: Person_Natural_Full_Name
-                      condition1:
-                        filter: JO
-                        filterType: text
-                        type: contains
-                      condition2:
-                        filter: SE
-                        filterType: text
-                        type: contains
+                  - colId: Person_Natural_Full_Name
+                    condition1:
+                      filter: JO
                       filterType: text
-                      operator: AND
+                      type: contains
+                    condition2:
+                      filter: SE
+                      filterType: text
+                      type: contains
+                    filterType: text
+                    operator: AND
                   from: 0
                   search:
                     cols:
-                      - field: Person_Natural_Full_Name
-                        filter: true
-                        headerName: Full Name
-                        id: Person_Natural_Full_Name
-                        name: Full Name
-                        sortable: true
-                      - field: Person_Natural_Customer_ID
-                        filter: true
-                        headerName: Customer ID
-                        id: Person_Natural_Customer_ID
-                        name: Customer ID
-                        sortable: true
+                    - field: Person_Natural_Full_Name
+                      filter: true
+                      headerName: Full Name
+                      id: Person_Natural_Full_Name
+                      name: Full Name
+                      sortable: true
+                    - field: Person_Natural_Customer_ID
+                      filter: true
+                      headerName: Customer ID
+                      id: Person_Natural_Customer_ID
+                      name: Customer ID
+                      sortable: true
                     extraSearch:
                       label: Person_Natural
                       value: Person_Natural
@@ -245,17 +231,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/agGridOutput"
+                $ref: '#/components/schemas/agGridOutput'
               examples:
                 example-0001:
                   value:
                     type: recordReply
                     from: 0
                     records:
-                      - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
-                        ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
-                      - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
-                        ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
+                    - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
+                      ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
+                    - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
+                      ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
                     to: 2
                     totalAvailable: 4242
         "400":
@@ -278,7 +264,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewTableRow"
+              $ref: '#/components/schemas/NewTableRow'
             examples:
               example-01:
                 value:
@@ -295,7 +281,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /table/data/update:
     post:
@@ -306,7 +292,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTableRow"
+              $ref: '#/components/schemas/UpdateTableRow'
             examples:
               example-01:
                 value:
@@ -324,7 +310,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /table/data/delete:
     post:
@@ -335,7 +321,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTableRow"
+              $ref: '#/components/schemas/UpdateTableRow'
             examples:
               example-01:
                 value:
@@ -350,20 +336,19 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/create:
     post:
       summary: Create a new dashboard
-      description:
-        "Create a new dashboard with properties, auth group, folder, and\
+      description: "Create a new dashboard with properties, auth group, folder, and\
         \ owner"
       operationId: dashboardCreatePOST
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewDashboard"
+              $ref: '#/components/schemas/NewDashboard'
         required: true
       responses:
         "201":
@@ -371,13 +356,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Dashboard"
+                $ref: '#/components/schemas/Dashboard'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/read:
     post:
@@ -388,7 +373,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/dashboard_read_body"
+              $ref: '#/components/schemas/dashboard_read_body'
         required: true
       responses:
         "200":
@@ -396,26 +381,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Dashboard"
+                $ref: '#/components/schemas/Dashboard'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/update:
     post:
       summary: Update dashboard by ID
-      description:
-        "Update dashboard properties, auth group, folder, and owner by\
+      description: "Update dashboard properties, auth group, folder, and owner by\
         \ ID"
       operationId: dashboardUpdatePOST
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateDashboard"
+              $ref: '#/components/schemas/UpdateDashboard'
         required: true
       responses:
         "204":
@@ -427,7 +411,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/delete:
     post:
@@ -438,7 +422,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteDashboard"
+              $ref: '#/components/schemas/DeleteDashboard'
         required: true
       responses:
         "204":
@@ -448,7 +432,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/create:
     post:
@@ -459,7 +443,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_create_body"
+              $ref: '#/components/schemas/auth_create_body'
         required: true
       responses:
         "201":
@@ -467,13 +451,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardAuthGroup"
+                $ref: '#/components/schemas/DashboardAuthGroup'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/read:
     post:
@@ -484,7 +468,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_read_body"
+              $ref: '#/components/schemas/auth_read_body'
         required: true
       responses:
         "201":
@@ -492,13 +476,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardAuthGroup"
+                $ref: '#/components/schemas/DashboardAuthGroup'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/update:
     post:
@@ -509,7 +493,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_update_body"
+              $ref: '#/components/schemas/auth_update_body'
         required: true
       responses:
         "201":
@@ -517,13 +501,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardAuthGroup"
+                $ref: '#/components/schemas/DashboardAuthGroup'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/delete:
     post:
@@ -534,7 +518,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_delete_body"
+              $ref: '#/components/schemas/auth_delete_body'
         required: true
       responses:
         "201":
@@ -542,13 +526,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/auth_delete_body"
+                $ref: '#/components/schemas/auth_delete_body'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboards/read:
     post:
@@ -559,7 +543,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadPaginationFilter"
+              $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
         "200":
@@ -567,13 +551,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/inline_response_200"
+                $ref: '#/components/schemas/inline_response_200'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/create:
     post:
@@ -584,7 +568,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewGroup"
+              $ref: '#/components/schemas/NewGroup'
         required: true
       responses:
         "201":
@@ -592,13 +576,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Group"
+                $ref: '#/components/schemas/Group'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/read:
     post:
@@ -609,7 +593,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/group_read_body"
+              $ref: '#/components/schemas/group_read_body'
         required: true
       responses:
         "200":
@@ -617,11 +601,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Group"
+                $ref: '#/components/schemas/Group'
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/update:
     post:
@@ -632,7 +616,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateGroup"
+              $ref: '#/components/schemas/UpdateGroup'
         required: true
       responses:
         "204":
@@ -644,7 +628,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/delete:
     post:
@@ -655,7 +639,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteGroup"
+              $ref: '#/components/schemas/DeleteGroup'
         required: true
       responses:
         "204":
@@ -665,7 +649,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/groups/read:
     post:
@@ -676,7 +660,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadGroups"
+              $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
         "200":
@@ -684,11 +668,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/inline_response_200_1"
+                $ref: '#/components/schemas/inline_response_200_1'
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/users/read:
     post:
@@ -699,7 +683,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadUsers"
+              $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
         "200":
@@ -707,11 +691,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/inline_response_200_2"
+                $ref: '#/components/schemas/inline_response_200_2'
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/create:
     post:
@@ -722,7 +706,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewUser"
+              $ref: '#/components/schemas/NewUser'
         required: true
       responses:
         "201":
@@ -730,13 +714,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
         "400":
           description: Bad request
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/update:
     post:
@@ -747,7 +731,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateUser"
+              $ref: '#/components/schemas/UpdateUser'
         required: true
       responses:
         "204":
@@ -759,7 +743,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/delete:
     post:
@@ -770,7 +754,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteUser"
+              $ref: '#/components/schemas/DeleteUser'
         required: true
       responses:
         "204":
@@ -780,7 +764,7 @@ paths:
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/read:
     post:
@@ -791,7 +775,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/user_read_body"
+              $ref: '#/components/schemas/user_read_body'
         required: true
       responses:
         "200":
@@ -799,11 +783,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
         "500":
           description: Internal server error
       security:
-        - bearerAuth: []
+      - bearerAuth: []
       x-swagger-router-controller: Default
 components:
   schemas:
@@ -863,15 +847,15 @@ components:
       type: object
       properties:
         search:
-          $ref: "#/components/schemas/agGridInput_search"
+          $ref: '#/components/schemas/agGridInput_search'
         cols:
           type: array
           items:
-            $ref: "#/components/schemas/agGridInput_search_cols"
+            $ref: '#/components/schemas/agGridInput_search_cols'
         filters:
           type: array
           items:
-            $ref: "#/components/schemas/agGridInput_filters"
+            $ref: '#/components/schemas/agGridInput_filters'
         dataType:
           type: string
           example: Person_Natural
@@ -908,8 +892,8 @@ components:
       example:
         totalAvailable: 1
         records:
-          - records
-          - records
+        - records
+        - records
         from: 0
         to: 6
         type: type
@@ -996,23 +980,23 @@ components:
           type: array
           description: Table columns associated with the table
           items:
-            $ref: "#/components/schemas/TableColumn"
+            $ref: '#/components/schemas/TableColumn'
       example:
         name: name
         tableId: tableId
         cols:
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
-            sortable: true
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
-            sortable: true
+        - filter: true
+          headerName: headerName
+          field: field
+          name: name
+          id: id
+          sortable: true
+        - filter: true
+          headerName: headerName
+          field: field
+          name: name
+          id: id
+          sortable: true
     NewTable:
       type: object
       properties:
@@ -1023,7 +1007,7 @@ components:
           type: array
           description: Table columns to be associated with the table during creation
           items:
-            $ref: "#/components/schemas/TableColumn"
+            $ref: '#/components/schemas/TableColumn'
     DeleteTable:
       type: object
       properties:
@@ -1042,7 +1026,7 @@ components:
           type: array
           description: Updated table columns to associate with the table during update
           items:
-            $ref: "#/components/schemas/TableColumn"
+            $ref: '#/components/schemas/TableColumn'
     UpdateTableColumn:
       type: object
       properties:
@@ -1073,7 +1057,7 @@ components:
         tableId:
           type: string
         cols:
-          $ref: "#/components/schemas/NewTableRow_cols"
+          $ref: '#/components/schemas/NewTableRow_cols'
     UpdateTableRow:
       type: object
       properties:
@@ -1082,7 +1066,7 @@ components:
         rowId:
           type: string
         cols:
-          $ref: "#/components/schemas/NewTableRow_cols"
+          $ref: '#/components/schemas/NewTableRow_cols'
     Dashboard:
       type: object
       properties:
@@ -1166,17 +1150,17 @@ components:
             type: string
       example:
         read:
-          - read
-          - read
+        - read
+        - read
         create:
-          - create
-          - create
+        - create
+        - create
         update:
-          - update
-          - update
+        - update
+        - update
         delete:
-          - delete
-          - delete
+        - delete
+        - delete
     PaginationAndSearch:
       type: object
       properties:
@@ -1213,7 +1197,7 @@ components:
         filters:
           type: array
           items:
-            $ref: "#/components/schemas/ReadPaginationFilter_filters"
+            $ref: '#/components/schemas/ReadPaginationFilter_filters'
     GetTablesResponse:
       type: object
       properties:
@@ -1223,39 +1207,39 @@ components:
           type: array
           description: Table columns associated with the table
           items:
-            $ref: "#/components/schemas/Table"
+            $ref: '#/components/schemas/Table'
       example:
         tables:
-          - name: name
-            tableId: tableId
-            cols:
-              - filter: true
-                headerName: headerName
-                field: field
-                name: name
-                id: id
-                sortable: true
-              - filter: true
-                headerName: headerName
-                field: field
-                name: name
-                id: id
-                sortable: true
-          - name: name
-            tableId: tableId
-            cols:
-              - filter: true
-                headerName: headerName
-                field: field
-                name: name
-                id: id
-                sortable: true
-              - filter: true
-                headerName: headerName
-                field: field
-                name: name
-                id: id
-                sortable: true
+        - name: name
+          tableId: tableId
+          cols:
+          - filter: true
+            headerName: headerName
+            field: field
+            name: name
+            id: id
+            sortable: true
+          - filter: true
+            headerName: headerName
+            field: field
+            name: name
+            id: id
+            sortable: true
+        - name: name
+          tableId: tableId
+          cols:
+          - filter: true
+            headerName: headerName
+            field: field
+            name: name
+            id: id
+            sortable: true
+          - filter: true
+            headerName: headerName
+            field: field
+            name: name
+            id: id
+            sortable: true
         totalTables: 0
     User:
       type: object
@@ -1266,16 +1250,16 @@ components:
         name:
           type: string
           description: Name of the user
-        groups:
+        authGroups:
           type: array
           description: IDs of the groups the user belongs to
           items:
             type: string
       example:
+        authGroups:
+        - authGroups
+        - authGroups
         name: name
-        groups:
-          - groups
-          - groups
         userId: userId
     NewUser:
       type: object
@@ -1283,7 +1267,7 @@ components:
         name:
           type: string
           description: Name of the user
-        groups:
+        authGroups:
           type: array
           description: IDs of the groups the user belongs to
           items:
@@ -1297,7 +1281,7 @@ components:
         name:
           type: string
           description: Updated name of the user
-        groups:
+        authGroups:
           type: array
           description: Updated IDs of the groups the user belongs to
           items:
@@ -1315,7 +1299,7 @@ components:
         to:
           type: integer
         filters:
-          $ref: "#/components/schemas/ReadUsers_filters"
+          $ref: '#/components/schemas/ReadUsers_filters'
     ReadGroups:
       type: object
       properties:
@@ -1324,7 +1308,7 @@ components:
         to:
           type: integer
         filters:
-          $ref: "#/components/schemas/ReadGroups_filters"
+          $ref: '#/components/schemas/ReadGroups_filters'
     DashboardAuthGroup:
       type: object
       properties:
@@ -1334,21 +1318,21 @@ components:
         dashboardName:
           type: string
         authGroups:
-          $ref: "#/components/schemas/AuthGroups"
+          $ref: '#/components/schemas/AuthGroups'
       example:
         authGroups:
           read:
-            - read
-            - read
+          - read
+          - read
           create:
-            - create
-            - create
+          - create
+          - create
           update:
-            - update
-            - update
+          - update
+          - update
           delete:
-            - delete
-            - delete
+          - delete
+          - delete
         dashboardId: dashboardId
         dashboardName: dashboardName
     dashboard_read_body:
@@ -1381,7 +1365,7 @@ components:
         dashboardId:
           type: string
         authGroups:
-          $ref: "#/components/schemas/dashboardgroupauthcreate_authGroups"
+          $ref: '#/components/schemas/dashboardgroupauthcreate_authGroups'
     auth_read_body:
       type: object
       properties:
@@ -1393,28 +1377,28 @@ components:
         dashboardId:
           type: string
         authGroups:
-          $ref: "#/components/schemas/AuthGroups"
+          $ref: '#/components/schemas/AuthGroups'
     auth_delete_body:
       type: object
       properties:
         dashboardId:
           type: string
         authGroups:
-          $ref: "#/components/schemas/AuthGroups"
+          $ref: '#/components/schemas/AuthGroups'
       example:
         authGroups:
           read:
-            - read
-            - read
+          - read
+          - read
           create:
-            - create
-            - create
+          - create
+          - create
           update:
-            - update
-            - update
+          - update
+          - update
           delete:
-            - delete
-            - delete
+          - delete
+          - delete
         dashboardId: dashboardId
     inline_response_200:
       type: object
@@ -1424,20 +1408,20 @@ components:
         dashboards:
           type: array
           items:
-            $ref: "#/components/schemas/Dashboard"
+            $ref: '#/components/schemas/Dashboard'
       example:
         totalDashboards: 0
         dashboards:
-          - owner: owner
-            folder: folder
-            name: name
-            id: id
-            state: {}
-          - owner: owner
-            folder: folder
-            name: name
-            id: id
-            state: {}
+        - owner: owner
+          folder: folder
+          name: name
+          id: id
+          state: {}
+        - owner: owner
+          folder: folder
+          name: name
+          id: id
+          state: {}
     group_read_body:
       type: object
       properties:
@@ -1448,17 +1432,17 @@ components:
       properties:
         totalGroups:
           type: integer
-        groups:
+        authGroups:
           type: array
           items:
-            $ref: "#/components/schemas/Group"
+            $ref: '#/components/schemas/Group'
       example:
+        authGroups:
+        - groupId: groupId
+          name: name
+        - groupId: groupId
+          name: name
         totalGroups: 0
-        groups:
-          - groupId: groupId
-            name: name
-          - groupId: groupId
-            name: name
     inline_response_200_2:
       type: object
       properties:
@@ -1467,20 +1451,20 @@ components:
         users:
           type: array
           items:
-            $ref: "#/components/schemas/User"
+            $ref: '#/components/schemas/User'
       example:
         totalUsers: 0
         users:
-          - name: name
-            groups:
-              - groups
-              - groups
-            userId: userId
-          - name: name
-            groups:
-              - groups
-              - groups
-            userId: userId
+        - authGroups:
+          - authGroups
+          - authGroups
+          name: name
+          userId: userId
+        - authGroups:
+          - authGroups
+          - authGroups
+          name: name
+          userId: userId
     user_read_body:
       type: object
       properties:
@@ -1524,9 +1508,9 @@ components:
         cols:
           type: array
           items:
-            $ref: "#/components/schemas/agGridInput_search_cols"
+            $ref: '#/components/schemas/agGridInput_search_cols'
         extraSearch:
-          $ref: "#/components/schemas/agGridInput_search_extraSearch"
+          $ref: '#/components/schemas/agGridInput_search_extraSearch'
     agGridInput_filters:
       type: object
       properties:
@@ -1562,9 +1546,9 @@ components:
         colId:
           type: string
         condition1:
-          $ref: "#/components/schemas/ReadPaginationFilter_condition1"
+          $ref: '#/components/schemas/ReadPaginationFilter_condition1'
         condition2:
-          $ref: "#/components/schemas/ReadPaginationFilter_condition1"
+          $ref: '#/components/schemas/ReadPaginationFilter_condition1'
         filterType:
           type: string
         operator:
@@ -1574,7 +1558,7 @@ components:
       properties:
         name:
           type: string
-        groups:
+        authGroups:
           type: array
           items:
             type: string

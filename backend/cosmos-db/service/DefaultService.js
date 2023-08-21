@@ -79,21 +79,21 @@ exports.authGroupUpdatePOST = function(body) {
  * Get all groups
  * Retrieve all groups
  *
- * body ReadGroups 
+ * body ReadPaginationFilter 
  * returns inline_response_200_1
  **/
 exports.authGroupsReadPOST = function(body) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
-  "totalGroups" : 0,
-  "groups" : [ {
+  "authGroups" : [ {
     "groupId" : "groupId",
     "name" : "name"
   }, {
     "groupId" : "groupId",
     "name" : "name"
-  } ]
+  } ],
+  "totalGroups" : 0
 };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -115,8 +115,8 @@ exports.authUserCreatePOST = function(body) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
+  "authGroups" : [ "authGroups", "authGroups" ],
   "name" : "name",
-  "groups" : [ "groups", "groups" ],
   "userId" : "userId"
 };
     if (Object.keys(examples).length > 0) {
@@ -153,8 +153,8 @@ exports.authUserReadPOST = function(body) {
   return new Promise(function(resolve, reject) {
     var examples = {};
     examples['application/json'] = {
+  "authGroups" : [ "authGroups", "authGroups" ],
   "name" : "name",
-  "groups" : [ "groups", "groups" ],
   "userId" : "userId"
 };
     if (Object.keys(examples).length > 0) {
@@ -184,7 +184,7 @@ exports.authUserUpdatePOST = function(body) {
  * Get all users
  * Retrieve all users
  *
- * body ReadUsers 
+ * body ReadPaginationFilter 
  * returns inline_response_200_2
  **/
 exports.authUsersReadPOST = function(body) {
@@ -193,12 +193,12 @@ exports.authUsersReadPOST = function(body) {
     examples['application/json'] = {
   "totalUsers" : 0,
   "users" : [ {
+    "authGroups" : [ "authGroups", "authGroups" ],
     "name" : "name",
-    "groups" : [ "groups", "groups" ],
     "userId" : "userId"
   }, {
+    "authGroups" : [ "authGroups", "authGroups" ],
     "name" : "name",
-    "groups" : [ "groups", "groups" ],
     "userId" : "userId"
   } ]
 };

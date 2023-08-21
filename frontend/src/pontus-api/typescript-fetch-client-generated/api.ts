@@ -684,19 +684,19 @@ export interface ReadDashboardsRes {
 /**
  *
  * @export
- * @interface InlineResponse2001
+ * @interface ReadGroupsRes
  */
-export interface InlineResponse2001 {
+export interface ReadGroupsRes {
   /**
    *
    * @type {number}
-   * @memberof InlineResponse2001
+   * @memberof ReadGroupsRes
    */
   totalGroups?: number;
   /**
    *
    * @type {Array<Group>}
-   * @memberof InlineResponse2001
+   * @memberof ReadGroupsRes
    */
   authGroups?: Array<Group>;
 }
@@ -3025,7 +3025,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authGroupsReadPost(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse2001> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<ReadGroupsRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authGroupsReadPost(body, options);
