@@ -17,6 +17,7 @@ import CreateNewTable from './views/CreateNewTable';
 import UpdateTable from './views/UpdateTable';
 import DeleteTableView from './views/DeleteTableView';
 import TablesReadView from './views/tables/read';
+import Dashboards from './views/dashboards/Dashboards';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -42,6 +43,8 @@ function App() {
             <Route path="/table/update" element={<UpdateTable />} />
             <Route path="/table/delete" element={<DeleteTableView />} />
             <Route path="/tables/read" element={<TablesReadView />} />
+            <Route path="/dashboards/read" element={<Dashboards />} />
+            <Route path="/dashboard/:id" element={<DashboardView />} />
           </Route>
         </Routes>
       </>

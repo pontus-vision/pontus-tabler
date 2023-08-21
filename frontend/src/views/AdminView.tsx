@@ -18,6 +18,8 @@ import NewEntryView from './NewEntryView';
 import { ICmsGetContentModelDataField } from '../types';
 import { AuthContext } from '../AuthContext';
 import Unauthorized from './Unauthorized';
+import { useParams } from 'react-router-dom';
+import { getDashboard } from '../client';
 
 export type getModelDataReturn = {
   columnNames: ICmsGetContentModelDataField[];
@@ -27,6 +29,7 @@ export type getModelDataReturn = {
 
 const AdminView = () => {
   const [gridState, setGridState] = useState<IJsonModel>();
+
   const [showDashboardForm, setShowDashboardForm] = useState(false);
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const { t, i18n } = useTranslation();
@@ -48,8 +51,8 @@ const AdminView = () => {
   };
 
   useEffect(() => {
-    console.log(import.meta.env.VITE_WEBINY_API_TOKEN);
-  }, []);
+    console.log({ gridState });
+  }, [gridState]);
 
   return (
     <AdminViewStyles>

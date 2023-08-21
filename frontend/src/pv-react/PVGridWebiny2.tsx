@@ -20,18 +20,23 @@ import {
   IDatasource,
   IGetRowsParams,
   IRowNode,
+  RowEvent,
   SelectionChangedEvent,
 } from 'ag-grid-community';
-import { getModelData, getModelFields } from '../client';
 import { useDispatch } from 'react-redux';
 import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
 import { _isClickEvent } from 'chart.js/dist/helpers/helpers.core';
+<<<<<<< HEAD
+
+import { ReadPaginationFilterFilters } from '../pontus-api/typescript-fetch-client-generated';
+=======
 import { IListModelResponseData } from '../types';
 import {
   AgGridOutput,
   ReadPaginationFilter,
 } from '../pontus-api/typescript-fetch-client-generated';
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
 
 type FilterState = {
   [key: string]: any;
@@ -47,12 +52,25 @@ type Props = {
   deleteMode?: boolean;
   containerHeight?: string;
   updateMode?: boolean;
+<<<<<<< HEAD
+  setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
+  cols?: ColDef[];
+  rows?: { [key: string]: unknown }[];
+  totalCount?: number;
+  setFilters?: Dispatch<
+    SetStateAction<ReadPaginationFilterFilters | undefined>
+  >;
+  setFrom?: Dispatch<SetStateAction<number | undefined>>;
+  setTo?: Dispatch<SetStateAction<number | undefined>>;
+
+=======
   cols?: ColDef[];
   rows?: { [key: string]: unknown }[];
   totalCount?: number;
   setFilters?: Dispatch<SetStateAction<ReadPaginationFilter | undefined>>;
   setFrom?: Dispatch<SetStateAction<number | undefined>>;
   setTo?: Dispatch<SetStateAction<number | undefined>>;
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
   setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<string[] | undefined>>;
 };
@@ -64,10 +82,19 @@ const PVGridWebiny2 = ({
   modelId,
   showColumnSelector,
   setShowColumnSelector,
+<<<<<<< HEAD
+  setRowClicked,
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
   cols,
   rows,
   totalCount,
   setFilters,
+<<<<<<< HEAD
+  setFrom,
+  setTo,
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
   deleteMode,
   updateMode,
   setEntriesToBeDeleted,
@@ -93,10 +120,15 @@ const PVGridWebiny2 = ({
     onValueChange(id, columnState);
   }, [columnState, id]);
 
+  // useEffect(() => {
+  //   setColumnDefs(cols);
+  // }, [cols]);
+
   const getDataSource = () => {
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
         if (!showGrid) return;
+        console.log('datasource', { rows });
 
         try {
           const pageSize = params.endRow - params.startRow;
@@ -113,8 +145,14 @@ const PVGridWebiny2 = ({
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
 
-          console.log({ modelId });
+          console.log({ filter });
 
+<<<<<<< HEAD
+          setTo && setTo(params.endRow);
+          setFrom && setFrom(params.startRow);
+
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
           setFilters && setFilters(filter);
 
           // const data = await getModelData(
@@ -197,7 +235,11 @@ const PVGridWebiny2 = ({
           // });
 
           console.log({ cols, rows, totalCount });
+<<<<<<< HEAD
+          // if (!cols) return;
+=======
           if (!cols) return;
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
 
           setColumnDefs([
             {
@@ -264,6 +306,10 @@ const PVGridWebiny2 = ({
             // }),
             ...cols,
           ]);
+<<<<<<< HEAD
+          console.log({ rows, totalCount });
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
           if (rows) {
             params.successCallback(rows, totalCount);
           }
@@ -326,6 +372,10 @@ const PVGridWebiny2 = ({
       }),
     );
   };
+  useEffect(() => {
+    console.log(rows);
+    gridApi?.refreshInfiniteCache();
+  }, [rows]);
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
@@ -339,11 +389,14 @@ const PVGridWebiny2 = ({
 
   const gridOptions: GridOptions = {
     rowModelType: 'infinite',
-    cacheBlockSize: 100,
+    cacheBlockSize: 1,
     suppressRowClickSelection: true,
 
-    onCellClicked: (e) => {
-      console.log(e.column.getColId());
+    onRowClicked: (e) => {
+      if (setRowClicked) {
+        console.log(e.data);
+        setRowClicked(e.data);
+      }
     },
   };
 
