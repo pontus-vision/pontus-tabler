@@ -3445,7 +3445,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     dashboardsReadPost(
       body: ReadPaginationFilter2,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse200> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardReadBody> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).dashboardsReadPost(body, options);

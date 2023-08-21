@@ -27,8 +27,16 @@ import { useDispatch } from 'react-redux';
 import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
 import { _isClickEvent } from 'chart.js/dist/helpers/helpers.core';
+<<<<<<< HEAD
 
 import { ReadPaginationFilterFilters } from '../pontus-api/typescript-fetch-client-generated';
+=======
+import { IListModelResponseData } from '../types';
+import {
+  AgGridOutput,
+  ReadPaginationFilter,
+} from '../pontus-api/typescript-fetch-client-generated';
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
 
 type FilterState = {
   [key: string]: any;
@@ -44,6 +52,7 @@ type Props = {
   deleteMode?: boolean;
   containerHeight?: string;
   updateMode?: boolean;
+<<<<<<< HEAD
   setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
   cols?: ColDef[];
   rows?: { [key: string]: unknown }[];
@@ -54,6 +63,14 @@ type Props = {
   setFrom?: Dispatch<SetStateAction<number | undefined>>;
   setTo?: Dispatch<SetStateAction<number | undefined>>;
 
+=======
+  cols?: ColDef[];
+  rows?: { [key: string]: unknown }[];
+  totalCount?: number;
+  setFilters?: Dispatch<SetStateAction<ReadPaginationFilter | undefined>>;
+  setFrom?: Dispatch<SetStateAction<number | undefined>>;
+  setTo?: Dispatch<SetStateAction<number | undefined>>;
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
   setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<string[] | undefined>>;
 };
@@ -65,13 +82,19 @@ const PVGridWebiny2 = ({
   modelId,
   showColumnSelector,
   setShowColumnSelector,
+<<<<<<< HEAD
   setRowClicked,
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
   cols,
   rows,
   totalCount,
   setFilters,
+<<<<<<< HEAD
   setFrom,
   setTo,
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
   deleteMode,
   updateMode,
   setEntriesToBeDeleted,
@@ -124,9 +147,12 @@ const PVGridWebiny2 = ({
 
           console.log({ filter });
 
+<<<<<<< HEAD
           setTo && setTo(params.endRow);
           setFrom && setFrom(params.startRow);
 
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
           setFilters && setFilters(filter);
 
           // const data = await getModelData(
@@ -209,7 +235,11 @@ const PVGridWebiny2 = ({
           // });
 
           console.log({ cols, rows, totalCount });
+<<<<<<< HEAD
           // if (!cols) return;
+=======
+          if (!cols) return;
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
 
           setColumnDefs([
             {
@@ -276,7 +306,10 @@ const PVGridWebiny2 = ({
             // }),
             ...cols,
           ]);
+<<<<<<< HEAD
           console.log({ rows, totalCount });
+=======
+>>>>>>> 11bffbe22235cf5f6b73b6ee5b722d2342fa5a44
           if (rows) {
             params.successCallback(rows, totalCount);
           }
