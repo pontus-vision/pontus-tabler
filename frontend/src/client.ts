@@ -34,7 +34,7 @@ import {
   UpdateDashboard,
   UpdateTable,
   UpdateTableRow,
-} from './pontus-api/typescript-fetch-client-generated/';
+} from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 
 export const getModelData = async (
