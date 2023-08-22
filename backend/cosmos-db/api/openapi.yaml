@@ -14,10 +14,10 @@ servers:
   - url: http://localhost:8080/PontusTest/1.0.0
     description: SwaggerHub API Auto Mocking
 tags:
-- name: admins
-  description: Secured Admin-only calls
-- name: developers
-  description: Operations available to regular developers
+  - name: admins
+    description: Secured Admin-only calls
+  - name: developers
+    description: Operations available to regular developers
 paths:
   /table/create:
     post:
@@ -34,31 +34,31 @@ paths:
                 value:
                   name: Person Natural
                   cols:
-                  - field: Person_Natural_Full_Name
-                    filter: true
-                    headerName: Full Name
-                    id: Person_Natural_Full_Name
-                    name: Full Name
-                    sortable: true
-                  - field: Person_Natural_Customer_ID
-                    filter: true
-                    headerName: Customer ID
-                    id: Person_Natural_Customer_ID
-                    name: Customer ID
-                    sortable: true
+                    - field: Person_Natural_Full_Name
+                      filter: true
+                      headerName: Full Name
+                      id: Person_Natural_Full_Name
+                      name: Full Name
+                      sortable: true
+                    - field: Person_Natural_Customer_ID
+                      filter: true
+                      headerName: Customer ID
+                      id: Person_Natural_Customer_ID
+                      name: Customer ID
+                      sortable: true
       responses:
-        "201":
+        '201':
           description: Table created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Table'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /table/read:
     post:
@@ -76,7 +76,7 @@ paths:
                   tableId: mapeamentoDeProcessos
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -88,24 +88,24 @@ paths:
                     tableId: mapeamentoDeProcessos
                     name: Mapeamento de Processos
                     cols:
-                    - field: Person_Natural_Full_Name
-                      filter: true
-                      headerName: Full Name
-                      id: Person_Natural_Full_Name
-                      name: Full Name
-                      sortable: true
-                    - field: Person_Natural_Customer_ID
-                      filter: true
-                      headerName: Customer ID
-                      id: Person_Natural_Customer_ID
-                      name: Customer ID
-                      sortable: true
-        "400":
+                      - field: Person_Natural_Full_Name
+                        filter: true
+                        headerName: Full Name
+                        id: Person_Natural_Full_Name
+                        name: Full Name
+                        sortable: true
+                      - field: Person_Natural_Customer_ID
+                        filter: true
+                        headerName: Customer ID
+                        id: Person_Natural_Customer_ID
+                        name: Customer ID
+                        sortable: true
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /table/update:
     post:
@@ -119,16 +119,16 @@ paths:
               $ref: '#/components/schemas/UpdateTable'
         required: true
       responses:
-        "204":
+        '204':
           description: Table updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: Table not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /table/delete:
     post:
@@ -142,14 +142,14 @@ paths:
               $ref: '#/components/schemas/DeleteTable'
         required: true
       responses:
-        "204":
+        '204':
           description: Table deleted successfully
-        "404":
+        '404':
           description: Table not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /tables/read:
     post:
@@ -163,22 +163,22 @@ paths:
               $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetTablesResponse'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /table/data/read:
     post:
-      description: ""
+      description: ''
       operationId: get-table-data
       parameters: []
       requestBody:
@@ -191,42 +191,42 @@ paths:
                 value:
                   dataType: Person_Natural
                   filters:
-                  - colId: Person_Natural_Full_Name
-                    condition1:
-                      filter: JO
+                    - colId: Person_Natural_Full_Name
+                      condition1:
+                        filter: JO
+                        filterType: text
+                        type: contains
+                      condition2:
+                        filter: SE
+                        filterType: text
+                        type: contains
                       filterType: text
-                      type: contains
-                    condition2:
-                      filter: SE
-                      filterType: text
-                      type: contains
-                    filterType: text
-                    operator: AND
+                      operator: AND
                   from: 0
                   search:
                     cols:
-                    - field: Person_Natural_Full_Name
-                      filter: true
-                      headerName: Full Name
-                      id: Person_Natural_Full_Name
-                      name: Full Name
-                      sortable: true
-                    - field: Person_Natural_Customer_ID
-                      filter: true
-                      headerName: Customer ID
-                      id: Person_Natural_Customer_ID
-                      name: Customer ID
-                      sortable: true
+                      - field: Person_Natural_Full_Name
+                        filter: true
+                        headerName: Full Name
+                        id: Person_Natural_Full_Name
+                        name: Full Name
+                        sortable: true
+                      - field: Person_Natural_Customer_ID
+                        filter: true
+                        headerName: Customer ID
+                        id: Person_Natural_Customer_ID
+                        name: Customer ID
+                        sortable: true
                     extraSearch:
                       label: Person_Natural
                       value: Person_Natural
                     searchExact: true
-                    searchStr: ""
+                    searchStr: ''
                   sortCol: Person_Natural_Full_Name
                   sortDir: +asc
                   to: 100
       responses:
-        "200":
+        '200':
           description: AG Record data
           content:
             application/json:
@@ -238,27 +238,27 @@ paths:
                     type: recordReply
                     from: 0
                     records:
-                    - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
-                      ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
-                    - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
-                      ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
+                      - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
+                        ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
+                      - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
+                        ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
                     to: 2
                     totalAvailable: 4242
-        "400":
+        '400':
           description: Invalid search supplied
-        "401":
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: Person not found
-        "405":
+        '405':
           description: Method Not Allowed
-        "500":
+        '500':
           description: Internal error
       x-swagger-router-controller: Default
   /table/data/create:
     post:
       summary: Create a new row
-      description: "Create a new row data, by using key/value pair for each column."
+      description: 'Create a new row data, by using key/value pair for each column.'
       operationId: tableDataCreatePOST
       requestBody:
         content:
@@ -274,19 +274,19 @@ paths:
                     mapeamentoDeProcessoCol2: New value
         required: true
       responses:
-        "201":
+        '201':
           description: Table row created successfully
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /table/data/update:
     post:
       summary: Update a row
-      description: "Update a row data, by using key/value pair for each column."
+      description: 'Update a row data, by using key/value pair for each column.'
       operationId: tableDataUpdatePOST
       requestBody:
         content:
@@ -303,19 +303,19 @@ paths:
                     mapeamentoDeProcessoCol2: Value Overwritten
         required: true
       responses:
-        "201":
+        '201':
           description: Table row updated successfully
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /table/data/delete:
     post:
       summary: Update a row
-      description: "Update a row data, by using key/value pair for each column."
+      description: 'Update a row data, by using key/value pair for each column.'
       operationId: tableDataDeletePOST
       requestBody:
         content:
@@ -329,19 +329,20 @@ paths:
                   rowId: 15
         required: true
       responses:
-        "201":
+        '201':
           description: Table row deleted successfully
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/create:
     post:
       summary: Create a new dashboard
-      description: "Create a new dashboard with properties, auth group, folder, and\
+      description:
+        "Create a new dashboard with properties, auth group, folder, and\
         \ owner"
       operationId: dashboardCreatePOST
       requestBody:
@@ -351,18 +352,18 @@ paths:
               $ref: '#/components/schemas/NewDashboard'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Dashboard'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/read:
     post:
@@ -376,23 +377,24 @@ paths:
               $ref: '#/components/schemas/dashboard_read_body'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Dashboard'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/update:
     post:
       summary: Update dashboard by ID
-      description: "Update dashboard properties, auth group, folder, and owner by\
+      description:
+        "Update dashboard properties, auth group, folder, and owner by\
         \ ID"
       operationId: dashboardUpdatePOST
       requestBody:
@@ -402,16 +404,16 @@ paths:
               $ref: '#/components/schemas/UpdateDashboard'
         required: true
       responses:
-        "204":
+        '204':
           description: Dashboard updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: Dashboard not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/delete:
     post:
@@ -425,14 +427,14 @@ paths:
               $ref: '#/components/schemas/DeleteDashboard'
         required: true
       responses:
-        "204":
+        '204':
           description: Dashboard deleted successfully
-        "404":
+        '404':
           description: Dashboard not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/create:
     post:
@@ -446,18 +448,18 @@ paths:
               $ref: '#/components/schemas/auth_create_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard state created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardAuthGroup'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/read:
     post:
@@ -471,18 +473,18 @@ paths:
               $ref: '#/components/schemas/auth_read_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard state created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardAuthGroup'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/update:
     post:
@@ -496,18 +498,18 @@ paths:
               $ref: '#/components/schemas/auth_update_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard state created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardAuthGroup'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboard/group/auth/delete:
     post:
@@ -521,18 +523,18 @@ paths:
               $ref: '#/components/schemas/auth_delete_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard Auth Group(s) deleted successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/auth_delete_body'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /dashboards/read:
     post:
@@ -546,23 +548,23 @@ paths:
               $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/create:
     post:
       summary: Create a new group
-      description: "Create a new group with a name, parents, and symlinks"
+      description: 'Create a new group with a name, parents, and symlinks'
       operationId: authGroupCreatePOST
       requestBody:
         content:
@@ -571,18 +573,18 @@ paths:
               $ref: '#/components/schemas/NewGroup'
         required: true
       responses:
-        "201":
+        '201':
           description: Group created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/read:
     post:
@@ -596,16 +598,16 @@ paths:
               $ref: '#/components/schemas/group_read_body'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/update:
     post:
@@ -619,16 +621,16 @@ paths:
               $ref: '#/components/schemas/UpdateGroup'
         required: true
       responses:
-        "204":
+        '204':
           description: Group updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: Group not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/group/delete:
     post:
@@ -642,14 +644,14 @@ paths:
               $ref: '#/components/schemas/DeleteGroup'
         required: true
       responses:
-        "204":
+        '204':
           description: Group deleted successfully
-        "404":
+        '404':
           description: Group not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/groups/read:
     post:
@@ -663,16 +665,16 @@ paths:
               $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200_1'
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/users/read:
     post:
@@ -686,16 +688,16 @@ paths:
               $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_200_2'
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/create:
     post:
@@ -709,18 +711,18 @@ paths:
               $ref: '#/components/schemas/NewUser'
         required: true
       responses:
-        "201":
+        '201':
           description: User created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/update:
     post:
@@ -734,16 +736,16 @@ paths:
               $ref: '#/components/schemas/UpdateUser'
         required: true
       responses:
-        "204":
+        '204':
           description: User updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: User not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/delete:
     post:
@@ -757,14 +759,14 @@ paths:
               $ref: '#/components/schemas/DeleteUser'
         required: true
       responses:
-        "204":
+        '204':
           description: User deleted successfully
-        "404":
+        '404':
           description: User not found
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
   /auth/user/read:
     post:
@@ -778,16 +780,16 @@ paths:
               $ref: '#/components/schemas/user_read_body'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        "500":
+        '500':
           description: Internal server error
       security:
-      - bearerAuth: []
+        - bearerAuth: []
       x-swagger-router-controller: Default
 components:
   schemas:
@@ -892,8 +894,8 @@ components:
       example:
         totalAvailable: 1
         records:
-        - records
-        - records
+          - records
+          - records
         from: 0
         to: 6
         type: type
@@ -985,18 +987,18 @@ components:
         name: name
         tableId: tableId
         cols:
-        - filter: true
-          headerName: headerName
-          field: field
-          name: name
-          id: id
-          sortable: true
-        - filter: true
-          headerName: headerName
-          field: field
-          name: name
-          id: id
-          sortable: true
+          - filter: true
+            headerName: headerName
+            field: field
+            name: name
+            id: id
+            sortable: true
+          - filter: true
+            headerName: headerName
+            field: field
+            name: name
+            id: id
+            sortable: true
     NewTable:
       type: object
       properties:
@@ -1150,17 +1152,17 @@ components:
             type: string
       example:
         read:
-        - read
-        - read
+          - read
+          - read
         create:
-        - create
-        - create
+          - create
+          - create
         update:
-        - update
-        - update
+          - update
+          - update
         delete:
-        - delete
-        - delete
+          - delete
+          - delete
     PaginationAndSearch:
       type: object
       properties:
@@ -1210,36 +1212,36 @@ components:
             $ref: '#/components/schemas/Table'
       example:
         tables:
-        - name: name
-          tableId: tableId
-          cols:
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
-            sortable: true
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
-            sortable: true
-        - name: name
-          tableId: tableId
-          cols:
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
-            sortable: true
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
-            sortable: true
+          - name: name
+            tableId: tableId
+            cols:
+              - filter: true
+                headerName: headerName
+                field: field
+                name: name
+                id: id
+                sortable: true
+              - filter: true
+                headerName: headerName
+                field: field
+                name: name
+                id: id
+                sortable: true
+          - name: name
+            tableId: tableId
+            cols:
+              - filter: true
+                headerName: headerName
+                field: field
+                name: name
+                id: id
+                sortable: true
+              - filter: true
+                headerName: headerName
+                field: field
+                name: name
+                id: id
+                sortable: true
         totalTables: 0
     User:
       type: object
@@ -1257,8 +1259,8 @@ components:
             type: string
       example:
         authGroups:
-        - authGroups
-        - authGroups
+          - authGroups
+          - authGroups
         name: name
         userId: userId
     NewUser:
@@ -1322,17 +1324,17 @@ components:
       example:
         authGroups:
           read:
-          - read
-          - read
+            - read
+            - read
           create:
-          - create
-          - create
+            - create
+            - create
           update:
-          - update
-          - update
+            - update
+            - update
           delete:
-          - delete
-          - delete
+            - delete
+            - delete
         dashboardId: dashboardId
         dashboardName: dashboardName
     dashboard_read_body:
@@ -1388,17 +1390,17 @@ components:
       example:
         authGroups:
           read:
-          - read
-          - read
+            - read
+            - read
           create:
-          - create
-          - create
+            - create
+            - create
           update:
-          - update
-          - update
+            - update
+            - update
           delete:
-          - delete
-          - delete
+            - delete
+            - delete
         dashboardId: dashboardId
     inline_response_200:
       type: object
@@ -1408,20 +1410,29 @@ components:
         dashboards:
           type: array
           items:
-            $ref: '#/components/schemas/Dashboard'
+            type: object
+            properties:
+              owner:
+                type: string
+              folder:
+                type: string
+              name:
+                type: string
+              id:
+                type: string
       example:
         totalDashboards: 0
         dashboards:
-        - owner: owner
-          folder: folder
-          name: name
-          id: id
-          state: {}
-        - owner: owner
-          folder: folder
-          name: name
-          id: id
-          state: {}
+          - owner: owner
+            folder: folder
+            name: name
+            id: id
+            state: {}
+          - owner: owner
+            folder: folder
+            name: name
+            id: id
+            state: {}
     group_read_body:
       type: object
       properties:
@@ -1438,10 +1449,10 @@ components:
             $ref: '#/components/schemas/Group'
       example:
         authGroups:
-        - groupId: groupId
-          name: name
-        - groupId: groupId
-          name: name
+          - groupId: groupId
+            name: name
+          - groupId: groupId
+            name: name
         totalGroups: 0
     inline_response_200_2:
       type: object
@@ -1455,16 +1466,16 @@ components:
       example:
         totalUsers: 0
         users:
-        - authGroups:
-          - authGroups
-          - authGroups
-          name: name
-          userId: userId
-        - authGroups:
-          - authGroups
-          - authGroups
-          name: name
-          userId: userId
+          - authGroups:
+              - authGroups
+              - authGroups
+            name: name
+            userId: userId
+          - authGroups:
+              - authGroups
+              - authGroups
+            name: name
+            userId: userId
     user_read_body:
       type: object
       properties:

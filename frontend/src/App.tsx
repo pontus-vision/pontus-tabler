@@ -19,6 +19,7 @@ import DeleteTableView from './views/DeleteTableView';
 import TablesReadView from './views/tables/read';
 import Dashboards from './views/dashboards/Dashboards';
 import CreateUser from './views/users/CreateUser';
+import ReadUsers from './views/users/ReadUsers';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -47,6 +48,7 @@ function App() {
             <Route path="/dashboards/read" element={<Dashboards />} />
             <Route path="/dashboard/:id" element={<DashboardView />} />
             <Route path="/users/create" element={<CreateUser />} />
+            <Route path="/users/read" element={<ReadUsers />} />
           </Route>
         </Routes>
       </>

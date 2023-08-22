@@ -81,13 +81,13 @@ const GridActionsPanel = ({
                 onClick={() => {
                   setModelId(configTableId);
                   console.log('whatever');
-                  entriesToBeDeleted &&
-                    entriesToBeDeleted.length > 0 &&
-                    setDeletion(true);
+                  // entriesToBeDeleted &&
+                  //   entriesToBeDeleted.length > 0 &&
+                  setDeletion(true);
                 }}
               />
               <i
-                className="fa-solid fa-x"
+                className="fa-solid fa-x "
                 onClick={() => {
                   changeBurguerMenuValue(true, 'flex');
                   setDeleteMode(false);
@@ -113,7 +113,7 @@ const GridActionsPanel = ({
         >
           {deleteMode || updateMode || (
             <Button
-              className="grid-actions-panel__plus-btn btn"
+              className="grid-actions-panel__plus-btn btn "
               onClick={() => {
                 setFlexModelId(id);
                 console.log('add entry');
@@ -180,16 +180,16 @@ const GridActionsPanel = ({
     <div className="grid-actions-panel">
       {deleteMode || updateMode || (
         <label
-          className="grid-actions-panel__plus-btn"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: 0,
-            cursor: 'pointer',
-            height: '2rem',
-            fontSize: '4rem',
-            left: '8rem',
-          }}
+          className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
+          // style={{
+          //   display: 'flex',
+          //   alignItems: 'center',
+          //   padding: 0,
+          //   cursor: 'pointer',
+          //   height: '2rem',
+          //   fontSize: '4rem',
+          //   left: '8rem',
+          // }}
           onClick={() => {
             setFlexModelId(id);
             setOpenNewEntryView(true);
@@ -227,7 +227,7 @@ const GridActionsPanel = ({
         <button
           className="grid-actions-panel__delete-btn"
           onClick={() => {
-            setDeleteMode(!deleteMode);
+            setDeleteMode(true);
           }}
         >
           Delete Mode
@@ -257,8 +257,8 @@ const GridActionsPanel = ({
           <i
             className="fa-solid fa-trash"
             onClick={() => {
-              setModelId(configTableId);
-              console.log('delete');
+              setModelId && setModelId(configTableId);
+              console.log({ entriesToBeDeleted });
               entriesToBeDeleted &&
                 entriesToBeDeleted.length > 0 &&
                 setDeletion(true);

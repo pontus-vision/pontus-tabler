@@ -40,12 +40,6 @@ const Dashboards = () => {
       filter: true,
       sortable: true,
     },
-    {
-      headerName: 'State',
-      field: 'state',
-      filter: true,
-      sortable: true,
-    },
   ]);
   const [rows, setRows] = useState<{ [key: string]: unknown }[]>();
   const [filters, setFilters] = useState<ReadPaginationFilterFilters>();

@@ -34,6 +34,7 @@ import {
   ReadDashboardsRes,
   ReadGroupsRes,
   ReadPaginationFilter,
+  ReadUsersRes,
   Table,
   UpdateDashboard,
   UpdateTable,
@@ -268,6 +269,18 @@ export const readAuthGroups = async (
   }
 };
 
+export const readUsers = async (
+  body: ReadPaginationFilter,
+): Promise<AxiosResponse<ReadUsersRes> | undefined> => {
+  try {
+    const res = api.post('/auth/users/read', {});
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const createUser = async (
   body: NewUser,
 ): Promise<AxiosResponse<User> | undefined> => {
@@ -275,6 +288,18 @@ export const createUser = async (
     const res = await api.post('/auth/user/create', { body });
 
     return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteUser = async (
+  userId: string,
+): Promise<AxiosResponse<Response> | undefined> => {
+  try {
+    const data = await api.post('auth/user/delete', { userId });
+
+    return data;
   } catch (error) {
     throw error;
   }

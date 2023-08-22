@@ -703,19 +703,19 @@ export interface ReadGroupsRes {
 /**
  *
  * @export
- * @interface InlineResponse2002
+ * @interface ReadUsersRes
  */
-export interface InlineResponse2002 {
+export interface ReadUsersRes {
   /**
    *
    * @type {number}
-   * @memberof InlineResponse2002
+   * @memberof ReadUsersRes
    */
   totalUsers?: number;
   /**
    *
    * @type {Array<User>}
-   * @memberof InlineResponse2002
+   * @memberof ReadUsersRes
    */
   users?: Array<User>;
 }
@@ -999,7 +999,7 @@ export interface ReadPaginationFilter {
    * @type {Array<ReadPaginationFilterFilters>}
    * @memberof ReadPaginationFilter
    */
-  filters?: Array<ReadPaginationFilterFilters>;
+  filters?: Array<ReadPaginationFilterFilters> | null;
 }
 /**
  *
@@ -3175,7 +3175,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authUsersReadPost(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse2002> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<ReadUsersRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authUsersReadPost(body, options);

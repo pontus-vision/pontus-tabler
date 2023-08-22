@@ -55,7 +55,7 @@ type Props = {
   setTo?: Dispatch<SetStateAction<number | undefined>>;
 
   setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
-  setEntriesToBeDeleted?: Dispatch<React.SetStateAction<string[] | undefined>>;
+  setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
 };
 
 const PVGridWebiny2 = ({
@@ -94,7 +94,7 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (!columnState || !onValueChange || !id) return;
-    onValueChange(id, columnState);
+    // onValueChange(id, columnState);
   }, [columnState, id]);
 
   // useEffect(() => {
@@ -436,7 +436,6 @@ const PVGridWebiny2 = ({
   }, [columnApi, selectedColumns]);
 
   // const gridStyle = useMemo(() => ({ height: "25rem", width: "100%" }), []);
-
   function restoreGridColumnStates() {
     if (columnApi && lastState) {
       columnApi.applyColumnState({ state: lastState });
@@ -457,7 +456,7 @@ const PVGridWebiny2 = ({
   useEffect(() => {
     console.log(selectedRows);
     setEntriesToBeDeleted &&
-      setEntriesToBeDeleted(selectedRows.map((row) => row.data.id));
+      setEntriesToBeDeleted(selectedRows.map((row) => row.data.id ?? row.data));
   }, [selectedRows]);
 
   const gridContainerRef = useRef(null);

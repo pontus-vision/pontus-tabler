@@ -89,6 +89,10 @@ const PVFlexLayout = ({
     setTableId(updateTableId);
   }, [updateTableId, rowId]);
 
+  useEffect(() => {
+    console.log({ deletion });
+  }, [deletion]);
+
   const factory = (node: TabNode) => {
     const component = node.getComponent();
     const config = node.getConfig();
