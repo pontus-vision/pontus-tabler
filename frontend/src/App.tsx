@@ -54,6 +54,7 @@ function App() {
             <Route path="/tables/read" element={<TablesReadView />} />
             <Route path="/dashboard/:id" element={<DashboardView />} />
             <Route path="/user/create" element={<CreateUser />} />
+
             <Route path="/user/update/:id" element={<UpdateUser />} />
           </Route>
           <Route path="/login" element={<Login />} />
@@ -61,7 +62,6 @@ function App() {
             <Route path="/table/create" element={<CreateNewTable />} />
             <Route path="/table/update" element={<UpdateTable />} />
             <Route path="/table/delete" element={<DeleteTableView />} />
-
             <Route path="/dashboards/read" element={<Dashboards />} />
             <Route path="/dashboard/:id" element={<DashboardView />} />
             <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
