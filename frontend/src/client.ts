@@ -28,8 +28,10 @@ import {
   NewDashboard,
   NewTable,
   NewTableRow,
+  ReadAuthGroupsRes,
   ReadDashboardsRes,
   ReadPaginationFilter,
+  ReadPaginationFilter2,
   Table,
   UpdateDashboard,
   UpdateTable,
@@ -244,6 +246,18 @@ export const deleteDashboard = async (
 ): Promise<AxiosResponse<string> | undefined> => {
   try {
     const res = await api.post('/dashboard/delete', { dashboardId });
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const readAuthGroups = async (
+  data: ReadPaginationFilter2,
+): Promise<AxiosResponse<ReadAuthGroupsRes> | undefined> => {
+  try {
+    const res = await api.post('/auth/groups/read');
 
     return res;
   } catch (error) {

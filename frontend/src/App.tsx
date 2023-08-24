@@ -18,6 +18,7 @@ import UpdateTable from './views/UpdateTable';
 import DeleteTableView from './views/DeleteTableView';
 import TablesReadView from './views/tables/read';
 import Dashboards from './views/dashboards/Dashboards';
+import ReadAuthGroups from './views/authGroups/ReadAuthGroups';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -45,6 +46,7 @@ function App() {
             <Route path="/tables/read" element={<TablesReadView />} />
             <Route path="/dashboards/read" element={<Dashboards />} />
             <Route path="/dashboard/:id" element={<DashboardView />} />
+            <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
           </Route>
         </Routes>
       </>
