@@ -342,8 +342,6 @@ const PVGridWebiny2 = ({
 
     const { id, ...rest } = rowData;
 
-    console.log('hey');
-
     dispatch(
       newRowState({
         tableId: modelId,
@@ -359,7 +357,6 @@ const PVGridWebiny2 = ({
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
-    console.log('hey');
 
     setColumnApi(params.columnApi);
     if (gridApi) {
@@ -405,7 +402,6 @@ const PVGridWebiny2 = ({
   }
 
   const handleGridStateChanged = () => {
-    console.log('heyy');
     onColumnMoved();
     onFilterChanged();
   };

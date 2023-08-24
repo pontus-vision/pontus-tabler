@@ -22,9 +22,10 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(
-    JSON.parse(localStorage.getItem('userRole')),
-  );
+  const [userRole, setUserRole] = useState<string | null>(() => {
+    const storedAuth = localStorage.getItem('userRole');
+    return storedAuth ? JSON.parse(storedAuth) : null;
+  });
 
   const [token, setToken] = useState();
   const navigate = useNavigate();
@@ -39,7 +40,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  useEffect(() => {}, [userRole]);
+  useEffect(() => {
+    console.log({ userRole });
+  }, [userRole]);
 
   useEffect(() => {
     if (userRole) {

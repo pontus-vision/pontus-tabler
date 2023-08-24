@@ -15,7 +15,6 @@ const ProtectedLayout = ({ allowedRoles }: Props) => {
   const [openedSidebar, setOpenedSidebar] = useState(false);
 
   const [userRole, setUserRole] = useState(() => {
-    // Initialize auth state from localStorage (if available)
     const storedAuth = localStorage.getItem('userRole');
     return storedAuth ? JSON.parse(storedAuth) : null;
   });

@@ -67,7 +67,6 @@ const PVFlexLayout = ({
   const [flexModelId, setFlexModelId] = useState<string>();
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>();
   const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<string[]>();
-  // const [deletion, setDeletion] = useState(false);
   const [openNewEntryView, setOpenNewEntryView] = useState(false);
 
   const { t } = useTranslation();
@@ -179,23 +178,6 @@ const PVFlexLayout = ({
       if (cols.length > 0) {
         return (
           <>
-            {/* <GridActionsPanel
-              key={id}
-              configTableId={config.tableId}
-              deleteMode={deleteMode}
-              updateMode={updateMode}
-              setDeleteMode={setDeleteMode}
-              setUpdateMode={setUpdateMode}
-              entriesToBeDeleted={entriesToBeDeleted}
-              setDeletion={setDeletion}
-              setGridKey={setGridKey}
-              updateModelId={updateTableId}
-              setFlexModelId={setFlexModelId}
-              setModelId={setTableId}
-              id={id}
-              setOpenNewEntryView={setOpenNewEntryView}
-              setShowColumnSelector={setShowColumnSelector}
-            /> */}
             <PVGridWebiny2
               setGridHeight={setGridHeight}
               deleteMode={deleteMode}

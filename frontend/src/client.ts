@@ -156,7 +156,7 @@ export const deleteTable = async (
 
 export const createDataTable = async (body: NewTableRow) => {
   try {
-    const res = await api.post('/table/data/create', { body });
+    const res = await api.post('/table/data/create', { ...body });
 
     return res;
   } catch (error) {
@@ -202,7 +202,7 @@ export const getAllDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<AxiosResponse<ReadDashboardsRes> | undefined> => {
   try {
-    const res = await api.post('/dashboards/read', { body });
+    const res = await api.post('/dashboards/read', { ...body });
 
     return res;
   } catch (error) {
@@ -238,7 +238,7 @@ export const updateDashboard = async (
   body: UpdateDashboard,
 ): Promise<AxiosResponse<string> | undefined> => {
   try {
-    const res = await api.post('/dashboard/update', { body });
+    const res = await api.post('/dashboard/update', { ...body });
 
     return res;
   } catch (error) {
@@ -262,7 +262,7 @@ export const readAuthGroups = async (
   body: ReadPaginationFilter,
 ): Promise<AxiosResponse<ReadGroupsRes> | undefined> => {
   try {
-    const res = await api.post('/auth/groups/read', { body });
+    const res = await api.post('/auth/groups/read', { ...body });
 
     return res;
   } catch (error) {
@@ -274,7 +274,7 @@ export const createUser = async (
   body: NewUser,
 ): Promise<AxiosResponse<User> | undefined> => {
   try {
-    const res = await api.post('/auth/user/create', { body });
+    const res = await api.post('/auth/user/create', { ...body });
 
     return res;
   } catch (error) {
