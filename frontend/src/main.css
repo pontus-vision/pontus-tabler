@@ -166,6 +166,7 @@
     height: 3rem;
   }
   .grid-actions-panel__plus-btn {
+    font-size: 2rem;
     width: 100%;
   }
   .grid-actions-panel__restore-btn {

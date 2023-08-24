@@ -25,17 +25,23 @@ import {
   DefaultApiFetchParamCreator,
   DeleteTableRow,
   GetTablesResponse,
+  Group,
+  GroupReadBody,
   NewDashboard,
   NewTable,
   NewTableRow,
-  ReadAuthGroupsRes,
+  NewUser,
   ReadDashboardsRes,
+  ReadGroupsRes,
   ReadPaginationFilter,
   ReadPaginationFilter2,
+  ReadUsersRes,
   Table,
   UpdateDashboard,
   UpdateTable,
   UpdateTableRow,
+  UpdateUser,
+  User,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 
@@ -151,7 +157,7 @@ export const deleteTable = async (
 
 export const createDataTable = async (body: NewTableRow) => {
   try {
-    const res = await api.post('/table/data/create', { body });
+    const res = await api.post('/table/data/create', { ...body });
 
     return res;
   } catch (error) {
@@ -197,7 +203,7 @@ export const getAllDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<AxiosResponse<ReadDashboardsRes> | undefined> => {
   try {
-    const res = await api.post('/dashboards/read', { body });
+    const res = await api.post('/dashboards/read', { ...body });
 
     return res;
   } catch (error) {
@@ -233,7 +239,7 @@ export const updateDashboard = async (
   body: UpdateDashboard,
 ): Promise<AxiosResponse<string> | undefined> => {
   try {
-    const res = await api.post('/dashboard/update', { body });
+    const res = await api.post('/dashboard/update', { ...body });
 
     return res;
   } catch (error) {
@@ -254,10 +260,17 @@ export const deleteDashboard = async (
 };
 
 export const readAuthGroups = async (
+<<<<<<< HEAD
   data: ReadPaginationFilter2,
 ): Promise<AxiosResponse<ReadAuthGroupsRes> | undefined> => {
   try {
     const res = await api.post('/auth/groups/read');
+=======
+  body: ReadPaginationFilter,
+): Promise<AxiosResponse<ReadGroupsRes> | undefined> => {
+  try {
+    const res = await api.post('/auth/groups/read', { ...body });
+>>>>>>> e46a039aa97d36f4b3059e87289966835587254b
 
     return res;
   } catch (error) {
@@ -265,6 +278,57 @@ export const readAuthGroups = async (
   }
 };
 
+<<<<<<< HEAD
+=======
+export const createUser = async (
+  body: NewUser,
+): Promise<AxiosResponse<User> | undefined> => {
+  try {
+    const res = await api.post('/auth/user/create', { ...body });
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const readUsers = async (
+  body: ReadPaginationFilter,
+): Promise<AxiosResponse<ReadUsersRes> | undefined> => {
+  try {
+    const res = api.post('/auth/users/read', {});
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateUser = async (
+  body: UpdateUser,
+): Promise<AxiosResponse<Response>> => {
+  try {
+    const res = api.post('/auth/user/update', { ...body });
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteUser = async (
+  userId: string,
+): Promise<AxiosResponse<Response> | undefined> => {
+  try {
+    const data = await api.post('auth/user/delete', { userId });
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+>>>>>>> e46a039aa97d36f4b3059e87289966835587254b
 export const getModelFields = async (
   tableId: string,
 ): Promise<Table | undefined> => {

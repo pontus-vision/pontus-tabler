@@ -16,6 +16,7 @@ type Props = {
   setDeleteMode: Dispatch<React.SetStateAction<boolean>>;
   setUpdateMode: Dispatch<React.SetStateAction<boolean>>;
   configTableId: string;
+  add: () => void;
   entriesToBeDeleted: string[] | undefined;
 };
 
@@ -29,6 +30,7 @@ const GridActionsPanel = ({
   updateModelId,
   setDeletion,
   id,
+  add,
   setShowColumnSelector,
   setDeleteMode,
   setUpdateMode,
@@ -81,13 +83,13 @@ const GridActionsPanel = ({
                 onClick={() => {
                   setModelId(configTableId);
                   console.log('whatever');
-                  entriesToBeDeleted &&
-                    entriesToBeDeleted.length > 0 &&
-                    setDeletion(true);
+                  // entriesToBeDeleted &&
+                  //   entriesToBeDeleted.length > 0 &&
+                  setDeletion(true);
                 }}
               />
               <i
-                className="fa-solid fa-x"
+                className="fa-solid fa-x "
                 onClick={() => {
                   changeBurguerMenuValue(true, 'flex');
                   setDeleteMode(false);
@@ -123,6 +125,7 @@ const GridActionsPanel = ({
                     ? (prevState = updateModelId)
                     : (prevState = configTableId),
                 );
+                add();
               }}
             >
               +
@@ -180,24 +183,26 @@ const GridActionsPanel = ({
     <div className="grid-actions-panel">
       {deleteMode || updateMode || (
         <label
-          className="grid-actions-panel__plus-btn"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: 0,
-            cursor: 'pointer',
-            height: '2rem',
-            fontSize: '4rem',
-            left: '8rem',
-          }}
+          className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
+          // style={{
+          //   display: 'flex',
+          //   alignItems: 'center',
+          //   padding: 0,
+          //   cursor: 'pointer',
+          //   height: '2rem',
+          //   fontSize: '4rem',
+          //   left: '8rem',
+          // }}
           onClick={() => {
-            setFlexModelId(id);
-            setOpenNewEntryView(true);
-            setModelId((prevState) =>
-              updateModelId
-                ? (prevState = updateModelId)
-                : (prevState = configTableId),
-            );
+            setFlexModelId && setFlexModelId(id);
+            setOpenNewEntryView && setOpenNewEntryView(true);
+            setModelId &&
+              setModelId((prevState) =>
+                updateModelId
+                  ? (prevState = updateModelId)
+                  : (prevState = configTableId),
+              );
+            add();
           }}
         >
           +
@@ -227,7 +232,7 @@ const GridActionsPanel = ({
         <button
           className="grid-actions-panel__delete-btn"
           onClick={() => {
-            setDeleteMode(!deleteMode);
+            setDeleteMode(true);
           }}
         >
           Delete Mode
@@ -257,11 +262,8 @@ const GridActionsPanel = ({
           <i
             className="fa-solid fa-trash"
             onClick={() => {
-              setModelId(configTableId);
-              console.log('delete');
-              entriesToBeDeleted &&
-                entriesToBeDeleted.length > 0 &&
-                setDeletion(true);
+              setModelId && setModelId(configTableId);
+              setDeletion(true);
             }}
             style={{ fontSize: '1.8rem', color: '#b53737', cursor: 'pointer' }}
           ></i>

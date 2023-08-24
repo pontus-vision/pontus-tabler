@@ -28,7 +28,11 @@ import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
 import { _isClickEvent } from 'chart.js/dist/helpers/helpers.core';
 
-import { ReadPaginationFilterFilters } from '../pontus-api/typescript-fetch-client-generated';
+import {
+  ReadPaginationFilterFilters,
+  User,
+} from '../pontus-api/typescript-fetch-client-generated';
+import GridActionsPanel from '../components/GridActionsPanel';
 
 type FilterState = {
   [key: string]: any;
@@ -48,14 +52,16 @@ type Props = {
   cols?: ColDef[];
   rows?: { [key: string]: unknown }[];
   totalCount?: number;
+  add: () => void;
+  onUpdate: (data: any) => void;
   setFilters?: Dispatch<
     SetStateAction<ReadPaginationFilterFilters | undefined>
   >;
   setFrom?: Dispatch<SetStateAction<number | undefined>>;
   setTo?: Dispatch<SetStateAction<number | undefined>>;
-
+  setDeletion?: Dispatch<SetStateAction<User[] | undefined>>;
   setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
-  setEntriesToBeDeleted?: Dispatch<React.SetStateAction<string[] | undefined>>;
+  setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
 };
 
 const PVGridWebiny2 = ({
@@ -68,12 +74,13 @@ const PVGridWebiny2 = ({
   setRowClicked,
   cols,
   rows,
+  add,
   totalCount,
+  setDeletion,
   setFilters,
+  onUpdate,
   setFrom,
   setTo,
-  deleteMode,
-  updateMode,
   setEntriesToBeDeleted,
   setGridHeight,
 }: Props) => {
@@ -84,6 +91,10 @@ const PVGridWebiny2 = ({
   const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>([]);
   const [cursors, setCursors] = useState(new Set([null]));
   const [gridApi, setGridApi] = useState<GridApi>();
+
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [updateMode, setUpdateMode] = useState(false);
+
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
 
@@ -94,7 +105,7 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (!columnState || !onValueChange || !id) return;
-    onValueChange(id, columnState);
+    // onValueChange(id, columnState);
   }, [columnState, id]);
 
   // useEffect(() => {
@@ -327,9 +338,9 @@ const PVGridWebiny2 = ({
   const handleUpdateIconClick = (params: CellClickedEvent<any, any>) => {
     const { data: rowData } = params;
 
-    const { id, ...rest } = rowData;
+    onUpdate(rowData);
 
-    console.log('hey');
+    const { id, ...rest } = rowData;
 
     dispatch(
       newRowState({
@@ -346,7 +357,6 @@ const PVGridWebiny2 = ({
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
-    console.log('hey');
 
     setColumnApi(params.columnApi);
     if (gridApi) {
@@ -436,7 +446,6 @@ const PVGridWebiny2 = ({
   }, [columnApi, selectedColumns]);
 
   // const gridStyle = useMemo(() => ({ height: "25rem", width: "100%" }), []);
-
   function restoreGridColumnStates() {
     if (columnApi && lastState) {
       columnApi.applyColumnState({ state: lastState });
@@ -455,9 +464,9 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    console.log(selectedRows);
+    console.log(selectedRows, 'HEYYY');
     setEntriesToBeDeleted &&
-      setEntriesToBeDeleted(selectedRows.map((row) => row.data.id));
+      setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);
 
   const gridContainerRef = useRef(null);
@@ -502,7 +511,17 @@ const PVGridWebiny2 = ({
             columns={columnDefs}
           />
         )}
+        <GridActionsPanel
+          data-testid="grid-action-panel"
+          add={add}
+          setDeletion={setDeletion}
+          deleteMode={deleteMode}
+          updateMode={updateMode}
+          setDeleteMode={setDeleteMode}
+          setUpdateMode={setUpdateMode}
+        />
         <AgGridReact
+          data-testid="ag-grid-component"
           gridOptions={gridOptions}
           enableRangeSelection={true}
           // paginationAutoPageSize={true}

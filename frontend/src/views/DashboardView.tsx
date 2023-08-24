@@ -42,6 +42,8 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
   const [successMsg, setSuccessMsg] = useState<string>();
   const [owner, setOwner] = useState<string>();
 
+  const [deletion, setDeletion] = useState();
+
   const { userRole } = useAuth();
 
   const navigate = useNavigate();
@@ -59,6 +61,7 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
   useEffect(() => {
     console.log({ isEditing });
   }, [isEditing]);
+
   const saveEdition = async () => {
     if (gridState) {
       if (id) {
@@ -126,6 +129,10 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
 
   const [initialState, setInitialState] = useState<IJsonModel>();
   const { id } = useParams();
+
+  useEffect(() => {
+    console.log({ deletion });
+  }, [deletion]);
 
   useEffect(() => {
     if (!id) return;
@@ -240,6 +247,7 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
       )}
       <PVFlexLayout
         setModelId={setModelId}
+        setDeletion={setDeletion}
         selectedCmp={selectedCmp}
         setGridState={setGridState}
         setIsEditing={setIsEditing}

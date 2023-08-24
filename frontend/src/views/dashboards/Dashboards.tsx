@@ -40,21 +40,16 @@ const Dashboards = () => {
       filter: true,
       sortable: true,
     },
-    {
-      headerName: 'State',
-      field: 'state',
-      filter: true,
-      sortable: true,
-    },
   ]);
   const [rows, setRows] = useState<{ [key: string]: unknown }[]>();
   const [filters, setFilters] = useState<ReadPaginationFilterFilters>();
   const [from, setFrom] = useState<number>();
   const [to, setTo] = useState<number>();
   const [totalCount, setTotalCount] = useState<number>(2);
-  const navigate = useNavigate();
   const [rowClicked, setRowClicked] = useState<RowEvent>();
   const [newDashboardName, setNewDashboardName] = useState<string>();
+  const [deletion, setDeletion] = useState(false);
+  const navigate = useNavigate();
 
   const [newDashboard, setNewDashboard] = useState(false);
 
@@ -113,11 +108,12 @@ const Dashboards = () => {
   if (!rows) return;
 
   return (
-    <>
+    <div className="top-12 relative">
       {!newDashboard && (
         <>
           <PVGridWebiny2
             totalCount={totalCount}
+            // setDeletion={set}
             rows={rows}
             cols={cols}
             setFilters={setFilters}
@@ -145,7 +141,7 @@ const Dashboards = () => {
           <DashboardView createMode={true} dashboardName={newDashboardName} />
         </>
       )}
-    </>
+    </div>
   );
 };
 

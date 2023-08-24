@@ -684,38 +684,38 @@ export interface ReadDashboardsRes {
 /**
  *
  * @export
- * @interface ReadAuthGroupsRes
+ * @interface ReadGroupsRes
  */
-export interface ReadAuthGroupsRes {
+export interface ReadGroupsRes {
   /**
    *
    * @type {number}
-   * @memberof ReadAuthGroupsRes
+   * @memberof ReadGroupsRes
    */
   totalGroups?: number;
   /**
    *
    * @type {Array<Group>}
-   * @memberof ReadAuthGroupsRes
+   * @memberof ReadGroupsRes
    */
   authGroups?: Array<Group>;
 }
 /**
  *
  * @export
- * @interface InlineResponse2002
+ * @interface ReadUsersRes
  */
-export interface InlineResponse2002 {
+export interface ReadUsersRes {
   /**
    *
    * @type {number}
-   * @memberof InlineResponse2002
+   * @memberof ReadUsersRes
    */
   totalUsers?: number;
   /**
    *
    * @type {Array<User>}
-   * @memberof InlineResponse2002
+   * @memberof ReadUsersRes
    */
   users?: Array<User>;
 }
@@ -999,7 +999,7 @@ export interface ReadPaginationFilter {
    * @type {Array<ReadPaginationFilterFilters>}
    * @memberof ReadPaginationFilter
    */
-  filters?: Array<ReadPaginationFilterFilters>;
+  filters?: Array<ReadPaginationFilterFilters> | null;
 }
 /**
  *
@@ -3025,7 +3025,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authGroupsReadPost(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<ReadAuthGroupsRes> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<ReadGroupsRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authGroupsReadPost(body, options);
@@ -3175,7 +3175,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authUsersReadPost(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse2002> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<ReadUsersRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authUsersReadPost(body, options);
