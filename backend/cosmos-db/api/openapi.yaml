@@ -28,12 +28,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewTable"
+              $ref: '#/components/schemas/NewTable'
             examples:
               example-0001:
                 value:
                   name: Person Natural
-                  tableId: Person_Natural
                   cols:
                     - field: Person_Natural_Full_Name
                       filter: true
@@ -48,15 +47,15 @@ paths:
                       name: Customer ID
                       sortable: true
       responses:
-        "201":
+        '201':
           description: Table created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Table"
-        "400":
+                $ref: '#/components/schemas/Table'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -70,19 +69,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GetTable"
+              $ref: '#/components/schemas/GetTable'
             examples:
               example-0001:
                 value:
                   tableId: mapeamentoDeProcessos
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Table"
+                $ref: '#/components/schemas/Table'
               examples:
                 example-01:
                   value:
@@ -101,9 +100,9 @@ paths:
                         id: Person_Natural_Customer_ID
                         name: Customer ID
                         sortable: true
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -117,16 +116,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTable"
+              $ref: '#/components/schemas/UpdateTable'
         required: true
       responses:
-        "204":
+        '204':
           description: Table updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: Table not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -140,14 +139,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteTable"
+              $ref: '#/components/schemas/DeleteTable'
         required: true
       responses:
-        "204":
+        '204':
           description: Table deleted successfully
-        "404":
+        '404':
           description: Table not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -161,48 +160,35 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadPaginationFilter"
+              $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetTablesResponse"
-        "400":
+                $ref: '#/components/schemas/GetTablesResponse'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
       x-swagger-router-controller: Default
   /table/data/read:
     post:
-      description: ""
+      description: ''
       operationId: get-table-data
       parameters: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/agGridInput"
+              $ref: '#/components/schemas/agGridInput'
             examples:
               example-0001:
                 value:
-                  cols:
-                    - field: Person_Natural_Full_Name
-                      filter: true
-                      headerName: Full Name
-                      id: Person_Natural_Full_Name
-                      name: Full Name
-                      sortable: true
-                    - field: Person_Natural_Customer_ID
-                      filter: true
-                      headerName: Customer ID
-                      id: Person_Natural_Customer_ID
-                      name: Customer ID
-                      sortable: true
                   dataType: Person_Natural
                   filters:
                     - colId: Person_Natural_Full_Name
@@ -235,17 +221,17 @@ paths:
                       label: Person_Natural
                       value: Person_Natural
                     searchExact: true
-                    searchStr: ""
+                    searchStr: ''
                   sortCol: Person_Natural_Full_Name
                   sortDir: +asc
                   to: 100
       responses:
-        "200":
+        '200':
           description: AG Record data
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/agGridOutput"
+                $ref: '#/components/schemas/agGridOutput'
               examples:
                 example-0001:
                   value:
@@ -258,27 +244,27 @@ paths:
                         ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
                     to: 2
                     totalAvailable: 4242
-        "400":
+        '400':
           description: Invalid search supplied
-        "401":
+        '401':
           description: Unauthorized
-        "404":
+        '404':
           description: Person not found
-        "405":
+        '405':
           description: Method Not Allowed
-        "500":
+        '500':
           description: Internal error
       x-swagger-router-controller: Default
   /table/data/create:
     post:
       summary: Create a new row
-      description: "Create a new row data, by using key/value pair for each column."
+      description: 'Create a new row data, by using key/value pair for each column.'
       operationId: tableDataCreatePOST
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewTableRow"
+              $ref: '#/components/schemas/NewTableRow'
             examples:
               example-01:
                 value:
@@ -288,11 +274,11 @@ paths:
                     mapeamentoDeProcessoCol2: New value
         required: true
       responses:
-        "201":
+        '201':
           description: Table row created successfully
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -300,13 +286,13 @@ paths:
   /table/data/update:
     post:
       summary: Update a row
-      description: "Update a row data, by using key/value pair for each column."
+      description: 'Update a row data, by using key/value pair for each column.'
       operationId: tableDataUpdatePOST
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTableRow"
+              $ref: '#/components/schemas/UpdateTableRow'
             examples:
               example-01:
                 value:
@@ -317,11 +303,11 @@ paths:
                     mapeamentoDeProcessoCol2: Value Overwritten
         required: true
       responses:
-        "201":
+        '201':
           description: Table row updated successfully
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -329,13 +315,13 @@ paths:
   /table/data/delete:
     post:
       summary: Update a row
-      description: "Update a row data, by using key/value pair for each column."
+      description: 'Update a row data, by using key/value pair for each column.'
       operationId: tableDataDeletePOST
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTableRow"
+              $ref: '#/components/schemas/UpdateTableRow'
             examples:
               example-01:
                 value:
@@ -343,11 +329,11 @@ paths:
                   rowId: 15
         required: true
       responses:
-        "201":
+        '201':
           description: Table row deleted successfully
-        "400":
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -363,18 +349,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewDashboard"
+              $ref: '#/components/schemas/NewDashboard'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Dashboard"
-        "400":
+                $ref: '#/components/schemas/Dashboard'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -388,18 +374,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/dashboard_read_body"
+              $ref: '#/components/schemas/dashboard_read_body'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Dashboard"
-        "400":
+                $ref: '#/components/schemas/Dashboard'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -415,16 +401,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateDashboard"
+              $ref: '#/components/schemas/UpdateDashboard'
         required: true
       responses:
-        "204":
+        '204':
           description: Dashboard updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: Dashboard not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -438,14 +424,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteDashboard"
+              $ref: '#/components/schemas/DeleteDashboard'
         required: true
       responses:
-        "204":
+        '204':
           description: Dashboard deleted successfully
-        "404":
+        '404':
           description: Dashboard not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -459,18 +445,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_create_body"
+              $ref: '#/components/schemas/auth_create_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard state created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardAuthGroup"
-        "400":
+                $ref: '#/components/schemas/DashboardAuthGroup'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -484,18 +470,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_read_body"
+              $ref: '#/components/schemas/auth_read_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard state created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardAuthGroup"
-        "400":
+                $ref: '#/components/schemas/DashboardAuthGroup'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -509,18 +495,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_update_body"
+              $ref: '#/components/schemas/auth_update_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard state created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardAuthGroup"
-        "400":
+                $ref: '#/components/schemas/DashboardAuthGroup'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -534,18 +520,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/auth_delete_body"
+              $ref: '#/components/schemas/auth_delete_body'
         required: true
       responses:
-        "201":
+        '201':
           description: Dashboard Auth Group(s) deleted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/auth_delete_body"
-        "400":
+                $ref: '#/components/schemas/auth_delete_body'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -559,18 +545,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadPaginationFilter"
+              $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/inline_response_200"
-        "400":
+                $ref: '#/components/schemas/inline_response_200'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -578,24 +564,24 @@ paths:
   /auth/group/create:
     post:
       summary: Create a new group
-      description: "Create a new group with a name, parents, and symlinks"
+      description: 'Create a new group with a name, parents, and symlinks'
       operationId: authGroupCreatePOST
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewGroup"
+              $ref: '#/components/schemas/NewGroup'
         required: true
       responses:
-        "201":
+        '201':
           description: Group created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Group"
-        "400":
+                $ref: '#/components/schemas/Group'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -609,16 +595,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/group_read_body"
+              $ref: '#/components/schemas/group_read_body'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Group"
-        "500":
+                $ref: '#/components/schemas/Group'
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -632,16 +618,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateGroup"
+              $ref: '#/components/schemas/UpdateGroup'
         required: true
       responses:
-        "204":
+        '204':
           description: Group updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: Group not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -655,14 +641,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteGroup"
+              $ref: '#/components/schemas/DeleteGroup'
         required: true
       responses:
-        "204":
+        '204':
           description: Group deleted successfully
-        "404":
+        '404':
           description: Group not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -676,16 +662,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadGroups"
+              $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/inline_response_200_1"
-        "500":
+                $ref: '#/components/schemas/inline_response_200_1'
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -699,16 +685,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReadUsers"
+              $ref: '#/components/schemas/ReadPaginationFilter'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/inline_response_200_2"
-        "500":
+                $ref: '#/components/schemas/inline_response_200_2'
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -722,18 +708,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewUser"
+              $ref: '#/components/schemas/NewUser'
         required: true
       responses:
-        "201":
+        '201':
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "400":
+                $ref: '#/components/schemas/User'
+        '400':
           description: Bad request
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -747,16 +733,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateUser"
+              $ref: '#/components/schemas/UpdateUser'
         required: true
       responses:
-        "204":
+        '204':
           description: User updated successfully
-        "400":
+        '400':
           description: Bad request
-        "404":
+        '404':
           description: User not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -770,14 +756,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeleteUser"
+              $ref: '#/components/schemas/DeleteUser'
         required: true
       responses:
-        "204":
+        '204':
           description: User deleted successfully
-        "404":
+        '404':
           description: User not found
-        "500":
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -791,16 +777,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/user_read_body"
+              $ref: '#/components/schemas/user_read_body'
         required: true
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "500":
+                $ref: '#/components/schemas/User'
+        '500':
           description: Internal server error
       security:
         - bearerAuth: []
@@ -863,15 +849,15 @@ components:
       type: object
       properties:
         search:
-          $ref: "#/components/schemas/agGridInput_search"
+          $ref: '#/components/schemas/agGridInput_search'
         cols:
           type: array
           items:
-            $ref: "#/components/schemas/agGridInput_search_cols"
+            $ref: '#/components/schemas/agGridInput_search_cols'
         filters:
           type: array
           items:
-            $ref: "#/components/schemas/agGridInput_filters"
+            $ref: '#/components/schemas/agGridInput_filters'
         dataType:
           type: string
           example: Person_Natural
@@ -996,7 +982,7 @@ components:
           type: array
           description: Table columns associated with the table
           items:
-            $ref: "#/components/schemas/TableColumn"
+            $ref: '#/components/schemas/TableColumn'
       example:
         name: name
         tableId: tableId
@@ -1023,7 +1009,7 @@ components:
           type: array
           description: Table columns to be associated with the table during creation
           items:
-            $ref: "#/components/schemas/TableColumn"
+            $ref: '#/components/schemas/TableColumn'
     DeleteTable:
       type: object
       properties:
@@ -1042,7 +1028,7 @@ components:
           type: array
           description: Updated table columns to associate with the table during update
           items:
-            $ref: "#/components/schemas/TableColumn"
+            $ref: '#/components/schemas/TableColumn'
     UpdateTableColumn:
       type: object
       properties:
@@ -1073,7 +1059,7 @@ components:
         tableId:
           type: string
         cols:
-          $ref: "#/components/schemas/NewTableRow_cols"
+          $ref: '#/components/schemas/NewTableRow_cols'
     UpdateTableRow:
       type: object
       properties:
@@ -1082,7 +1068,7 @@ components:
         rowId:
           type: string
         cols:
-          $ref: "#/components/schemas/NewTableRow_cols"
+          $ref: '#/components/schemas/NewTableRow_cols'
     Dashboard:
       type: object
       properties:
@@ -1213,7 +1199,7 @@ components:
         filters:
           type: array
           items:
-            $ref: "#/components/schemas/ReadPaginationFilter_filters"
+            $ref: '#/components/schemas/ReadPaginationFilter_filters'
     GetTablesResponse:
       type: object
       properties:
@@ -1223,7 +1209,7 @@ components:
           type: array
           description: Table columns associated with the table
           items:
-            $ref: "#/components/schemas/Table"
+            $ref: '#/components/schemas/Table'
       example:
         tables:
           - name: name
@@ -1266,16 +1252,16 @@ components:
         name:
           type: string
           description: Name of the user
-        groups:
+        authGroups:
           type: array
           description: IDs of the groups the user belongs to
           items:
             type: string
       example:
+        authGroups:
+          - authGroups
+          - authGroups
         name: name
-        groups:
-          - groups
-          - groups
         userId: userId
     NewUser:
       type: object
@@ -1283,7 +1269,7 @@ components:
         name:
           type: string
           description: Name of the user
-        groups:
+        authGroups:
           type: array
           description: IDs of the groups the user belongs to
           items:
@@ -1297,7 +1283,7 @@ components:
         name:
           type: string
           description: Updated name of the user
-        groups:
+        authGroups:
           type: array
           description: Updated IDs of the groups the user belongs to
           items:
@@ -1315,7 +1301,7 @@ components:
         to:
           type: integer
         filters:
-          $ref: "#/components/schemas/ReadUsers_filters"
+          $ref: '#/components/schemas/ReadUsers_filters'
     ReadGroups:
       type: object
       properties:
@@ -1324,7 +1310,7 @@ components:
         to:
           type: integer
         filters:
-          $ref: "#/components/schemas/ReadGroups_filters"
+          $ref: '#/components/schemas/ReadGroups_filters'
     DashboardAuthGroup:
       type: object
       properties:
@@ -1334,7 +1320,7 @@ components:
         dashboardName:
           type: string
         authGroups:
-          $ref: "#/components/schemas/AuthGroups"
+          $ref: '#/components/schemas/AuthGroups'
       example:
         authGroups:
           read:
@@ -1381,7 +1367,7 @@ components:
         dashboardId:
           type: string
         authGroups:
-          $ref: "#/components/schemas/dashboardgroupauthcreate_authGroups"
+          $ref: '#/components/schemas/dashboardgroupauthcreate_authGroups'
     auth_read_body:
       type: object
       properties:
@@ -1393,14 +1379,14 @@ components:
         dashboardId:
           type: string
         authGroups:
-          $ref: "#/components/schemas/AuthGroups"
+          $ref: '#/components/schemas/AuthGroups'
     auth_delete_body:
       type: object
       properties:
         dashboardId:
           type: string
         authGroups:
-          $ref: "#/components/schemas/AuthGroups"
+          $ref: '#/components/schemas/AuthGroups'
       example:
         authGroups:
           read:
@@ -1424,7 +1410,16 @@ components:
         dashboards:
           type: array
           items:
-            $ref: "#/components/schemas/Dashboard"
+            type: object
+            properties:
+              owner:
+                type: string
+              folder:
+                type: string
+              name:
+                type: string
+              id:
+                type: string
       example:
         totalDashboards: 0
         dashboards:
@@ -1448,17 +1443,17 @@ components:
       properties:
         totalGroups:
           type: integer
-        groups:
+        authGroups:
           type: array
           items:
-            $ref: "#/components/schemas/Group"
+            $ref: '#/components/schemas/Group'
       example:
+        authGroups:
+          - groupId: groupId
+            name: name
+          - groupId: groupId
+            name: name
         totalGroups: 0
-        groups:
-          - groupId: groupId
-            name: name
-          - groupId: groupId
-            name: name
     inline_response_200_2:
       type: object
       properties:
@@ -1467,19 +1462,19 @@ components:
         users:
           type: array
           items:
-            $ref: "#/components/schemas/User"
+            $ref: '#/components/schemas/User'
       example:
         totalUsers: 0
         users:
-          - name: name
-            groups:
-              - groups
-              - groups
+          - authGroups:
+              - authGroups
+              - authGroups
+            name: name
             userId: userId
-          - name: name
-            groups:
-              - groups
-              - groups
+          - authGroups:
+              - authGroups
+              - authGroups
+            name: name
             userId: userId
     user_read_body:
       type: object
@@ -1524,9 +1519,9 @@ components:
         cols:
           type: array
           items:
-            $ref: "#/components/schemas/agGridInput_search_cols"
+            $ref: '#/components/schemas/agGridInput_search_cols'
         extraSearch:
-          $ref: "#/components/schemas/agGridInput_search_extraSearch"
+          $ref: '#/components/schemas/agGridInput_search_extraSearch'
     agGridInput_filters:
       type: object
       properties:
@@ -1562,9 +1557,9 @@ components:
         colId:
           type: string
         condition1:
-          $ref: "#/components/schemas/ReadPaginationFilter_condition1"
+          $ref: '#/components/schemas/ReadPaginationFilter_condition1'
         condition2:
-          $ref: "#/components/schemas/ReadPaginationFilter_condition1"
+          $ref: '#/components/schemas/ReadPaginationFilter_condition1'
         filterType:
           type: string
         operator:
@@ -1574,7 +1569,7 @@ components:
       properties:
         name:
           type: string
-        groups:
+        authGroups:
           type: array
           items:
             type: string

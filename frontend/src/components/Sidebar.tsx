@@ -85,7 +85,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   }, [deviceSize]);
 
   return (
-    <div className={`${openedSidebar ? 'active' : ''}` + ' sidebar'}>
+    <div className={`top-12 ${openedSidebar ? 'active' : ''}` + ' sidebar'}>
       <ul className="list-none p-0 m-0">
         {deviceSize === 'sm' && (
           <li>
@@ -100,21 +100,31 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           </li>
         )}
         <li>
-          <Button onClick={() => logout()}>Logout</Button>
+          <button
+            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors hover:bg-blue-500 hover:text-white"
+            onClick={() => logout()}
+          >
+            Logout
+          </button>
         </li>
         <li>
-          <Button
-            className="sidebar__admin-btn"
+          <button
+            className="sidebar__admin-btn px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors hover:bg-blue-500 hover:text-white"
             type="button"
             onClick={() => onClickNavigate('/admin')}
           >
             {t('admin-panel')}
-          </Button>
+          </button>
         </li>
         <li>
           <Link to="/table/create">
-            <Button>Nova Entrada</Button>
+            <button className="bg-blue-600">Nova Entrada</button>
           </Link>
+        </li>
+        <li>
+          <button className="block uppercase text-blue-500 mx-auto shadow bg-slate-50 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white text-xs py-3 px-10 rounded">
+            Sign in
+          </button>
         </li>
       </ul>
 

@@ -18,7 +18,7 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
   };
 
   return (
-    <div className="header">
+    <div className="header absolute">
       <Form.Select
         data-testid="language-select"
         className="header__language-selector"
