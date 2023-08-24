@@ -16,6 +16,7 @@ type Props = {
   setDeleteMode: Dispatch<React.SetStateAction<boolean>>;
   setUpdateMode: Dispatch<React.SetStateAction<boolean>>;
   configTableId: string;
+  add: () => void;
   entriesToBeDeleted: string[] | undefined;
 };
 
@@ -29,6 +30,7 @@ const GridActionsPanel = ({
   updateModelId,
   setDeletion,
   id,
+  add,
   setShowColumnSelector,
   setDeleteMode,
   setUpdateMode,
@@ -123,6 +125,7 @@ const GridActionsPanel = ({
                     ? (prevState = updateModelId)
                     : (prevState = configTableId),
                 );
+                add();
               }}
             >
               +
@@ -191,13 +194,15 @@ const GridActionsPanel = ({
           //   left: '8rem',
           // }}
           onClick={() => {
-            setFlexModelId(id);
-            setOpenNewEntryView(true);
-            setModelId((prevState) =>
-              updateModelId
-                ? (prevState = updateModelId)
-                : (prevState = configTableId),
-            );
+            setFlexModelId && setFlexModelId(id);
+            setOpenNewEntryView && setOpenNewEntryView(true);
+            setModelId &&
+              setModelId((prevState) =>
+                updateModelId
+                  ? (prevState = updateModelId)
+                  : (prevState = configTableId),
+              );
+            add();
           }}
         >
           +
@@ -259,9 +264,9 @@ const GridActionsPanel = ({
             onClick={() => {
               setModelId && setModelId(configTableId);
               console.log({ entriesToBeDeleted });
-              entriesToBeDeleted &&
-                entriesToBeDeleted.length > 0 &&
-                setDeletion(true);
+              // entriesToBeDeleted &&
+              //   entriesToBeDeleted.length > 0 &&
+              setDeletion(true);
             }}
             style={{ fontSize: '1.8rem', color: '#b53737', cursor: 'pointer' }}
           ></i>

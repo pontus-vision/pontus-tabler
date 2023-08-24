@@ -39,6 +39,7 @@ import {
   UpdateDashboard,
   UpdateTable,
   UpdateTableRow,
+  UpdateUser,
   User,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
@@ -269,6 +270,18 @@ export const readAuthGroups = async (
   }
 };
 
+export const createUser = async (
+  body: NewUser,
+): Promise<AxiosResponse<User> | undefined> => {
+  try {
+    const res = await api.post('/auth/user/create', { body });
+
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const readUsers = async (
   body: ReadPaginationFilter,
 ): Promise<AxiosResponse<ReadUsersRes> | undefined> => {
@@ -281,11 +294,11 @@ export const readUsers = async (
   }
 };
 
-export const createUser = async (
-  body: NewUser,
-): Promise<AxiosResponse<User> | undefined> => {
+export const updateUser = async (
+  body: UpdateUser,
+): Promise<AxiosResponse<Response>> => {
   try {
-    const res = await api.post('/auth/user/create', { body });
+    const res = api.post('/auth/user/update', { ...body });
 
     return res;
   } catch (error) {

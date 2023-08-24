@@ -20,6 +20,7 @@ import TablesReadView from './views/tables/read';
 import Dashboards from './views/dashboards/Dashboards';
 import CreateUser from './views/users/CreateUser';
 import ReadUsers from './views/users/ReadUsers';
+import UpdateUser from './views/users/UpdateUser';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -49,6 +50,7 @@ function App() {
             <Route path="/dashboard/:id" element={<DashboardView />} />
             <Route path="/users/create" element={<CreateUser />} />
             <Route path="/users/read" element={<ReadUsers />} />
+            <Route path="/user/update/:id" element={<UpdateUser />} />
           </Route>
         </Routes>
       </>

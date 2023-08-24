@@ -17,6 +17,7 @@
   "enter-dashboard-name": "Insira um nome para o dashboard",
   "confirm-delete-entries": "Quer realmente deletar essas entradas?",
   "confirm-delete-entry": "Quer realmente deletar essa entrada?",
+  "Row(s) deleted": "Linhas deletadas",
   "add-component": "Adicionar Componente",
   "col": "coluna",
   "col-type": "Tipo",

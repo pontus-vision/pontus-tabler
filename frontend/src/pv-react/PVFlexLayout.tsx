@@ -29,6 +29,8 @@ import {
 
 type Props = {
   gridState?: IJsonModel;
+  setDeletion?: Dispatch<SetStateAction<undefined>>;
+  deletion: boolean;
   selectedCmp?: FlexLayoutCmp;
   setIsEditing?: Dispatch<React.SetStateAction<boolean>>;
   dashboardId?: string;
@@ -41,6 +43,8 @@ const PVFlexLayout = ({
   gridState,
   setIsEditing,
   dashboardId,
+  setDeletion,
+  deletion,
 }: Props) => {
   const initialJson: IJsonModel = {
     global: {},
@@ -63,7 +67,7 @@ const PVFlexLayout = ({
   const [flexModelId, setFlexModelId] = useState<string>();
   const [aggridColumnsState, setAGGridColumnsState] = useState<ColumnState[]>();
   const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<string[]>();
-  const [deletion, setDeletion] = useState(false);
+  // const [deletion, setDeletion] = useState(false);
   const [openNewEntryView, setOpenNewEntryView] = useState(false);
 
   const { t } = useTranslation();
@@ -175,7 +179,7 @@ const PVFlexLayout = ({
       if (cols.length > 0) {
         return (
           <>
-            <GridActionsPanel
+            {/* <GridActionsPanel
               key={id}
               configTableId={config.tableId}
               deleteMode={deleteMode}
@@ -191,7 +195,7 @@ const PVFlexLayout = ({
               id={id}
               setOpenNewEntryView={setOpenNewEntryView}
               setShowColumnSelector={setShowColumnSelector}
-            />
+            /> */}
             <PVGridWebiny2
               setGridHeight={setGridHeight}
               deleteMode={deleteMode}
@@ -201,6 +205,7 @@ const PVFlexLayout = ({
               id={id}
               cols={cols}
               totalCount={totalCount}
+              setDeletion={setDeletion}
               rows={rows}
               lastState={lastState || config.lastState}
               onValueChange={handleValueChange}
@@ -372,9 +377,7 @@ const PVFlexLayout = ({
 
   useEffect(() => {
     if (!gridState) return;
-    console.log('GRIIIID STATEEE', gridState);
     setModel(Model.fromJson(gridState));
-    console.log({ model, gridState });
   }, [gridState]);
 
   useEffect(() => {
