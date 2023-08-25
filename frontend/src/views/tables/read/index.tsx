@@ -4,9 +4,11 @@ import PVGridWebiny2 from '../../../pv-react/PVGridWebiny2';
 import {
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
+  Table,
 } from '../../../pontus-api/typescript-fetch-client-generated';
 import { getTables } from '../../../client';
 import { ColDef } from 'ag-grid-community';
+import { useNavigate } from 'react-router-dom';
 
 const TablesReadView = () => {
   const [cols, setCols] = useState<ColDef[]>([
@@ -19,6 +21,8 @@ const TablesReadView = () => {
   const [to, setTo] = useState<number>();
   const [totalCount, setTotalCount] = useState<number>();
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchTables = async () => {
       const data = await getTables();
@@ -27,6 +31,7 @@ const TablesReadView = () => {
         return {
           table: table.name,
           cols: table.cols?.map((col) => col.name).join(', '),
+          tableId: table.tableId,
         };
       });
       console.log({ data });
@@ -41,15 +46,22 @@ const TablesReadView = () => {
     console.log({ filters });
   }, [filters]);
 
+  const handleUpdate = (data: Table) => {
+    navigate('/table/update/' + data.tableId, { state: data });
+  };
+
   if (!totalCount) return;
 
   return (
-    <PVGridWebiny2
-      setFilters={setFilters}
-      totalCount={totalCount}
-      cols={cols}
-      rows={rows}
-    />
+    <div className="pt-12">
+      <PVGridWebiny2
+        onUpdate={handleUpdate}
+        setFilters={setFilters}
+        totalCount={totalCount}
+        cols={cols}
+        rows={rows}
+      />
+    </div>
   );
 };
 

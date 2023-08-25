@@ -464,7 +464,7 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    console.log(selectedRows, 'HEYYY');
+    console.log(selectedRows);
     setEntriesToBeDeleted &&
       setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);

@@ -6,9 +6,10 @@ import {
   Table,
   TableColumn,
 } from '../pontus-api/typescript-fetch-client-generated';
-import { getTables, updateTable } from '../client';
+import { getTable, getTables, updateTable } from '../client';
 import { useTranslation } from 'react-i18next';
 import { capitalizeFirstLetter } from '../webinyApi';
+import { useLocation, useParams } from 'react-router-dom';
 
 const updateTableView = () => {
   const [cols, setCols] = useState<{ colId: string; colDef: NewTableColumn }[]>(
@@ -17,6 +18,7 @@ const updateTableView = () => {
   const [table, setTable] = useState<Table>();
   const [tables, setTables] = useState<Table[]>();
   const [successMessage, setSuccessMessage] = useState('');
+  const { id } = useParams();
 
   function generateUniqueId() {
     const timestamp = new Date().getTime();
@@ -25,15 +27,27 @@ const updateTableView = () => {
   }
   const { t, i18n } = useTranslation();
 
-  const fetchTables = async () => {
-    const data = await getTables();
-    console.log(data);
-    setTables(data.tables);
+  const fetchTable = async (id: string) => {
+    const data = await getTable(id);
+    setTable(data?.data);
+
+    data?.data.cols &&
+      setCols(
+        data?.data.cols?.map((col) => {
+          return {
+            colId: col.id || '',
+            colDef: col,
+          };
+        }),
+      );
   };
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
-    fetchTables();
-  }, []);
+    if (!id) return;
+    fetchTable(id);
+  }, [id]);
 
   const update = async () => {
     const res = await updateTable({
@@ -49,28 +63,7 @@ const updateTableView = () => {
   };
 
   return (
-    <div className="flex flex-col items-center h-full">
-      <label htmlFor="">{t('select-table-to-be-updated')}:</label>
-      <select
-        name=""
-        id=""
-        onChange={(e) => {
-          if (!e.target.value) {
-            setCols([]);
-          }
-          setCols(
-            JSON.parse(e.target.value).cols.map((col: TableColumn) => {
-              return { colId: generateUniqueId(), colDef: col };
-            }),
-          );
-          setTable(JSON.parse(e.target.value));
-        }}
-      >
-        <option value=""></option>
-        {tables?.map((table) => (
-          <option value={JSON.stringify(table)}>{table.name}</option>
-        ))}
-      </select>
+    <div className="flex flex-col items-center h-full pt-12">
       {cols.length > 0 && (
         <div className="overflow-x-auto w-5/6">
           <div className="w-full">
