@@ -24,6 +24,7 @@ import UpdateUser from './views/users/UpdateUser';
 import ReadAuthGroups from './views/authGroups/ReadAuthGroups';
 import CreateAuthGroup from './views/authGroups/CreateAuthGroup';
 import UpdateAuthGroup from './views/authGroups/UpdateAuthGroup';
+import DashboardAuthGroup from './views/dashboard/DashboardAuthGroup';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -73,6 +74,10 @@ function App() {
               path="/auth/group/update/:id"
               element={<UpdateAuthGroup />}
             />
+            <Route
+              path="dashboard/auth/group"
+              element={<DashboardAuthGroup />}
+            /> 
           </Route>
         </Routes>
       </>

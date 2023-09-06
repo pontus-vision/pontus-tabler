@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { ReadPaginationFilter2Filters } from '../../pontus-api/typescript-fetch-client-generated';
 import Select from 'react-select';
 import { readAuthGroups } from '../../client';
+import TreeView from '../../components/Tree/TreeView';
+import FolderItem from '../../components/Tree/FolderItem';
+import data from '../../components/Tree/data';
 
 type Props = {
   onSubmit: (body: {
@@ -48,7 +51,8 @@ const AuthGroupForm = ({ onSubmit, values }: Props) => {
   };
 
   const handleParentChange = (selectedOptions) => {
-    setSelectedParents(selectedOptions);
+    // setSelectedParents(selectedOptions);
+    console.log(selectedOptions);
   };
 
   const handleSymlinkChange = (selectedOptions) => {
@@ -121,15 +125,17 @@ const AuthGroupForm = ({ onSubmit, values }: Props) => {
           htmlFor="parents"
           className="block text-sm font-medium text-gray-700"
         >
-          Parents
+          Select a folder:
         </label>
-        <Select
+        {/* <Select
           id="parents"
           name="parents"
           options={parentOptions}
           isMulti
           onChange={handleParentChange}
-        />
+        /> */}
+        <TreeView />
+        {/* <FolderItem folder={data} onSelect={handleParentChange} /> */}
       </div>
       <div className="mb-4">
         <label

@@ -28,7 +28,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
-    console.log({ dashboards });
+   console.log({ dashboards });
   }, [dashboards]);
 
   const handleLanguageChange = (event) => {
@@ -101,7 +101,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         )}
         <li>
           <button
-            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors hover:bg-blue-500 hover:text-white"
+            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
             onClick={() => logout()}
           >
             Logout
@@ -109,7 +109,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         </li>
         <li>
           <button
-            className="sidebar__admin-btn px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors hover:bg-blue-500 hover:text-white"
+            className="sidebar__admin-btn px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
             type="button"
             onClick={() => onClickNavigate('/admin')}
           >
@@ -118,14 +118,10 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         </li>
         <li>
           <Link to="/table/create">
-            <button className="bg-blue-600">Nova Entrada</button>
+            <button className="">Nova Entrada</button>
           </Link>
         </li>
-        <li>
-          <button className="block uppercase text-blue-500 mx-auto shadow bg-slate-50 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white text-xs py-3 px-10 rounded">
-            Sign in
-          </button>
-        </li>
+        
       </ul>
 
       {dashboards &&
