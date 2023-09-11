@@ -4,16 +4,26 @@ import { DataRoot, Child } from '../../types';
 type Props = {
   onSelect?: (folderId: DataRoot | Child) => void;
   selected: string;
-  path?: string
-  file: any
+  path?: string;
+  file: any;
 };
 
-const FileItem = ({ file, onSelect, path, selected }:Props) => {
+const FileItem = (props: Props) => {
   const handleSelect = () => {
-        onSelect && onSelect({...file, path: path || "/"});
+    props.onSelect &&
+      props.onSelect({ ...props.file, path: props.path || '/' });
   };
 
-  return <div onClick={handleSelect} className={`cursor-pointer pl-2 ${selected === path ? 'text-blue-500' : ''}`}>📄 {file.name}</div>;
+  return (
+    <div
+      onClick={handleSelect}
+      className={`cursor-pointer pl-2 ${
+        props.selected === props.path ? 'text-blue-500' : ''
+      }`}
+    >
+      📄 {props.file.name}
+    </div>
+  );
 };
 
 export default FileItem;
