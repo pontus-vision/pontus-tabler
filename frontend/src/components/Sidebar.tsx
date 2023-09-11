@@ -21,7 +21,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [data, setData] = useState<DataRoot>()
+  const [data, setData] = useState<DataRoot>();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -33,15 +33,15 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const res = await readMenu()
-        
-        res && setData(res.data)
-      } catch (error) {
-        console.error(error) 
-      }
-    }
+        const res = await readMenu();
 
-    fetchMenu()
+        res && setData(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchMenu();
   }, []);
 
   const handleLanguageChange = (event) => {
@@ -99,9 +99,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
 
   return (
     <div className={`top-12 ${openedSidebar ? 'active' : ''}` + ' sidebar'}>
-      <div className='w-5/6'>
-        {data && <TreeView data={data} />}
-      </div>
+      <div className="w-5/6">{data && <TreeView data={data} />}</div>
       <ul className="list-none p-0 m-0">
         {deviceSize === 'sm' && (
           <li>
@@ -125,7 +123,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         </li>
         <li>
           <button
-            className="sidebar__admin-btn px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
+            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
             type="button"
             onClick={() => onClickNavigate('/admin')}
           >
@@ -137,7 +135,6 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
             <button className="">Nova Entrada</button>
           </Link>
         </li>
-        
       </ul>
 
       {dashboards &&
