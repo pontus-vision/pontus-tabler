@@ -281,21 +281,6 @@ const DragAndDropArray = () => {
         </div>
       </div>
     </div>
-    // <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-    //   <Tree
-    //     tree={treeData}
-    //     rootId={0}
-    //     onDrop={handleDrop}
-    //     render={(node, { depth, isOpen, onToggle }) => (
-    //       <div style={{ marginLeft: depth * 10 }}>
-    //         {node.droppable && (
-    //           <span onClick={onToggle}>{isOpen ? '[-]' : '[+]'}</span>
-    //         )}
-    //         {node.text}
-    //       </div>
-    //     )}
-    //   />
-    // </DndProvider>
   );
 };
 

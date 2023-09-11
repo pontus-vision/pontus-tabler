@@ -6,9 +6,11 @@ import styled from 'styled-components';
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';
-import { Dashboard } from '../types';
+import { Dashboard, DataRoot } from '../types';
 import { setDashboardId } from '../store/sliceDashboards';
 import { useAuth } from '../AuthContext';
+import TreeView from './Tree/TreeView';
+import { readMenu } from '../client';
 
 type Props = {
   openedSidebar: boolean;
@@ -19,6 +21,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const [data, setData] = useState<DataRoot>()
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -28,8 +31,18 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
-   console.log({ dashboards });
-  }, [dashboards]);
+    const fetchMenu = async () => {
+      try {
+        const res = await readMenu()
+        
+        res && setData(res.data)
+      } catch (error) {
+        console.error(error) 
+      }
+    }
+
+    fetchMenu()
+  }, []);
 
   const handleLanguageChange = (event) => {
     const selectedLanguage = event.target.value;
@@ -86,6 +99,9 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
 
   return (
     <div className={`top-12 ${openedSidebar ? 'active' : ''}` + ' sidebar'}>
+      <div className='w-5/6'>
+        {data && <TreeView data={data} />}
+      </div>
       <ul className="list-none p-0 m-0">
         {deviceSize === 'sm' && (
           <li>

@@ -16,7 +16,7 @@ import Unauthorized from './views/Unauthorized';
 import CreateNewTable from './views/CreateNewTable';
 import UpdateTable from './views/UpdateTable';
 import DeleteTableView from './views/DeleteTableView';
-import TablesReadView from './views/tables/read';
+import TablesReadView from './views/tables/ReadTables';
 import Dashboards from './views/dashboards/Dashboards';
 import CreateUser from './views/users/CreateUser';
 import ReadUsers from './views/users/ReadUsers';
@@ -77,7 +77,7 @@ function App() {
             <Route
               path="dashboard/auth/group"
               element={<DashboardAuthGroup />}
-            /> 
+            />
           </Route>
         </Routes>
       </>

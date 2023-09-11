@@ -18,7 +18,7 @@ const updateTableView = () => {
   const [table, setTable] = useState<Table>();
   const [tables, setTables] = useState<Table[]>();
   const [successMessage, setSuccessMessage] = useState('');
-  const { id } = useParams();
+  const params = useParams();
 
   function generateUniqueId() {
     const timestamp = new Date().getTime();
@@ -42,12 +42,10 @@ const updateTableView = () => {
       );
   };
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
-    if (!id) return;
-    fetchTable(id);
-  }, [id]);
+    if (!params.id) return;
+    fetchTable(params.id);
+  }, [params]);
 
   const update = async () => {
     const res = await updateTable({

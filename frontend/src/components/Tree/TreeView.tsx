@@ -115,13 +115,11 @@ const TreeView = ({ data, onSelect }: Props) => {
         folder={jsonData}
         onSelect={handleFolderSelect}
         onToggle={handleFolderToggle}
-        selected={selectedFolder}
+        
+        selected={selectedFolder?.path}
+
       />
-      {selectedFolder && (
-        <p className="text-green-600 mt-2">
-          Selected folder: {selectedFolder.name}
-        </p>
-      )}
+      
     </div>
   );
 };

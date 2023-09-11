@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
   Dashboard,
+  DataRoot,
   ICmsGetContentModel,
   ICmsGetContentModelData,
   ICmsGetContentModelDataField,
@@ -75,7 +76,7 @@ export const getModelData = async (
   if (!data) return;
   const { data: modelContentListData, meta } = data;
 
-  // console.log({ modelContentListData });
+  
   return { columnNames, modelContentListData, meta };
 };
 
@@ -89,13 +90,15 @@ const api = axios.create({
   },
 });
 
-(async () => {
-  console.log(await api.post('/tables/read', {}), await getModelsWebiny());
-  console.log(
-    await api.post('/tables/read', {}),
-    await cmsGetContentModel('titulares'),
-  );
-})();
+export const readMenu = async (): Promise<AxiosResponse<DataRoot> | undefined> => {
+  try {
+    const res = await api.post("/menu")
+
+    return res
+  } catch (error) {
+    throw error 
+  }
+}
 
 export const getTables = async (): Promise<
   AxiosResponse<GetTablesResponse> | undefined
@@ -138,8 +141,8 @@ export const updateTable = async (
   body: UpdateTable,
 ): Promise<AxiosResponse<Table, any> | undefined> => {
   try {
-    const res = await api.post('table/update', { ...body });
-    console.log({ body });
+    const res = await api.post('table/update', body);
+    
     return res;
   } catch (error) {
     console.error(error);
@@ -160,7 +163,7 @@ export const deleteTable = async (
 
 export const createDataTable = async (body: NewTableRow) => {
   try {
-    const res = await api.post('/table/data/create', { ...body });
+    const res = await api.post('/table/data/create', body);
 
     return res;
   } catch (error) {
@@ -186,7 +189,7 @@ export const updateDataTableRow = async (body: UpdateTableRow) => {
 
     return res;
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -266,7 +269,6 @@ export const createAuthGroup = async (
   body: NewGroup,
 ): Promise<AxiosResponse<Group> | undefined> => {
   try {
-    console.log(body);
     const res = await api.post('/auth/group/create', body);
 
     return res;
@@ -279,7 +281,7 @@ export const readAuthGroups = async (
   data: ReadPaginationFilter2,
 ): Promise<AxiosResponse<ReadGroupsRes> | undefined> => {
   try {
-    const res = await api.post('/auth/groups/read', { ...data });
+    const res = await api.post('/auth/groups/read', data);
 
     return res;
   } catch (error) {
@@ -314,7 +316,7 @@ export const deleteAuthGroup = async (
   body: DeleteGroup,
 ): Promise<AxiosResponse<Response> | undefined> => {
   try {
-    const res = await api.post('/auth/group/delete', { ...body });
+    const res = await api.post('/auth/group/delete', body);
 
     return res;
   } catch (error) {
@@ -326,7 +328,7 @@ export const createUser = async (
   body: NewUser,
 ): Promise<AxiosResponse<User> | undefined> => {
   try {
-    const res = await api.post('/auth/user/create', { ...body });
+    const res = await api.post('/auth/user/create', body);
 
     return res;
   } catch (error) {
@@ -350,7 +352,7 @@ export const updateUser = async (
   body: UpdateUser,
 ): Promise<AxiosResponse<Response>> => {
   try {
-    const res = api.post('/auth/user/update', { ...body });
+    const res = api.post('/auth/user/update', body);
 
     return res;
   } catch (error) {
@@ -376,7 +378,6 @@ export const getModelFields = async (
   // try {
   //   const { data } = await cmsGetContentModel(modelId);
 
-  //   console.log({ data });
   //   return data;
   // } catch (error) {
   //   console.error(error);
@@ -384,7 +385,7 @@ export const getModelFields = async (
 
   const data = await api.post('/table/read', { tableId });
 
-  console.log({ data });
+  
 
   return data;
 };

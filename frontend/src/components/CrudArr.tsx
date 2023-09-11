@@ -13,9 +13,9 @@ const CrudArr = ({name, onCrudSelection}:Props) => {
       <div className="flex flex-col">
         <h2 className="text-xl font-semibold mb-2">Create</h2>
         <div
-          onClick={() => setSelectedCrud('Create')}
+          onClick={() => setSelectedCrud(name)}
           className={`drop-target bg-gray-200 p-4 rounded ${
-            selectedCrud === 'Create'
+            selectedCrud === name 
               ? 'border-blue-700 border-2 border-solid'
               : ''
           }`}
@@ -34,9 +34,9 @@ const CrudArr = ({name, onCrudSelection}:Props) => {
             </div>
           ))}
         </div>
-        {selectedCrud === 'Create' && selectedArrItem && (
+        {selectedCrud === name && selectedArrItem && (
           <button
-            onClick={() => removeFromCrudArr('Create')}
+            onClick={() => removeFromCrudArr(name)}
             className="w-6 bg-neutral-200"
           >
             -

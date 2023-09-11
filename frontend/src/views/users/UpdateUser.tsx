@@ -103,20 +103,6 @@ const UpdateUser = () => {
             <label className="block text-sm font-medium text-gray-700">
               {t('Select Group')}
             </label>
-            {/* <select
-            multiple
-            className="mt-1 w-full px-4 py-2 border rounded-md focus:ring focus:border-blue-300"
-            value={selectedGroups}
-            onChange={handleGroupChange}
-            required
-            >
-            <option value=""></option>
-            {groups.map((group) => (
-              <option key={group} value={group}>
-              {group}
-              </option>
-              ))}
-          </select> */}
             <Select
               options={groups}
               isMulti
