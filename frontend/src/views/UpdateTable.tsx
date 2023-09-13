@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { capitalizeFirstLetter } from '../webinyApi';
 import { useLocation, useParams } from 'react-router-dom';
 
-const updateTableView = () => {
+const UpdateTableView = () => {
   const [cols, setCols] = useState<{ colId: string; colDef: NewTableColumn }[]>(
     [],
   );
@@ -61,22 +61,30 @@ const updateTableView = () => {
   };
 
   return (
-    <div className="flex flex-col items-center h-full pt-12">
+    <div className="update-table">
       {cols.length > 0 && (
-        <div className="overflow-x-auto w-5/6">
-          <div className="w-full">
-            <div className="bg-white shadow-md rounded my-6">
-              <table className="min-w-max w-full table-auto">
+        <div className="update-table-overflow-container">
+          <div className="update-table-container">
+            <div className="update-table-card">
+              <table className="update-table-table">
                 <thead>
-                  <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                    <th className="py-3 px-6 text-left">{t('col')}</th>
-                    <th className="py-3 px-6 text-left">{t('col-type')}</th>
-                    <th className="py-3 px-6 text-center">{t('filter')}</th>
-                    <th className="py-3 px-6 text-center">{t('sortable')}</th>
-                    <th className="py-3 px-6 text-center">Actions</th>
+                  <tr className="update-table-table-header">
+                    <th className="update-table-table-header-cell">
+                      {t('col')}
+                    </th>
+                    <th className="update-table-table-header-cell">
+                      {t('col-type')}
+                    </th>
+                    <th className="update-table-table-header-cell">
+                      {t('filter')}
+                    </th>
+                    <th className="update-table-table-header-cell">
+                      {t('sortable')}
+                    </th>
+                    <th className="update-table-table-header-cell">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="text-gray-600 text-sm font-light">
+                <tbody className="update-table-table-body">
                   {cols.map((col, index) => (
                     <NewTableCol
                       key={col.colId}
@@ -104,6 +112,7 @@ const updateTableView = () => {
                     },
                   ])
                 }
+                className="update-table-add-button"
               >
                 Add
               </button>
@@ -117,17 +126,15 @@ const updateTableView = () => {
           onClick={() => {
             update();
           }}
+          className="update-table-update-button"
         >
           {t('Update')}
         </button>
       )}
       {successMessage && (
-        <div
-          className="flex items-center p-4 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
-          role="alert"
-        >
+        <div className="update-table-alert" role="alert">
           <svg
-            className="flex-shrink-0 inline w-4 h-4 mr-3"
+            className="update-table-alert-icon"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
@@ -135,15 +142,12 @@ const updateTableView = () => {
           >
             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
           </svg>
-          <span className="sr-only">Info</span>
-          <div>
-            <span className="font-medium">Success alert!</span>{' '}
-            {capitalizeFirstLetter(successMessage)}
-          </div>
+          <span className="update-table-alert-title">Success alert!</span>{' '}
+          {capitalizeFirstLetter(successMessage)}
         </div>
       )}
     </div>
   );
 };
 
-export default updateTableView;
+export default UpdateTableView;

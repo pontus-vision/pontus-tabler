@@ -116,7 +116,6 @@ const PVGridWebiny2 = ({
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
         if (!showGrid) return;
-        
 
         try {
           const pageSize = params.endRow - params.startRow;
@@ -125,6 +124,8 @@ const PVGridWebiny2 = ({
 
           const filter = params.filterModel;
 
+          console.log(filter);
+
           let sorting;
 
           if (params.sortModel.length > 0) {
@@ -132,8 +133,6 @@ const PVGridWebiny2 = ({
             const sort = params?.sortModel[0].sort;
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
-
-          
 
           setTo && setTo(params.endRow);
           setFrom && setFrom(params.startRow);
@@ -286,7 +285,7 @@ const PVGridWebiny2 = ({
             // }),
             ...cols,
           ]);
-          
+
           if (rows) {
             params.successCallback(rows, totalCount);
           }
@@ -298,13 +297,12 @@ const PVGridWebiny2 = ({
     return datasource;
   };
 
-  
   useEffect(() => {
     const objects = columnDefs?.filter(
       (el: { [key: string]: any }) => el?.children,
     );
 
-      const checkHiddenObj =
+    const checkHiddenObj =
       objects &&
       objects.length > 0 &&
       objects
@@ -317,9 +315,7 @@ const PVGridWebiny2 = ({
 
     checkHiddenObj && setCheckHiddenObjects(true);
 
-    
     if (checkHiddenObj) {
-      
       setColumnDefs(
         (prevState) =>
           (prevState = prevState?.filter(
@@ -364,7 +360,6 @@ const PVGridWebiny2 = ({
 
     onRowClicked: (e) => {
       if (setRowClicked) {
-      
         setRowClicked(e.data);
       }
     },
@@ -416,7 +411,6 @@ const PVGridWebiny2 = ({
   }, [deleteMode]);
 
   useEffect(() => {
-  
     if (updateMode) {
       columnApi?.setColumnVisible('update-mode', true);
     } else {
@@ -451,11 +445,11 @@ const PVGridWebiny2 = ({
 
   const onSelectionChanged = (event: SelectionChangedEvent): void => {
     const selectedRows = event.api.getSelectedNodes();
-    
+
     setSelectedRows(selectedRows);
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     setEntriesToBeDeleted &&
       setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);

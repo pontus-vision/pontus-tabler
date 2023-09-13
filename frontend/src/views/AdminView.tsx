@@ -55,7 +55,7 @@ const AdminView = () => {
   }, [gridState]);
 
   return (
-    <div className="flex flex-col justify-center items-center pt-16 gap-4 h-92 w-full ">
+    <div className="admin-view__container">
       {
         <>
           <CmpPanel setSelectedCmp={setSelectedCmp} />

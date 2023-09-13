@@ -118,7 +118,7 @@ const ReadUsers = () => {
   if (!cols || !rows) return;
 
   return (
-    <div className="w-5/6 m-auto flex flex-col h-full justify-center">
+    <div className="read-users__container">
       {entriesToBeDeleted?.length > 0 && (
         <DeleteConfirmationModal
           onDelete={deleteUsers}

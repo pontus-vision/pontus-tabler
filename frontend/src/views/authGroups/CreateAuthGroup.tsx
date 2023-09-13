@@ -31,7 +31,7 @@ const CreateAuthGroup = () => {
   //   ];
 
   return (
-    <div className="flex flex-col items-center h-full justify-center">
+    <div className="create-auth-group">
       <AuthGroupForm onSubmit={createGroup} />
     </div>
   );

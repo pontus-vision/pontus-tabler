@@ -31,27 +31,30 @@ const DeleteTableView = () => {
   }, []);
 
   return (
-    <>
+    <div className="delete-table-view">
       <select
         name=""
         id=""
         onChange={(e) => {
           setTable(JSON.parse(e.target.value));
         }}
+        className="delete-table-view-select"
       >
         <option value=""></option>
         {tables?.map((table) => (
           <option value={JSON.stringify(table)}>{table.name}</option>
         ))}
       </select>
-      <button onClick={() => tableDelete()}>Delete</button>
+      <button
+        onClick={() => tableDelete()}
+        className="delete-table-view-button"
+      >
+        Delete
+      </button>
       {successMessage && (
-        <div
-          className="flex items-center p-4 mb-4 text-sm text-green-800 border border-green-300 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400 dark:border-green-800"
-          role="alert"
-        >
+        <div className="delete-table-view-alert" role="alert">
           <svg
-            className="flex-shrink-0 inline w-4 h-4 mr-3"
+            className="delete-table-view-alert-icon"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
@@ -59,14 +62,11 @@ const DeleteTableView = () => {
           >
             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
           </svg>
-          <span className="sr-only">Info</span>
-          <div>
-            <span className="font-medium">Success alert!</span>{' '}
-            {capitalizeFirstLetter(successMessage)}
-          </div>
+          <span className="delete-table-view-alert-title">Success alert!</span>{' '}
+          {capitalizeFirstLetter(successMessage)}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

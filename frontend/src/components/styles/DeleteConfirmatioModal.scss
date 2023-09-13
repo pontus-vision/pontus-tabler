@@ -1,0 +1,68 @@
+/* DeleteConfirmationModal.scss */
+
+.delete-confirmation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  &-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  &-content {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 16rem;
+    z-index: 1;
+  }
+
+  &-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+
+  &-text {
+    margin-bottom: 1rem;
+  }
+
+  &-buttons {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &-button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    border: none;
+  }
+
+  .delete-button {
+    background-color: #ccc;
+    color: #333;
+  }
+
+  .confirm-button {
+    background-color: #e53e3e;
+    color: white;
+  }
+
+  .cancel-button {
+    background-color: #ccc;
+    color: #333;
+  }
+}

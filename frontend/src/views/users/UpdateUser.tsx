@@ -83,40 +83,31 @@ const UpdateUser = () => {
   }, [groups]);
 
   return (
-    <div className="h-full flex flex-col justify-center">
-      <div className="w-1/2 max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4">Update User</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t('Name')}
-            </label>
+    <div className="update-user__container">
+      <div className="update-user__form">
+        <h2 className="update-user__form-title">Update User</h2>
+        <form onSubmit={handleSubmit} className="update-user__form-fields">
+          <div className="update-user__form-field">
+            <label className="update-user__label">{t('Name')}</label>
             <input
               type="text"
-              className="mt-1 w-full px-4 py-2 border rounded-md focus:ring focus:border-blue-300"
+              className="update-user__input"
               value={userName}
               onChange={handleUserNameChange}
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {t('Select Group')}
-            </label>
+          <div className="update-user__form-field">
+            <label className="update-user__label">{t('Select Group')}</label>
             <Select
               options={groups}
               isMulti
               onChange={handleGroupChange}
               value={selectedGroups}
-              className="mt-1"
+              className="update-user__select"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300"
-          >
-            {t('Register')}
-          </button>
+          <button className="update-user__button">{t('Register')}</button>
         </form>
       </div>
     </div>

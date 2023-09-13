@@ -93,7 +93,7 @@ const ReadAuthGroups = () => {
   if (!rows) return;
 
   return (
-    <div className="flex h-full flex-col pt-12 items-center">
+    <div className="auth-groups-read">
       {entriesToBeDeleted?.length > 0 && (
         <DeleteConfirmationModal
           onDelete={handleDeleteGroups}
@@ -101,7 +101,7 @@ const ReadAuthGroups = () => {
           isOpen={deletion}
         />
       )}
-      <div className="w-5/6">
+      <div className="auth-groups-read__grid">
         <PVGridWebiny2
           add={handleAdd}
           onUpdate={handleUpdate}

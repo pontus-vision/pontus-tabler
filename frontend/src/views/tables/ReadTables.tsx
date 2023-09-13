@@ -60,7 +60,7 @@ const TablesReadView = () => {
   if (!totalCount) return;
 
   return (
-    <div className="pt-12">
+    <div className="read-tables__container">
       <PVGridWebiny2
         onUpdate={handleUpdate}
         setFilters={setFilters}

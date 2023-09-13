@@ -100,15 +100,9 @@ const AuthGroupForm = ({ onSubmit, values }: Props) => {
   }, [values]);
 
   return (
-    <form
-      className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg w-1/2"
-      onSubmit={handleSubmit}
-    >
-      <div className="mb-4">
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
+    <form className="auth-group-form" onSubmit={handleSubmit}>
+      <div className="auth-group-form-field">
+        <label htmlFor="name" className="custom-label">
           Name
         </label>
         <input
@@ -117,31 +111,17 @@ const AuthGroupForm = ({ onSubmit, values }: Props) => {
           name="name"
           value={name}
           onChange={handleNameChange}
-          className="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-opacity-50 focus:border-indigo-500"
+          className="custom-input"
         />
       </div>
-      <div className="mb-4">
-        <label
-          htmlFor="parents"
-          className="block text-sm font-medium text-gray-700"
-        >
+      <div className="auth-group-form-field">
+        <label htmlFor="parents" className="custom-label">
           Select a folder:
         </label>
-        {/* <Select
-          id="parents"
-          name="parents"
-          options={parentOptions}
-          isMulti
-          onChange={handleParentChange}
-        /> */}
         <TreeView />
-        {/* <FolderItem folder={data} onSelect={handleParentChange} /> */}
       </div>
-      <div className="mb-4">
-        <label
-          htmlFor="symlinks"
-          className="block text-sm font-medium text-gray-700"
-        >
+      <div className="auth-group-form-field">
+        <label htmlFor="symlinks" className="custom-label">
           Symlinks
         </label>
         <Select
@@ -150,12 +130,10 @@ const AuthGroupForm = ({ onSubmit, values }: Props) => {
           options={symlinkOptions}
           isMulti
           onChange={handleSymlinkChange}
+          className="custom-select"
         />
       </div>
-      <button
-        type="submit"
-        className="w-full bg-indigo-500 text-white p-2 rounded-md hover:bg-indigo-600 transition duration-300"
-      >
+      <button className="auth-group-button">
         {!values ? 'Create Auth Group' : 'Update Auth Group'}
       </button>
     </form>

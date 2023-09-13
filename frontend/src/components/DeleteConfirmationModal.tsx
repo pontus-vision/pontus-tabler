@@ -16,27 +16,27 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onDelete }: Props) => {
 
   return (
     <div
-      className={`fixed inset-0 ${
+      className={`delete-confirmation ${
         isOpen ? 'flex' : 'hidden'
       } items-center justify-center z-50`}
     >
-      <div className="fixed inset-0 bg-gray-900 opacity-50"></div>
-      <div className="bg-white p-6 rounded shadow-md w-64 z-0">
-        <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
-        <p className="mb-4">Are you sure you want to delete this item?</p>
-        <div className="flex justify-end">
+      <div className="delete-confirmation-overlay"></div>
+      <div className="delete-confirmation-content">
+        <h2 className="delete-confirmation-title">Confirm Deletion</h2>
+        <p className="delete-confirmation-text">
+          Are you sure you want to delete this item?
+        </p>
+        <div className="delete-confirmation-buttons">
           <button
-            className={`px-4 py-2 mr-2 ${
-              isConfirming ? 'bg-red-600' : 'bg-gray-400'
-            } text-white rounded`}
-            onClick={
-              isConfirming ? handleDelete : setIsConfirming.bind(null, true)
-            }
+            className={`delete-confirmation-button ${
+              isConfirming ? 'confirm-button' : 'delete-button'
+            }`}
+            onClick={isConfirming ? handleDelete : () => setIsConfirming(true)}
           >
             {isConfirming ? 'Confirm' : 'Delete'}
           </button>
           <button
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded"
+            className="delete-confirmation-button cancel-button"
             onClick={() => {
               setIsConfirming(false);
               onClose();

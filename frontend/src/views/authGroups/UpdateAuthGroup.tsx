@@ -17,7 +17,6 @@ const UpdateAuthGroup = () => {
     const fetchAuthGroup = async () => {
       try {
         const res = await readAuthGroup({ groupId: id });
-        console.log(res?.data.name);
 
         setName(res?.data.name || '');
       } catch (error) {
@@ -28,22 +27,16 @@ const UpdateAuthGroup = () => {
     fetchAuthGroup();
   }, []);
 
-  useEffect(() => {
-    console.log({ name });
-  }, [name]);
-
   const updateGroup = async (body: NewGroup) => {
     try {
       const data = updateAuthGroup({ ...body, groupId: id });
-
-      console.log(data, body);
     } catch (error) {
       console.error;
     }
   };
 
   return (
-    <div className="flex flex-col items-center h-full justify-center">
+    <div className="update-auth-group-container">
       <AuthGroupForm
         onSubmit={updateGroup}
         values={{ name, parents, symlinks }}

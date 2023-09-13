@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import FolderItem, { Folder } from './FolderItem';
-import data1 from './data';
+import defaultData from './data';
 import { AiFillFolderAdd } from 'react-icons/ai';
 
 type Props = {
@@ -14,7 +14,7 @@ const TreeView = ({ data, onSelect }: Props) => {
   const [newFolder, setNewFolder] = useState<Folder>();
 
   const [createFolder, setCreateFolder] = useState(false);
-  const [jsonData, setJsonData] = useState(data || data1);
+  const [jsonData, setJsonData] = useState(data || defaultData);
 
   const handleFolderSelect = (folder) => {
     setSelectedFolder(folder);
@@ -115,11 +115,8 @@ const TreeView = ({ data, onSelect }: Props) => {
         folder={jsonData}
         onSelect={handleFolderSelect}
         onToggle={handleFolderToggle}
-        
         selected={selectedFolder?.path}
-
       />
-      
     </div>
   );
 };

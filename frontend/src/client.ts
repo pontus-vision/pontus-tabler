@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
   Dashboard,
@@ -48,6 +48,8 @@ import {
   User,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
+import { D } from 'msw/lib/glossary-de6278a9';
+import { sendHttpRequest } from './http';
 
 export const getModelData = async (
   modelId: string,
@@ -76,7 +78,6 @@ export const getModelData = async (
   if (!data) return;
   const { data: modelContentListData, meta } = data;
 
-  
   return { columnNames, modelContentListData, meta };
 };
 
@@ -90,304 +91,171 @@ const api = axios.create({
   },
 });
 
-export const readMenu = async (): Promise<AxiosResponse<DataRoot> | undefined> => {
-  try {
-    const res = await api.post("/menu")
+// wrapper for every post request. eg. handling errors like Too Many Requests (429), internal server error (500), 503...
+const post = async (url: string, data?: any) => {
+  const baseURL = 'http://localhost:8080/PontusTest/1.0.0';
+  const headers = {
+    Authorization: 'Bearer 123456',
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  };
 
-    return res
-  } catch (error) {
-    throw error 
-  }
-}
+  return sendHttpRequest(baseURL + url, headers, '', data, 'POST');
+};
+
+export const readMenu = async (): Promise<
+  AxiosResponse<DataRoot> | undefined
+> => {
+  return post('/menu', {});
+};
 
 export const getTables = async (): Promise<
   AxiosResponse<GetTablesResponse> | undefined
 > => {
-  try {
-    const data = await api.post('/tables/read', {});
-
-    return data;
-  } catch (error) {
-    console.error(error);
-  }
-  // const listModels = data.data.listContentModels.data;
+  return post('/tables/read', {});
 };
 
 export const getTable = async (
   tableId: string,
 ): Promise<AxiosResponse<Table> | undefined> => {
-  try {
-    const res = await api.post('/table/read', { tableId });
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/table/read', { tableId });
 };
 
 export const createTable = async (
   data: NewTable,
 ): Promise<AxiosResponse<GetTablesResponse, any> | undefined> => {
-  try {
-    const res = await api.post('/table/create', data);
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/table/create', data);
 };
 
 export const updateTable = async (
   body: UpdateTable,
 ): Promise<AxiosResponse<Table, any> | undefined> => {
-  try {
-    const res = await api.post('table/update', body);
-    
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('table/update', body);
 };
 
 export const deleteTable = async (
   tableId: string,
 ): Promise<AxiosResponse<string, any> | undefined> => {
-  try {
-    const res = await api.post('table/delete', { tableId });
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('table/delete', { tableId });
 };
 
 export const createDataTable = async (body: NewTableRow) => {
-  try {
-    const res = await api.post('/table/data/create', body);
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/table/data/create', body);
 };
 
 export const readDataTable = async (
   body: AgGridInput,
 ): Promise<AxiosResponse<AgGridOutput> | undefined> => {
-  try {
-    const res = await api.post('/table/data/read', {});
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/table/data/read', {});
 };
 
 export const updateDataTableRow = async (body: UpdateTableRow) => {
-  try {
-    const res = await api.post('/table/data/update');
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/table/data/update');
 };
 
 export const deleteDataTableRow = async (
   body: DeleteTableRow,
 ): Promise<AxiosResponse<string> | undefined> => {
-  try {
-    const res = await api.post('/table/data/delete', { ...body });
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/table/data/delete', body);
 };
 
 export const getAllDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<AxiosResponse<ReadDashboardsRes> | undefined> => {
-  try {
-    const res = await api.post('/dashboards/read', { body });
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/dashboards/read', body);
 };
 
 export const createDashboard = async (
   body: NewDashboard,
 ): Promise<AxiosResponse<Dashboard> | undefined> => {
-  try {
-    const res = await api.post('/dashboard/create', {});
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/dashboard/create', {});
 };
 
 export const getDashboard = async (
   dashboardId: string,
 ): Promise<AxiosResponse<Dashboard> | undefined> => {
-  try {
-    const res = await api.post('/dashboard/read', { dashboardId });
-
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
+  return post('/dashboard/read', { dashboardId });
 };
 
 export const updateDashboard = async (
   body: UpdateDashboard,
 ): Promise<AxiosResponse<string> | undefined> => {
-  try {
-    const res = await api.post('/dashboard/update', { ...body });
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/dashboard/update', { ...body });
 };
 
 export const deleteDashboard = async (
   dashboardId: string,
 ): Promise<AxiosResponse<string> | undefined> => {
-  try {
-    const res = await api.post('/dashboard/delete', { dashboardId });
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/dashboard/delete', { dashboardId });
 };
 
 export const createAuthGroup = async (
   body: NewGroup,
 ): Promise<AxiosResponse<Group> | undefined> => {
-  try {
-    const res = await api.post('/auth/group/create', body);
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/group/create', body);
 };
 
 export const readAuthGroups = async (
   data: ReadPaginationFilter2,
 ): Promise<AxiosResponse<ReadGroupsRes> | undefined> => {
-  try {
-    const res = await api.post('/auth/groups/read', data);
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/groups/read', data);
 };
 
 export const readAuthGroup = async (
   body: GroupReadBody,
 ): Promise<AxiosResponse<Group> | undefined> => {
-  try {
-    const res = await api.post('/auth/group/read', body);
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/group/read', body);
 };
 
 export const updateAuthGroup = async (
   body: UpdateGroup,
 ): Promise<AxiosResponse<Response> | undefined> => {
-  try {
-    const res = await api.post('/auth/group/update', body);
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/group/update', body);
 };
 
 export const deleteAuthGroup = async (
   body: DeleteGroup,
 ): Promise<AxiosResponse<Response> | undefined> => {
-  try {
-    const res = await api.post('/auth/group/delete', body);
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/group/delete', body);
 };
 
 export const createUser = async (
   body: NewUser,
 ): Promise<AxiosResponse<User> | undefined> => {
-  try {
-    const res = await api.post('/auth/user/create', body);
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/user/create', body);
 };
 
 export const readUsers = async (
   body: ReadPaginationFilter,
 ): Promise<AxiosResponse<ReadUsersRes> | undefined> => {
-  try {
-    const res = api.post('/auth/users/read', {});
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/users/read', {});
 };
 
 export const updateUser = async (
   body: UpdateUser,
 ): Promise<AxiosResponse<Response>> => {
-  try {
-    const res = api.post('/auth/user/update', body);
-
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return post('/auth/user/update', body);
 };
 
 export const deleteUser = async (
   userId: string,
 ): Promise<AxiosResponse<Response> | undefined> => {
-  try {
-    const data = await api.post('auth/user/delete', { userId });
-
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  return post('auth/user/delete', { userId });
 };
 
-export const getModelFields = async (
-  tableId: string,
-): Promise<Table | undefined> => {
-  // try {
-  //   const { data } = await cmsGetContentModel(modelId);
-
-  //   return data;
-  // } catch (error) {
-  //   console.error(error);
-  // }
-
-  const data = await api.post('/table/read', { tableId });
-
-  
+export const getApiKeys = async () => {
+  const data = await listApiKeys();
 
   return data;
+};
+
+////////////////////////////////////////////////
+// Webiny related stuff.
+export const getModelFields = async (
+  tableId: string,
+): Promise<AxiosResponse<Table> | undefined> => {
+  return post('/table/read', { tableId });
 };
 
 export const deleteEntry = async (modelId: string, entryId: string) => {
@@ -472,10 +340,4 @@ const createMutationStr = (fields: ICmsGetContentModelDataField[]): string => {
   });
 
   return str;
-};
-
-export const getApiKeys = async () => {
-  const data = await listApiKeys();
-
-  return data;
 };
