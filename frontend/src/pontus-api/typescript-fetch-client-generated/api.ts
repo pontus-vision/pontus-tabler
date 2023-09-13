@@ -12,25 +12,21 @@
  * Do not edit the file manually.
  */
 
-import * as url from 'url';
-import * as isomorphicFetch from 'isomorphic-fetch';
-import { Configuration } from './configuration';
+import * as url from "url";
+import * as isomorphicFetch from "isomorphic-fetch";
+import { Configuration } from "./configuration";
 
-const BASE_PATH =
-  'https://virtserver.swaggerhub.com/PVPMARTINS_1/PontusBackend/1.0.0'.replace(
-    /\/+$/,
-    '',
-  );
+const BASE_PATH = "https://virtserver.swaggerhub.com/PVPMARTINS_1/PontusBackend/1.0.0".replace(/\/+$/, "");
 
 /**
  *
  * @export
  */
 export const COLLECTION_FORMATS = {
-  csv: ',',
-  ssv: ' ',
-  tsv: '\t',
-  pipes: '|',
+    csv: ",",
+    ssv: " ",
+    tsv: "\t",
+    pipes: "|",
 };
 
 /**
@@ -39,7 +35,7 @@ export const COLLECTION_FORMATS = {
  * @interface FetchAPI
  */
 export interface FetchAPI {
-  (url: string, init?: any): Promise<Response>;
+    (url: string, init?: any): Promise<Response>;
 }
 
 /**
@@ -48,8 +44,8 @@ export interface FetchAPI {
  * @interface FetchArgs
  */
 export interface FetchArgs {
-  url: string;
-  options: any;
+    url: string;
+    options: any;
 }
 
 /**
@@ -58,19 +54,15 @@ export interface FetchArgs {
  * @class BaseAPI
  */
 export class BaseAPI {
-  protected configuration: Configuration;
+    protected configuration: Configuration;
 
-  constructor(
-    configuration?: Configuration,
-    protected basePath: string = BASE_PATH,
-    protected fetch: FetchAPI = isomorphicFetch,
-  ) {
-    if (configuration) {
-      this.configuration = configuration;
-      this.basePath = configuration.basePath || this.basePath;
+    constructor(configuration?: Configuration, protected basePath: string = BASE_PATH, protected fetch: FetchAPI = isomorphicFetch) {
+        if (configuration) {
+            this.configuration = configuration;
+            this.basePath = configuration.basePath || this.basePath;
+        }
     }
-  }
-}
+};
 
 /**
  *
@@ -79,3944 +71,3026 @@ export class BaseAPI {
  * @extends {Error}
  */
 export class RequiredError extends Error {
-  name: 'RequiredError';
-  constructor(public field: string, msg?: string) {
-    super(msg);
-  }
+    name: "RequiredError"
+    constructor(public field: string, msg?: string) {
+        super(msg);
+    }
 }
 
 /**
- *
+ * 
  * @export
  * @interface AgGridInput
  */
 export interface AgGridInput {
-  /**
-   *
-   * @type {AgGridInputSearch}
-   * @memberof AgGridInput
-   */
-  search?: AgGridInputSearch;
-  /**
-   *
-   * @type {Array<AgGridInputSearchCols>}
-   * @memberof AgGridInput
-   */
-  cols?: Array<AgGridInputSearchCols>;
-  /**
-   *
-   * @type {Array<AgGridInputFilters>}
-   * @memberof AgGridInput
-   */
-  filters?: Array<AgGridInputFilters>;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInput
-   */
-  dataType?: string;
-  /**
-   *
-   * @type {number}
-   * @memberof AgGridInput
-   */
-  from?: number;
-  /**
-   *
-   * @type {number}
-   * @memberof AgGridInput
-   */
-  to?: number;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInput
-   */
-  sortCol?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInput
-   */
-  sortDir?: string;
+    /**
+     * 
+     * @type {AgGridInputSearch}
+     * @memberof AgGridInput
+     */
+    search?: AgGridInputSearch;
+    /**
+     * 
+     * @type {Array<AgGridInputSearchCols>}
+     * @memberof AgGridInput
+     */
+    cols?: Array<AgGridInputSearchCols>;
+    /**
+     * 
+     * @type {Array<AgGridInputFilters>}
+     * @memberof AgGridInput
+     */
+    filters?: Array<AgGridInputFilters>;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInput
+     */
+    dataType?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgGridInput
+     */
+    from?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgGridInput
+     */
+    to?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInput
+     */
+    sortCol?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInput
+     */
+    sortDir?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface AgGridInputFilters
  */
 export interface AgGridInputFilters {
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputFilters
-   */
-  colId?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputFilters
-   */
-  filterType?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputFilters
-   */
-  type?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputFilters
-   */
-  filter?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputFilters
+     */
+    colId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputFilters
+     */
+    filterType?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputFilters
+     */
+    type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputFilters
+     */
+    filter?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface AgGridInputSearch
  */
 export interface AgGridInputSearch {
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputSearch
-   */
-  searchStr?: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof AgGridInputSearch
-   */
-  searchExact?: boolean;
-  /**
-   *
-   * @type {Array<AgGridInputSearchCols>}
-   * @memberof AgGridInputSearch
-   */
-  cols?: Array<AgGridInputSearchCols>;
-  /**
-   *
-   * @type {AgGridInputSearchExtraSearch}
-   * @memberof AgGridInputSearch
-   */
-  extraSearch?: AgGridInputSearchExtraSearch;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputSearch
+     */
+    searchStr?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AgGridInputSearch
+     */
+    searchExact?: boolean;
+    /**
+     * 
+     * @type {Array<AgGridInputSearchCols>}
+     * @memberof AgGridInputSearch
+     */
+    cols?: Array<AgGridInputSearchCols>;
+    /**
+     * 
+     * @type {AgGridInputSearchExtraSearch}
+     * @memberof AgGridInputSearch
+     */
+    extraSearch?: AgGridInputSearchExtraSearch;
 }
 /**
- *
+ * 
  * @export
  * @interface AgGridInputSearchCols
  */
 export interface AgGridInputSearchCols {
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputSearchCols
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputSearchCols
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputSearchCols
-   */
-  field?: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof AgGridInputSearchCols
-   */
-  sortable?: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputSearchCols
-   */
-  headerName?: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof AgGridInputSearchCols
-   */
-  filter?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputSearchCols
+     */
+    id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputSearchCols
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputSearchCols
+     */
+    field?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AgGridInputSearchCols
+     */
+    sortable?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputSearchCols
+     */
+    headerName?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AgGridInputSearchCols
+     */
+    filter?: boolean;
 }
 /**
- *
+ * 
  * @export
  * @interface AgGridInputSearchExtraSearch
  */
 export interface AgGridInputSearchExtraSearch {
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputSearchExtraSearch
-   */
-  label?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridInputSearchExtraSearch
-   */
-  value?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputSearchExtraSearch
+     */
+    label?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridInputSearchExtraSearch
+     */
+    value?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface AgGridOutput
  */
 export interface AgGridOutput {
-  /**
-   *
-   * @type {string}
-   * @memberof AgGridOutput
-   */
-  type?: string;
-  /**
-   *
-   * @type {number}
-   * @memberof AgGridOutput
-   */
-  from?: number;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof AgGridOutput
-   */
-  records?: Array<string>;
-  /**
-   *
-   * @type {number}
-   * @memberof AgGridOutput
-   */
-  to?: number;
-  /**
-   *
-   * @type {number}
-   * @memberof AgGridOutput
-   */
-  totalAvailable?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AgGridOutput
+     */
+    type?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgGridOutput
+     */
+    from?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AgGridOutput
+     */
+    records?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgGridOutput
+     */
+    to?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AgGridOutput
+     */
+    totalAvailable?: number;
 }
 /**
- *
+ * 
  * @export
  * @interface AuthCreateBody
  */
 export interface AuthCreateBody {
-  /**
-   *
-   * @type {string}
-   * @memberof AuthCreateBody
-   */
-  dashboardId?: string;
-  /**
-   *
-   * @type {DashboardgroupauthcreateAuthGroups}
-   * @memberof AuthCreateBody
-   */
-  authGroups?: DashboardgroupauthcreateAuthGroups;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthCreateBody
+     */
+    dashboardId?: string;
+    /**
+     * 
+     * @type {DashboardgroupauthcreateAuthGroups}
+     * @memberof AuthCreateBody
+     */
+    authGroups?: DashboardgroupauthcreateAuthGroups;
 }
 /**
- *
+ * 
  * @export
  * @interface AuthDeleteBody
  */
 export interface AuthDeleteBody {
-  /**
-   *
-   * @type {string}
-   * @memberof AuthDeleteBody
-   */
-  dashboardId?: string;
-  /**
-   *
-   * @type {AuthGroups}
-   * @memberof AuthDeleteBody
-   */
-  authGroups?: AuthGroups;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthDeleteBody
+     */
+    dashboardId?: string;
+    /**
+     * 
+     * @type {AuthGroups}
+     * @memberof AuthDeleteBody
+     */
+    authGroups?: AuthGroups;
 }
 /**
- *
+ * 
  * @export
  * @interface AuthGroup
  */
 export interface AuthGroup {
-  /**
-   * Unique identifier of the group
-   * @type {string}
-   * @memberof AuthGroup
-   */
-  groupId?: string;
-  /**
-   * Name of the group
-   * @type {string}
-   * @memberof AuthGroup
-   */
-  name?: string;
+    /**
+     * Unique identifier of the group
+     * @type {string}
+     * @memberof AuthGroup
+     */
+    groupId?: string;
+    /**
+     * Name of the group
+     * @type {string}
+     * @memberof AuthGroup
+     */
+    name?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface AuthGroups
  */
 export interface AuthGroups {
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof AuthGroups
-   */
-  create?: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof AuthGroups
-   */
-  read?: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof AuthGroups
-   */
-  update?: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof AuthGroups
-   */
-  _delete?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AuthGroups
+     */
+    create?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AuthGroups
+     */
+    read?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AuthGroups
+     */
+    update?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AuthGroups
+     */
+    _delete?: Array<string>;
 }
 /**
- *
+ * 
  * @export
  * @interface AuthReadBody
  */
 export interface AuthReadBody {
-  /**
-   *
-   * @type {string}
-   * @memberof AuthReadBody
-   */
-  dashboardId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthReadBody
+     */
+    dashboardId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface AuthUpdateBody
  */
 export interface AuthUpdateBody {
-  /**
-   *
-   * @type {string}
-   * @memberof AuthUpdateBody
-   */
-  dashboardId?: string;
-  /**
-   *
-   * @type {AuthGroups}
-   * @memberof AuthUpdateBody
-   */
-  authGroups?: AuthGroups;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthUpdateBody
+     */
+    dashboardId?: string;
+    /**
+     * 
+     * @type {AuthGroups}
+     * @memberof AuthUpdateBody
+     */
+    authGroups?: AuthGroups;
 }
 /**
- *
+ * 
  * @export
  * @interface Child
  */
 export interface Child {
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  type?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  path?: string;
-  /**
-   *
-   * @type {Array<Child>}
-   * @memberof Child
-   */
-  children?: Array<Child>;
+    /**
+     * 
+     * @type {string}
+     * @memberof Child
+     */
+    id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Child
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Child
+     */
+    type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Child
+     */
+    path?: string;
+    /**
+     * 
+     * @type {Array<Child>}
+     * @memberof Child
+     */
+    children?: Array<Child>;
 }
 /**
- *
+ * 
  * @export
  * @interface Dashboard
  */
 export interface Dashboard {
-  /**
-   * Unique identifier of the dashboard
-   * @type {string}
-   * @memberof Dashboard
-   */
-  id?: string;
-  /**
-   * Name of the dashboard
-   * @type {string}
-   * @memberof Dashboard
-   */
-  name?: string;
-  /**
-   * Folder where the dashboard belongs
-   * @type {string}
-   * @memberof Dashboard
-   */
-  folder?: string;
-  /**
-   * Owner of the dashboard
-   * @type {string}
-   * @memberof Dashboard
-   */
-  owner?: string;
-  /**
-   * JSON containing all the dashboard state
-   * @type {any}
-   * @memberof Dashboard
-   */
-  state?: any;
+    /**
+     * Unique identifier of the dashboard
+     * @type {string}
+     * @memberof Dashboard
+     */
+    id?: string;
+    /**
+     * Name of the dashboard
+     * @type {string}
+     * @memberof Dashboard
+     */
+    name?: string;
+    /**
+     * Folder where the dashboard belongs
+     * @type {string}
+     * @memberof Dashboard
+     */
+    folder?: string;
+    /**
+     * Owner of the dashboard
+     * @type {string}
+     * @memberof Dashboard
+     */
+    owner?: string;
+    /**
+     * JSON containing all the dashboard state
+     * @type {any}
+     * @memberof Dashboard
+     */
+    state?: any;
 }
 /**
- *
+ * 
  * @export
  * @interface DashboardAuthGroup
  */
 export interface DashboardAuthGroup {
-  /**
-   * Unique identifier of the dashboard
-   * @type {string}
-   * @memberof DashboardAuthGroup
-   */
-  dashboardId?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DashboardAuthGroup
-   */
-  dashboardName?: string;
-  /**
-   *
-   * @type {AuthGroups}
-   * @memberof DashboardAuthGroup
-   */
-  authGroups?: AuthGroups;
+    /**
+     * Unique identifier of the dashboard
+     * @type {string}
+     * @memberof DashboardAuthGroup
+     */
+    dashboardId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DashboardAuthGroup
+     */
+    dashboardName?: string;
+    /**
+     * 
+     * @type {AuthGroups}
+     * @memberof DashboardAuthGroup
+     */
+    authGroups?: AuthGroups;
 }
 /**
- *
+ * 
  * @export
  * @interface DashboardReadBody
  */
 export interface DashboardReadBody {
-  /**
-   *
-   * @type {string}
-   * @memberof DashboardReadBody
-   */
-  dashboardId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DashboardReadBody
+     */
+    dashboardId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface DashboardgroupauthcreateAuthGroups
  */
 export interface DashboardgroupauthcreateAuthGroups {
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof DashboardgroupauthcreateAuthGroups
-   */
-  create?: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof DashboardgroupauthcreateAuthGroups
-   */
-  read?: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof DashboardgroupauthcreateAuthGroups
-   */
-  update?: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof DashboardgroupauthcreateAuthGroups
-   */
-  _delete?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DashboardgroupauthcreateAuthGroups
+     */
+    create?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DashboardgroupauthcreateAuthGroups
+     */
+    read?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DashboardgroupauthcreateAuthGroups
+     */
+    update?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DashboardgroupauthcreateAuthGroups
+     */
+    _delete?: Array<string>;
 }
 /**
- *
+ * 
  * @export
  * @interface DataRoot
  */
 export interface DataRoot {
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  type?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  path?: string;
-  /**
-   *
-   * @type {Array<Child>}
-   * @memberof DataRoot
-   */
-  children?: Array<Child>;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataRoot
+     */
+    id?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataRoot
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataRoot
+     */
+    type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DataRoot
+     */
+    path?: string;
+    /**
+     * 
+     * @type {Array<Child>}
+     * @memberof DataRoot
+     */
+    children?: Array<Child>;
 }
 /**
- *
+ * 
  * @export
  * @interface DeleteDashboard
  */
 export interface DeleteDashboard {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteDashboard
-   */
-  dashboardId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeleteDashboard
+     */
+    dashboardId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface DeleteGroup
  */
 export interface DeleteGroup {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteGroup
-   */
-  groupId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeleteGroup
+     */
+    groupId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface DeleteTable
  */
 export interface DeleteTable {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTable
-   */
-  tableId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeleteTable
+     */
+    tableId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface DeleteTableRow
  */
 export interface DeleteTableRow {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableRow
-   */
-  tableId?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableRow
-   */
-  rowId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeleteTableRow
+     */
+    tableId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeleteTableRow
+     */
+    rowId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface DeleteUser
  */
 export interface DeleteUser {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteUser
-   */
-  userId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DeleteUser
+     */
+    userId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface GetTable
  */
 export interface GetTable {
-  /**
-   *
-   * @type {string}
-   * @memberof GetTable
-   */
-  tableId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GetTable
+     */
+    tableId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface GetTablesResponse
  */
 export interface GetTablesResponse {
-  /**
-   *
-   * @type {number}
-   * @memberof GetTablesResponse
-   */
-  totalTables?: number;
-  /**
-   * Table columns associated with the table
-   * @type {Array<Table>}
-   * @memberof GetTablesResponse
-   */
-  tables?: Array<Table>;
-}
-
-/**
- *
- * @export
- * @interface ReadGroupsRes
- */
-export interface ReadGroupsRes {
-  /**
-   *
-   * @type {number}
-   * @memberof ReadGroupsRes
-   */
-  totalGroups?: number;
-  /**
-   *
-   * @type {Array<Group>}
-   * @memberof ReadGroupsRes
-   */
-  authGroups?: Array<Group>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GetTablesResponse
+     */
+    totalTables?: number;
+    /**
+     * Table columns associated with the table
+     * @type {Array<Table>}
+     * @memberof GetTablesResponse
+     */
+    tables?: Array<Table>;
 }
 /**
- *
- * @export
- * @interface Group
- */
-export interface Group {
-  /**
-   * Unique identifier of the group
-   * @type {string}
-   * @memberof Group
-   */
-  groupId?: string;
-  /**
-   * Name of the group
-   * @type {string}
-   * @memberof Group
-   */
-  name?: string;
-}
-/**
- *
+ * 
  * @export
  * @interface GroupReadBody
  */
 export interface GroupReadBody {
-  /**
-   *
-   * @type {string}
-   * @memberof GroupReadBody
-   */
-  groupId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GroupReadBody
+     */
+    groupId?: string;
 }
 /**
- *
- * @export
- * @interface ReadDashboardsRes
- */
-export interface ReadDashboardsRes {
-  /**
-   *
-   * @type {number}
-   * @memberof ReadDashboardsRes
-   */
-  totalDashboards?: number;
-  /**
-   *
-   * @type {Array<Dashboard>}
-   * @memberof ReadDashboardsRes
-   */
-  dashboards?: Array<Dashboard>;
-}
-/**
- *
- * @export
- * @interface InlineResponse2001
- */
-export interface InlineResponse2001 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineResponse2001
-   */
-  totalGroups?: number;
-  /**
-   *
-   * @type {Array<AuthGroup>}
-   * @memberof InlineResponse2001
-   */
-  authGroups?: Array<AuthGroup>;
-}
-/**
- *
- * @export
- * @interface ReadUsersRes
- */
-export interface ReadUsersRes {
-  /**
-   *
-   * @type {number}
-   * @memberof ReadUsersRes
-   */
-  totalUsers?: number;
-  /**
-   *
-   * @type {Array<User>}
-   * @memberof ReadUsersRes
-   */
-  users?: Array<User>;
-}
-/**
- *
- * @export
- * @interface InlineResponse200Dashboards
- */
-export interface InlineResponse200Dashboards {
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  owner?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  folder?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  id?: string;
-}
-/**
- *
+ * 
  * @export
  * @interface NewDashboard
  */
 export interface NewDashboard {
-  /**
-   * Name of the dashboard
-   * @type {string}
-   * @memberof NewDashboard
-   */
-  name?: string;
-  /**
-   * Folder where the dashboard belongs
-   * @type {string}
-   * @memberof NewDashboard
-   */
-  folder?: string;
-  /**
-   * Owner of the dashboard
-   * @type {string}
-   * @memberof NewDashboard
-   */
-  owner?: string;
-  /**
-   * State information of the dashboard
-   * @type {any}
-   * @memberof NewDashboard
-   */
-  state?: any;
+    /**
+     * Name of the dashboard
+     * @type {string}
+     * @memberof NewDashboard
+     */
+    name?: string;
+    /**
+     * Folder where the dashboard belongs
+     * @type {string}
+     * @memberof NewDashboard
+     */
+    folder?: string;
+    /**
+     * Owner of the dashboard
+     * @type {string}
+     * @memberof NewDashboard
+     */
+    owner?: string;
+    /**
+     * State information of the dashboard
+     * @type {any}
+     * @memberof NewDashboard
+     */
+    state?: any;
 }
 /**
- *
+ * 
  * @export
  * @interface NewGroup
  */
 export interface NewGroup {
-  /**
-   * Name of the group
-   * @type {string}
-   * @memberof NewGroup
-   */
-  name?: string;
-  /**
-   * Parent groups of the group (optional)
-   * @type {Array<string>}
-   * @memberof NewGroup
-   */
-  parents?: Array<string>;
-  /**
-   * Symlinks associated with the group (optional)
-   * @type {Array<string>}
-   * @memberof NewGroup
-   */
-  symlinks?: Array<string>;
+    /**
+     * Name of the group
+     * @type {string}
+     * @memberof NewGroup
+     */
+    name?: string;
+    /**
+     * Parent groups of the group (optional)
+     * @type {Array<string>}
+     * @memberof NewGroup
+     */
+    parents?: Array<string>;
+    /**
+     * Symlinks associated with the group (optional)
+     * @type {Array<string>}
+     * @memberof NewGroup
+     */
+    symlinks?: Array<string>;
 }
 /**
- *
+ * 
  * @export
  * @interface NewTable
  */
 export interface NewTable {
-  /**
-   * Name of the table
-   * @type {string}
-   * @memberof NewTable
-   */
-  name?: string;
-  /**
-   * Table columns to be associated with the table during creation
-   * @type {Array<TableColumn>}
-   * @memberof NewTable
-   */
-  cols?: Array<TableColumn>;
+    /**
+     * Name of the table
+     * @type {string}
+     * @memberof NewTable
+     */
+    name?: string;
+    /**
+     * Table columns to be associated with the table during creation
+     * @type {Array<TableColumn>}
+     * @memberof NewTable
+     */
+    cols?: Array<TableColumn>;
 }
 /**
- *
+ * 
  * @export
  * @interface NewTableRow
  */
 export interface NewTableRow {
-  /**
-   *
-   * @type {string}
-   * @memberof NewTableRow
-   */
-  tableId?: string;
-  /**
-   *
-   * @type {NewTableRowCols}
-   * @memberof NewTableRow
-   */
-  cols?: NewTableRowCols;
+    /**
+     * 
+     * @type {string}
+     * @memberof NewTableRow
+     */
+    tableId?: string;
+    /**
+     * 
+     * @type {NewTableRowCols}
+     * @memberof NewTableRow
+     */
+    cols?: NewTableRowCols;
 }
 /**
- *
+ * 
  * @export
  * @interface NewTableRowCols
  */
 export interface NewTableRowCols {
-  /**
-   *
-   * @type {string}
-   * @memberof NewTableRowCols
-   */
-  colId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof NewTableRowCols
+     */
+    colId?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface NewUser
  */
 export interface NewUser {
-  /**
-   * Name of the user
-   * @type {string}
-   * @memberof NewUser
-   */
-  name?: string;
-  /**
-   * IDs of the groups the user belongs to
-   * @type {Array<string>}
-   * @memberof NewUser
-   */
-  authGroups?: Array<string>;
+    /**
+     * Name of the user
+     * @type {string}
+     * @memberof NewUser
+     */
+    name?: string;
+    /**
+     * IDs of the groups the user belongs to
+     * @type {Array<string>}
+     * @memberof NewUser
+     */
+    authGroups?: Array<string>;
 }
 /**
- *
+ * 
+ * @export
+ * @interface ReadDashboardsRes
+ */
+export interface ReadDashboardsRes {
+    /**
+     * 
+     * @type {number}
+     * @memberof ReadDashboardsRes
+     */
+    totalDashboards?: number;
+    /**
+     * 
+     * @type {Array<ReadDashboardsResDashboards>}
+     * @memberof ReadDashboardsRes
+     */
+    dashboards?: Array<ReadDashboardsResDashboards>;
+}
+/**
+ * 
+ * @export
+ * @interface ReadDashboardsResDashboards
+ */
+export interface ReadDashboardsResDashboards {
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadDashboardsResDashboards
+     */
+    owner?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadDashboardsResDashboards
+     */
+    folder?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadDashboardsResDashboards
+     */
+    name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadDashboardsResDashboards
+     */
+    id?: string;
+}
+/**
+ * 
+ * @export
+ * @interface ReadGroupsRes
+ */
+export interface ReadGroupsRes {
+    /**
+     * 
+     * @type {number}
+     * @memberof ReadGroupsRes
+     */
+    totalGroups?: number;
+    /**
+     * 
+     * @type {Array<AuthGroup>}
+     * @memberof ReadGroupsRes
+     */
+    authGroups?: Array<AuthGroup>;
+}
+/**
+ * 
  * @export
  * @interface ReadPaginationFilter
  */
 export interface ReadPaginationFilter {
-  /**
-   *
-   * @type {number}
-   * @memberof ReadPaginationFilter
-   */
-  from?: number;
-  /**
-   *
-   * @type {number}
-   * @memberof ReadPaginationFilter
-   */
-  to?: number;
-  /**
-   *
-   * @type {ReadPaginationFilterFilters}
-   * @memberof ReadPaginationFilter
-   */
-  filters?: ReadPaginationFilterFilters;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReadPaginationFilter
+     */
+    from?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ReadPaginationFilter
+     */
+    to?: number;
+    /**
+     * 
+     * @type {ReadPaginationFilterFilters}
+     * @memberof ReadPaginationFilter
+     */
+    filters?: ReadPaginationFilterFilters;
 }
 /**
- *
+ * 
  * @export
  * @interface ReadPaginationFilterFilters
  */
 export interface ReadPaginationFilterFilters {
-  /**
-   *
-   * @type {ReadPaginationFilterFiltersColId}
-   * @memberof ReadPaginationFilterFilters
-   */
-  colId?: ReadPaginationFilterFiltersColId;
+    /**
+     * 
+     * @type {ReadPaginationFilterFiltersColId}
+     * @memberof ReadPaginationFilterFilters
+     */
+    colId?: ReadPaginationFilterFiltersColId;
 }
 /**
- *
+ * 
  * @export
  * @interface ReadPaginationFilterFiltersColId
  */
 export interface ReadPaginationFilterFiltersColId {
-  /**
-   *
-   * @type {ReadPaginationFilterFiltersColIdCondition1}
-   * @memberof ReadPaginationFilterFiltersColId
-   */
-  condition1?: ReadPaginationFilterFiltersColIdCondition1;
-  /**
-   *
-   * @type {ReadPaginationFilterFiltersColIdCondition1}
-   * @memberof ReadPaginationFilterFiltersColId
-   */
-  condition2?: ReadPaginationFilterFiltersColIdCondition1;
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterFiltersColId
-   */
-  filterType?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterFiltersColId
-   */
-  operator?: string;
+    /**
+     * 
+     * @type {ReadPaginationFilterFiltersColIdCondition1}
+     * @memberof ReadPaginationFilterFiltersColId
+     */
+    condition1?: ReadPaginationFilterFiltersColIdCondition1;
+    /**
+     * 
+     * @type {ReadPaginationFilterFiltersColIdCondition1}
+     * @memberof ReadPaginationFilterFiltersColId
+     */
+    condition2?: ReadPaginationFilterFiltersColIdCondition1;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadPaginationFilterFiltersColId
+     */
+    filterType?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadPaginationFilterFiltersColId
+     */
+    operator?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface ReadPaginationFilterFiltersColIdCondition1
  */
 export interface ReadPaginationFilterFiltersColIdCondition1 {
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterFiltersColIdCondition1
-   */
-  filter?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterFiltersColIdCondition1
-   */
-  filterType?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterFiltersColIdCondition1
-   */
-  type?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadPaginationFilterFiltersColIdCondition1
+     */
+    filter?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadPaginationFilterFiltersColIdCondition1
+     */
+    filterType?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReadPaginationFilterFiltersColIdCondition1
+     */
+    type?: string;
 }
 /**
- *
+ * 
+ * @export
+ * @interface ReadUsersRes
+ */
+export interface ReadUsersRes {
+    /**
+     * 
+     * @type {number}
+     * @memberof ReadUsersRes
+     */
+    totalUsers?: number;
+    /**
+     * 
+     * @type {Array<User>}
+     * @memberof ReadUsersRes
+     */
+    users?: Array<User>;
+}
+/**
+ * 
  * @export
  * @interface Table
  */
 export interface Table {
-  /**
-   * Unique identifier of the table
-   * @type {string}
-   * @memberof Table
-   */
-  tableId?: string;
-  /**
-   * Name of the table
-   * @type {string}
-   * @memberof Table
-   */
-  name?: string;
-  /**
-   * Table columns associated with the table
-   * @type {Array<TableColumn>}
-   * @memberof Table
-   */
-  cols?: Array<TableColumn>;
+    /**
+     * Unique identifier of the table
+     * @type {string}
+     * @memberof Table
+     */
+    tableId?: string;
+    /**
+     * Name of the table
+     * @type {string}
+     * @memberof Table
+     */
+    name?: string;
+    /**
+     * Table columns associated with the table
+     * @type {Array<TableColumn>}
+     * @memberof Table
+     */
+    cols?: Array<TableColumn>;
 }
 /**
- *
+ * 
  * @export
  * @interface TableColumn
  */
 export interface TableColumn {
-  /**
-   * Unique identifier of the table column
-   * @type {string}
-   * @memberof TableColumn
-   */
-  id?: string;
-  /**
-   * Name of the table column
-   * @type {string}
-   * @memberof TableColumn
-   */
-  name?: string;
-  /**
-   * Field name of the table column
-   * @type {string}
-   * @memberof TableColumn
-   */
-  field?: string;
-  /**
-   * Indicates if the table column is sortable
-   * @type {boolean}
-   * @memberof TableColumn
-   */
-  sortable?: boolean;
-  /**
-   * Header name of the table column
-   * @type {string}
-   * @memberof TableColumn
-   */
-  headerName?: string;
-  /**
-   * Indicates if the table column is filterable
-   * @type {boolean}
-   * @memberof TableColumn
-   */
-  filter?: boolean;
+    /**
+     * Unique identifier of the table column
+     * @type {string}
+     * @memberof TableColumn
+     */
+    id?: string;
+    /**
+     * Name of the table column
+     * @type {string}
+     * @memberof TableColumn
+     */
+    name?: string;
+    /**
+     * Field name of the table column
+     * @type {string}
+     * @memberof TableColumn
+     */
+    field?: string;
+    /**
+     * Indicates if the table column is sortable
+     * @type {boolean}
+     * @memberof TableColumn
+     */
+    sortable?: boolean;
+    /**
+     * Header name of the table column
+     * @type {string}
+     * @memberof TableColumn
+     */
+    headerName?: string;
+    /**
+     * Indicates if the table column is filterable
+     * @type {boolean}
+     * @memberof TableColumn
+     */
+    filter?: boolean;
 }
 /**
- *
+ * 
  * @export
  * @interface UpdateDashboard
  */
 export interface UpdateDashboard {
-  /**
-   * ID of the dashboard to update
-   * @type {string}
-   * @memberof UpdateDashboard
-   */
-  dashboardId?: string;
-  /**
-   * Updated name of the dashboard
-   * @type {string}
-   * @memberof UpdateDashboard
-   */
-  name?: string;
-  /**
-   * Updated folder where the dashboard belongs
-   * @type {string}
-   * @memberof UpdateDashboard
-   */
-  folder?: string;
-  /**
-   * Updated owner of the dashboard
-   * @type {string}
-   * @memberof UpdateDashboard
-   */
-  owner?: string;
-  /**
-   * JSON containing all the dashboard state
-   * @type {any}
-   * @memberof UpdateDashboard
-   */
-  state?: any;
+    /**
+     * ID of the dashboard to update
+     * @type {string}
+     * @memberof UpdateDashboard
+     */
+    dashboardId?: string;
+    /**
+     * Updated name of the dashboard
+     * @type {string}
+     * @memberof UpdateDashboard
+     */
+    name?: string;
+    /**
+     * Updated folder where the dashboard belongs
+     * @type {string}
+     * @memberof UpdateDashboard
+     */
+    folder?: string;
+    /**
+     * Updated owner of the dashboard
+     * @type {string}
+     * @memberof UpdateDashboard
+     */
+    owner?: string;
+    /**
+     * JSON containing all the dashboard state
+     * @type {any}
+     * @memberof UpdateDashboard
+     */
+    state?: any;
 }
 /**
- *
+ * 
  * @export
  * @interface UpdateGroup
  */
 export interface UpdateGroup {
-  /**
-   * ID of the group to update
-   * @type {string}
-   * @memberof UpdateGroup
-   */
-  groupId?: string;
-  /**
-   * Updated name of the group
-   * @type {string}
-   * @memberof UpdateGroup
-   */
-  name?: string;
-  /**
-   * Updated parent groups of the group (optional)
-   * @type {Array<string>}
-   * @memberof UpdateGroup
-   */
-  parents?: Array<string>;
-  /**
-   * Updated symlinks associated with the group (optional)
-   * @type {Array<string>}
-   * @memberof UpdateGroup
-   */
-  symlinks?: Array<string>;
+    /**
+     * ID of the group to update
+     * @type {string}
+     * @memberof UpdateGroup
+     */
+    groupId?: string;
+    /**
+     * Updated name of the group
+     * @type {string}
+     * @memberof UpdateGroup
+     */
+    name?: string;
+    /**
+     * Updated parent groups of the group (optional)
+     * @type {Array<string>}
+     * @memberof UpdateGroup
+     */
+    parents?: Array<string>;
+    /**
+     * Updated symlinks associated with the group (optional)
+     * @type {Array<string>}
+     * @memberof UpdateGroup
+     */
+    symlinks?: Array<string>;
 }
 /**
- *
+ * 
  * @export
  * @interface UpdateTable
  */
 export interface UpdateTable {
-  /**
-   * ID of the table to update
-   * @type {string}
-   * @memberof UpdateTable
-   */
-  tableId?: string;
-  /**
-   * Updated name of the table
-   * @type {string}
-   * @memberof UpdateTable
-   */
-  name?: string;
-  /**
-   * Updated table columns to associate with the table during update
-   * @type {Array<TableColumn>}
-   * @memberof UpdateTable
-   */
-  cols?: Array<TableColumn>;
+    /**
+     * ID of the table to update
+     * @type {string}
+     * @memberof UpdateTable
+     */
+    tableId?: string;
+    /**
+     * Updated name of the table
+     * @type {string}
+     * @memberof UpdateTable
+     */
+    name?: string;
+    /**
+     * Updated table columns to associate with the table during update
+     * @type {Array<TableColumn>}
+     * @memberof UpdateTable
+     */
+    cols?: Array<TableColumn>;
 }
 /**
- *
+ * 
  * @export
  * @interface UpdateTableRow
  */
 export interface UpdateTableRow {
-  /**
-   *
-   * @type {string}
-   * @memberof UpdateTableRow
-   */
-  tableId?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof UpdateTableRow
-   */
-  rowId?: string;
-  /**
-   *
-   * @type {NewTableRowCols}
-   * @memberof UpdateTableRow
-   */
-  cols?: NewTableRowCols;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTableRow
+     */
+    tableId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateTableRow
+     */
+    rowId?: string;
+    /**
+     * 
+     * @type {NewTableRowCols}
+     * @memberof UpdateTableRow
+     */
+    cols?: NewTableRowCols;
 }
 /**
- *
+ * 
  * @export
  * @interface UpdateUser
  */
 export interface UpdateUser {
-  /**
-   * ID of the user to update
-   * @type {string}
-   * @memberof UpdateUser
-   */
-  userId?: string;
-  /**
-   * Updated name of the user
-   * @type {string}
-   * @memberof UpdateUser
-   */
-  name?: string;
-  /**
-   * Updated IDs of the groups the user belongs to
-   * @type {Array<string>}
-   * @memberof UpdateUser
-   */
-  authGroups?: Array<string>;
+    /**
+     * ID of the user to update
+     * @type {string}
+     * @memberof UpdateUser
+     */
+    userId?: string;
+    /**
+     * Updated name of the user
+     * @type {string}
+     * @memberof UpdateUser
+     */
+    name?: string;
+    /**
+     * Updated IDs of the groups the user belongs to
+     * @type {Array<string>}
+     * @memberof UpdateUser
+     */
+    authGroups?: Array<string>;
 }
 /**
- *
+ * 
  * @export
  * @interface User
  */
 export interface User {
-  /**
-   * Unique identifier of the user
-   * @type {string}
-   * @memberof User
-   */
-  userId?: string;
-  /**
-   * Name of the user
-   * @type {string}
-   * @memberof User
-   */
-  name?: string;
-  /**
-   * IDs of the groups the user belongs to
-   * @type {Array<string>}
-   * @memberof User
-   */
-  authGroups?: Array<string>;
+    /**
+     * Unique identifier of the user
+     * @type {string}
+     * @memberof User
+     */
+    userId?: string;
+    /**
+     * Name of the user
+     * @type {string}
+     * @memberof User
+     */
+    name?: string;
+    /**
+     * IDs of the groups the user belongs to
+     * @type {Array<string>}
+     * @memberof User
+     */
+    authGroups?: Array<string>;
 }
 /**
- *
+ * 
  * @export
  * @interface UserReadBody
  */
 export interface UserReadBody {
-  /**
-   *
-   * @type {string}
-   * @memberof UserReadBody
-   */
-  userId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserReadBody
+     */
+    userId?: string;
 }
 /**
  * DefaultApi - fetch parameter creator
  * @export
  */
-export const DefaultApiFetchParamCreator = function (
-  configuration?: Configuration,
-) {
-  return {
-    /**
-     * Create a new group with a name, parents, and symlinks
-     * @summary Create a new group
-     * @param {NewGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupCreatePost(body: NewGroup, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authGroupCreatePost.',
-        );
-      }
-      const localVarPath = `/auth/group/create`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'NewGroup' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Delete a group by ID
-     * @summary Delete a group
-     * @param {DeleteGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupDeletePost(body: DeleteGroup, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authGroupDeletePost.',
-        );
-      }
-      const localVarPath = `/auth/group/delete`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'DeleteGroup' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Retrieve group by id
-     * @summary Get group by ID
-     * @param {GroupReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupReadPost(body: GroupReadBody, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authGroupReadPost.',
-        );
-      }
-      const localVarPath = `/auth/group/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'GroupReadBody' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Update group details by ID
-     * @summary Update group by ID
-     * @param {UpdateGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupUpdatePost(body: UpdateGroup, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authGroupUpdatePost.',
-        );
-      }
-      const localVarPath = `/auth/group/update`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'UpdateGroup' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
-     * @summary Get all groups
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupsReadPost(
-      body: ReadPaginationFilter,
-      options: any = {},
-    ): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authGroupsReadPost.',
-        );
-      }
-      const localVarPath = `/auth/groups/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'ReadPaginationFilter' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new user with a name and associated groups
-     * @summary Create a new user
-     * @param {NewUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserCreatePost(body: NewUser, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authUserCreatePost.',
-        );
-      }
-      const localVarPath = `/auth/user/create`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'NewUser' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Delete a user by ID
-     * @summary Delete a user
-     * @param {DeleteUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserDeletePost(body: DeleteUser, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authUserDeletePost.',
-        );
-      }
-      const localVarPath = `/auth/user/delete`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'DeleteUser' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Retrieve user by ID
-     * @summary Get user by ID
-     * @param {UserReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserReadPost(body: UserReadBody, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authUserReadPost.',
-        );
-      }
-      const localVarPath = `/auth/user/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'UserReadBody' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Update user details by ID
-     * @summary Update user by ID
-     * @param {UpdateUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserUpdatePost(body: UpdateUser, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authUserUpdatePost.',
-        );
-      }
-      const localVarPath = `/auth/user/update`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'UpdateUser' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Retrieve all users
-     * @summary Get all users
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersReadPost(
-      body: ReadPaginationFilter,
-      options: any = {},
-    ): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling authUsersReadPost.',
-        );
-      }
-      const localVarPath = `/auth/users/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'ReadPaginationFilter' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new dashboard with properties, auth group, folder, and owner
-     * @summary Create a new dashboard
-     * @param {NewDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardCreatePost(body: NewDashboard, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardCreatePost.',
-        );
-      }
-      const localVarPath = `/dashboard/create`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'NewDashboard' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Delete a dashboard by ID
-     * @summary Delete a dashboard
-     * @param {DeleteDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardDeletePost(body: DeleteDashboard, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardDeletePost.',
-        );
-      }
-      const localVarPath = `/dashboard/delete`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'DeleteDashboard' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthCreateBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthCreatePost(
-      body: AuthCreateBody,
-      options: any = {},
-    ): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardGroupAuthCreatePost.',
-        );
-      }
-      const localVarPath = `/dashboard/group/auth/create`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'AuthCreateBody' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Delete group from dashboard
-     * @param {AuthDeleteBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthDeletePost(
-      body: AuthDeleteBody,
-      options: any = {},
-    ): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardGroupAuthDeletePost.',
-        );
-      }
-      const localVarPath = `/dashboard/group/auth/delete`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'AuthDeleteBody' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthReadPost(
-      body: AuthReadBody,
-      options: any = {},
-    ): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardGroupAuthReadPost.',
-        );
-      }
-      const localVarPath = `/dashboard/group/auth/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'AuthReadBody' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthUpdateBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthUpdatePost(
-      body: AuthUpdateBody,
-      options: any = {},
-    ): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardGroupAuthUpdatePost.',
-        );
-      }
-      const localVarPath = `/dashboard/group/auth/update`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'AuthUpdateBody' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Retrieve dashboard by id
-     * @summary Get dashboard by id
-     * @param {DashboardReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardReadPost(body: DashboardReadBody, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardReadPost.',
-        );
-      }
-      const localVarPath = `/dashboard/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'DashboardReadBody' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Update dashboard properties, auth group, folder, and owner by ID
-     * @summary Update dashboard by ID
-     * @param {UpdateDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardUpdatePost(body: UpdateDashboard, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardUpdatePost.',
-        );
-      }
-      const localVarPath = `/dashboard/update`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'UpdateDashboard' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Retrieve all dashboards with pagination and search
-     * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardsReadPost(
-      body: ReadPaginationFilter,
-      options: any = {},
-    ): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling dashboardsReadPost.',
-        );
-      }
-      const localVarPath = `/dashboards/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'ReadPaginationFilter' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     *
-     * @param {AgGridInput} [body]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getTableData(body?: AgGridInput, options: any = {}): FetchArgs {
-      const localVarPath = `/table/data/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'AgGridInput' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     *
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    menuPost(options: any = {}): FetchArgs {
-      const localVarPath = `/menu`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new table with properties and associated columns
-     * @summary Create a new table
-     * @param {NewTable} [body]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableCreatePost(body?: NewTable, options: any = {}): FetchArgs {
-      const localVarPath = `/table/create`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'NewTable' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Create a new row data, by using key/value pair for each column.
-     * @summary Create a new row
-     * @param {NewTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataCreatePost(body: NewTableRow, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling tableDataCreatePost.',
-        );
-      }
-      const localVarPath = `/table/data/create`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'NewTableRow' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Update a row data, by using key/value pair for each column.
-     * @summary Update a row
-     * @param {DeleteTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataDeletePost(body: DeleteTableRow, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling tableDataDeletePost.',
-        );
-      }
-      const localVarPath = `/table/data/delete`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'DeleteTableRow' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Update a row data, by using key/value pair for each column.
-     * @summary Update a row
-     * @param {UpdateTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataUpdatePost(body: UpdateTableRow, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling tableDataUpdatePost.',
-        );
-      }
-      const localVarPath = `/table/data/update`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'UpdateTableRow' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Delete a table by ID
-     * @summary Delete a table
-     * @param {DeleteTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDeletePost(body: DeleteTable, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling tableDeletePost.',
-        );
-      }
-      const localVarPath = `/table/delete`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'DeleteTable' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Get table by id
-     * @summary Get table by id
-     * @param {GetTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableReadPost(body: GetTable, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling tableReadPost.',
-        );
-      }
-      const localVarPath = `/table/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'GetTable' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Update table properties and associated columns by ID
-     * @summary Update table by ID
-     * @param {UpdateTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableUpdatePost(body: UpdateTable, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling tableUpdatePost.',
-        );
-      }
-      const localVarPath = `/table/update`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'UpdateTable' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Retrieve all tables with pagination and search
-     * @summary Get all tables
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tablesReadPost(body: ReadPaginationFilter, options: any = {}): FetchArgs {
-      // verify required parameter 'body' is not null or undefined
-      if (body === null || body === undefined) {
-        throw new RequiredError(
-          'body',
-          'Required parameter body was null or undefined when calling tablesReadPost.',
-        );
-      }
-      const localVarPath = `/tables/read`;
-      const localVarUrlObj = url.parse(localVarPath, true);
-      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication bearerAuth required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json';
-
-      localVarUrlObj.query = Object.assign(
-        {},
-        localVarUrlObj.query,
-        localVarQueryParameter,
-        options.query,
-      );
-      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
-      localVarRequestOptions.headers = Object.assign(
-        {},
-        localVarHeaderParameter,
-        options.headers,
-      );
-      const needsSerialization =
-        <any>'ReadPaginationFilter' !== 'string' ||
-        localVarRequestOptions.headers['Content-Type'] === 'application/json';
-      localVarRequestOptions.body = needsSerialization
-        ? JSON.stringify(body || {})
-        : body || '';
-
-      return {
-        url: url.format(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-  };
+export const DefaultApiFetchParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a new group with a name, parents, and symlinks
+         * @summary Create a new group
+         * @param {NewGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupCreatePost(body: NewGroup, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authGroupCreatePost.');
+            }
+            const localVarPath = `/auth/group/create`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"NewGroup" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a group by ID
+         * @summary Delete a group
+         * @param {DeleteGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupDeletePost(body: DeleteGroup, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authGroupDeletePost.');
+            }
+            const localVarPath = `/auth/group/delete`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"DeleteGroup" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve group by id
+         * @summary Get group by ID
+         * @param {GroupReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupReadPost(body: GroupReadBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authGroupReadPost.');
+            }
+            const localVarPath = `/auth/group/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"GroupReadBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update group details by ID
+         * @summary Update group by ID
+         * @param {UpdateGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupUpdatePost(body: UpdateGroup, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authGroupUpdatePost.');
+            }
+            const localVarPath = `/auth/group/update`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateGroup" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
+         * @summary Get all groups
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupsReadPost(body: ReadPaginationFilter, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authGroupsReadPost.');
+            }
+            const localVarPath = `/auth/groups/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"ReadPaginationFilter" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new user with a name and associated groups
+         * @summary Create a new user
+         * @param {NewUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserCreatePost(body: NewUser, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authUserCreatePost.');
+            }
+            const localVarPath = `/auth/user/create`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"NewUser" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a user by ID
+         * @summary Delete a user
+         * @param {DeleteUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserDeletePost(body: DeleteUser, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authUserDeletePost.');
+            }
+            const localVarPath = `/auth/user/delete`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"DeleteUser" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve user by ID
+         * @summary Get user by ID
+         * @param {UserReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserReadPost(body: UserReadBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authUserReadPost.');
+            }
+            const localVarPath = `/auth/user/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UserReadBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update user details by ID
+         * @summary Update user by ID
+         * @param {UpdateUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserUpdatePost(body: UpdateUser, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authUserUpdatePost.');
+            }
+            const localVarPath = `/auth/user/update`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateUser" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve all users
+         * @summary Get all users
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUsersReadPost(body: ReadPaginationFilter, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling authUsersReadPost.');
+            }
+            const localVarPath = `/auth/users/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"ReadPaginationFilter" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new dashboard with properties, auth group, folder, and owner
+         * @summary Create a new dashboard
+         * @param {NewDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardCreatePost(body: NewDashboard, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardCreatePost.');
+            }
+            const localVarPath = `/dashboard/create`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"NewDashboard" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a dashboard by ID
+         * @summary Delete a dashboard
+         * @param {DeleteDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardDeletePost(body: DeleteDashboard, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardDeletePost.');
+            }
+            const localVarPath = `/dashboard/delete`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"DeleteDashboard" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthCreateBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthCreatePost(body: AuthCreateBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardGroupAuthCreatePost.');
+            }
+            const localVarPath = `/dashboard/group/auth/create`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"AuthCreateBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Delete group from dashboard
+         * @param {AuthDeleteBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthDeletePost(body: AuthDeleteBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardGroupAuthDeletePost.');
+            }
+            const localVarPath = `/dashboard/group/auth/delete`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"AuthDeleteBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthReadPost(body: AuthReadBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardGroupAuthReadPost.');
+            }
+            const localVarPath = `/dashboard/group/auth/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"AuthReadBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthUpdateBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthUpdatePost(body: AuthUpdateBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardGroupAuthUpdatePost.');
+            }
+            const localVarPath = `/dashboard/group/auth/update`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"AuthUpdateBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve dashboard by id
+         * @summary Get dashboard by id
+         * @param {DashboardReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardReadPost(body: DashboardReadBody, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardReadPost.');
+            }
+            const localVarPath = `/dashboard/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"DashboardReadBody" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update dashboard properties, auth group, folder, and owner by ID
+         * @summary Update dashboard by ID
+         * @param {UpdateDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardUpdatePost(body: UpdateDashboard, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardUpdatePost.');
+            }
+            const localVarPath = `/dashboard/update`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateDashboard" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve all dashboards with pagination and search
+         * @summary Get all dashboards
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardsReadPost(body: ReadPaginationFilter, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling dashboardsReadPost.');
+            }
+            const localVarPath = `/dashboards/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"ReadPaginationFilter" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {AgGridInput} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTableData(body?: AgGridInput, options: any = {}): FetchArgs {
+            const localVarPath = `/table/data/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"AgGridInput" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        menuPost(options: any = {}): FetchArgs {
+            const localVarPath = `/menu`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new table with properties and associated columns
+         * @summary Create a new table
+         * @param {NewTable} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableCreatePost(body?: NewTable, options: any = {}): FetchArgs {
+            const localVarPath = `/table/create`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"NewTable" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new row data, by using key/value pair for each column.
+         * @summary Create a new row
+         * @param {NewTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataCreatePost(body: NewTableRow, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling tableDataCreatePost.');
+            }
+            const localVarPath = `/table/data/create`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"NewTableRow" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update a row data, by using key/value pair for each column.
+         * @summary Update a row
+         * @param {DeleteTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataDeletePost(body: DeleteTableRow, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling tableDataDeletePost.');
+            }
+            const localVarPath = `/table/data/delete`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"DeleteTableRow" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update a row data, by using key/value pair for each column.
+         * @summary Update a row
+         * @param {UpdateTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataUpdatePost(body: UpdateTableRow, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling tableDataUpdatePost.');
+            }
+            const localVarPath = `/table/data/update`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateTableRow" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a table by ID
+         * @summary Delete a table
+         * @param {DeleteTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDeletePost(body: DeleteTable, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling tableDeletePost.');
+            }
+            const localVarPath = `/table/delete`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"DeleteTable" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get table by id
+         * @summary Get table by id
+         * @param {GetTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableReadPost(body: GetTable, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling tableReadPost.');
+            }
+            const localVarPath = `/table/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"GetTable" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update table properties and associated columns by ID
+         * @summary Update table by ID
+         * @param {UpdateTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableUpdatePost(body: UpdateTable, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling tableUpdatePost.');
+            }
+            const localVarPath = `/table/update`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"UpdateTable" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve all tables with pagination and search
+         * @summary Get all tables
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tablesReadPost(body: ReadPaginationFilter, options: any = {}): FetchArgs {
+            // verify required parameter 'body' is not null or undefined
+            if (body === null || body === undefined) {
+                throw new RequiredError('body','Required parameter body was null or undefined when calling tablesReadPost.');
+            }
+            const localVarPath = `/tables/read`;
+            const localVarUrlObj = url.parse(localVarPath, true);
+            const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            localVarUrlObj.query = Object.assign({}, localVarUrlObj.query, localVarQueryParameter, options.query);
+            // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+            delete localVarUrlObj.search;
+            localVarRequestOptions.headers = Object.assign({}, localVarHeaderParameter, options.headers);
+            const needsSerialization = (<any>"ReadPaginationFilter" !== "string") || localVarRequestOptions.headers['Content-Type'] === 'application/json';
+            localVarRequestOptions.body =  needsSerialization ? JSON.stringify(body || {}) : (body || "");
+
+            return {
+                url: url.format(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
 };
 
 /**
  * DefaultApi - functional programming interface
  * @export
  */
-export const DefaultApiFp = function (configuration?: Configuration) {
-  return {
-    /**
-     * Create a new group with a name, parents, and symlinks
-     * @summary Create a new group
-     * @param {NewGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupCreatePost(
-      body: NewGroup,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<AuthGroup> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authGroupCreatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Delete a group by ID
-     * @summary Delete a group
-     * @param {DeleteGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupDeletePost(
-      body: DeleteGroup,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authGroupDeletePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Retrieve group by id
-     * @summary Get group by ID
-     * @param {GroupReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupReadPost(
-      body: GroupReadBody,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<AuthGroup> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authGroupReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Update group details by ID
-     * @summary Update group by ID
-     * @param {UpdateGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupUpdatePost(
-      body: UpdateGroup,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authGroupUpdatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
-     * @summary Get all groups
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupsReadPost(
-      body: ReadPaginationFilter,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse2001> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authGroupsReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new user with a name and associated groups
-     * @summary Create a new user
-     * @param {NewUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserCreatePost(
-      body: NewUser,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<User> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authUserCreatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Delete a user by ID
-     * @summary Delete a user
-     * @param {DeleteUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserDeletePost(
-      body: DeleteUser,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authUserDeletePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Retrieve user by ID
-     * @summary Get user by ID
-     * @param {UserReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserReadPost(
-      body: UserReadBody,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<User> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authUserReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Update user details by ID
-     * @summary Update user by ID
-     * @param {UpdateUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserUpdatePost(
-      body: UpdateUser,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authUserUpdatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Retrieve all users
-     * @summary Get all users
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersReadPost(
-      body: ReadPaginationFilter,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse2002> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).authUsersReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new dashboard with properties, auth group, folder, and owner
-     * @summary Create a new dashboard
-     * @param {NewDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardCreatePost(
-      body: NewDashboard,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Dashboard> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardCreatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Delete a dashboard by ID
-     * @summary Delete a dashboard
-     * @param {DeleteDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardDeletePost(
-      body: DeleteDashboard,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardDeletePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthCreateBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthCreatePost(
-      body: AuthCreateBody,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardAuthGroup> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardGroupAuthCreatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Delete group from dashboard
-     * @param {AuthDeleteBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthDeletePost(
-      body: AuthDeleteBody,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<AuthDeleteBody> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardGroupAuthDeletePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthReadPost(
-      body: AuthReadBody,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardAuthGroup> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardGroupAuthReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthUpdateBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthUpdatePost(
-      body: AuthUpdateBody,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardAuthGroup> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardGroupAuthUpdatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Retrieve dashboard by id
-     * @summary Get dashboard by id
-     * @param {DashboardReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardReadPost(
-      body: DashboardReadBody,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Dashboard> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Update dashboard properties, auth group, folder, and owner by ID
-     * @summary Update dashboard by ID
-     * @param {UpdateDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardUpdatePost(
-      body: UpdateDashboard,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardUpdatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Retrieve all dashboards with pagination and search
-     * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardsReadPost(
-      body: ReadPaginationFilter,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse200> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).dashboardsReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     *
-     * @param {AgGridInput} [body]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getTableData(
-      body?: AgGridInput,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<AgGridOutput> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).getTableData(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     *
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    menuPost(
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DataRoot> {
-      const localVarFetchArgs =
-        DefaultApiFetchParamCreator(configuration).menuPost(options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new table with properties and associated columns
-     * @summary Create a new table
-     * @param {NewTable} [body]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableCreatePost(
-      body?: NewTable,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Table> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tableCreatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Create a new row data, by using key/value pair for each column.
-     * @summary Create a new row
-     * @param {NewTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataCreatePost(
-      body: NewTableRow,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tableDataCreatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Update a row data, by using key/value pair for each column.
-     * @summary Update a row
-     * @param {DeleteTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataDeletePost(
-      body: DeleteTableRow,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tableDataDeletePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Update a row data, by using key/value pair for each column.
-     * @summary Update a row
-     * @param {UpdateTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataUpdatePost(
-      body: UpdateTableRow,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tableDataUpdatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Delete a table by ID
-     * @summary Delete a table
-     * @param {DeleteTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDeletePost(
-      body: DeleteTable,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tableDeletePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Get table by id
-     * @summary Get table by id
-     * @param {GetTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableReadPost(
-      body: GetTable,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Table> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tableReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Update table properties and associated columns by ID
-     * @summary Update table by ID
-     * @param {UpdateTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableUpdatePost(
-      body: UpdateTable,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tableUpdatePost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response;
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-    /**
-     * Retrieve all tables with pagination and search
-     * @summary Get all tables
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tablesReadPost(
-      body: ReadPaginationFilter,
-      options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<GetTablesResponse> {
-      const localVarFetchArgs = DefaultApiFetchParamCreator(
-        configuration,
-      ).tablesReadPost(body, options);
-      return (
-        fetch: FetchAPI = isomorphicFetch,
-        basePath: string = BASE_PATH,
-      ) => {
-        return fetch(
-          basePath + localVarFetchArgs.url,
-          localVarFetchArgs.options,
-        ).then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw response;
-          }
-        });
-      };
-    },
-  };
+export const DefaultApiFp = function(configuration?: Configuration) {
+    return {
+        /**
+         * Create a new group with a name, parents, and symlinks
+         * @summary Create a new group
+         * @param {NewGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupCreatePost(body: NewGroup, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AuthGroup> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authGroupCreatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Delete a group by ID
+         * @summary Delete a group
+         * @param {DeleteGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupDeletePost(body: DeleteGroup, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authGroupDeletePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Retrieve group by id
+         * @summary Get group by ID
+         * @param {GroupReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupReadPost(body: GroupReadBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AuthGroup> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authGroupReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Update group details by ID
+         * @summary Update group by ID
+         * @param {UpdateGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupUpdatePost(body: UpdateGroup, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authGroupUpdatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
+         * @summary Get all groups
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupsReadPost(body: ReadPaginationFilter, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<ReadGroupsRes> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authGroupsReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new user with a name and associated groups
+         * @summary Create a new user
+         * @param {NewUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserCreatePost(body: NewUser, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<User> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authUserCreatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Delete a user by ID
+         * @summary Delete a user
+         * @param {DeleteUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserDeletePost(body: DeleteUser, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authUserDeletePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Retrieve user by ID
+         * @summary Get user by ID
+         * @param {UserReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserReadPost(body: UserReadBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<User> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authUserReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Update user details by ID
+         * @summary Update user by ID
+         * @param {UpdateUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserUpdatePost(body: UpdateUser, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authUserUpdatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Retrieve all users
+         * @summary Get all users
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUsersReadPost(body: ReadPaginationFilter, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<ReadUsersRes> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).authUsersReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new dashboard with properties, auth group, folder, and owner
+         * @summary Create a new dashboard
+         * @param {NewDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardCreatePost(body: NewDashboard, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Dashboard> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardCreatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Delete a dashboard by ID
+         * @summary Delete a dashboard
+         * @param {DeleteDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardDeletePost(body: DeleteDashboard, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardDeletePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthCreateBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthCreatePost(body: AuthCreateBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardAuthGroup> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardGroupAuthCreatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Delete group from dashboard
+         * @param {AuthDeleteBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthDeletePost(body: AuthDeleteBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AuthDeleteBody> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardGroupAuthDeletePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthReadPost(body: AuthReadBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardAuthGroup> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardGroupAuthReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthUpdateBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthUpdatePost(body: AuthUpdateBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardAuthGroup> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardGroupAuthUpdatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Retrieve dashboard by id
+         * @summary Get dashboard by id
+         * @param {DashboardReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardReadPost(body: DashboardReadBody, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Dashboard> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Update dashboard properties, auth group, folder, and owner by ID
+         * @summary Update dashboard by ID
+         * @param {UpdateDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardUpdatePost(body: UpdateDashboard, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardUpdatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Retrieve all dashboards with pagination and search
+         * @summary Get all dashboards
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardsReadPost(body: ReadPaginationFilter, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<ReadDashboardsRes> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).dashboardsReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {AgGridInput} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTableData(body?: AgGridInput, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<AgGridOutput> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).getTableData(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        menuPost(options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<DataRoot> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).menuPost(options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new table with properties and associated columns
+         * @summary Create a new table
+         * @param {NewTable} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableCreatePost(body?: NewTable, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Table> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tableCreatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Create a new row data, by using key/value pair for each column.
+         * @summary Create a new row
+         * @param {NewTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataCreatePost(body: NewTableRow, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tableDataCreatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Update a row data, by using key/value pair for each column.
+         * @summary Update a row
+         * @param {DeleteTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataDeletePost(body: DeleteTableRow, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tableDataDeletePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Update a row data, by using key/value pair for each column.
+         * @summary Update a row
+         * @param {UpdateTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataUpdatePost(body: UpdateTableRow, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tableDataUpdatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Delete a table by ID
+         * @summary Delete a table
+         * @param {DeleteTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDeletePost(body: DeleteTable, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tableDeletePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Get table by id
+         * @summary Get table by id
+         * @param {GetTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableReadPost(body: GetTable, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Table> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tableReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Update table properties and associated columns by ID
+         * @summary Update table by ID
+         * @param {UpdateTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableUpdatePost(body: UpdateTable, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tableUpdatePost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response;
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+        /**
+         * Retrieve all tables with pagination and search
+         * @summary Get all tables
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tablesReadPost(body: ReadPaginationFilter, options?: any): (fetch?: FetchAPI, basePath?: string) => Promise<GetTablesResponse> {
+            const localVarFetchArgs = DefaultApiFetchParamCreator(configuration).tablesReadPost(body, options);
+            return (fetch: FetchAPI = isomorphicFetch, basePath: string = BASE_PATH) => {
+                return fetch(basePath + localVarFetchArgs.url, localVarFetchArgs.options).then((response) => {
+                    if (response.status >= 200 && response.status < 300) {
+                        return response.json();
+                    } else {
+                        throw response;
+                    }
+                });
+            };
+        },
+    }
 };
 
 /**
  * DefaultApi - factory interface
  * @export
  */
-export const DefaultApiFactory = function (
-  configuration?: Configuration,
-  fetch?: FetchAPI,
-  basePath?: string,
-) {
-  return {
-    /**
-     * Create a new group with a name, parents, and symlinks
-     * @summary Create a new group
-     * @param {NewGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupCreatePost(body: NewGroup, options?: any) {
-      return DefaultApiFp(configuration).authGroupCreatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Delete a group by ID
-     * @summary Delete a group
-     * @param {DeleteGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupDeletePost(body: DeleteGroup, options?: any) {
-      return DefaultApiFp(configuration).authGroupDeletePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Retrieve group by id
-     * @summary Get group by ID
-     * @param {GroupReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupReadPost(body: GroupReadBody, options?: any) {
-      return DefaultApiFp(configuration).authGroupReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Update group details by ID
-     * @summary Update group by ID
-     * @param {UpdateGroup} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupUpdatePost(body: UpdateGroup, options?: any) {
-      return DefaultApiFp(configuration).authGroupUpdatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
-     * @summary Get all groups
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authGroupsReadPost(body: ReadPaginationFilter, options?: any) {
-      return DefaultApiFp(configuration).authGroupsReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Create a new user with a name and associated groups
-     * @summary Create a new user
-     * @param {NewUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserCreatePost(body: NewUser, options?: any) {
-      return DefaultApiFp(configuration).authUserCreatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Delete a user by ID
-     * @summary Delete a user
-     * @param {DeleteUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserDeletePost(body: DeleteUser, options?: any) {
-      return DefaultApiFp(configuration).authUserDeletePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Retrieve user by ID
-     * @summary Get user by ID
-     * @param {UserReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserReadPost(body: UserReadBody, options?: any) {
-      return DefaultApiFp(configuration).authUserReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Update user details by ID
-     * @summary Update user by ID
-     * @param {UpdateUser} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUserUpdatePost(body: UpdateUser, options?: any) {
-      return DefaultApiFp(configuration).authUserUpdatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Retrieve all users
-     * @summary Get all users
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    authUsersReadPost(body: ReadPaginationFilter, options?: any) {
-      return DefaultApiFp(configuration).authUsersReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Create a new dashboard with properties, auth group, folder, and owner
-     * @summary Create a new dashboard
-     * @param {NewDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardCreatePost(body: NewDashboard, options?: any) {
-      return DefaultApiFp(configuration).dashboardCreatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Delete a dashboard by ID
-     * @summary Delete a dashboard
-     * @param {DeleteDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardDeletePost(body: DeleteDashboard, options?: any) {
-      return DefaultApiFp(configuration).dashboardDeletePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthCreateBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthCreatePost(body: AuthCreateBody, options?: any) {
-      return DefaultApiFp(configuration).dashboardGroupAuthCreatePost(
-        body,
-        options,
-      )(fetch, basePath);
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Delete group from dashboard
-     * @param {AuthDeleteBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthDeletePost(body: AuthDeleteBody, options?: any) {
-      return DefaultApiFp(configuration).dashboardGroupAuthDeletePost(
-        body,
-        options,
-      )(fetch, basePath);
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthReadPost(body: AuthReadBody, options?: any) {
-      return DefaultApiFp(configuration).dashboardGroupAuthReadPost(
-        body,
-        options,
-      )(fetch, basePath);
-    },
-    /**
-     * Create a new dashboard state with name and state information
-     * @summary Create a new dashboard state
-     * @param {AuthUpdateBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardGroupAuthUpdatePost(body: AuthUpdateBody, options?: any) {
-      return DefaultApiFp(configuration).dashboardGroupAuthUpdatePost(
-        body,
-        options,
-      )(fetch, basePath);
-    },
-    /**
-     * Retrieve dashboard by id
-     * @summary Get dashboard by id
-     * @param {DashboardReadBody} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardReadPost(body: DashboardReadBody, options?: any) {
-      return DefaultApiFp(configuration).dashboardReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Update dashboard properties, auth group, folder, and owner by ID
-     * @summary Update dashboard by ID
-     * @param {UpdateDashboard} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardUpdatePost(body: UpdateDashboard, options?: any) {
-      return DefaultApiFp(configuration).dashboardUpdatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Retrieve all dashboards with pagination and search
-     * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
-      return DefaultApiFp(configuration).dashboardsReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     *
-     * @param {AgGridInput} [body]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getTableData(body?: AgGridInput, options?: any) {
-      return DefaultApiFp(configuration).getTableData(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     *
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    menuPost(options?: any) {
-      return DefaultApiFp(configuration).menuPost(options)(fetch, basePath);
-    },
-    /**
-     * Create a new table with properties and associated columns
-     * @summary Create a new table
-     * @param {NewTable} [body]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableCreatePost(body?: NewTable, options?: any) {
-      return DefaultApiFp(configuration).tableCreatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Create a new row data, by using key/value pair for each column.
-     * @summary Create a new row
-     * @param {NewTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataCreatePost(body: NewTableRow, options?: any) {
-      return DefaultApiFp(configuration).tableDataCreatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Update a row data, by using key/value pair for each column.
-     * @summary Update a row
-     * @param {DeleteTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataDeletePost(body: DeleteTableRow, options?: any) {
-      return DefaultApiFp(configuration).tableDataDeletePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Update a row data, by using key/value pair for each column.
-     * @summary Update a row
-     * @param {UpdateTableRow} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDataUpdatePost(body: UpdateTableRow, options?: any) {
-      return DefaultApiFp(configuration).tableDataUpdatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Delete a table by ID
-     * @summary Delete a table
-     * @param {DeleteTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableDeletePost(body: DeleteTable, options?: any) {
-      return DefaultApiFp(configuration).tableDeletePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Get table by id
-     * @summary Get table by id
-     * @param {GetTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableReadPost(body: GetTable, options?: any) {
-      return DefaultApiFp(configuration).tableReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Update table properties and associated columns by ID
-     * @summary Update table by ID
-     * @param {UpdateTable} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tableUpdatePost(body: UpdateTable, options?: any) {
-      return DefaultApiFp(configuration).tableUpdatePost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-    /**
-     * Retrieve all tables with pagination and search
-     * @summary Get all tables
-     * @param {ReadPaginationFilter} body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    tablesReadPost(body: ReadPaginationFilter, options?: any) {
-      return DefaultApiFp(configuration).tablesReadPost(body, options)(
-        fetch,
-        basePath,
-      );
-    },
-  };
+export const DefaultApiFactory = function (configuration?: Configuration, fetch?: FetchAPI, basePath?: string) {
+    return {
+        /**
+         * Create a new group with a name, parents, and symlinks
+         * @summary Create a new group
+         * @param {NewGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupCreatePost(body: NewGroup, options?: any) {
+            return DefaultApiFp(configuration).authGroupCreatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Delete a group by ID
+         * @summary Delete a group
+         * @param {DeleteGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupDeletePost(body: DeleteGroup, options?: any) {
+            return DefaultApiFp(configuration).authGroupDeletePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Retrieve group by id
+         * @summary Get group by ID
+         * @param {GroupReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupReadPost(body: GroupReadBody, options?: any) {
+            return DefaultApiFp(configuration).authGroupReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * Update group details by ID
+         * @summary Update group by ID
+         * @param {UpdateGroup} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupUpdatePost(body: UpdateGroup, options?: any) {
+            return DefaultApiFp(configuration).authGroupUpdatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
+         * @summary Get all groups
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authGroupsReadPost(body: ReadPaginationFilter, options?: any) {
+            return DefaultApiFp(configuration).authGroupsReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * Create a new user with a name and associated groups
+         * @summary Create a new user
+         * @param {NewUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserCreatePost(body: NewUser, options?: any) {
+            return DefaultApiFp(configuration).authUserCreatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Delete a user by ID
+         * @summary Delete a user
+         * @param {DeleteUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserDeletePost(body: DeleteUser, options?: any) {
+            return DefaultApiFp(configuration).authUserDeletePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Retrieve user by ID
+         * @summary Get user by ID
+         * @param {UserReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserReadPost(body: UserReadBody, options?: any) {
+            return DefaultApiFp(configuration).authUserReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * Update user details by ID
+         * @summary Update user by ID
+         * @param {UpdateUser} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUserUpdatePost(body: UpdateUser, options?: any) {
+            return DefaultApiFp(configuration).authUserUpdatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Retrieve all users
+         * @summary Get all users
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        authUsersReadPost(body: ReadPaginationFilter, options?: any) {
+            return DefaultApiFp(configuration).authUsersReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * Create a new dashboard with properties, auth group, folder, and owner
+         * @summary Create a new dashboard
+         * @param {NewDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardCreatePost(body: NewDashboard, options?: any) {
+            return DefaultApiFp(configuration).dashboardCreatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Delete a dashboard by ID
+         * @summary Delete a dashboard
+         * @param {DeleteDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardDeletePost(body: DeleteDashboard, options?: any) {
+            return DefaultApiFp(configuration).dashboardDeletePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthCreateBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthCreatePost(body: AuthCreateBody, options?: any) {
+            return DefaultApiFp(configuration).dashboardGroupAuthCreatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Delete group from dashboard
+         * @param {AuthDeleteBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthDeletePost(body: AuthDeleteBody, options?: any) {
+            return DefaultApiFp(configuration).dashboardGroupAuthDeletePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthReadPost(body: AuthReadBody, options?: any) {
+            return DefaultApiFp(configuration).dashboardGroupAuthReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * Create a new dashboard state with name and state information
+         * @summary Create a new dashboard state
+         * @param {AuthUpdateBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardGroupAuthUpdatePost(body: AuthUpdateBody, options?: any) {
+            return DefaultApiFp(configuration).dashboardGroupAuthUpdatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Retrieve dashboard by id
+         * @summary Get dashboard by id
+         * @param {DashboardReadBody} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardReadPost(body: DashboardReadBody, options?: any) {
+            return DefaultApiFp(configuration).dashboardReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * Update dashboard properties, auth group, folder, and owner by ID
+         * @summary Update dashboard by ID
+         * @param {UpdateDashboard} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardUpdatePost(body: UpdateDashboard, options?: any) {
+            return DefaultApiFp(configuration).dashboardUpdatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Retrieve all dashboards with pagination and search
+         * @summary Get all dashboards
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
+            return DefaultApiFp(configuration).dashboardsReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {AgGridInput} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getTableData(body?: AgGridInput, options?: any) {
+            return DefaultApiFp(configuration).getTableData(body, options)(fetch, basePath);
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        menuPost(options?: any) {
+            return DefaultApiFp(configuration).menuPost(options)(fetch, basePath);
+        },
+        /**
+         * Create a new table with properties and associated columns
+         * @summary Create a new table
+         * @param {NewTable} [body] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableCreatePost(body?: NewTable, options?: any) {
+            return DefaultApiFp(configuration).tableCreatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Create a new row data, by using key/value pair for each column.
+         * @summary Create a new row
+         * @param {NewTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataCreatePost(body: NewTableRow, options?: any) {
+            return DefaultApiFp(configuration).tableDataCreatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Update a row data, by using key/value pair for each column.
+         * @summary Update a row
+         * @param {DeleteTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataDeletePost(body: DeleteTableRow, options?: any) {
+            return DefaultApiFp(configuration).tableDataDeletePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Update a row data, by using key/value pair for each column.
+         * @summary Update a row
+         * @param {UpdateTableRow} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDataUpdatePost(body: UpdateTableRow, options?: any) {
+            return DefaultApiFp(configuration).tableDataUpdatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Delete a table by ID
+         * @summary Delete a table
+         * @param {DeleteTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableDeletePost(body: DeleteTable, options?: any) {
+            return DefaultApiFp(configuration).tableDeletePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Get table by id
+         * @summary Get table by id
+         * @param {GetTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableReadPost(body: GetTable, options?: any) {
+            return DefaultApiFp(configuration).tableReadPost(body, options)(fetch, basePath);
+        },
+        /**
+         * Update table properties and associated columns by ID
+         * @summary Update table by ID
+         * @param {UpdateTable} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tableUpdatePost(body: UpdateTable, options?: any) {
+            return DefaultApiFp(configuration).tableUpdatePost(body, options)(fetch, basePath);
+        },
+        /**
+         * Retrieve all tables with pagination and search
+         * @summary Get all tables
+         * @param {ReadPaginationFilter} body 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tablesReadPost(body: ReadPaginationFilter, options?: any) {
+            return DefaultApiFp(configuration).tablesReadPost(body, options)(fetch, basePath);
+        },
+    };
 };
 
 /**
@@ -4026,435 +3100,349 @@ export const DefaultApiFactory = function (
  * @extends {BaseAPI}
  */
 export class DefaultApi extends BaseAPI {
-  /**
-   * Create a new group with a name, parents, and symlinks
-   * @summary Create a new group
-   * @param {NewGroup} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authGroupCreatePost(body: NewGroup, options?: any) {
-    return DefaultApiFp(this.configuration).authGroupCreatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Create a new group with a name, parents, and symlinks
+     * @summary Create a new group
+     * @param {NewGroup} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authGroupCreatePost(body: NewGroup, options?: any) {
+        return DefaultApiFp(this.configuration).authGroupCreatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Delete a group by ID
-   * @summary Delete a group
-   * @param {DeleteGroup} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authGroupDeletePost(body: DeleteGroup, options?: any) {
-    return DefaultApiFp(this.configuration).authGroupDeletePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Delete a group by ID
+     * @summary Delete a group
+     * @param {DeleteGroup} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authGroupDeletePost(body: DeleteGroup, options?: any) {
+        return DefaultApiFp(this.configuration).authGroupDeletePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Retrieve group by id
-   * @summary Get group by ID
-   * @param {GroupReadBody} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authGroupReadPost(body: GroupReadBody, options?: any) {
-    return DefaultApiFp(this.configuration).authGroupReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Retrieve group by id
+     * @summary Get group by ID
+     * @param {GroupReadBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authGroupReadPost(body: GroupReadBody, options?: any) {
+        return DefaultApiFp(this.configuration).authGroupReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Update group details by ID
-   * @summary Update group by ID
-   * @param {UpdateGroup} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authGroupUpdatePost(body: UpdateGroup, options?: any) {
-    return DefaultApiFp(this.configuration).authGroupUpdatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Update group details by ID
+     * @summary Update group by ID
+     * @param {UpdateGroup} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authGroupUpdatePost(body: UpdateGroup, options?: any) {
+        return DefaultApiFp(this.configuration).authGroupUpdatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
-   * @summary Get all groups
-   * @param {ReadPaginationFilter} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authGroupsReadPost(body: ReadPaginationFilter, options?: any) {
-    return DefaultApiFp(this.configuration).authGroupsReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
+     * @summary Get all groups
+     * @param {ReadPaginationFilter} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authGroupsReadPost(body: ReadPaginationFilter, options?: any) {
+        return DefaultApiFp(this.configuration).authGroupsReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new user with a name and associated groups
-   * @summary Create a new user
-   * @param {NewUser} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authUserCreatePost(body: NewUser, options?: any) {
-    return DefaultApiFp(this.configuration).authUserCreatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Create a new user with a name and associated groups
+     * @summary Create a new user
+     * @param {NewUser} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authUserCreatePost(body: NewUser, options?: any) {
+        return DefaultApiFp(this.configuration).authUserCreatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Delete a user by ID
-   * @summary Delete a user
-   * @param {DeleteUser} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authUserDeletePost(body: DeleteUser, options?: any) {
-    return DefaultApiFp(this.configuration).authUserDeletePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Delete a user by ID
+     * @summary Delete a user
+     * @param {DeleteUser} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authUserDeletePost(body: DeleteUser, options?: any) {
+        return DefaultApiFp(this.configuration).authUserDeletePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Retrieve user by ID
-   * @summary Get user by ID
-   * @param {UserReadBody} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authUserReadPost(body: UserReadBody, options?: any) {
-    return DefaultApiFp(this.configuration).authUserReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Retrieve user by ID
+     * @summary Get user by ID
+     * @param {UserReadBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authUserReadPost(body: UserReadBody, options?: any) {
+        return DefaultApiFp(this.configuration).authUserReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Update user details by ID
-   * @summary Update user by ID
-   * @param {UpdateUser} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authUserUpdatePost(body: UpdateUser, options?: any) {
-    return DefaultApiFp(this.configuration).authUserUpdatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Update user details by ID
+     * @summary Update user by ID
+     * @param {UpdateUser} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authUserUpdatePost(body: UpdateUser, options?: any) {
+        return DefaultApiFp(this.configuration).authUserUpdatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Retrieve all users
-   * @summary Get all users
-   * @param {ReadPaginationFilter} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public authUsersReadPost(body: ReadPaginationFilter, options?: any) {
-    return DefaultApiFp(this.configuration).authUsersReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Retrieve all users
+     * @summary Get all users
+     * @param {ReadPaginationFilter} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public authUsersReadPost(body: ReadPaginationFilter, options?: any) {
+        return DefaultApiFp(this.configuration).authUsersReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new dashboard with properties, auth group, folder, and owner
-   * @summary Create a new dashboard
-   * @param {NewDashboard} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardCreatePost(body: NewDashboard, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardCreatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Create a new dashboard with properties, auth group, folder, and owner
+     * @summary Create a new dashboard
+     * @param {NewDashboard} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardCreatePost(body: NewDashboard, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardCreatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Delete a dashboard by ID
-   * @summary Delete a dashboard
-   * @param {DeleteDashboard} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardDeletePost(body: DeleteDashboard, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardDeletePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Delete a dashboard by ID
+     * @summary Delete a dashboard
+     * @param {DeleteDashboard} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardDeletePost(body: DeleteDashboard, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardDeletePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new dashboard state with name and state information
-   * @summary Create a new dashboard state
-   * @param {AuthCreateBody} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardGroupAuthCreatePost(body: AuthCreateBody, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardGroupAuthCreatePost(
-      body,
-      options,
-    )(this.fetch, this.basePath);
-  }
+    /**
+     * Create a new dashboard state with name and state information
+     * @summary Create a new dashboard state
+     * @param {AuthCreateBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardGroupAuthCreatePost(body: AuthCreateBody, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardGroupAuthCreatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new dashboard state with name and state information
-   * @summary Delete group from dashboard
-   * @param {AuthDeleteBody} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardGroupAuthDeletePost(body: AuthDeleteBody, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardGroupAuthDeletePost(
-      body,
-      options,
-    )(this.fetch, this.basePath);
-  }
+    /**
+     * Create a new dashboard state with name and state information
+     * @summary Delete group from dashboard
+     * @param {AuthDeleteBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardGroupAuthDeletePost(body: AuthDeleteBody, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardGroupAuthDeletePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new dashboard state with name and state information
-   * @summary Create a new dashboard state
-   * @param {AuthReadBody} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardGroupAuthReadPost(body: AuthReadBody, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardGroupAuthReadPost(
-      body,
-      options,
-    )(this.fetch, this.basePath);
-  }
+    /**
+     * Create a new dashboard state with name and state information
+     * @summary Create a new dashboard state
+     * @param {AuthReadBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardGroupAuthReadPost(body: AuthReadBody, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardGroupAuthReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new dashboard state with name and state information
-   * @summary Create a new dashboard state
-   * @param {AuthUpdateBody} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardGroupAuthUpdatePost(body: AuthUpdateBody, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardGroupAuthUpdatePost(
-      body,
-      options,
-    )(this.fetch, this.basePath);
-  }
+    /**
+     * Create a new dashboard state with name and state information
+     * @summary Create a new dashboard state
+     * @param {AuthUpdateBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardGroupAuthUpdatePost(body: AuthUpdateBody, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardGroupAuthUpdatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Retrieve dashboard by id
-   * @summary Get dashboard by id
-   * @param {DashboardReadBody} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardReadPost(body: DashboardReadBody, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Retrieve dashboard by id
+     * @summary Get dashboard by id
+     * @param {DashboardReadBody} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardReadPost(body: DashboardReadBody, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Update dashboard properties, auth group, folder, and owner by ID
-   * @summary Update dashboard by ID
-   * @param {UpdateDashboard} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardUpdatePost(body: UpdateDashboard, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardUpdatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Update dashboard properties, auth group, folder, and owner by ID
+     * @summary Update dashboard by ID
+     * @param {UpdateDashboard} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardUpdatePost(body: UpdateDashboard, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardUpdatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Retrieve all dashboards with pagination and search
-   * @summary Get all dashboards
-   * @param {ReadPaginationFilter} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
-    return DefaultApiFp(this.configuration).dashboardsReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Retrieve all dashboards with pagination and search
+     * @summary Get all dashboards
+     * @param {ReadPaginationFilter} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
+        return DefaultApiFp(this.configuration).dashboardsReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   *
-   * @param {AgGridInput} [body]
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public getTableData(body?: AgGridInput, options?: any) {
-    return DefaultApiFp(this.configuration).getTableData(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * 
+     * @param {AgGridInput} [body] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public getTableData(body?: AgGridInput, options?: any) {
+        return DefaultApiFp(this.configuration).getTableData(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   *
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public menuPost(options?: any) {
-    return DefaultApiFp(this.configuration).menuPost(options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public menuPost(options?: any) {
+        return DefaultApiFp(this.configuration).menuPost(options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new table with properties and associated columns
-   * @summary Create a new table
-   * @param {NewTable} [body]
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tableCreatePost(body?: NewTable, options?: any) {
-    return DefaultApiFp(this.configuration).tableCreatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Create a new table with properties and associated columns
+     * @summary Create a new table
+     * @param {NewTable} [body] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tableCreatePost(body?: NewTable, options?: any) {
+        return DefaultApiFp(this.configuration).tableCreatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Create a new row data, by using key/value pair for each column.
-   * @summary Create a new row
-   * @param {NewTableRow} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tableDataCreatePost(body: NewTableRow, options?: any) {
-    return DefaultApiFp(this.configuration).tableDataCreatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Create a new row data, by using key/value pair for each column.
+     * @summary Create a new row
+     * @param {NewTableRow} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tableDataCreatePost(body: NewTableRow, options?: any) {
+        return DefaultApiFp(this.configuration).tableDataCreatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Update a row data, by using key/value pair for each column.
-   * @summary Update a row
-   * @param {DeleteTableRow} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tableDataDeletePost(body: DeleteTableRow, options?: any) {
-    return DefaultApiFp(this.configuration).tableDataDeletePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Update a row data, by using key/value pair for each column.
+     * @summary Update a row
+     * @param {DeleteTableRow} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tableDataDeletePost(body: DeleteTableRow, options?: any) {
+        return DefaultApiFp(this.configuration).tableDataDeletePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Update a row data, by using key/value pair for each column.
-   * @summary Update a row
-   * @param {UpdateTableRow} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tableDataUpdatePost(body: UpdateTableRow, options?: any) {
-    return DefaultApiFp(this.configuration).tableDataUpdatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Update a row data, by using key/value pair for each column.
+     * @summary Update a row
+     * @param {UpdateTableRow} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tableDataUpdatePost(body: UpdateTableRow, options?: any) {
+        return DefaultApiFp(this.configuration).tableDataUpdatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Delete a table by ID
-   * @summary Delete a table
-   * @param {DeleteTable} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tableDeletePost(body: DeleteTable, options?: any) {
-    return DefaultApiFp(this.configuration).tableDeletePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Delete a table by ID
+     * @summary Delete a table
+     * @param {DeleteTable} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tableDeletePost(body: DeleteTable, options?: any) {
+        return DefaultApiFp(this.configuration).tableDeletePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Get table by id
-   * @summary Get table by id
-   * @param {GetTable} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tableReadPost(body: GetTable, options?: any) {
-    return DefaultApiFp(this.configuration).tableReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Get table by id
+     * @summary Get table by id
+     * @param {GetTable} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tableReadPost(body: GetTable, options?: any) {
+        return DefaultApiFp(this.configuration).tableReadPost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Update table properties and associated columns by ID
-   * @summary Update table by ID
-   * @param {UpdateTable} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tableUpdatePost(body: UpdateTable, options?: any) {
-    return DefaultApiFp(this.configuration).tableUpdatePost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Update table properties and associated columns by ID
+     * @summary Update table by ID
+     * @param {UpdateTable} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tableUpdatePost(body: UpdateTable, options?: any) {
+        return DefaultApiFp(this.configuration).tableUpdatePost(body, options)(this.fetch, this.basePath);
+    }
 
-  /**
-   * Retrieve all tables with pagination and search
-   * @summary Get all tables
-   * @param {ReadPaginationFilter} body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DefaultApi
-   */
-  public tablesReadPost(body: ReadPaginationFilter, options?: any) {
-    return DefaultApiFp(this.configuration).tablesReadPost(body, options)(
-      this.fetch,
-      this.basePath,
-    );
-  }
+    /**
+     * Retrieve all tables with pagination and search
+     * @summary Get all tables
+     * @param {ReadPaginationFilter} body 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public tablesReadPost(body: ReadPaginationFilter, options?: any) {
+        return DefaultApiFp(this.configuration).tablesReadPost(body, options)(this.fetch, this.basePath);
+    }
+
 }

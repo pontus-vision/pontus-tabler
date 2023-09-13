@@ -22,12 +22,10 @@ import {
 import {
   AgGridInput,
   AgGridOutput,
-  Configuration,
-  DefaultApiFetchParamCreator,
   DeleteGroup,
   DeleteTableRow,
   GetTablesResponse,
-  Group,
+  AuthGroup,
   GroupReadBody,
   NewDashboard,
   NewGroup,
@@ -191,7 +189,7 @@ export const deleteDashboard = async (
 
 export const createAuthGroup = async (
   body: NewGroup,
-): Promise<AxiosResponse<Group> | undefined> => {
+): Promise<AxiosResponse<AuthGroup> | undefined> => {
   return post('/auth/group/create', body);
 };
 
@@ -203,7 +201,7 @@ export const readAuthGroups = async (
 
 export const readAuthGroup = async (
   body: GroupReadBody,
-): Promise<AxiosResponse<Group> | undefined> => {
+): Promise<AxiosResponse<AuthGroup> | undefined> => {
   return post('/auth/group/read', body);
 };
 
