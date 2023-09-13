@@ -37,7 +37,6 @@ import {
   ReadDashboardsRes,
   ReadGroupsRes,
   ReadPaginationFilter,
-  ReadPaginationFilter2,
   ReadUsersRes,
   Table,
   UpdateDashboard,
@@ -197,7 +196,7 @@ export const createAuthGroup = async (
 };
 
 export const readAuthGroups = async (
-  data: ReadPaginationFilter2,
+  data: ReadPaginationFilter,
 ): Promise<AxiosResponse<ReadGroupsRes> | undefined> => {
   return post('/auth/groups/read', data);
 };

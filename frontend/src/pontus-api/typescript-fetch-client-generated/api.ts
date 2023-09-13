@@ -342,6 +342,25 @@ export interface AuthDeleteBody {
 /**
  *
  * @export
+ * @interface AuthGroup
+ */
+export interface AuthGroup {
+  /**
+   * Unique identifier of the group
+   * @type {string}
+   * @memberof AuthGroup
+   */
+  groupId?: string;
+  /**
+   * Name of the group
+   * @type {string}
+   * @memberof AuthGroup
+   */
+  name?: string;
+}
+/**
+ *
+ * @export
  * @interface AuthGroups
  */
 export interface AuthGroups {
@@ -401,6 +420,43 @@ export interface AuthUpdateBody {
    * @memberof AuthUpdateBody
    */
   authGroups?: AuthGroups;
+}
+/**
+ *
+ * @export
+ * @interface Child
+ */
+export interface Child {
+  /**
+   *
+   * @type {string}
+   * @memberof Child
+   */
+  id?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Child
+   */
+  name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Child
+   */
+  type?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Child
+   */
+  path?: string;
+  /**
+   *
+   * @type {Array<Child>}
+   * @memberof Child
+   */
+  children?: Array<Child>;
 }
 /**
  *
@@ -511,6 +567,43 @@ export interface DashboardgroupauthcreateAuthGroups {
 /**
  *
  * @export
+ * @interface DataRoot
+ */
+export interface DataRoot {
+  /**
+   *
+   * @type {string}
+   * @memberof DataRoot
+   */
+  id?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DataRoot
+   */
+  name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DataRoot
+   */
+  type?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DataRoot
+   */
+  path?: string;
+  /**
+   *
+   * @type {Array<Child>}
+   * @memberof DataRoot
+   */
+  children?: Array<Child>;
+}
+/**
+ *
+ * @export
  * @interface DeleteDashboard
  */
 export interface DeleteDashboard {
@@ -546,25 +639,6 @@ export interface DeleteTable {
    * @memberof DeleteTable
    */
   tableId?: string;
-}
-/**
- *
- * @export
- * @interface DeleteTableColumn
- */
-export interface DeleteTableColumn {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableColumn
-   */
-  tableId?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableColumn
-   */
-  colId?: string;
 }
 /**
  *
@@ -630,6 +704,26 @@ export interface GetTablesResponse {
    */
   tables?: Array<Table>;
 }
+
+/**
+ *
+ * @export
+ * @interface ReadGroupsRes
+ */
+export interface ReadGroupsRes {
+  /**
+   *
+   * @type {number}
+   * @memberof ReadGroupsRes
+   */
+  totalGroups?: number;
+  /**
+   *
+   * @type {Array<Group>}
+   * @memberof ReadGroupsRes
+   */
+  authGroups?: Array<Group>;
+}
 /**
  *
  * @export
@@ -684,21 +778,21 @@ export interface ReadDashboardsRes {
 /**
  *
  * @export
- * @interface ReadGroupsRes
+ * @interface InlineResponse2001
  */
-export interface ReadGroupsRes {
+export interface InlineResponse2001 {
   /**
    *
    * @type {number}
-   * @memberof ReadGroupsRes
+   * @memberof InlineResponse2001
    */
   totalGroups?: number;
   /**
    *
-   * @type {Array<Group>}
-   * @memberof ReadGroupsRes
+   * @type {Array<AuthGroup>}
+   * @memberof InlineResponse2001
    */
-  authGroups?: Array<Group>;
+  authGroups?: Array<AuthGroup>;
 }
 /**
  *
@@ -722,21 +816,33 @@ export interface ReadUsersRes {
 /**
  *
  * @export
- * @interface ListAllTables
+ * @interface InlineResponse200Dashboards
  */
-export interface ListAllTables {
+export interface InlineResponse200Dashboards {
   /**
-   * Page number for pagination
-   * @type {number}
-   * @memberof ListAllTables
+   *
+   * @type {string}
+   * @memberof InlineResponse200Dashboards
    */
-  page?: number;
+  owner?: string;
   /**
-   * Number of items per page for pagination
-   * @type {number}
-   * @memberof ListAllTables
+   *
+   * @type {string}
+   * @memberof InlineResponse200Dashboards
    */
-  pageSize?: number;
+  folder?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof InlineResponse200Dashboards
+   */
+  name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof InlineResponse200Dashboards
+   */
+  id?: string;
 }
 /**
  *
@@ -816,49 +922,6 @@ export interface NewTable {
 /**
  *
  * @export
- * @interface NewTableColumn
- */
-export interface NewTableColumn {
-  /**
-   * ID of the table to which the column belongs
-   * @type {string}
-   * @memberof NewTableColumn
-   */
-  tableId?: string;
-  /**
-   * Name of the table column
-   * @type {string}
-   * @memberof NewTableColumn
-   */
-  name?: string;
-  /**
-   * Field name of the table column
-   * @type {string}
-   * @memberof NewTableColumn
-   */
-  field?: string;
-  /**
-   * Indicates if the table column is sortable
-   * @type {boolean}
-   * @memberof NewTableColumn
-   */
-  sortable?: boolean;
-  /**
-   * Header name of the table column
-   * @type {string}
-   * @memberof NewTableColumn
-   */
-  headerName?: string;
-  /**
-   * Indicates if the table column is filterable
-   * @type {boolean}
-   * @memberof NewTableColumn
-   */
-  filter?: boolean;
-}
-/**
- *
- * @export
  * @interface NewTableRow
  */
 export interface NewTableRow {
@@ -910,75 +973,6 @@ export interface NewUser {
 /**
  *
  * @export
- * @interface PaginationAndSearch
- */
-export interface PaginationAndSearch {
-  /**
-   * Page number for pagination
-   * @type {number}
-   * @memberof PaginationAndSearch
-   */
-  page?: number;
-  /**
-   * Number of items per page for pagination
-   * @type {number}
-   * @memberof PaginationAndSearch
-   */
-  pageSize?: number;
-  /**
-   * Search query to filter dashboards by name (optional)
-   * @type {string}
-   * @memberof PaginationAndSearch
-   */
-  searchQuery?: string;
-}
-/**
- *
- * @export
- * @interface ReadGroups
- */
-export interface ReadGroups {
-  /**
-   *
-   * @type {number}
-   * @memberof ReadGroups
-   */
-  from?: number;
-  /**
-   *
-   * @type {number}
-   * @memberof ReadGroups
-   */
-  to?: number;
-  /**
-   *
-   * @type {ReadGroupsFilters}
-   * @memberof ReadGroups
-   */
-  filters?: ReadGroupsFilters;
-}
-/**
- *
- * @export
- * @interface ReadGroupsFilters
- */
-export interface ReadGroupsFilters {
-  /**
-   *
-   * @type {string}
-   * @memberof ReadGroupsFilters
-   */
-  name?: string;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof ReadGroupsFilters
-   */
-  users?: Array<string>;
-}
-/**
- *
- * @export
  * @interface ReadPaginationFilter
  */
 export interface ReadPaginationFilter {
@@ -996,73 +990,10 @@ export interface ReadPaginationFilter {
   to?: number;
   /**
    *
-   * @type {Array<ReadPaginationFilterFilters>}
+   * @type {ReadPaginationFilterFilters}
    * @memberof ReadPaginationFilter
    */
-  filters?: Array<ReadPaginationFilterFilters> | null;
-}
-/**
- *
- * @export
- * @interface ReadPaginationFilter2
- */
-export interface ReadPaginationFilter2 {
-  /**
-   *
-   * @type {number}
-   * @memberof ReadPaginationFilter2
-   */
-  from?: number;
-  /**
-   *
-   * @type {number}
-   * @memberof ReadPaginationFilter2
-   */
-  to?: number;
-  /**
-   *
-   * @type {ReadPaginationFilter2Filters}
-   * @memberof ReadPaginationFilter2
-   */
-  filters?: ReadPaginationFilter2Filters;
-}
-/**
- *
- * @export
- * @interface ReadPaginationFilter2Filters
- */
-export interface ReadPaginationFilter2Filters {
-  /**
-   *
-   * @type {ReadPaginationFilterFilters}
-   * @memberof ReadPaginationFilter2Filters
-   */
-  colId?: ReadPaginationFilterFilters;
-}
-/**
- *
- * @export
- * @interface ReadPaginationFilterCondition1
- */
-export interface ReadPaginationFilterCondition1 {
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterCondition1
-   */
-  filter?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterCondition1
-   */
-  filterType?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterCondition1
-   */
-  type?: string;
+  filters?: ReadPaginationFilterFilters;
 }
 /**
  *
@@ -1072,109 +1003,66 @@ export interface ReadPaginationFilterCondition1 {
 export interface ReadPaginationFilterFilters {
   /**
    *
+   * @type {ReadPaginationFilterFiltersColId}
+   * @memberof ReadPaginationFilterFilters
+   */
+  colId?: ReadPaginationFilterFiltersColId;
+}
+/**
+ *
+ * @export
+ * @interface ReadPaginationFilterFiltersColId
+ */
+export interface ReadPaginationFilterFiltersColId {
+  /**
+   *
+   * @type {ReadPaginationFilterFiltersColIdCondition1}
+   * @memberof ReadPaginationFilterFiltersColId
+   */
+  condition1?: ReadPaginationFilterFiltersColIdCondition1;
+  /**
+   *
+   * @type {ReadPaginationFilterFiltersColIdCondition1}
+   * @memberof ReadPaginationFilterFiltersColId
+   */
+  condition2?: ReadPaginationFilterFiltersColIdCondition1;
+  /**
+   *
    * @type {string}
-   * @memberof ReadPaginationFilterFilters
-   */
-  colId?: string;
-  /**
-   *
-   * @type {ReadPaginationFilterCondition1}
-   * @memberof ReadPaginationFilterFilters
-   */
-  condition1?: ReadPaginationFilterCondition1;
-  /**
-   *
-   * @type {ReadPaginationFilterCondition1}
-   * @memberof ReadPaginationFilterFilters
-   */
-  condition2?: ReadPaginationFilterCondition1;
-  /**
-   *
-   * @type {string}
-   * @memberof ReadPaginationFilterFilters
+   * @memberof ReadPaginationFilterFiltersColId
    */
   filterType?: string;
   /**
    *
    * @type {string}
-   * @memberof ReadPaginationFilterFilters
+   * @memberof ReadPaginationFilterFiltersColId
    */
   operator?: string;
 }
 /**
  *
  * @export
- * @interface ReadTableColumn
+ * @interface ReadPaginationFilterFiltersColIdCondition1
  */
-export interface ReadTableColumn {
+export interface ReadPaginationFilterFiltersColIdCondition1 {
   /**
    *
    * @type {string}
-   * @memberof ReadTableColumn
+   * @memberof ReadPaginationFilterFiltersColIdCondition1
    */
-  tableId?: string;
-  /**
-   * Page number for pagination
-   * @type {number}
-   * @memberof ReadTableColumn
-   */
-  page?: number;
-  /**
-   * Number of items per page for pagination
-   * @type {number}
-   * @memberof ReadTableColumn
-   */
-  pageSize?: number;
-  /**
-   * Search query to filter dashboards by name (optional)
-   * @type {string}
-   * @memberof ReadTableColumn
-   */
-  searchQuery?: string;
-}
-/**
- *
- * @export
- * @interface ReadUsers
- */
-export interface ReadUsers {
-  /**
-   *
-   * @type {number}
-   * @memberof ReadUsers
-   */
-  from?: number;
-  /**
-   *
-   * @type {number}
-   * @memberof ReadUsers
-   */
-  to?: number;
-  /**
-   *
-   * @type {ReadUsersFilters}
-   * @memberof ReadUsers
-   */
-  filters?: ReadUsersFilters;
-}
-/**
- *
- * @export
- * @interface ReadUsersFilters
- */
-export interface ReadUsersFilters {
+  filter?: string;
   /**
    *
    * @type {string}
-   * @memberof ReadUsersFilters
+   * @memberof ReadPaginationFilterFiltersColIdCondition1
    */
-  name?: string;
+  filterType?: string;
   /**
    *
-   * @type {Array<string>}
-   * @memberof ReadUsersFilters
+   * @type {string}
+   * @memberof ReadPaginationFilterFiltersColIdCondition1
    */
-  authGroups?: Array<string>;
+  type?: string;
 }
 /**
  *
@@ -1336,55 +1224,6 @@ export interface UpdateTable {
    * @memberof UpdateTable
    */
   cols?: Array<TableColumn>;
-}
-/**
- *
- * @export
- * @interface UpdateTableColumn
- */
-export interface UpdateTableColumn {
-  /**
-   * ID of the table table to update
-   * @type {string}
-   * @memberof UpdateTableColumn
-   */
-  tableId?: string;
-  /**
-   * ID of the table column to update
-   * @type {string}
-   * @memberof UpdateTableColumn
-   */
-  columnId?: string;
-  /**
-   * Updated name of the table column
-   * @type {string}
-   * @memberof UpdateTableColumn
-   */
-  name?: string;
-  /**
-   * Updated field name of the table column
-   * @type {string}
-   * @memberof UpdateTableColumn
-   */
-  field?: string;
-  /**
-   * Updated value indicating if the table column is sortable
-   * @type {boolean}
-   * @memberof UpdateTableColumn
-   */
-  sortable?: boolean;
-  /**
-   * Updated header name of the table column
-   * @type {string}
-   * @memberof UpdateTableColumn
-   */
-  headerName?: string;
-  /**
-   * Updated value indicating if the table column is filterable
-   * @type {boolean}
-   * @memberof UpdateTableColumn
-   */
-  filter?: boolean;
 }
 /**
  *
@@ -1683,7 +1522,7 @@ export const DefaultApiFetchParamCreator = function (
       };
     },
     /**
-     * Retrieve all groups
+     * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
      * @summary Get all groups
      * @param {ReadPaginationFilter} body
      * @param {*} [options] Override http request option.
@@ -2403,12 +2242,12 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter2} body
+     * @param {ReadPaginationFilter} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     dashboardsReadPost(
-      body: ReadPaginationFilter2,
+      body: ReadPaginationFilter,
       options: any = {},
     ): FetchArgs {
       // verify required parameter 'body' is not null or undefined
@@ -2442,7 +2281,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'ReadPaginationFilter2' !== 'string' ||
+        <any>'ReadPaginationFilter' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2487,6 +2326,39 @@ export const DefaultApiFetchParamCreator = function (
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
         : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuPost(options: any = {}): FetchArgs {
+      const localVarPath = `/menu`;
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication bearerAuth required
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
 
       return {
         url: url.format(localVarUrlObj),
@@ -2905,7 +2777,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authGroupCreatePost(
       body: NewGroup,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Group> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<AuthGroup> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authGroupCreatePost(body, options);
@@ -2965,7 +2837,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authGroupReadPost(
       body: GroupReadBody,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<Group> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<AuthGroup> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authGroupReadPost(body, options);
@@ -3016,7 +2888,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
       };
     },
     /**
-     * Retrieve all groups
+     * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
      * @summary Get all groups
      * @param {ReadPaginationFilter} body
      * @param {*} [options] Override http request option.
@@ -3025,7 +2897,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authGroupsReadPost(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<ReadGroupsRes> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse2001> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authGroupsReadPost(body, options);
@@ -3175,7 +3047,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     authUsersReadPost(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<ReadUsersRes> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse2002> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).authUsersReadPost(body, options);
@@ -3438,14 +3310,14 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter2} body
+     * @param {ReadPaginationFilter} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     dashboardsReadPost(
-      body: ReadPaginationFilter2,
+      body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardReadBody> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse200> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).dashboardsReadPost(body, options);
@@ -3478,6 +3350,32 @@ export const DefaultApiFp = function (configuration?: Configuration) {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).getTableData(body, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     *
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuPost(
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<DataRoot> {
+      const localVarFetchArgs =
+        DefaultApiFetchParamCreator(configuration).menuPost(options);
       return (
         fetch: FetchAPI = isomorphicFetch,
         basePath: string = BASE_PATH,
@@ -3800,7 +3698,7 @@ export const DefaultApiFactory = function (
       );
     },
     /**
-     * Retrieve all groups
+     * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
      * @summary Get all groups
      * @param {ReadPaginationFilter} body
      * @param {*} [options] Override http request option.
@@ -3984,11 +3882,11 @@ export const DefaultApiFactory = function (
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter2} body
+     * @param {ReadPaginationFilter} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    dashboardsReadPost(body: ReadPaginationFilter2, options?: any) {
+    dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
       return DefaultApiFp(configuration).dashboardsReadPost(body, options)(
         fetch,
         basePath,
@@ -4005,6 +3903,14 @@ export const DefaultApiFactory = function (
         fetch,
         basePath,
       );
+    },
+    /**
+     *
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuPost(options?: any) {
+      return DefaultApiFp(configuration).menuPost(options)(fetch, basePath);
     },
     /**
      * Create a new table with properties and associated columns
@@ -4181,7 +4087,7 @@ export class DefaultApi extends BaseAPI {
   }
 
   /**
-   * Retrieve all groups
+   * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
    * @summary Get all groups
    * @param {ReadPaginationFilter} body
    * @param {*} [options] Override http request option.
@@ -4393,12 +4299,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Retrieve all dashboards with pagination and search
    * @summary Get all dashboards
-   * @param {ReadPaginationFilter2} body
+   * @param {ReadPaginationFilter} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public dashboardsReadPost(body: ReadPaginationFilter2, options?: any) {
+  public dashboardsReadPost(body: ReadPaginationFilter, options?: any) {
     return DefaultApiFp(this.configuration).dashboardsReadPost(body, options)(
       this.fetch,
       this.basePath,
@@ -4414,6 +4320,19 @@ export class DefaultApi extends BaseAPI {
    */
   public getTableData(body?: AgGridInput, options?: any) {
     return DefaultApiFp(this.configuration).getTableData(body, options)(
+      this.fetch,
+      this.basePath,
+    );
+  }
+
+  /**
+   *
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public menuPost(options?: any) {
+    return DefaultApiFp(this.configuration).menuPost(options)(
       this.fetch,
       this.basePath,
     );
