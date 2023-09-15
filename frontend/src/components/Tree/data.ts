@@ -7,6 +7,7 @@ const data = {
       id: 'dashboard1',
       name: '...',
       type: 'folder',
+      children: [],
     },
   ],
 };

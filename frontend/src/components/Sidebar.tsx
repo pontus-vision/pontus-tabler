@@ -11,6 +11,7 @@ import { setDashboardId } from '../store/sliceDashboards';
 import { useAuth } from '../AuthContext';
 import TreeView from './Tree/TreeView';
 import { readMenu } from '../client';
+import data from './Tree/data';
 
 type Props = {
   openedSidebar: boolean;
@@ -21,7 +22,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [data, setData] = useState<DataRoot>();
+  const [dashboardsData, setDashboardsData] = useState<DataRoot>(data);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -35,7 +36,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
       try {
         const res = await readMenu();
 
-        res && setData(res.data);
+        // res && setDashboardsData(res.data);
       } catch (error) {
         console.error(error);
       }
@@ -99,7 +100,9 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
 
   return (
     <div className={`top-12 ${openedSidebar ? 'active' : ''}` + ' sidebar'}>
-      <div className="w-5/6">{data && <TreeView data={data} />}</div>
+      <div className="w-5/6">
+        {dashboardsData && <TreeView data={dashboardsData} />}
+      </div>
       <ul className="list-none p-0 m-0">
         {deviceSize === 'sm' && (
           <li>
