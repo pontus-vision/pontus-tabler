@@ -7,11 +7,7 @@ import { useLocation, useParams } from 'react-router-dom';
 const UpdateUser = () => {
   const [userName, setUserName] = useState('');
   const [selectedGroups, setSelectedGroups] = useState([]);
-  const [groups, setGroups] = useState([
-    { value: 'groupA', label: 'Group A' },
-    { value: 'groupB', label: 'Group B' },
-    { value: 'groupC', label: 'Group C' },
-  ]);
+  const [groups, setGroups] = useState([{ value: 'groupA', label: '...' }]);
 
   const { t } = useTranslation();
   const { id } = useParams();
@@ -33,17 +29,11 @@ const UpdateUser = () => {
   };
 
   const updateUserData = async () => {
-    try {
-      const data = await updateUser({
-        authGroups: selectedGroups.map((el) => el.value),
-        name: userName,
-        userId: id,
-      });
-
-      return data;
-    } catch (error) {
-      console.error;
-    }
+    return updateUser({
+      authGroups: selectedGroups.map((el) => el.value),
+      name: userName,
+      userId: id,
+    });
   };
 
   useEffect(() => {
@@ -77,10 +67,6 @@ const UpdateUser = () => {
       }),
     );
   }, [location]);
-
-  useEffect(() => {
-    console.log({ groups });
-  }, [groups]);
 
   return (
     <div className="update-user__container">
