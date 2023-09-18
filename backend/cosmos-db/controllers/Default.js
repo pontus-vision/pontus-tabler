@@ -203,6 +203,16 @@ module.exports.getTableData = function getTableData (req, res, next, body) {
     });
 };
 
+module.exports.menuPOST = function menuPOST (req, res, next) {
+  Default.menuPOST()
+    .then(function (response) {
+      utils.writeJson(res, response);
+    })
+    .catch(function (response) {
+      utils.writeJson(res, response);
+    });
+};
+
 module.exports.tableCreatePOST = function tableCreatePOST (req, res, next, body) {
   Default.tableCreatePOST(body)
     .then(function (response) {

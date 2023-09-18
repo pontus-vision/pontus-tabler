@@ -6,7 +6,7 @@
  * Create a new group with a name, parents, and symlinks
  *
  * body NewGroup 
- * returns Group
+ * returns authGroup
  **/
 exports.authGroupCreatePOST = function(body) {
   return new Promise(function(resolve, reject) {
@@ -43,7 +43,7 @@ exports.authGroupDeletePOST = function(body) {
  * Retrieve group by id
  *
  * body Group_read_body 
- * returns Group
+ * returns authGroup
  **/
 exports.authGroupReadPOST = function(body) {
   return new Promise(function(resolve, reject) {
@@ -77,7 +77,7 @@ exports.authGroupUpdatePOST = function(body) {
 
 /**
  * Get all groups
- * Retrieve all groups
+ * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
  *
  * body ReadPaginationFilter 
  * returns inline_response_200_1
@@ -422,14 +422,12 @@ exports.dashboardsReadPOST = function(body) {
     "owner" : "owner",
     "folder" : "folder",
     "name" : "name",
-    "id" : "id",
-    "state" : { }
+    "id" : "id"
   }, {
     "owner" : "owner",
     "folder" : "folder",
     "name" : "name",
-    "id" : "id",
-    "state" : { }
+    "id" : "id"
   } ]
 };
     if (Object.keys(examples).length > 0) {
@@ -454,6 +452,41 @@ exports.getTableData = function(body) {
   "records" : [ "records", "records" ],
   "from" : 0,
   "to" : 6,
+  "type" : "type"
+};
+    if (Object.keys(examples).length > 0) {
+      resolve(examples[Object.keys(examples)[0]]);
+    } else {
+      resolve();
+    }
+  });
+}
+
+
+/**
+ *
+ * returns DataRoot
+ **/
+exports.menuPOST = function() {
+  return new Promise(function(resolve, reject) {
+    var examples = {};
+    examples['application/json'] = {
+  "path" : "path",
+  "children" : [ {
+    "path" : "path",
+    "children" : [ null, null ],
+    "name" : "name",
+    "id" : "id",
+    "type" : "type"
+  }, {
+    "path" : "path",
+    "children" : [ null, null ],
+    "name" : "name",
+    "id" : "id",
+    "type" : "type"
+  } ],
+  "name" : "name",
+  "id" : "id",
   "type" : "type"
 };
     if (Object.keys(examples).length > 0) {
@@ -521,7 +554,7 @@ exports.tableDataCreatePOST = function(body) {
  * Update a row
  * Update a row data, by using key/value pair for each column.
  *
- * body UpdateTableRow 
+ * body DeleteTableRow 
  * no response value expected for this operation
  **/
 exports.tableDataDeletePOST = function(body) {

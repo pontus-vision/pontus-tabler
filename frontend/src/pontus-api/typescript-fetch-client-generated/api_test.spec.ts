@@ -147,6 +147,9 @@ describe("DefaultApi", () => {
 }
     return expect(instance.getTableData(body, {})).resolves.toBe(null)
   })
+  test("menuPost", () => {
+    return expect(instance.menuPost({})).resolves.toBe(null)
+  })
   test("tableCreatePost", () => {
     const body: api.NewTable = {
   "value" : {
@@ -183,7 +186,7 @@ describe("DefaultApi", () => {
     return expect(instance.tableDataCreatePost(body, {})).resolves.toBe(null)
   })
   test("tableDataDeletePost", () => {
-    const body: api.UpdateTableRow = {
+    const body: api.DeleteTableRow = {
   "value" : {
     "tableId" : "mapeamentoDeProcessos",
     "rowId" : 15

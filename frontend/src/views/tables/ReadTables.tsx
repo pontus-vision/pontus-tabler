@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import PVFlexLayout from '../../../pv-react/PVFlexLayout';
-import PVGridWebiny2 from '../../../pv-react/PVGridWebiny2';
+import PVFlexLayout from '../../pv-react/PVFlexLayout';
+import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
 import {
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
-} from '../../../pontus-api/typescript-fetch-client-generated';
-import { getTables } from '../../../client';
+  Table,
+  User,
+} from '../../pontus-api/typescript-fetch-client-generated';
+import { getTables } from '../../client';
 import { ColDef } from 'ag-grid-community';
+import { useNavigate } from 'react-router-dom';
 
 const TablesReadView = () => {
   const [cols, setCols] = useState<ColDef[]>([
@@ -18,6 +21,10 @@ const TablesReadView = () => {
   const [from, setFrom] = useState<number>();
   const [to, setTo] = useState<number>();
   const [totalCount, setTotalCount] = useState<number>();
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [deletion, setDeletion] = useState(false);
+  const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<User[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTables = async () => {
@@ -27,6 +34,7 @@ const TablesReadView = () => {
         return {
           table: table.name,
           cols: table.cols?.map((col) => col.name).join(', '),
+          tableId: table.tableId,
         };
       });
       console.log({ data });
@@ -41,15 +49,29 @@ const TablesReadView = () => {
     console.log({ filters });
   }, [filters]);
 
+  const handleUpdate = (data: Table) => {
+    navigate('/table/update/' + data.tableId, { state: data });
+  };
+
+  useEffect(() => {
+    console.log({ entriesToBeDeleted, deleteMode, deletion });
+  }, [entriesToBeDeleted, deleteMode, deletion]);
+
   if (!totalCount) return;
 
   return (
-    <PVGridWebiny2
-      setFilters={setFilters}
-      totalCount={totalCount}
-      cols={cols}
-      rows={rows}
-    />
+    <div className="read-tables__container">
+      <PVGridWebiny2
+        onUpdate={handleUpdate}
+        setFilters={setFilters}
+        totalCount={totalCount}
+        cols={cols}
+        setEntriesToBeDeleted={setEntriesToBeDeleted}
+        deleteMode={deleteMode}
+        setDeletion={setDeletion}
+        rows={rows}
+      />
+    </div>
   );
 };
 

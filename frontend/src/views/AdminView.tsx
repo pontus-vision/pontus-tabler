@@ -55,7 +55,7 @@ const AdminView = () => {
   }, [gridState]);
 
   return (
-    <AdminViewStyles>
+    <div className="admin-view__container">
       {
         <>
           <CmpPanel setSelectedCmp={setSelectedCmp} />
@@ -71,36 +71,8 @@ const AdminView = () => {
           </button>
         </>
       }
-    </AdminViewStyles>
+    </div>
   );
 };
-
-const AdminViewStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding-top: 2rem;
-  gap: 1rem;
-  height: 92%;
-  width: 100%;
-
-  .shadow {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    background-color: #0000004b;
-  }
-
-  .layout {
-    position: relative;
-    top: 0rem;
-    height: 30rem;
-    width: 90%;
-  }
-`;
 
 export default AdminView;

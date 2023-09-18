@@ -1,0 +1,13 @@
+.auth-groups-read {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  margin-inline: auto;
+  &__grid {
+    width: 90%;
+    position: relative;
+    box-shadow: 0 0 3px black;
+    top: 10rem;
+  }
+}
