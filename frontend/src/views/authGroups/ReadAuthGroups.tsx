@@ -41,15 +41,6 @@ const ReadAuthGroups = () => {
           from,
           to,
         });
-        console.log(
-          res,
-          res?.data.authGroups?.map((authGroup) => {
-            return {
-              headerClass: authGroup.name,
-              field: authGroup.groupId,
-            };
-          }),
-        );
 
         setRows(res?.data.authGroups || []);
         setTotalCount(res?.data.totalGroups || 2);
@@ -78,7 +69,6 @@ const ReadAuthGroups = () => {
   };
 
   const handleUpdate = (group) => {
-    console.log(group);
     navigate('/auth/group/update/' + group.groupId);
   };
 

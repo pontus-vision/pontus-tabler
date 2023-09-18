@@ -124,8 +124,6 @@ const PVGridWebiny2 = ({
 
           const filter = params.filterModel;
 
-          console.log(filter);
-
           let sorting;
 
           if (params.sortModel.length > 0) {

@@ -16,8 +16,6 @@ const CreateAuthGroup = () => {
         parents: body?.parents?.map((parent) => parent.value),
         symlinks: body?.symlinks?.map((symlink) => symlink.value),
       });
-
-      console.log(res, body);
     } catch (error) {
       console.error(error);
     }
