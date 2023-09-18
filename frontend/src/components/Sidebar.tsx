@@ -6,9 +6,12 @@ import styled from 'styled-components';
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';
-import { Dashboard } from '../types';
+import { Dashboard, DataRoot } from '../types';
 import { setDashboardId } from '../store/sliceDashboards';
 import { useAuth } from '../AuthContext';
+import TreeView from './Tree/TreeView';
+import { readMenu } from '../client';
+import data from './Tree/data';
 
 type Props = {
   openedSidebar: boolean;
@@ -19,6 +22,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const [dashboardsData, setDashboardsData] = useState<DataRoot>(data);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -28,8 +32,18 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
-    console.log({ dashboards });
-  }, [dashboards]);
+    const fetchMenu = async () => {
+      try {
+        const res = await readMenu();
+
+        // res && setDashboardsData(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchMenu();
+  }, []);
 
   const handleLanguageChange = (event) => {
     const selectedLanguage = event.target.value;
@@ -86,6 +100,9 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
 
   return (
     <div className={`top-12 ${openedSidebar ? 'active' : ''}` + ' sidebar'}>
+      <div className="w-5/6">
+        {dashboardsData && <TreeView data={dashboardsData} />}
+      </div>
       <ul className="list-none p-0 m-0">
         {deviceSize === 'sm' && (
           <li>
@@ -101,7 +118,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         )}
         <li>
           <button
-            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors hover:bg-blue-500 hover:text-white"
+            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
             onClick={() => logout()}
           >
             Logout
@@ -109,7 +126,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         </li>
         <li>
           <button
-            className="sidebar__admin-btn px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors hover:bg-blue-500 hover:text-white"
+            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
             type="button"
             onClick={() => onClickNavigate('/admin')}
           >
@@ -118,13 +135,8 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         </li>
         <li>
           <Link to="/table/create">
-            <button className="bg-blue-600">Nova Entrada</button>
+            <button className="">Nova Entrada</button>
           </Link>
-        </li>
-        <li>
-          <button className="block uppercase text-blue-500 mx-auto shadow bg-slate-50 hover:bg-blue-500 focus:shadow-outline focus:outline-none text-white text-xs py-3 px-10 rounded">
-            Sign in
-          </button>
         </li>
       </ul>
 

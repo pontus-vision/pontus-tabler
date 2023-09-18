@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@minoru/react-dnd-treeview": "^3.4.4",
+    "react-dnd": "^16.0.1"
+  }
+}
