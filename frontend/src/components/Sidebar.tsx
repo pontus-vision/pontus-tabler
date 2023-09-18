@@ -99,15 +99,15 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   }, [deviceSize]);
 
   return (
-    <div className={`top-12 ${openedSidebar ? 'active' : ''}` + ' sidebar'}>
-      <div className="w-5/6">
+    <div className={`${openedSidebar ? 'active' : ''} sidebar`}>
+      <div className="sidebar-content">
         {dashboardsData && <TreeView data={dashboardsData} />}
       </div>
       <ul className="list-none p-0 m-0">
         {deviceSize === 'sm' && (
           <li>
             <Form.Select
-              className="sidebar__language-selector"
+              className="sidebar-language-selector"
               defaultValue="en"
               onChange={handleLanguageChange}
             >
@@ -117,16 +117,13 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           </li>
         )}
         <li>
-          <button
-            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
-            onClick={() => logout()}
-          >
+          <button className="sidebar-button" onClick={() => logout()}>
             Logout
           </button>
         </li>
         <li>
           <button
-            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
+            className="sidebar-button"
             type="button"
             onClick={() => onClickNavigate('/admin')}
           >
@@ -135,7 +132,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
         </li>
         <li>
           <Link to="/table/create">
-            <button className="">Nova Entrada</button>
+            <button className="sidebar-button">Nova Entrada</button>
           </Link>
         </li>
       </ul>
@@ -148,6 +145,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
               dispatch(setDashboardId({ id: dashboard.id }));
             }}
             key={dashboard.id}
+            className="sidebar-label"
           >
             {dashboard.name}
           </label>
