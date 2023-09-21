@@ -35,6 +35,12 @@ type Props = {
   setIsEditing?: Dispatch<React.SetStateAction<boolean>>;
   dashboardId?: string;
   setGridState?: Dispatch<SetStateAction<IJsonModel | undefined>>;
+  permissions?: {
+    updateAction: boolean;
+    createAction: boolean;
+    deleteAction: boolean;
+    readAction: boolean;
+  };
 };
 
 const PVFlexLayout = ({
@@ -45,6 +51,7 @@ const PVFlexLayout = ({
   dashboardId,
   setDeletion,
   deletion,
+  permissions,
 }: Props) => {
   const initialJson: IJsonModel = {
     global: {},
@@ -170,6 +177,7 @@ const PVFlexLayout = ({
               key={gridKey}
               id={id}
               cols={cols}
+              permissions={permissions}
               totalCount={totalCount}
               setDeletion={setDeletion}
               rows={rows}
