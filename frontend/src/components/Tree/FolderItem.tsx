@@ -10,7 +10,7 @@ export type Folder = {
   children: Array<Folder | File>;
 };
 
-type File = {
+export type File = {
   id: string;
   name: string;
   type: string;
@@ -20,9 +20,14 @@ type FolderItemProps = {
   folder: Child | DataRoot;
   onSelect?: (folderId: DataRoot | Child) => void;
   selected?: string;
-  onDragStart?: (event: React.DragEvent<HTMLDivElement>, index: number, item: Child | DataRoot) => void;
+  onDragStart?: (
+    event: React.DragEvent<HTMLDivElement>,
+    index: number,
+    item: Child | DataRoot,
+  ) => void;
   index?: number;
-  path?: string
+  path?: string;
+  actionsMode: boolean;
 };
 
 const FolderItem = ({
@@ -31,30 +36,31 @@ const FolderItem = ({
   selected,
   onDragStart,
   index,
-  path 
+  path,
+  actionsMode,
 }: FolderItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(folder.name);
   const [contextMenu, setContextMenu] = useState(null); // Track context menu state
   const [selectedItem, setSelectedItem] = useState();
-  const [currentPath, setCurrentPath] = useState(path + "/" + folder.id)
-  
- 
+  const [currentPath, setCurrentPath] = useState(path + '/' + folder.id);
+
   const toggleFolder = () => {
     setIsOpen(!isOpen);
   };
 
   const handleSelect = () => {
     toggleFolder();
-    onSelect && onSelect({...folder, path: path || "/"});
+    onSelect && onSelect({ ...folder, path: path || '/' });
   };
 
   const handleEdit = () => {
+    if (!actionsMode) return;
     setIsEditing(true);
   };
 
-  const handleEditInputChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditedName(e.target.value);
   };
 
@@ -65,6 +71,7 @@ const FolderItem = ({
   };
 
   const handleContextMenu = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    if (!actionsMode) return;
     e.preventDefault();
     setContextMenu({
       x: e.clientX,
@@ -102,21 +109,20 @@ const FolderItem = ({
       window.removeEventListener('click', handleWindowClick);
     };
   }, []);
-  useEffect(()=>{
-    console.log(selected === folder.path, {selected, path})
-  },[selected])
+  useEffect(() => {
+    console.log(selected === folder.path, { selected, path });
+  }, [selected]);
 
-  
   return (
     <div
       className={'mb-2 '}
       onBlur={() => setContextMenu(null)}
+      actionsMode={actionsMode}
       onContextMenu={handleContextMenu}
       onDragStart={(e) => {
         onSelect && onSelect(folder);
         onDragStart && onDragStart(e, index || 0, folder);
       }}
-      
       draggable
     >
       {isEditing ? (
@@ -128,9 +134,11 @@ const FolderItem = ({
         />
       ) : (
         <span
-          className={`cursor-pointer ${selected === path ? 'text-blue-500' : ''}`}
+          className={`cursor-pointer ${
+            selected === path ? 'text-blue-500' : ''
+          }`}
           onClick={onSelect ? handleSelect : toggleFolder}
-          onDragStart={() => console.log("Dragging")}
+          onDragStart={() => console.log('Dragging')}
           onDoubleClick={handleEdit}
         >
           {isOpen ? '📂' : '📁'} {folder.name}
@@ -147,12 +155,17 @@ const FolderItem = ({
                   folder={child}
                   onSelect={onSelect}
                   selected={selected}
-                  path={`${!!path ? path : ""}/${child.name}`}
+                  path={`${!!path ? path : ''}/${child.name}`}
+                  actionsMode={actionsMode}
                 />
               ) : (
-                <FileItem file={child} onSelect={onSelect}
-                  selected={selected || ""}
-                  path={`${!!path ? path : ""}/${child.name}`}  />
+                <FileItem
+                  file={child}
+                  onSelect={onSelect}
+                  selected={selected || ''}
+                  path={`${!!path ? path : ''}/${child.name}`}
+                  actionsMode={actionsMode}
+                />
               )}
             </li>
           ))}
