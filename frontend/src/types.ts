@@ -62,20 +62,21 @@ export interface Meta {
 //   settings: null;
 //   __typename: string;
 // }
+
 export interface DataRoot {
-    id:       string;
-    name:     string;
-    type:     string;
-    path:     string;
-    children: Child[];
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  path: string;
+  children: Child[];
 }
 
 export interface Child {
-    id:        string;
-    name:      string;
-    type:      string;
-    path:       string;
-    children?: Child[];
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  path: string;
+  children?: Child[];
 }
 
 export interface Renderer {
