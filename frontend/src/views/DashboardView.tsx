@@ -140,54 +140,36 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
 
   useEffect(() => {
     const groupPermissions = async (dashboardId: string) => {
-      // const res = await readDashboardGroupAuth(dashboardId);
-      // const dashboardPermissions = res?.data.authGroups;
-      // const res2 = await readUser({ userId: 'user1' });
-      // const userGroups = res2?.data.authGroups;
+      const res = await readDashboardGroupAuth(dashboardId);
+      const dashboardPermissions = res?.data.authGroups;
+      const res2 = await readUser({ userId: 'user1' });
+      const userGroups = res2?.data.authGroups;
 
-      // const del = dashboardPermissions?.delete?.some((dashboard) =>
-      //   userGroups?.some((group) => group === dashboard),
-      // );
-      // const updt = dashboardPermissions?.update?.some((dashboard) =>
-      //   userGroups?.some((group) => group === dashboard),
-      // );
-      // const create = dashboardPermissions?.create?.some((dashboard) =>
-      //   userGroups?.some((group) => group === dashboard),
-      // );
-      // const read = dashboardPermissions?.read?.some((dashboard) =>
-      //   userGroups?.some((group) => group === dashboard),
-      // );
-
-      // del && setDeleteAction(del);
-      // create && setCreateAction(create);
-      // read && setReadAction(read);
-      // updt && setUpdateAction(updt);
-      // console.log(dashboardPermissions?.delete, {
-      //   userGroups,
-      //   res2,
-      //   del,
-      //   create,
-      //   read,
-      //   updt,
-      // });
-
-      const createArr = ['group 1'];
-      const readArr = ['group 1', 'group 2'];
-      const updateArr = ['group 1'];
-      const deleteArr = ['group 1'];
-
-      const userGroup = ['group 1'];
-
-      setReadAction(readArr.some((el) => userGroup.some((el2) => el === el2)));
-      setCreateAction(
-        createArr.some((el) => userGroup.some((el2) => el === el2)),
+      const del = dashboardPermissions?.delete?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
       );
-      setUpdateAction(
-        updateArr.some((el) => userGroup.some((el2) => el === el2)),
+      const updt = dashboardPermissions?.update?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
       );
-      setDeleteAction(
-        deleteArr.some((el) => userGroup.some((el2) => el === el2)),
+      const create = dashboardPermissions?.create?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
       );
+      const read = dashboardPermissions?.read?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
+      );
+
+      del && setDeleteAction(del);
+      create && setCreateAction(create);
+      read && setReadAction(read);
+      updt && setUpdateAction(updt);
+      console.log(dashboardPermissions?.delete, {
+        userGroups,
+        res2,
+        del,
+        create,
+        read,
+        updt,
+      });
     };
     console.log(id);
     id && groupPermissions(id);
