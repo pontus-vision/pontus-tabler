@@ -102,6 +102,10 @@ const Dashboards = () => {
     navigate(`/dashboard/${rowClicked.id}`);
   };
 
+  const handleAddition = () => {
+    navigate('/dashboard/create');
+  };
+
   useEffect(() => {
     setDashboard();
   }, [rowClicked]);
@@ -115,6 +119,7 @@ const Dashboards = () => {
             totalCount={totalCount}
             // setDeletion={set}
             rows={rows}
+            add={handleAddition}
             cols={cols}
             setFilters={setFilters}
             setFrom={setFrom}

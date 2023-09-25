@@ -17,6 +17,12 @@ type Props = {
   setUpdateMode: Dispatch<React.SetStateAction<boolean>>;
   configTableId: string;
   add: () => void;
+  permissions?: {
+    updateAction: boolean;
+    createAction: boolean;
+    deleteAction: boolean;
+    readAction: boolean;
+  };
   entriesToBeDeleted: string[] | undefined;
 };
 
@@ -36,6 +42,7 @@ const GridActionsPanel = ({
   setUpdateMode,
   configTableId,
   entriesToBeDeleted,
+  permissions,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
@@ -43,6 +50,10 @@ const GridActionsPanel = ({
   var windowWidth = window.innerWidth;
 
   const burguerMenu = useRef(null);
+
+  useEffect(() => {
+    console.log({ permissions });
+  }, []);
 
   const changeBurguerMenuValue = (value: boolean, display?: string) => {
     burguerMenu.current.checked = value;
@@ -181,33 +192,35 @@ const GridActionsPanel = ({
 
   return (
     <div className="grid-actions-panel">
-      {deleteMode || updateMode || (
-        <label
-          className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
-          // style={{
-          //   display: 'flex',
-          //   alignItems: 'center',
-          //   padding: 0,
-          //   cursor: 'pointer',
-          //   height: '2rem',
-          //   fontSize: '4rem',
-          //   left: '8rem',
-          // }}
-          onClick={() => {
-            setFlexModelId && setFlexModelId(id);
-            setOpenNewEntryView && setOpenNewEntryView(true);
-            setModelId &&
-              setModelId((prevState) =>
-                updateModelId
-                  ? (prevState = updateModelId)
-                  : (prevState = configTableId),
-              );
-            add();
-          }}
-        >
-          +
-        </label>
-      )}
+      {deleteMode ||
+        updateMode ||
+        (permissions?.createAction && (
+          <label
+            className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
+            // style={{
+            //   display: 'flex',
+            //   alignItems: 'center',
+            //   padding: 0,
+            //   cursor: 'pointer',
+            //   height: '2rem',
+            //   fontSize: '4rem',
+            //   left: '8rem',
+            // }}
+            onClick={() => {
+              setFlexModelId && setFlexModelId(id);
+              setOpenNewEntryView && setOpenNewEntryView(true);
+              setModelId &&
+                setModelId((prevState) =>
+                  updateModelId
+                    ? (prevState = updateModelId)
+                    : (prevState = configTableId),
+                );
+              add();
+            }}
+          >
+            +
+          </label>
+        ))}
       {updateMode || deleteMode || (
         <button
           className="grid-actions-panel__restore-btn"
@@ -228,26 +241,30 @@ const GridActionsPanel = ({
           Select Columns
         </button>
       )}
-      {updateMode || deleteMode || (
-        <button
-          className="grid-actions-panel__delete-btn"
-          onClick={() => {
-            setDeleteMode(true);
-          }}
-        >
-          Delete Mode
-        </button>
-      )}
-      {updateMode || deleteMode || (
-        <button
-          className="grid-actions-panel__update-btn"
-          onClick={() => {
-            setUpdateMode(!updateMode);
-          }}
-        >
-          Update Mode
-        </button>
-      )}
+      {updateMode ||
+        deleteMode ||
+        (permissions?.deleteAction && (
+          <button
+            className="grid-actions-panel__delete-btn"
+            onClick={() => {
+              setDeleteMode(true);
+            }}
+          >
+            Delete Mode
+          </button>
+        ))}
+      {updateMode ||
+        deleteMode ||
+        (permissions?.updateAction && (
+          <button
+            className="grid-actions-panel__update-btn"
+            onClick={() => {
+              setUpdateMode(!updateMode);
+            }}
+          >
+            Update Mode
+          </button>
+        ))}
 
       {deleteMode && (
         <div

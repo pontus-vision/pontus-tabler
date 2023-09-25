@@ -16,6 +16,9 @@ import {
   updateDashboard,
   deleteDashboard,
   createDashboard,
+  readAuthGroup,
+  readDashboardGroupAuth,
+  readUser,
 } from '../client';
 import { UpdateDashboard } from '../pontus-api/typescript-fetch-client-generated';
 import Alert from 'react-bootstrap/esm/Alert';
@@ -42,7 +45,14 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
   const [successMsg, setSuccessMsg] = useState<string>();
   const [owner, setOwner] = useState<string>();
 
+  const [createAction, setCreateAction] = useState(false);
+  const [readAction, setReadAction] = useState(false);
+  const [updateAction, setUpdateAction] = useState(false);
+  const [deleteAction, setDeleteAction] = useState(false);
+
   const [deletion, setDeletion] = useState();
+  const [initialState, setInitialState] = useState<IJsonModel>();
+  const { id } = useParams();
 
   const { userRole } = useAuth();
 
@@ -53,14 +63,6 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
   useEffect(() => {
     setDashboard(dashboards.find((el) => el.id === dashboardId));
   }, [dashboardId]);
-
-  useEffect(() => {
-    console.log({ dashboard });
-  }, [dashboard]);
-
-  useEffect(() => {
-    console.log({ isEditing });
-  }, [isEditing]);
 
   const saveEdition = async () => {
     if (gridState) {
@@ -73,6 +75,9 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
           owner,
         };
         try {
+          if (!updateAction) {
+            throw new Error('Delete is not allowed for the user.');
+          }
           const data = await updateDashboard(obj);
 
           if (data?.status === 200) {
@@ -82,7 +87,7 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
             }, 4000);
           }
         } catch (error) {
-          console.log(error);
+          console.error(error);
         }
       } else {
         createNewDashboard();
@@ -92,6 +97,9 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
 
   const createNewDashboard = async () => {
     try {
+      if (!createAction) {
+        throw new Error('Create is not allowed for the user.');
+      }
       const data = await createDashboard({
         folder,
         name: dashboardName,
@@ -113,6 +121,9 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
   const delDashboard = async () => {
     if (!id) return;
     try {
+      if (!deleteAction) {
+        throw new Error('Delete is not allowed for the user.');
+      }
       const data = await deleteDashboard(id);
 
       if (data?.status === 200) {
@@ -127,12 +138,42 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
     setDeleteModal(false);
   };
 
-  const [initialState, setInitialState] = useState<IJsonModel>();
-  const { id } = useParams();
-
   useEffect(() => {
-    console.log({ deletion });
-  }, [deletion]);
+    const groupPermissions = async (dashboardId: string) => {
+      const res = await readDashboardGroupAuth(dashboardId);
+      const dashboardPermissions = res?.data.authGroups;
+      const res2 = await readUser({ userId: 'user1' });
+      const userGroups = res2?.data.authGroups;
+
+      const del = dashboardPermissions?.delete?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
+      );
+      const updt = dashboardPermissions?.update?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
+      );
+      const create = dashboardPermissions?.create?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
+      );
+      const read = dashboardPermissions?.read?.some((dashboard) =>
+        userGroups?.some((group) => group === dashboard),
+      );
+
+      del && setDeleteAction(del);
+      create && setCreateAction(create);
+      read && setReadAction(read);
+      updt && setUpdateAction(updt);
+      console.log(dashboardPermissions?.delete, {
+        userGroups,
+        res2,
+        del,
+        create,
+        read,
+        updt,
+      });
+    };
+    console.log(id);
+    id && groupPermissions(id);
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -206,15 +247,20 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
       <h1 className="title">{dashboard?.name}</h1>
       {userRole === 'Admin' && (
         <div className="actions-panel">
-          {addCmp && <div className="shadow-mobile"></div>}
-          {addCmp && <CmpPanel setSelectedCmp={setSelectedCmp} />}
+          {/* {addCmp && <div className="shadow-mobile"></div>} */}
+          {updateAction && addCmp && (
+            <CmpPanel setSelectedCmp={setSelectedCmp} />
+          )}
           {!addCmp && (
             <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
           )}
-          {!createMode && (
-            <Button onClick={() => setDeleteModal(true)}>
+          {deleteAction && !createMode && (
+            <button
+              className="actions-panel__delete-btn"
+              onClick={() => setDeleteModal(true)}
+            >
               {t('delete-dashboard')}
-            </Button>
+            </button>
           )}
           {deleteModal && (
             <div className="delete-dashboard-modal">
@@ -226,7 +272,7 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
               </div>
             </div>
           )}
-          {isEditing && (
+          {updateAction && isEditing && (
             <button
               className="actions-panel__save"
               onClick={() => saveEdition()}
@@ -240,12 +286,12 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
         <div
           className="shadow"
           onClick={() => {
-            console.log('hey');
             setModelId('');
           }}
         ></div>
       )}
       <PVFlexLayout
+        permissions={{ updateAction, createAction, deleteAction, readAction }}
         setModelId={setModelId}
         setDeletion={setDeletion}
         selectedCmp={selectedCmp}

@@ -15,7 +15,7 @@ export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Application context as set on `gridOptions.context`.
   context: TContext;
   // Event identifier
-  type: string;
+  kind: string;
 }
 
 export interface IListModelResponse {
@@ -50,7 +50,7 @@ export interface Meta {
 //   id: string;
 //   fieldId: string;
 //   storageId: string;
-//   type: string;
+//   kind: string;
 //   label: string;
 //   placeholderText: string;
 //   helpText: null;
@@ -62,20 +62,21 @@ export interface Meta {
 //   settings: null;
 //   __typename: string;
 // }
+
 export interface DataRoot {
-    id:       string;
-    name:     string;
-    type:     string;
-    path:     string;
-    children: Child[];
+  id: string;
+  name: string;
+  kind: 'folder' | 'file';
+  path: string;
+  children: Child[];
 }
 
 export interface Child {
-    id:        string;
-    name:      string;
-    type:      string;
-    path:       string;
-    children?: Child[];
+  id: string;
+  name: string;
+  kind: 'folder' | 'file';
+  path: string;
+  children?: Child[];
 }
 
 export interface Renderer {
@@ -181,7 +182,7 @@ export interface ICmsGetContentModelDataField {
   id: string;
   fieldId: string;
   storageId: string;
-  type: string;
+  kind: string;
   label: string;
   placeholderText: null | string;
   helpText: null | string;

@@ -35,6 +35,12 @@ type Props = {
   setIsEditing?: Dispatch<React.SetStateAction<boolean>>;
   dashboardId?: string;
   setGridState?: Dispatch<SetStateAction<IJsonModel | undefined>>;
+  permissions?: {
+    updateAction: boolean;
+    createAction: boolean;
+    deleteAction: boolean;
+    readAction: boolean;
+  };
 };
 
 const PVFlexLayout = ({
@@ -45,6 +51,7 @@ const PVFlexLayout = ({
   dashboardId,
   setDeletion,
   deletion,
+  permissions,
 }: Props) => {
   const initialJson: IJsonModel = {
     global: {},
@@ -85,16 +92,8 @@ const PVFlexLayout = ({
   }, [updateTableId]);
 
   useEffect(() => {
-    console.log({ openNewEntryView });
-  }, [openNewEntryView]);
-
-  useEffect(() => {
     setTableId(updateTableId);
   }, [updateTableId, rowId]);
-
-  useEffect(() => {
-    console.log({ deletion });
-  }, [deletion]);
 
   const factory = (node: TabNode) => {
     const component = node.getComponent();
@@ -122,7 +121,6 @@ const PVFlexLayout = ({
         const colState = findChildById(model.toJson().layout, id, 'tab').config
           .lastState;
         setAGGridColumnsState(colState);
-        console.log({ colState });
       }, [model]);
 
       useEffect(() => {
@@ -132,7 +130,6 @@ const PVFlexLayout = ({
       }, [updatedGrid]);
 
       useEffect(() => {
-        console.log({ gridHeight });
         const json = model.toJson();
 
         const jsonCopy = JSON.parse(JSON.stringify(json));
@@ -144,10 +141,6 @@ const PVFlexLayout = ({
           setModel(Model.fromJson(jsonCopy));
         }
       }, [gridHeight]);
-
-      useEffect(() => {
-        console.log({ entriesToBeDeleted, deletion });
-      }, [entriesToBeDeleted, deletion]);
 
       useEffect(() => {
         const fetchTable = async () => {
@@ -168,8 +161,6 @@ const PVFlexLayout = ({
               }),
             );
           setTotalCount(data.totalAvailable || 2);
-
-          console.log({ data });
         };
 
         fetchTable();
@@ -186,6 +177,7 @@ const PVFlexLayout = ({
               key={gridKey}
               id={id}
               cols={cols}
+              permissions={permissions}
               totalCount={totalCount}
               setDeletion={setDeletion}
               rows={rows}
@@ -262,11 +254,6 @@ const PVFlexLayout = ({
       return acc;
     }, 0);
 
-    console.log(
-      { tabsets, totalHeight, tabsetsHeight },
-      tabsets.length * 100 + totalHeight + 'px',
-    );
-
     return tabsets.length * 100 + totalHeight + 'px';
   };
 
@@ -300,8 +287,6 @@ const PVFlexLayout = ({
 
     const childrenNum = children.length;
 
-    console.log({ tabsets });
-
     setContainerHeight(calcContainerHeight() || '400px');
   };
 
@@ -316,7 +301,6 @@ const PVFlexLayout = ({
         lastState: [],
       },
     };
-    console.log({ entry, aggridCmp });
 
     const rootNode = model.getRoot();
 
@@ -339,8 +323,6 @@ const PVFlexLayout = ({
         tabset.weight = 100;
       });
     });
-
-    // console.log({ jsonCopy, newJson });
 
     setModel(Model.fromJson(jsonCopy));
 
