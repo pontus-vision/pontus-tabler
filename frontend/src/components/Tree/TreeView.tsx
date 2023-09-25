@@ -58,7 +58,7 @@ const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
     }
 
     for (const child of folder.children) {
-      if (child.type === 'folder') {
+      if (child.kind === 'folder') {
         const found = findFolderById(child, targetId);
         if (found) {
           return found;

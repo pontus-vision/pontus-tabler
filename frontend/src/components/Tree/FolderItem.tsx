@@ -148,7 +148,7 @@ const FolderItem = ({
         <ul className="pl-4 ">
           {folder?.children.map((child, index) => (
             <li key={child.id}>
-              {child.type === 'folder' ? (
+              {child.kind === 'folder' ? (
                 <FolderItem
                   onDragStart={onDragStart}
                   index={index}
