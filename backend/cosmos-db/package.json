@@ -1,11 +1,12 @@
 {
   "name": "simple-inventory-api",
   "version": "1.0.0-oas3",
+  "type": "module",
   "description": "This is a simple API",
   "main": "index.js",
   "scripts": {
-    "prestart": "npm install",
-    "start": "node index.js"
+    "prestart": "bun install",
+    "start": "bun index.js"
   },
   "keywords": [
     "swagger"
@@ -15,6 +16,7 @@
   "dependencies": {
     "connect": "^3.2.0",
     "cors": "^2.8.5",
+    "esm": "^3.2.25",
     "js-yaml": "^3.3.0",
     "oas3-tools": "^2.2.3"
   }

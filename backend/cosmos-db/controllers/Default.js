@@ -1,294 +1,263 @@
-'use strict';
+import * as utils from '../utils/writer.js';
+import * as Default from '../service/DefaultService';
 
-var utils = require('../utils/writer.js');
-var Default = require('../service/DefaultService');
+export async function authGroupCreatePOST(req, res, next, body) {
+  try {
+    const response = await Default.authGroupCreatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authGroupCreatePOST = function authGroupCreatePOST (req, res, next, body) {
-  Default.authGroupCreatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authGroupDeletePOST(req, res, next, body) {
+  try {
+    const response = await Default.authGroupDeletePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authGroupDeletePOST = function authGroupDeletePOST (req, res, next, body) {
-  Default.authGroupDeletePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authGroupReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.authGroupReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authGroupReadPOST = function authGroupReadPOST (req, res, next, body) {
-  Default.authGroupReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authGroupUpdatePOST(req, res, next, body) {
+  try {
+    const response = await Default.authGroupUpdatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authGroupUpdatePOST = function authGroupUpdatePOST (req, res, next, body) {
-  Default.authGroupUpdatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authGroupsReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.authGroupsReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authGroupsReadPOST = function authGroupsReadPOST (req, res, next, body) {
-  Default.authGroupsReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authUserCreatePOST(req, res, next, body) {
+  try {
+    const response = await Default.authUserCreatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authUserCreatePOST = function authUserCreatePOST (req, res, next, body) {
-  Default.authUserCreatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authUserDeletePOST(req, res, next, body) {
+  try {
+    const response = await Default.authUserDeletePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authUserDeletePOST = function authUserDeletePOST (req, res, next, body) {
-  Default.authUserDeletePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authUserReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.authUserReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authUserReadPOST = function authUserReadPOST (req, res, next, body) {
-  Default.authUserReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authUserUpdatePOST(req, res, next, body) {
+  try {
+    const response = await Default.authUserUpdatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authUserUpdatePOST = function authUserUpdatePOST (req, res, next, body) {
-  Default.authUserUpdatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function authUsersReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.authUsersReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.authUsersReadPOST = function authUsersReadPOST (req, res, next, body) {
-  Default.authUsersReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardCreatePOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardCreatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardCreatePOST = function dashboardCreatePOST (req, res, next, body) {
-  Default.dashboardCreatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardDeletePOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardDeletePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardDeletePOST = function dashboardDeletePOST (req, res, next, body) {
-  Default.dashboardDeletePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardGroupAuthCreatePOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardGroupAuthCreatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardGroupAuthCreatePOST = function dashboardGroupAuthCreatePOST (req, res, next, body) {
-  Default.dashboardGroupAuthCreatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardGroupAuthDeletePOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardGroupAuthDeletePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardGroupAuthDeletePOST = function dashboardGroupAuthDeletePOST (req, res, next, body) {
-  Default.dashboardGroupAuthDeletePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardGroupAuthReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardGroupAuthReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardGroupAuthReadPOST = function dashboardGroupAuthReadPOST (req, res, next, body) {
-  Default.dashboardGroupAuthReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardGroupAuthUpdatePOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardGroupAuthUpdatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardGroupAuthUpdatePOST = function dashboardGroupAuthUpdatePOST (req, res, next, body) {
-  Default.dashboardGroupAuthUpdatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardReadPOST = function dashboardReadPOST (req, res, next, body) {
-  Default.dashboardReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardUpdatePOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardUpdatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardUpdatePOST = function dashboardUpdatePOST (req, res, next, body) {
-  Default.dashboardUpdatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function dashboardsReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.dashboardsReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.dashboardsReadPOST = function dashboardsReadPOST (req, res, next, body) {
-  Default.dashboardsReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function getTableData(req, res, next, body) {
+  try {
+    const response = await Default.getTableData(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.getTableData = function getTableData (req, res, next, body) {
-  Default.getTableData(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function menuPOST(req, res, next) {
+  try {
+    const response = await Default.menuPOST();
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.menuPOST = function menuPOST (req, res, next) {
-  Default.menuPOST()
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tableCreatePOST(req, res, next, body) {
+  try {
+    const response = await Default.tableCreatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.tableCreatePOST = function tableCreatePOST (req, res, next, body) {
-  Default.tableCreatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tableDataCreatePOST(req, res, next, body) {
+  try {
+    const response = await Default.tableDataCreatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.tableDataCreatePOST = function tableDataCreatePOST (req, res, next, body) {
-  Default.tableDataCreatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tableDataDeletePOST(req, res, next, body) {
+  try {
+    const response = await Default.tableDataDeletePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.tableDataDeletePOST = function tableDataDeletePOST (req, res, next, body) {
-  Default.tableDataDeletePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tableDataUpdatePOST(req, res, next, body) {
+  try {
+    const response = await Default.tableDataUpdatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.tableDataUpdatePOST = function tableDataUpdatePOST (req, res, next, body) {
-  Default.tableDataUpdatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tableDeletePOST(req, res, next, body) {
+  try {
+    const response = await Default.tableDeletePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.tableDeletePOST = function tableDeletePOST (req, res, next, body) {
-  Default.tableDeletePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tableReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.tableReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.tableReadPOST = function tableReadPOST (req, res, next, body) {
-  Default.tableReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tableUpdatePOST(req, res, next, body) {
+  try {
+    const response = await Default.tableUpdatePOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}
 
-module.exports.tableUpdatePOST = function tableUpdatePOST (req, res, next, body) {
-  Default.tableUpdatePOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
-
-module.exports.tablesReadPOST = function tablesReadPOST (req, res, next, body) {
-  Default.tablesReadPOST(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+export async function tablesReadPOST(req, res, next, body) {
+  try {
+    const response = await Default.tablesReadPOST(body);
+    utils.writeJson(res, response);
+  } catch (error) {
+    utils.writeJson(res, error);
+  }
+}

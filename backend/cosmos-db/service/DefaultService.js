@@ -1,20 +1,19 @@
-'use strict';
-
+import { createTable } from '../docker/test/app';
 
 /**
  * Create a new group
  * Create a new group with a name, parents, and symlinks
  *
- * body NewGroup 
+ * body NewGroup
  * returns authGroup
  **/
-exports.authGroupCreatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export async function authGroupCreatePOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "groupId" : "groupId",
-  "name" : "name"
-};
+      groupId: 'groupId',
+      name: 'name',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -22,36 +21,34 @@ exports.authGroupCreatePOST = function(body) {
     }
   });
 }
-
 
 /**
  * Delete a group
  * Delete a group by ID
  *
- * body DeleteGroup 
+ * body DeleteGroup
  * no response value expected for this operation
  **/
-exports.authGroupDeletePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function authGroupDeletePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Get group by ID
  * Retrieve group by id
  *
- * body Group_read_body 
+ * body Group_read_body
  * returns authGroup
  **/
-exports.authGroupReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function authGroupReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "groupId" : "groupId",
-  "name" : "name"
-};
+      groupId: 'groupId',
+      name: 'name',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -59,42 +56,43 @@ exports.authGroupReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  * Update group by ID
  * Update group details by ID
  *
- * body UpdateGroup 
+ * body UpdateGroup
  * no response value expected for this operation
  **/
-exports.authGroupUpdatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function authGroupUpdatePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Get all groups
  * Retrieve all groups (nodes that Aggrid is using a new pagination filter model)
  *
- * body ReadPaginationFilter 
+ * body ReadPaginationFilter
  * returns inline_response_200_1
  **/
-exports.authGroupsReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function authGroupsReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "authGroups" : [ {
-    "groupId" : "groupId",
-    "name" : "name"
-  }, {
-    "groupId" : "groupId",
-    "name" : "name"
-  } ],
-  "totalGroups" : 0
-};
+      authGroups: [
+        {
+          groupId: 'groupId',
+          name: 'name',
+        },
+        {
+          groupId: 'groupId',
+          name: 'name',
+        },
+      ],
+      totalGroups: 0,
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -102,23 +100,22 @@ exports.authGroupsReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  * Create a new user
  * Create a new user with a name and associated groups
  *
- * body NewUser 
+ * body NewUser
  * returns User
  **/
-exports.authUserCreatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function authUserCreatePOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "authGroups" : [ "authGroups", "authGroups" ],
-  "name" : "name",
-  "userId" : "userId"
-};
+      authGroups: ['authGroups', 'authGroups'],
+      name: 'name',
+      userId: 'userId',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -126,37 +123,35 @@ exports.authUserCreatePOST = function(body) {
     }
   });
 }
-
 
 /**
  * Delete a user
  * Delete a user by ID
  *
- * body DeleteUser 
+ * body DeleteUser
  * no response value expected for this operation
  **/
-exports.authUserDeletePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function authUserDeletePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Get user by ID
  * Retrieve user by ID
  *
- * body User_read_body 
+ * body User_read_body
  * returns User
  **/
-exports.authUserReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function authUserReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "authGroups" : [ "authGroups", "authGroups" ],
-  "name" : "name",
-  "userId" : "userId"
-};
+      authGroups: ['authGroups', 'authGroups'],
+      name: 'name',
+      userId: 'userId',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -164,44 +159,45 @@ exports.authUserReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  * Update user by ID
  * Update user details by ID
  *
- * body UpdateUser 
+ * body UpdateUser
  * no response value expected for this operation
  **/
-exports.authUserUpdatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function authUserUpdatePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Get all users
  * Retrieve all users
  *
- * body ReadPaginationFilter 
+ * body ReadPaginationFilter
  * returns inline_response_200_2
  **/
-exports.authUsersReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function authUsersReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "totalUsers" : 0,
-  "users" : [ {
-    "authGroups" : [ "authGroups", "authGroups" ],
-    "name" : "name",
-    "userId" : "userId"
-  }, {
-    "authGroups" : [ "authGroups", "authGroups" ],
-    "name" : "name",
-    "userId" : "userId"
-  } ]
-};
+      totalUsers: 0,
+      users: [
+        {
+          authGroups: ['authGroups', 'authGroups'],
+          name: 'name',
+          userId: 'userId',
+        },
+        {
+          authGroups: ['authGroups', 'authGroups'],
+          name: 'name',
+          userId: 'userId',
+        },
+      ],
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -209,25 +205,24 @@ exports.authUsersReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  * Create a new dashboard
  * Create a new dashboard with properties, auth group, folder, and owner
  *
- * body NewDashboard 
+ * body NewDashboard
  * returns Dashboard
  **/
-exports.dashboardCreatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function dashboardCreatePOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "owner" : "owner",
-  "folder" : "folder",
-  "name" : "name",
-  "id" : "id",
-  "state" : { }
-};
+      owner: 'owner',
+      folder: 'folder',
+      name: 'name',
+      id: 'id',
+      state: {},
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -235,42 +230,40 @@ exports.dashboardCreatePOST = function(body) {
     }
   });
 }
-
 
 /**
  * Delete a dashboard
  * Delete a dashboard by ID
  *
- * body DeleteDashboard 
+ * body DeleteDashboard
  * no response value expected for this operation
  **/
-exports.dashboardDeletePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function dashboardDeletePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Create a new dashboard state
  * Create a new dashboard state with name and state information
  *
- * body Auth_create_body 
+ * body Auth_create_body
  * returns DashboardAuthGroup
  **/
-exports.dashboardGroupAuthCreatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function dashboardGroupAuthCreatePOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "authGroups" : {
-    "read" : [ "read", "read" ],
-    "create" : [ "create", "create" ],
-    "update" : [ "update", "update" ],
-    "delete" : [ "delete", "delete" ]
-  },
-  "dashboardId" : "dashboardId",
-  "dashboardName" : "dashboardName"
-};
+      authGroups: {
+        read: ['read', 'read'],
+        create: ['create', 'create'],
+        update: ['update', 'update'],
+        delete: ['delete', 'delete'],
+      },
+      dashboardId: 'dashboardId',
+      dashboardName: 'dashboardName',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -278,27 +271,26 @@ exports.dashboardGroupAuthCreatePOST = function(body) {
     }
   });
 }
-
 
 /**
  * Delete group from dashboard
  * Create a new dashboard state with name and state information
  *
- * body Auth_delete_body 
+ * body Auth_delete_body
  * returns auth_delete_body
  **/
-exports.dashboardGroupAuthDeletePOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function dashboardGroupAuthDeletePOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "authGroups" : {
-    "read" : [ "read", "read" ],
-    "create" : [ "create", "create" ],
-    "update" : [ "update", "update" ],
-    "delete" : [ "delete", "delete" ]
-  },
-  "dashboardId" : "dashboardId"
-};
+      authGroups: {
+        read: ['read', 'read'],
+        create: ['create', 'create'],
+        update: ['update', 'update'],
+        delete: ['delete', 'delete'],
+      },
+      dashboardId: 'dashboardId',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -306,28 +298,27 @@ exports.dashboardGroupAuthDeletePOST = function(body) {
     }
   });
 }
-
 
 /**
  * Create a new dashboard state
  * Create a new dashboard state with name and state information
  *
- * body Auth_read_body 
+ * body Auth_read_body
  * returns DashboardAuthGroup
  **/
-exports.dashboardGroupAuthReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function dashboardGroupAuthReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "authGroups" : {
-    "read" : [ "read", "read" ],
-    "create" : [ "create", "create" ],
-    "update" : [ "update", "update" ],
-    "delete" : [ "delete", "delete" ]
-  },
-  "dashboardId" : "dashboardId",
-  "dashboardName" : "dashboardName"
-};
+      authGroups: {
+        read: ['read', 'read'],
+        create: ['create', 'create'],
+        update: ['update', 'update'],
+        delete: ['delete', 'delete'],
+      },
+      dashboardId: 'dashboardId',
+      dashboardName: 'dashboardName',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -335,28 +326,27 @@ exports.dashboardGroupAuthReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  * Create a new dashboard state
  * Create a new dashboard state with name and state information
  *
- * body Auth_update_body 
+ * body Auth_update_body
  * returns DashboardAuthGroup
  **/
-exports.dashboardGroupAuthUpdatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function dashboardGroupAuthUpdatePOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "authGroups" : {
-    "read" : [ "read", "read" ],
-    "create" : [ "create", "create" ],
-    "update" : [ "update", "update" ],
-    "delete" : [ "delete", "delete" ]
-  },
-  "dashboardId" : "dashboardId",
-  "dashboardName" : "dashboardName"
-};
+      authGroups: {
+        read: ['read', 'read'],
+        create: ['create', 'create'],
+        update: ['update', 'update'],
+        delete: ['delete', 'delete'],
+      },
+      dashboardId: 'dashboardId',
+      dashboardName: 'dashboardName',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -364,25 +354,24 @@ exports.dashboardGroupAuthUpdatePOST = function(body) {
     }
   });
 }
-
 
 /**
  * Get dashboard by id
  * Retrieve dashboard by id
  *
- * body Dashboard_read_body 
+ * body Dashboard_read_body
  * returns Dashboard
  **/
-exports.dashboardReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function dashboardReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "owner" : "owner",
-  "folder" : "folder",
-  "name" : "name",
-  "id" : "id",
-  "state" : { }
-};
+      owner: 'owner',
+      folder: 'folder',
+      name: 'name',
+      id: 'id',
+      state: {},
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -390,46 +379,47 @@ exports.dashboardReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  * Update dashboard by ID
  * Update dashboard properties, auth group, folder, and owner by ID
  *
- * body UpdateDashboard 
+ * body UpdateDashboard
  * no response value expected for this operation
  **/
-exports.dashboardUpdatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function dashboardUpdatePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Get all dashboards
  * Retrieve all dashboards with pagination and search
  *
- * body ReadPaginationFilter 
+ * body ReadPaginationFilter
  * returns inline_response_200
  **/
-exports.dashboardsReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function dashboardsReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "totalDashboards" : 0,
-  "dashboards" : [ {
-    "owner" : "owner",
-    "folder" : "folder",
-    "name" : "name",
-    "id" : "id"
-  }, {
-    "owner" : "owner",
-    "folder" : "folder",
-    "name" : "name",
-    "id" : "id"
-  } ]
-};
+      totalDashboards: 0,
+      dashboards: [
+        {
+          owner: 'owner',
+          folder: 'folder',
+          name: 'name',
+          id: 'id',
+        },
+        {
+          owner: 'owner',
+          folder: 'folder',
+          name: 'name',
+          id: 'id',
+        },
+      ],
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -437,23 +427,22 @@ exports.dashboardsReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  *
  * body AgGridInput  (optional)
  * returns agGridOutput
  **/
-exports.getTableData = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function getTableData(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "totalAvailable" : 1,
-  "records" : [ "records", "records" ],
-  "from" : 0,
-  "to" : 6,
-  "type" : "type"
-};
+      totalAvailable: 1,
+      records: ['records', 'records'],
+      from: 0,
+      to: 6,
+      type: 'type',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -461,34 +450,36 @@ exports.getTableData = function(body) {
     }
   });
 }
-
 
 /**
  *
  * returns DataRoot
  **/
-exports.menuPOST = function() {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function menuPOST() {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "path" : "path",
-  "children" : [ {
-    "path" : "path",
-    "children" : [ null, null ],
-    "name" : "name",
-    "id" : "id",
-    "type" : "type"
-  }, {
-    "path" : "path",
-    "children" : [ null, null ],
-    "name" : "name",
-    "id" : "id",
-    "type" : "type"
-  } ],
-  "name" : "name",
-  "id" : "id",
-  "type" : "type"
-};
+      path: 'path',
+      children: [
+        {
+          path: 'path',
+          children: [null, null],
+          name: 'name',
+          id: 'id',
+          type: 'type',
+        },
+        {
+          path: 'path',
+          children: [null, null],
+          name: 'name',
+          id: 'id',
+          type: 'type',
+        },
+      ],
+      name: 'name',
+      id: 'id',
+      type: 'type',
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -496,7 +487,6 @@ exports.menuPOST = function() {
     }
   });
 }
-
 
 /**
  * Create a new table
@@ -505,28 +495,31 @@ exports.menuPOST = function() {
  * body NewTable  (optional)
  * returns Table
  **/
-exports.tableCreatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function tableCreatePOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "name" : "name",
-  "tableId" : "tableId",
-  "cols" : [ {
-    "filter" : true,
-    "headerName" : "headerName",
-    "field" : "field",
-    "name" : "name",
-    "id" : "id",
-    "sortable" : true
-  }, {
-    "filter" : true,
-    "headerName" : "headerName",
-    "field" : "field",
-    "name" : "name",
-    "id" : "id",
-    "sortable" : true
-  } ]
-};
+      name: 'name',
+      tableId: 'tableId',
+      cols: [
+        {
+          filter: true,
+          headerName: 'headerName',
+          field: 'field',
+          name: 'name',
+          id: 'id',
+          sortable: true,
+        },
+        {
+          filter: true,
+          headerName: 'headerName',
+          field: 'field',
+          name: 'name',
+          id: 'id',
+          sortable: true,
+        },
+      ],
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -534,93 +527,91 @@ exports.tableCreatePOST = function(body) {
     }
   });
 }
-
 
 /**
  * Create a new row
  * Create a new row data, by using key/value pair for each column.
  *
- * body NewTableRow 
+ * body NewTableRow
  * no response value expected for this operation
  **/
-exports.tableDataCreatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function tableDataCreatePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Update a row
  * Update a row data, by using key/value pair for each column.
  *
- * body DeleteTableRow 
+ * body DeleteTableRow
  * no response value expected for this operation
  **/
-exports.tableDataDeletePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function tableDataDeletePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Update a row
  * Update a row data, by using key/value pair for each column.
  *
- * body UpdateTableRow 
+ * body UpdateTableRow
  * no response value expected for this operation
  **/
-exports.tableDataUpdatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function tableDataUpdatePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Delete a table
  * Delete a table by ID
  *
- * body DeleteTable 
+ * body DeleteTable
  * no response value expected for this operation
  **/
-exports.tableDeletePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function tableDeletePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Get table by id
  * Get table by id
  *
- * body GetTable 
+ * body GetTable
  * returns Table
  **/
-exports.tableReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function tableReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "name" : "name",
-  "tableId" : "tableId",
-  "cols" : [ {
-    "filter" : true,
-    "headerName" : "headerName",
-    "field" : "field",
-    "name" : "name",
-    "id" : "id",
-    "sortable" : true
-  }, {
-    "filter" : true,
-    "headerName" : "headerName",
-    "field" : "field",
-    "name" : "name",
-    "id" : "id",
-    "sortable" : true
-  } ]
-};
+      name: 'name',
+      tableId: 'tableId',
+      cols: [
+        {
+          filter: true,
+          headerName: 'headerName',
+          field: 'field',
+          name: 'name',
+          id: 'id',
+          sortable: true,
+        },
+        {
+          filter: true,
+          headerName: 'headerName',
+          field: 'field',
+          name: 'name',
+          id: 'id',
+          sortable: true,
+        },
+      ],
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -628,72 +619,79 @@ exports.tableReadPOST = function(body) {
     }
   });
 }
-
 
 /**
  * Update table by ID
  * Update table properties and associated columns by ID
  *
- * body UpdateTable 
+ * body UpdateTable
  * no response value expected for this operation
  **/
-exports.tableUpdatePOST = function(body) {
-  return new Promise(function(resolve, reject) {
+export function tableUpdatePOST(body) {
+  return new Promise((resolve, reject) => {
     resolve();
   });
 }
-
 
 /**
  * Get all tables
  * Retrieve all tables with pagination and search
  *
- * body ReadPaginationFilter 
+ * body ReadPaginationFilter
  * returns GetTablesResponse
  **/
-exports.tablesReadPOST = function(body) {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
+export function tablesReadPOST(body) {
+  return new Promise((resolve, reject) => {
+    const examples = {};
     examples['application/json'] = {
-  "tables" : [ {
-    "name" : "name",
-    "tableId" : "tableId",
-    "cols" : [ {
-      "filter" : true,
-      "headerName" : "headerName",
-      "field" : "field",
-      "name" : "name",
-      "id" : "id",
-      "sortable" : true
-    }, {
-      "filter" : true,
-      "headerName" : "headerName",
-      "field" : "field",
-      "name" : "name",
-      "id" : "id",
-      "sortable" : true
-    } ]
-  }, {
-    "name" : "name",
-    "tableId" : "tableId",
-    "cols" : [ {
-      "filter" : true,
-      "headerName" : "headerName",
-      "field" : "field",
-      "name" : "name",
-      "id" : "id",
-      "sortable" : true
-    }, {
-      "filter" : true,
-      "headerName" : "headerName",
-      "field" : "field",
-      "name" : "name",
-      "id" : "id",
-      "sortable" : true
-    } ]
-  } ],
-  "totalTables" : 0
-};
+      tables: [
+        {
+          name: 'name',
+          tableId: 'tableId',
+          cols: [
+            {
+              filter: true,
+              headerName: 'headerName',
+              field: 'field',
+              name: 'name',
+              id: 'id',
+              sortable: true,
+            },
+            {
+              filter: true,
+              headerName: 'headerName',
+              field: 'field',
+              name: 'name',
+              id: 'id',
+              sortable: true,
+            },
+          ],
+        },
+        {
+          name: 'name',
+          tableId: 'tableId',
+          cols: [
+            {
+              filter: true,
+              headerName: 'headerName',
+              field: 'field',
+              name: 'name',
+              id: 'id',
+              sortable: true,
+            },
+            {
+              filter: true,
+              headerName: 'headerName',
+              field: 'field',
+              name: 'name',
+              id: 'id',
+              sortable: true,
+            },
+          ],
+        },
+      ],
+      totalTables: 0,
+    };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -701,4 +699,3 @@ exports.tablesReadPOST = function(body) {
     }
   });
 }
-
