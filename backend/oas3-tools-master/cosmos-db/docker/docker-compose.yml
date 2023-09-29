@@ -1,0 +1,29 @@
+version: "3"
+services:
+  cosmosdb:
+    #image: "tensorflow/tensorflow:latest-gpu"
+    image: "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest"
+    #command: bash
+    environment:
+      SA_PASSWORD: "Your_password123"
+      #ACCEPT_EULA: "Y"
+      #MSSQL_PID: "Developer"
+    #volumes:
+      #- dbbackup:/dbbackup
+    cap_add:
+      - SYS_PTRACE
+    ports:
+      - 8888:8888
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2000M
+        reservations:
+          cpus: '1'
+          memory: 1000M
+
+
+#volumes:
+  #dbbackup:
+    #driver: local
