@@ -1,5 +1,7 @@
 // import { createTable } from '../docker/test/app';
 
+import { dashboardCreate } from "./dashboardCreate";
+
 /**
  * Create a new group
  * Create a new group with a name, parents, and symlinks
@@ -213,7 +215,8 @@ export function authUsersReadPOST(body) {
  * body NewDashboard
  * returns Dashboard
  **/
-export function dashboardCreatePOST(body) {
+export const  dashboardCreatePOST = async (body) => {
+  await dashboardCreate();
   return new Promise((resolve, reject) => {
     const examples = {};
     examples["application/json"] = {

@@ -17,7 +17,7 @@ const debug = Debug("oas3-tools:routing");
 export class SwaggerRouter {
   handlerCacheFromDir(dirOrDirs: any) {
     const handlerCache: object = {};
-    const jsFileRegex = /\.(coffee|js|ts)$/;
+    const jsFileRegex = /\.(coffee|js)$/;
     var dirs = new Array<any>();
 
     if (isArray(dirOrDirs)) {

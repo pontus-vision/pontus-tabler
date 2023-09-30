@@ -1,7 +1,8 @@
 // 'use strict';
 import { ExpressAppConfig } from "./middleware/express.app.config";
 import { Oas3AppOptions } from "./middleware/oas3.options";
-import { OpenApiRequestHandler } from 'express-openapi-validator/dist/framework/types'
+import {absolutePath} from "swagger-ui-dist";
+// import { OpenApiRequestHandler } from 'express-openapi-validator/dist/framework/types'
 
 // export function expressAppConfig(
 //   definitionPath: string,
@@ -22,6 +23,7 @@ let  serverPort = 8080;
 import * as express from 'express';
 
 import * as cors from 'cors';
+import { SwaggerUiOptions } from "./middleware/swagger.ui.options";
 
 // swaggerRouter configuration
 // var options = {
@@ -103,7 +105,9 @@ const options:Oas3AppOptions = {
           }
       }
   },
-  swaggerUI: undefined, 
+  // swaggerUI: new SwaggerUiOptions('/docs','/swagger',absolutePath()), 
+  swaggerUI: new SwaggerUiOptions('/api','/docs',path.join(__dirname, 'docs')), 
+  // swaggerUI: new SwaggerUiOptions(path.join(__dirname, 'docs/index.html'),absolutePath(),undefined), 
   cors: undefined
 
 }; 
@@ -119,5 +123,6 @@ app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
 // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
   console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-  console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+  console.log('HTML docs are available on http://localhost:%d/docs', serverPort);
+  console.log('Open API json is  available on http://localhost:%d/api', serverPort);
 });

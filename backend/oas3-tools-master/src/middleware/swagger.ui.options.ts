@@ -4,7 +4,7 @@ export class SwaggerUiOptions {
     public swaggerUiDir: string;
 
     constructor(apiDocsPath: string, swaggerUIPath: string, swaggerUiDir: string) {
-        this.apiDocsPath = apiDocsPath;
+        this.apiDocsPath = apiDocsPath ;
         this.swaggerUIPath = swaggerUIPath;
         this.swaggerUiDir = swaggerUiDir;
 
