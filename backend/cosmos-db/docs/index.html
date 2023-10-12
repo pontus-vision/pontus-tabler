@@ -1,0 +1,1255 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Simple Inventory API</title>
+    <style type="text/css">
+      body {
+	font-family: Trebuchet MS, sans-serif;
+	font-size: 15px;
+	color: #444;
+	margin-right: 24px;
+}
+
+h1	{
+	font-size: 25px;
+}
+h2	{
+	font-size: 20px;
+}
+h3	{
+	font-size: 16px;
+	font-weight: bold;
+}
+hr	{
+	height: 1px;
+	border: 0;
+	color: #ddd;
+	background-color: #ddd;
+}
+
+.app-desc {
+  clear: both;
+  margin-left: 20px;
+}
+.param-name {
+  width: 100%;
+}
+.license-info {
+  margin-left: 20px;
+}
+
+.license-url {
+  margin-left: 20px;
+}
+
+.model {
+  margin: 0 0 0px 20px;
+}
+
+.method {
+  margin-left: 20px;
+}
+
+.method-notes	{
+	margin: 10px 0 20px 0;
+	font-size: 90%;
+	color: #555;
+}
+
+pre {
+  padding: 10px;
+  margin-bottom: 2px;
+}
+
+.http-method {
+ text-transform: uppercase;
+}
+
+pre.get {
+  background-color: #0f6ab4;
+}
+
+pre.post {
+  background-color: #10a54a;
+}
+
+pre.put {
+  background-color: #c5862b;
+}
+
+pre.delete {
+  background-color: #a41e22;
+}
+
+.huge	{
+	color: #fff;
+}
+
+pre.example {
+  background-color: #f3f3f3;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+code {
+  white-space: pre;
+}
+
+.nickname {
+  font-weight: bold;
+}
+
+.method-path {
+  font-size: 1.5em;
+  background-color: #0f6ab4;
+}
+
+.up {
+  float:right;
+}
+
+.parameter {
+  width: 500px;
+}
+
+.param {
+  width: 500px;
+  padding: 10px 0 0 20px;
+  font-weight: bold;
+}
+
+.param-desc {
+  width: 700px;
+  padding: 0 0 0 20px;
+  color: #777;
+}
+
+.param-type {
+  font-style: italic;
+}
+
+.param-enum-header {
+width: 700px;
+padding: 0 0 0 60px;
+color: #777;
+font-weight: bold;
+}
+
+.param-enum {
+width: 700px;
+padding: 0 0 0 80px;
+color: #777;
+font-style: italic;
+}
+
+.field-label {
+  padding: 0;
+  margin: 0;
+  clear: both;
+}
+
+.field-items	{
+	padding: 0 0 15px 0;
+	margin-bottom: 15px;
+}
+
+.return-type {
+  clear: both;
+  padding-bottom: 10px;
+}
+
+.param-header {
+  font-weight: bold;
+}
+
+.method-tags {
+  text-align: right;
+}
+
+.method-tag {
+  background: none repeat scroll 0% 0% #24A600;
+  border-radius: 3px;
+  padding: 2px 10px;
+  margin: 2px;
+  color: #FFF;
+  display: inline-block;
+  text-decoration: none;
+}
+
+    </style>
+  </head>
+  <body>
+  <h1>Simple Inventory API</h1>
+    <div class="app-desc">This is a simple API</div>
+    <div class="app-desc">More information: <a href="https://helloreverb.com">https://helloreverb.com</a></div>
+    <div class="app-desc">Contact Info: <a href="you@your-company.com">you@your-company.com</a></div>
+    <div class="app-desc">Version: 1.0.0</div>
+    <div class="app-desc">BasePath:/PVPMARTINS_1/PontusBackend/1.0.0</div>
+    <div class="license-info">Apache 2.0</div>
+    <div class="license-url">http://www.apache.org/licenses/LICENSE-2.0.html</div>
+  <h2>Access</h2>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Default">Default</a></h4>
+  <ul>
+  <li><a href="#authGroupCreatePost"><code><span class="http-method">post</span> /auth/group/create</code></a></li>
+  <li><a href="#authGroupDeletePost"><code><span class="http-method">post</span> /auth/group/delete</code></a></li>
+  <li><a href="#authGroupReadPost"><code><span class="http-method">post</span> /auth/group/read</code></a></li>
+  <li><a href="#authGroupUpdatePost"><code><span class="http-method">post</span> /auth/group/update</code></a></li>
+  <li><a href="#authGroupsReadPost"><code><span class="http-method">post</span> /auth/groups/read</code></a></li>
+  <li><a href="#authUserCreatePost"><code><span class="http-method">post</span> /auth/user/create</code></a></li>
+  <li><a href="#authUserDeletePost"><code><span class="http-method">post</span> /auth/user/delete</code></a></li>
+  <li><a href="#authUserReadPost"><code><span class="http-method">post</span> /auth/user/read</code></a></li>
+  <li><a href="#authUserUpdatePost"><code><span class="http-method">post</span> /auth/user/update</code></a></li>
+  <li><a href="#authUsersReadPost"><code><span class="http-method">post</span> /auth/users/read</code></a></li>
+  <li><a href="#dashboardCreatePost"><code><span class="http-method">post</span> /dashboard/create</code></a></li>
+  <li><a href="#dashboardDeletePost"><code><span class="http-method">post</span> /dashboard/delete</code></a></li>
+  <li><a href="#dashboardReadPost"><code><span class="http-method">post</span> /dashboard/read</code></a></li>
+  <li><a href="#dashboardStateCreatePost"><code><span class="http-method">post</span> /dashboard/state/create</code></a></li>
+  <li><a href="#dashboardStateDeletePost"><code><span class="http-method">post</span> /dashboard/state/delete</code></a></li>
+  <li><a href="#dashboardStateReadPost"><code><span class="http-method">post</span> /dashboard/state/read</code></a></li>
+  <li><a href="#dashboardStateUpdatePost"><code><span class="http-method">post</span> /dashboard/state/update</code></a></li>
+  <li><a href="#dashboardUpdatePost"><code><span class="http-method">post</span> /dashboard/update</code></a></li>
+  <li><a href="#dashboardsReadPost"><code><span class="http-method">post</span> /dashboards/read</code></a></li>
+  <li><a href="#getTableData"><code><span class="http-method">post</span> /table/data/read</code></a></li>
+  <li><a href="#postHomeAgrecords"><code><span class="http-method">post</span> /agrecords</code></a></li>
+  <li><a href="#tableCreatePost"><code><span class="http-method">post</span> /table/create</code></a></li>
+  <li><a href="#tableDataCreatePost"><code><span class="http-method">post</span> /table/data/create</code></a></li>
+  <li><a href="#tableDataDeletePost"><code><span class="http-method">post</span> /table/data/delete</code></a></li>
+  <li><a href="#tableDataUpdatePost"><code><span class="http-method">post</span> /table/data/update</code></a></li>
+  <li><a href="#tableDeletePost"><code><span class="http-method">post</span> /table/delete</code></a></li>
+  <li><a href="#tableReadPost"><code><span class="http-method">post</span> /table/read</code></a></li>
+  <li><a href="#tableUpdatePost"><code><span class="http-method">post</span> /table/update</code></a></li>
+  <li><a href="#tablecolDeletePost"><code><span class="http-method">post</span> /tablecol/delete</code></a></li>
+  <li><a href="#tablecolUpdatePost"><code><span class="http-method">post</span> /tablecol/update</code></a></li>
+  <li><a href="#tablecolsCreatePost"><code><span class="http-method">post</span> /tablecols/create</code></a></li>
+  <li><a href="#tablecolsReadPost"><code><span class="http-method">post</span> /tablecols/read</code></a></li>
+  <li><a href="#tablesReadPost"><code><span class="http-method">post</span> /tables/read</code></a></li>
+  </ul>
+
+  <h1><a name="Default">Default</a></h1>
+  <div class="method"><a name="authGroupCreatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/group/create</code></pre></div>
+    <div class="method-summary">Create a new group (<span class="nickname">authGroupCreatePost</span>)</div>
+    <div class="method-notes">Create a new group with a name, parents, and symlinks</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Group created successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authGroupDeletePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/group/delete</code></pre></div>
+    <div class="method-summary">Delete a group (<span class="nickname">authGroupDeletePost</span>)</div>
+    <div class="method-notes">Delete a group by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Group deleted successfully
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Group not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authGroupReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/group/read</code></pre></div>
+    <div class="method-summary">Get group by ID (<span class="nickname">authGroupReadPost</span>)</div>
+    <div class="method-notes">Retrieve group by id</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authGroupUpdatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/group/update</code></pre></div>
+    <div class="method-summary">Update group by ID (<span class="nickname">authGroupUpdatePost</span>)</div>
+    <div class="method-notes">Update group details by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Group updated successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Group not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authGroupsReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/groups/read</code></pre></div>
+    <div class="method-summary">Get all groups (<span class="nickname">authGroupsReadPost</span>)</div>
+    <div class="method-notes">Retrieve all groups</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authUserCreatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/user/create</code></pre></div>
+    <div class="method-summary">Create a new user (<span class="nickname">authUserCreatePost</span>)</div>
+    <div class="method-notes">Create a new user with a name and associated groups</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    User created successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authUserDeletePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/user/delete</code></pre></div>
+    <div class="method-summary">Delete a user (<span class="nickname">authUserDeletePost</span>)</div>
+    <div class="method-notes">Delete a user by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    User deleted successfully
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    User not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authUserReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/user/read</code></pre></div>
+    <div class="method-summary">Get user by ID (<span class="nickname">authUserReadPost</span>)</div>
+    <div class="method-notes">Retrieve user by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authUserUpdatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/user/update</code></pre></div>
+    <div class="method-summary">Update user by ID (<span class="nickname">authUserUpdatePost</span>)</div>
+    <div class="method-notes">Update user details by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    User updated successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    User not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="authUsersReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /auth/users/read</code></pre></div>
+    <div class="method-summary">Get all users (<span class="nickname">authUsersReadPost</span>)</div>
+    <div class="method-notes">Retrieve all users</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardCreatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/create</code></pre></div>
+    <div class="method-summary">Create a new dashboard (<span class="nickname">dashboardCreatePost</span>)</div>
+    <div class="method-notes">Create a new dashboard with properties, auth group, folder, and owner</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Dashboard created successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardDeletePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/delete</code></pre></div>
+    <div class="method-summary">Delete a dashboard (<span class="nickname">dashboardDeletePost</span>)</div>
+    <div class="method-notes">Delete a dashboard by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Dashboard deleted successfully
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Dashboard not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/read</code></pre></div>
+    <div class="method-summary">Get dashboard by id (<span class="nickname">dashboardReadPost</span>)</div>
+    <div class="method-notes">Retrieve dashboard by id</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardStateCreatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/state/create</code></pre></div>
+    <div class="method-summary">Create a new dashboard state (<span class="nickname">dashboardStateCreatePost</span>)</div>
+    <div class="method-notes">Create a new dashboard state with name and state information</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Dashboard state created successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardStateDeletePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/state/delete</code></pre></div>
+    <div class="method-summary">Delete a dashboard state (<span class="nickname">dashboardStateDeletePost</span>)</div>
+    <div class="method-notes">Delete a dashboard state by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Dashboard state deleted successfully
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Dashboard state not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardStateReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/state/read</code></pre></div>
+    <div class="method-summary">Get dashboard by id (<span class="nickname">dashboardStateReadPost</span>)</div>
+    <div class="method-notes">Get dashboard by id</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardStateUpdatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/state/update</code></pre></div>
+    <div class="method-summary">Update dashboard state by ID (<span class="nickname">dashboardStateUpdatePost</span>)</div>
+    <div class="method-notes">Update dashboard state properties by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Dashboard state updated successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Dashboard state not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardUpdatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboard/update</code></pre></div>
+    <div class="method-summary">Update dashboard by ID (<span class="nickname">dashboardUpdatePost</span>)</div>
+    <div class="method-notes">Update dashboard properties, auth group, folder, and owner by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Dashboard updated successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Dashboard not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="dashboardsReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /dashboards/read</code></pre></div>
+    <div class="method-summary">Get all dashboards (<span class="nickname">dashboardsReadPost</span>)</div>
+    <div class="method-notes">Retrieve all dashboards with pagination and search</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getTableData"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/data/read</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getTableData</span>)</div>
+    <div class="method-notes"></div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    AG Record data
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Invalid search supplied
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Unauthorized
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Person not found
+        <a href="#"></a>
+    <h4 class="field-label">405</h4>
+    Method Not Allowed
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="postHomeAgrecords"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /agrecords</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">postHomeAgrecords</span>)</div>
+    <div class="method-notes"></div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    AG Record data
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Invalid search supplied
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Unauthorized
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Person not found
+        <a href="#"></a>
+    <h4 class="field-label">405</h4>
+    Method Not Allowed
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tableCreatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/create</code></pre></div>
+    <div class="method-summary">Create a new table (<span class="nickname">tableCreatePost</span>)</div>
+    <div class="method-notes">Create a new table with properties and associated columns</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Table created successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tableDataCreatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/data/create</code></pre></div>
+    <div class="method-summary">Create a new row (<span class="nickname">tableDataCreatePost</span>)</div>
+    <div class="method-notes">Create a new row data, by using key/value pair for each column.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Table row created successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tableDataDeletePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/data/delete</code></pre></div>
+    <div class="method-summary">Update a row (<span class="nickname">tableDataDeletePost</span>)</div>
+    <div class="method-notes">Update a row data, by using key/value pair for each column.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Table row deleted successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tableDataUpdatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/data/update</code></pre></div>
+    <div class="method-summary">Update a row (<span class="nickname">tableDataUpdatePost</span>)</div>
+    <div class="method-notes">Update a row data, by using key/value pair for each column.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Table row updated successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tableDeletePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/delete</code></pre></div>
+    <div class="method-summary">Delete a table (<span class="nickname">tableDeletePost</span>)</div>
+    <div class="method-notes">Delete a table by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Table deleted successfully
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Table not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tableReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/read</code></pre></div>
+    <div class="method-summary">Get table by id (<span class="nickname">tableReadPost</span>)</div>
+    <div class="method-notes">Get table by id</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tableUpdatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /table/update</code></pre></div>
+    <div class="method-summary">Update table by ID (<span class="nickname">tableUpdatePost</span>)</div>
+    <div class="method-notes">Update table properties and associated columns by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Table updated successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Table not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tablecolDeletePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /tablecol/delete</code></pre></div>
+    <div class="method-summary">Delete a table column (<span class="nickname">tablecolDeletePost</span>)</div>
+    <div class="method-notes">Delete a table column by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Table column deleted successfully
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Table column not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tablecolUpdatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /tablecol/update</code></pre></div>
+    <div class="method-summary">Update table column by ID (<span class="nickname">tablecolUpdatePost</span>)</div>
+    <div class="method-notes">Update table column properties by ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Table column updated successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Table column not found
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tablecolsCreatePost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /tablecols/create</code></pre></div>
+    <div class="method-summary">Create a new table column (<span class="nickname">tablecolsCreatePost</span>)</div>
+    <div class="method-notes">Create a new table column with properties and associated table ID</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Table column created successfully
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tablecolsReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /tablecols/read</code></pre></div>
+    <div class="method-summary">Get all table columns (<span class="nickname">tablecolsReadPost</span>)</div>
+    <div class="method-notes">Retrieve all table columns with pagination and search</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="tablesReadPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /tables/read</code></pre></div>
+    <div class="method-summary">Get all tables (<span class="nickname">tablesReadPost</span>)</div>
+    <div class="method-notes">Retrieve all tables with pagination and search</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Successful response
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+  </ol>
+
+  </body>
+</html>
