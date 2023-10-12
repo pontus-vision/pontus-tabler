@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import NewTableCol from '../components/NewTable/Column';
 import { useEffect, useState } from 'react';
-import { NewTableColumn } from '../pontus-api/typescript-fetch-client-generated';
+import { TableColumn } from '../pontus-api/typescript-fetch-client-generated';
 import { createTable } from '../client';
 import { capitalizeFirstLetter } from '../webinyApi';
 
@@ -9,21 +9,19 @@ const CreateNewTable = () => {
   const { t, i18n } = useTranslation();
   const [name, setName] = useState<string>('');
 
-  const [cols, setCols] = useState<{ colId: string; colDef: NewTableColumn }[]>(
-    [
-      {
-        colId: generateUniqueId(),
-        colDef: {
-          field: '',
-          filter: false,
-          headerName: '',
-          name: '',
-          sortable: false,
-          tableId: '',
-        },
+  const [cols, setCols] = useState<{ colId: string; colDef: TableColumn }[]>([
+    {
+      colId: generateUniqueId(),
+      colDef: {
+        field: '',
+        filter: false,
+        headerName: '',
+        name: '',
+        sortable: false,
+        tableId: '',
       },
-    ],
-  );
+    },
+  ]);
   const [successMessage, setSuccessMessage] = useState('');
 
   function generateUniqueId() {
