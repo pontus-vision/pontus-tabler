@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "target": "ES5",
+    "lib": ["es6", "dom"],
+    "module": "commonjs",
+    "outDir": "dist",
+    "sourceMap": true,
+    "resolveJsonModule": true
+  },
+  "exclude": ["node_modules"],
+  "include": ["typings.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.yaml"]
+}
