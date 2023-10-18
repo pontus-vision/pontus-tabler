@@ -24,12 +24,18 @@ export const dashboardCreatePOST = async (
   body: DashboardCreateReq,
 ): Promise<Response> => {
   try {
+    if (body === undefined) {
+      // res.status(400);
+      // res.json({ message: 'Body is undefined' });
+      // return res
+      throw { code: 400, message: 'No properties defined' };
+    }
     const response = await upsertDashboard(body);
-
     res.status(200);
     res.json(response);
     return res;
   } catch (error) {
+    console.log(JSON.stringify(error));
     if (error?.code && error?.message) {
       res.status(error.code);
       res.json(error.message);
@@ -54,6 +60,12 @@ export const dashboardReadPOST = async (
     res.json(response);
     return res;
   } catch (error) {
+    if (error?.message && error?.code) {
+      res.status(error.code);
+      res.json(error.message);
+      return res;
+    }
+
     res.status(500);
     res.json(error);
 
@@ -88,7 +100,11 @@ export const dashboardUpdatePOST = async (
   body: DashboardUpdateReq,
 ) => {
   try {
+    if (body === undefined) {
+      throw { code: 400, message: 'No properties defined' };
+    }
     const response = await upsertDashboard(body);
+
     res.status(200);
     res.json(response);
     return res;
