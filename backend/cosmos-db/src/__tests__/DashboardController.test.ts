@@ -20,6 +20,9 @@ import {
   DashboardUpdateRes,
   DashboardUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
+import { sendHttpRequest } from './http';
+import { method } from 'lodash';
+import axios from 'axios';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -36,6 +39,46 @@ jest.setTimeout(1000000);
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
+  const post = async (
+    endpoint,
+    body,
+  ): Promise<{ data: any; status: number }> => {
+    // return sendHttpRequest(
+    //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    //   {
+    //     'Content-Type': 'application/json',
+    //     Authorization: 'Bearer 123456',
+    //   },
+    //   {},
+    //   JSON.stringify(body),
+    // );
+
+    //   const res = await axios.post(
+    //     'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    //     body,
+    //     {
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //         Authorization: 'Bearer 123456',
+    //       },
+    //     },
+    //   );
+    //   return res;
+
+    const res = await fetch(
+      'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer 123456',
+        },
+        body: JSON.stringify(body),
+      },
+    );
+
+    return { status: res.status, data: await res.json() };
+  };
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
@@ -44,6 +87,7 @@ describe('dashboardCreatePOST', () => {
   afterAll(() => {
     process.env = OLD_ENV; // Restore old environment
   });
+
   it('should do the CRUD "happy path"', async () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     const req = {} as any;
@@ -56,28 +100,32 @@ describe('dashboardCreatePOST', () => {
       state: {},
     };
 
-    const createRetVal = await dashboardCreatePOST(req, res, next, body);
-    let resPayload: DashboardCreateRes = res.payload;
+    const createRetVal = await post('dashboard/create', body);
+
+    let resPayload: DashboardCreateRes = createRetVal.data;
     let id = resPayload.id;
 
-    const readRetVal = await dashboardReadPOST(req, res, next, {
+    const readRetVal = await post('dashboard/read', {
       id,
     });
-    let resPayload2: DashboardReadRes = res.payload;
+    let resPayload2: DashboardReadRes = readRetVal.data;
 
     console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
-    expect(resPayload.name).toBe(body.name);
-    expect(resPayload2.name).toBe(body.name);
+    expect(createRetVal.data.name).toBe(body.name);
+    expect(readRetVal.data.name).toBe(body.name);
 
-    const body2 = {
-      ...resPayload2,
+    const body2: DashboardUpdateReq = {
+      id: resPayload2.id,
+      owner: resPayload2.owner,
       name: 'Pontus 2',
+      folder: resPayload2.folder,
+      state: resPayload2.state,
     };
 
-    const updateRetVal = await dashboardUpdatePOST(req, res, next, body2);
+    const updateRetVal = await post('dashboard/update', body2);
 
-    let resPayload3: DashboardUpdateRes = res.payload;
+    let resPayload3: DashboardUpdateRes = updateRetVal.data;
 
     expect(resPayload3.name).toBe(body2.name);
 
@@ -85,61 +133,42 @@ describe('dashboardCreatePOST', () => {
       id: resPayload3.id,
     };
 
-    const deleteRetVal = await dashboardDeletePOST(req, res, next, body3);
+    const deleteRetVal = await post('dashboard/delete', body3);
 
-    let resPayload4 = res.payload;
+    let resPayload4 = deleteRetVal.data;
 
-    expect(resPayload4.id).toBe(body3.id);
+    expect(deleteRetVal.status).toBe(200);
   });
   it('should do the CRUD "sad path"', async () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     const req = {} as any;
     const res = new PVResponse();
     const next = jest.fn();
-    const body = {
+    const body: DashboardRef = {
       name: 'string',
       folder: 'string',
       owner: 'string',
-      foo: 'bar',
+      state: {},
     };
 
-    const createRetVal = await dashboardCreatePOST(req, res, next, null);
-    console.log(res);
-    expect(res.code).toBe(400);
-    let resPayload: DashboardCreateRes = res.payload;
-    console.log(`jsonRes: ${JSON.stringify(resPayload)}`);
-    let id = resPayload.id;
+    const createRetVal = await post('dashboard/create', {});
 
-    const readRetVal = await dashboardReadPOST(req, res, next, {
-      id: 15151 as any,
+    expect(createRetVal.status).toBe(400);
+
+    const readRetVal = await post('dashboard/read', {
+      id: 'foo',
     });
-    let resPayload2: DashboardReadRes = res.payload;
-    let resCode = res.code;
 
-    console.log(`res2: ${JSON.stringify(resPayload2)}`);
+    expect(readRetVal.status).toBe(404);
 
-    expect(resPayload?.state).toBeFalsy();
-    expect(resCode).toBe(404);
+    const updateRetVal = await post('dashboard/update', { foo: 'bar' });
 
-    // const body2 = {
-    //   ...resPayload2,
-    //   name: 'Pontus 2',
-    // };
+    expect(updateRetVal.status).toBe(400);
 
-    // const updateRetVal = await dashboardUpdatePOST(req, res, next, body2);
+    const deleteRetVal = await post('dashboard/delete', { foo: 'bar' });
 
-    // let resPayload3: DashboardUpdateRes = res.payload;
+    let resPayload4 = deleteRetVal.data;
 
-    // expect(resPayload3.name).toBe(body2.name);
-
-    // const body3 = {
-    //   id: resPayload3.id,
-    // };
-
-    // const deleteRetVal = await dashboardDeletePOST(req, res, next, body3);
-
-    // let resPayload4 = res.payload;
-
-    // expect(resPayload4.id).toBe(body3.id);
+    expect(deleteRetVal.status).toBe(400);
   });
 });

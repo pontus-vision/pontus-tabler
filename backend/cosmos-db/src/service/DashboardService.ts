@@ -75,8 +75,12 @@ export const readDashboardById = async (dashboardId: string) => {
       .fetchAll();
     if (resources.length === 1) {
       return resources[0];
+    } else if (resources.length === 0) {
+      console.log(resources);
+
+      throw { code: 404, message: 'No dashboard found.' };
     } else {
-      throw new Error('There is more than 1 dashboard');
+      throw { code: 409, message: 'There is more than 1 dashboard' };
     }
   } catch (error) {
     throw error;
@@ -86,11 +90,12 @@ export const readDashboardById = async (dashboardId: string) => {
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   try {
     const dashboardContainer = await fetchDashboardContainer();
-
     const res = await dashboardContainer.item(data.id, data.id).delete();
+    console.log(res, data.id);
 
-    return res.item;
+    return 'Dashboard deleted!';
   } catch (error) {
+    console.log(error, data.id);
     throw error;
   }
 };
@@ -130,7 +135,9 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         const condition1Filter = cols[colId].condition1.filter;
         const condition2Filter = cols[colId].condition2.filter;
 
-        if (condition1Filter) {
+        const type1 = cols[colId].condition1.type;
+
+        if (condition1Filter && type1 === 'contains') {
           query += ` AND c.${colId}.property1 = "${condition1Filter}"`;
         }
 
