@@ -21,6 +21,7 @@ tags:
     description: Secured Admin-only calls
   - name: developers
     description: Operations available to regular developers
+# jsonSchemaDialect: 'https://json-schema.org/draft/2020-12/schema'
 paths:
   /menu:
     post:
@@ -439,7 +440,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DashboardUpdateReq'
+              allOf:
+                - $ref: '#/components/schemas/DashboardUpdateReq'
+
         required: true
       responses:
         '204':
@@ -1122,7 +1125,7 @@ components:
         - id
     DashboardRef:
       type: object
-      additionalProperties: false
+      # additionalProperties: false
       properties:
         name:
           type: string
@@ -1140,7 +1143,6 @@ components:
         owner: owner
         folder: folder
         name: name
-        id: id
         state: {}
     DashboardsReadReq:
       allOf:
@@ -1161,6 +1163,8 @@ components:
         - $ref: '#/components/schemas/DashboardRef'
         - $ref: '#/components/schemas/BaseModelRef'
     DashboardUpdateReq:
+      type: object
+      # unevaluatedProperties: false
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/DashboardRef'
