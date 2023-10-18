@@ -166,7 +166,7 @@ export const sendHttpRequest = async (
     throw new Error('MUST SET THE URL; CANNOT FUNCTION WITH AN EMPTY URL');
   }
 
-  const maxRetries = parseInt(import.meta.env.PV_NUM_RETRIES || '5');
+  const maxRetries = parseInt(process.env.PV_NUM_RETRIES || '5');
 
   const queryString = new URLSearchParams(queryParams).toString();
   const fullUrl = reqUrl + (queryString ? `?${queryString}` : '');
@@ -174,7 +174,7 @@ export const sendHttpRequest = async (
   const axiosInstance = axios.create({
     baseURL: fullUrl, // Set the base URL for all requests
     headers, // Set the request headers
-    timeout: parseInt(import.meta.env.PV_TIMEOUT_MS || '2000'), // Set a timeout for the request
+    timeout: parseInt(process.env.PV_TIMEOUT_MS || '2000'), // Set a timeout for the request
   });
 
   for (let i = 0; i < maxRetries; i++) {
@@ -191,7 +191,7 @@ export const sendHttpRequest = async (
         data,
       });
 
-      if (import.meta.env.PV_DEBUG) {
+      if (process.env.PV_DEBUG) {
         console.log(
           `!!!! received reply code (${response.status}) \n${JSON.stringify(
             response.headers,
@@ -208,8 +208,8 @@ export const sendHttpRequest = async (
       );
 
       return response;
-    } catch (error) {
-      console.error(`error: ${error.message}`);
+    } catch (error: any) {
+      console.error(`error: ${error?.message}`);
       await new Promise((resolve) => setTimeout(resolve, 200 * i + 1));
     }
   }

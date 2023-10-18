@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createUser, readAuthGroups, updateUser } from '../../client';
 import Select from 'react-select';
@@ -14,7 +14,7 @@ const UpdateUser = () => {
 
   const location = useLocation();
 
-  const handleUserNameChange = (event) => {
+  const handleUserNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setUserName(event.target.value);
   };
 
@@ -22,7 +22,7 @@ const UpdateUser = () => {
     setSelectedGroups(selectedOptions);
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     updateUserData();

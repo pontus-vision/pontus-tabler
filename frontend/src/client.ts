@@ -32,7 +32,7 @@ import {
   NewTable,
   NewTableRow,
   NewUser,
-  ReadDashboardsRes,
+  DashboardReadRes,
   ReadGroupsRes,
   ReadPaginationFilter,
   ReadUsersRes,
@@ -159,7 +159,7 @@ export const deleteDataTableRow = async (
 
 export const getAllDashboards = async (
   body: ReadPaginationFilter,
-): Promise<AxiosResponse<ReadDashboardsRes> | undefined> => {
+): Promise<AxiosResponse<Dash> | undefined> => {
   return post('/dashboards/read', body);
 };
 
