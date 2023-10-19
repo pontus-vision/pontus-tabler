@@ -171,4 +171,35 @@ describe('dashboardCreatePOST', () => {
 
     expect(deleteRetVal.status).toBe(400);
   });
+  it('should read dashboards', async () => {
+    const body: DashboardCreateReq = {
+      owner: 'Joe',
+      name: 'PontusVision',
+      folder: 'folder 1',
+      state: {},
+    };
+
+    const createRetVal = await post('dashboard/create', body);
+
+    const createRetVal2 = await post('dashboard/create', {
+      ...body,
+      name: 'PontusVision2',
+    });
+
+    const readBody = {
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'string',
+            type: 'contains',
+          },
+        },
+      },
+    };
+
+    const readRetVal = await post('dashboards/read', readBody);
+
+    expect(readRetVal.data.length).toBe(2);
+  });
 });
