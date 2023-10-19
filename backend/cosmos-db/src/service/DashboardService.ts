@@ -139,35 +139,35 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         const type2 = cols[colId]?.condition2?.type.toLowerCase();
 
         if (condition1Filter && type1 === 'contains') {
-          query += ` WHERE CONTAINS(d.${colId}, "")`;
+          query += ` WHERE CONTAINS(d.${colId}, "${condition1Filter}")`;
         }
 
         if (condition2Filter && type2 === 'contains') {
-          query += ` AND CONTAINS(d.${colId}, "")`;
+          query += ` AND CONTAINS(d.${colId}, "${condition2Filter}")`;
         }
 
         if (condition1Filter && type1 === 'not contains') {
-          query += ` WHERE NOT CONTAINS(d.${colId}, "")`;
+          query += ` WHERE NOT CONTAINS(d.${colId}, "${condition1Filter}")`;
         }
 
         if (condition2Filter && type2 === 'not contains') {
-          query += ` AND NOT CONTAINS(d.${colId}, "")`;
+          query += ` AND NOT CONTAINS(d.${colId}, "${condition2Filter}")`;
         }
 
         if (condition1Filter && type1 === 'starts with') {
-          query += ` WHERE STARTSWITH(d.${colId}, "")`;
+          query += ` WHERE STARTSWITH(d.${colId}, "${condition1Filter}")`;
         }
 
         if (condition2Filter && type2 === 'starts with') {
-          query += ` AND STARTSWITH(d.${colId}, "")`;
+          query += ` AND STARTSWITH(d.${colId}, "${condition2Filter}")`;
         }
 
         if (condition1Filter && type1 === 'ends with') {
-          query += ` WHERE ENDSWITH(d.${colId}, "")`;
+          query += ` WHERE ENDSWITH(d.${colId}, "${condition1Filter}")`;
         }
 
         if (condition2Filter && type2 === 'ends with') {
-          query += ` AND ENDSWITH(d.${colId}, "")`;
+          query += ` AND ENDSWITH(d.${colId}, "${condition2Filter}")`;
         }
 
         if (condition1Filter && type1 === 'equals') {
@@ -175,7 +175,7 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         }
 
         if (condition2Filter && type2 === 'equals') {
-          query += ` AND WHERE d.${colId} = "")`;
+          query += ` AND WHERE d.${colId} = "${condition2Filter}")`;
         }
 
         if (condition1Filter && type1 === 'not equals') {
@@ -183,7 +183,7 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         }
 
         if (condition2Filter && type2 === 'not equals') {
-          query += ` AND WHERE NOT d.${colId} = "")`;
+          query += ` AND WHERE NOT d.${colId} = "${condition2Filter}")`;
         }
       }
     }
