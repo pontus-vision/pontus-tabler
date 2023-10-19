@@ -138,6 +138,10 @@ describe('dashboardCreatePOST', () => {
     let resPayload4 = deleteRetVal.data;
 
     expect(deleteRetVal.status).toBe(200);
+
+    const readRetVal2 = await post('dashboard/read', body3);
+
+    expect(readRetVal2.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
