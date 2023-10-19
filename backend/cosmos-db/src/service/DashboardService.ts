@@ -125,35 +125,78 @@ export function camelCaseString(inputString) {
 
 export const readDashboards = async (body: ReadPaginationFilter) => {
   try {
-    let query =
-      'select * from dashboards p where p.colId = @colId OFFSET @offset LIMIT @limit';
+    let query = 'select * from dashboards d';
 
-    const cols = body.filters;
+    const cols = body?.filters;
 
     for (const colId in cols) {
+      console.log(colId);
       if (cols.hasOwnProperty(colId)) {
-        const condition1Filter = cols[colId].condition1.filter;
-        const condition2Filter = cols[colId].condition2.filter;
+        const condition1Filter = cols[colId]?.condition1?.filter;
+        const condition2Filter = cols[colId]?.condition2?.filter;
 
-        const type1 = cols[colId].condition1.type;
+        const type1 = cols[colId]?.condition1?.type.toLowerCase();
+        const type2 = cols[colId]?.condition2?.type.toLowerCase();
 
         if (condition1Filter && type1 === 'contains') {
-          query += ` AND c.${colId}.property1 = "${condition1Filter}"`;
+          query += ` WHERE CONTAINS(d.${colId}, "")`;
         }
 
-        if (condition2Filter) {
-          query += ` AND c.${colId}.property2 = "${condition2Filter}"`;
+        if (condition2Filter && type2 === 'contains') {
+          query += ` AND CONTAINS(d.${colId}, "")`;
         }
-        // ... add more conditions as needed for each colId
+
+        if (condition1Filter && type1 === 'not contains') {
+          query += ` WHERE NOT CONTAINS(d.${colId}, "")`;
+        }
+
+        if (condition2Filter && type2 === 'not contains') {
+          query += ` AND NOT CONTAINS(d.${colId}, "")`;
+        }
+
+        if (condition1Filter && type1 === 'starts with') {
+          query += ` WHERE STARTSWITH(d.${colId}, "")`;
+        }
+
+        if (condition2Filter && type2 === 'starts with') {
+          query += ` AND STARTSWITH(d.${colId}, "")`;
+        }
+
+        if (condition1Filter && type1 === 'ends with') {
+          query += ` WHERE ENDSWITH(d.${colId}, "")`;
+        }
+
+        if (condition2Filter && type2 === 'ends with') {
+          query += ` AND ENDSWITH(d.${colId}, "")`;
+        }
+
+        if (condition1Filter && type1 === 'equals') {
+          query += ` WHERE d.${colId} = "${condition1Filter}"`;
+        }
+
+        if (condition2Filter && type2 === 'equals') {
+          query += ` AND WHERE d.${colId} = "")`;
+        }
+
+        if (condition1Filter && type1 === 'not equals') {
+          query += ` WHERE NOT d.${colId} = "${condition1Filter}"`;
+        }
+
+        if (condition2Filter && type2 === 'not equals') {
+          query += ` AND WHERE NOT d.${colId} = "")`;
+        }
       }
     }
+
+    console.log({ query });
+    // where d.colId = @colId OFFSET @offset LIMIT @limit'
 
     const querySpec = {
       query,
       parameters: [
         {
           name: '@colId',
-          value: Object.keys(body.filters.colId)[0],
+          value: Object.keys(body?.filters)[0],
         },
         {
           name: '@offset',
@@ -165,7 +208,6 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         },
       ],
     };
-    console.log({ querySpec });
 
     const dashboardContainer = await fetchDashboardContainer();
     console.log({ dashboardContainer });
