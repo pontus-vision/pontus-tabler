@@ -5,10 +5,11 @@ import { AiFillFolderAdd } from 'react-icons/ai';
 
 type Props = {
   data?: any;
-  onSelect?: (data: any) => void;
+  onSelect?: (data: Folder | File) => void;
+  actionsMode?: boolean;
 };
 
-const TreeView = ({ data, onSelect }: Props) => {
+const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [expandedFolders, setExpandedFolders] = useState([]);
   const [newFolder, setNewFolder] = useState<Folder>();
@@ -57,7 +58,7 @@ const TreeView = ({ data, onSelect }: Props) => {
     }
 
     for (const child of folder.children) {
-      if (child.type === 'folder') {
+      if (child.kind === 'folder') {
         const found = findFolderById(child, targetId);
         if (found) {
           return found;
@@ -84,33 +85,35 @@ const TreeView = ({ data, onSelect }: Props) => {
 
   return (
     <div className="relative">
-      <div className="flex justify-end">
-        <AiFillFolderAdd
-          onClick={() => setCreateFolder(!createFolder)}
-          className={'text-3xl h-12 mb-0 cursor-pointer'}
-        ></AiFillFolderAdd>
-        <div
-          className={`flex flex-col gap-3 z-1 absolute top-8 p-2 ${
-            createFolder ? '' : 'hidden'
-          } bg-white border rounded-md `}
-        >
-          <input
-            className={
-              'mt-1 p-2 w-full border rounded-md focus:ring focus:ring-opacity-50 focus:border-indigo-500'
-            }
-            type="text"
-            onChange={(e) =>
-              setNewFolder({
-                name: e.target.value,
-                type: 'folder',
-                id: e.target.value.toLocaleLowerCase(),
-                children: [],
-              })
-            }
-          />
-          <button onClick={addFolder}>Create</button>
+      {actionsMode && (
+        <div className="flex justify-end">
+          <AiFillFolderAdd
+            onClick={() => setCreateFolder(!createFolder)}
+            className={'text-3xl h-12 mb-0 cursor-pointer'}
+          ></AiFillFolderAdd>
+          <div
+            className={`flex flex-col gap-3 z-1 absolute top-8 p-2 ${
+              createFolder ? '' : 'hidden'
+            } bg-white border rounded-md `}
+          >
+            <input
+              className={
+                'mt-1 p-2 w-full border rounded-md focus:ring focus:ring-opacity-50 focus:border-indigo-500'
+              }
+              type="text"
+              onChange={(e) =>
+                setNewFolder({
+                  name: e.target.value,
+                  type: 'folder',
+                  id: e.target.value.toLocaleLowerCase(),
+                  children: [],
+                })
+              }
+            />
+            <button onClick={addFolder}>Create</button>
+          </div>
         </div>
-      </div>
+      )}
       <FolderItem
         folder={jsonData}
         onSelect={handleFolderSelect}

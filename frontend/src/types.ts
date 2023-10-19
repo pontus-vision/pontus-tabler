@@ -48,7 +48,7 @@ export interface Meta {
 //   id: string;
 //   fieldId: string;
 //   storageId: string;
-//   type: string;
+//   kind: string;
 //   label: string;
 //   placeholderText: string;
 //   helpText: null;
@@ -60,10 +60,12 @@ export interface Meta {
 //   settings: null;
 //   __typename: string;
 // }
+
 export interface DataRoot {
   id: string;
   name: string;
-  kind: string;
+
+  kind: 'folder' | 'file';
   path: string;
   children: Child[];
 }
@@ -71,7 +73,7 @@ export interface DataRoot {
 export interface Child {
   id: string;
   name: string;
-  kind: string;
+  kind: 'folder' | 'file';
   path: string;
   children?: Child[];
 }

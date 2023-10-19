@@ -43,6 +43,8 @@ import {
   UpdateTableRow,
   UpdateUser,
   User,
+  UserReadBody,
+  DashboardAuthGroup,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -128,13 +130,13 @@ export const createTable = async (
 export const updateTable = async (
   body: UpdateTable,
 ): Promise<AxiosResponse<Table, any> | undefined> => {
-  return post('table/update', body);
+  return post('/table/update', body);
 };
 
 export const deleteTable = async (
   tableId: string,
 ): Promise<AxiosResponse<string, any> | undefined> => {
-  return post('table/delete', { tableId });
+  return post('/table/delete', { tableId });
 };
 
 export const createDataTable = async (body: NewTableRow) => {
@@ -229,6 +231,12 @@ export const readUsers = async (
   return post('/auth/users/read', {});
 };
 
+export const readUser = async (
+  body: UserReadBody,
+): Promise<AxiosResponse<User> | undefined> => {
+  return post('/auth/user/read', {});
+};
+
 export const updateUser = async (
   body: UpdateUser,
 ): Promise<AxiosResponse<Response>> => {
@@ -238,7 +246,13 @@ export const updateUser = async (
 export const deleteUser = async (
   userId: string,
 ): Promise<AxiosResponse<Response> | undefined> => {
-  return post('auth/user/delete', { userId });
+  return post('/auth/user/delete', { userId });
+};
+
+export const readDashboardGroupAuth = async (
+  dashboardId: string,
+): Promise<AxiosResponse<DashboardAuthGroup> | undefined> => {
+  return post('/dashboard/group/auth/read', { dashboardId });
 };
 
 export const getApiKeys = async () => {
