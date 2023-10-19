@@ -124,7 +124,6 @@ export async function dashboardsReadPOST(
   try {
     const response = await readDashboards(body);
 
-    console.log({ body });
     res.status(200);
     res.json(response);
 
