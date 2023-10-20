@@ -6,26 +6,22 @@ import {
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { DataRoot } from 'pontus-tabler/src/types';
 import { fetchDatabase } from '../utils/cosmos-utils';
+import { Container } from '@azure/cosmos';
+import { fetchContainer } from '../utils/fetch-containers';
 
-const fetchDashboardContainer = async () => {
-  const database = await fetchDatabase('pv_db');
+const fetchDashboardsContainer = async (): Promise<Container> => {
+  try {
+    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
 
-  const { container: dashboardsContainer } =
-    await database.containers.createIfNotExists({
-      id: 'dashboards',
-      partitionKey: {
-        paths: ['/id'],
-      },
-    });
-
-  return dashboardsContainer;
+    return dashboardContainer;
+  } catch (error) {}
 };
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
 ) => {
   try {
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
 
     const res = await dashboardContainer.items.upsert(data);
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
@@ -48,7 +44,7 @@ export const readDashboardById = async (dashboardId: string) => {
         },
       ],
     };
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
 
     const { resources } = await dashboardContainer.items
       .query(querySpec)
@@ -69,7 +65,7 @@ export const readDashboardById = async (dashboardId: string) => {
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   try {
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
     const res = await dashboardContainer.item(data.id, data.id).delete();
     console.log(res, data.id);
 
@@ -124,7 +120,7 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
     };
     console.log({ querySpec });
 
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
     console.log({ dashboardContainer });
     const { resources } = await dashboardContainer.items
       .query(querySpec)
