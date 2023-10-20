@@ -201,5 +201,28 @@ describe('dashboardCreatePOST', () => {
     const readRetVal = await post('dashboards/read', readBody);
 
     expect(readRetVal.data.length).toBe(2);
+
+    const readBody2 = {
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'string',
+            type: 'contains',
+          },
+        },
+        folder: {
+          condition1: {
+            filter: 'folder 1',
+            filterType: 'string',
+            type: 'contains',
+          },
+        },
+      },
+    };
+
+    const readRetVal2 = await post('dashboards/read', readBody2);
+
+    expect(readRetVal.data.length).toBe(2);
   });
 });
