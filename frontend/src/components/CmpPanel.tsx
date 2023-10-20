@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { getTables } from '../client';
 import {
   GetTablesResponse,
-  Table,
+  TableRef,
 } from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const CmpPanel = ({ setSelectedCmp }: Props) => {
-  const [tables, setTables] = useState<Table[]>();
+  const [tables, setTables] = useState<TableRef[]>();
   const { t, i18n } = useTranslation();
 
   const fetchModels = async () => {
