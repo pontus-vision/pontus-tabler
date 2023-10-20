@@ -125,7 +125,8 @@ export function camelCaseString(inputString) {
 
 export const readDashboards = async (body: ReadPaginationFilter) => {
   try {
-    let query = 'select * from dashboards d';
+    // let query = 'select * from dashboards d';
+    const query = [];
 
     const cols = body?.filters;
 
@@ -139,60 +140,64 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         const type2 = cols[colId]?.condition2?.type.toLowerCase();
 
         if (condition1Filter && type1 === 'contains') {
-          query += ` WHERE CONTAINS(d.${colId}, "${condition1Filter}")`;
+          query.push(` WHERE CONTAINS(d.${colId}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'contains') {
-          query += ` AND CONTAINS(d.${colId}, "${condition2Filter}")`;
+          query.push(` AND CONTAINS(d.${colId}, "${condition2Filter}")`);
         }
 
         if (condition1Filter && type1 === 'not contains') {
-          query += ` WHERE NOT CONTAINS(d.${colId}, "${condition1Filter}")`;
+          query.push(` WHERE NOT CONTAINS(d.${colId}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'not contains') {
-          query += ` AND NOT CONTAINS(d.${colId}, "${condition2Filter}")`;
+          query.push(` AND NOT CONTAINS(d.${colId}, "${condition2Filter}")`);
         }
 
         if (condition1Filter && type1 === 'starts with') {
-          query += ` WHERE STARTSWITH(d.${colId}, "${condition1Filter}")`;
+          query.push(` WHERE STARTSWITH(d.${colId}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'starts with') {
-          query += ` AND STARTSWITH(d.${colId}, "${condition2Filter}")`;
+          query.push(` AND STARTSWITH(d.${colId}, "${condition2Filter}")`);
         }
 
         if (condition1Filter && type1 === 'ends with') {
-          query += ` WHERE ENDSWITH(d.${colId}, "${condition1Filter}")`;
+          query.push(` WHERE ENDSWITH(d.${colId}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'ends with') {
-          query += ` AND ENDSWITH(d.${colId}, "${condition2Filter}")`;
+          query.push(` AND ENDSWITH(d.${colId}, "${condition2Filter}")`);
         }
 
         if (condition1Filter && type1 === 'equals') {
-          query += ` WHERE d.${colId} = "${condition1Filter}"`;
+          query.push(` WHERE d.${colId} = "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'equals') {
-          query += ` AND WHERE d.${colId} = "${condition2Filter}")`;
+          query.push(` AND WHERE d.${colId} = "${condition2Filter}")`);
         }
 
         if (condition1Filter && type1 === 'not equals') {
-          query += ` WHERE NOT d.${colId} = "${condition1Filter}"`;
+          query.push(` WHERE NOT d.${colId} = "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'not equals') {
-          query += ` AND WHERE NOT d.${colId} = "${condition2Filter}")`;
+          query.push(` AND WHERE NOT d.${colId} = "${condition2Filter}")`);
         }
       }
     }
 
-    console.log({ query });
-    // where d.colId = @colId OFFSET @offset LIMIT @limit'
+    for (let i = 0; i < query.length; i++) {
+      // Replace the first occurrence of "WHERE" with "AND" in each element
+      if (i > 0) {
+        query[i] = query[i].replace('WHERE', 'AND');
+      }
+    }
 
     const querySpec = {
-      query,
+      query: 'select * from dashboards d ' + query.join(''),
       parameters: [
         {
           name: '@colId',
