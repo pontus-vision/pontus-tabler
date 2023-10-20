@@ -9,40 +9,27 @@ import {
   IListModelResponseData,
   Meta,
 } from './types';
+
 import {
-  cmsCreateModelFrom,
-  cmsDeleteEntry,
-  cmsEntriesCreateModel,
-  cmsGetContentModel,
-  cmsPublishModelId,
-  getModelsWebiny,
-  listApiKeys,
-  listModel,
-} from './webinyApi';
-import {
-  AgGridInput,
-  AgGridOutput,
-  DeleteGroup,
   DeleteTableRow,
   GetTablesResponse,
-  AuthGroup,
   GroupReadBody,
-  NewDashboard,
-  NewGroup,
   NewTable,
   NewTableRow,
   NewUser,
   DashboardReadRes,
-  ReadGroupsRes,
   ReadPaginationFilter,
-  ReadUsersRes,
-  Table,
-  UpdateDashboard,
-  UpdateGroup,
   UpdateTable,
   UpdateTableRow,
   UpdateUser,
   User,
+  DashboardRef,
+  DashboardCreateReq,
+  DashboardUpdateReq,
+  GroupCreateReq,
+  AuthGroupRef,
+  GroupUpdateReq,
+  GroupDeleteReq,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -159,12 +146,12 @@ export const deleteDataTableRow = async (
 
 export const getAllDashboards = async (
   body: ReadPaginationFilter,
-): Promise<AxiosResponse<Dash> | undefined> => {
+): Promise<AxiosResponse<DashboardRef[]> | undefined> => {
   return post('/dashboards/read', body);
 };
 
 export const createDashboard = async (
-  body: NewDashboard,
+  body: DashboardCreateReq,
 ): Promise<AxiosResponse<Dashboard> | undefined> => {
   return post('/dashboard/create', {});
 };
@@ -176,7 +163,7 @@ export const getDashboard = async (
 };
 
 export const updateDashboard = async (
-  body: UpdateDashboard,
+  body: DashboardUpdateReq,
 ): Promise<AxiosResponse<string> | undefined> => {
   return post('/dashboard/update', { ...body });
 };
@@ -188,31 +175,31 @@ export const deleteDashboard = async (
 };
 
 export const createAuthGroup = async (
-  body: NewGroup,
-): Promise<AxiosResponse<AuthGroup> | undefined> => {
+  body: GroupCreateReq,
+): Promise<AxiosResponse<AuthGroupRef> | undefined> => {
   return post('/auth/group/create', body);
 };
 
 export const readAuthGroups = async (
   data: ReadPaginationFilter,
-): Promise<AxiosResponse<ReadGroupsRes> | undefined> => {
+): Promise<AxiosResponse<AuthGroupRef[]> | undefined> => {
   return post('/auth/groups/read', data);
 };
 
 export const readAuthGroup = async (
   body: GroupReadBody,
-): Promise<AxiosResponse<AuthGroup> | undefined> => {
+): Promise<AxiosResponse<AuthGroupRef> | undefined> => {
   return post('/auth/group/read', body);
 };
 
 export const updateAuthGroup = async (
-  body: UpdateGroup,
+  body: GroupUpdateReq,
 ): Promise<AxiosResponse<Response> | undefined> => {
   return post('/auth/group/update', body);
 };
 
 export const deleteAuthGroup = async (
-  body: DeleteGroup,
+  body: GroupDeleteReq,
 ): Promise<AxiosResponse<Response> | undefined> => {
   return post('/auth/group/delete', body);
 };
@@ -225,7 +212,7 @@ export const createUser = async (
 
 export const readUsers = async (
   body: ReadPaginationFilter,
-): Promise<AxiosResponse<ReadUsersRes> | undefined> => {
+): Promise<AxiosResponse<User[]> | undefined> => {
   return post('/auth/users/read', {});
 };
 

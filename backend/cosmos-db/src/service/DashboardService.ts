@@ -100,29 +100,6 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
   }
 };
 
-// Get items
-
-// for (const item of resources) {
-//   console.log(`${item.id}: ${item.name}, ${item.sku}`);
-// }
-
-export function camelCaseString(inputString) {
-  // Split the string by spaces
-  const words = inputString.split(' ');
-
-  // Capitalize the first letter of each word (except the first word)
-  for (let i = 0; i < words.length; i++) {
-    if (i === 0) {
-      words[i] = words[i][0].toLowerCase() + words[i].substring(1);
-    } else {
-      words[i] = words[i][0].toUpperCase() + words[i].substring(1);
-    }
-  }
-
-  // Join the words together without spaces
-  return words.join('');
-}
-
 export const readDashboards = async (body: ReadPaginationFilter) => {
   try {
     let query =

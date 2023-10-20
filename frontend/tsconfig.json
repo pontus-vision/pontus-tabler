@@ -18,6 +18,5 @@
     "outDir": "dist"
   },
   "exclude": ["node_modules"],
-  "include": ["src", "../backend/cosmos-db/src/__tests__/pv-response.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
