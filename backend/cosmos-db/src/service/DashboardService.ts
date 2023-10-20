@@ -1,4 +1,3 @@
-import { CosmosClient } from '@azure/cosmos';
 import {
   DashboardDeleteReq,
   DashboardCreateReq,
@@ -6,29 +5,10 @@ import {
   ReadPaginationFilter,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { DataRoot } from 'pontus-tabler/src/types';
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-const cosmosClient = new CosmosClient({
-  endpoint: process.env.PH_COSMOS_ENDPOINT || 'https://localhost:8081/',
-  key:
-    process.env.PH_COSMOS_KEY ||
-    'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==',
-});
-
-const fetchDatabase = async () => {
-  try {
-    const { database } = await cosmosClient.databases.createIfNotExists({
-      id: 'cosmicworks',
-      throughput: 400,
-    });
-    return database;
-  } catch (error) {
-    console.error(error);
-  }
-};
+import { fetchDatabase } from '../utils/cosmos-utils';
 
 const fetchDashboardContainer = async () => {
-  const database = await fetchDatabase();
+  const database = await fetchDatabase('pv_db');
 
   const { container: dashboardsContainer } =
     await database.containers.createIfNotExists({
