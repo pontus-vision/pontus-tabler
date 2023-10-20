@@ -6,12 +6,13 @@ import styled from 'styled-components';
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';
-import { Dashboard, DataRoot } from '../types';
+import { Child, Dashboard, DataRoot } from '../types';
 import { setDashboardId } from '../store/sliceDashboards';
 import { useAuth } from '../AuthContext';
 import TreeView from './Tree/TreeView';
 import { readMenu } from '../client';
 import data from './Tree/data';
+import { File, Folder } from './Tree/FolderItem';
 
 type Props = {
   openedSidebar: boolean;
@@ -98,12 +99,31 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
     console.log(deviceSize);
   }, [deviceSize]);
 
+  const handleSelect = (selection: DataRoot | Child) => {
+    if (!selection?.path || selection.type === 'folder') return;
+    console.log(selection.path.replace(/\//g, '-').slice(1).replace(' ', '-'));
+    navigate(
+      '/dashboard/' +
+        selection.path
+          .replace(/\//g, '-')
+          .slice(1)
+          .replace(/\s+/g, '-')
+          .toLocaleLowerCase(),
+    );
+  };
+
   return (
-    <div className={`top-12 ${openedSidebar ? 'active' : ''}` + ' sidebar'}>
-      <div className="w-5/6">
-        {dashboardsData && <TreeView data={dashboardsData} />}
+    <div className={`${openedSidebar ? 'active' : ''}` + ' sidebar'}>
+      <div className="tree-view">
+        {dashboardsData && (
+          <TreeView
+            data={dashboardsData}
+            actionsMode={false}
+            onSelect={handleSelect}
+          />
+        )}
       </div>
-      <ul className="list-none p-0 m-0">
+      <ul className="sidebar__items-list">
         {deviceSize === 'sm' && (
           <li>
             <Form.Select

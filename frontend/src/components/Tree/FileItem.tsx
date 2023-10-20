@@ -6,6 +6,7 @@ type Props = {
   selected: string;
   path?: string;
   file: any;
+  actionsMode: boolean;
 };
 
 const FileItem = (props: Props) => {
