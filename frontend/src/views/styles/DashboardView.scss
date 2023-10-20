@@ -44,6 +44,14 @@
     &__save {
       background-color: #8d8b01;
     }
+    &__delete-btn {
+      background-color: #62c5ff;
+      transition: background-color 50ms ease-in-out;
+      &:hover {
+        background-color: #ff6262;
+        border-color: #00000000;
+      }
+    }
   }
   .delete-dashboard-modal {
     position: fixed;

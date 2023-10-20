@@ -1,4 +1,3 @@
-import { CosmosClient } from '@azure/cosmos';
 import {
   DashboardDeleteReq,
   DashboardCreateReq,
@@ -6,46 +5,23 @@ import {
   ReadPaginationFilter,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { DataRoot } from 'pontus-tabler/src/types';
+import { fetchDatabase } from '../utils/cosmos-utils';
+import { Container } from '@azure/cosmos';
+import { fetchContainer } from '../utils/fetch-containers';
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-const cosmosClient = new CosmosClient({
-  endpoint: process.env.PH_COSMOS_ENDPOINT || 'https://localhost:8081/',
-  key:
-    process.env.PH_COSMOS_KEY ||
-    'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==',
-});
-
-const fetchDatabase = async () => {
+const fetchDashboardsContainer = async (): Promise<Container> => {
   try {
-    const { database } = await cosmosClient.databases.createIfNotExists({
-      id: 'cosmicworks',
-      throughput: 400,
-    });
-    return database;
-  } catch (error) {
-    console.error(error);
-  }
-};
+    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
 
-const fetchDashboardContainer = async () => {
-  const database = await fetchDatabase();
-
-  const { container: dashboardsContainer } =
-    await database.containers.createIfNotExists({
-      id: 'dashboards',
-      partitionKey: {
-        paths: ['/id'],
-      },
-    });
-
-  return dashboardsContainer;
+    return dashboardContainer;
+  } catch (error) {}
 };
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
 ) => {
   try {
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
 
     const res = await dashboardContainer.items.upsert(data);
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
@@ -68,7 +44,7 @@ export const readDashboardById = async (dashboardId: string) => {
         },
       ],
     };
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
 
     const { resources } = await dashboardContainer.items
       .query(querySpec)
@@ -89,7 +65,7 @@ export const readDashboardById = async (dashboardId: string) => {
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   try {
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
     const res = await dashboardContainer.item(data.id, data.id).delete();
     console.log(res, data.id);
 
@@ -99,29 +75,6 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
     throw error;
   }
 };
-
-// Get items
-
-// for (const item of resources) {
-//   console.log(`${item.id}: ${item.name}, ${item.sku}`);
-// }
-
-export function camelCaseString(inputString) {
-  // Split the string by spaces
-  const words = inputString.split(' ');
-
-  // Capitalize the first letter of each word (except the first word)
-  for (let i = 0; i < words.length; i++) {
-    if (i === 0) {
-      words[i] = words[i][0].toLowerCase() + words[i].substring(1);
-    } else {
-      words[i] = words[i][0].toUpperCase() + words[i].substring(1);
-    }
-  }
-
-  // Join the words together without spaces
-  return words.join('');
-}
 
 export const readDashboards = async (body: ReadPaginationFilter) => {
   try {
@@ -224,7 +177,7 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
       ],
     };
 
-    const dashboardContainer = await fetchDashboardContainer();
+    const dashboardContainer = await fetchDashboardsContainer();
     console.log({ dashboardContainer });
     const { resources } = await dashboardContainer.items
       .query(querySpec)

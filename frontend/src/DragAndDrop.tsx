@@ -6,16 +6,22 @@ import { Child, DataRoot } from './types';
 
 const DragAndDropArray = () => {
   const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3']);
-  const [createArr, setCreateArr] = useState<Array<Child|DataRoot>>([]);
+  const [createArr, setCreateArr] = useState<Array<Child | DataRoot>>([]);
   const [selectedCrud, setSelectedCrud] = useState();
-  const [selectedGroup, setSelectedGroup] = useState<Child|DataRoot>();
-  const [selectedDashboard, setSelectedDashboard] = useState<Child|DataRoot>();
-  const [readArr, setReadArr] = useState<Array<Child|DataRoot>>([]);
-  const [updateArr, setUpdateArr] = useState<Array<Child|DataRoot>>([]);
-  const [deleteArr, setDeleteArr] = useState<Array<Child|DataRoot>>([]);
+  const [selectedGroup, setSelectedGroup] = useState<Child | DataRoot>();
+  const [selectedDashboard, setSelectedDashboard] = useState<
+    Child | DataRoot
+  >();
+  const [readArr, setReadArr] = useState<Array<Child | DataRoot>>([]);
+  const [updateArr, setUpdateArr] = useState<Array<Child | DataRoot>>([]);
+  const [deleteArr, setDeleteArr] = useState<Array<Child | DataRoot>>([]);
   const [selectedArrItem, setSelectedArrItem] = useState();
 
-  const handleDragStart = (event: React.DragEvent<HTMLDivElement>, index: number, item: Child | DataRoot) => {
+  const handleDragStart = (
+    event: React.DragEvent<HTMLDivElement>,
+    index: number,
+    item: Child | DataRoot,
+  ) => {
     console.log({ item });
     // if (item.id === 'root') return;
     event.dataTransfer.setData('text/plain', JSON.stringify(item));
@@ -74,29 +80,32 @@ const DragAndDropArray = () => {
     console.log({ selectedGroup });
   }, [selectedGroup]);
 
-  const handleGroupSelect = (folder:Child | DataRoot) => {
-    if(folder.type !== 'folder') return
+  const handleGroupSelect = (folder: Child | DataRoot) => {
+    if (folder.kind !== 'folder') return;
     setSelectedGroup(folder);
-    console.log({group: folder})
+    console.log({ group: folder });
   };
 
   const handleDashboardSelect = (dashboard: DataRoot | Child) => {
-    if(dashboard.type !== 'file') return
+    if (dashboard.kind !== 'file') return;
     setSelectedDashboard(dashboard);
-    console.log({dash:dashboard})
+    console.log({ dash: dashboard });
   };
 
-  const searchItems = (folder:DataRoot | Child, term: string): Array<Child| DataRoot> | undefined=> {
+  const searchItems = (
+    folder: DataRoot | Child,
+    term: string,
+  ): Array<Child | DataRoot> | undefined => {
     const results = [];
 
     if (folder.name.toLowerCase().includes(term.toLowerCase())) {
       results.push(folder);
     }
-    
-    if(!folder?.children) return
+
+    if (!folder?.children) return;
     for (const child of folder?.children) {
-      if (child.type === 'folder') {
-      results.push(...searchItems(child, term));
+      if (child.kind === 'folder') {
+        results.push(...searchItems(child, term));
       } else if (child.name.toLowerCase().includes(term.toLowerCase())) {
         results.push(child);
       }
@@ -141,7 +150,7 @@ const DragAndDropArray = () => {
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
                   className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === "Create"
+                    item === selectedArrItem && selectedCrud === 'Create'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
                   }`}
@@ -150,14 +159,16 @@ const DragAndDropArray = () => {
                 </div>
               ))}
             </div>
-            {selectedCrud === 'Create' && selectedArrItem && createArr.length > 0 && (
-              <button
-                onClick={() => removeFromCrudArr('Create')}
-                className="w-6 bg-neutral-200"
-              >
-                -
-              </button>
-            )}
+            {selectedCrud === 'Create' &&
+              selectedArrItem &&
+              createArr.length > 0 && (
+                <button
+                  onClick={() => removeFromCrudArr('Create')}
+                  className="w-6 bg-neutral-200"
+                >
+                  -
+                </button>
+              )}
           </div>
           <div className="flex flex-col">
             <h2 className="text-xl font-semibold mb-2">Read</h2>
@@ -174,7 +185,7 @@ const DragAndDropArray = () => {
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
                   className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === "Read"
+                    item === selectedArrItem && selectedCrud === 'Read'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
                   }`}
@@ -183,16 +194,18 @@ const DragAndDropArray = () => {
                 </div>
               ))}
             </div>
-            {selectedCrud === 'Read' && selectedArrItem && readArr.length > 0 &&(
-              <button
-                onClick={() => removeFromCrudArr('Read')}
-                className="w-6 bg-neutral-200"
-              >
-                -
-              </button>
-            )}
+            {selectedCrud === 'Read' &&
+              selectedArrItem &&
+              readArr.length > 0 && (
+                <button
+                  onClick={() => removeFromCrudArr('Read')}
+                  className="w-6 bg-neutral-200"
+                >
+                  -
+                </button>
+              )}
           </div>
-          
+
           <div className="flex flex-col">
             <h2 className="text-xl font-semibold mb-2">Update</h2>
             <div
@@ -208,7 +221,7 @@ const DragAndDropArray = () => {
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
                   className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === "Update"
+                    item === selectedArrItem && selectedCrud === 'Update'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
                   }`}
@@ -217,14 +230,16 @@ const DragAndDropArray = () => {
                 </div>
               ))}
             </div>
-            {selectedCrud === 'Update' && selectedArrItem  && updateArr.length > 0 && (
-              <button
-                onClick={() => removeFromCrudArr('Update')}
-                className="w-6 bg-neutral-200"
-              >
-                -
-              </button>
-            )}
+            {selectedCrud === 'Update' &&
+              selectedArrItem &&
+              updateArr.length > 0 && (
+                <button
+                  onClick={() => removeFromCrudArr('Update')}
+                  className="w-6 bg-neutral-200"
+                >
+                  -
+                </button>
+              )}
           </div>
           <div className="flex flex-col">
             <h2 className="text-xl font-semibold mb-2">Delete</h2>
@@ -241,7 +256,7 @@ const DragAndDropArray = () => {
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
                   className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === "Delete"
+                    item === selectedArrItem && selectedCrud === 'Delete'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
                   }`}
@@ -250,14 +265,16 @@ const DragAndDropArray = () => {
                 </div>
               ))}
             </div>
-            {selectedCrud === 'Delete' && selectedArrItem && deleteArr.length > 0 && (
-              <button
-                onClick={() => removeFromCrudArr('Delete')}
-                className="w-6 bg-neutral-200"
-              >
-                -
-              </button>
-            )}
+            {selectedCrud === 'Delete' &&
+              selectedArrItem &&
+              deleteArr.length > 0 && (
+                <button
+                  onClick={() => removeFromCrudArr('Delete')}
+                  className="w-6 bg-neutral-200"
+                >
+                  -
+                </button>
+              )}
           </div>
         </div>
         <div className="flex flex-col space-y-4 w-52">

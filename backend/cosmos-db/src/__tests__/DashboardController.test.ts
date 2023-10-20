@@ -89,10 +89,6 @@ describe('dashboardCreatePOST', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    const req = {} as any;
-    const res = new PVResponse();
-    const next = jest.fn();
     const body: DashboardRef = {
       name: 'string',
       folder: 'string',
@@ -105,6 +101,8 @@ describe('dashboardCreatePOST', () => {
     let resPayload: DashboardCreateRes = createRetVal.data;
     let id = resPayload.id;
 
+    expect(createRetVal.data.name).toBe(body.name);
+
     const readRetVal = await post('dashboard/read', {
       id,
     });
@@ -112,7 +110,6 @@ describe('dashboardCreatePOST', () => {
 
     console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
-    expect(createRetVal.data.name).toBe(body.name);
     expect(readRetVal.data.name).toBe(body.name);
 
     const body2: DashboardUpdateReq = {
@@ -138,19 +135,12 @@ describe('dashboardCreatePOST', () => {
     let resPayload4 = deleteRetVal.data;
 
     expect(deleteRetVal.status).toBe(200);
+
+    const readRetVal2 = await post('dashboard/read', body3);
+
+    expect(readRetVal2.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    const req = {} as any;
-    const res = new PVResponse();
-    const next = jest.fn();
-    const body: DashboardRef = {
-      name: 'string',
-      folder: 'string',
-      owner: 'string',
-      state: {},
-    };
-
     const createRetVal = await post('dashboard/create', {});
 
     expect(createRetVal.status).toBe(400);
