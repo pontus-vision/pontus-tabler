@@ -139,12 +139,16 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         const type1 = cols[colId]?.condition1?.type.toLowerCase();
         const type2 = cols[colId]?.condition2?.type.toLowerCase();
 
+        const operator = cols[colId]?.operator;
+
         if (condition1Filter && type1 === 'contains') {
           query.push(` WHERE CONTAINS(d.${colId}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'contains') {
-          query.push(` AND CONTAINS(d.${colId}, "${condition2Filter}")`);
+          query.push(
+            ` ${operator} CONTAINS(d.${colId}, "${condition2Filter}")`,
+          );
         }
 
         if (condition1Filter && type1 === 'not contains') {
@@ -152,7 +156,9 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         }
 
         if (condition2Filter && type2 === 'not contains') {
-          query.push(` AND NOT CONTAINS(d.${colId}, "${condition2Filter}")`);
+          query.push(
+            ` ${operator} NOT CONTAINS(d.${colId}, "${condition2Filter}")`,
+          );
         }
 
         if (condition1Filter && type1 === 'starts with') {
@@ -160,7 +166,9 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         }
 
         if (condition2Filter && type2 === 'starts with') {
-          query.push(` AND STARTSWITH(d.${colId}, "${condition2Filter}")`);
+          query.push(
+            ` ${operator} STARTSWITH(d.${colId}, "${condition2Filter}")`,
+          );
         }
 
         if (condition1Filter && type1 === 'ends with') {
@@ -168,7 +176,9 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         }
 
         if (condition2Filter && type2 === 'ends with') {
-          query.push(` AND ENDSWITH(d.${colId}, "${condition2Filter}")`);
+          query.push(
+            ` ${operator} ENDSWITH(d.${colId}, "${condition2Filter}")`,
+          );
         }
 
         if (condition1Filter && type1 === 'equals') {
@@ -176,7 +186,7 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         }
 
         if (condition2Filter && type2 === 'equals') {
-          query.push(` AND WHERE d.${colId} = "${condition2Filter}")`);
+          query.push(` ${operator} d.${colId} = "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'not equals') {
@@ -184,7 +194,7 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
         }
 
         if (condition2Filter && type2 === 'not equals') {
-          query.push(` AND WHERE NOT d.${colId} = "${condition2Filter}")`);
+          query.push(` ${operator} NOT d.${colId} = "${condition2Filter}"`);
         }
       }
     }
