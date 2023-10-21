@@ -5,17 +5,8 @@ import {
   ReadPaginationFilter,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { DataRoot } from 'pontus-tabler/src/types';
-import { fetchDatabase } from '../utils/cosmos-utils';
+import { fetchDashboardsContainer, fetchDatabase } from '../utils/cosmos-utils';
 import { Container } from '@azure/cosmos';
-import { fetchContainer } from '../utils/fetch-containers';
-
-const fetchDashboardsContainer = async (): Promise<Container> => {
-  try {
-    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
-
-    return dashboardContainer;
-  } catch (error) {}
-};
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
@@ -34,32 +25,28 @@ export const upsertDashboard = async (
 };
 
 export const readDashboardById = async (dashboardId: string) => {
-  try {
-    const querySpec = {
-      query: 'select * from dashboards p where p.id=@dashboardId',
-      parameters: [
-        {
-          name: '@dashboardId',
-          value: dashboardId,
-        },
-      ],
-    };
-    const dashboardContainer = await fetchDashboardsContainer();
+  const querySpec = {
+    query: 'select * from dashboards p where p.id=@dashboardId',
+    parameters: [
+      {
+        name: '@dashboardId',
+        value: dashboardId,
+      },
+    ],
+  };
+  const dashboardContainer = await fetchDashboardsContainer();
 
-    const { resources } = await dashboardContainer.items
-      .query(querySpec)
-      .fetchAll();
-    if (resources.length === 1) {
-      return resources[0];
-    } else if (resources.length === 0) {
-      console.log(resources);
+  const { resources } = await dashboardContainer.items
+    .query(querySpec)
+    .fetchAll();
+  if (resources.length === 1) {
+    return resources[0];
+  } else if (resources.length === 0) {
+    console.log(resources);
 
-      throw { code: 404, message: 'No dashboard found.' };
-    } else {
-      throw { code: 409, message: 'There is more than 1 dashboard' };
-    }
-  } catch (error) {
-    throw error;
+    throw { code: 404, message: 'No dashboard found.' };
+  } else {
+    throw { code: 409, message: 'There is more than 1 dashboard' };
   }
 };
 
@@ -77,62 +64,58 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 };
 
 export const readDashboards = async (body: ReadPaginationFilter) => {
-  try {
-    let query =
-      'select * from dashboards p where p.colId = @colId OFFSET @offset LIMIT @limit';
+  let query =
+    'select * from dashboards p where p.colId = @colId OFFSET @offset LIMIT @limit';
 
-    const cols = body.filters;
+  const cols = body.filters;
 
-    for (const colId in cols) {
-      if (cols.hasOwnProperty(colId)) {
-        const condition1Filter = cols[colId].condition1.filter;
-        const condition2Filter = cols[colId].condition2.filter;
+  for (const colId in cols) {
+    if (cols.hasOwnProperty(colId)) {
+      const condition1Filter = cols[colId].condition1.filter;
+      const condition2Filter = cols[colId].condition2.filter;
 
-        const type1 = cols[colId].condition1.type;
+      const type1 = cols[colId].condition1.type;
 
-        if (condition1Filter && type1 === 'contains') {
-          query += ` AND c.${colId}.property1 = "${condition1Filter}"`;
-        }
-
-        if (condition2Filter) {
-          query += ` AND c.${colId}.property2 = "${condition2Filter}"`;
-        }
-        // ... add more conditions as needed for each colId
+      if (condition1Filter && type1 === 'contains') {
+        query += ` AND c.${colId}.property1 = "${condition1Filter}"`;
       }
+
+      if (condition2Filter) {
+        query += ` AND c.${colId}.property2 = "${condition2Filter}"`;
+      }
+      // ... add more conditions as needed for each colId
     }
-
-    const querySpec = {
-      query,
-      parameters: [
-        {
-          name: '@colId',
-          value: Object.keys(body.filters.colId)[0],
-        },
-        {
-          name: '@offset',
-          value: body.from - 1,
-        },
-        {
-          name: '@limit',
-          value: body.to - body.from + 1,
-        },
-      ],
-    };
-    console.log({ querySpec });
-
-    const dashboardContainer = await fetchDashboardsContainer();
-    console.log({ dashboardContainer });
-    const { resources } = await dashboardContainer.items
-      .query(querySpec)
-      .fetchAll();
-
-    console.log({ resources });
-    if (resources.length === 0) {
-      throw { code: 404, message: 'No dashboard has been found.' };
-    }
-
-    return resources;
-  } catch (error) {
-    throw error;
   }
+
+  const querySpec = {
+    query,
+    parameters: [
+      {
+        name: '@colId',
+        value: Object.keys(body.filters.colId)[0],
+      },
+      {
+        name: '@offset',
+        value: body.from - 1,
+      },
+      {
+        name: '@limit',
+        value: body.to - body.from + 1,
+      },
+    ],
+  };
+  console.log({ querySpec });
+
+  const dashboardContainer = await fetchDashboardsContainer();
+  console.log({ dashboardContainer });
+  const { resources } = await dashboardContainer.items
+    .query(querySpec)
+    .fetchAll();
+
+  console.log({ resources });
+  if (resources.length === 0) {
+    throw { code: 404, message: 'No dashboard has been found.' };
+  }
+
+  return resources;
 };
