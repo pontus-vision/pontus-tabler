@@ -209,7 +209,7 @@ export const sendHttpRequest = async (
 
       return response;
     } catch (error: any) {
-      console.error(`error: ${error?.message}`);
+      console.log(`error: ${JSON.stringify(error)}`);
       await new Promise((resolve) => setTimeout(resolve, 200 * i + 1));
     }
   }

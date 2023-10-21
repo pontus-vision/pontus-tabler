@@ -147,13 +147,17 @@ const PVFlexLayout = ({
           const input: AgGridInput = {
             // cols:
           };
-          const { data: colsRes } = await getTable(config.tableId);
+          const colsRes = await getTable(config.tableId);
 
-          const { data } = await readDataTable(input);
+          const readDataTableRes = await readDataTable(input);
+
+          const colsData = colsRes?.data;
+
+          const dataTableData = readDataTableRes?.data;
 
           // setRows(data.records?.map((record) => JSON?.parse(record)));
-          colsRes.cols && setCols(colsRes.cols);
-          data.records &&
+          colsData?.cols && setCols(colsData?.cols);
+          data?.records &&
             // setRows(data.records?.map((record) => JSON?.parse(record)));
             setRows(
               data.records.map((rec) => {

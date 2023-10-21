@@ -1,7 +1,6 @@
 import { ColumnApi, GridApi } from 'ag-grid-community';
 import { IJsonModel } from 'flexlayout-react';
-import { P } from 'vitest/dist/types-5872e574';
-import { Table } from './pontus-api/typescript-fetch-client-generated';
+import { TableRef } from './pontus-api/typescript-fetch-client-generated';
 
 export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Index of the first rendered row
@@ -66,6 +65,7 @@ export interface Meta {
 export interface DataRoot {
   id: string;
   name: string;
+
   kind: 'folder' | 'file';
   path: string;
   children: Child[];
@@ -134,7 +134,7 @@ export interface CmsEntriesListContentMeta {
 
 export interface FlexLayoutCmp {
   componentName: string;
-  cmp?: Table;
+  cmp?: TableRef;
 }
 
 export interface WebinyRefInput {

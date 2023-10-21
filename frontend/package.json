@@ -5,9 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "tsbuild": "tsc",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest"
+  },
+  "exports": {
+    "./src/types.ts": "./src/types.ts",
+    "./src/http.ts": "./src/http.ts",
+    "./package.json": "./package.json"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
