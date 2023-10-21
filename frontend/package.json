@@ -52,7 +52,7 @@
     "keycloak-js": "^15.0.2",
     "lodash": "^4.17.21",
     "path": "^0.12.7",
-    "postcss": "^8.4.27",
+    "postcss": "^8.4.31",
     "prop-types": "^15.8.1",
     "pubsub-js": "^1.9.2",
     "react": "^18.2.0",
