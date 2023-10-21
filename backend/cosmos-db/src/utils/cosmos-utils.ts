@@ -29,7 +29,7 @@ export const fetchContainer = async (
   databaseId: string,
   containerId: string,
   partitionKey?: string[],
-): Promise<Container> => {
+): Promise<Container | undefined> => {
   try {
     const database = await fetchDatabase(databaseId);
 
@@ -45,7 +45,9 @@ export const fetchContainer = async (
   }
 };
 
-export const fetchDashboardsContainer = async (): Promise<Container> => {
+export const fetchDashboardsContainer = async (): Promise<
+  Container | undefined
+> => {
   try {
     const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
 
