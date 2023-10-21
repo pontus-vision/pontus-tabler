@@ -22,7 +22,7 @@ export const fetchDatabase = async (
     });
     return database;
   } catch (error) {
-    console.error(error);
+    throw error;
   }
 };
 export const fetchContainer = async (
@@ -30,16 +30,19 @@ export const fetchContainer = async (
   containerId: string,
   partitionKey?: string[],
 ): Promise<Container> => {
-  const database = await fetchDatabase(databaseId);
+  try {
+    const database = await fetchDatabase(databaseId);
 
-  const { container } = await database.containers.createIfNotExists({
-    id: containerId,
-    partitionKey: {
-      paths: partitionKey || ['/id'],
-    },
-  });
-
-  return container;
+    const { container } = await database.containers.createIfNotExists({
+      id: containerId,
+      partitionKey: {
+        paths: partitionKey || ['/id'],
+      },
+    });
+    return container;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const fetchDashboardsContainer = async (): Promise<Container> => {
