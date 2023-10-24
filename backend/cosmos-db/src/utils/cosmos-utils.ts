@@ -1,4 +1,9 @@
-import { CosmosClient, Database, DatabaseResponse } from '@azure/cosmos';
+import {
+  Container,
+  CosmosClient,
+  Database,
+  DatabaseResponse,
+} from '@azure/cosmos';
 
 const cosmosClient = new CosmosClient({
   endpoint: process.env.PH_COSMOS_ENDPOINT || 'https://localhost:8081/',
@@ -17,6 +22,37 @@ export const fetchDatabase = async (
     });
     return database;
   } catch (error) {
-    console.error(error);
+    throw error;
+  }
+};
+export const fetchContainer = async (
+  databaseId: string,
+  containerId: string,
+  partitionKey?: string[],
+): Promise<Container | undefined> => {
+  try {
+    const database = await fetchDatabase(databaseId);
+
+    const { container } = await database.containers.createIfNotExists({
+      id: containerId,
+      partitionKey: {
+        paths: partitionKey || ['/id'],
+      },
+    });
+    return container;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchDashboardsContainer = async (): Promise<
+  Container | undefined
+> => {
+  try {
+    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
+
+    return dashboardContainer;
+  } catch (error) {
+    throw error;
   }
 };
