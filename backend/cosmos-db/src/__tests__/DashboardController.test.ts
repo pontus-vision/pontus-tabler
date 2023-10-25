@@ -23,6 +23,8 @@ import {
 import { sendHttpRequest } from './http';
 import { method } from 'lodash';
 import axios from 'axios';
+import httpTrigger from '../index'
+import { HttpRequest, InvocationContext } from '@azure/functions';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -65,19 +67,31 @@ describe('dashboardCreatePOST', () => {
     //   );
     //   return res;
 
-    const res = await fetch(
-      'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-      {
-        method: 'POST',
+    // const res = await fetch(
+    //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    //   {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: 'Bearer 123456',
+    //     },
+    //     body: JSON.stringify(body),
+    //   },
+    // );
+
+    const res = await httpTrigger( new HttpRequest( {
+      body: {string: JSON.stringify(body) },
+      method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer 123456',
         },
-        body: JSON.stringify(body),
-      },
-    );
+       url:  'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    }), 
+    new InvocationContext());
+    
 
-    return { status: res.status, data: await res.json() };
+    return { status: res.status, data:  typeof res.body === 'string' ?  JSON.parse(res.body ): res.body };
   };
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
