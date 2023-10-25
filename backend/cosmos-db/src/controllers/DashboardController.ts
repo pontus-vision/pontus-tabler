@@ -8,12 +8,14 @@ import {
   DashboardReadRes,
   DashboardReadReq,
   ReadPaginationFilter,
+  DashboardsReadRes,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import {
   upsertDashboard,
   readDashboardById,
   deleteDashboard,
   readDashboards,
+  countDashboardsRecords,
 } from '../service/DashboardService';
 import { Request, Response, NextFunction } from 'express';
 
@@ -123,9 +125,15 @@ export async function dashboardsReadPOST(
 ) {
   try {
     const response = await readDashboards(body);
+    const response2 = await countDashboardsRecords();
+
+    const obj: DashboardsReadRes = {
+      dashboards: response,
+      totalDashboards: response2,
+    };
 
     res.status(200);
-    res.json(response);
+    res.json(obj);
 
     return res;
   } catch (error) {
