@@ -160,12 +160,11 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
   };
 
   const dashboardContainer = await fetchDashboardsContainer();
-  console.log({ dashboardContainer });
+
   const { resources } = await dashboardContainer.items
     .query(querySpec)
     .fetchAll();
 
-  console.log({ resources });
   if (resources.length === 0) {
     throw { code: 404, message: 'No dashboard has been found.' };
   }
