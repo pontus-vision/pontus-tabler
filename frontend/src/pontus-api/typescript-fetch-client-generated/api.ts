@@ -863,28 +863,22 @@ export interface GroupUpdateReq {
 /**
  *
  * @export
- * @interface DashboardsReadRes
+ * @interface InlineResponse200
  */
-export interface DashboardsReadRes {
+export interface InlineResponse200 {
   /**
    *
    * @type {number}
-   * @memberof DashboardsReadRes
+   * @memberof InlineResponse200
    */
   totalDashboards?: number;
   /**
    *
-   * @type {Array<Dashboard>}
-   * @memberof DashboardsReadRes
+   * @type {Array<InlineResponse200Dashboards>}
+   * @memberof InlineResponse200
    */
-  dashboards?: Array<Dashboard>;
+  dashboards?: Array<InlineResponse200Dashboards>;
 }
-/**
- *
- * @export
- * @interface DashboardsReadReq
- */
-export interface DashboardsReadReq extends ReadPaginationFilter {}
 /**
  *
  * @export
@@ -926,31 +920,31 @@ export interface InlineResponse2002 {
 /**
  *
  * @export
- * @interface Dashboard
+ * @interface InlineResponse200Dashboards
  */
-export interface Dashboard {
+export interface InlineResponse200Dashboards {
   /**
    *
    * @type {string}
-   * @memberof Dashboard
+   * @memberof InlineResponse200Dashboards
    */
   owner?: string;
   /**
    *
    * @type {string}
-   * @memberof Dashboard
+   * @memberof InlineResponse200Dashboards
    */
   folder?: string;
   /**
    *
    * @type {string}
-   * @memberof Dashboard
+   * @memberof InlineResponse200Dashboards
    */
   name?: string;
   /**
    *
    * @type {string}
-   * @memberof Dashboard
+   * @memberof InlineResponse200Dashboards
    */
   id?: string;
 }
@@ -3312,7 +3306,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     dashboardsReadPOST(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardsReadRes> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse200> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).dashboardsReadPOST(body, options);

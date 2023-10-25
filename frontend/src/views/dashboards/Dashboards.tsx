@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
 import {
-  DashboardsReadReq,
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
 } from '../../pontus-api/typescript-fetch-client-generated';
@@ -43,9 +42,9 @@ const Dashboards = () => {
     },
   ]);
   const [rows, setRows] = useState<{ [key: string]: unknown }[]>();
-  const [filters, setFilters] = useState<ReadPaginationFilterFilters>({});
-  const [from, setFrom] = useState<number>(0);
-  const [to, setTo] = useState<number>(0);
+  const [filters, setFilters] = useState<ReadPaginationFilterFilters>();
+  const [from, setFrom] = useState<number>();
+  const [to, setTo] = useState<number>();
   const [totalCount, setTotalCount] = useState<number>(2);
   const [rowClicked, setRowClicked] = useState<RowEvent>();
   const [newDashboardName, setNewDashboardName] = useState<string>();
@@ -58,7 +57,7 @@ const Dashboards = () => {
     const fetchDashboars = async () => {
       console.log('fetching');
       try {
-        const req: DashboardsReadReq = {
+        const req: ReadPaginationFilter = {
           from,
           to,
           filters,
@@ -113,44 +112,41 @@ const Dashboards = () => {
   if (!rows) return;
 
   return (
-    <>
-      <div className="hey">hey</div>
-      <div className="top-12 relative">
-        {!newDashboard && (
-          <>
-            <PVGridWebiny2
-              totalCount={totalCount}
-              // setDeletion={set}
-              rows={rows}
-              add={handleAddition}
-              cols={cols}
-              setFilters={setFilters}
-              setFrom={setFrom}
-              setTo={setTo}
-              setRowClicked={setRowClicked}
-            />
+    <div className="top-12 relative">
+      {!newDashboard && (
+        <>
+          <PVGridWebiny2
+            totalCount={totalCount}
+            // setDeletion={set}
+            rows={rows}
+            add={handleAddition}
+            cols={cols}
+            setFilters={setFilters}
+            setFrom={setFrom}
+            setTo={setTo}
+            setRowClicked={setRowClicked}
+          />
 
-            <button
-              onClick={() => setNewDashboard(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow-sm hover:shadow-md"
-            >
-              Add New Dashboard
-            </button>
-          </>
-        )}
-        {newDashboard && (
-          <>
-            <label htmlFor="">Dashboard Name: </label>
-            <input
-              type="text"
-              onChange={(e) => setNewDashboardName(e.target.value)}
-            />
-            <DashboardView createMode={true} dashboardName={newDashboardName} />
-          </>
-        )}
-        <h1>heyyy</h1>
-      </div>
-    </>
+          <button
+            onClick={() => setNewDashboard(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow-sm hover:shadow-md"
+          >
+            Add New Dashboard
+          </button>
+        </>
+      )}
+
+      {newDashboard && (
+        <>
+          <label htmlFor="">Dashboard Name: </label>
+          <input
+            type="text"
+            onChange={(e) => setNewDashboardName(e.target.value)}
+          />
+          <DashboardView createMode={true} dashboardName={newDashboardName} />
+        </>
+      )}
+    </div>
   );
 };
 
