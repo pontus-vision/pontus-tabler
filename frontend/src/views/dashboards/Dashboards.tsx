@@ -44,7 +44,9 @@ const Dashboards = () => {
     },
   ]);
   const [rows, setRows] = useState<{ [key: string]: unknown }[]>();
-  const [filters, setFilters] = useState<ReadPaginationFilterFilters>({});
+  const [filters, setFilters] = useState<{
+    [key: string]: ReadPaginationFilterFilters;
+  }>({});
   const [from, setFrom] = useState<number>(0);
   const [to, setTo] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(2);
@@ -75,6 +77,8 @@ const Dashboards = () => {
           };
         });
 
+        const totalRows = res?.data?.totalDashboards;
+
         const obj: ColDef[] = rowsVal
           ?.map((dashboard) => {
             return Object.keys(dashboard);
@@ -91,7 +95,7 @@ const Dashboards = () => {
         console.log({ rowsVal, obj });
 
         setRows(rowsVal);
-
+        setTotalCount(totalRows || 0);
         setCols(obj);
       } catch (error) {}
     };
