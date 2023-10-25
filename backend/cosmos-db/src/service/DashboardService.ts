@@ -83,6 +83,7 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
     .query(querySpec)
     .fetchAll();
 
+  console.log({});
   console.log({ resources });
   if (resources.length === 0) {
     throw { code: 404, message: 'No dashboard has been found.' };

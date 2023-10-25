@@ -140,6 +140,6 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
   return (
     'select * from dashboards d ' +
     query.join('') +
-    `${from ? 'OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (from - to) : ''}`
+    `${from ? 'OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
   );
 };
