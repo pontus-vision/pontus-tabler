@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
 import {
+  DashboardsReadReq,
+  DashboardsReadRes,
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
 } from '../../pontus-api/typescript-fetch-client-generated';
@@ -42,9 +44,9 @@ const Dashboards = () => {
     },
   ]);
   const [rows, setRows] = useState<{ [key: string]: unknown }[]>();
-  const [filters, setFilters] = useState<ReadPaginationFilterFilters>();
-  const [from, setFrom] = useState<number>();
-  const [to, setTo] = useState<number>();
+  const [filters, setFilters] = useState<ReadPaginationFilterFilters>({});
+  const [from, setFrom] = useState<number>(0);
+  const [to, setTo] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(2);
   const [rowClicked, setRowClicked] = useState<RowEvent>();
   const [newDashboardName, setNewDashboardName] = useState<string>();
@@ -64,8 +66,17 @@ const Dashboards = () => {
         };
         const res = await getAllDashboards(req);
 
-        const obj: ColDef[] = res?.data?.dashboards
-          .map((dashboard) => {
+        const rowsVal = res?.data?.dashboards?.map((dashboard) => {
+          return {
+            owner: dashboard?.owner,
+            folder: dashboard?.folder,
+            name: dashboard?.name,
+            id: dashboard?.id,
+          };
+        });
+
+        const obj: ColDef[] = rowsVal
+          ?.map((dashboard) => {
             return Object.keys(dashboard);
           })[0]
           .map((header) => {
@@ -77,13 +88,11 @@ const Dashboards = () => {
             };
             return obj;
           });
+        console.log({ rowsVal, obj });
 
-        setRows(res?.data.dashboards);
-        console.log({ cols: obj, rows: res?.data.dashboards });
+        setRows(rowsVal);
 
-        // setCols(obj);
-
-        console.log({ filters, to, from });
+        setCols(obj);
       } catch (error) {}
     };
 
@@ -91,8 +100,8 @@ const Dashboards = () => {
   }, [filters, to, from]);
 
   useEffect(() => {
-    console.log({ from, to });
-  }, [from, to]);
+    console.log({ rows, cols });
+  }, [rows, cols]);
 
   const setDashboard = async () => {
     if (!rowClicked) return;
