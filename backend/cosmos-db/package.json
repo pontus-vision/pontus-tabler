@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc && cp -a src/api docs ./dist/",
     "install-frontend": "cd ../../frontend && npm install",
-    "jest": "jest --coverage",
+    "jest": "/usr/bin/env NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0  jest DashboardController.test --coverage --detectOpenHandles --runInBand  --config jest.config.js ",
     "refresh": "npm uninstall ../../frontend/ && npm install ../../frontend/"
   },
   "author": {

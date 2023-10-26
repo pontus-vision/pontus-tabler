@@ -63,7 +63,7 @@ app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
 //   app._router.stack.push(openApiApp._router.stack[i]);
 // }
 // Initialize the Swagger middleware
-const srv  = http.createServer(app).listen(serverPort, function () {
+export const srv  = http.createServer(app).listen(serverPort, function () {
   console.log(
     'Your server is listening on port %d (http://localhost:%d)',
     serverPort,
@@ -102,82 +102,82 @@ const httpTrigger = async (
   };
 
 
-  // const ret = await fetch(
-  //     // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
-  //     'http://localhost:8080' + url.pathname,
-  //     {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: 'Bearer 123456',
-  //       },
-  //       body:data,
-  //     },
-  //   );
+  const ret = await fetch(
+      // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
+      'http://localhost:8080' + url.pathname,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer 123456',
+        },
+        body:data,
+      },
+    );
 
-  //   const respHeaders: HeadersInit= {};
+    const respHeaders: HeadersInit= {};
 
-  //   ret.headers.forEach((value: string, key: string) => {
-  //     respHeaders[key] = value;
-  //   });
+    ret.headers.forEach((value: string, key: string) => {
+      respHeaders[key] = value;
+    });
   
-  //   const resp: HttpResponseInit = {
-  //     body: await ret.text(),
-  //     cookies: undefined,
-  //     enableContentNegotiation: undefined,
-  //     headers: respHeaders,
-  //     // jsonBody: await ret.json(),
-  //     status: ret.status,
-  //   };
-  
-  //   return resp;
     const resp: HttpResponseInit = {
-      body: "",
+      body: await ret.text(),
       cookies: undefined,
       enableContentNegotiation: undefined,
-      headers: {},
+      headers: respHeaders,
       // jsonBody: await ret.json(),
-      status: 200
+      status: ret.status,
     };
+  
+    return resp;
+  //   const resp: HttpResponseInit = {
+  //     body: "",
+  //     cookies: undefined,
+  //     enableContentNegotiation: undefined,
+  //     headers: {},
+  //     // jsonBody: await ret.json(),
+  //     status: 200
+  //   };
 
-  return new Promise<HttpResponseInit>(
-    (
-      resolve: (value: HttpResponseInit | PromiseLike<HttpResponseInit>) => void,
-      reject: (reason: any) => void,
-    ) => {
+  // return new Promise<HttpResponseInit>(
+  //   (
+  //     resolve: (value: HttpResponseInit | PromiseLike<HttpResponseInit>) => void,
+  //     reject: (reason: any) => void,
+  //   ) => {
 
 
 
-      const req = http.request(reqOpts, (res: http.IncomingMessage) => {
-        resp.status = res.statusCode;
-        resp.headers = res.headers;
+  //     const req = http.request(reqOpts, (res: http.IncomingMessage) => {
+  //       resp.status = res.statusCode;
+  //       resp.headers = res.headers;
 
-        context.log(`STATUS: ${res.statusCode}`);
-        context.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-        res.setEncoding('utf8');
-        res.on('data', (chunk) => {
-          resp.body += chunk as string;
-        });
-        res.on('end', () => {
-          context.log('No more data in response.');
-          resolve(resp);
-        });
-      });
+  //       context.log(`STATUS: ${res.statusCode}`);
+  //       context.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+  //       res.setEncoding('utf8');
+  //       res.on('data', (chunk) => {
+  //         resp.body += chunk as string;
+  //       });
+  //       res.on('end', () => {
+  //         context.log('No more data in response.');
+  //         resolve(resp);
+  //       });
+  //     });
 
-      req.on('error', (e) => {
-        context.error(`problem with request: ${e.message}`);
-        resp.body = JSON.stringify( {
-          error: e.message,
-        });
-        reject(resp);
-      });
+  //     req.on('error', (e) => {
+  //       context.error(`problem with request: ${e.message}`);
+  //       resp.body = JSON.stringify( {
+  //         error: e.message,
+  //       });
+  //       reject(resp);
+  //     });
 
-      // Write data to request body
-      req.write(data);
-      req.end();
+  //     // Write data to request body
+  //     req.write(data);
+  //     req.end();
 
-    },
-  );
+  //   },
+  // );
 };
 
 azureApp.http('httpTrigger', {
