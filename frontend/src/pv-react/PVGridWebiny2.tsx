@@ -60,11 +60,11 @@ type Props = {
     deleteAction: boolean;
     readAction: boolean;
   };
-  setFilters?: Dispatch<
-    SetStateAction<ReadPaginationFilterFilters | undefined>
-  >;
-  setFrom?: Dispatch<SetStateAction<number | undefined>>;
-  setTo?: Dispatch<SetStateAction<number | undefined>>;
+  onFiltersChange?: (filters: {
+    [key: string]: ReadPaginationFilterFilters;
+  }) => void;
+  onFromChange?: (num: number) => void;
+  onToChange?: (num: number) => void;
   setDeletion?: Dispatch<SetStateAction<User[] | undefined>>;
   setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
@@ -84,10 +84,10 @@ const PVGridWebiny2 = ({
   totalCount,
   permissions,
   setDeletion,
-  setFilters,
+  onFiltersChange,
   onUpdate,
-  setFrom,
-  setTo,
+  onFromChange,
+  onToChange,
   setEntriesToBeDeleted,
   setGridHeight,
 }: Props) => {
@@ -139,10 +139,10 @@ const PVGridWebiny2 = ({
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
 
-          setTo && setTo(params.endRow);
-          setFrom && setFrom(params.startRow);
+          onToChange && onToChange(params.endRow);
+          onFromChange && onFromChange(params.startRow);
 
-          setFilters && setFilters(filter);
+          onFiltersChange && onFiltersChange(filter);
 
           // const data = await getModelData(
           //   modelId,
