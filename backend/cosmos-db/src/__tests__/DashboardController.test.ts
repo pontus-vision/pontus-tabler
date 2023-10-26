@@ -191,7 +191,7 @@ describe('dashboardCreatePOST', () => {
 
     const readRetVal = await post('dashboards/read', readBody);
 
-    expect(readRetVal.data.length).toBe(2);
+    expect(readRetVal.data.dashboards.length).toBe(2);
 
     const readBody2 = {
       filters: {
@@ -212,9 +212,16 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const readRetVal2 = await post('dashboards/read', readBody2);
+    const deleteVal = await post('dashboard/delete', {
+      id: createRetVal.data.id,
+    });
 
-    expect(readRetVal.data.length).toBe(2);
+    expect(deleteVal.status).toBe(200);
+    const deleteVal2 = await post('dashboard/delete', {
+      id: createRetVal2.data.id,
+    });
+
+    expect(deleteVal2.status).toBe(200);
   });
   it('should write proper query', () => {
     const readBody2 = {
