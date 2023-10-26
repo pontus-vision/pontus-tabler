@@ -237,9 +237,77 @@ describe('dashboardCreatePOST', () => {
     };
     const query = filterToQuery(readBody2);
 
-    console.log(query);
     expect(query.toLocaleLowerCase()).toBe(
       'select * from dashboards d where contains(d.name, "pontusvision") and contains(d.folder, "folder 1")',
+    );
+
+    const query2 = filterToQuery({
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'string',
+            type: 'equals',
+          },
+        },
+        folder: {
+          condition1: {
+            filter: 'folder 1',
+            filterType: 'string',
+            type: 'equals',
+          },
+        },
+      },
+    });
+
+    expect(query2.toLocaleLowerCase()).toBe(
+      'select * from dashboards d where d.name = "pontusvision" and d.folder = "folder 1"',
+    );
+
+    const query3 = filterToQuery({
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'string',
+            type: 'not contains',
+          },
+        },
+        folder: {
+          condition1: {
+            filter: 'folder 1',
+            filterType: 'string',
+            type: 'not contains',
+          },
+        },
+      },
+    });
+
+    expect(query3.toLocaleLowerCase()).toBe(
+      'select * from dashboards d where not contains(d.name, "pontusvision") and not contains(d.folder, "folder 1")',
+    );
+
+    const query4 = filterToQuery({
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'string',
+            type: 'not equals',
+          },
+        },
+        folder: {
+          condition1: {
+            filter: 'folder 1',
+            filterType: 'string',
+            type: 'not equals',
+          },
+        },
+      },
+    });
+
+    expect(query4.toLocaleLowerCase()).toBe(
+      'select * from dashboards d where not d.name = "pontusvision" and not d.folder = "folder 1"',
     );
   });
 });
