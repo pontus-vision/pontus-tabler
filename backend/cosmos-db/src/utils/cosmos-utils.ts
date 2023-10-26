@@ -81,7 +81,7 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
       }
 
       if (condition2Filter && type2 === 'contains') {
-        query.push(` ${operator} CONTAINS(d.${colId}, "${condition2Filter}")`);
+        query.push(`${operator} CONTAINS(d.${colId}, "${condition2Filter}")`);
       }
 
       if (condition1Filter && type1 === 'not contains') {
@@ -137,9 +137,12 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
     }
   }
 
-  return (
-    'select * from dashboards d ' +
+  const finalQuery =
+    'select * from dashboards d' +
     query.join('') +
-    `${from ? 'OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
-  );
+    `${from ? 'OFFSET ' + (from - 1) : ''} ${
+      to ? 'LIMIT ' + (to - from) : ''
+    }`.trim();
+
+  return finalQuery;
 };
