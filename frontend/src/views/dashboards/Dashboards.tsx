@@ -14,6 +14,7 @@ import { setDashboardId } from '../../store/sliceDashboards';
 import { redirect, useNavigate } from 'react-router-dom';
 import PVFlexLayout from '../../pv-react/PVFlexLayout';
 import DashboardView from '../DashboardView';
+import { isEmpty } from '../../helpers/functions';
 
 const Dashboards = () => {
   const dispatch = useDispatch();
@@ -47,8 +48,8 @@ const Dashboards = () => {
   const [filters, setFilters] = useState<{
     [key: string]: ReadPaginationFilterFilters;
   }>({});
-  const [from, setFrom] = useState<number>(0);
-  const [to, setTo] = useState<number>(0);
+  const [from, setFrom] = useState<number>(1);
+  const [to, setTo] = useState<number>(5);
   const [totalCount, setTotalCount] = useState<number>(2);
   const [rowClicked, setRowClicked] = useState<RowEvent>();
   const [newDashboardName, setNewDashboardName] = useState<string>();
@@ -92,7 +93,7 @@ const Dashboards = () => {
             };
             return obj;
           });
-        console.log({ rowsVal, obj });
+        console.log({ rowsVal, obj, totalRows });
 
         setRows(rowsVal);
         setTotalCount(totalRows || 0);
@@ -124,6 +125,14 @@ const Dashboards = () => {
   }, [rowClicked]);
   if (!rows) return;
 
+  const handleFiltersChange = (filters: {
+    [key: string]: ReadPaginationFilterFilters;
+  }) => {
+    if (isEmpty(filters)) return;
+
+    setFilters(filters);
+  };
+
   return (
     <div className="top-12 relative">
       {!newDashboard && (
@@ -134,9 +143,9 @@ const Dashboards = () => {
             rows={rows}
             add={handleAddition}
             cols={cols}
-            setFilters={setFilters}
-            setFrom={setFrom}
-            setTo={setTo}
+            onFiltersChange={handleFiltersChange}
+            // setFrom={setFrom}
+            // setTo={setTo}
             setRowClicked={setRowClicked}
           />
 
