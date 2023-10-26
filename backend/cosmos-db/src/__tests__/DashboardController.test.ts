@@ -23,6 +23,7 @@ import {
 import { sendHttpRequest } from './http';
 import { method } from 'lodash';
 import axios from 'axios';
+import { filterToQuery } from '../utils/cosmos-utils';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -214,5 +215,31 @@ describe('dashboardCreatePOST', () => {
     const readRetVal2 = await post('dashboards/read', readBody2);
 
     expect(readRetVal.data.length).toBe(2);
+  });
+  it('should write proper query', () => {
+    const readBody2 = {
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'string',
+            type: 'contains',
+          },
+        },
+        folder: {
+          condition1: {
+            filter: 'folder 1',
+            filterType: 'string',
+            type: 'contains',
+          },
+        },
+      },
+    };
+    const query = filterToQuery(readBody2);
+
+    console.log(query);
+    expect(query.toLocaleLowerCase()).toBe(
+      'select * from dashboards d where contains(d.name, "pontusvision") and contains(d.folder, "folder 1")',
+    );
   });
 });
