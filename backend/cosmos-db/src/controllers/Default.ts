@@ -92,23 +92,6 @@ export async function authUsersReadPOST(req, res, next, body) {
   }
 }
 
-export async function dashboardCreatePOST(req, res, next, body) {
-  try {
-    // const response = await Default.dashboardCreatePOST(body);
-    // utils.writeJson(res, response);
-  } catch (error) {
-    utils.writeJson(res, error);
-  }
-}
-
-export async function dashboardDeletePOST(req, res, next, body) {
-  try {
-    // const response = await Default.dashboardDeletePOST(body);
-    // utils.writeJson(res, response);
-  } catch (error) {
-    utils.writeJson(res, error);
-  }
-}
 
 export async function dashboardGroupAuthCreatePOST(req, res, next, body) {
   try {

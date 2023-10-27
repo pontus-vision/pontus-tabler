@@ -1,28 +1,29 @@
+// import {
+//   dashboardCreatePOST,
+//   dashboardReadPOST,
+//   dashboardDeletePOST,
+//   dashboardUpdatePOST,
+// } from '../controllers/DashboardController';
+// import * as utils from '../utils/writer';
+// import {
+//   upsertDashboard,
+//   readDashboardById,
+//   deleteDashboard,
+// } from '../service/DashboardService';
+// import { Dashboard } from 'pontus-tabler/src/types';
+// import { PVResponse } from './pv-response';
 import {
-  dashboardCreatePOST,
-  dashboardReadPOST,
-  dashboardDeletePOST,
-  dashboardUpdatePOST,
-} from '../controllers/DashboardController';
-import * as utils from '../utils/writer';
-import {
-  upsertDashboard,
-  readDashboardById,
-  deleteDashboard,
-} from '../service/DashboardService';
-import { Dashboard } from 'pontus-tabler/src/types';
-import { PVResponse } from './pv-response';
-import {
-  DashboardCreateReq,
   DashboardCreateRes,
   DashboardReadRes,
   DashboardRef,
   DashboardUpdateRes,
   DashboardUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { sendHttpRequest } from './http';
-import { method } from 'lodash';
-import axios from 'axios';
+// import { sendHttpRequest } from '../http';
+// import { method } from 'lodash';
+// import axios from 'axios';
+import httpTrigger, {srv} from '../index'
+import { HttpRequest, InvocationContext } from '@azure/functions';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -36,12 +37,12 @@ import axios from 'axios';
 // }));
 jest.setTimeout(1000000);
 
-describe('dashboardCreatePOST', () => {
+describe('dashboardCreatePOST',  () => {
   const OLD_ENV = process.env;
 
   const post = async (
-    endpoint,
-    body,
+    endpoint: string,
+    body: any,
   ): Promise<{ data: any; status: number }> => {
     // return sendHttpRequest(
     //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
@@ -65,19 +66,33 @@ describe('dashboardCreatePOST', () => {
     //   );
     //   return res;
 
-    const res = await fetch(
-      'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-      {
-        method: 'POST',
+    // const res = await fetch(
+    //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    //   {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: 'Bearer 123456',
+    //     },
+    //     body: JSON.stringify(body),
+    //   },
+    // );
+
+    const res = await httpTrigger( new HttpRequest( {
+      body: {string: JSON.stringify(body) },
+      method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer 123456',
         },
-        body: JSON.stringify(body),
-      },
-    );
+       url:  'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    }), 
+    new InvocationContext());
+    
 
-    return { status: res.status, data: await res.json() };
+    const retVal =  { status: res.status, data:  typeof res.body === 'string' ?  JSON.parse(res.body ): res.body };
+    console.log(`Ret val is ${JSON.stringify(retVal)}`)
+    return retVal
   };
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
@@ -86,6 +101,7 @@ describe('dashboardCreatePOST', () => {
 
   afterAll(() => {
     process.env = OLD_ENV; // Restore old environment
+    srv.close();
   });
 
   it('should do the CRUD "happy path"', async () => {
