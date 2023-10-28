@@ -182,9 +182,10 @@ describe('dashboardCreatePOST', () => {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
       },
     };
@@ -198,16 +199,18 @@ describe('dashboardCreatePOST', () => {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
         folder: {
           condition1: {
             filter: 'folder 1',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
       },
     };
@@ -229,16 +232,18 @@ describe('dashboardCreatePOST', () => {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
         folder: {
           condition1: {
             filter: 'folder 1',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
       },
     };
@@ -253,16 +258,18 @@ describe('dashboardCreatePOST', () => {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'equals',
           },
+          filterType: 'text',
         },
         folder: {
           condition1: {
             filter: 'folder 1',
-            filterType: 'string',
+            filterType: 'text',
             type: 'equals',
           },
+          filterType: 'text',
         },
       },
     });
@@ -276,16 +283,18 @@ describe('dashboardCreatePOST', () => {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'not contains',
           },
+          filterType: 'text',
         },
         folder: {
           condition1: {
             filter: 'folder 1',
-            filterType: 'string',
+            filterType: 'text',
             type: 'not contains',
           },
+          filterType: 'text',
         },
       },
     });
@@ -299,22 +308,100 @@ describe('dashboardCreatePOST', () => {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'not equals',
           },
+          filterType: 'text',
         },
         folder: {
           condition1: {
             filter: 'folder 1',
-            filterType: 'string',
+            filterType: 'text',
             type: 'not equals',
           },
+          filterType: 'text',
         },
       },
     });
 
     expect(query4.toLocaleLowerCase()).toBe(
       'select * from dashboards d where not d.name = "pontusvision" and not d.folder = "folder 1"',
+    );
+
+    const date = '2023-10-19 00:00:00';
+
+    const query5 = filterToQuery({
+      filters: {
+        name: {
+          condition1: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'greater than',
+          },
+          condition2: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'greater than',
+          },
+          filterType: 'date',
+          operator: 'AND',
+        },
+        folder: {
+          condition1: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'less than',
+          },
+          condition2: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'less than',
+          },
+          operator: 'AND',
+          filterType: 'date',
+        },
+      },
+    });
+
+    expect(query5.toLocaleLowerCase()).toBe(
+      `select * from dashboards d where d.name > "2023-10-19T00:00:00Z" and d.name > "2023-10-19T00:00:00Z" and d.folder < "2023-10-19T00:00:00Z" and d.folder < "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
+    );
+
+    const query6 = filterToQuery({
+      filters: {
+        name: {
+          condition1: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'greater than',
+          },
+          condition2: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'greater than',
+          },
+          filterType: 'date',
+          operator: 'OR',
+        },
+        folder: {
+          condition1: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'less than',
+          },
+          condition2: {
+            dateFrom: date,
+            filterType: 'date',
+            type: 'less than',
+          },
+          operator: 'OR',
+          filterType: 'date',
+        },
+      },
+    });
+
+    expect(query6.toLocaleLowerCase()).toBe(
+      `select * from dashboards d where d.name > "2023-10-19T00:00:00Z" or d.name > "2023-10-19T00:00:00Z" and d.folder < "2023-10-19T00:00:00Z" or d.folder < "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
     );
   });
 });
