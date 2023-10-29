@@ -598,7 +598,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
+                $ref: '#/components/schemas/DashboardsReadRes'
         '400':
           description: Bad request
         '500':
@@ -1223,7 +1223,10 @@ components:
         to:
           type: integer
         filters:
-          $ref: '#/components/schemas/ReadPaginationFilter_filters'
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ReadPaginationFilter_filters'
+
     GetTablesResponse:
       type: object
       properties:
@@ -1403,7 +1406,7 @@ components:
             - delete
             - delete
         dashboardId: dashboardId
-    inline_response_200:
+    DashboardsReadRes:
       type: object
       properties:
         totalDashboards:
@@ -1411,7 +1414,7 @@ components:
         dashboards:
           type: array
           items:
-            $ref: '#/components/schemas/inline_response_200_dashboards'
+            $ref: '#/components/schemas/Dashboard'
       example:
         totalDashboards: 0
         dashboards:
@@ -1532,32 +1535,65 @@ components:
       properties:
         colId:
           type: string
-    ReadPaginationFilter_filters_colId_condition1:
+    ReadPaginationFilter_filters_colId_condition:
       type: object
       properties:
+        dateFrom:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: string
+        dateTo:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: string
         filter:
-          type: string
+          oneOf:
+            - type: string
+            - type: integer
+        filterTo:
+          oneOf:
+            - type: string
+            - type: integer
         filterType:
           type: string
         type:
           type: string
-    ReadPaginationFilter_filters_colId:
+
+    ReadPaginationFilter_filters:
       type: object
+      pattern: '^.+$'
       properties:
+        filter:
+          oneOf:
+            - type: string
+            - type: integer
+        type:
+          type: string
+        dateFrom:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: string
+        dateTo:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: string
+        filterTo:
+          oneOf:
+            - type: string
+            - type: integer
         condition1:
-          $ref: '#/components/schemas/ReadPaginationFilter_filters_colId_condition1'
+          $ref: '#/components/schemas/ReadPaginationFilter_filters_colId_condition'
         condition2:
-          $ref: '#/components/schemas/ReadPaginationFilter_filters_colId_condition1'
+          $ref: '#/components/schemas/ReadPaginationFilter_filters_colId_condition'
         filterType:
           type: string
         operator:
           type: string
-    ReadPaginationFilter_filters:
-      type: object
-      properties:
-        colId:
-          $ref: '#/components/schemas/ReadPaginationFilter_filters_colId'
-    inline_response_200_dashboards:
+    Dashboard:
       type: object
       properties:
         owner:
