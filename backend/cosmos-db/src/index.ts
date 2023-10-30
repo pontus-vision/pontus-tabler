@@ -1,119 +1,61 @@
-// 'use strict';
-import { ExpressAppConfig } from "./middleware/express.app.config";
-import { Oas3AppOptions } from "./middleware/oas3.options";
-import {absolutePath} from "swagger-ui-dist";
-// import { OpenApiRequestHandler } from 'express-openapi-validator/dist/framework/types'
-
-// export function expressAppConfig(
-//   definitionPath: string,
-//   appOptions: Oas3AppOptions,
-//   customMiddlewares?: OpenApiRequestHandler[]
-// ): ExpressAppConfig {
-//   return new ExpressAppConfig(definitionPath, appOptions, customMiddlewares);
-// }
-
-
-'use strict';
-
-import  * as path  from 'path';
-import  * as http from 'http';
-// var oas3Tools = require('oas3-tools');
-let  serverPort = 8080;
-
+import { ExpressAppConfig } from './middleware/express.app.config';
+import { Oas3AppOptions } from './middleware/oas3.options';
+import {
+  app as azureApp,
+  HttpRequest,
+  HttpResponseInit,
+  InvocationContext,
+} from '@azure/functions';
+import * as path from 'path';
+import * as http from 'http';
 import * as express from 'express';
-
 import * as cors from 'cors';
-import { SwaggerUiOptions } from "./middleware/swagger.ui.options";
-
-// swaggerRouter configuration
-// var options = {
-//   routing: {
-//     controllers: path.join(__dirname, './controllers'),
-//   },
-// };
-
-// var expressAppConfig = oas3Tools.expressAppConfig(
-//   path.join(__dirname, 'api/openapi.yaml'),
-//   options,
-// );
-
-// const app = express();
-// let expressAppConfig = new ExpressAppConfig(path.join(__dirname, 'api/openapi.yaml'), {
-//   app: app,
-//   cors: cors(),
-//   openApiValidator: {
-//     apiSpec: path.join(__dirname, 'api/openapi.yaml')
-
-//   },
-//   routing:  {
-//     controllers: path.join(__dirname, './controllers'),
-//   }, 
-//   swaggerUI: undefined, 
-//   logging: undefined
-
-// }, undefined);
-
-// var openApiApp = expressAppConfig.getApp();
-
-// app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
-
-// for (let i = 2; i < openApiApp._router.stack.length; i++) {
-//   app._router.stack.push(openApiApp._router.stack[i]);
-// }
-
-// // Custom CORS middleware to allow requests from 'http://localhost:5173'
-
-// // Initialize the Swagger middleware
-// http.createServer(app).listen(serverPort, function () {
-//   console.log(
-//     'Your server is listening on port %d (http://localhost:%d)',
-//     serverPort,
-//     serverPort,
-//   );
-//   console.log(
-//     'Swagger-ui is available on http://localhost:%d/docs',
-//     serverPort,
-//   );
-// });
-
-
-
-function validate(request, scopes, schema) {
+import { SwaggerUiOptions } from './middleware/swagger.ui.options';
+const validate = (_request, _scopes, _schema) => {
   // security stuff here
   return true;
-}
+};
+
+const serverPort = 8080;
 const openApiApp = express();
 
+const currDir = __dirname.replace(/src/, 'dist' )
+
 // swaggerRouter configuration
-const options:Oas3AppOptions = {
-  app:openApiApp,
+const options: Oas3AppOptions = {
+  app: openApiApp,
   routing: {
-      controllers: path.join(__dirname, './controllers')
+    controllers: path.join(currDir, './controllers'),
   },
   logging: {
-      format: 'combined',
-      errorLimit: 400
+    format: 'combined',
+    errorLimit: 400,
   },
   openApiValidator: {
-    apiSpec: path.join(__dirname, 'api/openapi.yaml'),
+    apiSpec: path.join(currDir, 'api/openapi.yaml'),
 
-      validateSecurity: {
-          handlers: {
-              petstore_auth: validate,
-              api_key: validate,
-              bearerAuth: validate
-          }
-      }
+    validateSecurity: {
+      handlers: {
+        petstore_auth: validate,
+        api_key: validate,
+        bearerAuth: validate,
+      },
+    },
   },
-  // swaggerUI: new SwaggerUiOptions('/docs','/swagger',absolutePath()), 
-  swaggerUI: new SwaggerUiOptions('/api','/docs',path.join(__dirname, 'docs')), 
-  // swaggerUI: new SwaggerUiOptions(path.join(__dirname, 'docs/index.html'),absolutePath(),undefined), 
-  cors: undefined
+  swaggerUI: new SwaggerUiOptions(
+    '/api',
+    '/docs',
+    path.join(currDir, 'docs'),
+  ),
+  cors: undefined,
+};
 
-}; 
+const pathName =  path.join(currDir, 'api/openapi.yaml');
 
-
-var expressAppConfig = new ExpressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
+let expressAppConfig = new ExpressAppConfig(
+  pathName,
+  options,
+);
 let app = expressAppConfig.getApp();
 app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
 
@@ -121,8 +63,127 @@ app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
 //   app._router.stack.push(openApiApp._router.stack[i]);
 // }
 // Initialize the Swagger middleware
-http.createServer(app).listen(serverPort, function () {
-  console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-  console.log('HTML docs are available on http://localhost:%d/docs', serverPort);
-  console.log('Open API json is  available on http://localhost:%d/api', serverPort);
+export const srv  = http.createServer(app).listen(serverPort, function () {
+  console.log(
+    'Your server is listening on port %d (http://localhost:%d)',
+    serverPort,
+    serverPort,
+  );
+  console.log(
+    'HTML docs are available on http://localhost:%d/docs',
+    serverPort,
+  );
+  console.log(
+    'Open API json is  available on http://localhost:%d/api',
+    serverPort,
+  );
 });
+
+const httpTrigger = async (
+  request: HttpRequest,
+  context: InvocationContext,
+): Promise<HttpResponseInit> => {
+  context.log(`Http function processed request for url "${request.url}"`);
+
+  const data = await request.text();
+  const url = new URL(request.url);
+  const headers: http.OutgoingHttpHeaders = {};
+
+  request.headers.forEach((value: string, key: string) => {
+    headers[key] = value;
+  });
+
+  const reqOpts: http.RequestOptions = {
+    hostname: url.hostname,
+    port: url.port,
+    path: url.pathname,
+    method: request.method,
+    headers: headers,
+  };
+
+
+  const ret = await fetch(
+      // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
+      'http://localhost:8080' + url.pathname,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer 123456',
+        },
+        body:data,
+      },
+    );
+
+    const respHeaders: HeadersInit= {};
+
+    ret.headers.forEach((value: string, key: string) => {
+      respHeaders[key] = value;
+    });
+  
+    const resp: HttpResponseInit = {
+      body: await ret.text(),
+      cookies: undefined,
+      enableContentNegotiation: undefined,
+      headers: respHeaders,
+      // jsonBody: await ret.json(),
+      status: ret.status,
+    };
+  
+    return resp;
+  //   const resp: HttpResponseInit = {
+  //     body: "",
+  //     cookies: undefined,
+  //     enableContentNegotiation: undefined,
+  //     headers: {},
+  //     // jsonBody: await ret.json(),
+  //     status: 200
+  //   };
+
+  // return new Promise<HttpResponseInit>(
+  //   (
+  //     resolve: (value: HttpResponseInit | PromiseLike<HttpResponseInit>) => void,
+  //     reject: (reason: any) => void,
+  //   ) => {
+
+
+
+  //     const req = http.request(reqOpts, (res: http.IncomingMessage) => {
+  //       resp.status = res.statusCode;
+  //       resp.headers = res.headers;
+
+  //       context.log(`STATUS: ${res.statusCode}`);
+  //       context.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+  //       res.setEncoding('utf8');
+  //       res.on('data', (chunk) => {
+  //         resp.body += chunk as string;
+  //       });
+  //       res.on('end', () => {
+  //         context.log('No more data in response.');
+  //         resolve(resp);
+  //       });
+  //     });
+
+  //     req.on('error', (e) => {
+  //       context.error(`problem with request: ${e.message}`);
+  //       resp.body = JSON.stringify( {
+  //         error: e.message,
+  //       });
+  //       reject(resp);
+  //     });
+
+  //     // Write data to request body
+  //     req.write(data);
+  //     req.end();
+
+  //   },
+  // );
+};
+
+azureApp.http('httpTrigger', {
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  authLevel: 'function',
+  handler: httpTrigger,
+});
+
+export default httpTrigger;
