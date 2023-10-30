@@ -413,11 +413,10 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
           );
         }
       }
-      query.push(
-        colQuery.length > 1
-          ? `(${colQuery.join('').trim()})`
-          : `${colQuery.join('').trim()}`,
-      );
+
+      const colQueryStr = colQuery.join('').trim();
+
+      query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
     }
   }
 
