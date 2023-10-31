@@ -1063,6 +1063,36 @@ export interface ReadPaginationFilter {
 export interface ReadPaginationFilterFilters {
   /**
    *
+   * @type {string | number}
+   * @memberof ReadPaginationFilterFilters
+   */
+  filter?: string | number;
+  /**
+   *
+   * @type {string}
+   * @memberof ReadPaginationFilterFilters
+   */
+  type?: string;
+  /**
+   *
+   * @type {Date | string}
+   * @memberof ReadPaginationFilterFilters
+   */
+  dateFrom?: Date | string;
+  /**
+   *
+   * @type {Date | string}
+   * @memberof ReadPaginationFilterFilters
+   */
+  dateTo?: Date | string;
+  /**
+   *
+   * @type {string | number}
+   * @memberof ReadPaginationFilterFilters
+   */
+  filterTo?: string | number;
+  /**
+   *
    * @type {ReadPaginationFilterFiltersColIdCondition}
    * @memberof ReadPaginationFilterFilters
    */
@@ -1094,10 +1124,28 @@ export interface ReadPaginationFilterFilters {
 export interface ReadPaginationFilterFiltersColIdCondition {
   /**
    *
-   * @type {string}
+   * @type {Date | string}
    * @memberof ReadPaginationFilterFiltersColIdCondition
    */
-  filter?: string;
+  dateFrom?: Date | string;
+  /**
+   *
+   * @type {Date | string}
+   * @memberof ReadPaginationFilterFiltersColIdCondition
+   */
+  dateTo?: Date | string;
+  /**
+   *
+   * @type {string | number}
+   * @memberof ReadPaginationFilterFiltersColIdCondition
+   */
+  filter?: string | number;
+  /**
+   *
+   * @type {string | number}
+   * @memberof ReadPaginationFilterFiltersColIdCondition
+   */
+  filterTo?: string | number;
   /**
    *
    * @type {string}
