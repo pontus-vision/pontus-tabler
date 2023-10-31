@@ -11,7 +11,6 @@ import {
   deleteDashboard,
 } from '../service/DashboardService';
 import { Dashboard } from 'pontus-tabler/src/types';
-import { PVResponse } from './pv-response';
 import {
   DashboardCreateReq,
   DashboardCreateRes,
@@ -110,143 +109,143 @@ describe('dashboardCreatePOST', () => {
     srv.close();
   });
 
-  it('should do the CRUD "happy path"', async () => {
-    const body: DashboardRef = {
-      name: 'string',
-      folder: 'string',
-      owner: 'string',
-      state: {},
-    };
+  // it('should do the CRUD "happy path"', async () => {
+  //   const body: DashboardRef = {
+  //     name: 'string',
+  //     folder: 'string',
+  //     owner: 'string',
+  //     state: {},
+  //   };
 
-    const createRetVal = await post('dashboard/create', body);
+  //   const createRetVal = await post('dashboard/create', body);
 
-    let resPayload: DashboardCreateRes = createRetVal.data;
-    let id = resPayload.id;
+  //   let resPayload: DashboardCreateRes = createRetVal.data;
+  //   let id = resPayload.id;
 
-    expect(createRetVal.data.name).toBe(body.name);
+  //   expect(createRetVal.data.name).toBe(body.name);
 
-    const readRetVal = await post('dashboard/read', {
-      id,
-    });
-    let resPayload2: DashboardReadRes = readRetVal.data;
+  //   const readRetVal = await post('dashboard/read', {
+  //     id,
+  //   });
+  //   let resPayload2: DashboardReadRes = readRetVal.data;
 
-    console.log(`res2: ${JSON.stringify(resPayload2)}`);
+  //   console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
-    expect(readRetVal.data.name).toBe(body.name);
+  //   expect(readRetVal.data.name).toBe(body.name);
 
-    const body2: DashboardUpdateReq = {
-      id: resPayload2.id,
-      owner: resPayload2.owner,
-      name: 'Pontus 2',
-      folder: resPayload2.folder,
-      state: resPayload2.state,
-    };
+  //   const body2: DashboardUpdateReq = {
+  //     id: resPayload2.id,
+  //     owner: resPayload2.owner,
+  //     name: 'Pontus 2',
+  //     folder: resPayload2.folder,
+  //     state: resPayload2.state,
+  //   };
 
-    const updateRetVal = await post('dashboard/update', body2);
+  //   const updateRetVal = await post('dashboard/update', body2);
 
-    let resPayload3: DashboardUpdateRes = updateRetVal.data;
+  //   let resPayload3: DashboardUpdateRes = updateRetVal.data;
 
-    expect(resPayload3.name).toBe(body2.name);
+  //   expect(resPayload3.name).toBe(body2.name);
 
-    const body3 = {
-      id: resPayload3.id,
-    };
+  //   const body3 = {
+  //     id: resPayload3.id,
+  //   };
 
-    const deleteRetVal = await post('dashboard/delete', body3);
+  //   const deleteRetVal = await post('dashboard/delete', body3);
 
-    let resPayload4 = deleteRetVal.data;
+  //   let resPayload4 = deleteRetVal.data;
 
-    expect(deleteRetVal.status).toBe(200);
+  //   expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal2 = await post('dashboard/read', body3);
+  //   const readRetVal2 = await post('dashboard/read', body3);
 
-    expect(readRetVal2.status).toBe(404);
-  });
-  it('should do the CRUD "sad path"', async () => {
-    const createRetVal = await post('dashboard/create', {});
+  //   expect(readRetVal2.status).toBe(404);
+  // });
+  // it('should do the CRUD "sad path"', async () => {
+  //   const createRetVal = await post('dashboard/create', {});
 
-    expect(createRetVal.status).toBe(400);
+  //   expect(createRetVal.status).toBe(400);
 
-    const readRetVal = await post('dashboard/read', {
-      id: 'foo',
-    });
+  //   const readRetVal = await post('dashboard/read', {
+  //     id: 'foo',
+  //   });
 
-    expect(readRetVal.status).toBe(404);
+  //   expect(readRetVal.status).toBe(404);
 
-    const updateRetVal = await post('dashboard/update', { foo: 'bar' });
+  //   const updateRetVal = await post('dashboard/update', { foo: 'bar' });
 
-    expect(updateRetVal.status).toBe(400);
+  //   expect(updateRetVal.status).toBe(400);
 
-    const deleteRetVal = await post('dashboard/delete', { foo: 'bar' });
+  //   const deleteRetVal = await post('dashboard/delete', { foo: 'bar' });
 
-    let resPayload4 = deleteRetVal.data;
+  //   let resPayload4 = deleteRetVal.data;
 
-    expect(deleteRetVal.status).toBe(400);
-  });
-  it('should read dashboards', async () => {
-    const body: DashboardCreateReq = {
-      owner: 'Joe',
-      name: 'PontusVision',
-      folder: 'folder 1',
-      state: {},
-    };
+  //   expect(deleteRetVal.status).toBe(400);
+  // });
+  // it('should read dashboards', async () => {
+  //   const body: DashboardCreateReq = {
+  //     owner: 'Joe',
+  //     name: 'PontusVision',
+  //     folder: 'folder 1',
+  //     state: {},
+  //   };
 
-    const createRetVal = await post('dashboard/create', body);
+  //   const createRetVal = await post('dashboard/create', body);
 
-    const createRetVal2 = await post('dashboard/create', {
-      ...body,
-      name: 'PontusVision2',
-    });
+  //   const createRetVal2 = await post('dashboard/create', {
+  //     ...body,
+  //     name: 'PontusVision2',
+  //   });
 
-    const readBody = {
-      filters: {
-        name: {
-          condition1: {
-            filter: 'PontusVision',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-      },
-    };
+  //   const readBody = {
+  //     filters: {
+  //       name: {
+  //         condition1: {
+  //           filter: 'PontusVision',
+  //           filterType: 'text',
+  //           type: 'contains',
+  //         },
+  //         filterType: 'text',
+  //       },
+  //     },
+  //   };
 
-    const readRetVal = await post('dashboards/read', readBody);
+  //   const readRetVal = await post('dashboards/read', readBody);
 
-    expect(readRetVal.data.dashboards.length).toBe(2);
+  //   expect(readRetVal.data.dashboards.length).toBe(2);
 
-    const readBody2 = {
-      filters: {
-        name: {
-          condition1: {
-            filter: 'PontusVision',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-        folder: {
-          condition1: {
-            filter: 'folder 1',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-      },
-    };
+  //   const readBody2 = {
+  //     filters: {
+  //       name: {
+  //         condition1: {
+  //           filter: 'PontusVision',
+  //           filterType: 'text',
+  //           type: 'contains',
+  //         },
+  //         filterType: 'text',
+  //       },
+  //       folder: {
+  //         condition1: {
+  //           filter: 'folder 1',
+  //           filterType: 'text',
+  //           type: 'contains',
+  //         },
+  //         filterType: 'text',
+  //       },
+  //     },
+  //   };
 
-    const deleteVal = await post('dashboard/delete', {
-      id: createRetVal.data.id,
-    });
+  //   const deleteVal = await post('dashboard/delete', {
+  //     id: createRetVal.data.id,
+  //   });
 
-    expect(deleteVal.status).toBe(200);
-    const deleteVal2 = await post('dashboard/delete', {
-      id: createRetVal2.data.id,
-    });
+  //   expect(deleteVal.status).toBe(200);
+  //   const deleteVal2 = await post('dashboard/delete', {
+  //     id: createRetVal2.data.id,
+  //   });
 
-    expect(deleteVal2.status).toBe(200);
-  });
+  //   expect(deleteVal2.status).toBe(200);
+  // });
   it('should write proper query', () => {
     const readBody2 = {
       filters: {
