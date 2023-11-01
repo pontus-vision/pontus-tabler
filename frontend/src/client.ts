@@ -30,6 +30,7 @@ import {
   AuthGroupRef,
   GroupUpdateReq,
   GroupDeleteReq,
+  DashboardsReadRes,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -146,7 +147,7 @@ export const deleteDataTableRow = async (
 
 export const getAllDashboards = async (
   body: ReadPaginationFilter,
-): Promise<AxiosResponse<DashboardRef[]> | undefined> => {
+): Promise<AxiosResponse<DashboardsReadRes> | undefined> => {
   return post('/dashboards/read', body);
 };
 

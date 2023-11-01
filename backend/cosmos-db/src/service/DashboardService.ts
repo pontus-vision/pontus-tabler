@@ -5,7 +5,11 @@ import {
   ReadPaginationFilter,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { DataRoot } from 'pontus-tabler/src/types';
-import { fetchDashboardsContainer, fetchDatabase } from '../utils/cosmos-utils';
+import {
+  fetchDashboardsContainer,
+  fetchDatabase,
+  filterToQuery,
+} from '../utils/cosmos-utils';
 import { Container } from '@azure/cosmos';
 
 export const upsertDashboard = async (
@@ -64,58 +68,35 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 };
 
 export const readDashboards = async (body: ReadPaginationFilter) => {
-  let query =
-    'select * from dashboards p where p.colId = @colId OFFSET @offset LIMIT @limit';
+  // let query = 'select * from dashboards d';
 
-  const cols = body.filters;
-
-  for (const colId in cols) {
-    if (cols.hasOwnProperty(colId)) {
-      const condition1Filter = cols[colId].condition1.filter;
-      const condition2Filter = cols[colId].condition2.filter;
-
-      const type1 = cols[colId].condition1.type;
-
-      if (condition1Filter && type1 === 'contains') {
-        query += ` AND c.${colId}.property1 = "${condition1Filter}"`;
-      }
-
-      if (condition2Filter) {
-        query += ` AND c.${colId}.property2 = "${condition2Filter}"`;
-      }
-      // ... add more conditions as needed for each colId
-    }
-  }
+  const query = filterToQuery(body);
 
   const querySpec = {
     query,
-    parameters: [
-      {
-        name: '@colId',
-        value: Object.keys(body.filters.colId)[0],
-      },
-      {
-        name: '@offset',
-        value: body.from - 1,
-      },
-      {
-        name: '@limit',
-        value: body.to - body.from + 1,
-      },
-    ],
+    parameters: [],
   };
-  console.log({ querySpec });
 
   const dashboardContainer = await fetchDashboardsContainer();
-  console.log({ dashboardContainer });
+  console.log({ query: querySpec.query });
   const { resources } = await dashboardContainer.items
     .query(querySpec)
     .fetchAll();
 
+  console.log({});
   console.log({ resources });
   if (resources.length === 0) {
     throw { code: 404, message: 'No dashboard has been found.' };
   }
 
   return resources;
+};
+
+export const countDashboardsRecords = async (): Promise<number> => {
+  const dashboardContainer = await fetchDashboardsContainer();
+  const { resources } = await dashboardContainer.items
+    .query({ query: 'SELECT VALUE COUNT(1) FROM dashboards', parameters: [] })
+    .fetchAll();
+
+  return resources[0];
 };

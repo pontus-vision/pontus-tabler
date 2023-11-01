@@ -1,18 +1,18 @@
-// import {
-//   dashboardCreatePOST,
-//   dashboardReadPOST,
-//   dashboardDeletePOST,
-//   dashboardUpdatePOST,
-// } from '../controllers/DashboardController';
-// import * as utils from '../utils/writer';
-// import {
-//   upsertDashboard,
-//   readDashboardById,
-//   deleteDashboard,
-// } from '../service/DashboardService';
-// import { Dashboard } from 'pontus-tabler/src/types';
-// import { PVResponse } from './pv-response';
 import {
+  dashboardCreatePOST,
+  dashboardReadPOST,
+  dashboardDeletePOST,
+  dashboardUpdatePOST,
+} from '../controllers/DashboardController';
+import * as utils from '../utils/writer';
+import {
+  upsertDashboard,
+  readDashboardById,
+  deleteDashboard,
+} from '../service/DashboardService';
+import { Dashboard } from 'pontus-tabler/src/types';
+import {
+  DashboardCreateReq,
   DashboardCreateRes,
   DashboardReadRes,
   DashboardRef,
@@ -22,7 +22,7 @@ import {
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import httpTrigger, {srv} from '../index'
+import httpTrigger, { srv } from '../index';
 import { HttpRequest, InvocationContext } from '@azure/functions';
 
 // // Mock the utils.writeJson function
@@ -37,7 +37,7 @@ import { HttpRequest, InvocationContext } from '@azure/functions';
 // }));
 jest.setTimeout(1000000);
 
-describe('dashboardCreatePOST',  () => {
+describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
   const post = async (
@@ -78,21 +78,25 @@ describe('dashboardCreatePOST',  () => {
     //   },
     // );
 
-    const res = await httpTrigger( new HttpRequest( {
-      body: {string: JSON.stringify(body) },
-      method: 'POST',
+    const res = await httpTrigger(
+      new HttpRequest({
+        body: { string: JSON.stringify(body) },
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer 123456',
         },
-       url:  'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-    }), 
-    new InvocationContext());
-    
+        url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+      }),
+      new InvocationContext(),
+    );
 
-    const retVal =  { status: res.status, data:  typeof res.body === 'string' ?  JSON.parse(res.body ): res.body };
-    console.log(`Ret val is ${JSON.stringify(retVal)}`)
-    return retVal
+    const retVal = {
+      status: res.status,
+      data: typeof res.body === 'string' ? JSON.parse(res.body) : res.body,
+    };
+    console.log(`Ret val is ${JSON.stringify(retVal)}`);
+    return retVal;
   };
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
@@ -176,5 +180,69 @@ describe('dashboardCreatePOST',  () => {
     let resPayload4 = deleteRetVal.data;
 
     expect(deleteRetVal.status).toBe(400);
+  });
+  it('should read dashboards', async () => {
+    const body: DashboardCreateReq = {
+      owner: 'Joe',
+      name: 'PontusVision',
+      folder: 'folder 1',
+      state: {},
+    };
+
+    const createRetVal = await post('dashboard/create', body);
+
+    const createRetVal2 = await post('dashboard/create', {
+      ...body,
+      name: 'PontusVision2',
+    });
+
+    const readBody = {
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'text',
+            type: 'contains',
+          },
+          filterType: 'text',
+        },
+      },
+    };
+
+    const readRetVal = await post('dashboards/read', readBody);
+
+    expect(readRetVal.data.dashboards.length).toBe(2);
+
+    const readBody2 = {
+      filters: {
+        name: {
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'text',
+            type: 'contains',
+          },
+          filterType: 'text',
+        },
+        folder: {
+          condition1: {
+            filter: 'folder 1',
+            filterType: 'text',
+            type: 'contains',
+          },
+          filterType: 'text',
+        },
+      },
+    };
+
+    const deleteVal = await post('dashboard/delete', {
+      id: createRetVal.data.id,
+    });
+
+    expect(deleteVal.status).toBe(200);
+    const deleteVal2 = await post('dashboard/delete', {
+      id: createRetVal2.data.id,
+    });
+
+    expect(deleteVal2.status).toBe(200);
   });
 });

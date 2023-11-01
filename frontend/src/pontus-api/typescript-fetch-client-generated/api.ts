@@ -474,6 +474,37 @@ export interface Child {
 /**
  *
  * @export
+ * @interface Dashboard
+ */
+export interface Dashboard {
+  /**
+   *
+   * @type {string}
+   * @memberof Dashboard
+   */
+  owner?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Dashboard
+   */
+  folder?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Dashboard
+   */
+  name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof Dashboard
+   */
+  id?: string;
+}
+/**
+ *
+ * @export
  * @interface DashboardAuthGroup
  */
 export interface DashboardAuthGroup {
@@ -574,6 +605,12 @@ export interface DashboardRef {
 /**
  *
  * @export
+ * @interface DashboardUpdateBody
+ */
+export interface DashboardUpdateBody extends DashboardUpdateReq {}
+/**
+ *
+ * @export
  * @interface DashboardUpdateReq
  */
 export interface DashboardUpdateReq extends BaseModelRef {
@@ -663,6 +700,31 @@ export interface DashboardgroupauthcreateAuthGroups {
    * @memberof DashboardgroupauthcreateAuthGroups
    */
   _delete?: Array<string>;
+}
+/**
+ *
+ * @export
+ * @interface DashboardsReadReq
+ */
+export interface DashboardsReadReq extends ReadPaginationFilter {}
+/**
+ *
+ * @export
+ * @interface DashboardsReadRes
+ */
+export interface DashboardsReadRes {
+  /**
+   *
+   * @type {number}
+   * @memberof DashboardsReadRes
+   */
+  totalDashboards?: number;
+  /**
+   *
+   * @type {Array<Dashboard>}
+   * @memberof DashboardsReadRes
+   */
+  dashboards?: Array<Dashboard>;
 }
 /**
  *
@@ -863,25 +925,6 @@ export interface GroupUpdateReq {
 /**
  *
  * @export
- * @interface InlineResponse200
- */
-export interface InlineResponse200 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineResponse200
-   */
-  totalDashboards?: number;
-  /**
-   *
-   * @type {Array<InlineResponse200Dashboards>}
-   * @memberof InlineResponse200
-   */
-  dashboards?: Array<InlineResponse200Dashboards>;
-}
-/**
- *
- * @export
  * @interface InlineResponse2001
  */
 export interface InlineResponse2001 {
@@ -916,37 +959,6 @@ export interface InlineResponse2002 {
    * @memberof InlineResponse2002
    */
   users?: Array<User>;
-}
-/**
- *
- * @export
- * @interface InlineResponse200Dashboards
- */
-export interface InlineResponse200Dashboards {
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  owner?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  folder?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineResponse200Dashboards
-   */
-  id?: string;
 }
 /**
  *
@@ -1038,10 +1050,10 @@ export interface ReadPaginationFilter {
   to?: number;
   /**
    *
-   * @type {ReadPaginationFilterFilters}
+   * @type {{ [key: string]: ReadPaginationFilterFilters; }}
    * @memberof ReadPaginationFilter
    */
-  filters?: ReadPaginationFilterFilters;
+  filters?: { [key: string]: ReadPaginationFilterFilters };
 }
 /**
  *
@@ -1051,64 +1063,99 @@ export interface ReadPaginationFilter {
 export interface ReadPaginationFilterFilters {
   /**
    *
-   * @type {ReadPaginationFilterFiltersColId}
+   * @type {string | number}
    * @memberof ReadPaginationFilterFilters
    */
-  colId?: ReadPaginationFilterFiltersColId;
-}
-/**
- *
- * @export
- * @interface ReadPaginationFilterFiltersColId
- */
-export interface ReadPaginationFilterFiltersColId {
-  /**
-   *
-   * @type {ReadPaginationFilterFiltersColIdCondition1}
-   * @memberof ReadPaginationFilterFiltersColId
-   */
-  condition1?: ReadPaginationFilterFiltersColIdCondition1;
-  /**
-   *
-   * @type {ReadPaginationFilterFiltersColIdCondition1}
-   * @memberof ReadPaginationFilterFiltersColId
-   */
-  condition2?: ReadPaginationFilterFiltersColIdCondition1;
+  filter?: string | number;
   /**
    *
    * @type {string}
-   * @memberof ReadPaginationFilterFiltersColId
+   * @memberof ReadPaginationFilterFilters
+   */
+  type?: string;
+  /**
+   *
+   * @type {Date | string}
+   * @memberof ReadPaginationFilterFilters
+   */
+  dateFrom?: Date | string;
+  /**
+   *
+   * @type {Date | string}
+   * @memberof ReadPaginationFilterFilters
+   */
+  dateTo?: Date | string;
+  /**
+   *
+   * @type {string | number}
+   * @memberof ReadPaginationFilterFilters
+   */
+  filterTo?: string | number;
+  /**
+   *
+   * @type {ReadPaginationFilterFiltersColIdCondition}
+   * @memberof ReadPaginationFilterFilters
+   */
+  condition1?: ReadPaginationFilterFiltersColIdCondition;
+  /**
+   *
+   * @type {ReadPaginationFilterFiltersColIdCondition}
+   * @memberof ReadPaginationFilterFilters
+   */
+  condition2?: ReadPaginationFilterFiltersColIdCondition;
+  /**
+   *
+   * @type {string}
+   * @memberof ReadPaginationFilterFilters
    */
   filterType?: string;
   /**
    *
    * @type {string}
-   * @memberof ReadPaginationFilterFiltersColId
+   * @memberof ReadPaginationFilterFilters
    */
   operator?: string;
 }
 /**
  *
  * @export
- * @interface ReadPaginationFilterFiltersColIdCondition1
+ * @interface ReadPaginationFilterFiltersColIdCondition
  */
-export interface ReadPaginationFilterFiltersColIdCondition1 {
+export interface ReadPaginationFilterFiltersColIdCondition {
   /**
    *
-   * @type {string}
-   * @memberof ReadPaginationFilterFiltersColIdCondition1
+   * @type {Date | string}
+   * @memberof ReadPaginationFilterFiltersColIdCondition
    */
-  filter?: string;
+  dateFrom?: Date | string;
+  /**
+   *
+   * @type {Date | string}
+   * @memberof ReadPaginationFilterFiltersColIdCondition
+   */
+  dateTo?: Date | string;
+  /**
+   *
+   * @type {string | number}
+   * @memberof ReadPaginationFilterFiltersColIdCondition
+   */
+  filter?: string | number;
+  /**
+   *
+   * @type {string | number}
+   * @memberof ReadPaginationFilterFiltersColIdCondition
+   */
+  filterTo?: string | number;
   /**
    *
    * @type {string}
-   * @memberof ReadPaginationFilterFiltersColIdCondition1
+   * @memberof ReadPaginationFilterFiltersColIdCondition
    */
   filterType?: string;
   /**
    *
    * @type {string}
-   * @memberof ReadPaginationFilterFiltersColIdCondition1
+   * @memberof ReadPaginationFilterFiltersColIdCondition
    */
   type?: string;
 }
@@ -2178,12 +2225,12 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Update dashboard properties, auth group, folder, and owner by ID
      * @summary Update dashboard by ID
-     * @param {DashboardUpdateReq} body
+     * @param {DashboardUpdateBody} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     dashboardUpdatePOST(
-      body: DashboardUpdateReq,
+      body: DashboardUpdateBody,
       options: any = {},
     ): FetchArgs {
       // verify required parameter 'body' is not null or undefined
@@ -2217,7 +2264,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'DashboardUpdateReq' !== 'string' ||
+        <any>'DashboardUpdateBody' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2231,14 +2278,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
+     * @param {DashboardsReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    dashboardsReadPOST(
-      body: ReadPaginationFilter,
-      options: any = {},
-    ): FetchArgs {
+    dashboardsReadPOST(body: DashboardsReadReq, options: any = {}): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2270,7 +2314,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'ReadPaginationFilter' !== 'string' ||
+        <any>'DashboardsReadReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -3269,12 +3313,12 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Update dashboard properties, auth group, folder, and owner by ID
      * @summary Update dashboard by ID
-     * @param {DashboardUpdateReq} body
+     * @param {DashboardUpdateBody} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     dashboardUpdatePOST(
-      body: DashboardUpdateReq,
+      body: DashboardUpdateBody,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardUpdateRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3299,14 +3343,14 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
+     * @param {DashboardsReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     dashboardsReadPOST(
-      body: ReadPaginationFilter,
+      body: DashboardsReadReq,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<InlineResponse200> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<DashboardsReadRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).dashboardsReadPOST(body, options);
@@ -3858,11 +3902,11 @@ export const DefaultApiFactory = function (
     /**
      * Update dashboard properties, auth group, folder, and owner by ID
      * @summary Update dashboard by ID
-     * @param {DashboardUpdateReq} body
+     * @param {DashboardUpdateBody} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    dashboardUpdatePOST(body: DashboardUpdateReq, options?: any) {
+    dashboardUpdatePOST(body: DashboardUpdateBody, options?: any) {
       return DefaultApiFp(configuration).dashboardUpdatePOST(body, options)(
         fetch,
         basePath,
@@ -3871,11 +3915,11 @@ export const DefaultApiFactory = function (
     /**
      * Retrieve all dashboards with pagination and search
      * @summary Get all dashboards
-     * @param {ReadPaginationFilter} body
+     * @param {DashboardsReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    dashboardsReadPOST(body: ReadPaginationFilter, options?: any) {
+    dashboardsReadPOST(body: DashboardsReadReq, options?: any) {
       return DefaultApiFp(configuration).dashboardsReadPOST(body, options)(
         fetch,
         basePath,
@@ -4273,12 +4317,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Update dashboard properties, auth group, folder, and owner by ID
    * @summary Update dashboard by ID
-   * @param {DashboardUpdateReq} body
+   * @param {DashboardUpdateBody} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public dashboardUpdatePOST(body: DashboardUpdateReq, options?: any) {
+  public dashboardUpdatePOST(body: DashboardUpdateBody, options?: any) {
     return DefaultApiFp(this.configuration).dashboardUpdatePOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4288,12 +4332,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Retrieve all dashboards with pagination and search
    * @summary Get all dashboards
-   * @param {ReadPaginationFilter} body
+   * @param {DashboardsReadReq} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public dashboardsReadPOST(body: ReadPaginationFilter, options?: any) {
+  public dashboardsReadPOST(body: DashboardsReadReq, options?: any) {
     return DefaultApiFp(this.configuration).dashboardsReadPOST(body, options)(
       this.fetch,
       this.basePath,
