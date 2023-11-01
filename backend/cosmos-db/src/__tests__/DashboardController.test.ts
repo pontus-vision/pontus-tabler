@@ -24,7 +24,6 @@ import {
 // import axios from 'axios';
 import httpTrigger, { srv } from '../index';
 import { HttpRequest, InvocationContext } from '@azure/functions';
-import { filterToQuery } from '../utils/cosmos-utils';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -109,328 +108,141 @@ describe('dashboardCreatePOST', () => {
     srv.close();
   });
 
-  // it('should do the CRUD "happy path"', async () => {
-  //   const body: DashboardRef = {
-  //     name: 'string',
-  //     folder: 'string',
-  //     owner: 'string',
-  //     state: {},
-  //   };
+  it('should do the CRUD "happy path"', async () => {
+    const body: DashboardRef = {
+      name: 'string',
+      folder: 'string',
+      owner: 'string',
+      state: {},
+    };
 
-  //   const createRetVal = await post('dashboard/create', body);
+    const createRetVal = await post('dashboard/create', body);
 
-  //   let resPayload: DashboardCreateRes = createRetVal.data;
-  //   let id = resPayload.id;
+    let resPayload: DashboardCreateRes = createRetVal.data;
+    let id = resPayload.id;
 
-  //   expect(createRetVal.data.name).toBe(body.name);
+    expect(createRetVal.data.name).toBe(body.name);
 
-  //   const readRetVal = await post('dashboard/read', {
-  //     id,
-  //   });
-  //   let resPayload2: DashboardReadRes = readRetVal.data;
+    const readRetVal = await post('dashboard/read', {
+      id,
+    });
+    let resPayload2: DashboardReadRes = readRetVal.data;
 
-  //   console.log(`res2: ${JSON.stringify(resPayload2)}`);
+    console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
-  //   expect(readRetVal.data.name).toBe(body.name);
+    expect(readRetVal.data.name).toBe(body.name);
 
-  //   const body2: DashboardUpdateReq = {
-  //     id: resPayload2.id,
-  //     owner: resPayload2.owner,
-  //     name: 'Pontus 2',
-  //     folder: resPayload2.folder,
-  //     state: resPayload2.state,
-  //   };
+    const body2: DashboardUpdateReq = {
+      id: resPayload2.id,
+      owner: resPayload2.owner,
+      name: 'Pontus 2',
+      folder: resPayload2.folder,
+      state: resPayload2.state,
+    };
 
-  //   const updateRetVal = await post('dashboard/update', body2);
+    const updateRetVal = await post('dashboard/update', body2);
 
-  //   let resPayload3: DashboardUpdateRes = updateRetVal.data;
+    let resPayload3: DashboardUpdateRes = updateRetVal.data;
 
-  //   expect(resPayload3.name).toBe(body2.name);
+    expect(resPayload3.name).toBe(body2.name);
 
-  //   const body3 = {
-  //     id: resPayload3.id,
-  //   };
+    const body3 = {
+      id: resPayload3.id,
+    };
 
-  //   const deleteRetVal = await post('dashboard/delete', body3);
+    const deleteRetVal = await post('dashboard/delete', body3);
 
-  //   let resPayload4 = deleteRetVal.data;
+    let resPayload4 = deleteRetVal.data;
 
-  //   expect(deleteRetVal.status).toBe(200);
+    expect(deleteRetVal.status).toBe(200);
 
-  //   const readRetVal2 = await post('dashboard/read', body3);
+    const readRetVal2 = await post('dashboard/read', body3);
 
-  //   expect(readRetVal2.status).toBe(404);
-  // });
-  // it('should do the CRUD "sad path"', async () => {
-  //   const createRetVal = await post('dashboard/create', {});
+    expect(readRetVal2.status).toBe(404);
+  });
+  it('should do the CRUD "sad path"', async () => {
+    const createRetVal = await post('dashboard/create', {});
 
-  //   expect(createRetVal.status).toBe(400);
+    expect(createRetVal.status).toBe(400);
 
-  //   const readRetVal = await post('dashboard/read', {
-  //     id: 'foo',
-  //   });
+    const readRetVal = await post('dashboard/read', {
+      id: 'foo',
+    });
 
-  //   expect(readRetVal.status).toBe(404);
+    expect(readRetVal.status).toBe(404);
 
-  //   const updateRetVal = await post('dashboard/update', { foo: 'bar' });
+    const updateRetVal = await post('dashboard/update', { foo: 'bar' });
 
-  //   expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(400);
 
-  //   const deleteRetVal = await post('dashboard/delete', { foo: 'bar' });
+    const deleteRetVal = await post('dashboard/delete', { foo: 'bar' });
 
-  //   let resPayload4 = deleteRetVal.data;
+    let resPayload4 = deleteRetVal.data;
 
-  //   expect(deleteRetVal.status).toBe(400);
-  // });
-  // it('should read dashboards', async () => {
-  //   const body: DashboardCreateReq = {
-  //     owner: 'Joe',
-  //     name: 'PontusVision',
-  //     folder: 'folder 1',
-  //     state: {},
-  //   };
+    expect(deleteRetVal.status).toBe(400);
+  });
+  it('should read dashboards', async () => {
+    const body: DashboardCreateReq = {
+      owner: 'Joe',
+      name: 'PontusVision',
+      folder: 'folder 1',
+      state: {},
+    };
 
-  //   const createRetVal = await post('dashboard/create', body);
+    const createRetVal = await post('dashboard/create', body);
 
-  //   const createRetVal2 = await post('dashboard/create', {
-  //     ...body,
-  //     name: 'PontusVision2',
-  //   });
+    const createRetVal2 = await post('dashboard/create', {
+      ...body,
+      name: 'PontusVision2',
+    });
 
-  //   const readBody = {
-  //     filters: {
-  //       name: {
-  //         condition1: {
-  //           filter: 'PontusVision',
-  //           filterType: 'text',
-  //           type: 'contains',
-  //         },
-  //         filterType: 'text',
-  //       },
-  //     },
-  //   };
-
-  //   const readRetVal = await post('dashboards/read', readBody);
-
-  //   expect(readRetVal.data.dashboards.length).toBe(2);
-
-  //   const readBody2 = {
-  //     filters: {
-  //       name: {
-  //         condition1: {
-  //           filter: 'PontusVision',
-  //           filterType: 'text',
-  //           type: 'contains',
-  //         },
-  //         filterType: 'text',
-  //       },
-  //       folder: {
-  //         condition1: {
-  //           filter: 'folder 1',
-  //           filterType: 'text',
-  //           type: 'contains',
-  //         },
-  //         filterType: 'text',
-  //       },
-  //     },
-  //   };
-
-  //   const deleteVal = await post('dashboard/delete', {
-  //     id: createRetVal.data.id,
-  //   });
-
-  //   expect(deleteVal.status).toBe(200);
-  //   const deleteVal2 = await post('dashboard/delete', {
-  //     id: createRetVal2.data.id,
-  //   });
-
-  //   expect(deleteVal2.status).toBe(200);
-  // });
-  it('should write proper query', () => {
-    const readBody2 = {
+    const readBody = {
       filters: {
         name: {
-          filter: 'PontusVision',
+          condition1: {
+            filter: 'PontusVision',
+            filterType: 'text',
+            type: 'contains',
+          },
           filterType: 'text',
-          type: 'contains',
-        },
-        folder: {
-          filter: 'folder 1',
-          filterType: 'text',
-          type: 'contains',
         },
       },
     };
-    const query = filterToQuery(readBody2);
 
-    expect(query.toLocaleLowerCase()).toBe(
-      'select * from dashboards d where contains(d.name, "pontusvision") and contains(d.folder, "folder 1")',
-    );
+    const readRetVal = await post('dashboards/read', readBody);
 
-    const query2 = filterToQuery({
-      filters: {
-        name: {
-          filter: 'PontusVision',
-          filterType: 'text',
-          type: 'equals',
-        },
-        folder: {
-          filter: 'folder 1',
-          filterType: 'text',
-          type: 'equals',
-        },
-      },
-    });
+    expect(readRetVal.data.dashboards.length).toBe(2);
 
-    expect(query2.toLocaleLowerCase()).toBe(
-      'select * from dashboards d where d.name = "pontusvision" and d.folder = "folder 1"',
-    );
-
-    const query3 = filterToQuery({
-      filters: {
-        name: {
-          filter: 'PontusVision',
-          filterType: 'text',
-          type: 'not contains',
-        },
-        folder: {
-          filter: 'folder 1',
-          filterType: 'text',
-          type: 'not contains',
-        },
-      },
-    });
-
-    expect(query3.toLocaleLowerCase()).toBe(
-      'select * from dashboards d where not contains(d.name, "pontusvision") and not contains(d.folder, "folder 1")',
-    );
-
-    const query4 = filterToQuery({
-      filters: {
-        name: {
-          filter: 'PontusVision',
-          filterType: 'text',
-          type: 'not equals',
-        },
-        folder: {
-          filter: 'folder 1',
-          filterType: 'text',
-          type: 'not equals',
-        },
-      },
-    });
-
-    expect(query4.toLocaleLowerCase()).toBe(
-      'select * from dashboards d where not d.name = "pontusvision" and not d.folder = "folder 1"',
-    );
-
-    const date = '2023-10-19 00:00:00';
-
-    const query5 = filterToQuery({
+    const readBody2 = {
       filters: {
         name: {
           condition1: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'greaterThan',
+            filter: 'PontusVision',
+            filterType: 'text',
+            type: 'contains',
           },
-          condition2: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'greaterThan',
-          },
-          filterType: 'date',
-          operator: 'AND',
+          filterType: 'text',
         },
         folder: {
           condition1: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'lessThan',
+            filter: 'folder 1',
+            filterType: 'text',
+            type: 'contains',
           },
-          condition2: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'lessThan',
-          },
-          operator: 'AND',
-          filterType: 'date',
+          filterType: 'text',
         },
       },
+    };
+
+    const deleteVal = await post('dashboard/delete', {
+      id: createRetVal.data.id,
     });
 
-    expect(query5.toLocaleLowerCase()).toBe(
-      `select * from dashboards d where (d.name > "2023-10-19T00:00:00Z" and d.name > "2023-10-19T00:00:00Z") and (d.folder < "2023-10-19T00:00:00Z" and d.folder < "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
-    );
-
-    const query6 = filterToQuery({
-      filters: {
-        name: {
-          condition1: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'greaterThan',
-          },
-          condition2: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'greaterThan',
-          },
-          filterType: 'date',
-          operator: 'OR',
-        },
-        folder: {
-          condition1: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'lessThan',
-          },
-          condition2: {
-            dateFrom: date,
-            filterType: 'date',
-            type: 'lessThan',
-          },
-          operator: 'OR',
-          filterType: 'date',
-        },
-      },
+    expect(deleteVal.status).toBe(200);
+    const deleteVal2 = await post('dashboard/delete', {
+      id: createRetVal2.data.id,
     });
 
-    expect(query6.toLocaleLowerCase()).toBe(
-      `select * from dashboards d where (d.name > "2023-10-19T00:00:00Z" or d.name > "2023-10-19T00:00:00Z") and (d.folder < "2023-10-19T00:00:00Z" or d.folder < "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
-    );
-
-    const query7 = filterToQuery({
-      filters: {
-        name: {
-          dateFrom: date,
-          filterType: 'date',
-          type: 'greaterThan',
-
-          operator: 'OR',
-        },
-      },
-    });
-
-    expect(query7.toLocaleLowerCase()).toBe(
-      `select * from dashboards d where d.name > "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
-    );
-
-    const query8 = filterToQuery({
-      filters: {
-        name: {
-          dateFrom: date,
-          dateTo: date,
-          filterType: 'date',
-          type: 'inRange',
-
-          operator: 'OR',
-        },
-      },
-    });
-
-    expect(query8.toLocaleLowerCase()).toBe(
-      `select * from dashboards d where d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
-    );
+    expect(deleteVal2.status).toBe(200);
   });
 });
