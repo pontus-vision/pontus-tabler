@@ -423,9 +423,6 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
 
       const colQueryStr = colQuery.join('').trim();
 
-      if (Object.keys(cols).length > 1) {
-      }
-
       query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
     }
   }
