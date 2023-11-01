@@ -403,13 +403,14 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
 
         if (condition1DateFrom && type1 === 'inrange') {
           colQuery.push(
-            ` d.${colId} >= "${condition1DateFrom}" AND d.${colId} <= "${condition1DateTo}"`,
+            ` d.${colId} >= "${condition1DateFrom}" AND d.${colId} <= "${condition1DateTo}"` +
+              (condition2DateFrom ? ')' : ''),
           );
         }
 
         if (condition2DateFrom && type2 === 'inrange') {
           colQuery.push(
-            ` ${operator} d.${colId} >= "${condition2DateFrom}" AND d.${colId} <= "${condition2DateTo}"`,
+            ` ${operator} (d.${colId} >= "${condition2DateFrom}" AND d.${colId} <= "${condition2DateTo}"`,
           );
         }
       }
