@@ -402,20 +402,29 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
         }
 
         if (condition1DateFrom && type1 === 'inrange') {
+          const multiCol = Object.keys(cols).length > 1;
           colQuery.push(
-            ` d.${colId} >= "${condition1DateFrom}" AND d.${colId} <= "${condition1DateTo}"` +
+            ` ${
+              multiCol ? '(' : ''
+            }d.${colId} >= "${condition1DateFrom}" AND d.${colId} <= "${condition1DateTo}"` +
               (condition2DateFrom ? ')' : ''),
           );
         }
 
         if (condition2DateFrom && type2 === 'inrange') {
+          const multiCol = Object.keys(cols).length > 1;
           colQuery.push(
-            ` ${operator} (d.${colId} >= "${condition2DateFrom}" AND d.${colId} <= "${condition2DateTo}"`,
+            ` ${operator} (d.${colId} >= "${condition2DateFrom}" AND d.${colId} <= "${condition2DateTo}"${
+              multiCol ? ')' : ''
+            }`,
           );
         }
       }
 
       const colQueryStr = colQuery.join('').trim();
+
+      if (Object.keys(cols).length > 1) {
+      }
 
       query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
     }
