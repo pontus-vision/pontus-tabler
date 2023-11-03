@@ -208,8 +208,8 @@ export const sendHttpRequest = async (
       );
 
       return response;
-    } catch (error) {
-      console.error(`error: ${error.message}`);
+    } catch (error: any) {
+      console.error(`error: ${error?.message}`);
       await new Promise((resolve) => setTimeout(resolve, 200 * i + 1));
     }
   }

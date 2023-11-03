@@ -29,7 +29,7 @@ export type getModelDataReturn = {
 
 const AdminView = () => {
   const [gridState, setGridState] = useState<IJsonModel>();
-
+  const [deletion, setDeletion] = useState(false);
   const [showDashboardForm, setShowDashboardForm] = useState(false);
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const { t, i18n } = useTranslation();
@@ -59,7 +59,11 @@ const AdminView = () => {
       {
         <>
           <CmpPanel setSelectedCmp={setSelectedCmp} />
-          <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
+          <PVFlexLayout
+            deletion={deletion}
+            setGridState={setGridState}
+            selectedCmp={selectedCmp}
+          />
           {showDashboardForm && (
             <FormDashboard
               saveDashboard={saveDashboard}

@@ -54,6 +54,12 @@ type Props = {
   totalCount?: number;
   add: () => void;
   onUpdate: (data: any) => void;
+  permissions?: {
+    updateAction: boolean;
+    createAction: boolean;
+    deleteAction: boolean;
+    readAction: boolean;
+  };
   setFilters?: Dispatch<
     SetStateAction<ReadPaginationFilterFilters | undefined>
   >;
@@ -76,6 +82,7 @@ const PVGridWebiny2 = ({
   rows,
   add,
   totalCount,
+  permissions,
   setDeletion,
   setFilters,
   onUpdate,
@@ -495,6 +502,7 @@ const PVGridWebiny2 = ({
         <GridActionsPanel
           data-testid="grid-action-panel"
           add={add}
+          permissions={permissions}
           setDeletion={setDeletion}
           deleteMode={deleteMode}
           updateMode={updateMode}
