@@ -11,7 +11,6 @@ import {
   deleteDashboard,
 } from '../service/DashboardService';
 import { Dashboard } from 'pontus-tabler/src/types';
-import { PVResponse } from './pv-response';
 import {
   DashboardCreateReq,
   DashboardCreateRes,
@@ -20,9 +19,11 @@ import {
   DashboardUpdateRes,
   DashboardUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { sendHttpRequest } from './http';
-import { method } from 'lodash';
-import axios from 'axios';
+// import { sendHttpRequest } from '../http';
+// import { method } from 'lodash';
+// import axios from 'axios';
+import httpTrigger, { srv } from '../index';
+import { HttpRequest, InvocationContext } from '@azure/functions';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -40,8 +41,8 @@ describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
   const post = async (
-    endpoint,
-    body,
+    endpoint: string,
+    body: any,
   ): Promise<{ data: any; status: number }> => {
     // return sendHttpRequest(
     //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
@@ -65,19 +66,37 @@ describe('dashboardCreatePOST', () => {
     //   );
     //   return res;
 
-    const res = await fetch(
-      'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-      {
+    // const res = await fetch(
+    //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    //   {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: 'Bearer 123456',
+    //     },
+    //     body: JSON.stringify(body),
+    //   },
+    // );
+
+    const res = await httpTrigger(
+      new HttpRequest({
+        body: { string: JSON.stringify(body) },
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer 123456',
         },
-        body: JSON.stringify(body),
-      },
+        url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+      }),
+      new InvocationContext(),
     );
 
-    return { status: res.status, data: await res.json() };
+    const retVal = {
+      status: res.status,
+      data: typeof res.body === 'string' ? JSON.parse(res.body) : res.body,
+    };
+    console.log(`Ret val is ${JSON.stringify(retVal)}`);
+    return retVal;
   };
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
@@ -86,6 +105,7 @@ describe('dashboardCreatePOST', () => {
 
   afterAll(() => {
     process.env = OLD_ENV; // Restore old environment
+    srv.close();
   });
 
   it('should do the CRUD "happy path"', async () => {
@@ -181,38 +201,48 @@ describe('dashboardCreatePOST', () => {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
       },
     };
 
     const readRetVal = await post('dashboards/read', readBody);
 
-    expect(readRetVal.data.length).toBe(2);
+    expect(readRetVal.data.dashboards.length).toBe(2);
 
     const readBody2 = {
       filters: {
         name: {
           condition1: {
             filter: 'PontusVision',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
         folder: {
           condition1: {
             filter: 'folder 1',
-            filterType: 'string',
+            filterType: 'text',
             type: 'contains',
           },
+          filterType: 'text',
         },
       },
     };
 
-    const readRetVal2 = await post('dashboards/read', readBody2);
+    const deleteVal = await post('dashboard/delete', {
+      id: createRetVal.data.id,
+    });
 
-    expect(readRetVal.data.length).toBe(2);
+    expect(deleteVal.status).toBe(200);
+    const deleteVal2 = await post('dashboard/delete', {
+      id: createRetVal2.data.id,
+    });
+
+    expect(deleteVal2.status).toBe(200);
   });
 });
