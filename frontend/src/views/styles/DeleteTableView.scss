@@ -1,0 +1,57 @@
+/* DeleteTableView.css */
+
+.delete-table-view {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.delete-table-view-select {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #2d3748;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.delete-table-view-button {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-table-view-button:hover {
+  background-color: #c53030;
+}
+
+.delete-table-view-alert {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  color: #48bb78;
+  border: 1px solid #48bb78;
+  border-radius: 0.375rem;
+  background-color: #f0fff4;
+  margin-bottom: 1rem;
+}
+
+.delete-table-view-alert-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  fill: currentColor;
+}
+
+.delete-table-view-alert-title {
+  font-weight: bold;
+}
+
+.delete-table-view-alert-content {
+  font-size: 0.875rem;
+}

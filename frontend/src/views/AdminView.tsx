@@ -29,7 +29,7 @@ export type getModelDataReturn = {
 
 const AdminView = () => {
   const [gridState, setGridState] = useState<IJsonModel>();
-
+  const [deletion, setDeletion] = useState(false);
   const [showDashboardForm, setShowDashboardForm] = useState(false);
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const { t, i18n } = useTranslation();
@@ -55,11 +55,15 @@ const AdminView = () => {
   }, [gridState]);
 
   return (
-    <AdminViewStyles>
+    <div className="admin-view__container">
       {
         <>
           <CmpPanel setSelectedCmp={setSelectedCmp} />
-          <PVFlexLayout setGridState={setGridState} selectedCmp={selectedCmp} />
+          <PVFlexLayout
+            deletion={deletion}
+            setGridState={setGridState}
+            selectedCmp={selectedCmp}
+          />
           {showDashboardForm && (
             <FormDashboard
               saveDashboard={saveDashboard}
@@ -71,36 +75,8 @@ const AdminView = () => {
           </button>
         </>
       }
-    </AdminViewStyles>
+    </div>
   );
 };
-
-const AdminViewStyles = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding-top: 2rem;
-  gap: 1rem;
-  height: 92%;
-  width: 100%;
-
-  .shadow {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    background-color: #0000004b;
-  }
-
-  .layout {
-    position: relative;
-    top: 0rem;
-    height: 30rem;
-    width: 90%;
-  }
-`;
 
 export default AdminView;

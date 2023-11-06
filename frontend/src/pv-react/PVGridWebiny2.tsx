@@ -54,6 +54,12 @@ type Props = {
   totalCount?: number;
   add: () => void;
   onUpdate: (data: any) => void;
+  permissions?: {
+    updateAction: boolean;
+    createAction: boolean;
+    deleteAction: boolean;
+    readAction: boolean;
+  };
   setFilters?: Dispatch<
     SetStateAction<ReadPaginationFilterFilters | undefined>
   >;
@@ -76,6 +82,7 @@ const PVGridWebiny2 = ({
   rows,
   add,
   totalCount,
+  permissions,
   setDeletion,
   setFilters,
   onUpdate,
@@ -116,7 +123,6 @@ const PVGridWebiny2 = ({
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
         if (!showGrid) return;
-        console.log('datasource', { rows });
 
         try {
           const pageSize = params.endRow - params.startRow;
@@ -132,8 +138,6 @@ const PVGridWebiny2 = ({
             const sort = params?.sortModel[0].sort;
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
-
-          console.log({ filter });
 
           setTo && setTo(params.endRow);
           setFrom && setFrom(params.startRow);
@@ -219,7 +223,6 @@ const PVGridWebiny2 = ({
           //   return flattenObj(row);
           // });
 
-          console.log({ cols, rows, totalCount });
           // if (!cols) return;
 
           setColumnDefs([
@@ -287,7 +290,7 @@ const PVGridWebiny2 = ({
             // }),
             ...cols,
           ]);
-          console.log({ rows, totalCount });
+
           if (rows) {
             params.successCallback(rows, totalCount);
           }
@@ -300,15 +303,10 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    console.log(selectedRows);
-  }, [selectedRows]);
-
-  useEffect(() => {
     const objects = columnDefs?.filter(
       (el: { [key: string]: any }) => el?.children,
     );
 
-    console.log({ columnState, columnDefs, objects });
     const checkHiddenObj =
       objects &&
       objects.length > 0 &&
@@ -322,10 +320,7 @@ const PVGridWebiny2 = ({
 
     checkHiddenObj && setCheckHiddenObjects(true);
 
-    console.log({ checkHiddenObj });
     if (checkHiddenObj) {
-      console.log({ checkHiddenObj, checkHiddenObjects });
-
       setColumnDefs(
         (prevState) =>
           (prevState = prevState?.filter(
@@ -351,7 +346,6 @@ const PVGridWebiny2 = ({
     );
   };
   useEffect(() => {
-    console.log(rows);
     gridApi?.refreshInfiniteCache();
   }, [rows]);
 
@@ -371,7 +365,6 @@ const PVGridWebiny2 = ({
 
     onRowClicked: (e) => {
       if (setRowClicked) {
-        console.log(e.data);
         setRowClicked(e.data);
       }
     },
@@ -412,7 +405,6 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    console.log({ deleteMode });
     if (deleteMode) {
       columnApi?.setColumnVisible('delete-mode', true);
     } else {
@@ -424,7 +416,6 @@ const PVGridWebiny2 = ({
   }, [deleteMode]);
 
   useEffect(() => {
-    console.log({ updateMode });
     if (updateMode) {
       columnApi?.setColumnVisible('update-mode', true);
     } else {
@@ -459,12 +450,11 @@ const PVGridWebiny2 = ({
 
   const onSelectionChanged = (event: SelectionChangedEvent): void => {
     const selectedRows = event.api.getSelectedNodes();
-    console.log(selectedRows);
+
     setSelectedRows(selectedRows);
   };
 
   useEffect(() => {
-    console.log(selectedRows, 'HEYYY');
     setEntriesToBeDeleted &&
       setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);
@@ -475,8 +465,6 @@ const PVGridWebiny2 = ({
     const gridElement = document.querySelector(`.${gridId}.ag-theme-alpine`);
     if (gridElement) {
       const gridHeight = gridElement.offsetHeight;
-      console.log({ gridId, gridElement, gridHeight });
-      console.log(gridHeight);
       setGridHeight && setGridHeight(gridHeight);
     }
   };
@@ -514,6 +502,7 @@ const PVGridWebiny2 = ({
         <GridActionsPanel
           data-testid="grid-action-panel"
           add={add}
+          permissions={permissions}
           setDeletion={setDeletion}
           deleteMode={deleteMode}
           updateMode={updateMode}

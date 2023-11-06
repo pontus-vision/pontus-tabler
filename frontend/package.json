@@ -5,9 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "tsbuild": "tsc",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest"
+  },
+  "exports": {
+    "./src/types.ts": "./src/types.ts",
+    "./src/http.ts": "./src/http.ts",
+    "./package.json": "./package.json"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
@@ -37,6 +43,7 @@
     "html2canvas": "^1.3.3",
     "i18next": "^22.5.0",
     "immer": "^9.0.6",
+    "isomorphic-fetch": "^3.0.0",
     "jquery": "^3.6.0",
     "jquery-ui-sortable": "^1.0.0",
     "js-base64": "^3.6.0",
@@ -76,6 +83,7 @@
     "sass": "^1.63.6",
     "semantic-ui-react": "^2.0.3",
     "slickgrid": "^2.4.34",
+    "ssl-root-cas": "^1.3.1",
     "styled-components": "^5.3.9",
     "tailwindcss": "^3.3.3",
     "tooltip.js": "^1.3.3",

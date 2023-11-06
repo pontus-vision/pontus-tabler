@@ -1,7 +1,6 @@
 import { ColumnApi, GridApi } from 'ag-grid-community';
 import { IJsonModel } from 'flexlayout-react';
-import { P } from 'vitest/dist/types-5872e574';
-import { Table } from './pontus-api/typescript-fetch-client-generated';
+import { TableRef } from './pontus-api/typescript-fetch-client-generated';
 
 export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Index of the first rendered row
@@ -15,7 +14,7 @@ export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Application context as set on `gridOptions.context`.
   context: TContext;
   // Event identifier
-  type: string;
+  kind: string;
 }
 
 export interface IListModelResponse {
@@ -50,7 +49,7 @@ export interface Meta {
 //   id: string;
 //   fieldId: string;
 //   storageId: string;
-//   type: string;
+//   kind: string;
 //   label: string;
 //   placeholderText: string;
 //   helpText: null;
@@ -62,6 +61,23 @@ export interface Meta {
 //   settings: null;
 //   __typename: string;
 // }
+
+export interface DataRoot {
+  id: string;
+  name: string;
+
+  kind: 'folder' | 'file';
+  path: string;
+  children: Child[];
+}
+
+export interface Child {
+  id: string;
+  name: string;
+  kind: 'folder' | 'file';
+  path: string;
+  children?: Child[];
+}
 
 export interface Renderer {
   name: string;
@@ -118,7 +134,7 @@ export interface CmsEntriesListContentMeta {
 
 export interface FlexLayoutCmp {
   componentName: string;
-  cmp?: Table;
+  cmp?: TableRef;
 }
 
 export interface WebinyRefInput {
@@ -166,7 +182,7 @@ export interface ICmsGetContentModelDataField {
   id: string;
   fieldId: string;
   storageId: string;
-  type: string;
+  kind: string;
   label: string;
   placeholderText: null | string;
   helpText: null | string;

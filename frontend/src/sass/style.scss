@@ -1,13 +1,27 @@
-@use 'variables';
-@use '../views/styles/AdminView.scss';
+@use 'variables.scss';
 @use '../styles/Header.scss';
 @use '../styles/PVFlexLayout.scss';
 @use '../styles/Sidebar.scss';
-@use '../components/components';
+@use '../components/styles/components';
 @use '../styles/NewEntryForm.scss';
 @use '../views/styles/NewEntryView.scss';
 @use '../views/styles/LoginView.scss';
 @use '../views/styles/DashboardView.scss';
+@use '../components/styles/DeleteConfirmatioModal.scss';
+@use '../views/authGroups/AuthGroupForm.scss';
+@use '../views/authGroups/CreateAuthGroup.scss';
+@use '../views/authGroups/ReadAuthGroups.scss';
+@use '../views/users/UpdateUser.scss';
+@use '../views/authGroups/UpdateAuthGroup.scss';
+@use '../views/users/CreateUser.scss';
+@use '../views/users/ReadUsers.scss';
+@use '../views/tables/ReadTables.scss';
+@use '../views/styles/AdminView.scss';
+@use '../views/styles/CreateNewTable.scss';
+@use '../views/styles/DeleteTableView.scss';
+@use '../views/styles/UpdateTable.scss';
+@use '../views/styles/Unauthorized.scss';
+// @use '../components/styles/Sidebar.scss';
 
 #root {
   height: 100%;
