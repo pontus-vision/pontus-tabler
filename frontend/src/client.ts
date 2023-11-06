@@ -31,6 +31,9 @@ import {
   GroupUpdateReq,
   GroupDeleteReq,
   DashboardsReadRes,
+  DashboardAuthGroup,
+  UserReadBody,
+  TableRef,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -103,7 +106,7 @@ export const getTables = async (): Promise<
 
 export const getTable = async (
   tableId: string,
-): Promise<AxiosResponse<Table> | undefined> => {
+): Promise<AxiosResponse<TableRef> | undefined> => {
   return post('/table/read', { tableId });
 };
 
@@ -205,8 +208,6 @@ export const deleteAuthGroup = async (
   return post('/auth/group/delete', body);
 };
 
-<<<<<<< HEAD
-=======
 export const createUser = async (
   body: NewUser,
 ): Promise<AxiosResponse<User> | undefined> => {

@@ -89,13 +89,22 @@ export const readDashboards = async (body: ReadPaginationFilter) => {
     throw { code: 404, message: 'No dashboard has been found.' };
   }
 
-  return resources;
+  const countStr = query
+    .replace('*', 'VALUE COUNT(1)')
+    .replace(/OFFSET \d+ LIMIT \d+/, '');
+
+  console.log(countStr);
+  const dashboardsCount = await countDashboardsRecords(countStr);
+
+  return { totalDashboards: dashboardsCount, dashboards: resources };
 };
 
-export const countDashboardsRecords = async (): Promise<number> => {
+export const countDashboardsRecords = async (
+  query: string,
+): Promise<number> => {
   const dashboardContainer = await fetchDashboardsContainer();
   const { resources } = await dashboardContainer.items
-    .query({ query: 'SELECT VALUE COUNT(1) FROM dashboards', parameters: [] })
+    .query({ query, parameters: [] })
     .fetchAll();
 
   return resources[0];

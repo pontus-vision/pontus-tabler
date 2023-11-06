@@ -434,12 +434,12 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
     }
   }
 
-  const finalQuery =
-    'select * from dashboards d where ' +
+  const finalQuery = (
+    'select * from dashboards d' +
+    (Object.keys(body.filters).length > 0 ? ' WHERE ' : '') +
     query.join(' and ') +
-    `${from ? 'OFFSET ' + (from - 1) : ''} ${
-      to ? 'LIMIT ' + (to - from) : ''
-    }`.trim();
+    `${from ? ' OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
+  ).trim();
 
   return finalQuery;
 };

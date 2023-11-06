@@ -16,6 +16,10 @@ import PVFlexLayout from '../../pv-react/PVFlexLayout';
 import DashboardView from '../DashboardView';
 import { isEmpty } from '../../helpers/functions';
 
+interface Row extends RowEvent<any, any> {
+  id: string;
+}
+
 const Dashboards = () => {
   const dispatch = useDispatch();
   const [cols, setCols] = useState<ColDef[]>([
@@ -51,7 +55,7 @@ const Dashboards = () => {
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(5);
   const [totalCount, setTotalCount] = useState<number>(2);
-  const [rowClicked, setRowClicked] = useState<RowEvent>();
+  const [rowClicked, setRowClicked] = useState<{ [key: string]: any }>();
   const [newDashboardName, setNewDashboardName] = useState<string>();
   const [deletion, setDeletion] = useState(false);
   const navigate = useNavigate();
@@ -68,6 +72,7 @@ const Dashboards = () => {
           filters,
         };
         const res = await getAllDashboards(req);
+        console.log({ res, req });
 
         const rowsVal = res?.data?.dashboards?.map((dashboard) => {
           return {
@@ -80,7 +85,7 @@ const Dashboards = () => {
 
         const totalRows = res?.data?.totalDashboards;
 
-        const obj: ColDef[] = rowsVal
+        const obj: ColDef[] | undefined = rowsVal
           ?.map((dashboard) => {
             return Object.keys(dashboard);
           })[0]
@@ -97,8 +102,10 @@ const Dashboards = () => {
 
         setRows(rowsVal);
         setTotalCount(totalRows || 0);
-        setCols(obj);
-      } catch (error) {}
+        obj && setCols(obj);
+      } catch (error) {
+        setRows([]);
+      }
     };
 
     fetchDashboars();
@@ -111,7 +118,7 @@ const Dashboards = () => {
   const setDashboard = async () => {
     if (!rowClicked) return;
     console.log({ rowClicked });
-    dispatch(setDashboardId(rowClicked.id));
+    dispatch(setDashboardId({ id: rowClicked.id }));
 
     navigate(`/dashboard/${rowClicked.id}`);
   };
@@ -123,13 +130,13 @@ const Dashboards = () => {
   useEffect(() => {
     setDashboard();
   }, [rowClicked]);
-  if (!rows) return;
+  // if (!rows) return;
 
   const handleFiltersChange = (filters: {
     [key: string]: ReadPaginationFilterFilters;
   }) => {
     if (isEmpty(filters)) return;
-
+    console.log({ filters });
     setFilters(filters);
   };
 

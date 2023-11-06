@@ -125,19 +125,24 @@ export async function dashboardsReadPOST(
 ) {
   try {
     const response = await readDashboards(body);
-    const response2 = await countDashboardsRecords();
 
     const obj: DashboardsReadRes = {
-      dashboards: response,
-      totalDashboards: response2,
+      dashboards: response.dashboards,
+      totalDashboards: response.totalDashboards,
     };
 
+    console.log(obj);
     res.status(200);
     res.json(obj);
 
     return res;
   } catch (error) {
     if (error?.code && error?.message) {
+      if (error.code === 404) {
+        res.status(error.code);
+        res.json([]);
+        return res;
+      }
       res.status(error.code);
       res.json(error.message);
       return res;

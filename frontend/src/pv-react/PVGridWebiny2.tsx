@@ -20,6 +20,7 @@ import {
   IDatasource,
   IGetRowsParams,
   IRowNode,
+  IServerSideGetRowsParams,
   RowEvent,
   SelectionChangedEvent,
 } from 'ag-grid-community';
@@ -49,11 +50,11 @@ type Props = {
   containerHeight?: string;
   updateMode?: boolean;
   setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
-  cols?: ColDef[];
+  cols: ColDef[];
   rows?: { [key: string]: unknown }[];
   totalCount?: number;
-  add: () => void;
-  onUpdate: (data: any) => void;
+  add?: () => void;
+  onUpdate?: (data: any) => void;
   permissions?: {
     updateAction: boolean;
     createAction: boolean;
@@ -66,7 +67,7 @@ type Props = {
   onFromChange?: (num: number) => void;
   onToChange?: (num: number) => void;
   setDeletion?: Dispatch<SetStateAction<User[] | undefined>>;
-  setGridHeight?: Dispatch<React.SetStateAction<undefined>>;
+  setGridHeight?: Dispatch<React.SetStateAction<undefined | number>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
 };
 
@@ -98,7 +99,9 @@ const PVGridWebiny2 = ({
   const [columnDefs, setColumnDefs] = useState<ColDef[] | undefined>([]);
   const [cursors, setCursors] = useState(new Set([null]));
   const [gridApi, setGridApi] = useState<GridApi>();
-
+  const [cachedRowParams, setCachedRowParams] = useState<IGetRowsParams>();
+  const [to, setTo] = useState();
+  const [from, setFrom] = useState();
   const [deleteMode, setDeleteMode] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
 
@@ -119,9 +122,15 @@ const PVGridWebiny2 = ({
   //   setColumnDefs(cols);
   // }, [cols]);
 
+  useEffect(() => {
+    console.log({ filterState });
+  }, [filterState]);
+
   const getDataSource = () => {
     const datasource: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
+        setCachedRowParams(params);
+
         if (!showGrid) return;
 
         try {
@@ -142,88 +151,8 @@ const PVGridWebiny2 = ({
           onToChange && onToChange(params.endRow);
           onFromChange && onFromChange(params.startRow);
 
+          console.log({ filter });
           onFiltersChange && onFiltersChange(filter);
-
-          // const data = await getModelData(
-          //   modelId,
-          //   pageSize,
-          //   [...cursors][index],
-          //   filter,
-          //   sorting,
-          // );
-
-          // if (!data) return;
-
-          // setCursors((previousState) => previousState.add(data.meta.cursor));
-
-          // const { totalCount } = data.meta;
-
-          // const rows = data.modelContentListData.map(
-          //   (row: IListModelResponseData): { [key: string]: unknown } => {
-          //     const {
-          //       createdBy,
-          //       createdOn,
-          //       entryId,
-          //       ownedBy,
-          //       savedOn,
-          //       ...rest
-          //     } = row;
-          //     return rest;
-          //   },
-          // );
-
-          // const objFields = data.columnNames.filter(
-          //   (col) => col.type === 'object',
-          // );
-
-          // const refInputFields = data.columnNames.filter(
-          //   (col) => col.renderer.name === 'ref-input',
-          // );
-
-          // const refInputsFields = data.columnNames.filter(
-          //   (col) => col.renderer.name === 'ref-inputs',
-          // );
-
-          // const rows2 = rows.map((row) => {
-          //   const flattenObj = (ob: { [key: string]: any }) => {
-          //     let result = {} as any;
-          //     for (const i in ob) {
-          //       if (
-          //         typeof ob[i] === 'object' &&
-          //         !Array.isArray(ob[i]) &&
-          //         objFields.some((field) => field.fieldId === i)
-          //       ) {
-          //         const temp = flattenObj(ob[i]);
-          //         for (const j in temp) {
-          //           // Store temp in result
-          //           result[j] = temp[j];
-          //         }
-          //       } else if (
-          //         refInputFields.some((field) => field.fieldId === i)
-          //       ) {
-          //         if (!!ob[i]) {
-          //           result[i] = Object.values(ob[i])[0];
-          //         }
-          //       } else if (
-          //         refInputsFields.some((field) => field.fieldId === i)
-          //       ) {
-          //         if (ob[i]) {
-          //           const values = ob[i].map(
-          //             (el: { [key: string]: unknown }) => Object.values(el)[0],
-          //           );
-          //           result[i] = values.length > 1 ? values.join(', ') : values;
-          //         }
-          //       } else {
-          //         result[i] = ob[i];
-          //       }
-          //     }
-          //     return result;
-          //   };
-
-          //   return flattenObj(row);
-          // });
-
-          // if (!cols) return;
 
           setColumnDefs([
             {
@@ -257,43 +186,14 @@ const PVGridWebiny2 = ({
               cellRenderer: () => <i className="fa-solid fa-pen-to-square"></i>,
               onCellClicked: handleUpdateIconClick,
             },
-            // ...data.columnNames.map((field) => {
-            //   if (
-            //     field.type === 'object' &&
-            //     field.settings?.fields &&
-            //     checkHiddenObjects === false
-            //   ) {
-            //     return {
-            //       headerName: field.label,
-            //       field: field.fieldId,
-            //       children: field.settings?.fields.map((field) => {
-            //         return {
-            //           sortable: false,
-            //           field: field.fieldId,
-            //           headerName: field.label,
-            //         };
-            //       }),
-            //     };
-            //   } else if (field.type === 'ref') {
-            //     return {
-            //       headerName: field.label,
-            //       field: field.fieldId,
-            //       sortable: false,
-            //     };
-            //   }
-            //   return {
-            //     headerName: field.label,
-            //     field: field.fieldId,
-            //     filter: 'agTextColumnFilter',
-            //     filterParams: { apply: true, newRowsAction: 'keep' },
-            //   };
-            // }),
+
             ...cols,
           ]);
 
-          if (rows) {
-            params.successCallback(rows, totalCount);
-          }
+          // if (rows) {
+          //   console.log({ rows });
+          //   params.successCallback(rows, totalCount);
+          // }
         } catch (error) {
           console.error(error);
         }
@@ -301,6 +201,12 @@ const PVGridWebiny2 = ({
     };
     return datasource;
   };
+
+  useEffect(() => {
+    if (!rows) return;
+    console.log({ rows, totalCount });
+    cachedRowParams?.successCallback(rows, totalCount);
+  }, [rows, filterState]);
 
   useEffect(() => {
     const objects = columnDefs?.filter(
@@ -333,7 +239,7 @@ const PVGridWebiny2 = ({
   const handleUpdateIconClick = (params: CellClickedEvent<any, any>) => {
     const { data: rowData } = params;
 
-    onUpdate(rowData);
+    onUpdate && onUpdate(rowData);
 
     const { id, ...rest } = rowData;
 
@@ -360,7 +266,7 @@ const PVGridWebiny2 = ({
 
   const gridOptions: GridOptions = {
     rowModelType: 'infinite',
-    cacheBlockSize: 1,
+    cacheBlockSize: 100,
     suppressRowClickSelection: true,
 
     onRowClicked: (e) => {
@@ -462,7 +368,9 @@ const PVGridWebiny2 = ({
   const gridContainerRef = useRef(null);
 
   const updateGridHeight = () => {
-    const gridElement = document.querySelector(`.${gridId}.ag-theme-alpine`);
+    const gridElement = document.querySelector(
+      `.${gridId}.ag-theme-alpine`,
+    ) as HTMLElement;
     if (gridElement) {
       const gridHeight = gridElement.offsetHeight;
       setGridHeight && setGridHeight(gridHeight);
@@ -472,7 +380,7 @@ const PVGridWebiny2 = ({
   const [gridId, setGridId] = useState<string>();
 
   useEffect(() => {
-    function generateRandomString(length) {
+    function generateRandomString(length: number) {
       let result = '';
       const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const charactersLength = characters.length;
