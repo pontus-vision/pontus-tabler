@@ -33,7 +33,7 @@
     "canvg": "^3.0.9",
     "chart.js": "^4.3.0",
     "choices.js": "^10.1.0",
-    "crypto-js": "^4.1.1",
+    "crypto-js": "^4.2.0",
     "dompurify": "^2.3.4",
     "flexlayout-react": "^0.7.7",
     "font-awesome": "^4.7.0",
