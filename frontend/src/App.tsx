@@ -59,6 +59,7 @@ function App() {
             <Route path="/dashboard/:id" element={<DashboardView />} />
             <Route path="/users/read" element={<ReadUsers />} />
             <Route path="/user/create" element={<CreateUser />} />
+
             <Route path="/user/update/:id" element={<UpdateUser />} />
           </Route>
           <Route path="/login" element={<Login />} />

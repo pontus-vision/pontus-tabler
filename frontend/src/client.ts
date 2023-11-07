@@ -205,6 +205,8 @@ export const deleteAuthGroup = async (
   return post('/auth/group/delete', body);
 };
 
+<<<<<<< HEAD
+=======
 export const createUser = async (
   body: NewUser,
 ): Promise<AxiosResponse<User> | undefined> => {
@@ -247,8 +249,6 @@ export const getApiKeys = async () => {
   return data;
 };
 
-////////////////////////////////////////////////
-// Webiny related stuff.
 export const getModelFields = async (
   tableId: string,
 ): Promise<AxiosResponse<Table> | undefined> => {
