@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
-  Dashboard,
   DataRoot,
   ICmsGetContentModel,
   ICmsGetContentModelData,
@@ -156,14 +155,14 @@ export const getAllDashboards = async (
 
 export const createDashboard = async (
   body: DashboardCreateReq,
-): Promise<AxiosResponse<Dashboard> | undefined> => {
-  return post('/dashboard/create', {});
+): Promise<AxiosResponse<DashboardRef> | undefined> => {
+  return post('/dashboard/create', body);
 };
 
-export const getDashboard = async (
+export const readDashboard = async (
   dashboardId: string,
-): Promise<AxiosResponse<Dashboard> | undefined> => {
-  return post('/dashboard/read', { dashboardId });
+): Promise<AxiosResponse<DashboardRef> | undefined> => {
+  return post('/dashboard/read', { id: dashboardId });
 };
 
 export const updateDashboard = async (
@@ -175,7 +174,7 @@ export const updateDashboard = async (
 export const deleteDashboard = async (
   dashboardId: string,
 ): Promise<AxiosResponse<string> | undefined> => {
-  return post('/dashboard/delete', { dashboardId });
+  return post('/dashboard/delete', { id: dashboardId });
 };
 
 export const createAuthGroup = async (
