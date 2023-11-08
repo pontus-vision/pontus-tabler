@@ -345,6 +345,7 @@ const PVFlexLayout = ({
 
   useEffect(() => {
     if (!gridState) return;
+    console.log({ gridState });
     setModel(Model.fromJson(gridState));
   }, [gridState]);
 
