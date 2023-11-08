@@ -54,6 +54,8 @@ type Props = {
   rows?: { [key: string]: unknown }[];
   totalCount?: number;
   add?: () => void;
+  onRefresh?: () => void;
+  onDelete?: (arr: unknown[]) => void;
   onUpdate?: (data: any) => void;
   permissions?: {
     updateAction: boolean;
@@ -75,6 +77,7 @@ const PVGridWebiny2 = ({
   id,
   onValueChange,
   lastState,
+  onRefresh,
   modelId,
   showColumnSelector,
   setShowColumnSelector,
@@ -84,12 +87,12 @@ const PVGridWebiny2 = ({
   add,
   totalCount,
   permissions,
-  setDeletion,
+  onDelete,
   onFiltersChange,
   onUpdate,
   onFromChange,
   onToChange,
-  setEntriesToBeDeleted,
+
   setGridHeight,
 }: Props) => {
   const [columnState, setColumnState] = useState<ColumnState[]>();
@@ -104,7 +107,9 @@ const PVGridWebiny2 = ({
   const [from, setFrom] = useState();
   const [deleteMode, setDeleteMode] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
-
+  const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<IRowNode<any>[]>(
+    [],
+  );
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
 
@@ -411,11 +416,13 @@ const PVGridWebiny2 = ({
           data-testid="grid-action-panel"
           add={add}
           permissions={permissions}
-          setDeletion={setDeletion}
+          onDelete={onDelete}
           deleteMode={deleteMode}
+          onRefresh={onRefresh}
           updateMode={updateMode}
           setDeleteMode={setDeleteMode}
           setUpdateMode={setUpdateMode}
+          entriesToBeDeleted={entriesToBeDeleted}
         />
         <AgGridReact
           data-testid="ag-grid-component"
