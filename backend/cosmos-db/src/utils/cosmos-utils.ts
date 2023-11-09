@@ -58,6 +58,24 @@ export const fetchDashboardsContainer = async (): Promise<
   }
 };
 
+export const fetchDashboards = async (query): Promise<any[] | undefined> => {
+  try {
+    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
+
+    const { resources } = await dashboardContainer.items
+      .query({ query, parameters: [] })
+      .fetchAll();
+
+    if (resources.length === 0) {
+      throw { code: 404, message: 'No dashboard has been found.' };
+    }
+
+    return resources;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const filterToQuery = (body: ReadPaginationFilter) => {
   const query = [];
 
@@ -435,7 +453,6 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
   }
 
   const finalQuery = (
-    'select * from dashboards d' +
     (Object.keys(body.filters).length > 0 ? ' WHERE ' : '') +
     query.join(' and ') +
     `${from ? ' OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
