@@ -1,9 +1,3 @@
 export const isEmpty = (obj: Object) => {
-  for (const prop in obj) {
-    if (Object.hasOwn(obj, prop)) {
-      return false;
-    }
-  }
-
-  return true;
+  return Object.keys(obj).length === 0;
 };
