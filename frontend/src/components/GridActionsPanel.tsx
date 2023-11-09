@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/esm/Button';
 import { BsFillTrash2Fill } from 'react-icons/bs';
 import { GrUpdate } from 'react-icons/gr';
 import { FaPlusCircle } from 'react-icons/fa';
+import { IRowNode } from 'ag-grid-community';
 
 type Props = {
   deleteMode: boolean;
@@ -27,7 +28,7 @@ type Props = {
     readAction: boolean;
   };
   onDelete?: (arr: any[]) => void;
-  entriesToBeDeleted: string[] | undefined;
+  entriesToBeDeleted: IRowNode<any>[];
 };
 
 const GridActionsPanel = ({
@@ -55,20 +56,24 @@ const GridActionsPanel = ({
 
   var windowWidth = window.innerWidth;
 
-  const burguerMenu = useRef(null);
+  const burguerMenu = useRef<HTMLInputElement>();
 
   useEffect(() => {
     console.log({ permissions });
   }, []);
 
   const changeBurguerMenuValue = (value: boolean, display?: string) => {
-    burguerMenu.current.checked = value;
-    setOpenActionsPanel(value);
-    burguerMenu.current.style.display = display ? display : '';
+    if (burguerMenu.current) {
+      burguerMenu.current.checked = value;
+      setOpenActionsPanel(value);
+      burguerMenu.current.style.display = display ? display : '';
+    }
   };
 
   useEffect(() => {
-    const cmpWidth = document.querySelector('.grid-actions-panel')?.offsetWidth;
+    const cmpWidth = (
+      document.querySelector('.grid-actions-panel') as HTMLElement
+    )?.offsetWidth;
     setCmpWidth(cmpWidth);
   }, [windowWidth]);
 
