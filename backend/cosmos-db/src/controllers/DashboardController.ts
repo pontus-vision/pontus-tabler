@@ -15,7 +15,6 @@ import {
   readDashboardById,
   deleteDashboard,
   readDashboards,
-  countDashboardsRecords,
 } from '../service/DashboardService';
 import { Request, Response, NextFunction } from 'express';
 
@@ -131,7 +130,6 @@ export async function dashboardsReadPOST(
       totalDashboards: response.totalDashboards,
     };
 
-    console.log(obj);
     res.status(200);
     res.json(obj);
 
