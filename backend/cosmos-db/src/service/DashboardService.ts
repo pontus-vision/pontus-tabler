@@ -6,12 +6,10 @@ import {
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { DataRoot } from 'pontus-tabler/src/types';
 import {
-  fetchDashboards,
+  FetchData,
   fetchDashboardsContainer,
-  fetchDatabase,
-  filterToQuery,
+  fetchData,
 } from '../utils/cosmos-utils';
-import { Container } from '@azure/cosmos';
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
@@ -64,20 +62,10 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
   }
 };
 
-export const readDashboards = async (body: ReadPaginationFilter) => {
-  // let query = 'select * from dashboards d';
-
-  const query = filterToQuery(body);
-
-  const dashboards = await fetchDashboards(
-    'select * from dashboards d' + ' ' + query,
-  );
-
-  const countStr = 'select VALUE COUNT(1) from dashboards d' + ' ' + query;
-
-  const totalDashboards = await fetchDashboards(countStr);
-
-  return { totalDashboards: totalDashboards[0] || 4343, dashboards };
+export const readDashboards = async (
+  body: ReadPaginationFilter,
+): Promise<FetchData> => {
+  return fetchData(body, 'dashboards');
 };
 
 // export const countDashboardsRecords = async (
