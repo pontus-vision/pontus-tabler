@@ -255,5 +255,48 @@ describe('Filter to SQL', () => {
     expect(query10.toLocaleLowerCase()).toBe(
       `select * from dashboards d where ((d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z") OR (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z")) and ((d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z") OR (d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z"))`.toLocaleLowerCase(),
     );
+
+    const query11 = filterToQuery({
+      from: 1000,
+      to: 1100,
+      filters: {
+        name: {
+          condition1: {
+            dateFrom: date,
+            dateTo: date,
+            filterType: 'date',
+            type: 'inRange',
+          },
+          condition2: {
+            dateFrom: date,
+            dateTo: date,
+            filterType: 'date',
+            type: 'inRange',
+          },
+          operator: 'OR',
+          filterType: 'date',
+        },
+        folder: {
+          condition1: {
+            dateFrom: date,
+            dateTo: date,
+            filterType: 'date',
+            type: 'inRange',
+          },
+          condition2: {
+            dateFrom: date,
+            dateTo: date,
+            filterType: 'date',
+            type: 'inRange',
+          },
+          operator: 'OR',
+          filterType: 'date',
+        },
+      },
+    });
+
+    expect(query11.toLocaleLowerCase()).toBe(
+      `select * from dashboards d where ((d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z") OR (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z")) and ((d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z") OR (d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z")) OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
+    );
   });
 });
