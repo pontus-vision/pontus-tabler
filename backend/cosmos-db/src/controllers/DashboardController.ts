@@ -126,8 +126,8 @@ export async function dashboardsReadPOST(
     const response = await readDashboards(body);
 
     const obj: DashboardsReadRes = {
-      dashboards: response.dashboards,
-      totalDashboards: response.totalDashboards,
+      dashboards: response.values,
+      totalDashboards: response.count,
     };
 
     res.status(200);
