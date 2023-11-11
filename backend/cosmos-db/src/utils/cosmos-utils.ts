@@ -72,8 +72,6 @@ export const fetchData = async (
     const query = filterToQuery(filter);
     const dashboardContainer = await fetchContainer(database, table);
 
-    console.log({ query });
-
     const countStr = `select VALUE COUNT(1) from ${table} d ${query}`;
 
     const values = await dashboardContainer.items
@@ -101,7 +99,7 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
 
   const { from, to } = body;
 
-  let colSortStr;
+  let colSortStr = '';
 
   for (const colId in cols) {
     console.log(colId);
@@ -461,7 +459,7 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
 
       const colSort = cols[colId].sort;
 
-      if (colSort !== null && colSort !== undefined && colSort !== '') {
+      if (!!colSort) {
         colSortStr = `d.${colId} ${colSort}`;
       }
       const colQueryStr = colQuery.join('').trim();
@@ -480,12 +478,8 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
   const finalQuery = (
     (Object.keys(body.filters).length > 0 ? ' WHERE ' : '') +
     query.join(' and ') +
-    colSortStr
-      ? ` ORDER BY ${colSortStr}`
-      : '' +
-        `${from ? ' OFFSET ' + (from - 1) : ''} ${
-          to ? 'LIMIT ' + (to - from) : ''
-        }`
+    (colSortStr ? ` ORDER BY ${colSortStr}` : '') +
+    `${from ? ' OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
   ).trim();
 
   return finalQuery;
