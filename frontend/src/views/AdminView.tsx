@@ -19,7 +19,7 @@ import { ICmsGetContentModelDataField } from '../types';
 import { AuthContext } from '../AuthContext';
 import Unauthorized from './Unauthorized';
 import { useParams } from 'react-router-dom';
-import { getDashboard } from '../client';
+import { readDashboard } from '../client';
 
 export type getModelDataReturn = {
   columnNames: ICmsGetContentModelDataField[];

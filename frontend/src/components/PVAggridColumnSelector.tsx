@@ -69,11 +69,11 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
       ),
     );
 
-    console.log({ columnsVisible, columns, columnState });
+    // console.log({ columnsVisible, columns, columnState });
   }, [columns]);
 
   useEffect(() => {
-    console.log({ selectedColumns, columnState });
+    // console.log({ selectedColumns, columnState });
   }, [selectedColumns, columnState]);
 
   return (

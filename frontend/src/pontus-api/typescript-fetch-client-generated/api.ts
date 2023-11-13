@@ -1063,6 +1063,12 @@ export interface ReadPaginationFilter {
 export interface ReadPaginationFilterFilters {
   /**
    *
+   * @type {string}
+   * @memberof ReadPaginationFilterFilters
+   */
+  sort?: string;
+  /**
+   *
    * @type {string | number}
    * @memberof ReadPaginationFilterFilters
    */

@@ -6,6 +6,11 @@ import {
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 
+export interface FetchData {
+  count: number;
+  values: any[];
+}
+
 const cosmosClient = new CosmosClient({
   endpoint: process.env.PH_COSMOS_ENDPOINT || 'https://localhost:8081/',
   key:
@@ -58,12 +63,43 @@ export const fetchDashboardsContainer = async (): Promise<
   }
 };
 
+export const fetchData = async (
+  filter: ReadPaginationFilter,
+  table: string,
+  database: string = 'pv_db',
+): Promise<FetchData | undefined> => {
+  try {
+    const query = filterToQuery(filter);
+    const dashboardContainer = await fetchContainer(database, table);
+
+    const countStr = `select VALUE COUNT(1) from ${table} d ${query}`;
+
+    const values = await dashboardContainer.items
+      .query({ query: `select * from ${table} d ${query}`, parameters: [] })
+      .fetchAll();
+
+    const count = await dashboardContainer.items
+      .query({ query: countStr, parameters: [] })
+      .fetchAll();
+
+    if (values.resources.length === 0) {
+      throw { code: 404, message: 'No dashboard has been found.' };
+    }
+
+    return { count: count.resources[0], values: values.resources };
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const filterToQuery = (body: ReadPaginationFilter) => {
   const query = [];
 
   const cols = body?.filters;
 
   const { from, to } = body;
+
+  let colSortStr = '';
 
   for (const colId in cols) {
     console.log(colId);
@@ -421,6 +457,11 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
         }
       }
 
+      const colSort = cols[colId].sort;
+
+      if (!!colSort) {
+        colSortStr = `d.${colId} ${colSort}`;
+      }
       const colQueryStr = colQuery.join('').trim();
 
       query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
@@ -434,12 +475,12 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
     }
   }
 
-  const finalQuery =
-    'select * from dashboards d where ' +
+  const finalQuery = (
+    (Object.keys(body.filters).length > 0 ? ' WHERE ' : '') +
     query.join(' and ') +
-    `${from ? 'OFFSET ' + (from - 1) : ''} ${
-      to ? 'LIMIT ' + (to - from) : ''
-    }`.trim();
+    (colSortStr ? ` ORDER BY ${colSortStr}` : '') +
+    `${from ? ' OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
+  ).trim();
 
   return finalQuery;
 };

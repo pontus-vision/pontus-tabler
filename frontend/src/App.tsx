@@ -25,6 +25,8 @@ import ReadAuthGroups from './views/authGroups/ReadAuthGroups';
 import CreateAuthGroup from './views/authGroups/CreateAuthGroup';
 import UpdateAuthGroup from './views/authGroups/UpdateAuthGroup';
 import DashboardAuthGroup from './views/dashboard/DashboardAuthGroup';
+import CreateDashboard from './views/dashboard/CreateDashboard';
+import UpdateDashboard from './views/dashboard/UpdateDashboard';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -68,7 +70,8 @@ function App() {
             <Route path="/table/update/:id" element={<UpdateTable />} />
             <Route path="/table/delete" element={<DeleteTableView />} />
             <Route path="/dashboards/read" element={<Dashboards />} />
-            <Route path="/dashboard/:id" element={<DashboardView />} />
+            <Route path="/dashboard/create" element={<CreateDashboard />} />
+            <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
             <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
             <Route path="/auth/group/create" element={<CreateAuthGroup />} />
             <Route

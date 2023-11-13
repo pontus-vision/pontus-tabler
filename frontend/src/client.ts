@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
-  Dashboard,
   DataRoot,
   ICmsGetContentModel,
   ICmsGetContentModelData,
@@ -31,6 +30,9 @@ import {
   GroupUpdateReq,
   GroupDeleteReq,
   DashboardsReadRes,
+  DashboardAuthGroup,
+  UserReadBody,
+  TableRef,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -103,7 +105,7 @@ export const getTables = async (): Promise<
 
 export const getTable = async (
   tableId: string,
-): Promise<AxiosResponse<Table> | undefined> => {
+): Promise<AxiosResponse<TableRef> | undefined> => {
   return post('/table/read', { tableId });
 };
 
@@ -153,14 +155,14 @@ export const getAllDashboards = async (
 
 export const createDashboard = async (
   body: DashboardCreateReq,
-): Promise<AxiosResponse<Dashboard> | undefined> => {
-  return post('/dashboard/create', {});
+): Promise<AxiosResponse<DashboardRef> | undefined> => {
+  return post('/dashboard/create', body);
 };
 
-export const getDashboard = async (
+export const readDashboard = async (
   dashboardId: string,
-): Promise<AxiosResponse<Dashboard> | undefined> => {
-  return post('/dashboard/read', { dashboardId });
+): Promise<AxiosResponse<DashboardRef> | undefined> => {
+  return post('/dashboard/read', { id: dashboardId });
 };
 
 export const updateDashboard = async (
@@ -172,7 +174,7 @@ export const updateDashboard = async (
 export const deleteDashboard = async (
   dashboardId: string,
 ): Promise<AxiosResponse<string> | undefined> => {
-  return post('/dashboard/delete', { dashboardId });
+  return post('/dashboard/delete', { id: dashboardId });
 };
 
 export const createAuthGroup = async (
