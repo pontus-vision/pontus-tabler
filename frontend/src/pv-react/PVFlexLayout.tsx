@@ -329,8 +329,6 @@ const PVFlexLayout = ({
     });
 
     setModel(Model.fromJson(jsonCopy));
-
-    console.log({ model: model.toJson().layout.children[0].children[0] });
   };
 
   useEffect(() => {
@@ -351,13 +349,7 @@ const PVFlexLayout = ({
   useEffect(() => {
     if (!flexModelId) return;
     const flexModel = findChildById(model.toJson().layout, flexModelId, 'tab');
-
-    console.log(flexModel);
   }, [flexModelId]);
-
-  useEffect(() => {
-    console.log({ tableId, updateModelId: updateTableId, openNewEntryView });
-  }, [tableId, openNewEntryView]);
 
   return (
     <>

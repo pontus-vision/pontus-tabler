@@ -43,7 +43,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
       }
     };
 
-    fetchMenu();
+    // fetchMenu();
   }, []);
 
   const handleLanguageChange = (event) => {

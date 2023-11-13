@@ -5,6 +5,10 @@
   align-items: center;
   gap: 0.7rem;
   padding-left: 0.7rem;
+  &__plus-btn {
+    height: 2rem;
+    width: 1.7rem;
+  }
 }
 
 /* Target iPhone */
@@ -42,7 +46,6 @@
 
     &__plus-btn {
       font-size: 2rem;
-      width: 100%;
     }
     &__restore-btn {
       grid-row: 2;

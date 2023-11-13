@@ -1,6 +1,9 @@
 import { Dispatch, useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { BsFillTrash2Fill } from 'react-icons/bs';
+import { GrUpdate } from 'react-icons/gr';
+import { FaPlusCircle } from 'react-icons/fa';
+import { IRowNode } from 'ag-grid-community';
 
 type Props = {
   deleteMode: boolean;
@@ -15,6 +18,7 @@ type Props = {
   setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>;
   setDeleteMode: Dispatch<React.SetStateAction<boolean>>;
   setUpdateMode: Dispatch<React.SetStateAction<boolean>>;
+  onRefresh?: () => void;
   configTableId: string;
   add: () => void;
   permissions?: {
@@ -23,11 +27,13 @@ type Props = {
     deleteAction: boolean;
     readAction: boolean;
   };
-  entriesToBeDeleted: string[] | undefined;
+  onDelete?: (arr: any[]) => void;
+  entriesToBeDeleted: IRowNode<any>[];
 };
 
 const GridActionsPanel = ({
   deleteMode,
+  onRefresh,
   updateMode,
   setGridKey,
   setFlexModelId,
@@ -43,26 +49,31 @@ const GridActionsPanel = ({
   configTableId,
   entriesToBeDeleted,
   permissions,
+  onDelete,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
 
   var windowWidth = window.innerWidth;
 
-  const burguerMenu = useRef(null);
+  const burguerMenu = useRef<HTMLInputElement>();
 
   useEffect(() => {
     console.log({ permissions });
   }, []);
 
   const changeBurguerMenuValue = (value: boolean, display?: string) => {
-    burguerMenu.current.checked = value;
-    setOpenActionsPanel(value);
-    burguerMenu.current.style.display = display ? display : '';
+    if (burguerMenu.current) {
+      burguerMenu.current.checked = value;
+      setOpenActionsPanel(value);
+      burguerMenu.current.style.display = display ? display : '';
+    }
   };
 
   useEffect(() => {
-    const cmpWidth = document.querySelector('.grid-actions-panel')?.offsetWidth;
+    const cmpWidth = (
+      document.querySelector('.grid-actions-panel') as HTMLElement
+    )?.offsetWidth;
     setCmpWidth(cmpWidth);
   }, [windowWidth]);
 
@@ -195,7 +206,7 @@ const GridActionsPanel = ({
       {deleteMode ||
         updateMode ||
         (permissions?.createAction && (
-          <label
+          <FaPlusCircle
             className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
             // style={{
             //   display: 'flex',
@@ -217,19 +228,15 @@ const GridActionsPanel = ({
                 );
               add();
             }}
-          >
-            +
-          </label>
+          />
         ))}
       {updateMode || deleteMode || (
-        <button
+        <GrUpdate
           className="grid-actions-panel__restore-btn"
           onClick={() => {
-            setGridKey((prevState) => prevState + 1);
+            onRefresh && onRefresh();
           }}
-        >
-          restore
-        </button>
+        />
       )}
       {updateMode || deleteMode || (
         <button
@@ -279,8 +286,9 @@ const GridActionsPanel = ({
           <i
             className="fa-solid fa-trash"
             onClick={() => {
-              setModelId && setModelId(configTableId);
-              setDeletion(true);
+              if (entriesToBeDeleted && onDelete) {
+                onDelete(entriesToBeDeleted);
+              }
             }}
             style={{ fontSize: '1.8rem', color: '#b53737', cursor: 'pointer' }}
           ></i>

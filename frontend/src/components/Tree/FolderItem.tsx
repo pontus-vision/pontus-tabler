@@ -117,7 +117,7 @@ const FolderItem = ({
     <div
       className={'mb-2 '}
       onBlur={() => setContextMenu(null)}
-      actionsMode={actionsMode}
+      // actionsMode={actionsMode}
       onContextMenu={handleContextMenu}
       onDragStart={(e) => {
         onSelect && onSelect(folder);

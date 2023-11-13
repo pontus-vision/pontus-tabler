@@ -3,39 +3,48 @@ import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import CmpPanel from '../components/CmpPanel';
 import PVFlexLayout from '../pv-react/PVFlexLayout';
 import { RootState } from '../store/store';
-import { Dashboard, FlexLayoutCmp } from '../types';
+import { FlexLayoutCmp } from '../types';
 import { useTranslation } from 'react-i18next';
 import NewEntryView from './NewEntryView';
 import { useAuth } from '../AuthContext';
 import {
-  getDashboard,
-  updateDashboard,
+  readDashboard,
   deleteDashboard,
   createDashboard,
-  readAuthGroup,
   readDashboardGroupAuth,
   readUser,
 } from '../client';
-import { UpdateDashboard } from '../pontus-api/typescript-fetch-client-generated';
+import {
+  DashboardDeleteReq,
+  DashboardRef,
+} from '../pontus-api/typescript-fetch-client-generated';
 import Alert from 'react-bootstrap/esm/Alert';
 
 type Props = {
   dashboardId?: string;
   dashboardName?: string;
   createMode?: boolean;
+  onDashboardCreate?: (body: DashboardRef) => void;
+  onDashboardSave?: (body: DashboardRef) => void;
+  onDashboardDelete?: (body: DashboardDeleteReq) => void;
 };
 
-const DashboardView = ({ dashboardName, createMode }: Props) => {
+const DashboardView = ({
+  dashboardName,
+  createMode,
+  onDashboardCreate,
+  onDashboardSave,
+  onDashboardDelete,
+}: Props) => {
   const { value: dashboards, dashboardId } = useSelector(
     (state: RootState) => state.dashboards,
   );
   const [isEditing, setIsEditing] = useState(false);
   const [addCmp, setAddCmp] = useState(false);
-  const [dashboard, setDashboard] = useState<Dashboard>();
+  const [dashboard, setDashboard] = useState<DashboardRef>();
   const [gridState, setGridState] = useState<IJsonModel>();
   const [selectedCmp, setSelectedCmp] = useState<FlexLayoutCmp>();
   const [deleteModal, setDeleteModal] = useState(false);
@@ -47,7 +56,7 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
 
   const [createAction, setCreateAction] = useState(false);
   const [readAction, setReadAction] = useState(false);
-  const [updateAction, setUpdateAction] = useState(false);
+  const [updateAction, setUpdateAction] = useState(true);
   const [deleteAction, setDeleteAction] = useState(false);
 
   const [deletion, setDeletion] = useState();
@@ -64,42 +73,42 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
     setDashboard(dashboards.find((el) => el.id === dashboardId));
   }, [dashboardId]);
 
-  const saveEdition = async () => {
-    if (gridState) {
-      if (id) {
-        const obj: UpdateDashboard = {
-          dashboardId: id,
-          state: gridState,
-          folder,
-          name,
-          owner,
-        };
-        try {
-          if (!updateAction) {
-            throw new Error('Delete is not allowed for the user.');
-          }
-          const data = await updateDashboard(obj);
+  // const saveEdition = async () => {
+  //   if (gridState) {
+  //     if (id) {
+  //       const obj: DashboardUpdateReq = {
+  //         id,
+  //         state: gridState || dashboard?.state,
+  //         folder: folder || dashboard?.folder,
+  //         name: name || dashboard?.name,
+  //         owner: owner || dashboard?.name,
+  //       };
+  //       try {
+  //         if (!updateAction) {
+  //           throw new Error('Delete is not allowed for the user.');
+  //         }
+  //         const data = await updateDashboard(obj);
 
-          if (data?.status === 200) {
-            setSuccessMsg('updated!');
-            setTimeout(() => {
-              setSuccessMsg('');
-            }, 4000);
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        createNewDashboard();
-      }
-    }
-  };
+  //         if (data?.status === 200) {
+  //           setSuccessMsg('updated!');
+  //           setTimeout(() => {
+  //             setSuccessMsg('');
+  //           }, 4000);
+  //         }
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //     } else {
+  //       createNewDashboard();
+  //     }
+  //   }
+  // };
 
   const createNewDashboard = async () => {
     try {
-      if (!createAction) {
-        throw new Error('Create is not allowed for the user.');
-      }
+      // if (!createAction) {
+      //   throw new Error('Create is not allowed for the user.');
+      // }
       const data = await createDashboard({
         folder,
         name: dashboardName,
@@ -121,9 +130,9 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
   const delDashboard = async () => {
     if (!id) return;
     try {
-      if (!deleteAction) {
-        throw new Error('Delete is not allowed for the user.');
-      }
+      // if (!deleteAction) {
+      //   throw new Error('Delete is not allowed for the user.');
+      // }
       const data = await deleteDashboard(id);
 
       if (data?.status === 200) {
@@ -178,12 +187,13 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
   useEffect(() => {
     if (!id) return;
     const fetchDashboard = async () => {
-      const res = await getDashboard(id);
-
+      const res = await readDashboard(id);
+      console.log({ res });
       setName(res?.data.name || '');
+      setDashboard(res?.data);
 
       setInitialState(
-        res?.data.gridState || {
+        res?.data.state || {
           global: {},
           borders: [],
           layout: {
@@ -242,9 +252,37 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
     fetchDashboard();
   }, [id]);
 
+  useEffect(() => {
+    console.log({ state: JSON.stringify(initialState) });
+  }, [initialState]);
+
+  const handleDashboardCreate = () => {
+    const obj: DashboardRef = {
+      state: gridState || dashboard?.state,
+      folder: folder || dashboard?.folder,
+      name: name || dashboard?.name,
+      owner: owner || dashboard?.owner,
+    };
+
+    onDashboardCreate && onDashboardCreate(obj);
+  };
+
+  const handleDashboardSave = () => {
+    const obj: DashboardRef = {
+      state: gridState || dashboard?.state,
+      folder: folder || dashboard?.folder,
+      name: name || dashboard?.name,
+      owner: owner || dashboard?.owner,
+    };
+    console.log({ obj });
+
+    onDashboardSave && onDashboardSave(obj);
+  };
+
   return (
     <div className="dashboard-view">
       <h1 className="title">{dashboard?.name}</h1>
+
       {userRole === 'Admin' && (
         <div className="actions-panel">
           {/* {addCmp && <div className="shadow-mobile"></div>} */}
@@ -254,10 +292,10 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
           {!addCmp && (
             <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
           )}
-          {deleteAction && !createMode && (
+          {onDashboardSave && (
             <button
               className="actions-panel__delete-btn"
-              onClick={() => setDeleteModal(true)}
+              onClick={() => delDashboard()}
             >
               {t('delete-dashboard')}
             </button>
@@ -275,7 +313,11 @@ const DashboardView = ({ dashboardName, createMode }: Props) => {
           {updateAction && isEditing && (
             <button
               className="actions-panel__save"
-              onClick={() => saveEdition()}
+              onClick={() => {
+                console.log('HEEEY', onDashboardSave);
+                onDashboardCreate && handleDashboardCreate();
+                onDashboardSave && handleDashboardSave();
+              }}
             >
               {t('save-state')}
             </button>
