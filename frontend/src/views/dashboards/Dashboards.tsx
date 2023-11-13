@@ -54,7 +54,7 @@ const Dashboards = () => {
   }>({});
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(8);
-  const [totalCount, setTotalCount] = useState<number>(2);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [rowClicked, setRowClicked] = useState<Record<string, any>>();
 
   const [deletion, setDeletion] = useState(false);

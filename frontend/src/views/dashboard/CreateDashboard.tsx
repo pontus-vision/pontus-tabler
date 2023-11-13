@@ -11,6 +11,7 @@ const CreateDashboard = () => {
       const res = await createDashboard({
         ...body,
         name: newDashboardName || body?.name,
+        folder: '/',
       });
 
       console.log({ res });
