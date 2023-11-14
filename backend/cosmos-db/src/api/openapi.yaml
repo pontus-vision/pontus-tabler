@@ -66,7 +66,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewTable'
+              $ref: '#/components/schemas/TableCreateReq'
             examples:
               example-0001:
                 value:
@@ -90,7 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TableRef'
+                $ref: '#/components/schemas/TableCreateRes'
 
         '400':
           description: Bad request
@@ -108,7 +108,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetTable'
+              $ref: '#/components/schemas/TableReadReq'
             examples:
               example-0001:
                 value:
@@ -120,7 +120,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TableRef'
+                $ref: '#/components/schemas/TableReadRes'
               examples:
                 example-01:
                   value:
@@ -155,7 +155,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTable'
+              $ref: '#/components/schemas/TableUpdateReq'
         required: true
       responses:
         '204':
@@ -178,7 +178,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteTable'
+              $ref: '#/components/schemas/TableDeleteReq'
         required: true
       responses:
         '204':
@@ -1062,7 +1062,10 @@ components:
             name: name
             id: id
             sortable: true
-    NewTable:
+    TableReadRes:
+      allOf:
+        - $ref: '#/components/schemas/TableRef'
+    TableCreateReq:
       type: object
       properties:
         name:
@@ -1073,25 +1076,15 @@ components:
           description: Table columns to be associated with the table during creation
           items:
             $ref: '#/components/schemas/TableColumnRef'
-    DeleteTable:
-      type: object
-      properties:
-        tableId:
-          type: string
-    UpdateTable:
-      type: object
-      properties:
-        tableId:
-          type: string
-          description: ID of the table to update
-        name:
-          type: string
-          description: Updated name of the table
-        cols:
-          type: array
-          description: Updated table columns to associate with the table during update
-          items:
-            $ref: '#/components/schemas/TableColumnRef'
+    TableCreateRes:
+      allOf:
+        - $ref: '#/components/schemas/TableRef'
+    TableDeleteReq:
+      allOf:
+        - $ref: '#/components/schemas/TableBaseModelRef'
+    TableUpdateReq:
+      allOf:
+        - $ref: '#/components/schemas/TableRef'
     NewTableRow:
       type: object
       properties:
@@ -1208,7 +1201,10 @@ components:
         delete:
           - delete
           - delete
-    GetTable:
+    TableReadReq:
+      allOf:
+        - $ref: '#/components/schemas/TableBaseModelRef'
+    TableBaseModelRef:
       type: object
       additionalProperties: false
       properties:
