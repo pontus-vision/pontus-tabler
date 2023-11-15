@@ -3,19 +3,16 @@ import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
 import {
   BaseModelRef,
   DashboardRef,
-  DashboardsReadReq,
-  DashboardsReadRes,
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
 } from '../../pontus-api/typescript-fetch-client-generated';
-import { ColDef, RowEvent } from 'ag-grid-community';
+import { ColDef, IGetRowsParams, RowEvent } from 'ag-grid-community';
 import { deleteDashboard, getAllDashboards } from '../../client';
 import { capitalizeFirstLetter } from '../../webinyApi';
 import { useDispatch } from 'react-redux';
 import { setDashboardId } from '../../store/sliceDashboards';
-import { redirect, useNavigate } from 'react-router-dom';
-import PVFlexLayout from '../../pv-react/PVFlexLayout';
-import DashboardView from '../DashboardView';
+import { useNavigate } from 'react-router-dom';
+
 import { isEmpty } from '../../helpers/functions';
 
 interface DashboardRefId extends DashboardRef, BaseModelRef {}
@@ -61,7 +58,6 @@ const Dashboards = () => {
   const navigate = useNavigate();
 
   const fetchDashboars = async () => {
-    console.log('fetching');
     try {
       const req: ReadPaginationFilter = {
         from,
@@ -104,6 +100,7 @@ const Dashboards = () => {
       setRows([]);
     }
   };
+
   useEffect(() => {
     fetchDashboars();
   }, [filters, to, from]);
@@ -112,28 +109,16 @@ const Dashboards = () => {
     console.log({ rows, cols });
   }, [rows, cols]);
 
-  const setDashboard = async () => {
-    if (!rowClicked) return;
-    console.log({ rowClicked });
-    dispatch(setDashboardId({ id: rowClicked.id }));
+  const handleRowClicked = async (row: RowEvent<any, any>) => {
+    if (!row) return;
 
-    navigate(`/dashboard/update/${rowClicked.id}`);
+    dispatch(setDashboardId({ id: row.data.id }));
+
+    navigate(`/dashboard/update/${row.data.id}`);
   };
 
   const handleAddition = () => {
     navigate('/dashboard/create');
-  };
-
-  useEffect(() => {
-    setDashboard();
-  }, [rowClicked]);
-
-  const handleFiltersChange = (filters: {
-    [key: string]: ReadPaginationFilterFilters;
-  }) => {
-    if (isEmpty(filters)) return;
-    console.log({ filters });
-    setFilters(filters);
   };
 
   const handleRefresh = () => {
@@ -148,6 +133,12 @@ const Dashboards = () => {
     handleRefresh();
   };
 
+  const handleParamsChange = (params: IGetRowsParams) => {
+    setFilters(params.filterModel);
+    setFrom(params.startRow + 1);
+    setTo(params.endRow);
+  };
+
   if (!rows) return;
 
   return (
@@ -160,11 +151,9 @@ const Dashboards = () => {
           add={handleAddition}
           cols={cols}
           onDelete={handleDelete}
-          onFiltersChange={handleFiltersChange}
-          // setFrom={setFrom}
-          // setTo={setTo}
+          onParamsChange={handleParamsChange}
           onRefresh={handleRefresh}
-          setRowClicked={setRowClicked}
+          onRowClicked={handleRowClicked}
           permissions={{
             updateAction: true,
             createAction: true,
