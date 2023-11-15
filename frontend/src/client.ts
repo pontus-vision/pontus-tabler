@@ -33,6 +33,7 @@ import {
   DashboardAuthGroup,
   UserReadBody,
   TableRef,
+  TablesReadRes,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -97,16 +98,16 @@ export const readMenu = async (): Promise<
   return post('/menu', {});
 };
 
-export const getTables = async (): Promise<
-  AxiosResponse<GetTablesResponse> | undefined
-> => {
-  return post('/tables/read', {});
+export const getTables = async (
+  body: ReadPaginationFilter,
+): Promise<AxiosResponse<TablesReadRes> | undefined> => {
+  return post('/tables/read', body);
 };
 
 export const getTable = async (
-  tableId: string,
+  id: string,
 ): Promise<AxiosResponse<TableRef> | undefined> => {
-  return post('/table/read', { tableId });
+  return post('/table/read', { id });
 };
 
 export const createTable = async (
