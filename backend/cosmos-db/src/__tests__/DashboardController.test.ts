@@ -1,17 +1,4 @@
 import {
-  dashboardCreatePOST,
-  dashboardReadPOST,
-  dashboardDeletePOST,
-  dashboardUpdatePOST,
-} from '../controllers/DashboardController';
-import * as utils from '../utils/writer';
-import {
-  upsertDashboard,
-  readDashboardById,
-  deleteDashboard,
-} from '../service/DashboardService';
-import { Dashboard } from 'pontus-tabler/src/types';
-import {
   DashboardCreateReq,
   DashboardCreateRes,
   DashboardReadRes,
@@ -22,8 +9,9 @@ import {
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import httpTrigger, { srv } from '../index';
-import { HttpRequest, InvocationContext } from '@azure/functions';
+import { srv } from '../index';
+
+import { post } from './test-utils';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -40,64 +28,6 @@ jest.setTimeout(1000000);
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
-  const post = async (
-    endpoint: string,
-    body: any,
-  ): Promise<{ data: any; status: number }> => {
-    // return sendHttpRequest(
-    //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-    //   {
-    //     'Content-Type': 'application/json',
-    //     Authorization: 'Bearer 123456',
-    //   },
-    //   {},
-    //   JSON.stringify(body),
-    // );
-
-    //   const res = await axios.post(
-    //     'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-    //     body,
-    //     {
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //         Authorization: 'Bearer 123456',
-    //       },
-    //     },
-    //   );
-    //   return res;
-
-    // const res = await fetch(
-    //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-    //   {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: 'Bearer 123456',
-    //     },
-    //     body: JSON.stringify(body),
-    //   },
-    // );
-
-    const res = await httpTrigger(
-      new HttpRequest({
-        body: { string: JSON.stringify(body) },
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer 123456',
-        },
-        url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-      }),
-      new InvocationContext(),
-    );
-
-    const retVal = {
-      status: res.status,
-      data: typeof res.body === 'string' ? JSON.parse(res.body) : res.body,
-    };
-    console.log(`Ret val is ${JSON.stringify(retVal)}`);
-    return retVal;
-  };
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy

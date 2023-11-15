@@ -66,7 +66,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewTable'
+              $ref: '#/components/schemas/TableCreateReq'
             examples:
               example-0001:
                 value:
@@ -90,7 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TableRef'
+                $ref: '#/components/schemas/TableCreateRes'
 
         '400':
           description: Bad request
@@ -98,7 +98,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/read:
     post:
       summary: Get table by id
@@ -108,11 +108,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetTable'
+              $ref: '#/components/schemas/TableReadReq'
             examples:
               example-0001:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
         required: true
       responses:
         '200':
@@ -120,11 +120,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TableRef'
+                $ref: '#/components/schemas/TableReadRes'
               examples:
                 example-01:
                   value:
-                    tableId: mapeamentoDeProcessos
+                    id: mapeamentoDeProcessos
                     name: Mapeamento de Processos
                     cols:
                       - field: Person_Natural_Full_Name
@@ -145,7 +145,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/update:
     post:
       summary: Update table by ID
@@ -155,7 +155,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTable'
+              $ref: '#/components/schemas/TableUpdateReq'
         required: true
       responses:
         '204':
@@ -168,7 +168,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/delete:
     post:
       summary: Delete a table
@@ -178,7 +178,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteTable'
+              $ref: '#/components/schemas/TableDeleteReq'
         required: true
       responses:
         '204':
@@ -189,7 +189,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /tables/read:
     post:
       summary: Get all tables
@@ -207,14 +207,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetTablesResponse'
+                $ref: '#/components/schemas/TablesReadRes'
         '400':
           description: Bad request
         '500':
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/data/read:
     post:
       description: ''
@@ -307,7 +307,7 @@ paths:
             examples:
               example-01:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
                   cols:
                     mapeamentoDeProcessoCol1: New value
                     mapeamentoDeProcessoCol2: New value
@@ -335,7 +335,7 @@ paths:
             examples:
               example-01:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
                   rowId: 15
                   cols:
                     mapeamentoDeProcessoCol1: Value Overwritten
@@ -364,7 +364,7 @@ paths:
             examples:
               example-01:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
                   rowId: 15
         required: true
       responses:
@@ -1035,7 +1035,7 @@ components:
     TableRef:
       type: object
       properties:
-        tableId:
+        id:
           type: string
           description: Unique identifier of the table
         name:
@@ -1046,9 +1046,11 @@ components:
           description: Table columns associated with the table
           items:
             $ref: '#/components/schemas/TableColumnRef'
+      required:
+        - id
       example:
         name: name
-        tableId: tableId
+        id: id
         cols:
           - filter: true
             headerName: headerName
@@ -1062,7 +1064,10 @@ components:
             name: name
             id: id
             sortable: true
-    NewTable:
+    TableReadRes:
+      allOf:
+        - $ref: '#/components/schemas/TableRef'
+    TableCreateReq:
       type: object
       properties:
         name:
@@ -1073,36 +1078,26 @@ components:
           description: Table columns to be associated with the table during creation
           items:
             $ref: '#/components/schemas/TableColumnRef'
-    DeleteTable:
-      type: object
-      properties:
-        tableId:
-          type: string
-    UpdateTable:
-      type: object
-      properties:
-        tableId:
-          type: string
-          description: ID of the table to update
-        name:
-          type: string
-          description: Updated name of the table
-        cols:
-          type: array
-          description: Updated table columns to associate with the table during update
-          items:
-            $ref: '#/components/schemas/TableColumnRef'
+    TableCreateRes:
+      allOf:
+        - $ref: '#/components/schemas/TableRef'
+    TableDeleteReq:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+    TableUpdateReq:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
     NewTableRow:
       type: object
       properties:
-        tableId:
+        id:
           type: string
         cols:
           $ref: '#/components/schemas/NewTableRow_cols'
     UpdateTableRow:
       type: object
       properties:
-        tableId:
+        id:
           type: string
         rowId:
           type: string
@@ -1111,7 +1106,7 @@ components:
     DeleteTableRow:
       type: object
       properties:
-        tableId:
+        id:
           type: string
         rowId:
           type: string
@@ -1208,12 +1203,10 @@ components:
         delete:
           - delete
           - delete
-    GetTable:
-      type: object
-      additionalProperties: false
-      properties:
-        tableId:
-          type: string
+    TableReadReq:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+
     ReadPaginationFilter:
       type: object
       additionalProperties: false
@@ -1227,7 +1220,7 @@ components:
           additionalProperties:
             $ref: '#/components/schemas/ReadPaginationFilter_filters'
 
-    GetTablesResponse:
+    TablesReadRes:
       type: object
       properties:
         totalTables:
@@ -1240,7 +1233,7 @@ components:
       example:
         tables:
           - name: name
-            tableId: tableId
+            id: tableId
             cols:
               - filter: true
                 headerName: headerName
@@ -1255,7 +1248,7 @@ components:
                 id: id
                 sortable: true
           - name: name
-            tableId: tableId
+            id: tableId
             cols:
               - filter: true
                 headerName: headerName

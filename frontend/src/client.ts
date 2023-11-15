@@ -207,8 +207,6 @@ export const deleteAuthGroup = async (
   return post('/auth/group/delete', body);
 };
 
-<<<<<<< HEAD
-=======
 export const createUser = async (
   body: NewUser,
 ): Promise<AxiosResponse<User> | undefined> => {

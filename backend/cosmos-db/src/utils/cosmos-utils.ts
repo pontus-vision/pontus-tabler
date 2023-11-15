@@ -31,36 +31,27 @@ export const fetchDatabase = async (
     throw error;
   }
 };
+
 export const fetchContainer = async (
   databaseId: string,
   containerId: string,
   partitionKey?: string[],
 ): Promise<Container | undefined> => {
-  try {
-    const database = await fetchDatabase(databaseId);
+  const database = await fetchDatabase(databaseId);
 
-    const { container } = await database.containers.createIfNotExists({
-      id: containerId,
-      partitionKey: {
-        paths: partitionKey || ['/id'],
-      },
-    });
-    return container;
-  } catch (error) {
-    throw error;
-  }
+  const { container } = await database.containers.createIfNotExists({
+    id: containerId,
+    partitionKey: {
+      paths: partitionKey || ['/id'],
+    },
+  });
+  return container;
 };
-
-export const fetchDashboardsContainer = async (): Promise<
-  Container | undefined
-> => {
-  try {
-    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
-
-    return dashboardContainer;
-  } catch (error) {
-    throw error;
-  }
+export const deleteDatabase = async (
+  databaseId: string,
+): Promise<DatabaseResponse | undefined> => {
+  const database = await fetchDatabase(databaseId);
+  return database.delete({});
 };
 
 export const fetchData = async (

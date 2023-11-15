@@ -5,17 +5,13 @@ import {
   ReadPaginationFilter,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { DataRoot } from 'pontus-tabler/src/types';
-import {
-  FetchData,
-  fetchDashboardsContainer,
-  fetchData,
-} from '../utils/cosmos-utils';
+import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
 ) => {
   try {
-    const dashboardContainer = await fetchDashboardsContainer();
+    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
 
     const res = await dashboardContainer.items.upsert(data);
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
@@ -37,8 +33,9 @@ export const readDashboardById = async (dashboardId: string) => {
       },
     ],
   };
-  const dashboardContainer = await fetchDashboardsContainer();
+  const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
 
+  dashboardContainer.de;
   const { resources } = await dashboardContainer.items
     .query(querySpec)
     .fetchAll();
@@ -53,7 +50,7 @@ export const readDashboardById = async (dashboardId: string) => {
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   try {
-    const dashboardContainer = await fetchDashboardsContainer();
+    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
     const res = await dashboardContainer.item(data.id, data.id).delete();
 
     return 'Dashboard deleted!';

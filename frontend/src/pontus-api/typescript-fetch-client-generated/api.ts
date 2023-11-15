@@ -766,19 +766,6 @@ export interface DataRoot {
 /**
  *
  * @export
- * @interface DeleteTable
- */
-export interface DeleteTable {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTable
-   */
-  tableId?: string;
-}
-/**
- *
- * @export
  * @interface DeleteTableRow
  */
 export interface DeleteTableRow {
@@ -787,7 +774,7 @@ export interface DeleteTableRow {
    * @type {string}
    * @memberof DeleteTableRow
    */
-  tableId?: string;
+  id?: string;
   /**
    *
    * @type {string}
@@ -807,38 +794,6 @@ export interface DeleteUser {
    * @memberof DeleteUser
    */
   userId?: string;
-}
-/**
- *
- * @export
- * @interface GetTable
- */
-export interface GetTable {
-  /**
-   *
-   * @type {string}
-   * @memberof GetTable
-   */
-  tableId?: string;
-}
-/**
- *
- * @export
- * @interface GetTablesResponse
- */
-export interface GetTablesResponse {
-  /**
-   *
-   * @type {number}
-   * @memberof GetTablesResponse
-   */
-  totalTables?: number;
-  /**
-   * Table columns associated with the table
-   * @type {Array<TableRef>}
-   * @memberof GetTablesResponse
-   */
-  tables?: Array<TableRef>;
 }
 /**
  *
@@ -963,25 +918,6 @@ export interface InlineResponse2002 {
 /**
  *
  * @export
- * @interface NewTable
- */
-export interface NewTable {
-  /**
-   * Name of the table
-   * @type {string}
-   * @memberof NewTable
-   */
-  name?: string;
-  /**
-   * Table columns to be associated with the table during creation
-   * @type {Array<TableColumnRef>}
-   * @memberof NewTable
-   */
-  cols?: Array<TableColumnRef>;
-}
-/**
- *
- * @export
  * @interface NewTableRow
  */
 export interface NewTableRow {
@@ -990,7 +926,7 @@ export interface NewTableRow {
    * @type {string}
    * @memberof NewTableRow
    */
-  tableId?: string;
+  id?: string;
   /**
    *
    * @type {NewTableRowCols}
@@ -1168,6 +1104,19 @@ export interface ReadPaginationFilterFiltersColIdCondition {
 /**
  *
  * @export
+ * @interface TableBaseModelRef
+ */
+export interface TableBaseModelRef {
+  /**
+   *
+   * @type {string}
+   * @memberof TableBaseModelRef
+   */
+  id?: string;
+}
+/**
+ *
+ * @export
  * @interface TableColumnRef
  */
 export interface TableColumnRef {
@@ -1211,6 +1160,49 @@ export interface TableColumnRef {
 /**
  *
  * @export
+ * @interface TableCreateReq
+ */
+export interface TableCreateReq {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableCreateReq
+   */
+  name?: string;
+  /**
+   * Table columns to be associated with the table during creation
+   * @type {Array<TableColumnRef>}
+   * @memberof TableCreateReq
+   */
+  cols?: Array<TableColumnRef>;
+}
+/**
+ *
+ * @export
+ * @interface TableCreateRes
+ */
+export interface TableCreateRes extends TableRef {}
+/**
+ *
+ * @export
+ * @interface TableDeleteReq
+ */
+export interface TableDeleteReq extends TableBaseModelRef {}
+/**
+ *
+ * @export
+ * @interface TableReadReq
+ */
+export interface TableReadReq extends TableBaseModelRef {}
+/**
+ *
+ * @export
+ * @interface TableReadRes
+ */
+export interface TableReadRes extends TableRef {}
+/**
+ *
+ * @export
  * @interface TableRef
  */
 export interface TableRef {
@@ -1219,7 +1211,7 @@ export interface TableRef {
    * @type {string}
    * @memberof TableRef
    */
-  tableId?: string;
+  id?: string;
   /**
    * Name of the table
    * @type {string}
@@ -1236,27 +1228,27 @@ export interface TableRef {
 /**
  *
  * @export
- * @interface UpdateTable
+ * @interface TableUpdateReq
  */
-export interface UpdateTable {
+export interface TableUpdateReq extends TableRef {}
+/**
+ *
+ * @export
+ * @interface TablesReadRes
+ */
+export interface TablesReadRes {
   /**
-   * ID of the table to update
-   * @type {string}
-   * @memberof UpdateTable
+   *
+   * @type {number}
+   * @memberof TablesReadRes
    */
-  tableId?: string;
+  totalTables?: number;
   /**
-   * Updated name of the table
-   * @type {string}
-   * @memberof UpdateTable
+   * Table columns associated with the table
+   * @type {Array<TableRef>}
+   * @memberof TablesReadRes
    */
-  name?: string;
-  /**
-   * Updated table columns to associate with the table during update
-   * @type {Array<TableColumnRef>}
-   * @memberof UpdateTable
-   */
-  cols?: Array<TableColumnRef>;
+  tables?: Array<TableRef>;
 }
 /**
  *
@@ -1269,7 +1261,7 @@ export interface UpdateTableRow {
    * @type {string}
    * @memberof UpdateTableRow
    */
-  tableId?: string;
+  id?: string;
   /**
    *
    * @type {string}
@@ -2407,11 +2399,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Create a new table with properties and associated columns
      * @summary Create a new table
-     * @param {NewTable} [body]
+     * @param {TableCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableCreatePOST(body?: NewTable, options: any = {}): FetchArgs {
+    tableCreatePOST(body?: TableCreateReq, options: any = {}): FetchArgs {
       const localVarPath = `/table/create`;
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
@@ -2436,7 +2428,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'NewTable' !== 'string' ||
+        <any>'TableCreateReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2600,11 +2592,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Delete a table by ID
      * @summary Delete a table
-     * @param {DeleteTable} body
+     * @param {TableDeleteReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDeletePOST(body: DeleteTable, options: any = {}): FetchArgs {
+    tableDeletePOST(body: TableDeleteReq, options: any = {}): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2636,7 +2628,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'DeleteTable' !== 'string' ||
+        <any>'TableDeleteReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2650,11 +2642,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Get table by id
      * @summary Get table by id
-     * @param {GetTable} body
+     * @param {TableReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableReadPOST(body: GetTable, options: any = {}): FetchArgs {
+    tableReadPOST(body: TableReadReq, options: any = {}): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2686,7 +2678,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'GetTable' !== 'string' ||
+        <any>'TableReadReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2700,11 +2692,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Update table properties and associated columns by ID
      * @summary Update table by ID
-     * @param {UpdateTable} body
+     * @param {TableUpdateReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableUpdatePOST(body: UpdateTable, options: any = {}): FetchArgs {
+    tableUpdatePOST(body: TableUpdateReq, options: any = {}): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2736,7 +2728,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'UpdateTable' !== 'string' ||
+        <any>'TableUpdateReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -3434,14 +3426,14 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Create a new table with properties and associated columns
      * @summary Create a new table
-     * @param {NewTable} [body]
+     * @param {TableCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableCreatePOST(
-      body?: NewTable,
+      body?: TableCreateReq,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableRef> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableCreateRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).tableCreatePOST(body, options);
@@ -3554,12 +3546,12 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Delete a table by ID
      * @summary Delete a table
-     * @param {DeleteTable} body
+     * @param {TableDeleteReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableDeletePOST(
-      body: DeleteTable,
+      body: TableDeleteReq,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3584,14 +3576,14 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Get table by id
      * @summary Get table by id
-     * @param {GetTable} body
+     * @param {TableReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableReadPOST(
-      body: GetTable,
+      body: TableReadReq,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableRef> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableReadRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).tableReadPOST(body, options);
@@ -3614,12 +3606,12 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Update table properties and associated columns by ID
      * @summary Update table by ID
-     * @param {UpdateTable} body
+     * @param {TableUpdateReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableUpdatePOST(
-      body: UpdateTable,
+      body: TableUpdateReq,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3651,7 +3643,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     tablesReadPOST(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<GetTablesResponse> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<TablesReadRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).tablesReadPOST(body, options);
@@ -3954,11 +3946,11 @@ export const DefaultApiFactory = function (
     /**
      * Create a new table with properties and associated columns
      * @summary Create a new table
-     * @param {NewTable} [body]
+     * @param {TableCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableCreatePOST(body?: NewTable, options?: any) {
+    tableCreatePOST(body?: TableCreateReq, options?: any) {
       return DefaultApiFp(configuration).tableCreatePOST(body, options)(
         fetch,
         basePath,
@@ -4006,11 +3998,11 @@ export const DefaultApiFactory = function (
     /**
      * Delete a table by ID
      * @summary Delete a table
-     * @param {DeleteTable} body
+     * @param {TableDeleteReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDeletePOST(body: DeleteTable, options?: any) {
+    tableDeletePOST(body: TableDeleteReq, options?: any) {
       return DefaultApiFp(configuration).tableDeletePOST(body, options)(
         fetch,
         basePath,
@@ -4019,11 +4011,11 @@ export const DefaultApiFactory = function (
     /**
      * Get table by id
      * @summary Get table by id
-     * @param {GetTable} body
+     * @param {TableReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableReadPOST(body: GetTable, options?: any) {
+    tableReadPOST(body: TableReadReq, options?: any) {
       return DefaultApiFp(configuration).tableReadPOST(body, options)(
         fetch,
         basePath,
@@ -4032,11 +4024,11 @@ export const DefaultApiFactory = function (
     /**
      * Update table properties and associated columns by ID
      * @summary Update table by ID
-     * @param {UpdateTable} body
+     * @param {TableUpdateReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableUpdatePOST(body: UpdateTable, options?: any) {
+    tableUpdatePOST(body: TableUpdateReq, options?: any) {
       return DefaultApiFp(configuration).tableUpdatePOST(body, options)(
         fetch,
         basePath,
@@ -4380,12 +4372,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Create a new table with properties and associated columns
    * @summary Create a new table
-   * @param {NewTable} [body]
+   * @param {TableCreateReq} [body]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableCreatePOST(body?: NewTable, options?: any) {
+  public tableCreatePOST(body?: TableCreateReq, options?: any) {
     return DefaultApiFp(this.configuration).tableCreatePOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4440,12 +4432,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Delete a table by ID
    * @summary Delete a table
-   * @param {DeleteTable} body
+   * @param {TableDeleteReq} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableDeletePOST(body: DeleteTable, options?: any) {
+  public tableDeletePOST(body: TableDeleteReq, options?: any) {
     return DefaultApiFp(this.configuration).tableDeletePOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4455,12 +4447,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Get table by id
    * @summary Get table by id
-   * @param {GetTable} body
+   * @param {TableReadReq} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableReadPOST(body: GetTable, options?: any) {
+  public tableReadPOST(body: TableReadReq, options?: any) {
     return DefaultApiFp(this.configuration).tableReadPOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4470,12 +4462,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Update table properties and associated columns by ID
    * @summary Update table by ID
-   * @param {UpdateTable} body
+   * @param {TableUpdateReq} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableUpdatePOST(body: UpdateTable, options?: any) {
+  public tableUpdatePOST(body: TableUpdateReq, options?: any) {
     return DefaultApiFp(this.configuration).tableUpdatePOST(body, options)(
       this.fetch,
       this.basePath,
