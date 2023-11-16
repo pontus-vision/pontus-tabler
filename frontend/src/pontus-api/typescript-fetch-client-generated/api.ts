@@ -1104,19 +1104,6 @@ export interface ReadPaginationFilterFiltersColIdCondition {
 /**
  *
  * @export
- * @interface TableBaseModelRef
- */
-export interface TableBaseModelRef {
-  /**
-   *
-   * @type {string}
-   * @memberof TableBaseModelRef
-   */
-  id?: string;
-}
-/**
- *
- * @export
  * @interface TableColumnRef
  */
 export interface TableColumnRef {
@@ -1156,6 +1143,33 @@ export interface TableColumnRef {
    * @memberof TableColumnRef
    */
   filter?: boolean;
+  /**
+   * Indicates the kind of column input
+   * @type {string}
+   * @memberof TableColumnRef
+   */
+  kind?: TableColumnRef.KindEnum;
+}
+
+/**
+ * @export
+ * @namespace TableColumnRef
+ */
+export namespace TableColumnRef {
+  /**
+   * @export
+   * @enum {string}
+   */
+  export enum KindEnum {
+    Checkboxes = <any>'checkboxes',
+    Selectbox = <any>'selectbox',
+    Text = <any>'text',
+    Number = <any>'number',
+    Phone = <any>'phone',
+    Zipcode = <any>'zipcode',
+    Email = <any>'email',
+    Zipcode_7 = <any>'zipcode',
+  }
 }
 /**
  *
@@ -1187,13 +1201,13 @@ export interface TableCreateRes extends TableRef {}
  * @export
  * @interface TableDeleteReq
  */
-export interface TableDeleteReq extends TableBaseModelRef {}
+export interface TableDeleteReq extends BaseModelRef {}
 /**
  *
  * @export
  * @interface TableReadReq
  */
-export interface TableReadReq extends TableBaseModelRef {}
+export interface TableReadReq extends BaseModelRef {}
 /**
  *
  * @export
@@ -1211,7 +1225,7 @@ export interface TableRef {
    * @type {string}
    * @memberof TableRef
    */
-  id?: string;
+  id: string;
   /**
    * Name of the table
    * @type {string}
@@ -1230,7 +1244,7 @@ export interface TableRef {
  * @export
  * @interface TableUpdateReq
  */
-export interface TableUpdateReq extends TableRef {}
+export interface TableUpdateReq extends BaseModelRef {}
 /**
  *
  * @export
