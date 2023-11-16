@@ -1036,8 +1036,6 @@ components:
           description: Table columns associated with the table
           items:
             $ref: '#/components/schemas/TableColumnRef'
-      required:
-        - id
       example:
         name: name
         id: id
@@ -1079,6 +1077,7 @@ components:
     TableUpdateReq:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
     NewTableRow:
       type: object
       properties:
