@@ -1225,7 +1225,7 @@ export interface TableRef {
    * @type {string}
    * @memberof TableRef
    */
-  id: string;
+  id?: string;
   /**
    * Name of the table
    * @type {string}
@@ -1244,7 +1244,26 @@ export interface TableRef {
  * @export
  * @interface TableUpdateReq
  */
-export interface TableUpdateReq extends BaseModelRef {}
+export interface TableUpdateReq extends BaseModelRef {
+  /**
+   * Unique identifier of the table
+   * @type {string}
+   * @memberof TableUpdateReq
+   */
+  id?: string;
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableUpdateReq
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableUpdateReq
+   */
+  cols?: Array<TableColumnRef>;
+}
 /**
  *
  * @export
