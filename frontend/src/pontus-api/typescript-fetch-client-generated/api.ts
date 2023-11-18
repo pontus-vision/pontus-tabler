@@ -1195,7 +1195,20 @@ export interface TableCreateReq {
  * @export
  * @interface TableCreateRes
  */
-export interface TableCreateRes extends TableRef {}
+export interface TableCreateRes extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableCreateRes
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableCreateRes
+   */
+  cols?: Array<TableColumnRef>;
+}
 /**
  *
  * @export
@@ -1213,19 +1226,26 @@ export interface TableReadReq extends BaseModelRef {}
  * @export
  * @interface TableReadRes
  */
-export interface TableReadRes extends TableRef {}
+export interface TableReadRes extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableReadRes
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableReadRes
+   */
+  cols?: Array<TableColumnRef>;
+}
 /**
  *
  * @export
  * @interface TableRef
  */
 export interface TableRef {
-  /**
-   * Unique identifier of the table
-   * @type {string}
-   * @memberof TableRef
-   */
-  id?: string;
   /**
    * Name of the table
    * @type {string}
@@ -1245,12 +1265,6 @@ export interface TableRef {
  * @interface TableUpdateReq
  */
 export interface TableUpdateReq extends BaseModelRef {
-  /**
-   * Unique identifier of the table
-   * @type {string}
-   * @memberof TableUpdateReq
-   */
-  id?: string;
   /**
    * Name of the table
    * @type {string}
@@ -1278,10 +1292,10 @@ export interface TablesReadRes {
   totalTables?: number;
   /**
    * Table columns associated with the table
-   * @type {Array<TableRef>}
+   * @type {Array<BaseModelRef & TableRef>}
    * @memberof TablesReadRes
    */
-  tables?: Array<TableRef>;
+  tables?: Array<BaseModelRef & TableRef>;
 }
 /**
  *
