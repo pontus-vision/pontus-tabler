@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import PVFlexLayout from '../../pv-react/PVFlexLayout';
 import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
 import {
+  BaseModelRef,
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
   TableRef,
   User,
 } from '../../pontus-api/typescript-fetch-client-generated';
-import { getTables } from '../../client';
+import { deleteTable, getTables } from '../../client';
 import { ColDef, IGetRowsParams, RowEvent } from 'ag-grid-community';
 import { useNavigate } from 'react-router-dom';
 import { isEmpty } from '../../helpers/functions';
@@ -22,7 +23,7 @@ const TablesReadView = () => {
   }>({});
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(8);
-  const [totalCount, setTotalCount] = useState<number>(2);
+  const [totalCount, setTotalCount] = useState<number>();
   const [deleteMode, setDeleteMode] = useState(false);
   const [deletion, setDeletion] = useState(false);
   const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<User[]>([]);
@@ -76,6 +77,17 @@ const TablesReadView = () => {
   const handleRowClicked = (row: RowEvent<any, any>) => {
     navigate(`/table/read/${row.data.id}`);
   };
+  const handleAddition = () => {
+    navigate('/table/create');
+  };
+
+  const handleDelete = async (arr: BaseModelRef[]) => {
+    arr.forEach(async (el) => {
+      const res = await deleteTable(el.id);
+      console.log({ res });
+    });
+    fetchTables();
+  };
 
   if (!rows) return;
 
@@ -83,19 +95,23 @@ const TablesReadView = () => {
     <div className="read-tables__container">
       <PVGridWebiny2
         onUpdate={handleUpdate}
-        // onFiltersChange={handleFiltersChange}
         totalCount={totalCount}
-        onFromChange={(num: number) => {
-          console.log({ num });
-        }}
         onParamsChange={handleParamsChange}
         onRefresh={handleOnRefresh}
         cols={cols}
+        onDelete={handleDelete}
         onRowClicked={handleRowClicked}
         setEntriesToBeDeleted={setEntriesToBeDeleted}
         deleteMode={deleteMode}
         setDeletion={setDeletion}
         rows={rows}
+        add={handleAddition}
+        permissions={{
+          updateAction: true,
+          createAction: true,
+          deleteAction: true,
+          readAction: true,
+        }}
       />
     </div>
   );
