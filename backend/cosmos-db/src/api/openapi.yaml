@@ -1025,9 +1025,6 @@ components:
     TableRef:
       type: object
       properties:
-        id:
-          type: string
-          description: Unique identifier of the table
         name:
           type: string
           description: Name of the table
@@ -1056,6 +1053,7 @@ components:
             kind: checkboxes
     TableReadRes:
       allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
     TableCreateReq:
       type: object
@@ -1070,6 +1068,7 @@ components:
             $ref: '#/components/schemas/TableColumnRef'
     TableCreateRes:
       allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
     TableDeleteReq:
       allOf:
@@ -1220,7 +1219,9 @@ components:
           type: array
           description: Table columns associated with the table
           items:
-            $ref: '#/components/schemas/TableRef'
+            allOf:
+              - $ref: '#/components/schemas/BaseModelRef'
+              - $ref: '#/components/schemas/TableRef'
       example:
         tables:
           - name: name
