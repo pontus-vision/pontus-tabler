@@ -7,6 +7,43 @@
   padding: 0 2rem;
 }
 
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.create-table__name-input {
+  /* set width, padding, and margin */
+  width: 0;
+  padding: 10px;
+  margin: 10px 0;
+
+  /* set border */
+  border: none;
+  border-bottom: 2px solid #3cbc8d;
+
+  /* set background color and text color */
+  background-color: #f5f5f5;
+  color: #333;
+
+  /* set font */
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 20px;
+
+  /* set box shadow */
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+
+  /* add transition for smoother change of styles */
+  transition: width 0.4s ease-in-out;
+}
+
+.create-table__name-input:focus {
+  /* change width when input is focused */
+  width: 100%;
+}
+
 .create-new-table-input {
   background-color: #f7fafc;
   border: 1px solid #cbd5e0;
