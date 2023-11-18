@@ -35,6 +35,7 @@ export const readDashboardById = async (dashboardId: string) => {
   };
   const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
 
+  dashboardContainer.de;
   const { resources } = await dashboardContainer.items
     .query(querySpec)
     .fetchAll();
