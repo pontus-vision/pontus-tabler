@@ -51,12 +51,14 @@ type Props = {
   updateMode?: boolean;
   setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
   cols: ColDef[];
-  rows?: { [key: string]: unknown }[];
+  rows?: { [key: string]: any }[];
   totalCount?: number;
   add?: () => void;
+  onParamsChange?: (params: IGetRowsParams) => void;
   onRefresh?: () => void;
-  onDelete?: (arr: unknown[]) => void;
+  onDelete?: (arr: any[]) => void;
   onUpdate?: (data: any) => void;
+  onRowClicked?: (row: RowEvent<any, any>) => void;
   permissions?: {
     updateAction: boolean;
     createAction: boolean;
@@ -68,7 +70,7 @@ type Props = {
   }) => void;
   onFromChange?: (num: number) => void;
   onToChange?: (num: number) => void;
-  setDeletion?: Dispatch<SetStateAction<User[] | undefined>>;
+  setDeletion?: Dispatch<SetStateAction<boolean>>;
   setGridHeight?: Dispatch<React.SetStateAction<undefined | number>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
 };
@@ -92,8 +94,9 @@ const PVGridWebiny2 = ({
   onUpdate,
   onFromChange,
   onToChange,
-
+  onRowClicked,
   setGridHeight,
+  onParamsChange,
 }: Props) => {
   const [columnState, setColumnState] = useState<ColumnState[]>();
   const [filterState, setFilterState] = useState<ReadPaginationFilterFilters>();
@@ -123,27 +126,13 @@ const PVGridWebiny2 = ({
     // onValueChange(id, columnState);
   }, [columnState, id]);
 
-  // useEffect(() => {
-  //   setColumnDefs(cols);
-  // }, [cols]);
+  const paramsChange = () => {
+    cachedRowParams && onParamsChange && onParamsChange(cachedRowParams);
+  };
 
   useEffect(() => {
-    let filter = filterState;
-
-    const obj = columnState?.filter((col) => col.sort);
-
-    obj?.forEach(
-      (col) => (filter[col.colId] = { ...filter[col.colId], sort: col.sort }),
-    );
-
-    onFiltersChange && filter && onFiltersChange(filter);
-
-    console.log({
-      filterState,
-      obj,
-      filter,
-    });
-  }, [filterState, columnState]);
+    paramsChange();
+  }, [cachedRowParams]);
 
   const getDataSource = () => {
     const datasource: IDatasource = {
@@ -166,6 +155,7 @@ const PVGridWebiny2 = ({
             const sort = params?.sortModel[0].sort;
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
+          console.log({ params });
 
           onToChange && onToChange(params.endRow);
           onFromChange && onFromChange(params.startRow);
@@ -255,6 +245,10 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
+    console.log({ cachedRowParams });
+  }, [cachedRowParams]);
+
+  useEffect(() => {
     if (!rows) return;
     // console.log({ rows, totalCount });
     cachedRowParams?.successCallback(rows, totalCount);
@@ -322,9 +316,7 @@ const PVGridWebiny2 = ({
     suppressRowClickSelection: true,
 
     onRowClicked: (e) => {
-      if (setRowClicked) {
-        setRowClicked(e.data);
-      }
+      onRowClicked && onRowClicked(e);
     },
   };
 

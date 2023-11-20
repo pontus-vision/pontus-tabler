@@ -1,68 +1,51 @@
 import { useEffect, useState } from 'react';
-import NewTableCol from '../components/NewTable/Column';
 import {
-  GetTablesResponse,
-  NewTableColumn,
-  Table,
-  TableColumn,
+  TableColumnRef,
+  TableRef,
+  TableUpdateReq,
 } from '../pontus-api/typescript-fetch-client-generated';
-import { getTable, getTables, updateTable } from '../client';
 import { useTranslation } from 'react-i18next';
+import NewTableCol from '../components/NewTable/Column';
 import { capitalizeFirstLetter } from '../webinyApi';
-import { useLocation, useParams } from 'react-router-dom';
 
-const UpdateTableView = () => {
-  const [cols, setCols] = useState<{ colId: string; colDef: NewTableColumn }[]>(
-    [],
-  );
-  const [table, setTable] = useState<Table>();
-  const [tables, setTables] = useState<Table[]>();
+type Props = {
+  onUpdate?: (data: TableRef) => void;
+  onCreate?: (data: TableRef) => void;
+  table?: TableRef;
+};
+
+const TableView = ({ onCreate, onUpdate, table }: Props) => {
+  const [newTable, setNewTable] = useState<TableRef>();
   const [successMessage, setSuccessMessage] = useState('');
-  const params = useParams();
+  const [newCols, setNewCols] = useState<TableColumnRef[]>([]);
+
+  const { t, i18n } = useTranslation();
 
   function generateUniqueId() {
     const timestamp = new Date().getTime();
     const random = Math.floor(Math.random() * 10000); // You can adjust the range as needed
     return `${timestamp}-${random}`;
   }
-  const { t, i18n } = useTranslation();
-
-  const fetchTable = async (id: string) => {
-    const data = await getTable(id);
-    setTable(data?.data);
-
-    data?.data.cols &&
-      setCols(
-        data?.data.cols?.map((col) => {
-          return {
-            colId: col.id || '',
-            colDef: col,
-          };
-        }),
-      );
-  };
 
   useEffect(() => {
-    if (!params.id) return;
-    fetchTable(params.id);
-  }, [params]);
-
-  const update = async () => {
-    const res = await updateTable({
-      tableId: table?.tableId,
-      cols: cols.map((col) => col.colDef),
+    console.log({ newCols });
+    setNewTable((prevState) => {
+      if (!newCols) return;
+      return (prevState = {
+        cols: newCols,
+        name: newTable?.name || table?.name,
+      });
     });
+  }, [newCols]);
 
-    if (res?.statusText === 'OK') {
-      setSuccessMessage(
-        `${t('table')} ${table?.name} ${t('created-successfully')}.`,
-      );
-    }
-  };
+  useEffect(() => {
+    table && setNewTable(table);
+    table?.cols && setNewCols(table?.cols);
+  }, [table]);
 
   return (
     <div className="update-table">
-      {cols.length > 0 && (
+      {
         <div className="update-table-overflow-container">
           <div className="update-table-container">
             <div className="update-table-card">
@@ -85,23 +68,23 @@ const UpdateTableView = () => {
                   </tr>
                 </thead>
                 <tbody className="update-table-table-body">
-                  {cols.map((col, index) => (
-                    <NewTableCol
-                      key={col.colId}
-                      colDef={col.colDef}
-                      setCols={setCols}
-                      index={index}
-                    />
-                  ))}
+                  {newCols &&
+                    newCols.map((col, index) => (
+                      <NewTableCol
+                        key={col.id}
+                        colDef={col}
+                        setCols={setNewCols}
+                        index={index}
+                      />
+                    ))}
                 </tbody>
               </table>
               <button
                 onClick={() =>
-                  setCols((prevState) => [
-                    ...prevState,
-                    {
-                      colId: generateUniqueId(),
-                      colDef: {
+                  setNewCols((prevState) => {
+                    return [
+                      ...prevState,
+                      {
                         field: '',
                         filter: false,
                         headerName: '',
@@ -109,8 +92,8 @@ const UpdateTableView = () => {
                         sortable: false,
                         tableId: '',
                       },
-                    },
-                  ])
+                    ];
+                  })
                 }
                 className="update-table-add-button"
               >
@@ -119,16 +102,27 @@ const UpdateTableView = () => {
             </div>
           </div>
         </div>
-      )}
+      }
 
-      {table && (
+      {newTable && onUpdate && (
         <button
           onClick={() => {
-            update();
+            newTable && newTable.name && onUpdate(newTable);
           }}
           className="update-table-update-button"
         >
           {t('Update')}
+        </button>
+      )}
+
+      {newTable && onCreate && (
+        <button
+          onClick={() => {
+            newTable && onCreate(newTable);
+          }}
+          className="update-table-update-button"
+        >
+          {t('Create')}
         </button>
       )}
       {successMessage && (
@@ -150,4 +144,4 @@ const UpdateTableView = () => {
   );
 };
 
-export default UpdateTableView;
+export default TableView;

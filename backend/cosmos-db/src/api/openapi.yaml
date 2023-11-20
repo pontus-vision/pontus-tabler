@@ -121,24 +121,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TableReadRes'
-              examples:
-                example-01:
-                  value:
-                    id: mapeamentoDeProcessos
-                    name: Mapeamento de Processos
-                    cols:
-                      - field: Person_Natural_Full_Name
-                        filter: true
-                        headerName: Full Name
-                        id: Person_Natural_Full_Name
-                        name: Full Name
-                        sortable: true
-                      - field: Person_Natural_Customer_ID
-                        filter: true
-                        headerName: Customer ID
-                        id: Person_Natural_Customer_ID
-                        name: Customer ID
-                        sortable: true
         '400':
           description: Bad request
         '500':
@@ -1025,19 +1007,23 @@ components:
         filter:
           type: boolean
           description: Indicates if the table column is filterable
-      example:
-        filter: true
-        headerName: headerName
-        field: field
-        name: name
-        id: id
-        sortable: true
+        kind:
+          type: string
+          enum:
+            [
+              checkboxes,
+              selectbox,
+              text,
+              number,
+              phone,
+              zipcode,
+              email,
+              zipcode,
+            ]
+          description: Indicates the kind of column input
     TableRef:
       type: object
       properties:
-        id:
-          type: string
-          description: Unique identifier of the table
         name:
           type: string
           description: Name of the table
@@ -1052,20 +1038,23 @@ components:
         name: name
         id: id
         cols:
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
+          - field: Person_Natural_Full_Name
+            filter: true
+            headerName: Full Name
+            id: Person_Natural_Full_Name
+            name: Full Name
             sortable: true
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
+            kind: checkboxes
+          - field: Person_Natural_Full_Name
+            filter: true
+            headerName: Full Name
+            id: Person_Natural_Full_Name
+            name: Full Name
             sortable: true
+            kind: checkboxes
     TableReadRes:
       allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
     TableCreateReq:
       type: object
@@ -1080,6 +1069,7 @@ components:
             $ref: '#/components/schemas/TableColumnRef'
     TableCreateRes:
       allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
     TableDeleteReq:
       allOf:
@@ -1087,6 +1077,7 @@ components:
     TableUpdateReq:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
     NewTableRow:
       type: object
       properties:
@@ -1229,7 +1220,9 @@ components:
           type: array
           description: Table columns associated with the table
           items:
-            $ref: '#/components/schemas/TableRef'
+            allOf:
+              - $ref: '#/components/schemas/BaseModelRef'
+              - $ref: '#/components/schemas/TableRef'
       example:
         tables:
           - name: name

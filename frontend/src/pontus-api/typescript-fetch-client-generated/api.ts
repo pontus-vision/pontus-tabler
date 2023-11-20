@@ -1156,6 +1156,102 @@ export interface TableColumnRef {
    * @memberof TableColumnRef
    */
   filter?: boolean;
+  /**
+   * Indicates the kind of column input
+   * @type {string}
+   * @memberof TableColumnRef
+   */
+  kind?: TableColumnRef.KindEnum;
+}
+
+/**
+ * @export
+ * @namespace TableColumnRef
+ */
+export namespace TableColumnRef {
+  /**
+   * @export
+   * @enum {string}
+   */
+  export enum KindEnum {
+    Checkboxes = <any>'checkboxes',
+    Selectbox = <any>'selectbox',
+    Text = <any>'text',
+    Number = <any>'number',
+    Phone = <any>'phone',
+    Zipcode = <any>'zipcode',
+    Email = <any>'email',
+    Zipcode_7 = <any>'zipcode',
+  }
+}
+/**
+ *
+ * @export
+ * @interface TableCreateReq
+ */
+export interface TableCreateReq {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableCreateReq
+   */
+  name?: string;
+  /**
+   * Table columns to be associated with the table during creation
+   * @type {Array<TableColumnRef>}
+   * @memberof TableCreateReq
+   */
+  cols?: Array<TableColumnRef>;
+}
+/**
+ *
+ * @export
+ * @interface TableCreateRes
+ */
+export interface TableCreateRes extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableCreateRes
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableCreateRes
+   */
+  cols?: Array<TableColumnRef>;
+}
+/**
+ *
+ * @export
+ * @interface TableDeleteReq
+ */
+export interface TableDeleteReq extends BaseModelRef {}
+/**
+ *
+ * @export
+ * @interface TableReadReq
+ */
+export interface TableReadReq extends BaseModelRef {}
+/**
+ *
+ * @export
+ * @interface TableReadRes
+ */
+export interface TableReadRes extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableReadRes
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableReadRes
+   */
+  cols?: Array<TableColumnRef>;
 }
 /**
  *
@@ -1207,12 +1303,6 @@ export interface TableReadRes extends TableRef {}
  */
 export interface TableRef {
   /**
-   * Unique identifier of the table
-   * @type {string}
-   * @memberof TableRef
-   */
-  id?: string;
-  /**
    * Name of the table
    * @type {string}
    * @memberof TableRef
@@ -1230,7 +1320,20 @@ export interface TableRef {
  * @export
  * @interface TableUpdateReq
  */
-export interface TableUpdateReq extends TableRef {}
+export interface TableUpdateReq extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableUpdateReq
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableUpdateReq
+   */
+  cols?: Array<TableColumnRef>;
+}
 /**
  *
  * @export
@@ -1245,10 +1348,10 @@ export interface TablesReadRes {
   totalTables?: number;
   /**
    * Table columns associated with the table
-   * @type {Array<TableRef>}
+   * @type {Array<BaseModelRef & TableRef>}
    * @memberof TablesReadRes
    */
-  tables?: Array<TableRef>;
+  tables?: Array<BaseModelRef & TableRef>;
 }
 /**
  *
