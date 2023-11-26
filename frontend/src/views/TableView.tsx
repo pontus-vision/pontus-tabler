@@ -12,9 +12,10 @@ type Props = {
   onUpdate?: (data: TableRef) => void;
   onCreate?: (data: TableRef) => void;
   table?: TableRef;
+  testId?: string;
 };
 
-const TableView = ({ onCreate, onUpdate, table }: Props) => {
+const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
   const [newTable, setNewTable] = useState<TableRef>();
   const [successMessage, setSuccessMessage] = useState('');
   const [newCols, setNewCols] = useState<TableColumnRef[]>([]);
@@ -44,7 +45,7 @@ const TableView = ({ onCreate, onUpdate, table }: Props) => {
   }, [table]);
 
   return (
-    <div className="update-table">
+    <div className="update-table" data-testid={testId}>
       {
         <div className="update-table-overflow-container">
           <div className="update-table-container">
@@ -75,11 +76,13 @@ const TableView = ({ onCreate, onUpdate, table }: Props) => {
                         colDef={col}
                         setCols={setNewCols}
                         index={index}
+                        testId={`${testId}-col-${index}`}
                       />
                     ))}
                 </tbody>
               </table>
               <button
+                data-testid={`${testId}-add-col-btn`}
                 onClick={() =>
                   setNewCols((prevState) => {
                     return [
@@ -117,6 +120,7 @@ const TableView = ({ onCreate, onUpdate, table }: Props) => {
 
       {newTable && onCreate && (
         <button
+          data-testid={`${testId}-create-btn`}
           onClick={() => {
             newTable && onCreate(newTable);
           }}
