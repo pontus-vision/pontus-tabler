@@ -8,10 +8,14 @@ import {
 } from '../../pontus-api/typescript-fetch-client-generated';
 import TableView from '../TableView';
 
-const CreateTableView = () => {
-  const [cols, setCols] = useState<TableColumnRef[]>([]);
+type Props = {
+  testId?: string;
+};
 
+const CreateTableView = ({ testId }: Props) => {
+  const [cols, setCols] = useState<TableColumnRef[]>([]);
   const [name, setName] = useState<string>();
+
   const [tables, setTables] = useState<TableRef[]>();
 
   const { t, i18n } = useTranslation();
@@ -29,11 +33,12 @@ const CreateTableView = () => {
     <>
       <label htmlFor="">Name</label>
       <input
+        data-testid={`${testId}-input`}
         onChange={(e) => setName(e.target.value)}
         type="text"
         className="create-table__name-input"
       />
-      <TableView onCreate={handleCreate} />
+      <TableView testId="table-view" onCreate={handleCreate} />
     </>
   );
 };
