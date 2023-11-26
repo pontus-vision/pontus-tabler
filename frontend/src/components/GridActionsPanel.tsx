@@ -29,6 +29,7 @@ type Props = {
   };
   onDelete?: (arr: any[]) => void;
   entriesToBeDeleted: IRowNode<any>[];
+  testId?: string;
 };
 
 const GridActionsPanel = ({
@@ -50,6 +51,7 @@ const GridActionsPanel = ({
   entriesToBeDeleted,
   permissions,
   onDelete,
+  testId,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
@@ -253,6 +255,7 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.deleteAction && (
           <button
+            data-testid={`${testId}-delete-mode`}
             className="grid-actions-panel__delete-btn"
             onClick={() => {
               setDeleteMode && setDeleteMode(true);
@@ -265,6 +268,7 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.updateAction && (
           <button
+            data-testid={`${testId}-update-mode`}
             className="grid-actions-panel__update-btn"
             onClick={() => {
               setUpdateMode && setUpdateMode(!updateMode);
@@ -286,6 +290,7 @@ const GridActionsPanel = ({
         >
           <i
             className="fa-solid fa-trash"
+            data-testid={`${testId}-delete-btn`}
             onClick={() => {
               if (entriesToBeDeleted && onDelete) {
                 onDelete(entriesToBeDeleted);
