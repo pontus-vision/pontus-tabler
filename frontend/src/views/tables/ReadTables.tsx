@@ -5,7 +5,9 @@ import {
   BaseModelRef,
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
+  TableDeleteReq,
   TableRef,
+  TableUpdateReq,
   User,
 } from '../../pontus-api/typescript-fetch-client-generated';
 import { deleteTable, getTables } from '../../client';
@@ -44,7 +46,6 @@ const TablesReadView = () => {
       const entries = data?.data.tables;
       // setCols([...cols, ...data?.data.tables?.map()])
 
-      console.log({ entries });
       setRows(entries);
       setTotalCount(data?.data.totalTables || 2);
     } catch {
@@ -56,13 +57,9 @@ const TablesReadView = () => {
     fetchTables();
   }, [filters, from, to]);
 
-  const handleUpdate = (data: TableRef) => {
+  const handleUpdate = (data: TableUpdateReq) => {
     navigate('/table/update/' + data.id, { state: data });
   };
-
-  useEffect(() => {
-    console.log({ entriesToBeDeleted, deleteMode, deletion });
-  }, [entriesToBeDeleted, deleteMode, deletion]);
 
   const handleOnRefresh = () => {
     fetchTables();
@@ -81,10 +78,11 @@ const TablesReadView = () => {
     navigate('/table/create');
   };
 
-  const handleDelete = async (arr: BaseModelRef[]) => {
+  const handleDelete = async (arr: TableDeleteReq[]) => {
     arr.forEach(async (el) => {
-      const res = await deleteTable(el.id);
-      console.log({ res });
+      console.log({ el });
+
+      const res = await deleteTable(el);
     });
     fetchTables();
   };
@@ -94,6 +92,7 @@ const TablesReadView = () => {
   return (
     <div className="read-tables__container">
       <PVGridWebiny2
+        testId="read-tables-aggrid"
         onUpdate={handleUpdate}
         totalCount={totalCount}
         onParamsChange={handleParamsChange}
