@@ -24,7 +24,6 @@ import {
   RowEvent,
   SelectionChangedEvent,
 } from 'ag-grid-community';
-import { useDispatch } from 'react-redux';
 import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
 import { newRowState } from '../store/sliceGridUpdate';
 import { _isClickEvent } from 'chart.js/dist/helpers/helpers.core';
@@ -73,6 +72,7 @@ type Props = {
   setDeletion?: Dispatch<SetStateAction<boolean>>;
   setGridHeight?: Dispatch<React.SetStateAction<undefined | number>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
+  testId?: string;
 };
 
 const PVGridWebiny2 = ({
@@ -97,6 +97,7 @@ const PVGridWebiny2 = ({
   onRowClicked,
   setGridHeight,
   onParamsChange,
+  testId,
 }: Props) => {
   const [columnState, setColumnState] = useState<ColumnState[]>();
   const [filterState, setFilterState] = useState<ReadPaginationFilterFilters>();
@@ -116,7 +117,6 @@ const PVGridWebiny2 = ({
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
 
-  const dispatch = useDispatch();
   const [selectedColumns, setSelectedColumns] = useState<
     Array<string | undefined>
   >([]);
@@ -155,7 +155,6 @@ const PVGridWebiny2 = ({
             const sort = params?.sortModel[0].sort;
             sorting = `${colId}_${sort.toUpperCase()}`;
           }
-          console.log({ params });
 
           onToChange && onToChange(params.endRow);
           onFromChange && onFromChange(params.startRow);
@@ -166,7 +165,7 @@ const PVGridWebiny2 = ({
             {
               headerName: '',
               field: 'delete',
-              headerCheckboxSelection: true,
+
               checkboxSelection: true,
               width: 30,
               colId: 'delete-mode',
@@ -245,10 +244,6 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    console.log({ cachedRowParams });
-  }, [cachedRowParams]);
-
-  useEffect(() => {
     if (!rows) return;
     // console.log({ rows, totalCount });
     cachedRowParams?.successCallback(rows, totalCount);
@@ -288,14 +283,6 @@ const PVGridWebiny2 = ({
     onUpdate && onUpdate(rowData);
 
     const { id, ...rest } = rowData;
-
-    dispatch(
-      newRowState({
-        tableId: modelId,
-        rowId: rowData.id,
-        rowState: rest,
-      }),
-    );
   };
   useEffect(() => {
     gridApi?.refreshInfiniteCache();
@@ -441,7 +428,7 @@ const PVGridWebiny2 = ({
 
   return (
     <>
-      <div className={'ag-theme-alpine' + ' ' + gridId}>
+      <div data-testid={testId} className={'ag-theme-alpine' + ' ' + gridId}>
         {columnDefs && (
           <PVAggridColumnSelector
             columnState={columnState}
@@ -452,7 +439,7 @@ const PVGridWebiny2 = ({
           />
         )}
         <GridActionsPanel
-          data-testid="grid-action-panel"
+          testId={`${testId}-panel`}
           add={add}
           permissions={permissions}
           onDelete={onDelete}
@@ -466,7 +453,7 @@ const PVGridWebiny2 = ({
         <AgGridReact
           data-testid="ag-grid-component"
           gridOptions={gridOptions}
-          enableRangeSelection={true}
+          // enableRangeSelection={true}
           // paginationAutoPageSize={true}
           paginationPageSize={6}
           defaultColDef={defaultColDef}
