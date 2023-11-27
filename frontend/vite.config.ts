@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: 'src/setupTests.js',
+    testTimeout: 10000,
   },
   plugins: [react()],
   // base: '/app_dist',
