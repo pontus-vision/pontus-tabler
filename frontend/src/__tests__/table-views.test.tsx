@@ -150,7 +150,6 @@ describe('TableViews', () => {
     expect(col).toBeFalsy();
     unmount();
   });
-  it('should ', async () => {});
   it('should create a new table, read and delete table', async () => {
     const {
       unmount: unmountCreateTable,
