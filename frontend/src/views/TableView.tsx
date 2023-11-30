@@ -22,11 +22,11 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
 
   const { t, i18n } = useTranslation();
 
-  function generateUniqueId() {
-    const timestamp = new Date().getTime();
-    const random = Math.floor(Math.random() * 10000); // You can adjust the range as needed
-    return `${timestamp}-${random}`;
-  }
+  // function generateUniqueId() {
+  //   const timestamp = new Date().getTime();
+  //   const random = Math.floor(Math.random() * 10000); // You can adjust the range as needed
+  //   return `${timestamp}-${random}`;
+  // }
 
   useEffect(() => {
     console.log({ newCols });
@@ -113,6 +113,7 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
             newTable && newTable.name && onUpdate(newTable);
           }}
           className="update-table-update-button"
+          data-testid={`${testId}-update-btn`}
         >
           {t('Update')}
         </button>
