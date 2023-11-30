@@ -140,6 +140,7 @@ const GridActionsPanel = ({
           {deleteMode || updateMode || (
             <Button
               className="grid-actions-panel__plus-btn btn"
+              data-testid={`${testId}-add-btn`}
               onClick={() => {
                 setFlexModelId && setFlexModelId(id);
                 console.log('add entry');
@@ -210,6 +211,7 @@ const GridActionsPanel = ({
         updateMode ||
         (permissions?.createAction && (
           <FaPlusCircle
+            data-testid={`${testId}-add-btn`}
             className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
             // style={{
             //   display: 'flex',
@@ -239,6 +241,7 @@ const GridActionsPanel = ({
           onClick={() => {
             onRefresh && onRefresh();
           }}
+          data-testid={`${testId}-refresh-btn`}
         />
       )}
       {updateMode || deleteMode || (
