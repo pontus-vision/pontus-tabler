@@ -17,6 +17,7 @@ import {
   GridApi,
   GridOptions,
   GridReadyEvent,
+  ICellRendererParams,
   IDatasource,
   IGetRowsParams,
   IRowNode,
@@ -190,7 +191,15 @@ const PVGridWebiny2 = ({
               filter: false,
               hide: true,
               suppressMovable: true,
-              cellRenderer: () => <i className="fa-solid fa-pen-to-square"></i>,
+
+              cellRenderer: (e: ICellRendererParams) => {
+                return (
+                  <i
+                    data-testid={`${testId}-update-row-btn`}
+                    className="fa-solid fa-pen-to-square"
+                  ></i>
+                );
+              },
               onCellClicked: handleUpdateIconClick,
             },
 
@@ -281,9 +290,8 @@ const PVGridWebiny2 = ({
     const { data: rowData } = params;
 
     onUpdate && onUpdate(rowData);
-
-    const { id, ...rest } = rowData;
   };
+
   useEffect(() => {
     gridApi?.refreshInfiniteCache();
   }, [rows]);
