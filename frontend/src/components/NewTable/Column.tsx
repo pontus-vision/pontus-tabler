@@ -95,7 +95,6 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
       <td className="table-row__data--center">
         {filter ? (
           <BsCheckCircleFill
-            // className="table-row__icon--full-size"
             className="table-row__filter-icon--checked"
             onClick={() => {
               setFilter(false);
