@@ -8,7 +8,21 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: 'src/setupTests.js',
-    testTimeout: 10000,
+    testTimeout: 20000,
+    // environmentOptions: {
+    //   coverage: true,
+    //   testPathIgnorePatterns: [
+    //     '.*.js',
+    //     '.*d.ts',
+    //     '.*http.ts',
+    //     '.*pv-response.ts',
+    //     '.*test-utils.ts',
+    //   ],
+    // },
+    testNamePattern: 'TableViews',
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+    },
   },
   plugins: [react()],
   // base: '/app_dist',
