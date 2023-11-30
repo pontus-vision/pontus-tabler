@@ -21,10 +21,9 @@ const CreateTableView = ({ testId }: Props) => {
   const { t, i18n } = useTranslation();
 
   const handleCreate = async (data: TableRef) => {
-    console.log({ data });
+    setName('');
     try {
       const createRes = await createTable({ ...data, name });
-
       console.log({ createRes });
     } catch {}
   };
@@ -35,6 +34,7 @@ const CreateTableView = ({ testId }: Props) => {
       <input
         data-testid={`${testId}-input`}
         onChange={(e) => setName(e.target.value)}
+        value={name}
         type="text"
         className="create-table__name-input"
       />
