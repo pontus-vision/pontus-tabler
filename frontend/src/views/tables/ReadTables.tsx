@@ -15,7 +15,11 @@ import { ColDef, IGetRowsParams, RowEvent } from 'ag-grid-community';
 import { useNavigate } from 'react-router-dom';
 import { isEmpty } from '../../helpers/functions';
 
-const TablesReadView = () => {
+type Props = {
+  rowsTested?: any[];
+};
+
+const TablesReadView = ({ rowsTested }: Props) => {
   const [cols, setCols] = useState<ColDef[]>([
     { headerName: 'Name', field: 'name', filter: true },
   ]);
@@ -34,6 +38,9 @@ const TablesReadView = () => {
   const fetchTables = async () => {
     console.log('fetching');
     try {
+      if (rowsTested) {
+        throw 'No rows';
+      }
       const req: ReadPaginationFilter = {
         from,
         to,
@@ -58,7 +65,7 @@ const TablesReadView = () => {
   }, [filters, from, to]);
 
   const handleUpdate = (data: TableUpdateReq) => {
-    navigate('/table/update/' + data.id, { state: data });
+    data?.id && navigate('/table/update/' + data.id, { state: data });
   };
 
   const handleOnRefresh = () => {
@@ -72,7 +79,7 @@ const TablesReadView = () => {
   };
 
   const handleRowClicked = (row: RowEvent<any, any>) => {
-    navigate(`/table/read/${row.data.id}`);
+    row?.data?.id && navigate(`/table/read/${row.data.id}`);
   };
   const handleAddition = () => {
     navigate('/table/create');
