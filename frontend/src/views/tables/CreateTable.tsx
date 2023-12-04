@@ -24,7 +24,6 @@ const CreateTableView = ({ testId }: Props) => {
     setName('');
     try {
       const createRes = await createTable({ ...data, name });
-      console.log({ createRes });
     } catch {}
   };
 
