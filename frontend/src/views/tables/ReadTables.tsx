@@ -86,15 +86,15 @@ const TablesReadView = ({ rowsTested }: Props) => {
   };
 
   const handleDelete = async (arr: TableDeleteReq[]) => {
+    console.log({ arr });
     arr.forEach(async (el) => {
       console.log({ el });
-
-      const res = await deleteTable(el);
+      await deleteTable(el);
     });
     fetchTables();
   };
 
-  if (!rows) return;
+  // if (!rows) return;
 
   return (
     <div className="read-tables__container">
