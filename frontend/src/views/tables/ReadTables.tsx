@@ -94,8 +94,6 @@ const TablesReadView = ({ rowsTested }: Props) => {
     fetchTables();
   };
 
-  // if (!rows) return;
-
   return (
     <div className="read-tables__container">
       <PVGridWebiny2
