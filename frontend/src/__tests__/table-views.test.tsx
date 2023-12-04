@@ -13,6 +13,8 @@ import { sendHttpRequest } from '../http';
 import {
   DashboardCreateRes,
   DashboardsReadRes,
+  TableCreateRes,
+  TableReadRes,
   TablesReadRes,
 } from '../pontus-api/typescript-fetch-client-generated';
 import { AxiosResponse } from 'axios';
@@ -42,7 +44,7 @@ const post = async (body: any, endpoint: string) => {
 };
 
 describe('TableViews', () => {
-  it.skip('should load components properly', async () => {
+  it('should load components properly', async () => {
     const { unmount } = render(<CreateTableView />);
 
     // const button = getByText('Create')
@@ -60,7 +62,7 @@ describe('TableViews', () => {
     unmount();
   });
 
-  it.skip('should render TableView cmp in "update-mode"', async () => {
+  it('should render TableView cmp in "update-mode"', async () => {
     const { unmount } = render(<TableView onCreate={() => 'something'} />);
 
     expect(
@@ -71,7 +73,7 @@ describe('TableViews', () => {
     unmount();
   });
 
-  it.skip('should test if btns are behaving properly', async () => {
+  it('should test if btns are behaving properly', async () => {
     const { unmount, getByTestId, getByRole, container } = render(
       <NewTableCol testId="column-data" index={1} />,
     );
@@ -134,26 +136,6 @@ describe('TableViews', () => {
 
     unmount();
   });
-  it.skip('should delete a column', async () => {
-    const { container, unmount, getByTestId } = render(
-      <TableView testId="table-view" />,
-    );
-    const addColBtn = await getByTestId('table-view-add-col-btn');
-    expect(addColBtn).toBeTruthy();
-
-    await userEvent.click(addColBtn);
-
-    const col = getByTestId('table-view-col-0');
-    expect(col).toBeTruthy();
-
-    const colDeleteBtn = getByTestId('table-view-col-0-delete-btn');
-
-    expect(colDeleteBtn).toBeTruthy();
-    await userEvent.click(colDeleteBtn);
-
-    expect(col).toBeFalsy();
-    unmount();
-  });
   it.skip('should navigate between routes', async () => {
     window.history.pushState({}, '', '/dashboards/read');
     const { getByTestId, container } = render(<App />, {
@@ -173,8 +155,52 @@ describe('TableViews', () => {
     const { getByTestId, unmount } = render(<TablesReadView rowsTested={[]} />);
     unmount();
   });
-
   it('should test grid panel actions', async () => {
+    //Deleting records
+
+    const tablesRes: AxiosResponse<TablesReadRes> = await post(
+      {
+        from: 1,
+        to: 20,
+        filters: {},
+      },
+      'tables/read',
+    );
+
+    tablesRes?.data?.tables?.forEach(async (table) => {
+      const deleteRes = await post({ id: table.id }, 'table/delete');
+
+      expect(deleteRes).toBeTruthy();
+    });
+
+    // Creating a record
+    const createRes: AxiosResponse<TableCreateRes | undefined> = await post(
+      {
+        name: 'Table 1',
+        cols: [
+          {
+            filter: true,
+            headerName: 'headerName',
+            field: 'field',
+            name: 'nam2e',
+            id: 'id1',
+            sortable: true,
+            kind: 'selectbox',
+          },
+          {
+            filter: true,
+            headerName: 'headerName',
+            field: 'field',
+            name: 'name',
+            id: 'id',
+            sortable: true,
+            kind: 'text',
+          },
+        ],
+      },
+      'table/create',
+    );
+
     const { getByTestId, unmount } = render(<TablesReadView />);
 
     await waitFor(async () => {
@@ -182,7 +208,10 @@ describe('TableViews', () => {
 
       expect(addBtn).toBeInTheDocument();
 
-      await fireEvent.click(addBtn);
+      fireEvent.click(addBtn);
+    });
+
+    await waitFor(async () => {
       const row = document.querySelector(
         '.ag-cell.ag-cell-not-inline-editing.ag-cell-normal-height.ag-cell-value',
       );
@@ -190,28 +219,31 @@ describe('TableViews', () => {
       expect(row).toBeInTheDocument();
 
       row && fireEvent.click(row);
+    });
 
+    await waitFor(async () => {
       const refreshBtn = getByTestId('read-tables-aggrid-panel-refresh-btn');
 
       expect(refreshBtn).toBeInTheDocument();
 
       fireEvent.click(refreshBtn);
+    });
 
+    await waitFor(() => {
       const updateMode = getByTestId('read-tables-aggrid-panel-update-mode');
 
       expect(updateMode).toBeInTheDocument();
 
       fireEvent.click(updateMode);
+    });
 
+    await waitFor(() => {
       const updateBtn = getByTestId('read-tables-aggrid-update-row-btn');
 
       fireEvent.click(updateBtn);
     });
 
-    unmount();
-  });
-  it('should update a record', async () => {
-    const res: AxiosResponse<TablesReadRes> = await post(
+    const readRes: AxiosResponse<TablesReadRes> = await post(
       {
         from: 1,
         to: 11,
@@ -220,27 +252,79 @@ describe('TableViews', () => {
       'tables/read',
     );
 
-    const rec = res?.data?.tables?.[0];
-    expect(rec?.id).toBeTruthy();
-    console.log({ rec });
+    expect(readRes.data.totalTables).toBe(1);
+    const deleteRes = await post({ id: createRes?.data?.id }, 'table/delete');
+
+    expect(deleteRes.status).toBe(200);
+
+    unmount();
+  });
+  it('should update a record', async () => {
+    //Deleting records
+
+    const tablesRes: AxiosResponse<TablesReadRes | undefined> = await post(
+      {
+        from: 1,
+        to: 20,
+        filters: {},
+      },
+      'tables/read',
+    );
+
+    tablesRes?.data?.tables?.forEach(async (table) => {
+      if (!table?.id) return;
+      const deleteRes = await post({ id: table?.id }, 'table/delete');
+
+      expect(deleteRes).toBeTruthy();
+    });
+
+    const tableBody = {
+      name: 'Table 1',
+      cols: [
+        {
+          filter: true,
+          headerName: 'headerName',
+          field: 'field',
+          name: 'name',
+          id: 'id1',
+          sortable: true,
+          kind: 'selectbox',
+        },
+        {
+          filter: true,
+          headerName: 'headerName',
+          field: 'field',
+          name: 'name',
+          id: 'id',
+          sortable: true,
+          kind: 'text',
+        },
+      ],
+    };
+
+    const createRes: AxiosResponse<TableCreateRes> = await post(
+      tableBody,
+      'table/create',
+    );
+
+    expect(createRes.status).toBe(200);
+
+    const id = createRes.data.id;
 
     const { unmount, getByTestId, getAllByTestId, container } = render(
-      <UpdateTableView tableId={rec?.id} />,
+      <UpdateTableView tableId={id} />,
     );
 
     const updateTableInput: HTMLInputElement | null = document.querySelector(
       '.update-table__name-input',
     );
 
-    const updateTableInput2 = getByTestId('update-table-view');
-
-    expect(updateTableInput2).toBeInTheDocument();
-
     expect(updateTableInput).toBeInTheDocument();
+
     if (updateTableInput) {
-      fireEvent.change(updateTableInput, {
-        target: { value: 'Table Updated' },
-      });
+      const newName = 'Table Updated';
+
+      await userEvent.type(updateTableInput, newName);
     }
     expect(updateTableInput?.value).toBe('Table Updated');
 
@@ -313,17 +397,55 @@ describe('TableViews', () => {
       fireEvent.click(sortBtnUnchecked);
     }
 
+    expect(updateTableInput?.value).toBe('Table Updated');
+
+    const updateBtn = getByTestId('update-view-update-btn');
+
+    await waitFor(() => {
+      fireEvent.click(updateBtn);
+    });
+
+    const readRes: AxiosResponse<TableReadRes | undefined> = await post(
+      { id: createRes.data.id },
+      'table/read',
+    );
+
+    expect(readRes.data?.name).toBe('Table Updated');
+    // },
+    //   { timeout: 6000 },
+    // );
+
+    // const readRes: AxiosResponse<TablesReadRes> = await post(
+    //   {
+    //     from: 1,
+    //     to: 11,
+    //     filters: {},
+    //   },
+    //   'tables/read',
+    // );
+
+    // const findCreatedTable = readRes?.data?.tables?.some(
+    //   (table) =>
+    //     table.name === tableBody.name &&
+    //     table?.cols?.[0].headerName === tableBody.cols[0].headerName,
+    // );
+
+    // expect(findCreatedTable).toBeTruthy();
+
+    // readRes.data.tables?.forEach(async (table) => {
+    //   const deleteRes = await post({ id: table.id }, 'table/delete');
+
+    //   expect(deleteRes.status).toBe(200);
+    // });
+
     const navigateToTablesBtn = document.querySelector(
       '.update-table__tables-read-btn',
     );
 
-    const updateBtn = getByTestId('update-view-update-btn');
-
-    fireEvent.click(updateBtn);
-
     navigateToTablesBtn && (await fireEvent.click(navigateToTablesBtn));
   });
-  it('should create a new table, read and delete table', async () => {
+
+  it('should create a new table, read and delete it', async () => {
     const {
       unmount: unmountCreateTable,
       container: createTableContainer,
@@ -334,20 +456,24 @@ describe('TableViews', () => {
     const input = getByTestIdCreateTable('create-table-input');
     const createBtn = getByTestIdCreateTable('table-view-create-btn');
 
-    expect(createBtn).toBeTruthy();
-    expect(input).toBeTruthy();
+    expect(createBtn).toBeInTheDocument();
+    expect(input).toBeInTheDocument();
 
-    const inputVal = 'Table 1';
+    // Adding a new column
 
-    const inputVal2 = 'Table 2';
     const addColBtn = getByTestIdCreateTable('table-view-add-col-btn');
 
     fireEvent.click(addColBtn);
 
+    const inputVal = 'Table 1';
+
+    // Creating the table
+
     await userEvent.type(input, inputVal);
     fireEvent.click(createBtn);
 
-    // await waitFor( () => {
+    // Checking if it matches in the database
+
     const res: AxiosResponse<TablesReadRes> = await post(
       {
         from: 1,
@@ -357,15 +483,11 @@ describe('TableViews', () => {
       'tables/read',
     );
 
-    console.log({ res: JSON.stringify(res.data) });
-
     expect(
-      res.data.tables?.some(
-        (table) => table.name === inputVal || table.name === inputVal2,
-      ),
+      res.data.tables?.some((table) => table.name === inputVal),
     ).toBeTruthy();
+
     unmountCreateTable();
-    // });
 
     const { container, unmount, getByTestId, getAllByTestId } = render(
       <MemoryRouter initialEntries={['/tables/read']}>
@@ -377,6 +499,7 @@ describe('TableViews', () => {
       // <TablesReadView />,
     );
 
+    // Checking if components are correctly loaded
     await waitFor(async () => {
       expect(getByTestId('read-tables-aggrid')).toBeInTheDocument();
       const inputVal = 'Table';
@@ -428,11 +551,17 @@ describe('TableViews', () => {
       ),
     ) as HTMLDivElement[];
 
+    expect(agGridRows[0]).toBeInTheDocument();
+
     const deleteModeBtn = getByTestId('read-tables-aggrid-panel-delete-mode');
-    fireEvent.click(deleteModeBtn);
 
     // await waitFor(() => {
-    expect(agGridRows[0]).toBeInTheDocument();
+    fireEvent.click(deleteModeBtn);
+    // });
+
+    // Selecting rows for deletion.
+    // await waitFor(() => {
+    const user = userEvent.setup();
     agGridRows.forEach(async (row) => {
       const cell = row.querySelector(
         '.ag-cell.ag-cell-not-inline-editing.ag-cell-normal-height.ag-cell-value',
@@ -443,10 +572,10 @@ describe('TableViews', () => {
         rowInput = row.querySelector(
           '.ag-input-field-input.ag-checkbox-input',
         ) as HTMLInputElement;
-        expect(rowInput).toBeTruthy();
+        expect(rowInput).toBeInTheDocument();
 
         expect(rowInput.checked).toBe(false);
-        rowInput && (await fireEvent.click(rowInput));
+        fireEvent.click(rowInput);
         expect(rowInput.checked).toBe(true);
       }
     });
@@ -454,20 +583,19 @@ describe('TableViews', () => {
 
     const deleteBtn = getByTestId('read-tables-aggrid-panel-delete-btn');
 
-    await waitFor(() => {
-      const inputVal = 'Table';
-
-      const agGridCells = Array.from(
-        document.querySelectorAll(
-          '.ag-cell.ag-cell-not-inline-editing.ag-cell-normal-height.ag-cell-value',
-        ),
-      ) as HTMLDivElement[];
-
-      expect(
-        agGridCells.some((cell) => cell?.innerText?.includes(inputVal)),
-      ).toBeTruthy();
-    });
     expect(deleteBtn).toBeInTheDocument();
-    await fireEvent.click(deleteBtn);
+
+    await user.click(deleteBtn);
+
+    const tablesRes: AxiosResponse<TablesReadRes | undefined> = await post(
+      {
+        from: 1,
+        to: 20,
+        filters: {},
+      },
+      'tables/read',
+    );
+
+    expect(tablesRes.status).toBe(404);
   });
 });

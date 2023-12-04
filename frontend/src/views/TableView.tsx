@@ -93,7 +93,6 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
                         headerName: '',
                         name: '',
                         sortable: false,
-                        tableId: '',
                       },
                     ];
                   })
@@ -109,8 +108,9 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
 
       {newTable && onUpdate && (
         <button
+          type="button"
           onClick={() => {
-            newTable && newTable.name && onUpdate(newTable);
+            newTable && onUpdate(newTable);
           }}
           className="update-table-update-button"
           data-testid={`${testId}-update-btn`}
@@ -121,6 +121,7 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
 
       {newTable && onCreate && (
         <button
+          type="button"
           data-testid={`${testId}-create-btn`}
           onClick={() => {
             newTable && onCreate(newTable);
