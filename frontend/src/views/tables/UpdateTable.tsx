@@ -30,7 +30,6 @@ const UpdateTableView = ({ tableId }: Props) => {
   const fetchTable = async (id: string) => {
     const data = await getTable(id);
     setTable(data?.data);
-    console.log({ data });
 
     data?.data.cols && setCols(data?.data.cols);
     data?.data.name && setName(data?.data.name);
@@ -41,10 +40,6 @@ const UpdateTableView = ({ tableId }: Props) => {
       fetchTable(params.id || tableId || '');
     }
   }, [params, tableId]);
-
-  // useEffect(() => {
-  //   setName(table?.name);
-  // }, [table]);
 
   const handleUpdate = async (data: TableRef) => {
     const updateRes = await updateTable({
@@ -57,8 +52,6 @@ const UpdateTableView = ({ tableId }: Props) => {
   const navigateToTables = () => {
     navigate('/tables/read');
   };
-
-  // if (!table) return;
 
   return (
     <>
