@@ -402,9 +402,9 @@ describe('TableViews', () => {
 
     const updateBtn = getByTestId('update-view-update-btn');
 
-    await waitFor(() => {
-      fireEvent.click(updateBtn);
-    });
+    const user = userEvent.setup();
+
+    await user.click(updateBtn);
 
     const readRes: AxiosResponse<TableReadRes | undefined> = await post(
       { id: createRes.data.id },
@@ -424,18 +424,10 @@ describe('TableViews', () => {
           headerName: 'Col updated',
           field: 'Col updated',
         },
-        {
-          filter: true,
-          sortable: true,
-          kind: TableColumnRef.KindEnum.Text,
-          id: 'id',
-          name: 'headerName',
-          headerName: 'headerName',
-          field: 'headerName',
-        },
       ],
     };
 
+    // Checking if table parameters were properly changed
     expect(readRes.data?.name).toBe(bodyUpdated.name);
     expect(readRes.data?.id).toBe(bodyUpdated.id);
     expect(readRes.data?.cols?.[0].name).toBe(bodyUpdated?.cols?.[0].name);
@@ -450,6 +442,7 @@ describe('TableViews', () => {
     expect(readRes.data?.cols?.[0].kind).toBe(bodyUpdated?.cols?.[0].kind);
     expect(readRes.data?.cols?.[0].id).toBe(bodyUpdated?.cols?.[0].id);
 
+    // Just testing the go-to tables btn.
     const navigateToTablesBtn = document.querySelector(
       '.update-table__tables-read-btn',
     );
