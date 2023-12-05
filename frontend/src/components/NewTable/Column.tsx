@@ -37,7 +37,6 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
               sortable: sortable,
               headerName: header,
               name: header,
-              tableId: header,
               id: col.id,
               kind,
             }
