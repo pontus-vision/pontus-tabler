@@ -31,6 +31,8 @@ import {
   TablesReadRes,
   TableCreateRes,
   TableDeleteReq,
+  TableUpdateReq,
+  TableCreateReq,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -108,13 +110,13 @@ export const getTable = async (
 };
 
 export const createTable = async (
-  data: NewTable,
+  data: TableCreateReq,
 ): Promise<AxiosResponse<TableCreateRes, any> | undefined> => {
   return post('/table/create', data);
 };
 
 export const updateTable = async (
-  body: UpdateTable,
+  body: TableUpdateReq,
 ): Promise<AxiosResponse<string, any> | undefined> => {
   return post('/table/update', body);
 };
