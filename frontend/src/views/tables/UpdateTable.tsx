@@ -21,6 +21,7 @@ const UpdateTableView = ({ tableId }: Props) => {
   const [table, setTable] = useState<TableRef>();
   const [tables, setTables] = useState<TableRef[]>();
   const [name, setName] = useState<string>();
+  const [newName, setNewName] = useState<string>();
 
   const params = useParams();
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const UpdateTableView = ({ tableId }: Props) => {
     console.log({ data });
 
     data?.data.cols && setCols(data?.data.cols);
+    data?.data.name && setName(data?.data.name);
   };
 
   useEffect(() => {
@@ -40,12 +42,16 @@ const UpdateTableView = ({ tableId }: Props) => {
     }
   }, [params, tableId]);
 
-  useEffect(() => {
-    setName(table?.name);
-  }, [table]);
+  // useEffect(() => {
+  //   setName(table?.name);
+  // }, [table]);
 
   const handleUpdate = async (data: TableRef) => {
-    const updateRes = await updateTable({ ...data, id: params.id, name });
+    const updateRes = await updateTable({
+      ...data,
+      id: params.id || tableId || '',
+      name: newName || name,
+    });
   };
 
   const navigateToTables = () => {
@@ -57,10 +63,10 @@ const UpdateTableView = ({ tableId }: Props) => {
   return (
     <>
       <input
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => setNewName(e.target.value)}
         type="text"
-        value={name}
-        data-testid="update-table-view"
+        defaultValue={name}
+        data-testid="update-table-view-input"
         className="update-table__name-input"
       />
       <TableView onUpdate={handleUpdate} testId="update-view" table={table} />
