@@ -23,22 +23,6 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
 
   const { t, i18n } = useTranslation();
 
-  // function generateUniqueId() {
-  //   const timestamp = new Date().getTime();
-  //   const random = Math.floor(Math.random() * 10000); // You can adjust the range as needed
-  //   return `${timestamp}-${random}`;
-  // }
-
-  // useEffect(() => {
-  //   setNewTable((prevState) => {
-  //     if (!cols) return;
-  //     return (prevState = {
-  //       cols: cols,
-  //       name: newTable?.name || table?.name,
-  //     });
-  //   });
-  // }, [cols]);
-
   useEffect(() => {
     const name = cols.length > 0 ? cols[0]?.name : '';
     console.log({ name });
