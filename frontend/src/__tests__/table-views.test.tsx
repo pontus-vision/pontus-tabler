@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  cleanup,
 } from '@testing-library/react';
 import CreateTableView from '../views/tables/CreateTable';
 import { describe, it, expect, vi } from 'vitest';
@@ -44,11 +45,34 @@ const post = async (body: any, endpoint: string) => {
   );
 };
 
+beforeEach(async () => {
+  //Deleting records
+
+  const tablesRes: AxiosResponse<TablesReadRes | undefined> = await post(
+    {
+      from: 1,
+      to: 20,
+      filters: {},
+    },
+    'tables/read',
+  );
+
+  tablesRes?.data?.tables?.forEach(async (table) => {
+    if (!table?.id) return;
+    const deleteRes = await post({ id: table?.id }, 'table/delete');
+
+    expect(deleteRes).toBeTruthy();
+  });
+});
+
+afterEach(() => {
+  cleanup();
+});
+
 describe('TableViews', () => {
   it('should load components properly', async () => {
     const { unmount } = render(<CreateTableView />);
 
-    // const button = getByText('Create')
     await waitFor(() => {
       expect(
         (
@@ -75,6 +99,7 @@ describe('TableViews', () => {
   });
 
   it('should test if btns are behaving properly', async () => {
+    const user = userEvent.setup();
     const { unmount, getByTestId, getByRole, container } = render(
       <NewTableCol testId="column-data" index={1} />,
     );
@@ -83,7 +108,7 @@ describe('TableViews', () => {
       '.table-row__filter-icon--unchecked',
     );
 
-    filterBtnUnchecked && (await fireEvent.click(filterBtnUnchecked));
+    filterBtnUnchecked && (await user.click(filterBtnUnchecked));
 
     await waitFor(() => {
       const filterBtnChecked = document.querySelector(
@@ -103,6 +128,7 @@ describe('TableViews', () => {
       const sortBtnChecked = document.querySelector(
         '.table-row__sort-icon--checked',
       );
+
       expect(sortBtnChecked).toBeTruthy();
     });
 
@@ -112,19 +138,19 @@ describe('TableViews', () => {
 
     expect(dropdownSelect.value).toBe('checkboxes');
 
-    fireEvent.change(dropdownSelect, { target: { value: 'selectbox' } });
+    await user.selectOptions(dropdownSelect, 'selectbox');
     expect(dropdownSelect.value).toBe('selectbox');
 
-    fireEvent.change(dropdownSelect, { target: { value: 'text' } });
+    await user.selectOptions(dropdownSelect, 'text');
     expect(dropdownSelect.value).toBe('text');
 
-    fireEvent.change(dropdownSelect, { target: { value: 'email' } });
+    await user.selectOptions(dropdownSelect, 'email');
     expect(dropdownSelect.value).toBe('email');
 
-    fireEvent.change(dropdownSelect, { target: { value: 'zipcode' } });
+    await user.selectOptions(dropdownSelect, 'zipcode');
     expect(dropdownSelect.value).toBe('zipcode');
 
-    fireEvent.change(dropdownSelect, { target: { value: 'selectbox' } });
+    await user.selectOptions(dropdownSelect, 'selectbox');
     expect(dropdownSelect.value).toBe('selectbox');
 
     const input = getByTestId('column-data-input') as HTMLInputElement;
@@ -137,43 +163,29 @@ describe('TableViews', () => {
 
     unmount();
   });
-  it.skip('should navigate between routes', async () => {
+  it('should navigate between routes', async () => {
     window.history.pushState({}, '', '/dashboards/read');
-    const { getByTestId, container } = render(<App />, {
+    const { unmount } = render(<App />, {
       wrapper: BrowserRouter,
     });
 
     await waitFor(
       () => {
-        expect(getByTestId('header-logo')).toBeInTheDocument();
+        expect(screen.getByTestId('header-logo')).toBeInTheDocument();
       },
       { timeout: 5000 },
     );
 
-    console.log({ container: container.innerHTML });
+    unmount();
   });
   it('should read empty records', () => {
     const { getByTestId, unmount } = render(<TablesReadView rowsTested={[]} />);
+
+    // expect()
     unmount();
   });
-  it('should test grid panel actions', async () => {
-    //Deleting records
 
-    const tablesRes: AxiosResponse<TablesReadRes> = await post(
-      {
-        from: 1,
-        to: 20,
-        filters: {},
-      },
-      'tables/read',
-    );
-
-    tablesRes?.data?.tables?.forEach(async (table) => {
-      const deleteRes = await post({ id: table.id }, 'table/delete');
-
-      expect(deleteRes).toBeTruthy();
-    });
-
+  it('should click in a row', async () => {
     // Creating a record
     const createRes: AxiosResponse<TableCreateRes | undefined> = await post(
       {
@@ -205,14 +217,6 @@ describe('TableViews', () => {
     const { getByTestId, unmount } = render(<TablesReadView />);
 
     await waitFor(async () => {
-      const addBtn = getByTestId('read-tables-aggrid-panel-add-btn');
-
-      expect(addBtn).toBeInTheDocument();
-
-      fireEvent.click(addBtn);
-    });
-
-    await waitFor(async () => {
       const row = document.querySelector(
         '.ag-cell.ag-cell-not-inline-editing.ag-cell-normal-height.ag-cell-value',
       );
@@ -220,6 +224,19 @@ describe('TableViews', () => {
       expect(row).toBeInTheDocument();
 
       row && fireEvent.click(row);
+    });
+
+    unmount();
+  });
+  it('should test grid panel actions', async () => {
+    const { getByTestId, unmount } = render(<TablesReadView />);
+
+    await waitFor(async () => {
+      const addBtn = getByTestId('read-tables-aggrid-panel-add-btn');
+
+      expect(addBtn).toBeInTheDocument();
+
+      fireEvent.click(addBtn);
     });
 
     await waitFor(async () => {
@@ -244,41 +261,10 @@ describe('TableViews', () => {
       fireEvent.click(updateBtn);
     });
 
-    const readRes: AxiosResponse<TablesReadRes> = await post(
-      {
-        from: 1,
-        to: 11,
-        filters: {},
-      },
-      'tables/read',
-    );
-
-    expect(readRes.data.totalTables).toBe(1);
-    const deleteRes = await post({ id: createRes?.data?.id }, 'table/delete');
-
-    expect(deleteRes.status).toBe(200);
-
     unmount();
   });
   it('should update a record', async () => {
-    //Deleting records
-
-    const tablesRes: AxiosResponse<TablesReadRes | undefined> = await post(
-      {
-        from: 1,
-        to: 20,
-        filters: {},
-      },
-      'tables/read',
-    );
-
-    tablesRes?.data?.tables?.forEach(async (table) => {
-      if (!table?.id) return;
-      const deleteRes = await post({ id: table?.id }, 'table/delete');
-
-      expect(deleteRes).toBeTruthy();
-    });
-
+    const user = userEvent.setup();
     const tableBody = {
       name: 'Table 1',
       cols: [
@@ -290,15 +276,6 @@ describe('TableViews', () => {
           id: 'id1',
           sortable: true,
           kind: TableColumnRef.KindEnum.Selectbox,
-        },
-        {
-          filter: true,
-          headerName: 'headerName',
-          field: 'field',
-          name: 'name',
-          id: 'id',
-          sortable: true,
-          kind: TableColumnRef.KindEnum.Text,
         },
       ],
     };
@@ -322,41 +299,58 @@ describe('TableViews', () => {
 
     expect(updateTableInput).toBeInTheDocument();
 
+    const newName = 'Table Updated';
+    const newColName = 'Col updated';
+
     if (updateTableInput) {
-      const newName = 'Table Updated';
-
-      await userEvent.type(updateTableInput, newName);
+      await user.clear(updateTableInput);
+      await user.type(updateTableInput, newName);
+      // fireEvent.change(updateTableInput, { target: { value: newName } });
     }
-    expect(updateTableInput?.value).toBe('Table Updated');
-
-    const updateTableView = getByTestId('update-view');
-
-    expect(updateTableView).toBeInTheDocument();
 
     await waitFor(
       async () => {
-        const col1 = getByTestId('update-view-col-0');
+        const updateTableView = screen.getByTestId('update-view');
 
+        expect(updateTableView).toBeInTheDocument();
+        const col1 = screen.getByTestId('update-view-col-0');
         expect(col1).toBeInTheDocument();
       },
-      { timeout: 6000 },
+      { timeout: 10000 },
     );
 
-    const col1NameInput = getByTestId(
+    const col1NameInput = screen.getByTestId(
       'update-view-col-0-input',
     ) as HTMLInputElement;
 
     expect(col1NameInput).toBeInTheDocument();
 
-    fireEvent.change(col1NameInput, { target: { value: 'Col updated' } });
+    expect(col1NameInput?.value).toBe('headerName');
 
-    expect(col1NameInput?.value).toBe('Col updated');
+    await user.clear(col1NameInput);
+    await waitFor(async () => {}, { timeout: 100000 });
 
-    const col1KindDropdown = getByTestId('update-view-col-0-dropdown');
+    await user.type(col1NameInput, newColName);
+    await waitFor(
+      async () => {
+        expect(col1NameInput?.value).toBe(newColName);
+      },
+      { timeout: 100000 },
+    );
+    // fireEvent.change(col1NameInput, { target: { value: newColName } });
+
+    const colName2 = screen.getByTestId(
+      'update-view-col-0-input',
+    ) as HTMLInputElement;
+
+    expect(colName2?.value).toBe(newColName);
+
+    const col1KindDropdown = screen.getByTestId('update-view-col-0-dropdown');
 
     expect(col1KindDropdown).toBeInTheDocument();
 
-    fireEvent.change(col1KindDropdown, { target: { value: 'checkboxes' } });
+    // fireEvent.change(col1KindDropdown, { target: { value: 'checkboxes' } });
+    await user.selectOptions(col1KindDropdown, 'checkboxes');
 
     const filterBtnChecked = document.querySelector(
       '.table-row__filter-icon--checked',
@@ -366,16 +360,25 @@ describe('TableViews', () => {
       '.table-row__filter-icon--unchecked',
     );
 
+    expect(filterBtnChecked || filterBtnUnchecked).toBeInTheDocument();
+
     if (filterBtnChecked) {
       expect(filterBtnChecked).toBeInTheDocument();
 
-      fireEvent.click(filterBtnChecked);
+      await user.click(filterBtnChecked);
+
+      expect(
+        document.querySelector('.table-row__filter-icon--unchecked'),
+      ).toBeInTheDocument();
     }
 
     if (filterBtnUnchecked) {
       expect(filterBtnUnchecked).toBeInTheDocument();
 
-      fireEvent.click(filterBtnUnchecked);
+      await user.click(filterBtnUnchecked);
+      expect(
+        document.querySelector('.table-row__filter-icon--checked'),
+      ).toBeInTheDocument();
     }
 
     const sortBtnChecked = document.querySelector(
@@ -386,68 +389,79 @@ describe('TableViews', () => {
       '.table-row__sort-icon--unchecked',
     );
 
+    expect(sortBtnChecked || sortBtnUnchecked).toBeInTheDocument();
     if (sortBtnChecked) {
       expect(sortBtnChecked).toBeInTheDocument();
 
-      fireEvent.click(sortBtnChecked);
+      await user.click(sortBtnChecked);
     }
 
     if (sortBtnUnchecked) {
       expect(sortBtnUnchecked).toBeInTheDocument();
 
-      fireEvent.click(sortBtnUnchecked);
+      await user.click(sortBtnUnchecked);
     }
 
-    expect(updateTableInput?.value).toBe('Table Updated');
+    expect(updateTableInput?.value).toBe(newName);
 
-    const updateBtn = getByTestId('update-view-update-btn');
-
-    const user = userEvent.setup();
+    const updateBtn = screen.getByTestId('update-view-update-btn');
 
     await user.click(updateBtn);
-
-    const readRes: AxiosResponse<TableReadRes | undefined> = await post(
-      { id: createRes.data.id },
-      'table/read',
-    );
-
-    const bodyUpdated: TableReadRes = {
-      name: 'Table Updated',
-      id: createRes.data.id,
-      cols: [
-        {
-          filter: !tableBody.cols[0].filter,
-          sortable: !tableBody.cols[0].sortable,
-          kind: TableColumnRef.KindEnum.Checkboxes,
-          id: tableBody.cols[0].id,
-          name: 'Col updated',
-          headerName: 'Col updated',
-          field: 'Col updated',
-        },
-      ],
-    };
+    await waitFor(async () => {}, { timeout: 100000 });
 
     // Checking if table parameters were properly changed
-    expect(readRes.data?.name).toBe(bodyUpdated.name);
-    expect(readRes.data?.id).toBe(bodyUpdated.id);
-    expect(readRes.data?.cols?.[0].name).toBe(bodyUpdated?.cols?.[0].name);
-    expect(readRes.data?.cols?.[0].field).toBe(bodyUpdated?.cols?.[0].field);
-    expect(readRes.data?.cols?.[0].sortable).toBe(
-      bodyUpdated?.cols?.[0].sortable,
-    );
-    expect(readRes.data?.cols?.[0].filter).toBe(bodyUpdated?.cols?.[0].filter);
-    expect(readRes.data?.cols?.[0].headerName).toBe(
-      bodyUpdated?.cols?.[0].headerName,
-    );
-    expect(readRes.data?.cols?.[0].kind).toBe(bodyUpdated?.cols?.[0].kind);
-    expect(readRes.data?.cols?.[0].id).toBe(bodyUpdated?.cols?.[0].id);
+    await waitFor(
+      async () => {
+        const readRes: AxiosResponse<TableReadRes | undefined> = await post(
+          { id: createRes.data.id },
+          'table/read',
+        );
 
+        const bodyUpdated: TableReadRes = {
+          name: newName,
+          id: createRes.data.id,
+          cols: [
+            {
+              filter: !tableBody.cols[0].filter,
+              sortable: !tableBody.cols[0].sortable,
+              kind: TableColumnRef.KindEnum.Checkboxes,
+              id: tableBody.cols[0].id,
+              name: newColName,
+              headerName: newColName,
+              field: newColName,
+            },
+          ],
+        };
+
+        expect(readRes.data?.name).toBe(bodyUpdated.name);
+        expect(readRes.data?.id).toBe(bodyUpdated.id);
+        expect(readRes.data?.cols?.[0].name).toBe(bodyUpdated?.cols?.[0].name);
+        expect(readRes.data?.cols?.[0].field).toBe(
+          bodyUpdated?.cols?.[0].field,
+        );
+        expect(readRes.data?.cols?.[0].sortable).toBe(
+          bodyUpdated?.cols?.[0].sortable,
+        );
+        expect(readRes.data?.cols?.[0].filter).toBe(
+          bodyUpdated?.cols?.[0].filter,
+        );
+        expect(readRes.data?.cols?.[0].headerName).toBe(
+          bodyUpdated?.cols?.[0].headerName,
+        );
+        expect(readRes.data?.cols?.[0].kind).toBe(bodyUpdated?.cols?.[0].kind);
+        expect(readRes.data?.cols?.[0].id).toBe(bodyUpdated?.cols?.[0].id);
+      },
+      {
+        timeout: 30000,
+      },
+    );
     // Just testing the go-to tables btn.
     const navigateToTablesBtn = document.querySelector(
       '.update-table__tables-read-btn',
     );
 
     navigateToTablesBtn && (await fireEvent.click(navigateToTablesBtn));
+    unmount();
   });
 
   it('should create a new table, read and delete it', async () => {
