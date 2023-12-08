@@ -27,7 +27,6 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
 
   useEffect(() => {
     if (!setCols) return;
-
     setCols((prevState) =>
       prevState?.map((col, idx) =>
         idx === index

@@ -52,6 +52,7 @@ const UpdateTableView = ({ tableId }: Props) => {
   const navigateToTables = () => {
     navigate('/tables/read');
   };
+  console.log('rendering');
 
   return (
     <>

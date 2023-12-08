@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import {
   TableColumnRef,
   TableRef,
@@ -16,9 +16,10 @@ type Props = {
 };
 
 const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
-  const [newTable, setNewTable] = useState<TableRef>();
+  // const [newTable, setNewTable] = useState<TableRef>();
+  const passwordHintId = useId();
   const [successMessage, setSuccessMessage] = useState('');
-  const [newCols, setNewCols] = useState<TableColumnRef[]>([]);
+  let [cols, setCols] = useState<TableColumnRef[]>([]);
 
   const { t, i18n } = useTranslation();
 
@@ -28,20 +29,26 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
   //   return `${timestamp}-${random}`;
   // }
 
-  useEffect(() => {
-    console.log({ newCols });
-    setNewTable((prevState) => {
-      if (!newCols) return;
-      return (prevState = {
-        cols: newCols,
-        name: newTable?.name || table?.name,
-      });
-    });
-  }, [newCols]);
+  // useEffect(() => {
+  //   setNewTable((prevState) => {
+  //     if (!cols) return;
+  //     return (prevState = {
+  //       cols: cols,
+  //       name: newTable?.name || table?.name,
+  //     });
+  //   });
+  // }, [cols]);
 
   useEffect(() => {
-    table && setNewTable(table);
-    table?.cols && setNewCols(table?.cols);
+    const name = cols.length > 0 ? cols[0]?.name : '';
+    console.log({ name });
+  }, [cols]);
+
+  useEffect(() => {
+    // table && setNewTable(table);
+    if (cols.length === 0) {
+      table?.cols && setCols(table?.cols);
+    }
   }, [table]);
 
   return (
@@ -69,12 +76,12 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
                   </tr>
                 </thead>
                 <tbody className="update-table-table-body">
-                  {newCols &&
-                    newCols.map((col, index) => (
+                  {cols &&
+                    cols.map((col, index) => (
                       <NewTableCol
                         key={col.id}
                         colDef={col}
-                        setCols={setNewCols}
+                        setCols={setCols}
                         index={index}
                         testId={`${testId}-col-${index}`}
                       />
@@ -84,7 +91,7 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
               <button
                 data-testid={`${testId}-add-col-btn`}
                 onClick={() =>
-                  setNewCols((prevState) => {
+                  setCols((prevState) => {
                     return [
                       ...prevState,
                       {
@@ -106,11 +113,11 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
         </div>
       }
 
-      {newTable && onUpdate && (
+      {cols && onUpdate && (
         <button
           type="button"
           onClick={() => {
-            newTable && onUpdate(newTable);
+            cols && onUpdate({ cols: cols });
           }}
           className="update-table-update-button"
           data-testid={`${testId}-update-btn`}
@@ -119,12 +126,12 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
         </button>
       )}
 
-      {newTable && onCreate && (
+      {cols && onCreate && (
         <button
           type="button"
           data-testid={`${testId}-create-btn`}
           onClick={() => {
-            newTable && onCreate(newTable);
+            cols && onCreate(cols);
           }}
           className="update-table-update-button"
         >

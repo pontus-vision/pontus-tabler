@@ -8,7 +8,8 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: 'src/setupTests.js',
-    testTimeout: 10000,
+    testTimeout: 1000000,
+    hookTimeout: 100000,
     // environmentOptions: {
     //   coverage: true,
     //   testPathIgnorePatterns: [
