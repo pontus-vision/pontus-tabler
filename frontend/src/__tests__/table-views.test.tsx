@@ -4,6 +4,7 @@ import {
   screen,
   waitFor,
   cleanup,
+  fireEvent,
 } from '@testing-library/react';
 import CreateTableView from '../views/tables/CreateTable';
 import { describe, it, expect, vi } from 'vitest';
@@ -180,7 +181,6 @@ describe('TableViews', () => {
   it('should read empty records', () => {
     const { getByTestId, unmount } = render(<TablesReadView rowsTested={[]} />);
 
-    // expect()
     unmount();
   });
 
@@ -266,6 +266,8 @@ describe('TableViews', () => {
   });
   it('should update a record', async () => {
     const user = userEvent.setup();
+
+    // Creating a record
     const tableBody = {
       name: 'Table 1',
       cols: [
@@ -290,30 +292,32 @@ describe('TableViews', () => {
 
     const id = createRes.data.id;
 
+    // mounting component and passing table id as prop
     const { unmount, getByTestId, getAllByTestId, container } = render(
       <UpdateTableView tableId={id} />,
     );
 
-    const updateTableInput: HTMLInputElement | null = document.querySelector(
+    // Selecting input to update table's name and typing in it
+    const tableNameInput: HTMLInputElement | null = document.querySelector(
       '.update-table__name-input',
     );
 
-    expect(updateTableInput).toBeInTheDocument();
+    expect(tableNameInput).toBeInTheDocument();
 
     const newName = 'Table Updated';
-    const newColName = 'Col updated';
 
-    if (updateTableInput) {
-      await user.clear(updateTableInput);
-      await user.type(updateTableInput, newName);
-      // fireEvent.change(updateTableInput, { target: { value: newName } });
+    if (tableNameInput) {
+      await user.clear(tableNameInput);
+      await user.type(tableNameInput, newName);
     }
 
     await waitFor(
       async () => {
         const updateTableView = screen.getByTestId('update-view');
-
         expect(updateTableView).toBeInTheDocument();
+
+        // Selecting column component in the GUI and filling fields
+
         const col1 = screen.getByTestId('update-view-col-0');
         expect(col1).toBeInTheDocument();
       },
@@ -329,28 +333,21 @@ describe('TableViews', () => {
     expect(col1NameInput?.value).toBe('headerName');
 
     await user.clear(col1NameInput);
-    await waitFor(async () => {}, { timeout: 100000 });
+    const newColName = 'Col updated';
 
     await user.type(col1NameInput, newColName);
+
     await waitFor(
       async () => {
         expect(col1NameInput?.value).toBe(newColName);
       },
       { timeout: 100000 },
     );
-    // fireEvent.change(col1NameInput, { target: { value: newColName } });
-
-    const colName2 = screen.getByTestId(
-      'update-view-col-0-input',
-    ) as HTMLInputElement;
-
-    expect(colName2?.value).toBe(newColName);
 
     const col1KindDropdown = screen.getByTestId('update-view-col-0-dropdown');
 
     expect(col1KindDropdown).toBeInTheDocument();
 
-    // fireEvent.change(col1KindDropdown, { target: { value: 'checkboxes' } });
     await user.selectOptions(col1KindDropdown, 'checkboxes');
 
     const filterBtnChecked = document.querySelector(
@@ -403,7 +400,9 @@ describe('TableViews', () => {
       await user.click(sortBtnUnchecked);
     }
 
-    expect(updateTableInput?.value).toBe(newName);
+    expect(tableNameInput?.value).toBe(newName);
+
+    // Selecting update button to send the new data to server
 
     const updateBtn = screen.getByTestId('update-view-update-btn');
 
@@ -455,6 +454,7 @@ describe('TableViews', () => {
         timeout: 30000,
       },
     );
+
     // Just testing the go-to tables btn.
     const navigateToTablesBtn = document.querySelector(
       '.update-table__tables-read-btn',
@@ -565,6 +565,14 @@ describe('TableViews', () => {
     //////////////////////////////////////////////////////
     // DELETING ROWS
 
+    // Entering Delete Mode
+
+    const deleteModeBtn = getByTestId('read-tables-aggrid-panel-delete-mode');
+
+    await user.click(deleteModeBtn);
+
+    // Selecting rows in the GUI
+
     const agGridRows = Array.from(
       document.querySelectorAll(
         '.ag-row.ag-row-level-0.ag-row-position-absolute.ag-row-not-inline-editing',
@@ -573,43 +581,51 @@ describe('TableViews', () => {
 
     expect(agGridRows[0]).toBeInTheDocument();
 
-    const deleteModeBtn = getByTestId('read-tables-aggrid-panel-delete-mode');
-
-    await user.click(deleteModeBtn);
-
     agGridRows.forEach(async (row) => {
-      const cell = row.querySelector(
-        '.ag-cell.ag-cell-not-inline-editing.ag-cell-normal-height.ag-cell-value',
-      ) as HTMLDivElement;
-      let rowInput;
+      await waitFor(
+        async () => {
+          const cell = row.querySelector(
+            '.ag-cell.ag-cell-not-inline-editing.ag-cell-normal-height.ag-cell-value',
+          ) as HTMLDivElement;
+          let rowInput;
 
-      if (cell.innerText.includes('Table')) {
-        rowInput = row.querySelector(
-          '.ag-input-field-input.ag-checkbox-input',
-        ) as HTMLInputElement;
-        expect(rowInput).toBeInTheDocument();
+          if (cell.innerText.includes('Table')) {
+            rowInput = row.querySelector(
+              '.ag-input-field-input.ag-checkbox-input',
+            ) as HTMLInputElement;
+            expect(rowInput).toBeInTheDocument();
 
-        expect(rowInput.checked).toBe(false);
-        await user.click(rowInput);
-        expect(rowInput.checked).toBe(true);
-      }
+            expect(rowInput.checked).toBe(false);
+            await user.click(rowInput);
+            expect(rowInput.checked).toBe(true);
+          }
+        },
+        { timeout: 6000 },
+      );
     });
+
+    // Clicking in the delete button and waiting for the db response
 
     const deleteBtn = getByTestId('read-tables-aggrid-panel-delete-btn');
 
     expect(deleteBtn).toBeInTheDocument();
 
-    await user.click(deleteBtn);
+    await waitFor(
+      async () => {
+        await user.click(deleteBtn);
 
-    const tablesRes: AxiosResponse<TablesReadRes | undefined> = await post(
-      {
-        from: 1,
-        to: 20,
-        filters: {},
+        const tablesRes: AxiosResponse<TablesReadRes | undefined> = await post(
+          {
+            from: 1,
+            to: 20,
+            filters: {},
+          },
+          'tables/read',
+        );
+
+        expect(tablesRes.status).toBe(404);
       },
-      'tables/read',
+      { timeout: 10000 },
     );
-
-    expect(tablesRes.status).toBe(404);
   });
 });
