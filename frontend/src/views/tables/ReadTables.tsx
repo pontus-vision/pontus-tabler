@@ -5,7 +5,9 @@ import {
   BaseModelRef,
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
+  TableDeleteReq,
   TableRef,
+  TableUpdateReq,
   User,
 } from '../../pontus-api/typescript-fetch-client-generated';
 import { deleteTable, getTables } from '../../client';
@@ -13,7 +15,11 @@ import { ColDef, IGetRowsParams, RowEvent } from 'ag-grid-community';
 import { useNavigate } from 'react-router-dom';
 import { isEmpty } from '../../helpers/functions';
 
-const TablesReadView = () => {
+type Props = {
+  rowsTested?: any[];
+};
+
+const TablesReadView = ({ rowsTested }: Props) => {
   const [cols, setCols] = useState<ColDef[]>([
     { headerName: 'Name', field: 'name', filter: true },
   ]);
@@ -32,6 +38,9 @@ const TablesReadView = () => {
   const fetchTables = async () => {
     console.log('fetching');
     try {
+      if (rowsTested) {
+        throw 'No rows';
+      }
       const req: ReadPaginationFilter = {
         from,
         to,
@@ -44,7 +53,6 @@ const TablesReadView = () => {
       const entries = data?.data.tables;
       // setCols([...cols, ...data?.data.tables?.map()])
 
-      console.log({ entries });
       setRows(entries);
       setTotalCount(data?.data.totalTables || 2);
     } catch {
@@ -56,13 +64,9 @@ const TablesReadView = () => {
     fetchTables();
   }, [filters, from, to]);
 
-  const handleUpdate = (data: TableRef) => {
-    navigate('/table/update/' + data.id, { state: data });
+  const handleUpdate = (data: TableUpdateReq) => {
+    data?.id && navigate('/table/update/' + data.id, { state: data });
   };
-
-  useEffect(() => {
-    console.log({ entriesToBeDeleted, deleteMode, deletion });
-  }, [entriesToBeDeleted, deleteMode, deletion]);
 
   const handleOnRefresh = () => {
     fetchTables();
@@ -75,25 +79,25 @@ const TablesReadView = () => {
   };
 
   const handleRowClicked = (row: RowEvent<any, any>) => {
-    navigate(`/table/read/${row.data.id}`);
+    row?.data?.id && navigate(`/table/read/${row.data.id}`);
   };
   const handleAddition = () => {
     navigate('/table/create');
   };
 
-  const handleDelete = async (arr: BaseModelRef[]) => {
+  const handleDelete = async (arr: TableDeleteReq[]) => {
+    console.log({ arr });
     arr.forEach(async (el) => {
-      const res = await deleteTable(el.id);
-      console.log({ res });
+      console.log({ el });
+      await deleteTable(el);
     });
     fetchTables();
   };
 
-  if (!rows) return;
-
   return (
     <div className="read-tables__container">
       <PVGridWebiny2
+        testId="read-tables-aggrid"
         onUpdate={handleUpdate}
         totalCount={totalCount}
         onParamsChange={handleParamsChange}

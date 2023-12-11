@@ -22,10 +22,6 @@ const DeleteEntriesModal = ({
 }: Props) => {
   const { t } = useTranslation();
 
-  useEffect(() => {
-    console.log({ entries });
-  }, [entries]);
-
   const deleteEntries = () => {
     if (!entries || !modelId) return;
 

@@ -14,9 +14,10 @@ type Props = {
   setCols?: Dispatch<SetStateAction<TableColumnRef[]>>;
   index: number;
   colDef?: TableColumnRef;
+  testId?: string;
 };
 
-const NewTableCol = ({ setCols, index, colDef }: Props) => {
+const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
   const [header, setHeader] = useState<string>(colDef?.headerName || '');
   const [filter, setFilter] = useState(colDef?.filter || false);
   const [sortable, setSortable] = useState(colDef?.sortable || false);
@@ -26,7 +27,6 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
 
   useEffect(() => {
     if (!setCols) return;
-
     setCols((prevState) =>
       prevState?.map((col, idx) =>
         idx === index
@@ -36,7 +36,6 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
               sortable: sortable,
               headerName: header,
               name: header,
-              tableId: header,
               id: col.id,
               kind,
             }
@@ -55,12 +54,13 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
   };
 
   return (
-    <tr className="table-row">
+    <tr data-testid={testId} className="table-row">
       <td className="table-row__data--padded">
         <div className="table-row__flex-container">
           <input
             onChange={(e) => setHeader(e.target.value)}
             type="text"
+            data-testid={`${testId}-input`}
             className="table-row__input-field"
             defaultValue={colDef?.headerName ? colDef?.headerName : ''}
           />
@@ -74,6 +74,7 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
               const value = e.target.value as any;
               setKind(value);
             }}
+            data-testid={`${testId}-dropdown`}
             name=""
             id=""
           >
@@ -92,14 +93,14 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
       <td className="table-row__data--center">
         {filter ? (
           <BsCheckCircleFill
-            className="table-row__icon--full-size"
+            className="table-row__filter-icon--checked"
             onClick={() => {
               setFilter(false);
             }}
           />
         ) : (
           <FaRegCircleXmark
-            className="table-row__icon--full-size"
+            className="table-row__filter-icon--unchecked"
             onClick={() => {
               setFilter(true);
             }}
@@ -109,14 +110,14 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
       <td className="table-row__data--center">
         {sortable ? (
           <BsCheckCircleFill
-            className="table-row__icon--full-size"
+            className="table-row__sort-icon--checked"
             onClick={() => {
               setSortable(false);
             }}
           />
         ) : (
           <FaRegCircleXmark
-            className="table-row__icon--full-size"
+            className="table-row__sort-icon--unchecked"
             onClick={() => {
               setSortable(true);
             }}
@@ -128,6 +129,7 @@ const NewTableCol = ({ setCols, index, colDef }: Props) => {
           <div className="table-row__icon--transform">
             <svg
               onClick={() => deleteCol()}
+              data-testid={`${testId}-delete-btn`}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"

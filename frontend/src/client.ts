@@ -2,8 +2,6 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GridUpdateState } from './store/sliceGridUpdate';
 import {
   DataRoot,
-  ICmsGetContentModel,
-  ICmsGetContentModelData,
   ICmsGetContentModelDataField,
   IListModelResponseData,
   Meta,
@@ -11,14 +9,11 @@ import {
 
 import {
   DeleteTableRow,
-  GetTablesResponse,
   GroupReadBody,
-  NewTable,
   NewTableRow,
   NewUser,
   DashboardReadRes,
   ReadPaginationFilter,
-  UpdateTable,
   UpdateTableRow,
   UpdateUser,
   User,
@@ -35,6 +30,9 @@ import {
   TableRef,
   TablesReadRes,
   TableCreateRes,
+  TableDeleteReq,
+  TableUpdateReq,
+  TableCreateReq,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -112,21 +110,21 @@ export const getTable = async (
 };
 
 export const createTable = async (
-  data: NewTable,
+  data: TableCreateReq,
 ): Promise<AxiosResponse<TableCreateRes, any> | undefined> => {
   return post('/table/create', data);
 };
 
 export const updateTable = async (
-  body: UpdateTable,
+  body: TableUpdateReq,
 ): Promise<AxiosResponse<string, any> | undefined> => {
   return post('/table/update', body);
 };
 
 export const deleteTable = async (
-  tableId: string,
+  data: TableDeleteReq,
 ): Promise<AxiosResponse<string, any> | undefined> => {
-  return post('/table/delete', { id: tableId });
+  return post('/table/delete', data);
 };
 
 export const createDataTable = async (body: NewTableRow) => {

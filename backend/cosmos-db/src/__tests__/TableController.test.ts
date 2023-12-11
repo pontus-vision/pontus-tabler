@@ -23,7 +23,7 @@ import { srv } from '..';
 // }));
 jest.setTimeout(1000000);
 
-describe('dashboardCreatePOST', () => {
+describe('testing tables', () => {
   const OLD_ENV = process.env;
 
   beforeEach(async () => {

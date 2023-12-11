@@ -41,7 +41,6 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   };
 
   useEffect(() => {
-    console.log({ columnState });
     if (columnState) {
       setSelectedColumns(
         columnState.filter((col) => !col.hide).map((el) => el.colId),

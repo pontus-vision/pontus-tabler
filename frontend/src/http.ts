@@ -153,13 +153,13 @@ export const sendHttpRequest = async <T = any>(
 };
 */
 
-import axios from 'axios';
+import axios, { CreateAxiosDefaults } from 'axios';
 
 export const sendHttpRequest = async (
   reqUrl: string,
   headers: Record<string, string>,
   queryParams: Record<string, string> = {},
-  data = '',
+  data: string,
   method = 'POST',
 ) => {
   if (!reqUrl || reqUrl.length === 0) {
@@ -170,21 +170,21 @@ export const sendHttpRequest = async (
 
   const queryString = new URLSearchParams(queryParams).toString();
   const fullUrl = reqUrl + (queryString ? `?${queryString}` : '');
-
-  const axiosInstance = axios.create({
+  const config: CreateAxiosDefaults = {
     baseURL: fullUrl, // Set the base URL for all requests
     headers, // Set the request headers
     timeout: parseInt(import.meta.env.PV_TIMEOUT_MS || '2000'), // Set a timeout for the request
-  });
-
+  };
+  const axiosInstance = axios.create(config);
+  let errorResponse;
   for (let i = 0; i < maxRetries; i++) {
-    try {
-      console.log(
-        `############ Retry ${i}; Creating connection to URL ${fullUrl}; payload size = ${
-          data.length
-        } eventHeaders = ${JSON.stringify(headers)}`,
-      );
+    console.log(
+      `############ Retry ${i}; Creating connection to URL ${fullUrl}; payload size = ${
+        data.length
+      } eventHeaders = ${JSON.stringify(headers)}`,
+    );
 
+    try {
       const response = await axiosInstance.request({
         url: fullUrl,
         method,
@@ -209,10 +209,14 @@ export const sendHttpRequest = async (
 
       return response;
     } catch (error: any) {
+      errorResponse = error.response;
       console.error(`error: ${error?.message}`);
       await new Promise((resolve) => setTimeout(resolve, 200 * i + 1));
     }
   }
-
-  throw new Error('Max retries exceeded');
+  if (errorResponse?.status !== 404) {
+    throw new Error(`Max retries exceeded - Req Url:${reqUrl} - Data: ${data}`);
+  } else {
+    return errorResponse;
+  }
 };
