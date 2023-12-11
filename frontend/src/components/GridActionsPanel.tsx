@@ -29,6 +29,7 @@ type Props = {
   };
   onDelete?: (arr: any[]) => void;
   entriesToBeDeleted: IRowNode<any>[];
+  testId?: string;
 };
 
 const GridActionsPanel = ({
@@ -50,6 +51,7 @@ const GridActionsPanel = ({
   entriesToBeDeleted,
   permissions,
   onDelete,
+  testId,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
@@ -138,6 +140,7 @@ const GridActionsPanel = ({
           {deleteMode || updateMode || (
             <Button
               className="grid-actions-panel__plus-btn btn"
+              data-testid={`${testId}-add-btn`}
               onClick={() => {
                 setFlexModelId && setFlexModelId(id);
                 console.log('add entry');
@@ -208,6 +211,7 @@ const GridActionsPanel = ({
         updateMode ||
         (permissions?.createAction && (
           <FaPlusCircle
+            data-testid={`${testId}-add-btn`}
             className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
             // style={{
             //   display: 'flex',
@@ -237,6 +241,7 @@ const GridActionsPanel = ({
           onClick={() => {
             onRefresh && onRefresh();
           }}
+          data-testid={`${testId}-refresh-btn`}
         />
       )}
       {updateMode || deleteMode || (
@@ -253,6 +258,7 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.deleteAction && (
           <button
+            data-testid={`${testId}-delete-mode`}
             className="grid-actions-panel__delete-btn"
             onClick={() => {
               setDeleteMode && setDeleteMode(true);
@@ -265,6 +271,7 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.updateAction && (
           <button
+            data-testid={`${testId}-update-mode`}
             className="grid-actions-panel__update-btn"
             onClick={() => {
               setUpdateMode && setUpdateMode(!updateMode);
@@ -286,6 +293,7 @@ const GridActionsPanel = ({
         >
           <i
             className="fa-solid fa-trash"
+            data-testid={`${testId}-delete-btn`}
             onClick={() => {
               if (entriesToBeDeleted && onDelete) {
                 onDelete(entriesToBeDeleted);

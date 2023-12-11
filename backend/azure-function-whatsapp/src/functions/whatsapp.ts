@@ -9,7 +9,8 @@ import * as crypto from 'crypto';
 import { WhatsappWebHook } from './types';
 
 const hubVerifyToken = process.env.HUB_VERIFY_TOKEN || 'test';
-const hubVerifySha = process.env.HUB_VERIFY_SHA || 'sha256'
+const hubVerifySha = process.env.HUB_VERIFY_SHA || 'sha256';
+const whatsappToken = process.env.WHATSAPP_TOKEN;
 
 export const generateXHub256Sig = (body: string, appSecret: string) => {
   return crypto
@@ -21,12 +22,12 @@ export const generateXHub256Sig = (body: string, appSecret: string) => {
 export const verifySig = async (
   request: HttpRequest,
   context: InvocationContext,
-): Promise<{valid: boolean, body: string}> => {
+): Promise<{ valid: boolean; body: string }> => {
   const isPost = request.method === 'POST';
   const body = await request.text();
 
   if (!isPost) {
-    return {valid: true,body};
+    return { valid: true, body };
   }
 
   const hasSignature = request.headers.get('x-hub-signature-256').toString();
@@ -34,7 +35,7 @@ export const verifySig = async (
   if (!hasSignature) {
     context.error('FAILED TO FIND header x-hub-signature-256');
 
-    return {valid: false, body};
+    return { valid: false, body };
   }
 
   const signature = hasSignature.replace(`${hubVerifySha}=`, '');
@@ -42,73 +43,70 @@ export const verifySig = async (
 
   if (!appSecret) {
     context.error('FAILED TO FIND APP_SECRET');
-    return {valid: false, body};
+    return { valid: false, body };
   }
   const generatedSignature = generateXHub256Sig(body, appSecret);
 
   context.log(
     `generatedSignature = ${generatedSignature}; signature = ${signature} `,
   );
-  return {valid: generatedSignature === signature, body};
-  /*
-  if (request.)
+  return { valid: generatedSignature === signature, body };
+};
 
-  if (
-              req.method === 'POST' &&
-              req.headers['x-hub-signature-256']
-            ) {
-              //Removing the prepended 'sha256=' string
-              const xHubSignature = req.headers['x-hub-signature-256']
-                .toString()
-                .replace('sha256=', '');
+export const sendReply = async (
+  phone_number_id: string,
+  whatsapp_token: string,
+  to: string,
+  reply_message: string,
+): Promise<Response> => {
+  let json = {
+    messaging_product: 'whatsapp',
+    type: 'text',
+    to: to,
+    text: { body: reply_message },
+  };
+  // let data = JSON.stringify(json);
+  // let path = '/v17.0/' + phone_number_id + '/messages';
+  // let options = {
+  //   host: 'graph.facebook.com',
+  //   path: path,
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //     Authorization: `Bearer ${whatsapp_token}`,
+  //   },
+  // };
 
-              let bodyBuf: Buffer[] = [];
-              req.on('data', (chunk) => {
-                bodyBuf = bodyBuf + chunk; // linter bug where push() and "+=" throws an error
+  // const headers = new Headers();
+  // headers.append('Content-Type', 'application/json');
+  // headers.append('Authorization', `Bearer ${whatsapp_token}`);
 
-                if (bodyBuf.length > 1e6) req.destroy(); // close connection if payload is larger than 1MB for some reason
-              });
+  const ret = fetch(
+    `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
 
-              req.on('end', () => {
-                const body = Buffer.concat(bodyBuf).toString();
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${whatsapp_token}`,
+      },
+      body: JSON.stringify(json),
+    },
+  );
 
-                const generatedSignature = generateXHub256Sig(
-                  body,
-                  this.config[WAConfigEnum.AppSecret],
-                );
-
-                const cbBody: w.WebhookObject = JSON.parse(body);
-
-                if (generatedSignature == xHubSignature) {
-                  const responseStatus = 200;
-                  LOGGER.log(
-                    'x-hub-signature-256 header matches generated signature',
-                  );
-                  cb(responseStatus, req.headers, cbBody, res, undefined);
-                } else {
-                  const errorMessage = "error: x-hub signature doesn't match";
-                  const responseStatus = 401;
-
-                  LOGGER.log(errorMessage);
-                  res.writeHead(responseStatus);
-                  res.end(errorMessage);
-
-                  cb(
-                    responseStatus,
-                    req.headers,
-                    cbBody,
-                    undefined,
-                    new Error(errorMessage),
-                  );
-                }
-              });
-
-              req.on('error', (err) => {
-                const responseStatus = 500;
-                cb(responseStatus, req.headers, undefined, res, err);
-              });
-            }
-            */
+  return ret;
+  // let callback = (response) => {
+  //   let str = "";
+  //   response.on("data", (chunk) => {
+  //     str += chunk;
+  //   });
+  //   response.on("end", () => {
+  //   });
+  // };
+  // let req = https.request(options, callback);
+  // req.on("error", (e) => {});
+  // req.write(data);
+  // req.end();
 };
 
 export const whatsapp = async (
@@ -116,20 +114,21 @@ export const whatsapp = async (
   context: InvocationContext,
 ): Promise<HttpResponseInit> => {
   context.log(`Http function processed request for url "${request.url}"`);
-  
+
   context.log(`request = ${JSON.stringify(request)}`);
-  request.headers.forEach((val: String, key:string )=> context.log(`${key} = ${val}`));
+  request.headers.forEach((val: String, key: string) =>
+    context.log(`${key} = ${val}`),
+  );
 
   const verification = await verifySig(request, context);
 
-  if (!verification.valid ) {
+  if (!verification.valid) {
     const retVal: HttpResponseInit = {
       body: 'error: Unable to verify the signature',
       status: 401,
     };
     return retVal;
   }
-
 
   if (request.method === 'GET') {
     context.log(
@@ -161,6 +160,14 @@ export const whatsapp = async (
     // const name = request.query.get('name') || (await request.text()) || 'world';
 
     context.log(`Got a POST Message ${JSON.stringify(reqVal)}`);
+    for (const entry of reqVal.entry) {
+      for (const change of entry.changes) {
+        for (const msg of change.value.messages){
+          const ret2 = await sendReply(change.value.metadata.phone_number_id, whatsappToken, msg.from, msg.text.body);
+          context.log(`got ${ret2.status}-  ${JSON.stringify(ret2.headers)}; ${await ret2.text()}`);
+        }
+      }
+    }
   }
   return { body: `${request.body}`, status: 200 };
 };

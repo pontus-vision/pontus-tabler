@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import {
   TableColumnRef,
   TableRef,
-  TableUpdateReq,
 } from '../pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import NewTableCol from '../components/NewTable/Column';
@@ -12,39 +11,29 @@ type Props = {
   onUpdate?: (data: TableRef) => void;
   onCreate?: (data: TableRef) => void;
   table?: TableRef;
+  testId?: string;
 };
 
-const TableView = ({ onCreate, onUpdate, table }: Props) => {
-  const [newTable, setNewTable] = useState<TableRef>();
+const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
   const [successMessage, setSuccessMessage] = useState('');
-  const [newCols, setNewCols] = useState<TableColumnRef[]>([]);
+  let [cols, setCols] = useState<TableColumnRef[]>([]);
 
   const { t, i18n } = useTranslation();
 
-  function generateUniqueId() {
-    const timestamp = new Date().getTime();
-    const random = Math.floor(Math.random() * 10000); // You can adjust the range as needed
-    return `${timestamp}-${random}`;
-  }
+  useEffect(() => {
+    const name = cols.length > 0 ? cols[0]?.name : '';
+    console.log({ name });
+  }, [cols]);
 
   useEffect(() => {
-    console.log({ newCols });
-    setNewTable((prevState) => {
-      if (!newCols) return;
-      return (prevState = {
-        cols: newCols,
-        name: newTable?.name || table?.name,
-      });
-    });
-  }, [newCols]);
-
-  useEffect(() => {
-    table && setNewTable(table);
-    table?.cols && setNewCols(table?.cols);
+    // table && setNewTable(table);
+    if (cols.length === 0) {
+      table?.cols && setCols(table?.cols);
+    }
   }, [table]);
 
   return (
-    <div className="update-table">
+    <div className="update-table" data-testid={testId}>
       {
         <div className="update-table-overflow-container">
           <div className="update-table-container">
@@ -68,20 +57,22 @@ const TableView = ({ onCreate, onUpdate, table }: Props) => {
                   </tr>
                 </thead>
                 <tbody className="update-table-table-body">
-                  {newCols &&
-                    newCols.map((col, index) => (
+                  {cols &&
+                    cols.map((col, index) => (
                       <NewTableCol
                         key={col.id}
                         colDef={col}
-                        setCols={setNewCols}
+                        setCols={setCols}
                         index={index}
+                        testId={`${testId}-col-${index}`}
                       />
                     ))}
                 </tbody>
               </table>
               <button
+                data-testid={`${testId}-add-col-btn`}
                 onClick={() =>
-                  setNewCols((prevState) => {
+                  setCols((prevState) => {
                     return [
                       ...prevState,
                       {
@@ -90,7 +81,6 @@ const TableView = ({ onCreate, onUpdate, table }: Props) => {
                         headerName: '',
                         name: '',
                         sortable: false,
-                        tableId: '',
                       },
                     ];
                   })
@@ -104,21 +94,25 @@ const TableView = ({ onCreate, onUpdate, table }: Props) => {
         </div>
       }
 
-      {newTable && onUpdate && (
+      {cols && onUpdate && (
         <button
+          type="button"
           onClick={() => {
-            newTable && newTable.name && onUpdate(newTable);
+            cols && onUpdate({ cols: cols });
           }}
           className="update-table-update-button"
+          data-testid={`${testId}-update-btn`}
         >
           {t('Update')}
         </button>
       )}
 
-      {newTable && onCreate && (
+      {cols && onCreate && (
         <button
+          type="button"
+          data-testid={`${testId}-create-btn`}
           onClick={() => {
-            newTable && onCreate(newTable);
+            cols && onCreate(cols);
           }}
           className="update-table-update-button"
         >

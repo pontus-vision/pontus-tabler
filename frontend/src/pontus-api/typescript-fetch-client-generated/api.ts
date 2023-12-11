@@ -1104,19 +1104,6 @@ export interface ReadPaginationFilterFiltersColIdCondition {
 /**
  *
  * @export
- * @interface TableBaseModelRef
- */
-export interface TableBaseModelRef {
-  /**
-   *
-   * @type {string}
-   * @memberof TableBaseModelRef
-   */
-  id?: string;
-}
-/**
- *
- * @export
  * @interface TableColumnRef
  */
 export interface TableColumnRef {
@@ -1239,6 +1226,7 @@ export interface TableReadReq extends BaseModelRef {}
  * @export
  * @interface TableReadRes
  */
+
 export interface TableReadRes extends BaseModelRef {
   /**
    * Name of the table
@@ -1253,49 +1241,6 @@ export interface TableReadRes extends BaseModelRef {
    */
   cols?: Array<TableColumnRef>;
 }
-/**
- *
- * @export
- * @interface TableCreateReq
- */
-export interface TableCreateReq {
-  /**
-   * Name of the table
-   * @type {string}
-   * @memberof TableCreateReq
-   */
-  name?: string;
-  /**
-   * Table columns to be associated with the table during creation
-   * @type {Array<TableColumnRef>}
-   * @memberof TableCreateReq
-   */
-  cols?: Array<TableColumnRef>;
-}
-/**
- *
- * @export
- * @interface TableCreateRes
- */
-export interface TableCreateRes extends TableRef {}
-/**
- *
- * @export
- * @interface TableDeleteReq
- */
-export interface TableDeleteReq extends TableBaseModelRef {}
-/**
- *
- * @export
- * @interface TableReadReq
- */
-export interface TableReadReq extends TableBaseModelRef {}
-/**
- *
- * @export
- * @interface TableReadRes
- */
-export interface TableReadRes extends TableRef {}
 /**
  *
  * @export
