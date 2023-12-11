@@ -16,8 +16,6 @@ type Props = {
 };
 
 const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
-  // const [newTable, setNewTable] = useState<TableRef>();
-  const passwordHintId = useId();
   const [successMessage, setSuccessMessage] = useState('');
   let [cols, setCols] = useState<TableColumnRef[]>([]);
 
