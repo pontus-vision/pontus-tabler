@@ -466,22 +466,19 @@ describe('TableViews', () => {
 
   it('should create a new table, read and delete it', async () => {
     const user = userEvent.setup();
-    const {
-      unmount: unmountCreateTable,
-      container: createTableContainer,
-      getByTestId: getByTestIdCreateTable,
-      getAllByTestId: getAllByTestIdCreateTable,
-    } = render(<CreateTableView testId="create-table" />);
 
-    const input = getByTestIdCreateTable('create-table-input');
-    const createBtn = getByTestIdCreateTable('table-view-create-btn');
+    const createTable = render(<CreateTableView testId="create-table" />);
+    const unmountCreateTable = createTable.unmount;
+
+    const input = screen.getByTestId('create-table-input');
+    const createBtn = screen.getByTestId('table-view-create-btn');
 
     expect(createBtn).toBeInTheDocument();
     expect(input).toBeInTheDocument();
 
     // Adding a new column
 
-    const addColBtn = getByTestIdCreateTable('table-view-add-col-btn');
+    const addColBtn = screen.getByTestId('table-view-add-col-btn');
 
     await user.click(addColBtn);
 
