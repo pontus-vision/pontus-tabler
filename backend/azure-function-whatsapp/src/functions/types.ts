@@ -13,11 +13,39 @@ export interface Change {
   field: string;
 }
 
+export interface Conversation {
+  id: string
+  expiration_timestamp?: string
+  origin: Origin
+}
+
+export interface Origin {
+  type: string
+}
+
+export interface Pricing {
+  billable: boolean
+  pricing_model: string
+  category: string
+}
+
+
+export interface Status {
+  id: string
+  status: string
+  timestamp: string
+  recipient_id: string
+  conversation?: Conversation
+  pricing?: Pricing
+}
+
 export interface Value {
   messaging_product: string;
   metadata: Metadata;
-  contacts: Contact[];
-  messages: Message[];
+  contacts?: Contact[];
+  messages?: Message[];
+  statuses?: Status[]
+
 }
 
 export interface Metadata {
@@ -38,10 +66,23 @@ export interface Message {
   from: string;
   id: string;
   timestamp: string;
-  text: Text;
+  text?: Text;
+  reaction?: Reaction;
+  image?: Image;
+
   type: string;
 }
 
 export interface Text {
   body: string;
+}
+export interface Reaction {
+  message_id: string
+  emoji: string
+}
+export interface Image {
+  caption: string
+  mime_type: string
+  sha256: string
+  id: string
 }

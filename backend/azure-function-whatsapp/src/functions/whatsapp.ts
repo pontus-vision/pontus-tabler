@@ -63,7 +63,7 @@ export const sendReply = async (
     messaging_product: 'whatsapp',
     type: 'text',
     to: to,
-    text: { body: reply_message },
+    text: { body: `hello, ${reply_message}` },
   };
   // let data = JSON.stringify(json);
   // let path = '/v17.0/' + phone_number_id + '/messages';
@@ -160,14 +160,29 @@ export const whatsapp = async (
     // const name = request.query.get('name') || (await request.text()) || 'world';
 
     context.log(`Got a POST Message ${JSON.stringify(reqVal)}`);
-    for (const entry of reqVal.entry) {
-      for (const change of entry.changes) {
-        for (const msg of change.value.messages){
-          const ret2 = await sendReply(change.value.metadata.phone_number_id, whatsappToken, msg.from, msg.text.body);
-          context.log(`got ${ret2.status}-  ${JSON.stringify(ret2.headers)}; ${await ret2.text()}`);
-        }
+    if (reqVal.entry instanceof Array)
+      for (const entry of reqVal?.entry) {
+        if (entry?.changes instanceof Array)
+          for (const change of entry?.changes) {
+            if (change?.value?.messages instanceof Array) {
+              for (const msg of change?.value?.messages) {
+                if (msg?.text?.body) {
+                  const ret2 = await sendReply(
+                    change.value.metadata.phone_number_id,
+                    whatsappToken,
+                    msg.from,
+                    msg.text.body,
+                  );
+                  context.log(
+                    `got ${ret2.status}-  ${JSON.stringify(
+                      ret2.headers,
+                    )}; ${await ret2.text()}`,
+                  );
+                }
+              }
+            }
+          }
       }
-    }
   }
   return { body: `${request.body}`, status: 200 };
 };

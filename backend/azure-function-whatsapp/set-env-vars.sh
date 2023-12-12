@@ -1,3 +1,3 @@
 # az functionapp config appsettings set --name pvhome-whatsapp --resource-group pvhomewhatsapp  --settings 'HUB_VERIFY_TOKEN=123345'
 # az functionapp config appsettings set --name pvhome-whatsapp --resource-group pvhomewhatsapp  --settings 'APP_SECRET=xxxxx'
-az functionapp config appsettings set --name pvhome-whatsapp --resource-group pvhomewhatsapp  --settings 'WHATSAPP_TOKEN=EAAMtNegzED8BO08dy8Wln5VzaZC9cDCwq1wXa6ZBMcCCt0t2z2ZCmZCoZAzI75evpfqukNm32O4SpnIA3efKpm6JxPZCxhsYmSTZB0B6fFidMih7GXIz7PekB0tX4RPllwwx6KoEXHgdNngCNKqDnUYqZAukswcU4Lkv3b6hVCBWGmUv4wh1CyfQ5DuLq5LWJJYf5hWpYQTDZCeBHHLkgBm2R3pUZD'
+az functionapp config appsettings set --name pvhome-whatsapp --resource-group pvhomewhatsapp  --settings 'WHATSAPP_TOKEN=EAAMtNegzED8BO67mhu1FxwZABPtniHPiN3vUhVkYDdMHw8VvcLqvtxeZAg6ZBdWDnLwUnMNWOQPJCvPDRrMY0gqEZCcLMcJETZAXX6KhxtiNHT1T1QybpgVbu5H1vVWw5ppbgydFAsKCE7EPsttSKGckibJQBxWG6SCvnNZAQbyojTxXNCDJPfNgNGXrHVC3ZCMNaeNKDTqMiqESfCmoyZANJVgZD'
