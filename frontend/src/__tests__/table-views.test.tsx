@@ -461,6 +461,8 @@ describe('TableViews', () => {
     );
 
     navigateToTablesBtn && (await user.click(navigateToTablesBtn));
+
+    expect(navigateToTablesBtn).toBeInTheDocument();
     unmount();
   });
 

@@ -2,7 +2,6 @@ import { useEffect, useId, useState } from 'react';
 import {
   TableColumnRef,
   TableRef,
-  TableUpdateReq,
 } from '../pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import NewTableCol from '../components/NewTable/Column';
