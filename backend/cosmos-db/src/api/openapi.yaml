@@ -32,7 +32,7 @@ paths:
               $ref: '#/components/schemas/MenuCreateReq'
       responses:
         '201':
-          description: Directory created successfully
+          description: Menu item created successfully
           content:
             application/json:
               schema:
@@ -62,7 +62,6 @@ paths:
             #         path: /
       responses:
         '201':
-          description: Directory created successfully
           content:
             application/json:
               schema:
@@ -84,7 +83,7 @@ paths:
               $ref: '#/components/schemas/MenuUpdateReq'
       responses:
         '201':
-          description: Directory updated successfully
+          description: Menu item updated successfully
           content:
             application/json:
               schema:
@@ -106,7 +105,7 @@ paths:
               $ref: '#/components/schemas/MenuDeleteReq'
       responses:
         '201':
-          description: Directory deleted successfully
+          description: Menu item deleted successfully
 
         '400':
           description: Bad request
