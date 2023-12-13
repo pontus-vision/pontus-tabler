@@ -26,10 +26,10 @@ export const readMenuItemById = async (
   menuItemId: string,
 ): Promise<MenuReadRes> => {
   const querySpec = {
-    query: 'select * from menu p where p.id=@directoryId',
+    query: 'select * from menu p where p.id=@menuItemId',
     parameters: [
       {
-        name: '@directoryId',
+        name: '@menuItemId',
         value: menuItemId,
       },
     ],
@@ -40,7 +40,7 @@ export const readMenuItemById = async (
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {
-    throw { code: 404, message: 'No directory found.' };
+    throw { code: 404, message: 'No menu item found.' };
   }
 };
 
@@ -49,7 +49,7 @@ export const deleteMenuItem = async (data: MenuDeleteReq) => {
     const menuContainer = await fetchContainer(MENU);
     const res = await menuContainer.item(data.id, data.id).delete();
 
-    return 'menuItem deleted!';
+    return 'menu item deleted!';
   } catch (error) {
     throw error;
   }
