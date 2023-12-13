@@ -18,6 +18,8 @@ const cosmosClient = new CosmosClient({
     'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==',
 });
 
+const cosmosDbName = process.env.COSMOSDB_NAME || 'pv_db';
+
 export const fetchDatabase = async (
   db_name: string,
 ): Promise<Database | undefined> => {
@@ -33,11 +35,10 @@ export const fetchDatabase = async (
 };
 
 export const fetchContainer = async (
-  databaseId: string,
   containerId: string,
   partitionKey?: string[],
 ): Promise<Container | undefined> => {
-  const database = await fetchDatabase(databaseId);
+  const database = await fetchDatabase(cosmosDbName);
 
   const { container } = await database.containers.createIfNotExists({
     id: containerId,
@@ -57,11 +58,10 @@ export const deleteDatabase = async (
 export const fetchData = async (
   filter: ReadPaginationFilter,
   table: string,
-  database: string = 'pv_db',
 ): Promise<FetchData | undefined> => {
   try {
     const query = filterToQuery(filter);
-    const dashboardContainer = await fetchContainer(database, table);
+    const dashboardContainer = await fetchContainer(table);
 
     const countStr = `select VALUE COUNT(1) from ${table} d ${query}`;
 

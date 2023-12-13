@@ -4,14 +4,15 @@ import {
   DashboardUpdateReq,
   ReadPaginationFilter,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { DataRoot } from 'pontus-tabler/src/types';
 import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
+
+const DASHBOARDS = 'dashboards';
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
 ) => {
   try {
-    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
+    const dashboardContainer = await fetchContainer(DASHBOARDS);
 
     const res = await dashboardContainer.items.upsert(data);
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
@@ -33,7 +34,7 @@ export const readDashboardById = async (dashboardId: string) => {
       },
     ],
   };
-  const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
 
   const { resources } = await dashboardContainer.items
     .query(querySpec)
@@ -49,7 +50,7 @@ export const readDashboardById = async (dashboardId: string) => {
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   try {
-    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
+    const dashboardContainer = await fetchContainer(DASHBOARDS);
     const res = await dashboardContainer.item(data.id, data.id).delete();
 
     return 'Dashboard deleted!';
@@ -61,7 +62,7 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 export const readDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<FetchData> => {
-  return fetchData(body, 'dashboards');
+  return fetchData(body, DASHBOARDS);
 };
 
 // export const countDashboardsRecords = async (
