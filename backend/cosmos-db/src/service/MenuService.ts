@@ -10,7 +10,7 @@ import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
 
 const MENU = 'menu';
 
-export const upsertDirectory = async (
+export const upsertMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
 ): Promise<MenuCreateRes> => {
   const menuContainer = await fetchContainer(MENU);
@@ -22,15 +22,15 @@ export const upsertDirectory = async (
   return rest;
 };
 
-export const readDirectoryById = async (
-  directoryId: string,
+export const readMenuItemById = async (
+  menuItemId: string,
 ): Promise<MenuReadRes> => {
   const querySpec = {
-    query: 'select * from menu p where p.id=@directoryId',
+    query: 'select * from menu p where p.id=@menuItemId',
     parameters: [
       {
-        name: '@directoryId',
-        value: directoryId,
+        name: '@menuItemId',
+        value: menuItemId,
       },
     ],
   };
@@ -40,16 +40,16 @@ export const readDirectoryById = async (
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {
-    throw { code: 404, message: 'No directory found.' };
+    throw { code: 404, message: 'No menu item found.' };
   }
 };
 
-export const deleteDirectory = async (data: MenuDeleteReq) => {
+export const deleteMenuItem = async (data: MenuDeleteReq) => {
   try {
     const menuContainer = await fetchContainer(MENU);
     const res = await menuContainer.item(data.id, data.id).delete();
 
-    return 'Directory deleted!';
+    return 'menu item deleted!';
   } catch (error) {
     throw error;
   }
