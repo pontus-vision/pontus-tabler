@@ -32,11 +32,7 @@ paths:
               $ref: '#/components/schemas/MenuCreateReq'
       responses:
         '201':
-<<<<<<< HEAD
-          description: Directory created successfully
-=======
           description: Menu item created successfully
->>>>>>> a18f8e4dd892caff0a9ada2abcb26760b4543f74
           content:
             application/json:
               schema:
@@ -66,10 +62,6 @@ paths:
             #         path: /
       responses:
         '201':
-<<<<<<< HEAD
-          description: Directory created successfully
-=======
->>>>>>> a18f8e4dd892caff0a9ada2abcb26760b4543f74
           content:
             application/json:
               schema:
@@ -91,11 +83,7 @@ paths:
               $ref: '#/components/schemas/MenuUpdateReq'
       responses:
         '201':
-<<<<<<< HEAD
-          description: Directory updated successfully
-=======
           description: Menu item updated successfully
->>>>>>> a18f8e4dd892caff0a9ada2abcb26760b4543f74
           content:
             application/json:
               schema:
@@ -117,11 +105,7 @@ paths:
               $ref: '#/components/schemas/MenuDeleteReq'
       responses:
         '201':
-<<<<<<< HEAD
-          description: Directory deleted successfully
-=======
           description: Menu item deleted successfully
->>>>>>> a18f8e4dd892caff0a9ada2abcb26760b4543f74
 
         '400':
           description: Bad request
