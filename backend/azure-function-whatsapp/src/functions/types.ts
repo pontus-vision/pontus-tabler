@@ -66,6 +66,7 @@ export interface Message {
   from: string;
   id: string;
   timestamp: string;
+  audio?: Audio;
   text?: Text;
   reaction?: Reaction;
   image?: Image;
@@ -85,4 +86,18 @@ export interface Image {
   mime_type: string
   sha256: string
   id: string
+}
+
+
+export interface Audio {
+  mime_type: string
+  sha256: string
+  id: string
+  voice: boolean
+}
+
+export interface OpenAIMessage {
+  
+    role: "user"|"assistant"|"system",
+    content: string
 }
