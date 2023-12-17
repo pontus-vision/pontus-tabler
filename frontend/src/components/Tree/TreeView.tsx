@@ -2,41 +2,47 @@ import React, { useEffect, useState } from 'react';
 import FolderItem, { Folder } from './FolderItem';
 import defaultData from './data';
 import { AiFillFolderAdd } from 'react-icons/ai';
+import { MenuDirectoryTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   data?: any;
+  onCreate: (data: MenuDirectoryTreeRef) => void;
   onSelect?: (data: Folder | File) => void;
   actionsMode?: boolean;
 };
 
-const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
+const TreeView = ({ onCreate, data, onSelect, actionsMode = true }: Props) => {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [expandedFolders, setExpandedFolders] = useState([]);
-  const [newFolder, setNewFolder] = useState<Folder>();
+  const [newFolder, setNewFolder] = useState<MenuDirectoryTreeRef>();
 
   const [createFolder, setCreateFolder] = useState(false);
-  const [jsonData, setJsonData] = useState(data || defaultData);
+  const [jsonData, setJsonData] = useState(data);
 
   const handleFolderSelect = (folder) => {
     setSelectedFolder(folder);
   };
 
-  const addFolder = () => {
-    if (!selectedFolder || !newFolder) return;
+  useEffect(() => {
+    setJsonData(data);
+  }, [data]);
 
-    const folder = findFolderById(jsonData, selectedFolder.id);
-    if (folder) {
-      const updatedFolder = {
-        ...folder,
-        children: folder.children
-          ? [...folder.children, newFolder]
-          : [newFolder],
-      };
+  // const addFolder = () => {
+  //   if (!selectedFolder || !newFolder) return;
 
-      // Update the data with the new folder
-      updateFolder(jsonData, updatedFolder);
-    }
-  };
+  //   const folder = findFolderById(jsonData, selectedFolder.id);
+  //   if (folder) {
+  //     const updatedFolder = {
+  //       ...folder,
+  //       children: folder.children
+  //         ? [...folder.children, newFolder]
+  //         : [newFolder],
+  //     };
+
+  //     // Update the data with the new folder
+  //     updateFolder(jsonData, updatedFolder);
+  //   }
+  // };
 
   const updateFolder = (currentFolder: Folder, updatedFolder: Folder) => {
     if (currentFolder.id === updatedFolder.id) {
@@ -52,7 +58,7 @@ const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
     setJsonData({ ...jsonData }); // Update the state to trigger re-render
   };
 
-  const findFolderById = (folder, targetId) => {
+  const findFolderById = (folder, targetId): any => {
     if (folder.id === targetId) {
       return folder;
     }
@@ -104,13 +110,15 @@ const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
               onChange={(e) =>
                 setNewFolder({
                   name: e.target.value,
-                  type: 'folder',
-                  id: e.target.value.toLocaleLowerCase(),
+                  kind: MenuDirectoryTreeRef.KindEnum.Folder,
+                  // id: e.target.value.toLocaleLowerCase(),
                   children: [],
                 })
               }
             />
-            <button onClick={addFolder}>Create</button>
+            <button onClick={() => newFolder && onCreate(newFolder)}>
+              Create
+            </button>
           </div>
         </div>
       )}
