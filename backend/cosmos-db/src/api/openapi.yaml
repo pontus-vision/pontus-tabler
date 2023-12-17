@@ -12,7 +12,7 @@ servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/PVPMARTINS_1/PontusBackend2/1.0.0
-  - url: http://localhost:8080/PontusTest/1.0.0
+  - url: http://localhost:8080/PontusTest/1 .0
     description: SwaggerHub API Auto Mocking
   - url: http://localhost:8080/PontusTest/1.0.0
     description: SwaggerHub API Auto Mocking
@@ -32,7 +32,7 @@ paths:
               $ref: '#/components/schemas/MenuCreateReq'
       responses:
         '201':
-          description: Menu item created successfully
+          description: Directory created successfully
           content:
             application/json:
               schema:
@@ -52,16 +52,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/MenuReadReq'
-
-            # examples:
-            #     Example 1:
-            #       value:
-            #         id: root
-            #         name: Root
-            #         type: folder
-            #         path: /
       responses:
         '201':
+          description: Directory created successfully
           content:
             application/json:
               schema:
@@ -83,11 +76,11 @@ paths:
               $ref: '#/components/schemas/MenuUpdateReq'
       responses:
         '201':
-          description: Menu item updated successfully
+          description: Directory updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MenuReadRes'
+                $ref: '#/components/schemas/MenuUpdateRes'
         '400':
           description: Bad request
         '500':
@@ -105,7 +98,7 @@ paths:
               $ref: '#/components/schemas/MenuDeleteReq'
       responses:
         '201':
-          description: Menu item deleted successfully
+          description: Directory deleted successfully
 
         '400':
           description: Bad request
@@ -907,13 +900,23 @@ components:
         - $ref: '#/components/schemas/MenuDirectoryTreeRef'
         - $ref: '#/components/schemas/BaseModelRef'
     MenuReadReq:
-      allOf:
-        - $ref: '#/components/schemas/BaseModelRef'
+      type: object
+      properties:
+        path:
+          type: string
+      required:
+        - path
+      example:
+        path: /folder1/file1
     MenuReadRes:
       allOf:
         - $ref: '#/components/schemas/MenuDirectoryTreeRef'
         - $ref: '#/components/schemas/BaseModelRef'
     MenuUpdateReq:
+      allOf:
+        - $ref: '#/components/schemas/MenuDirectoryTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuUpdateRes:
       allOf:
         - $ref: '#/components/schemas/MenuDirectoryTreeRef'
         - $ref: '#/components/schemas/BaseModelRef'
@@ -923,10 +926,13 @@ components:
     MenuDirectoryTreeRef:
       type: object
       properties:
+        id:
+          type: string
         name:
           type: string
         kind:
           type: string
+          enum: [folder, file]
         path:
           type: string
         children:
@@ -940,7 +946,6 @@ components:
       #     - null
       #   name: name
       #   type: type
-
     authGroupRef:
       type: object
       properties:
