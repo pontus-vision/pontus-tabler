@@ -437,43 +437,6 @@ export interface BaseModelRef {
 /**
  *
  * @export
- * @interface Child
- */
-export interface Child {
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  type?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  path?: string;
-  /**
-   *
-   * @type {Array<Child>}
-   * @memberof Child
-   */
-  children?: Array<Child>;
-}
-/**
- *
- * @export
  * @interface Dashboard
  */
 export interface Dashboard {
@@ -729,43 +692,6 @@ export interface DashboardsReadRes {
 /**
  *
  * @export
- * @interface DataRoot
- */
-export interface DataRoot {
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  type?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  path?: string;
-  /**
-   *
-   * @type {Array<Child>}
-   * @memberof DataRoot
-   */
-  children?: Array<Child>;
-}
-/**
- *
- * @export
  * @interface DeleteTableRow
  */
 export interface DeleteTableRow {
@@ -915,6 +841,165 @@ export interface InlineResponse2002 {
    */
   users?: Array<User>;
 }
+/**
+ *
+ * @export
+ * @interface MenuCreateReq
+ */
+export interface MenuCreateReq extends MenuDirectoryTreeRef {}
+
+/**
+ * @export
+ * @namespace MenuCreateReq
+ */
+export namespace MenuCreateReq {}
+/**
+ *
+ * @export
+ * @interface MenuCreateRes
+ */
+export interface MenuCreateRes extends MenuDirectoryTreeRef {
+  /**
+   * Unique identifier
+   * @type {string}
+   * @memberof MenuCreateRes
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuCreateRes
+ */
+export namespace MenuCreateRes {}
+/**
+ *
+ * @export
+ * @interface MenuDeleteReq
+ */
+export interface MenuDeleteReq extends BaseModelRef {}
+/**
+ *
+ * @export
+ * @interface MenuDirectoryTreeRef
+ */
+export interface MenuDirectoryTreeRef {
+  /**
+   *
+   * @type {string}
+   * @memberof MenuDirectoryTreeRef
+   */
+  id?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof MenuDirectoryTreeRef
+   */
+  name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof MenuDirectoryTreeRef
+   */
+  kind?: MenuDirectoryTreeRef.KindEnum;
+  /**
+   *
+   * @type {string}
+   * @memberof MenuDirectoryTreeRef
+   */
+  path?: string;
+  /**
+   *
+   * @type {Array<MenuDirectoryTreeRef>}
+   * @memberof MenuDirectoryTreeRef
+   */
+  children?: Array<MenuDirectoryTreeRef>;
+}
+
+/**
+ * @export
+ * @namespace MenuDirectoryTreeRef
+ */
+export namespace MenuDirectoryTreeRef {
+  /**
+   * @export
+   * @enum {string}
+   */
+  export enum KindEnum {
+    Folder = <any>'folder',
+    File = <any>'file',
+  }
+}
+/**
+ *
+ * @export
+ * @interface MenuReadReq
+ */
+export interface MenuReadReq {
+  /**
+   *
+   * @type {string}
+   * @memberof MenuReadReq
+   */
+  path: string;
+}
+/**
+ *
+ * @export
+ * @interface MenuReadRes
+ */
+export interface MenuReadRes extends MenuDirectoryTreeRef {
+  /**
+   * Unique identifier
+   * @type {string}
+   * @memberof MenuReadRes
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuReadRes
+ */
+export namespace MenuReadRes {}
+/**
+ *
+ * @export
+ * @interface MenuUpdateReq
+ */
+export interface MenuUpdateReq extends MenuDirectoryTreeRef {
+  /**
+   * Unique identifier
+   * @type {string}
+   * @memberof MenuUpdateReq
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuUpdateReq
+ */
+export namespace MenuUpdateReq {}
+/**
+ *
+ * @export
+ * @interface MenuUpdateRes
+ */
+export interface MenuUpdateRes extends MenuDirectoryTreeRef {
+  /**
+   * Unique identifier
+   * @type {string}
+   * @memberof MenuUpdateRes
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuUpdateRes
+ */
+export namespace MenuUpdateRes {}
 /**
  *
  * @export
@@ -1226,7 +1311,6 @@ export interface TableReadReq extends BaseModelRef {}
  * @export
  * @interface TableReadRes
  */
-
 export interface TableReadRes extends BaseModelRef {
   /**
    * Name of the table
@@ -2413,17 +2497,20 @@ export const DefaultApiFetchParamCreator = function (
     },
     /**
      *
+     * @param {MenuCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    menuPOST(options: any = {}): FetchArgs {
-      const localVarPath = `/menu`;
+    menuCreatePOST(body?: MenuCreateReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/create`;
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
@@ -2438,6 +2525,138 @@ export const DefaultApiFetchParamCreator = function (
         localVarHeaderParameter,
         options.headers,
       );
+      const needsSerialization =
+        <any>'MenuCreateReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {MenuDeleteReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuDeletePOST(body?: MenuDeleteReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/delete`;
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'MenuDeleteReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {MenuReadReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuReadPOST(body?: MenuReadReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/read`;
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'MenuReadReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {MenuUpdateReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuUpdatePOST(body?: MenuUpdateReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/update`;
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'MenuUpdateReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -3447,14 +3666,104 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @param {MenuCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    menuPOST(
+    menuCreatePOST(
+      body?: MenuCreateReq,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DataRoot> {
-      const localVarFetchArgs =
-        DefaultApiFetchParamCreator(configuration).menuPOST(options);
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<MenuCreateRes> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuCreatePOST(body, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     *
+     * @param {MenuDeleteReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuDeletePOST(
+      body?: MenuDeleteReq,
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuDeletePOST(body, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response;
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     *
+     * @param {MenuReadReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuReadPOST(
+      body?: MenuReadReq,
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<MenuReadRes> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuReadPOST(body, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     *
+     * @param {MenuUpdateReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuUpdatePOST(
+      body?: MenuUpdateReq,
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<MenuUpdateRes> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuUpdatePOST(body, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
         basePath: string = BASE_PATH,
@@ -3985,11 +4294,51 @@ export const DefaultApiFactory = function (
     },
     /**
      *
+     * @param {MenuCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    menuPOST(options?: any) {
-      return DefaultApiFp(configuration).menuPOST(options)(fetch, basePath);
+    menuCreatePOST(body?: MenuCreateReq, options?: any) {
+      return DefaultApiFp(configuration).menuCreatePOST(body, options)(
+        fetch,
+        basePath,
+      );
+    },
+    /**
+     *
+     * @param {MenuDeleteReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuDeletePOST(body?: MenuDeleteReq, options?: any) {
+      return DefaultApiFp(configuration).menuDeletePOST(body, options)(
+        fetch,
+        basePath,
+      );
+    },
+    /**
+     *
+     * @param {MenuReadReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuReadPOST(body?: MenuReadReq, options?: any) {
+      return DefaultApiFp(configuration).menuReadPOST(body, options)(
+        fetch,
+        basePath,
+      );
+    },
+    /**
+     *
+     * @param {MenuUpdateReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuUpdatePOST(body?: MenuUpdateReq, options?: any) {
+      return DefaultApiFp(configuration).menuUpdatePOST(body, options)(
+        fetch,
+        basePath,
+      );
     },
     /**
      * Create a new table with properties and associated columns
@@ -4406,12 +4755,55 @@ export class DefaultApi extends BaseAPI {
 
   /**
    *
+   * @param {MenuCreateReq} [body]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public menuPOST(options?: any) {
-    return DefaultApiFp(this.configuration).menuPOST(options)(
+  public menuCreatePOST(body?: MenuCreateReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuCreatePOST(body, options)(
+      this.fetch,
+      this.basePath,
+    );
+  }
+
+  /**
+   *
+   * @param {MenuDeleteReq} [body]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public menuDeletePOST(body?: MenuDeleteReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuDeletePOST(body, options)(
+      this.fetch,
+      this.basePath,
+    );
+  }
+
+  /**
+   *
+   * @param {MenuReadReq} [body]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public menuReadPOST(body?: MenuReadReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuReadPOST(body, options)(
+      this.fetch,
+      this.basePath,
+    );
+  }
+
+  /**
+   *
+   * @param {MenuUpdateReq} [body]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public menuUpdatePOST(body?: MenuUpdateReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuUpdatePOST(body, options)(
       this.fetch,
       this.basePath,
     );
