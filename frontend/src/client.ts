@@ -33,6 +33,13 @@ import {
   TableDeleteReq,
   TableUpdateReq,
   TableCreateReq,
+  MenuDeleteReq,
+  MenuUpdateReq,
+  MenuUpdateRes,
+  MenuReadRes,
+  MenuReadReq,
+  MenuCreateReq,
+  MenuCreateRes,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -91,10 +98,28 @@ const post = async (url: string, data?: any) => {
   return sendHttpRequest(baseURL + url, headers, '', data, 'POST');
 };
 
-export const readMenu = async (): Promise<
-  AxiosResponse<DataRoot> | undefined
-> => {
-  return post('/menu', {});
+export const createMenu = async (
+  body: MenuCreateReq,
+): Promise<AxiosResponse<MenuCreateRes> | undefined> => {
+  return post('/menu/create', body);
+};
+
+export const readMenu = async (
+  body: MenuReadReq,
+): Promise<AxiosResponse<MenuReadRes> | undefined> => {
+  return post('/menu/read', body);
+};
+
+export const updateMenu = async (
+  body: MenuUpdateReq,
+): Promise<AxiosResponse<MenuUpdateRes> | undefined> => {
+  return post('/menu/update', body);
+};
+
+export const deleteMenu = async (
+  body: MenuDeleteReq,
+): Promise<AxiosResponse<string> | undefined> => {
+  return post('/menu/delete', body);
 };
 
 export const getTables = async (

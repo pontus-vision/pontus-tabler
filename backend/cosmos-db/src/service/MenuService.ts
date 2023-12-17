@@ -15,22 +15,28 @@ export const upsertMenuItem = async (
 ): Promise<MenuCreateRes> => {
   const menuContainer = await fetchContainer(MENU);
 
+  for (const childIdx in data?.children) {
+    const childRes = await upsertMenuItem(data.children[childIdx]);
+    data.children[childIdx].id = childRes.id;
+  }
+
   const res = await menuContainer.items.upsert(data);
+
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
   return rest;
 };
 
-export const readMenuItemById = async (
-  menuItemId: string,
+export const readMenuItemByPath = async (
+  path: string,
 ): Promise<MenuReadRes> => {
   const querySpec = {
-    query: 'select * from menu p where p.id=@menuItemId',
+    query: 'select * from menu p where p.path=@path',
     parameters: [
       {
-        name: '@menuItemId',
-        value: menuItemId,
+        name: '@path',
+        value: path,
       },
     ],
   };
