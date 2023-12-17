@@ -10,9 +10,13 @@ import { Child, Dashboard, DataRoot } from '../types';
 import { setDashboardId } from '../store/sliceDashboards';
 import { useAuth } from '../AuthContext';
 import TreeView from './Tree/TreeView';
-import { readMenu } from '../client';
+import { createMenu, readMenu } from '../client';
 import data from './Tree/data';
 import { File, Folder } from './Tree/FolderItem';
+import {
+  MenuDirectoryTreeRef,
+  MenuReadRes,
+} from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   openedSidebar: boolean;
@@ -23,7 +27,8 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [dashboardsData, setDashboardsData] = useState<DataRoot>(data);
+  const [data, setData] = useState<MenuReadRes>();
+  const [selectedItem, setSelectedItem] = useState<MenuDirectoryTreeRef>();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -32,24 +37,78 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   });
   const { t, i18n } = useTranslation();
 
+  function addChild(parentNode, childNode) {
+    parentNode.children.push(childNode);
+  }
+
+  const fetchMenu = async (path: string) => {
+    try {
+      const res = await readMenu({ path });
+
+      res?.status === 200 && setData(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchMenu = async () => {
-      try {
-        const res = await readMenu();
-
-        // res && setDashboardsData(res.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    // fetchMenu();
+    fetchMenu('/');
   }, []);
+  const [tree, setTree] = useState({
+    name: '/',
+    kind: 'folder',
+    path: '/',
+    children: [],
+  });
+
+  useEffect(() => {
+    console.log({ data });
+  }, [data]);
+
+  useEffect(() => {
+    console.log({ tree });
+  }, [tree]);
 
   const handleLanguageChange = (event) => {
     const selectedLanguage = event.target.value;
     i18n.changeLanguage(selectedLanguage);
   };
+
+  const handleCreate = async (folder: MenuDirectoryTreeRef) => {
+    console.log({
+      folder,
+      createdPath: `${selectedItem?.path}${
+        selectedItem?.path?.endsWith('/') ? '' : '/'
+      }${folder.name}`,
+    });
+    try {
+      const obj = {
+        ...selectedItem,
+        children: [
+          ...(selectedItem?.children || []),
+          {
+            ...folder,
+            path: `${selectedItem?.path}${
+              selectedItem?.path?.endsWith('/') ? '' : '/'
+            }${folder.name}`,
+          },
+        ],
+      };
+
+      const res = await createMenu(obj);
+
+      res &&
+        setData((prevState) =>
+          updateNodeByPath(prevState, folder?.path, res.data),
+        );
+
+      console.log({ res, obj });
+    } catch (error) {}
+  };
+
+  // useEffect(() => {
+  //   console.log({ selectedItem: selectedItem });
+  // }, [selectedItem]);
 
   const onClickNavigate = (endpoint: string) => {
     var width = window.innerWidth;
@@ -99,8 +158,34 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
     console.log(deviceSize);
   }, [deviceSize]);
 
-  const handleSelect = (selection: DataRoot | Child) => {
-    if (!selection?.path || selection.type === 'folder') return;
+  function updateNodeByPath(node, path, newData) {
+    if (node.path === path) {
+      return { ...node, ...newData };
+    }
+
+    return {
+      ...node,
+      children: node.children.map((child) =>
+        updateNodeByPath(child, path, newData),
+      ),
+    };
+  }
+
+  const handleSelect = async (selection: MenuDirectoryTreeRef) => {
+    setSelectedItem(selection);
+    console.log(selection);
+    const res = selection?.path && (await readMenu({ path: selection?.path }));
+
+    res &&
+      setData((prevState) =>
+        updateNodeByPath(prevState, selection?.path, res.data),
+      );
+
+    if (
+      !selection?.path ||
+      selection.kind === MenuDirectoryTreeRef.KindEnum.Folder
+    )
+      return;
     console.log(selection.path.replace(/\//g, '-').slice(1).replace(' ', '-'));
     navigate(
       '/dashboard/' +
@@ -115,11 +200,12 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   return (
     <div className={`${openedSidebar ? 'active' : ''}` + ' sidebar'}>
       <div className="tree-view">
-        {dashboardsData && (
+        {data && (
           <TreeView
-            data={dashboardsData}
-            actionsMode={false}
+            data={data}
+            actionsMode={true}
             onSelect={handleSelect}
+            onCreate={handleCreate}
           />
         )}
       </div>
