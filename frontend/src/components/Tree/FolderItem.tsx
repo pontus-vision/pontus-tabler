@@ -44,7 +44,7 @@ const FolderItem = ({
   const [editedName, setEditedName] = useState(folder.name);
   const [contextMenu, setContextMenu] = useState(null); // Track context menu state
   const [selectedItem, setSelectedItem] = useState();
-  const [currentPath, setCurrentPath] = useState(path + '/' + folder.id);
+  const [currentPath, setCurrentPath] = useState(folder.path);
 
   const toggleFolder = () => {
     setIsOpen(!isOpen);
@@ -52,7 +52,7 @@ const FolderItem = ({
 
   const handleSelect = () => {
     toggleFolder();
-    onSelect && onSelect({ ...folder, path: path || '/' });
+    onSelect && onSelect(folder);
   };
 
   const handleEdit = () => {
@@ -109,9 +109,6 @@ const FolderItem = ({
       window.removeEventListener('click', handleWindowClick);
     };
   }, []);
-  useEffect(() => {
-    console.log(selected === folder.path, { selected, path });
-  }, [selected]);
 
   return (
     <div
