@@ -1,24 +1,15 @@
 import {
   MenuCreateReq,
   MenuDeleteReq,
+  MenuDirectoryTreeRef,
   MenuReadReq,
   MenuUpdateReq,
-  ReadPaginationFilter,
-  TableDeleteReq,
-  TableUpdateReq,
-  TablesReadRes,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import {
-  deleteTable,
-  readTableById,
-  readTables,
-  upsertTable,
-} from '../service/TableService';
 import { Request, Response, NextFunction } from 'express';
 import {
-  deleteDirectory,
-  readDirectoryById,
-  upsertDirectory,
+  deleteMenuItem,
+  readMenuItemByPath,
+  upsertMenuItem,
 } from '../service/MenuService';
 
 export const menuCreatePOST = async (
@@ -31,7 +22,7 @@ export const menuCreatePOST = async (
     if (body === undefined) {
       throw { code: 400, message: 'No properties defined' };
     }
-    const response = await upsertDirectory(body);
+    const response = await upsertMenuItem(body);
     res.json(response);
     res.status(200);
 
@@ -55,7 +46,7 @@ export const menuReadPOST = async (
   body: MenuReadReq,
 ) => {
   try {
-    const response = await readDirectoryById(body.id);
+    const response = await readMenuItemByPath(body.path);
 
     res.status(200);
     res.json(response);
@@ -80,7 +71,7 @@ export const menuDeletePOST = async (
   body: MenuDeleteReq,
 ) => {
   try {
-    const response = await deleteDirectory(body);
+    const response = await deleteMenuItem(body);
 
     res.status(200);
     res.json(response);
@@ -98,7 +89,7 @@ export const menuUpdatePOST = async (
   body: MenuUpdateReq,
 ) => {
   try {
-    const response = await upsertDirectory(body);
+    const response = await upsertMenuItem(body);
 
     res.status(200);
     res.json(response);
