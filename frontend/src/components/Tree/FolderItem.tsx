@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DataRoot, Child } from '../../types';
 import FileItem from './FileItem';
+import { MenuDirectoryTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
 export type Folder = {
   id: string;
@@ -28,6 +29,7 @@ type FolderItemProps = {
   index?: number;
   path?: string;
   actionsMode: boolean;
+  onEditInputChange?: (e: any) => void;
 };
 
 const FolderItem = ({
@@ -38,6 +40,7 @@ const FolderItem = ({
   index,
   path,
   actionsMode,
+  onEditInputChange,
 }: FolderItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -53,15 +56,6 @@ const FolderItem = ({
   const handleSelect = () => {
     toggleFolder();
     onSelect && onSelect(folder);
-  };
-
-  const handleEdit = () => {
-    if (!actionsMode) return;
-    setIsEditing(true);
-  };
-
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditedName(e.target.value);
   };
 
   const handleEditSave = () => {
@@ -104,15 +98,30 @@ const FolderItem = ({
     // Add the event listener when the component mounts
     window.addEventListener('click', handleWindowClick);
 
+    document.addEventListener('click', function (e) {
+      const input = document.querySelector('.folder-item__input-rename');
+      console.log({ input });
+      let inside = e?.target?.closest('.folder-item__input-rename');
+      if (!inside && input) {
+        // setIsEditing(false);
+        // let contextMenu = document.getElementById('contextMenuId');
+        // contextMenu?.setAttribute('style', 'display:none');
+      }
+    });
     // Remove the event listener when the component unmounts
     return () => {
       window.removeEventListener('click', handleWindowClick);
     };
   }, []);
 
+  function changeLastPart(str: string, newPart: string) {
+    var n = str.lastIndexOf('/');
+    var result = str.substring(0, n + 1) + newPart;
+    return result;
+  }
+
   return (
     <div
-      className={'mb-2 '}
       onBlur={() => setContextMenu(null)}
       // actionsMode={actionsMode}
       onContextMenu={handleContextMenu}
@@ -124,19 +133,28 @@ const FolderItem = ({
     >
       {isEditing ? (
         <input
+          className="tree-item__input-rename"
           type="text"
-          value={editedName}
-          onChange={handleEditInputChange}
+          defaultValue={editedName}
+          onChange={(e) => {
+            // setEditedName(e?.target?.value);
+            onEditInputChange &&
+              onEditInputChange({
+                ...folder,
+                name: e?.target?.value,
+                kind: MenuDirectoryTreeRef.KindEnum.Folder,
+                path: `${changeLastPart(folder.path, e?.target?.value)}`,
+              });
+          }}
           onBlur={handleEditSave}
         />
       ) : (
         <span
           className={`cursor-pointer ${
             selected === path ? 'text-blue-500' : ''
-          }`}
+          } ${selected === folder.path ? 'tree-item__highlighted' : ''}`}
           onClick={onSelect ? handleSelect : toggleFolder}
           onDragStart={() => console.log('Dragging')}
-          onDoubleClick={handleEdit}
         >
           {isOpen ? '📂' : '📁'} {folder.name}
         </span>
@@ -168,9 +186,9 @@ const FolderItem = ({
           ))}
         </ul>
       )}
-      {contextMenu && (
+      {contextMenu && selected === folder.path && (
         <div
-          className="fixed bg-white border border-gray-300 shadow-lg p-2"
+          className="menu-right-click"
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
           <div
