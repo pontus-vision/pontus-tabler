@@ -921,8 +921,15 @@ components:
         - $ref: '#/components/schemas/MenuDirectoryTreeRef'
         - $ref: '#/components/schemas/BaseModelRef'
     MenuDeleteReq:
-      allOf:
-        - $ref: '#/components/schemas/BaseModelRef'
+      type: object
+      properties:
+        path:
+          type: string
+        id:
+          type: string
+      required:
+        - path
+        - id
     MenuDirectoryTreeRef:
       type: object
       properties:
