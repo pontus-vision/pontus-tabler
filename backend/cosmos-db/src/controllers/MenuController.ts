@@ -7,9 +7,10 @@ import {
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { Request, Response, NextFunction } from 'express';
 import {
+  createMenuItem,
   deleteMenuItem,
   readMenuItemByPath,
-  upsertMenuItem,
+  updateMenuItem,
 } from '../service/MenuService';
 
 export const menuCreatePOST = async (
@@ -22,7 +23,7 @@ export const menuCreatePOST = async (
     if (body === undefined) {
       throw { code: 400, message: 'No properties defined' };
     }
-    const response = await upsertMenuItem(body);
+    const response = await createMenuItem(body);
     res.json(response);
     res.status(200);
 
@@ -89,7 +90,7 @@ export const menuUpdatePOST = async (
   body: MenuUpdateReq,
 ) => {
   try {
-    const response = await upsertMenuItem(body);
+    const response = await updateMenuItem(body);
 
     res.status(200);
     res.json(response);
