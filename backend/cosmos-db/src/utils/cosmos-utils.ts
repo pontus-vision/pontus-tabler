@@ -3,6 +3,7 @@ import {
   CosmosClient,
   Database,
   DatabaseResponse,
+  PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
@@ -37,16 +38,16 @@ export const fetchDatabase = async (
 
 export const fetchContainer = async (
   containerId: string,
-  partitionKey?: string[],
-  uniqueKeyPolicy?: UniqueKeyPolicy,
+  partitionKey: string | PartitionKeyDefinition = {
+    paths: ['/id'],
+  },
+  uniqueKeyPolicy: UniqueKeyPolicy | undefined = undefined,
 ): Promise<Container | undefined> => {
   const database = await fetchDatabase(cosmosDbName);
 
   const { container } = await database.containers.createIfNotExists({
     id: containerId,
-    partitionKey: {
-      paths: partitionKey || ['/id'],
-    },
+    partitionKey,
     uniqueKeyPolicy,
   });
   return container;
