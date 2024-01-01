@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DataRoot, Child } from '../../types';
 import FileItem from './FileItem';
-import { MenuDirectoryTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
+import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
 export type Folder = {
   id: string;
@@ -100,7 +100,7 @@ const FolderItem = ({
 
     document.addEventListener('click', function (e) {
       const input = document.querySelector('.folder-item__input-rename');
-      console.log({ input });
+
       let inside = e?.target?.closest('.folder-item__input-rename');
       if (!inside && input) {
         // setIsEditing(false);
@@ -142,7 +142,7 @@ const FolderItem = ({
               onEditInputChange({
                 ...folder,
                 name: e?.target?.value,
-                kind: MenuDirectoryTreeRef.KindEnum.Folder,
+                kind: MenuItemTreeRef.KindEnum.Folder,
                 path: `${changeLastPart(folder.path, e?.target?.value)}`,
               });
           }}
