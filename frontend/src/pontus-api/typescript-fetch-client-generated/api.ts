@@ -846,7 +846,7 @@ export interface InlineResponse2002 {
  * @export
  * @interface MenuCreateReq
  */
-export interface MenuCreateReq extends MenuDirectoryTreeRef {}
+export interface MenuCreateReq extends MenuItemTreeRef {}
 
 /**
  * @export
@@ -858,7 +858,7 @@ export namespace MenuCreateReq {}
  * @export
  * @interface MenuCreateRes
  */
-export interface MenuCreateRes extends MenuDirectoryTreeRef {
+export interface MenuCreateRes extends MenuItemTreeRef {
   /**
    * Unique identifier
    * @type {string}
@@ -877,50 +877,63 @@ export namespace MenuCreateRes {}
  * @export
  * @interface MenuDeleteReq
  */
-export interface MenuDeleteReq extends BaseModelRef {}
-/**
- *
- * @export
- * @interface MenuDirectoryTreeRef
- */
-export interface MenuDirectoryTreeRef {
+export interface MenuDeleteReq {
   /**
    *
    * @type {string}
-   * @memberof MenuDirectoryTreeRef
+   * @memberof MenuDeleteReq
+   */
+  path: string;
+  /**
+   *
+   * @type {string}
+   * @memberof MenuDeleteReq
+   */
+  id: string;
+}
+/**
+ *
+ * @export
+ * @interface MenuItemTreeRef
+ */
+export interface MenuItemTreeRef {
+  /**
+   *
+   * @type {string}
+   * @memberof MenuItemTreeRef
    */
   id?: string;
   /**
    *
    * @type {string}
-   * @memberof MenuDirectoryTreeRef
+   * @memberof MenuItemTreeRef
    */
   name?: string;
   /**
    *
    * @type {string}
-   * @memberof MenuDirectoryTreeRef
+   * @memberof MenuItemTreeRef
    */
-  kind?: MenuDirectoryTreeRef.KindEnum;
+  kind?: MenuItemTreeRef.KindEnum;
   /**
    *
    * @type {string}
-   * @memberof MenuDirectoryTreeRef
+   * @memberof MenuItemTreeRef
    */
   path?: string;
   /**
    *
-   * @type {Array<MenuDirectoryTreeRef>}
-   * @memberof MenuDirectoryTreeRef
+   * @type {Array<MenuItemTreeRef>}
+   * @memberof MenuItemTreeRef
    */
-  children?: Array<MenuDirectoryTreeRef>;
+  children?: Array<MenuItemTreeRef>;
 }
 
 /**
  * @export
- * @namespace MenuDirectoryTreeRef
+ * @namespace MenuItemTreeRef
  */
-export namespace MenuDirectoryTreeRef {
+export namespace MenuItemTreeRef {
   /**
    * @export
    * @enum {string}
@@ -948,7 +961,7 @@ export interface MenuReadReq {
  * @export
  * @interface MenuReadRes
  */
-export interface MenuReadRes extends MenuDirectoryTreeRef {
+export interface MenuReadRes extends MenuItemTreeRef {
   /**
    * Unique identifier
    * @type {string}
@@ -967,7 +980,7 @@ export namespace MenuReadRes {}
  * @export
  * @interface MenuUpdateReq
  */
-export interface MenuUpdateReq extends MenuDirectoryTreeRef {
+export interface MenuUpdateReq extends MenuItemTreeRef {
   /**
    * Unique identifier
    * @type {string}
@@ -986,7 +999,7 @@ export namespace MenuUpdateReq {}
  * @export
  * @interface MenuUpdateRes
  */
-export interface MenuUpdateRes extends MenuDirectoryTreeRef {
+export interface MenuUpdateRes extends MenuItemTreeRef {
   /**
    * Unique identifier
    * @type {string}
