@@ -8,7 +8,7 @@ import TreeView from './Tree/TreeView';
 import { IoMdClose } from 'react-icons/io';
 
 const MenuTree = () => {
-  const [data, setData] = useState<MenuReadRes>();
+  const [data, setData] = useState<MenuItemTreeRef>();
   const [selectedItem, setSelectedItem] = useState<MenuItemTreeRef>();
   const [message, setMessage] = useState<string>();
 
@@ -42,7 +42,11 @@ const MenuTree = () => {
     // }, 8000);
   };
 
-  function updateNodeByPath(node, path, newData) {
+  function updateNodeByPath(
+    node: MenuItemTreeRef,
+    path: string,
+    newData: MenuItemTreeRef,
+  ): MenuItemTreeRef {
     if (node.path === path) {
       return { ...node, ...newData };
     }
@@ -77,9 +81,11 @@ const MenuTree = () => {
       const res = await createMenu(obj);
 
       if (res?.status === 200) {
-        setData((prevState) =>
-          updateNodeByPath(prevState, res.data?.path, res.data),
-        );
+        setData((prevState) => {
+          if (prevState && res.data?.path) {
+            return updateNodeByPath(prevState, res.data?.path, res.data);
+          }
+        });
         createMessage(`${folder?.kind} created.`);
       }
       if (res?.status === 409) {
@@ -101,9 +107,11 @@ const MenuTree = () => {
     const res = selection?.path && (await readMenu({ path: selection?.path }));
 
     res &&
-      setData((prevState) =>
-        updateNodeByPath(prevState, selection?.path, res.data),
-      );
+      setData((prevState) => {
+        if (prevState && selection?.path) {
+          return updateNodeByPath(prevState, selection?.path, res.data);
+        }
+      });
   };
 
   return (

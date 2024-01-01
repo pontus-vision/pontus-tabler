@@ -18,18 +18,18 @@ export type File = {
 };
 
 type FolderItemProps = {
-  folder: Child | DataRoot;
-  onSelect?: (folderId: DataRoot | Child) => void;
+  folder: MenuItemTreeRef;
+  onSelect?: (folderId: MenuItemTreeRef) => void;
   selected?: string;
   onDragStart?: (
     event: React.DragEvent<HTMLDivElement>,
     index: number,
-    item: Child | DataRoot,
+    item: MenuItemTreeRef,
   ) => void;
   index?: number;
   path?: string;
   actionsMode: boolean;
-  onEditInputChange?: (e: any) => void;
+  onEditInputChange?: (e: MenuItemTreeRef) => void;
 };
 
 const FolderItem = ({
@@ -45,7 +45,10 @@ const FolderItem = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(folder.name);
-  const [contextMenu, setContextMenu] = useState(null); // Track context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+  } | null>(); // Track context menu state
   const [selectedItem, setSelectedItem] = useState();
   const [currentPath, setCurrentPath] = useState(folder.path);
 
@@ -97,24 +100,11 @@ const FolderItem = ({
 
     // Add the event listener when the component mounts
     window.addEventListener('click', handleWindowClick);
-
-    document.addEventListener('click', function (e) {
-      const input = document.querySelector('.folder-item__input-rename');
-
-      let inside = e?.target?.closest('.folder-item__input-rename');
-      if (!inside && input) {
-        // setIsEditing(false);
-        // let contextMenu = document.getElementById('contextMenuId');
-        // contextMenu?.setAttribute('style', 'display:none');
-      }
-    });
-    // Remove the event listener when the component unmounts
-    return () => {
-      window.removeEventListener('click', handleWindowClick);
-    };
   }, []);
 
-  function changeLastPart(str: string, newPart: string) {
+  function changeLastPart(str?: string, newPart?: string) {
+    if (!str || !newPart) return;
+
     var n = str.lastIndexOf('/');
     var result = str.substring(0, n + 1) + newPart;
     return result;
@@ -163,7 +153,7 @@ const FolderItem = ({
         <ul className="pl-4 ">
           {folder?.children.map((child, index) => (
             <li key={child.id}>
-              {child.kind === 'folder' ? (
+              {child.kind === MenuItemTreeRef.KindEnum.Folder ? (
                 <FolderItem
                   onDragStart={onDragStart}
                   index={index}

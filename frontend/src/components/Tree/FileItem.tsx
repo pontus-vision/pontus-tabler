@@ -1,8 +1,9 @@
 import React from 'react';
 import { DataRoot, Child } from '../../types';
+import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
-  onSelect?: (folderId: DataRoot | Child) => void;
+  onSelect?: (folderId: MenuItemTreeRef) => void;
   selected: string;
   path?: string;
   file: any;

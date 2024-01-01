@@ -1,4 +1,10 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import {
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+  ChangeEvent,
+} from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -52,7 +58,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
     console.log({ tree });
   }, [tree]);
 
-  const handleLanguageChange = (event) => {
+  const handleLanguageChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedLanguage = event.target.value;
     i18n.changeLanguage(selectedLanguage);
   };
