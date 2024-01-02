@@ -8,7 +8,6 @@ import {
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
 import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
-import e = require('express');
 
 const MENU = 'menu';
 
@@ -112,11 +111,11 @@ export const updateMenuItem = async (
     }
   }
 
-  function changeLastPart(str, newPart) {
+  const changeLastPart = (str, newPart) => {
     var n = str.lastIndexOf('/');
     var result = str.substring(0, n + 1) + newPart;
     return result;
-  }
+  };
 
   // patchArr.push({
   //   op: 'replace',
@@ -136,7 +135,7 @@ export const updateMenuItem = async (
 
 export const readMenuItemByPath = async (
   path: string,
-): Promise<MenuReadRes | any> => {
+): Promise<MenuReadRes> => {
   const querySpec = {
     query: 'select * from menu p where p.path=@path',
     parameters: [
