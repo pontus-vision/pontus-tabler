@@ -1,11 +1,5 @@
 import {
-  TablesReadRes,
-  TableRef,
-  TableCreateRes,
-  TableReadRes,
-  TableUpdateReq,
-  TableCreateReq,
-  MenuDirectoryTreeRef,
+  MenuItemTreeRef,
   MenuCreateRes,
   MenuReadRes,
   MenuUpdateReq,
@@ -43,14 +37,14 @@ describe('testing Menu', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
-    const body: MenuDirectoryTreeRef = {
+    const body: MenuItemTreeRef = {
       name: 'string',
-      kind: MenuDirectoryTreeRef.KindEnum.Folder,
+      kind: MenuItemTreeRef.KindEnum.Folder,
       path: 'string',
       children: [
         {
           name: 'string',
-          kind: MenuDirectoryTreeRef.KindEnum.Folder,
+          kind: MenuItemTreeRef.KindEnum.Folder,
           path: 'string',
           children: [],
         },
@@ -76,12 +70,12 @@ describe('testing Menu', () => {
 
     const body2: MenuUpdateReq = {
       name: 'string',
-      kind: MenuDirectoryTreeRef.KindEnum.Folder,
+      kind: MenuItemTreeRef.KindEnum.Folder,
       path: 'string',
       children: [
         {
           name: 'string2',
-          kind: MenuDirectoryTreeRef.KindEnum.Folder,
+          kind: MenuItemTreeRef.KindEnum.Folder,
           path: 'string',
           children: [],
         },
