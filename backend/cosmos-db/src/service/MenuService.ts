@@ -89,6 +89,8 @@ export const updateMenuItem = async (
 
   const patchArr = [];
 
+  // Partial Update Docs https://learn.microsoft.com/en-us/azure/cosmos-db/partial-document-update
+
   for (const prop in data) {
     switch (prop) {
       case 'name':
