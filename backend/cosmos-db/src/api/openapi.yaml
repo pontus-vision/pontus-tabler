@@ -12,7 +12,7 @@ servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/PVPMARTINS_1/PontusBackend2/1.0.0
-  - url: http://localhost:8080/PontusTest/1 .0
+  - url: http://localhost:8080/PontusTest/1.0.0
     description: SwaggerHub API Auto Mocking
   - url: http://localhost:8080/PontusTest/1.0.0
     description: SwaggerHub API Auto Mocking
