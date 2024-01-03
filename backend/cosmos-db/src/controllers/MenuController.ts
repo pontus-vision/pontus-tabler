@@ -1,7 +1,7 @@
 import {
   MenuCreateReq,
   MenuDeleteReq,
-  MenuDirectoryTreeRef,
+  MenuItemTreeRef,
   MenuReadReq,
   MenuUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
