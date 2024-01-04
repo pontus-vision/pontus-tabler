@@ -10,6 +10,8 @@ module.exports = {
   ],
   // testNamePattern: 'testing tables',
   coverage: true,
+  // collectCoverageFrom: ['**/*.{ts}', '!**/node_modules/**', '!**/vendor/**'],
+  coverageProvider: 'v8',
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
   // testMatch: [
   //   '<rootDir>/src/__tests__/**/*.[jt]s?(x)',

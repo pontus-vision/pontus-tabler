@@ -1,19 +1,10 @@
-import {
-  getByText,
-  render,
-  screen,
-  waitFor,
-  cleanup,
-  fireEvent,
-} from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import CreateTableView from '../views/tables/CreateTable';
 import { describe, it, expect, vi } from 'vitest';
 import TableView from '../views/TableView';
 import NewTableCol from '../components/NewTable/Column';
 import { sendHttpRequest } from '../http';
 import {
-  DashboardCreateRes,
-  DashboardsReadRes,
   TableColumnRef,
   TableCreateRes,
   TableReadRes,
@@ -25,7 +16,6 @@ import userEvent from '@testing-library/user-event';
 import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
 import UpdateTableView from '../views/tables/UpdateTable';
 import App from '../App';
-import { updateTable } from '../client';
 
 const mockedUsedNavigate = vi.fn();
 

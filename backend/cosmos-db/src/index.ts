@@ -11,6 +11,7 @@ import * as http from 'http';
 import * as express from 'express';
 import * as cors from 'cors';
 import { SwaggerUiOptions } from './middleware/swagger.ui.options';
+
 const validate = (_request, _scopes, _schema) => {
   // security stuff here
   return true;
@@ -183,3 +184,16 @@ azureApp.http('httpTrigger', {
 });
 
 export default httpTrigger;
+
+// (async () => {
+//   const readRes = await readMenuItemByPath('/');
+
+//   if (!readRes) {
+//     await upsertMenuItem({
+//       name: '/',
+//       path: '/',
+//       children: [],
+//       kind: MenuDirectoryTreeRef.KindEnum.Folder,
+//     });
+//   }
+// })();

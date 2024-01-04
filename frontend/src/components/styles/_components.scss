@@ -176,6 +176,68 @@
   }
 }
 
+.menu-tree {
+  &.opened {
+  }
+  &#messageBox {
+    transition: transform 300ms ease-in-out;
+    transform: translateX(-104%);
+    position: absolute;
+    right: 3%;
+    top: 11%;
+    left: 3%;
+    padding: 10px;
+    background-color: #f9edbec9;
+    border: solid 1px #f0c36d;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 4;
+  }
+}
+
+.tree-view {
+  position: relative;
+  &__create-view {
+    display: flex;
+    justify-content: flex-end;
+  }
+  &__open-box-btn {
+    font-size: 1.875rem; /* 30px */
+    line-height: 2.25rem; /* 36px */
+  }
+  &__create-box {
+    box-shadow: 0px 0px 2px black;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    top: 2rem;
+    padding: 0.5rem;
+    background-color: #ffffffa6;
+    border-width: 1px;
+    border-radius: 0.2rem;
+    width: 100%;
+    &.hidden {
+      display: none;
+    }
+    &__create-box__input {
+      background-color: #3b82f6;
+      color: #ffffff;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      &:hover {
+        background-color: #1e40af;
+      }
+    }
+  }
+
+  .tree-item__highlighted {
+    background-color: #007cff47;
+    padding-inline: 0.2rem;
+  }
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }

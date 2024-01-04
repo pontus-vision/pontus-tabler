@@ -21,42 +21,92 @@ tags:
     description: Secured Admin-only calls
   - name: developers
     description: Operations available to regular developers
-# jsonSchemaDialect: 'https://json-schema.org/draft/2020-12/schema'
 paths:
-  /menu:
+  /menu/create:
     post:
-      operationId: menuPOST
+      operationId: menuCreatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuCreateReq'
       responses:
         '201':
-          description: Table created successfully
+          description: Menu item created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DataRoot'
-              examples:
-                DataRootExample1:
-                  value:
-                    id: root
-                    name: Root
-                    type: folder
-                    path: /
-                    children:
-                      - id: folder1
-                        name: Folder 1
-                        type: folder
-                        path: /folder1
-                        children: []
-                      - id: file1
-                        name: File 1
-                        type: file
-                        path: /file1.txt
+                $ref: '#/components/schemas/MenuCreateRes'
         '400':
           description: Bad request
         '500':
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: MenuController
+  /menu/read:
+    post:
+      operationId: menuReadPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuReadReq'
+      responses:
+        '201':
+          description: Menu item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuReadRes'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: MenuController
+  /menu/update:
+    post:
+      operationId: menuUpdatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuUpdateReq'
+      responses:
+        '201':
+          description: Menu item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuUpdateRes'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: MenuController
+  /menu/delete:
+    post:
+      operationId: menuDeletePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuDeleteReq'
+      responses:
+        '201':
+          description: Menu item deleted successfully
+
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: MenuController
   /table/create:
     post:
       summary: Create a new table
@@ -822,64 +872,87 @@ paths:
       x-swagger-router-controller: Default
 components:
   schemas:
-    DataRoot:
+    MenuCreateReq:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+      # example:
+      #   path: path
+      #   children:
+      #     - path: path
+      #       children:
+      #         - null
+      #         - null
+      #       name: name
+      #       id: id
+      #       type: type
+      #     - path: path
+      #       children:
+      #         - null
+      #         - null
+      #       name: name
+      #       id: id
+      #       type: type
+      #   name: name
+      #   id: id
+      #   type: type
+    MenuCreateRes:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuReadReq:
+      type: object
+      properties:
+        path:
+          type: string
+      required:
+        - path
+      example:
+        path: /folder1/file1
+    MenuReadRes:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuUpdateReq:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuUpdateRes:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuDeleteReq:
+      type: object
+      properties:
+        path:
+          type: string
+        id:
+          type: string
+      required:
+        - path
+        - id
+    MenuItemTreeRef:
       type: object
       properties:
         id:
           type: string
         name:
           type: string
-        type:
+        kind:
           type: string
+          enum: [folder, file]
         path:
           type: string
         children:
           type: array
           items:
-            $ref: '#/components/schemas/Child'
-      example:
-        path: path
-        children:
-          - path: path
-            children:
-              - null
-              - null
-            name: name
-            id: id
-            type: type
-          - path: path
-            children:
-              - null
-              - null
-            name: name
-            id: id
-            type: type
-        name: name
-        id: id
-        type: type
-    Child:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        type:
-          type: string
-        path:
-          type: string
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/Child'
-      example:
-        path: path
-        children:
-          - null
-          - null
-        name: name
-        id: id
-        type: type
+            $ref: '#/components/schemas/MenuItemTreeRef'
+      # example:
+      #   path: path
+      #   children:
+      #     - null
+      #     - null
+      #   name: name
+      #   type: type
     authGroupRef:
       type: object
       properties:
@@ -1032,8 +1105,6 @@ components:
           description: Table columns associated with the table
           items:
             $ref: '#/components/schemas/TableColumnRef'
-      required:
-        - id
       example:
         name: name
         id: id

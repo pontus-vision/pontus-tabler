@@ -1,4 +1,10 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import {
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+  ChangeEvent,
+} from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,9 +16,14 @@ import { Child, Dashboard, DataRoot } from '../types';
 import { setDashboardId } from '../store/sliceDashboards';
 import { useAuth } from '../AuthContext';
 import TreeView from './Tree/TreeView';
-import { readMenu } from '../client';
+import { createMenu, readMenu } from '../client';
 import data from './Tree/data';
 import { File, Folder } from './Tree/FolderItem';
+import {
+  MenuItemTreeRef,
+  MenuReadRes,
+} from '../pontus-api/typescript-fetch-client-generated';
+import MenuTree from './MenuTree';
 
 type Props = {
   openedSidebar: boolean;
@@ -23,7 +34,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [dashboardsData, setDashboardsData] = useState<DataRoot>(data);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -32,24 +43,29 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   });
   const { t, i18n } = useTranslation();
 
+  const [tree, setTree] = useState({
+    name: '/',
+    kind: 'folder',
+    path: '/',
+    children: [],
+  });
+
   useEffect(() => {
-    const fetchMenu = async () => {
-      try {
-        const res = await readMenu();
+    console.log({ data });
+  }, [data]);
 
-        // res && setDashboardsData(res.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  useEffect(() => {
+    console.log({ tree });
+  }, [tree]);
 
-    // fetchMenu();
-  }, []);
-
-  const handleLanguageChange = (event) => {
+  const handleLanguageChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedLanguage = event.target.value;
     i18n.changeLanguage(selectedLanguage);
   };
+
+  // useEffect(() => {
+  //   console.log({ selectedItem: selectedItem });
+  // }, [selectedItem]);
 
   const onClickNavigate = (endpoint: string) => {
     var width = window.innerWidth;
@@ -99,30 +115,9 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
     console.log(deviceSize);
   }, [deviceSize]);
 
-  const handleSelect = (selection: DataRoot | Child) => {
-    if (!selection?.path || selection.type === 'folder') return;
-    console.log(selection.path.replace(/\//g, '-').slice(1).replace(' ', '-'));
-    navigate(
-      '/dashboard/' +
-        selection.path
-          .replace(/\//g, '-')
-          .slice(1)
-          .replace(/\s+/g, '-')
-          .toLocaleLowerCase(),
-    );
-  };
-
   return (
     <div className={`${openedSidebar ? 'active' : ''}` + ' sidebar'}>
-      <div className="tree-view">
-        {dashboardsData && (
-          <TreeView
-            data={dashboardsData}
-            actionsMode={false}
-            onSelect={handleSelect}
-          />
-        )}
-      </div>
+      <MenuTree />
       <ul className="sidebar__items-list">
         {deviceSize === 'sm' && (
           <li>

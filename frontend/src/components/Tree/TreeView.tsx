@@ -2,41 +2,47 @@ import React, { useEffect, useState } from 'react';
 import FolderItem, { Folder } from './FolderItem';
 import defaultData from './data';
 import { AiFillFolderAdd } from 'react-icons/ai';
+import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   data?: any;
+  onCreate: (data: MenuItemTreeRef) => void;
   onSelect?: (data: Folder | File) => void;
   actionsMode?: boolean;
 };
 
-const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
+const TreeView = ({ onCreate, data, onSelect, actionsMode = true }: Props) => {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [expandedFolders, setExpandedFolders] = useState([]);
-  const [newFolder, setNewFolder] = useState<Folder>();
+  const [newFolder, setNewFolder] = useState<MenuItemTreeRef>();
 
   const [createFolder, setCreateFolder] = useState(false);
-  const [jsonData, setJsonData] = useState(data || defaultData);
+  const [jsonData, setJsonData] = useState(data);
 
   const handleFolderSelect = (folder) => {
     setSelectedFolder(folder);
   };
 
-  const addFolder = () => {
-    if (!selectedFolder || !newFolder) return;
+  useEffect(() => {
+    setJsonData(data);
+  }, [data]);
 
-    const folder = findFolderById(jsonData, selectedFolder.id);
-    if (folder) {
-      const updatedFolder = {
-        ...folder,
-        children: folder.children
-          ? [...folder.children, newFolder]
-          : [newFolder],
-      };
+  // const addFolder = () => {
+  //   if (!selectedFolder || !newFolder) return;
 
-      // Update the data with the new folder
-      updateFolder(jsonData, updatedFolder);
-    }
-  };
+  //   const folder = findFolderById(jsonData, selectedFolder.id);
+  //   if (folder) {
+  //     const updatedFolder = {
+  //       ...folder,
+  //       children: folder.children
+  //         ? [...folder.children, newFolder]
+  //         : [newFolder],
+  //     };
+
+  //     // Update the data with the new folder
+  //     updateFolder(jsonData, updatedFolder);
+  //   }
+  // };
 
   const updateFolder = (currentFolder: Folder, updatedFolder: Folder) => {
     if (currentFolder.id === updatedFolder.id) {
@@ -52,7 +58,7 @@ const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
     setJsonData({ ...jsonData }); // Update the state to trigger re-render
   };
 
-  const findFolderById = (folder, targetId) => {
+  const findFolderById = (folder, targetId): any => {
     if (folder.id === targetId) {
       return folder;
     }
@@ -80,37 +86,43 @@ const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
   };
 
   useEffect(() => {
+    console.log({ createFolder });
+  }, [createFolder]);
+  useEffect(() => {
     onSelect && onSelect(selectedFolder);
   }, [selectedFolder]);
 
   return (
-    <div className="relative">
+    <div className="tree-view">
       {actionsMode && (
-        <div className="flex justify-end">
+        <div className="tree-view__create-view">
           <AiFillFolderAdd
             onClick={() => setCreateFolder(!createFolder)}
-            className={'text-3xl h-12 mb-0 cursor-pointer'}
+            className="tree-view__open-box-btn"
           ></AiFillFolderAdd>
           <div
-            className={`flex flex-col gap-3 z-1 absolute top-8 p-2 ${
-              createFolder ? '' : 'hidden'
-            } bg-white border rounded-md `}
+            className={`tree-view__create-box ${createFolder ? '' : 'hidden'}`}
           >
             <input
-              className={
-                'mt-1 p-2 w-full border rounded-md focus:ring focus:ring-opacity-50 focus:border-indigo-500'
-              }
+              className="tree-view__create-box__input"
               type="text"
               onChange={(e) =>
                 setNewFolder({
                   name: e.target.value,
-                  type: 'folder',
-                  id: e.target.value.toLocaleLowerCase(),
+                  kind: MenuItemTreeRef.KindEnum.Folder,
+                  // id: e.target.value.toLocaleLowerCase(),
                   children: [],
                 })
               }
             />
-            <button onClick={addFolder}>Create</button>
+            <button
+              onClick={() => {
+                setCreateFolder(false);
+                newFolder && onCreate(newFolder);
+              }}
+            >
+              Create
+            </button>
           </div>
         </div>
       )}
@@ -119,6 +131,8 @@ const TreeView = ({ data, onSelect, actionsMode = true }: Props) => {
         onSelect={handleFolderSelect}
         onToggle={handleFolderToggle}
         selected={selectedFolder?.path}
+        onEditInputChange={(e) => console.log(e)}
+        actionsMode={true}
       />
     </div>
   );
