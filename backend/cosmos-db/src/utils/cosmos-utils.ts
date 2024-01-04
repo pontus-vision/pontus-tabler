@@ -42,14 +42,23 @@ export const fetchContainer = async (
     paths: ['/id'],
   },
   uniqueKeyPolicy: UniqueKeyPolicy | undefined = undefined,
+  initialDoc?: Record<any, any>,
 ): Promise<Container | undefined> => {
   const database = await fetchDatabase(cosmosDbName);
 
-  const { container } = await database.containers.createIfNotExists({
-    id: containerId,
-    partitionKey,
-    uniqueKeyPolicy,
-  });
+  const { container, statusCode } = await database.containers.createIfNotExists(
+    {
+      id: containerId,
+      partitionKey,
+      uniqueKeyPolicy,
+    },
+  );
+
+  // Creating initial document when container is created
+  if (statusCode === 201 && initialDoc) {
+    const res = await container.items.create(initialDoc);
+  }
+
   return container;
 };
 export const deleteDatabase = async (
