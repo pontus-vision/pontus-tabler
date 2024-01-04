@@ -3,7 +3,7 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: [
     '.*.js',
-    '.*d.ts',
+    '.*.d.ts',
     '.*http.ts',
     '.*pv-response.ts',
     '.*test-utils.ts',
