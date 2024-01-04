@@ -1,6 +1,6 @@
 import {
-  MenuCreateRes,
   MenuItemTreeRef,
+  MenuCreateRes,
   MenuReadRes,
   MenuUpdateReq,
   MenuUpdateRes,
@@ -38,12 +38,12 @@ describe('testing Menu', () => {
   it('should do the CRUD "happy path"', async () => {
     const body: MenuItemTreeRef = {
       name: 'string',
-      kind: MenuItemTreeRef.KindEnum.Folder,
+      kind: 'folder',
       path: 'string',
       children: [
         {
           name: 'string',
-          kind: MenuItemTreeRef.KindEnum.Folder,
+          kind: 'folder',
           path: 'string',
           children: [],
         },
@@ -69,12 +69,12 @@ describe('testing Menu', () => {
 
     const body2: MenuUpdateReq = {
       name: 'string',
-      kind: MenuItemTreeRef.KindEnum.Folder,
+      kind: 'folder',
       path: 'string',
       children: [
         {
           name: 'string2',
-          kind: MenuItemTreeRef.KindEnum.Folder,
+          kind: 'folder',
           path: 'string',
           children: [],
         },
