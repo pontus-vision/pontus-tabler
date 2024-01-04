@@ -1,14 +1,13 @@
 import {
-  MenuItemTreeRef,
   MenuCreateRes,
+  MenuItemTreeRef,
   MenuReadRes,
   MenuUpdateReq,
   MenuUpdateRes,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-
 import { post } from './test-utils';
 import { deleteDatabase } from '../utils/cosmos-utils';
-import { srv } from '..';
+import { srv } from '../index';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({

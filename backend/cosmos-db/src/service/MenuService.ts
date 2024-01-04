@@ -41,28 +41,6 @@ export const upsertMenuItem = async (
   return rest;
 };
 
-// export const createMenuItem = async (
-//   data: MenuCreateReq,
-// ): Promise<MenuCreateRes | any> => {
-//   const menuContainer = await fetchContainer(
-//     MENU,
-//     partitionKey,
-//     uniqueKeyPolicy,
-//   );
-
-//   for (const childIdx in data?.children) {
-//     const childRes = await createMenuItem(data?.children[childIdx]);
-//     data.children[childIdx].id = childRes.id;
-//   }
-//   const res = await menuContainer.items.upsert(data);
-//   console.log({ res });
-
-//   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-//     res.resource as any;
-
-//   return rest;
-// };
-
 export const createMenuItem = async (
   data: MenuCreateReq,
 ): Promise<MenuCreateRes | any> => {
@@ -112,20 +90,6 @@ export const updateMenuItem = async (
         break;
     }
   }
-
-  const changeLastPart = (str, newPart) => {
-    var n = str.lastIndexOf('/');
-    var result = str.substring(0, n + 1) + newPart;
-    return result;
-  };
-
-  // patchArr.push({
-  //   op: 'replace',
-  //   path: '/path',
-  //   value: changeLastPart(data.path, data.name),
-  // });
-
-  console.log({ id: data.id, path: data.path, patchArr });
 
   const res = await menuContainer.item(data.id, data.path).patch(patchArr);
 
