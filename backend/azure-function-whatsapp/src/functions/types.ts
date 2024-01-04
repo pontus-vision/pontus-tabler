@@ -14,29 +14,28 @@ export interface Change {
 }
 
 export interface Conversation {
-  id: string
-  expiration_timestamp?: string
-  origin: Origin
+  id: string;
+  expiration_timestamp?: string;
+  origin: Origin;
 }
 
 export interface Origin {
-  type: string
+  type: string;
 }
 
 export interface Pricing {
-  billable: boolean
-  pricing_model: string
-  category: string
+  billable: boolean;
+  pricing_model: string;
+  category: string;
 }
 
-
 export interface Status {
-  id: string
-  status: string
-  timestamp: string
-  recipient_id: string
-  conversation?: Conversation
-  pricing?: Pricing
+  id: string;
+  status: string;
+  timestamp: string;
+  recipient_id: string;
+  conversation?: Conversation;
+  pricing?: Pricing;
 }
 
 export interface Value {
@@ -44,8 +43,7 @@ export interface Value {
   metadata: Metadata;
   contacts?: Contact[];
   messages?: Message[];
-  statuses?: Status[]
-
+  statuses?: Status[];
 }
 
 export interface Metadata {
@@ -78,26 +76,98 @@ export interface Text {
   body: string;
 }
 export interface Reaction {
-  message_id: string
-  emoji: string
+  message_id: string;
+  emoji: string;
 }
 export interface Image {
-  caption: string
-  mime_type: string
-  sha256: string
-  id: string
+  caption: string;
+  mime_type: string;
+  sha256: string;
+  id: string;
 }
-
 
 export interface Audio {
-  mime_type: string
-  sha256: string
-  id: string
-  voice: boolean
+  mime_type: string;
+  sha256: string;
+  id: string;
+  voice: boolean;
 }
 
+export type RoleType = 'user' | 'assistant' | 'system' | 'function';
+
 export interface OpenAIMessage {
-  
-    role: "user"|"assistant"|"system",
-    content: string
+  role: RoleType;
+  content: string;
+}
+
+export type Features =
+  | '24-hour porter'
+  | '24-hour concierge'
+  | 'convenience store'
+  | 'fast internet'
+  | 'air conditioner'
+  | 'heated floor'
+  | 'solar panels'
+  | 'ground pump'
+  | 'modern'
+  | 'ensuite'
+  | 'luxurious';
+
+export type RoomTypes =
+  | 'bedroom'
+  | 'bathroom'
+  | 'outside kitchen'
+  | 'kitchen'
+  | 'utility'
+  | 'patio'
+  | 'garden'
+  | 'diningroom'
+  | 'balcony'
+  | 'livingroom'
+  | 'library'
+  | 'gym'
+  | 'office'
+  | 'toilet'
+  | 'walk-in closet'
+  | 'garage'
+  | 'playground'
+  | 'other'
+  | 'swimming pool'
+  | 'sauna';
+
+export type PropertyTypes =
+  | 'building'
+  | 'house'
+  | 'flat'
+  | 'penthouse'
+  | 'whole-floor apartment'
+  | 'castle'
+  | 'maizonette'
+  | 'studio'
+  | 'barn conversion'
+  | 'garage'
+  | 'commercial';
+export interface CommonData {
+  areaSqMeter?: number;
+  areaSqFeet?: number;
+  descripton?: string;
+  features?: Features[];
+  url?: string;
+}
+
+export interface Room extends CommonData {
+  kind: RoomTypes;
+}
+export interface Property extends CommonData {
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
+  name?: string;
+  address?: string;
+  kind: PropertyTypes[];
+  rooms?: Room[];
+  flats?: Property[];
+  communalAreas?: Room[];
+  floors?: number;
+  floorNumber?: number;
 }

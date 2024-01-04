@@ -6,19 +6,33 @@ import {
 } from '@azure/functions';
 // import { crypto } from 'crypto';
 import * as crypto from 'crypto';
-import { OpenAIMessage, WhatsappWebHook } from './types';
+import { OpenAIMessage, Property, RoleType, WhatsappWebHook } from './types';
 import {
   OpenAIClient,
   AzureKeyCredential,
   ChatCompletions,
+  ChatRequestMessage,
+  GetChatCompletionsOptions,
+  ChatCompletionsFunctionToolDefinition,
+  FunctionCall,
+  ChatCompletionsFunctionToolCall,
+  ChatRequestToolMessage,
+  ChatResponseMessage,
+  ChatRole,
+  ChatRequestAssistantMessage,
 } from '@azure/openai';
+import { DefaultAzureCredential } from '@azure/identity';
+
 import { BlobServiceClient } from '@azure/storage-blob';
+import { getDistance } from './geolocation';
+import { features } from 'process';
 
 const hubVerifyToken = process.env.HUB_VERIFY_TOKEN || 'test';
 const hubVerifySha = process.env.HUB_VERIFY_SHA || 'sha256';
 const whatsappToken = process.env.WHATSAPP_TOKEN;
 
-const azureEndpoint = process.env['ENDPOINT'] || '<endpoint>';
+const azureEndpoint =
+  process.env['ENDPOINT'] || 'https://whatsapp-chat.openai.azure.com/';
 // Your Azure OpenAI API key
 const azureApiKey = process.env['AZURE_API_KEY'];
 // Your Azure Cognitive Search endpoint, admin key, and index name
@@ -29,22 +43,391 @@ const azureSearchKey = process.env['AZURE_SEARCH_KEY'] || '<search key>';
 const azureSearchIndexName =
   process.env['AZURE_SEARCH_INDEX'] || "'whatsapp-chat-idx-index'";
 const azureSearchDeploymentId =
-  process.env['AZURE_SEARCH_DEPLOYMENT_ID'] || 'gpt-35-turbo';
+  process.env['AZURE_SEARCH_DEPLOYMENT_ID'] || 'whatsapp-chat';
 const azureOpenAISystemRole =
   process.env['AZURE_OPENAI_SYSTEM_ROLE'] ||
-  'You are an AI estate agent that helps people find information about new property builds (primary market) in Brazil.';
+  `You are an AI estate agent that helps people find information about new property builds (primary market) in Brazil. 
+You must only provide information about properties built by Exto Incorporação e Construção. `;
 
-const azureBlobConnectionString = process.env['AZURE_BLOB_CONNECTION_STRING'];
-const azureBlobContainerName = process.env['AZURE_BLOB_CONTAINER_NAME'];
+// You must only use content from the following sites:
+// GERAL
+// https://linktr.ee/exto_incorporadora
+// EXCELLENCE PERDIZES
+// https://linktr.ee/excellenceperdizes
+// LEDGE BROOKLIN
+// https://linktr.ee/Ledge_Brooklin
+// TERRARO VILA ROMANA
+// https://linktr.ee/Terraro_Vila_Romana
+// BLUE HOME RESORT
+// https://linktr.ee/Blue_Home_Resort_Jockey
+// LAMP PERDIZES
+// https://linktr.ee/LAMP_Perdizes
+// ONLY CIDADE JARDIM
+// https://linktr.ee/Only_Cidade_Jardim
+// UPPER EAST PERDIZES
+// https://linktr.ee/Upper_East_Perdizes
+// UPPER WEST PERDIZES
+// https://linktr.ee/Upper_West_Perdizes
+// MONDO MORUMBI
+// https://linktr.ee/Mondo_Morumbi
+// PROVENANCE MORUMBI
+// https://linktr.ee/Provenance_Morumbi
+// SINTONIA PERDIZES
+// https://linktr.ee/Sintonia_Perdizes
+// ESSÊNCIA DA VILA
+// https://linktr.ee/Essencia_da_Vila
+// INSPIRE IBIRAPUERA
+// https://linktr.ee/Inspire_Ibirapuera
+// PARC DEVANT PERDIZES
+// https://linktr.ee/Parc_Devant_Perdizes
+// CONVERGE
+// https://linktr.ee/Converge_Vila_Romana
+// `;
+
+const azureBlobConnectionString =
+  process.env['AZURE_BLOB_CONNECTION_STRING'] ||
+  'https://pvhomewhatsapp.blob.core.windows.net';
+const azureBlobContainerName =
+  process.env['AZURE_BLOB_CONTAINER_NAME'] || 'whatsapp-chat';
+
+const openAISettings: GetChatCompletionsOptions = {
+  maxTokens: 800,
+  temperature: 0.7,
+  topP: 0.95,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+  stop: null,
+
+  /**
+   * The `azureExtensionOptions` property is used to configure the
+   * Azure-specific extensions. In this case, we are using the
+   * Azure Cognitive Search extension with a vector index to provide
+   * the model with additional context.
+   */
+  // azureExtensionOptions: {
+
+  //   extensions: [
+  //     {
+  //       type: 'AzureCognitiveSearch',
+  //       endpoint: azureSearchEndpoint,
+  //       key: azureSearchKey,
+  //       indexName: azureSearchIndexName,
+  //     },
+  //   ],
+  // },
+};
+export interface Location {
+  latitude: number;
+  longitude: number;
+  radiusInMeters?: number;
+}
+
+const getBuildingCompaniesInLocation = async (
+  location: Location,
+  context: InvocationContext,
+): Promise<string> => {
+  context.log(
+    `in getBuildingCompaniesInLocation() => location = ${JSON.stringify(
+      location,
+    )}`,
+  );
+  return location.latitude < 0 && location.longitude < 0
+    ? 'Exto Incorporação e Construção'
+    : 'not available';
+};
+
+const squareFeetPerSquareMeter = 10.7639;
+
+const sampleProperties: Property[] = [
+  {
+    kind: ['house'],
+    floors: 3,
+    latitude: -23.560876,
+    longitude: -46.6937311,
+    descripton: 'Large House With garden',
+    address: 'Rua Morás, 53 - Pinheiros, São Paulo - SP, 05419-001, Brazil',
+    areaSqMeter: 3300 / squareFeetPerSquareMeter,
+    rooms: [
+      {
+        kind: 'bedroom',
+        areaSqMeter: 300 / squareFeetPerSquareMeter,
+      },
+      {
+        kind: 'bedroom',
+        areaSqMeter: 300 / squareFeetPerSquareMeter,
+      },
+      {
+        kind: 'bedroom',
+        areaSqMeter: 300 / squareFeetPerSquareMeter,
+        features: ['air conditioner', 'luxurious', 'modern'],
+      },
+      { kind: 'bathroom' },
+      { kind: 'diningroom' },
+      { kind: 'kitchen' },
+      { kind: 'swimming pool' },
+      { kind: 'garden' },
+    ],
+    features: ['ground pump', 'solar panels', 'fast internet'],
+  },
+  {
+    kind: ['building'],
+    floors: 30,
+    name: 'Excellence Perdizes',
+    latitude: -23.5636879,
+    longitude: -46.6916552,
+    descripton: 'Large House With garden',
+    address:
+      'Av. Pedroso de Morais, 600 - Pinheiros, São Paulo - SP, 05420-001, Brazil',
+    url: 'https://linktr.ee/excellenceperdizes',
+    areaSqMeter: 3300 / squareFeetPerSquareMeter,
+    communalAreas: [
+      {
+        kind: 'sauna',
+        areaSqMeter: 300 / squareFeetPerSquareMeter,
+        features: ['modern']
+
+      },
+      {
+        kind: 'gym',
+        areaSqMeter: 300 / squareFeetPerSquareMeter,
+      },
+      { kind: 'swimming pool' },
+      { kind: 'garden' },
+      { kind: 'playground' },
+    ],
+    features: [
+      'solar panels',
+      'fast internet',
+      '24-hour concierge',
+      '24-hour porter',
+      'convenience store',
+    ],
+    flats: [
+      {
+        floorNumber: 1,
+        kind: ['flat'],
+        areaSqMeter: 300,
+        rooms: [
+          {
+            kind: 'bedroom',
+            areaSqMeter: 300 / squareFeetPerSquareMeter,
+            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+          },
+          {
+            kind: 'bedroom',
+            areaSqMeter: 300 / squareFeetPerSquareMeter,
+            features: ['air conditioner', 'luxurious', 'modern'],
+          },
+          {
+            kind: 'bedroom',
+            areaSqMeter: 300 / squareFeetPerSquareMeter,
+            features: ['air conditioner', 'luxurious', 'modern'],
+          },
+          { kind: 'bathroom' },
+          { kind: 'diningroom' },
+          { kind: 'kitchen', features: ['modern'] },
+        ],
+      },
+      {
+        floorNumber: 21,
+        kind: ['flat'],
+        areaSqMeter: 300,
+        rooms: [
+          {
+            kind: 'bedroom',
+            areaSqMeter: 20,
+            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+          },
+          {
+            kind: 'bedroom',
+            areaSqMeter: 21,
+            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+          },
+          {
+            kind: 'bedroom',
+            areaSqMeter: 30,
+            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+          },
+          {
+            kind: 'bedroom',
+            areaSqMeter: 15,
+            features: ['air conditioner', 'luxurious', 'modern'],
+          },
+          {
+            kind: 'bedroom',
+            areaSqMeter: 17,
+            features: ['air conditioner', 'luxurious', 'modern'],
+          },
+          { kind: 'bathroom' },
+          { kind: 'bathroom' },
+          { kind: 'diningroom' },
+          { kind: 'livingroom' },
+          { kind: 'kitchen', features: ['modern'] },
+          { kind: 'outside kitchen', features: ['modern'] },
+        ],
+      },
+    ],
+  },
+];
+
+const resetHistory = async (
+  to: string,
+  messages: ChatRequestMessage[],
+  context: InvocationContext,
+): Promise<string> => {
+  messages.length = 0;
+  context.log(`resetting chat history`);
+  putOpenAIMessageHistory(to, []);
+  return '';
+};
+const getPropertiesNearLocation = async (
+  location: Location,
+  context: InvocationContext,
+): Promise<string> => {
+  context.log(
+    `in getPropertiesNearLocation() => location = ${JSON.stringify(location)}`,
+  );
+  const propertiesByDistance = sampleProperties.sort((a, b) => {
+    a.distance = getDistance(
+      location.latitude,
+      location.longitude,
+      a.latitude,
+      a.longitude,
+    );
+
+    b.distance = getDistance(
+      location.latitude,
+      location.longitude,
+      b.latitude,
+      b.longitude,
+    );
+    return a.distance - b.distance;
+  });
+
+  const properties10K = propertiesByDistance.filter((val) =>
+    val.distance
+      ? val.distance < (location.radiusInMeters || 10000)
+      : getDistance(
+          location.latitude,
+          location.longitude,
+          val.latitude,
+          val.longitude,
+        ) < (location.radiusInMeters || 10000),
+  );
+
+  context.log(`properties within 10K: ${JSON.stringify(properties10K)}`);
+
+  return JSON.stringify(properties10K);
+};
+
+type FunctionTypes =
+  | typeof getBuildingCompaniesInLocation
+  | typeof getPropertiesNearLocation;
+
+type FuncResetHistoryType = typeof resetHistory;
+
+type ToolType = {
+  metadata: ChatCompletionsFunctionToolDefinition;
+  func: FunctionTypes | FuncResetHistoryType;
+};
+
+const toolsMap: Record<string, ToolType> = {
+  getPropertiesNearLocation: {
+    func: getPropertiesNearLocation,
+    metadata: {
+      type: 'function',
+      function: {
+        name: 'getPropertiesNearLocation',
+        description: 'Lists properties in an area',
+        parameters: {
+          type: 'object',
+          descrition:
+            'The area as latitude, logitude, and radius in meters e.g. { "latitude": -23.6110,  "longitude": -46.6934, "radiusInMeters": 10000}',
+          properties: {
+            latitude: {
+              type: 'number',
+              minimum: -90,
+              maximum: 90,
+            },
+            longitude: {
+              type: 'number',
+              minimum: -180,
+              maximum: 180,
+            },
+            radiusInMeters: {
+              type: 'integer',
+              minimum: 1000,
+              maximum: 100000,
+              multipleOf: 1000,
+            },
+          },
+          required: ['latitude', 'longitude', 'radiusInMeters'],
+        },
+      },
+    },
+  },
+
+  getBuildingCompaniesInLocation: {
+    func: getBuildingCompaniesInLocation,
+    metadata: {
+      type: 'function',
+      function: {
+        name: 'getBuildingCompaniesInLocation',
+        description: 'Lists property development companies in a given location',
+        parameters: {
+          type: 'object',
+          descrition:
+            'The location as latitude and logitude, e.g. { "latitude": -23.6110,  "longitude": -46.6934}',
+          properties: {
+            latitude: {
+              type: 'number',
+              minimum: -90,
+              maximum: 90,
+            },
+            longitude: {
+              type: 'number',
+              minimum: -180,
+              maximum: 180,
+            },
+          },
+          required: ['latitude', 'longitude'],
+        },
+      },
+    },
+  },
+  resetHistory: {
+    func: resetHistory,
+    metadata: {
+      type: 'function',
+      function: {
+        name: 'resetHistory',
+        description: 'resets the chat history, restarts the chat',
+        parameters: {
+          type: 'object',
+          description: 'No parameters',
+          properties: {},
+        },
+      },
+    },
+  },
+};
+
+const tools: ChatCompletionsFunctionToolDefinition[] = Object.entries(
+  toolsMap,
+).map(([key, value]) => value.metadata);
+const blobServiceClient = new BlobServiceClient(
+  azureBlobConnectionString,
+  new DefaultAzureCredential(),
+);
 
 const openAIclient = new OpenAIClient(
   azureEndpoint,
-  new AzureKeyCredential(azureApiKey),
+  new DefaultAzureCredential(),
 );
 
-const blobServiceClient = BlobServiceClient.fromConnectionString(
-  azureBlobConnectionString,
-);
+// const blobServiceClient = BlobServiceClient.fromConnectionString(
+//   azureBlobConnectionString,
+// );
 const containerClient = blobServiceClient.getContainerClient(
   azureBlobContainerName,
 );
@@ -90,47 +473,158 @@ export const verifySig = async (
   return { valid: generatedSignature === signature, body };
 };
 
+export const getBlobNameFromConversationId = (
+  conversationId: string,
+): string => {
+  return `${conversationId}.json`;
+};
+
 export const getOpenAIMessageHistory = async (
   conversationId: string,
-): Promise<OpenAIMessage[]> => {
+): Promise<ChatRequestMessage[]> => {
   // const jsonString = JSON.stringify(jsonData);
   // To check container is exist or not. If not exist then create it.
+
   await containerClient.createIfNotExists();
 
   // Get a block blob client pointing to the blob
-  const blockBlobClient = containerClient.getBlockBlobClient(conversationId);
-  let retVal: OpenAIMessage[] = [];
+  const blockBlobClient = containerClient.getBlockBlobClient(
+    getBlobNameFromConversationId(conversationId),
+  );
+  let retVal: ChatRequestMessage[] = [];
 
-  if (blockBlobClient.exists()) {
-    const download:string|Buffer = await (await blockBlobClient.download()).readableStreamBody.read()
-    retVal = JSON.parse(download as string) 
-    return retVal;
+  try {
+    if (blockBlobClient.exists()) {
+      const download = await blockBlobClient.downloadToBuffer();
+      retVal = JSON.parse(download.toString());
+
+      return retVal.filter((obj) => Object.keys(obj).length > 0);
+    }
+  } catch (error) {
+    const uploadPayload = JSON.stringify(retVal);
+    await blockBlobClient.upload(
+      uploadPayload,
+      Buffer.byteLength(uploadPayload),
+    );
   }
-  
-  const uploadPayload = JSON.stringify(retVal);
-  await blockBlobClient.upload(uploadPayload, Buffer.byteLength(uploadPayload));
-  return retVal;
+  return retVal.filter((obj) => Object.keys(obj).length > 0);
 };
 
 export const putOpenAIMessageHistory = async (
-  conversationId: string,messageHistory:OpenAIMessage[]
-): Promise<OpenAIMessage[]> => {
+  conversationId: string,
+  messageHistory: ChatRequestMessage[],
+): Promise<ChatRequestMessage[]> => {
   // const jsonString = JSON.stringify(jsonData);
   // To check container is exist or not. If not exist then create it.
   await containerClient.createIfNotExists();
 
   // Get a block blob client pointing to the blob
-  const blockBlobClient = containerClient.getBlockBlobClient(conversationId);
+  const blockBlobClient = containerClient.getBlockBlobClient(
+    getBlobNameFromConversationId(conversationId),
+  );
 
   const uploadPayload = JSON.stringify(messageHistory);
   await blockBlobClient.upload(uploadPayload, Buffer.byteLength(uploadPayload));
   return messageHistory;
 };
 
+export const processOpenAIToolCalls = async (
+  to: string,
+  toolCalls: ChatCompletionsFunctionToolCall[],
+  reqMessage: ChatResponseMessage,
+  messagesHistory: ChatRequestMessage[],
+  context: InvocationContext,
+): Promise<void> => {
+  // context.log(`function call = ${JSON.stringify(toolCalls)}`);
+  let messages: ChatRequestMessage[] = [
+    {
+      role: 'system',
+      content: azureOpenAISystemRole,
+    },
+    ...messagesHistory.slice(-10),
+    {
+      // toolCallId: toolCall.id,
+      // name: toolCall.function.name,
+      role: 'assistant',
+      content: reqMessage?.content,
+      toolCalls: toolCalls,
+    } as ChatRequestAssistantMessage,
+  ];
+  for (const toolCall of toolCalls) {
+    context.log(
+      `in processOpenAIToolCalls() - Processing ${JSON.stringify(toolCall)} `,
+    );
+    const funcName = toolCall?.function?.name;
+    const func = toolsMap[funcName]?.func;
+    if (func) {
+      let retVal = '';
+      if (funcName === 'resetHistory') {
+        resetHistory(to, messages, context);
+        messages.push(
+          {
+            role: 'system',
+            content: azureOpenAISystemRole,
+          },
+          {
+            // toolCallId: toolCall.id,
+            // name: toolCall.function.name,
+            role: 'assistant',
+            content: reqMessage?.content,
+            toolCalls: toolCalls,
+          } as ChatRequestAssistantMessage,
+        );
+      } else {
+        retVal = await (func as FunctionTypes)(
+          JSON.parse(toolCall.function.arguments),
+          context,
+        );
+      }
+      messages.push({
+        content: retVal,
+        role: 'tool',
+        toolCallId: toolCall.id,
+      });
+    }
+  }
+  context.log(
+    `in processOpenAIToolCalls() - before calling getChatCompletions() `,
+  );
+
+  try {
+    const events = await openAIclient.getChatCompletions(
+      azureSearchDeploymentId,
+      messages,
+      openAISettings,
+    );
+
+    context.log(
+      `in processOpenAIToolCalls() - got event ${JSON.stringify(events)}`,
+    );
+    for (const choice of events.choices) {
+      context.log(
+        `in processOpenAIToolCalls() - delta content = ${choice?.delta?.content}`,
+      );
+      context.log(
+        `in processOpenAIToolCalls() - message content = ${choice?.message?.content}`,
+      );
+      messagesHistory.push({
+        name: undefined,
+        content: choice?.message?.content,
+        role: choice?.message?.role as RoleType,
+      });
+    }
+  } catch (e) {
+    context.error(e);
+    throw e;
+  }
+};
+
 export const getOpenAIReply = async (
+  to: string,
   text: string,
-  messagesHistory: OpenAIMessage[],
-): Promise<string> => {
+  messagesHistory: ChatRequestMessage[],
+  context: InvocationContext,
+): Promise<ChatRequestMessage[]> => {
   // let openAiJson = {
   //   messages: [
 
@@ -145,44 +639,52 @@ export const getOpenAIReply = async (
   //   azureSearchKey: azureSearchKey,
   //   azureSearchIndexName: azureSearchIndexName,
   // };
-  const messages: OpenAIMessage[] = [
+  messagesHistory.push({
+    name: to,
+    content: text,
+    role: 'user',
+  });
+
+  const messages: ChatRequestMessage[] = [
     {
       role: 'system',
       content: azureOpenAISystemRole,
     },
-    ...messagesHistory,
+    ...messagesHistory.slice(-10),
   ];
 
-  const events = openAIclient.listChatCompletions(
+  const events = await openAIclient.getChatCompletions(
     azureSearchDeploymentId,
     messages,
+
     {
-      maxTokens: 800,
-      /**
-       * The `azureExtensionOptions` property is used to configure the
-       * Azure-specific extensions. In this case, we are using the
-       * Azure Cognitive Search extension with a vector index to provide
-       * the model with additional context.
-       */
-      azureExtensionOptions: {
-        extensions: [
-          {
-            type: 'AzureCognitiveSearch',
-            endpoint: azureSearchEndpoint,
-            key: azureSearchKey,
-            indexName: azureSearchIndexName,
-          },
-        ],
-      },
+      ...openAISettings,
+      tools,
     },
   );
 
-  for await (const event of events) {
-    for (const choice of event.choices) {
-      console.log(choice.delta?.content);
-      return choice.message.content;
+  for (const choice of events.choices) {
+    context.log(`delta content = ${choice?.delta?.content}`);
+    context.log(`message content = ${choice?.message?.content}`);
+    const toolCalls = choice?.message?.toolCalls;
+    if (toolCalls && toolCalls.length > 0) {
+      await processOpenAIToolCalls(
+        to,
+        toolCalls,
+        choice?.message,
+        messagesHistory,
+        context,
+      );
+    } else {
+      messagesHistory.push({
+        name: undefined,
+        content: choice?.message?.content,
+        role: choice?.message?.role as RoleType,
+      });
     }
   }
+
+  return messagesHistory;
 
   // const retOpenAI = fetch(
   //   `https://whatsapp-chat.openai.azure.com/openai/deployments/whatsapp-chat/extensions/chat/completions?api-version=2023-07-01-preview`,
@@ -197,51 +699,78 @@ export const getOpenAIReply = async (
   //   },
   // );
 
-  return '';
+  // return '';
 };
 
 export const sendReply = async (
   phone_number_id: string,
   whatsapp_token: string,
   to: string,
-  reply_message: string,
+  customerMessage: string,
+  context: InvocationContext,
 ): Promise<Response> => {
-  let json = {
-    messaging_product: 'whatsapp',
-    type: 'text',
-    to: to,
-    text: { body: `hello, ${reply_message}` },
-  };
-  // let data = JSON.stringify(json);
-  // let path = '/v17.0/' + phone_number_id + '/messages';
-  // let options = {
-  //   host: 'graph.facebook.com',
-  //   path: path,
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${whatsapp_token}`,
-  //   },
-  // };
+  try {
+    context.log(`in SendReply() attempting to get the message history`);
+    const messageHistory = await getOpenAIMessageHistory(to);
+    context.log(
+      `in SendReply() message history is ${JSON.stringify(messageHistory)}`,
+    );
 
-  // const headers = new Headers();
-  // headers.append('Content-Type', 'application/json');
-  // headers.append('Authorization', `Bearer ${whatsapp_token}`);
+    const replyMessage = await getOpenAIReply(
+      to,
+      customerMessage,
+      messageHistory,
+      context,
+    );
+    context.log(
+      `in SendReply() reply Message is  ${JSON.stringify(replyMessage)}`,
+    );
 
-  const ret = fetch(
-    `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
+    await putOpenAIMessageHistory(to, messageHistory);
+    // let data = JSON.stringify(json);
+    // let path = '/v17.0/' + phone_number_id + '/messages';
+    // let options = {
+    //   host: 'graph.facebook.com',
+    //   path: path,
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: `Bearer ${whatsapp_token}`,
+    //   },
+    // };
 
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${whatsapp_token}`,
+    // const headers = new Headers();
+    // headers.append('Content-Type', 'application/json');
+    // headers.append('Authorization', `Bearer ${whatsapp_token}`);
+    let json = {
+      messaging_product: 'whatsapp',
+      type: 'text',
+      to: to,
+      text: {
+        body:
+          replyMessage.length > 0
+            ? replyMessage[replyMessage.length - 1].content
+            : `Sorry, no habla `,
       },
-      body: JSON.stringify(json),
-    },
-  );
+    };
+    const ret = fetch(
+      `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
 
-  return ret;
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${whatsapp_token}`,
+        },
+        body: JSON.stringify(json),
+      },
+    );
+
+    return ret;
+  } catch (e) {
+    context.error(e);
+    throw e;
+  }
   // let callback = (response) => {
   //   let str = "";
   //   response.on("data", (chunk) => {
@@ -263,9 +792,9 @@ export const whatsapp = async (
   context.log(`Http function processed request for url "${request.url}"`);
 
   context.log(`request = ${JSON.stringify(request)}`);
-  request.headers.forEach((val: String, key: string) =>
-    context.log(`${key} = ${val}`),
-  );
+  // request.headers.forEach((val: String, key: string) =>
+  //   context.log(`${key} = ${val}`),
+  // );
 
   const verification = await verifySig(request, context);
 
@@ -319,6 +848,7 @@ export const whatsapp = async (
                     whatsappToken,
                     msg.from,
                     msg.text.body,
+                    context,
                   );
                   context.log(
                     `got ${ret2.status}-  ${JSON.stringify(
