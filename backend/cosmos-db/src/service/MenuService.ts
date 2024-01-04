@@ -110,7 +110,13 @@ export const updateMenuItem = async (
         patchArr.push({ op: 'replace', path: '/kind', value: data[prop] });
         break;
       case 'children':
-        const res = await menuContainer.items.upsert(data[prop][0]);
+        const child = data[prop][0];
+        const res = await menuContainer.items.upsert({
+          ...child,
+          path: `${data.path}${data.path.endsWith('/') ? '' : '/'}${
+            child.name
+          }`,
+        });
         res.statusCode === 201 &&
           patchArr.push({
             op: 'add',
