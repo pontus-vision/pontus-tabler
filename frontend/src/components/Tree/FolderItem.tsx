@@ -141,7 +141,7 @@ const FolderItem = ({
           }}
           onBlur={() => {
             console.log({ updatedFolder, onUpdate });
-            updatedFolder && onUpdate(updatedFolder);
+            updatedFolder && onUpdate && onUpdate(updatedFolder);
           }}
         />
       ) : (
