@@ -1,11 +1,13 @@
 import {
-  MenuCreateRes,
   MenuItemTreeRef,
+  MenuCreateRes,
   MenuReadRes,
   MenuUpdateReq,
   MenuUpdateRes,
+  MenuReadReq,
+  MenuCreateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { post } from './test-utils';
+import { isSubset, post } from './test-utils';
 import { deleteDatabase } from '../utils/cosmos-utils';
 import { srv } from '../index';
 
@@ -19,6 +21,7 @@ import { srv } from '../index';
 //   dashboardUpdatePOST: jest.fn(),
 //   dashboardsReadPOST: jest.fn(),
 // }));
+
 jest.setTimeout(1000000);
 
 describe('testing Menu', () => {
@@ -35,16 +38,61 @@ describe('testing Menu', () => {
     srv.close();
   });
 
+  it('should read the root', async () => {
+    const data: MenuReadReq = {
+      path: '/',
+    };
+    const readRes = await post('menu/read', data);
+
+    expect(readRes.status).toBe(200);
+  });
+  it('should create a folder under root', async () => {
+    const data: MenuReadReq = {
+      path: '/',
+    };
+    const readRes = await post('menu/read', data);
+
+    const data2: MenuUpdateReq = {
+      id: readRes.data?.id,
+      path: readRes.data?.path,
+      kind: 'folder',
+      name: 'folder',
+      children: [{ kind: 'file', children: [], name: 'file1' }],
+    };
+
+    const updateRes = await post('menu/update', data2);
+
+    console.log({ updateRes });
+
+    const readRes2 = await post('menu/read', {
+      path: updateRes.data?.children[0]?.path,
+    });
+
+    expect(readRes2.status).toBe(200);
+
+    const readRes3 = await post('menu/read', {
+      path: updateRes.data?.path,
+    });
+
+    const obj1 = data2.children[0];
+
+    const obj2 = readRes3.data.children[0];
+    console.log({ obj1, obj2 });
+    expect(isSubset(obj1, obj2)).toBe(true);
+  });
+
   it('should do the CRUD "happy path"', async () => {
+    // Create Menu Item
+
     const body: MenuItemTreeRef = {
       name: 'string',
-      kind: MenuItemTreeRef.KindEnum.Folder,
+      kind: 'folder',
       path: 'string',
       children: [
         {
           name: 'string',
-          kind: MenuItemTreeRef.KindEnum.Folder,
-          path: 'string',
+          kind: 'folder',
+          path: '/',
           children: [],
         },
       ],
@@ -52,58 +100,63 @@ describe('testing Menu', () => {
 
     const createRetVal = await post('menu/create', body);
 
-    let resPayload: MenuCreateRes = createRetVal.data;
-    let id = resPayload.id;
+    let readRetVal: MenuCreateRes = createRetVal.data;
 
-    expect(createRetVal.data.name).toBe(body.name);
+    expect(isSubset(body, readRetVal)).toBeTruthy();
 
-    const readRetVal = await post('menu/read', {
-      id,
+    // Read the created Menu Item
+
+    const readRetVal2 = await post('menu/read', {
+      id: readRetVal?.id,
+      path: readRetVal?.path,
     });
 
-    let resPayload2: MenuReadRes = readRetVal.data;
-
-    console.log(`res2: ${JSON.stringify(resPayload2)}`);
-
-    expect(readRetVal.data.name).toBe(body.name);
+    expect(isSubset(body, readRetVal2.data)).toBe(true);
 
     const body2: MenuUpdateReq = {
       name: 'string',
-      kind: MenuItemTreeRef.KindEnum.Folder,
-      path: 'string',
+      kind: 'folder',
+      path: readRetVal.path,
       children: [
         {
           name: 'string2',
-          kind: MenuItemTreeRef.KindEnum.Folder,
-          path: 'string',
+          kind: 'folder',
           children: [],
         },
       ],
-      id: resPayload.id,
+      id: readRetVal.id,
     };
+
+    // Checking if update is correct.
 
     const updateRetVal = await post('menu/update', body2);
 
     let resPayload3: MenuUpdateRes = updateRetVal.data;
 
-    expect(resPayload3.name).toBe(body2.name);
-    expect(resPayload3.kind).toBe(body2.kind);
-    expect(resPayload3.path).toBe(body2.path);
-    expect(JSON.stringify(resPayload3.children)).toBe(
-      JSON.stringify(body2.children),
-    );
+    const { children, ...rest } = body2;
+    const { children: children2, ...rest2 } = resPayload3;
+
+    expect(isSubset(rest, rest2)).toBeTruthy();
+    expect(
+      children2.some((child2) =>
+        children.some((child) => isSubset(child, child2)),
+      ),
+    ).toBeTruthy();
+
+    // Deleting and checking if the file was indeed deleted.
 
     const body3 = {
       id: resPayload3.id,
+      path: resPayload3.path,
     };
 
     const deleteRetVal = await post('menu/delete', body3);
 
     expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal2 = await post('menu/read', body3);
+    const readRetVal3 = await post('menu/read', { path: body3.path });
 
-    expect(readRetVal2.status).toBe(404);
+    expect(readRetVal3.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
     const createRetVal = await post('menu/create', {});
@@ -112,6 +165,7 @@ describe('testing Menu', () => {
 
     const readRetVal = await post('menu/read', {
       id: 'foo',
+      path: 'bar',
     });
 
     expect(readRetVal.status).toBe(404);
@@ -120,10 +174,16 @@ describe('testing Menu', () => {
 
     expect(updateRetVal.status).toBe(400);
 
+    const updateRetVal2 = await post('menu/update', { path: 'bar', id: 'foo' });
+
+    expect(updateRetVal2.status).toBe(404);
+
     const deleteRetVal = await post('menu/delete', { foo: 'bar' });
 
-    let resPayload4 = deleteRetVal.data;
-
     expect(deleteRetVal.status).toBe(400);
+
+    const deleteRetVal2 = await post('menu/delete', { path: 'bar', id: 'foo' });
+
+    expect(deleteRetVal2.status).toBe(404);
   });
 });

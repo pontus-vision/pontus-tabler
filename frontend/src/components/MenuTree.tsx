@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { readMenu, createMenu } from '../client';
+import { readMenu, createMenu, updateMenu } from '../client';
 import {
   MenuItemTreeRef,
-  MenuReadRes,
+  MenuUpdateReq,
 } from '../pontus-api/typescript-fetch-client-generated';
 import TreeView from './Tree/TreeView';
 import { IoMdClose } from 'react-icons/io';
@@ -19,12 +19,6 @@ const MenuTree = () => {
 
         if (res?.status === 200) {
           setData(res.data);
-        } else if (res?.status === 404) {
-          await createMenu({
-            name: '/',
-            kind: MenuItemTreeRef.KindEnum.Folder,
-            path: '/',
-          });
         }
       } catch (error) {
         console.error(error);
@@ -65,10 +59,10 @@ const MenuTree = () => {
 
   const handleCreate = async (folder: MenuItemTreeRef) => {
     try {
-      const obj = {
+      const obj: MenuUpdateReq = {
         ...selectedItem,
+        id: selectedItem?.id || '',
         children: [
-          ...(selectedItem?.children || []),
           {
             ...folder,
             path: `${selectedItem?.path}${
@@ -78,21 +72,20 @@ const MenuTree = () => {
         ],
       };
 
-      const res = await createMenu(obj);
+      const res = await updateMenu(obj);
+      console.log({ res });
 
       if (res?.status === 200) {
-        setData((prevState) => {
-          if (prevState && res.data?.path) {
-            return updateNodeByPath(prevState, res.data?.path, res.data);
-          }
-        });
+        setData(
+          (prevState) =>
+            // if (prevState && res.data?.path) {
+            updateNodeByPath(prevState, res.data?.path, res.data),
+          // }
+        );
         createMessage(`${folder?.kind} created.`);
       }
       if (res?.status === 409) {
         createMessage(
-          // `${selectedItem?.path}${
-          //   selectedItem?.path?.endsWith('/') ? '' : '/'
-          // }${folder.name} already exist.`,
           `"${folder.name}" already taken in this directory. (${selectedItem?.path})`,
         );
       }
@@ -100,19 +93,41 @@ const MenuTree = () => {
       console.error({ error });
     }
   };
+  useEffect(() => {
+    console.log({ message });
+  }, [message]);
+
+  const handleUpdate = async (data: MenuUpdateReq) => {
+    const res = await updateMenu(data);
+
+    console.log({ res, data });
+    if (res?.status === 200) {
+      setData(
+        (prevState) =>
+          // if (prevState && res.data?.path) {
+          updateNodeByPath(prevState, res.data?.path, res.data),
+        // }
+      );
+      setMessage('Folder updated!');
+    } else if (res?.status === 409) {
+      setMessage('That name already exists under the parent folder');
+    }
+  };
 
   const handleSelect = async (selection: MenuItemTreeRef) => {
     setSelectedItem(selection);
-    console.log(selection);
-    const res = selection?.path && (await readMenu({ path: selection?.path }));
+    const res = await readMenu({ path: selection?.path });
+    console.log({ selection, res });
 
-    res &&
-      setData((prevState) => {
-        if (prevState && selection?.path) {
-          return updateNodeByPath(prevState, selection?.path, res.data);
-        }
-      });
+    res?.status === 200 &&
+      setData((prevState) =>
+        updateNodeByPath(prevState, selection?.path, res.data),
+      );
   };
+
+  useEffect(() => {
+    console.log({ data });
+  }, [data]);
 
   return (
     <>
@@ -122,6 +137,7 @@ const MenuTree = () => {
           actionsMode={true}
           onSelect={handleSelect}
           onCreate={handleCreate}
+          onUpdate={handleUpdate}
         />
       )}
 

@@ -1,4 +1,10 @@
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  fireEvent,
+} from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { sendHttpRequest } from '../http';
 import { TablesReadRes } from '../pontus-api/typescript-fetch-client-generated';
@@ -25,16 +31,14 @@ const post = async (body: any, endpoint: string) => {
   );
 };
 
-beforeEach(async () => {});
-
 afterEach(() => {
   cleanup();
 });
 
 describe('Menu', () => {
-  it('should visualize root', async () => {
+  it('should visualize root and create a folder under it', async () => {
+    const { unmount, container } = render(<MenuTree />);
     const user = userEvent.setup();
-    render(<MenuTree />);
 
     await waitFor(async () => {
       const root = screen.getByText('📁 /');
@@ -63,21 +67,32 @@ describe('Menu', () => {
 
     expect(createBoxInput.value).toBe('folder1');
 
+    const createBtn = screen.getByText('Create');
     await waitFor(async () => {
-      const createBtn = screen.getByText('Create');
-
       expect(createBtn).toBeInTheDocument();
 
       await user.click(createBtn);
-    });
-    await waitFor(async () => {
-      // const root = screen.getByText('📁 /');
-      // expect(root).toBeInTheDocument();
-      // await user.click(root);
-    });
-    await waitFor(() => {
       const folder1 = screen.getByText('📁 folder1');
       expect(folder1).toBeInTheDocument();
+      await user.click(folder1);
+      //Creating grand children of root
+
+      const folder1Opened = screen.getByText('📂 folder1');
+      expect(folder1Opened).toBeInTheDocument();
+    });
+
+    openCreateBoxBtn && (await user.click(openCreateBoxBtn));
+
+    await user.type(createBoxInput, 'grandchildren');
+
+    expect(createBoxInput.value).toBe('grandchildren');
+
+    await user.click(createBtn);
+
+    await waitFor(async () => {
+      const grandchildrenFolder = screen.getByText('📁 grandchildren');
+
+      expect(grandchildrenFolder).toBeInTheDocument();
     });
   });
 });

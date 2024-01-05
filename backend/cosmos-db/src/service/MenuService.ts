@@ -1,13 +1,17 @@
 import {
-  ReadPaginationFilter,
   MenuCreateReq,
   MenuUpdateReq,
   MenuDeleteReq,
   MenuCreateRes,
   MenuReadRes,
+  MenuItemTreeRef,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
-import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
+import { fetchContainer } from '../utils/cosmos-utils';
+import {
+  Container,
+  PartitionKeyDefinition,
+  UniqueKeyPolicy,
+} from '@azure/cosmos';
 
 const MENU = 'menu';
 
@@ -19,36 +23,28 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
   uniqueKeys: [{ paths: ['/path'] }],
 };
 
-export const upsertMenuItem = async (
-  data: MenuCreateReq | MenuUpdateReq,
-): Promise<MenuCreateRes> => {
+const initialDoc: MenuItemTreeRef = {
+  name: '/',
+  kind: 'folder',
+  path: '/',
+  children: [],
+};
+
+const initiateMenuContainer = async (): Promise<Container> => {
   const menuContainer = await fetchContainer(
     MENU,
     partitionKey,
     uniqueKeyPolicy,
+    initialDoc,
   );
 
-  for (const childIdx in data?.children) {
-    const childRes = await upsertMenuItem(data.children[childIdx]);
-    data.children[childIdx].id = childRes.id;
-  }
-
-  const res = await menuContainer.items.upsert(data);
-
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
-
-  return rest;
+  return menuContainer;
 };
 
 export const createMenuItem = async (
   data: MenuCreateReq,
 ): Promise<MenuCreateRes | any> => {
-  const menuContainer = await fetchContainer(
-    MENU,
-    partitionKey,
-    uniqueKeyPolicy,
-  );
+  const menuContainer = await initiateMenuContainer();
 
   const res = await menuContainer.items.create(data);
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
@@ -59,11 +55,7 @@ export const createMenuItem = async (
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
 ): Promise<MenuCreateRes> => {
-  const menuContainer = await fetchContainer(
-    MENU,
-    partitionKey,
-    uniqueKeyPolicy,
-  );
+  const menuContainer = await initiateMenuContainer();
 
   const patchArr = [];
 
@@ -78,13 +70,20 @@ export const updateMenuItem = async (
         patchArr.push({ op: 'replace', path: '/kind', value: data[prop] });
         break;
       case 'children':
-        const res = await menuContainer.items.upsert(data[prop][0]);
+        const child = data[prop][0];
+        const res = await menuContainer.items.upsert({
+          ...child,
+          path: `${data.path}${data.path.endsWith('/') ? '' : '/'}${
+            child.name
+          }`,
+        });
         res.statusCode === 201 &&
           patchArr.push({
             op: 'add',
             path: '/children/-',
             value: res.resource,
           });
+
         break;
       default:
         break;
@@ -111,29 +110,20 @@ export const readMenuItemByPath = async (
       },
     ],
   };
-  const menuContainer = await fetchContainer(
-    MENU,
-    partitionKey,
-    uniqueKeyPolicy,
-  );
+  const menuContainer = await initiateMenuContainer();
 
   const { resources } = await menuContainer.items.query(querySpec).fetchAll();
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {
     throw { code: 404, message: `No menu item found at path "${path}".` };
-  } else if (resources.length > 1) {
-    throw { code: 409, message: 'More than 1 record found.' };
   }
 };
 
 export const deleteMenuItem = async (data: MenuDeleteReq) => {
   try {
-    const menuContainer = await fetchContainer(
-      MENU,
-      partitionKey,
-      uniqueKeyPolicy,
-    );
+    const menuContainer = await initiateMenuContainer();
+
     const res = await menuContainer.item(data.id, data.path).delete();
 
     return 'menu item deleted!';
@@ -141,20 +131,3 @@ export const deleteMenuItem = async (data: MenuDeleteReq) => {
     throw error;
   }
 };
-
-// export const readMenu = async (
-//   body: ReadPaginationFilter,
-// ): Promise<FetchData> => {
-//   return fetchData(body, MENU);
-// };
-
-// export const countDashboardsRecords = async (
-//   query: string,
-// ): Promise<number> => {
-//   const menuContainer = await fetchDashboardsContainer(query);
-//   const { resources } = await menuContainer.items
-//     .query({ query, parameters: [] })
-//     .fetchAll();
-
-//   return resources[0];
-// };

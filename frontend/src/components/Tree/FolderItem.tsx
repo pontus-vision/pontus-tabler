@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { DataRoot, Child } from '../../types';
 import FileItem from './FileItem';
 import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
@@ -29,7 +28,7 @@ type FolderItemProps = {
   index?: number;
   path?: string;
   actionsMode: boolean;
-  onEditInputChange?: (e: MenuItemTreeRef) => void;
+  onUpdate?: (data: MenuItemTreeRef) => void;
 };
 
 const FolderItem = ({
@@ -40,7 +39,7 @@ const FolderItem = ({
   index,
   path,
   actionsMode,
-  onEditInputChange,
+  onUpdate,
 }: FolderItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -51,6 +50,7 @@ const FolderItem = ({
   } | null>(); // Track context menu state
   const [selectedItem, setSelectedItem] = useState();
   const [currentPath, setCurrentPath] = useState(folder.path);
+  const [updatedFolder, setUpdatedFolder] = useState<MenuItemTreeRef>();
 
   const toggleFolder = () => {
     setIsOpen(!isOpen);
@@ -110,6 +110,10 @@ const FolderItem = ({
     return result;
   }
 
+  useEffect(() => {
+    console.log(onUpdate);
+  }, [onUpdate]);
+
   return (
     <div
       onBlur={() => setContextMenu(null)}
@@ -128,15 +132,17 @@ const FolderItem = ({
           defaultValue={editedName}
           onChange={(e) => {
             // setEditedName(e?.target?.value);
-            onEditInputChange &&
-              onEditInputChange({
-                ...folder,
+            setUpdatedFolder &&
+              setUpdatedFolder({
+                id: folder?.id || '',
                 name: e?.target?.value,
-                kind: MenuItemTreeRef.KindEnum.Folder,
-                path: `${changeLastPart(folder.path, e?.target?.value)}`,
+                path: folder.path,
               });
           }}
-          onBlur={handleEditSave}
+          onBlur={() => {
+            console.log({ updatedFolder, onUpdate });
+            updatedFolder && onUpdate && onUpdate(updatedFolder);
+          }}
         />
       ) : (
         <span
@@ -153,13 +159,14 @@ const FolderItem = ({
         <ul className="pl-4 ">
           {folder?.children.map((child, index) => (
             <li key={child.id}>
-              {child.kind === MenuItemTreeRef.KindEnum.Folder ? (
+              {child.kind === 'folder' ? (
                 <FolderItem
                   onDragStart={onDragStart}
                   index={index}
                   folder={child}
                   onSelect={onSelect}
                   selected={selected}
+                  onUpdate={onUpdate}
                   path={`${!!path ? path : ''}/${child.name}`}
                   actionsMode={actionsMode}
                 />

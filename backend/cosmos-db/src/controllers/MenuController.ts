@@ -1,7 +1,6 @@
 import {
   MenuCreateReq,
   MenuDeleteReq,
-  MenuItemTreeRef,
   MenuReadReq,
   MenuUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
@@ -29,12 +28,7 @@ export const menuCreatePOST = async (
 
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
+    res.status(error.code);
     res.json(error);
     return res;
   }
@@ -54,12 +48,7 @@ export const menuReadPOST = async (
 
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
+    res.status(error.code);
     res.json(error);
     return res;
   }
@@ -77,7 +66,7 @@ export const menuDeletePOST = async (
     res.status(200);
     res.json(response);
   } catch (error) {
-    res.status(500);
+    res.status(error.code);
     res.json(error);
     return res;
   }
@@ -97,8 +86,8 @@ export const menuUpdatePOST = async (
 
     return res;
   } catch (error) {
-    res.status(500);
-    res.json(error);
+    res.status(error.code);
+    res.json(error.message);
     return res;
   }
 };
