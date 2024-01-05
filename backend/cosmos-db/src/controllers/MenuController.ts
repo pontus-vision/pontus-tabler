@@ -28,12 +28,7 @@ export const menuCreatePOST = async (
 
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
+    res.status(error.code);
     res.json(error);
     return res;
   }
@@ -53,12 +48,7 @@ export const menuReadPOST = async (
 
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
+    res.status(error.code);
     res.json(error);
     return res;
   }
