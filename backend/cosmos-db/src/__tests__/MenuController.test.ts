@@ -185,6 +185,7 @@ describe('testing Menu', () => {
 
     const readRetVal = await post('menu/read', {
       id: 'foo',
+      path: 'bar',
     });
 
     expect(readRetVal.status).toBe(404);
@@ -193,10 +194,16 @@ describe('testing Menu', () => {
 
     expect(updateRetVal.status).toBe(400);
 
+    const updateRetVal2 = await post('menu/update', { path: 'bar', id: "foo" });
+
+    expect(updateRetVal2.status).toBe(404);
+
     const deleteRetVal = await post('menu/delete', { foo: 'bar' });
 
-    let resPayload4 = deleteRetVal.data;
-
     expect(deleteRetVal.status).toBe(400);
+
+    const deleteRetVal2 = await post('menu/delete', { path: 'bar', id: "foo" });
+
+    expect(deleteRetVal2.status).toBe(404);
   });
 });

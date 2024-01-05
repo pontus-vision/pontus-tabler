@@ -41,46 +41,6 @@ const initiateMenuContainer = async (): Promise<Container> => {
   return menuContainer;
 };
 
-export const upsertMenuItem = async (
-  data: MenuCreateReq | MenuUpdateReq,
-): Promise<MenuCreateRes> => {
-  const menuContainer = await initiateMenuContainer();
-
-  for (const childIdx in data?.children) {
-    const childRes = await upsertMenuItem(data.children[childIdx]);
-    data.children[childIdx].id = childRes.id;
-  }
-
-  const res = await menuContainer.items.upsert(data);
-
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
-
-  return rest;
-};
-
-// export const createMenuItem = async (
-//   data: MenuCreateReq,
-// ): Promise<MenuCreateRes | any> => {
-//   const menuContainer = await fetchContainer(
-//     MENU,
-//     partitionKey,
-//     uniqueKeyPolicy,
-//   );
-
-//   for (const childIdx in data?.children) {
-//     const childRes = await createMenuItem(data?.children[childIdx]);
-//     data.children[childIdx].id = childRes.id;
-//   }
-//   const res = await menuContainer.items.upsert(data);
-//   console.log({ res });
-
-//   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-//     res.resource as any;
-
-//   return rest;
-// };
-
 export const createMenuItem = async (
   data: MenuCreateReq,
 ): Promise<MenuCreateRes | any> => {
@@ -157,9 +117,7 @@ export const readMenuItemByPath = async (
     return resources[0];
   } else if (resources.length === 0) {
     throw { code: 404, message: `No menu item found at path "${path}".` };
-  } else if (resources.length > 1) {
-    throw { code: 409, message: 'More than 1 record found.' };
-  }
+  } 
 };
 
 export const deleteMenuItem = async (data: MenuDeleteReq) => {
@@ -173,20 +131,3 @@ export const deleteMenuItem = async (data: MenuDeleteReq) => {
     throw error;
   }
 };
-
-// export const readMenu = async (
-//   body: ReadPaginationFilter,
-// ): Promise<FetchData> => {
-//   return fetchData(body, MENU);
-// };
-
-// export const countDashboardsRecords = async (
-//   query: string,
-// ): Promise<number> => {
-//   const menuContainer = await fetchDashboardsContainer(query);
-//   const { resources } = await menuContainer.items
-//     .query({ query, parameters: [] })
-//     .fetchAll();
-
-//   return resources[0];
-// };
