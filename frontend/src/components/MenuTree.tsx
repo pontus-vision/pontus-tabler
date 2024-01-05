@@ -19,12 +19,6 @@ const MenuTree = () => {
 
         if (res?.status === 200) {
           setData(res.data);
-        } else if (res?.status === 404) {
-          await createMenu({
-            name: '/',
-            kind: 'folder',
-            path: '/',
-          });
         }
       } catch (error) {
         console.error(error);
@@ -79,13 +73,15 @@ const MenuTree = () => {
       };
 
       const res = await updateMenu(obj);
+      console.log({ res });
 
       if (res?.status === 200) {
-        setData((prevState) => {
-          if (prevState && res.data?.path) {
-            return updateNodeByPath(prevState, res.data?.path, res.data);
-          }
-        });
+        setData(
+          (prevState) =>
+            // if (prevState && res.data?.path) {
+            updateNodeByPath(prevState, res.data?.path, res.data),
+          // }
+        );
         createMessage(`${folder?.kind} created.`);
       }
       if (res?.status === 409) {
@@ -101,20 +97,37 @@ const MenuTree = () => {
     console.log({ message });
   }, [message]);
 
-  const handleUpdate = async () => {};
+  const handleUpdate = async (data: MenuUpdateReq) => {
+    const res = await updateMenu(data);
+
+    console.log({ res, data });
+    if (res?.status === 200) {
+      setData(
+        (prevState) =>
+          // if (prevState && res.data?.path) {
+          updateNodeByPath(prevState, res.data?.path, res.data),
+        // }
+      );
+      setMessage('Folder updated!');
+    } else if (res?.status === 409) {
+      setMessage('That name already exists under the parent folder');
+    }
+  };
 
   const handleSelect = async (selection: MenuItemTreeRef) => {
     setSelectedItem(selection);
-    console.log(selection);
-    const res = selection?.path && (await readMenu({ path: selection?.path }));
+    const res = await readMenu({ path: selection?.path });
+    console.log({ selection, res });
 
-    res &&
-      setData((prevState) => {
-        if (prevState && selection?.path) {
-          return updateNodeByPath(prevState, selection?.path, res.data);
-        }
-      });
+    res?.status === 200 &&
+      setData((prevState) =>
+        updateNodeByPath(prevState, selection?.path, res.data),
+      );
   };
+
+  useEffect(() => {
+    console.log({ data });
+  }, [data]);
 
   return (
     <>
@@ -124,7 +137,7 @@ const MenuTree = () => {
           actionsMode={true}
           onSelect={handleSelect}
           onCreate={handleCreate}
-          onUpdate={(e) => console.log(e)}
+          onUpdate={handleUpdate}
         />
       )}
 

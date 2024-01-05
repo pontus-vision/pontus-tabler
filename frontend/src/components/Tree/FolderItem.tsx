@@ -50,6 +50,7 @@ const FolderItem = ({
   } | null>(); // Track context menu state
   const [selectedItem, setSelectedItem] = useState();
   const [currentPath, setCurrentPath] = useState(folder.path);
+  const [updatedFolder, setUpdatedFolder] = useState<MenuItemTreeRef>();
 
   const toggleFolder = () => {
     setIsOpen(!isOpen);
@@ -109,6 +110,10 @@ const FolderItem = ({
     return result;
   }
 
+  useEffect(() => {
+    console.log(onUpdate);
+  }, [onUpdate]);
+
   return (
     <div
       onBlur={() => setContextMenu(null)}
@@ -127,15 +132,17 @@ const FolderItem = ({
           defaultValue={editedName}
           onChange={(e) => {
             // setEditedName(e?.target?.value);
-            onUpdate &&
-              onUpdate({
-                ...folder,
+            setUpdatedFolder &&
+              setUpdatedFolder({
+                id: folder?.id || '',
                 name: e?.target?.value,
-                kind: 'folder',
-                path: `${changeLastPart(folder.path, e?.target?.value)}`,
+                path: folder.path,
               });
           }}
-          onBlur={handleEditSave}
+          onBlur={() => {
+            console.log({ updatedFolder, onUpdate });
+            updatedFolder && onUpdate(updatedFolder);
+          }}
         />
       ) : (
         <span
@@ -159,6 +166,7 @@ const FolderItem = ({
                   folder={child}
                   onSelect={onSelect}
                   selected={selected}
+                  onUpdate={onUpdate}
                   path={`${!!path ? path : ''}/${child.name}`}
                   actionsMode={actionsMode}
                 />

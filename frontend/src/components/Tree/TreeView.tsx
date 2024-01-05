@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FolderItem from './FolderItem';
 import { AiFillFolderAdd } from 'react-icons/ai';
 import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
@@ -21,7 +21,8 @@ const TreeView = ({
   const [selectedFolder, setSelectedFolder] = useState<MenuItemTreeRef>();
   const [newFolder, setNewFolder] = useState<MenuItemTreeRef>();
   const [createFolder, setCreateFolder] = useState(false);
-  const [jsonData, setJsonData] = useState(data);
+  const [newFolderName, setNewFolderName] = useState<string>();
+  const input = useRef<HTMLInputElement>(null);
 
   const handleFolderSelect = (folder: MenuItemTreeRef) => {
     setSelectedFolder(folder);
@@ -32,19 +33,6 @@ const TreeView = ({
       onSelect(selectedFolder);
     }
   }, [selectedFolder]);
-
-  const obj2 = {
-    _attachments: 'attachments/',
-    _etag: '"00000000-0000-0000-3f57-49e990d201da"',
-    _rid: 'fhwFAKtEy8MCAAAAAAAAAA==',
-    _self: 'dbs/fhwFAA==/colls/fhwFAKtEy8M=/docs/fhwFAKtEy8MCAAAAAAAAAA==/',
-    _ts: 1704404709,
-    children: [],
-    id: 'b0d9a341-ae73-4b07-bf6d-2303b124ebe9',
-    kind: 'file',
-    name: 'file1',
-    path: '/file1',
-  };
 
   return (
     <div className="tree-view">
@@ -60,6 +48,8 @@ const TreeView = ({
             <input
               className="tree-view__create-box__input"
               type="text"
+              // value={newFolderName}
+              ref={input}
               onChange={(e) =>
                 setNewFolder({
                   name: e.target.value,
@@ -72,6 +62,9 @@ const TreeView = ({
               onClick={() => {
                 setCreateFolder(false);
                 newFolder && onCreate(newFolder);
+                if (input.current) {
+                  input.current.value = '';
+                }
               }}
             >
               Create
@@ -80,7 +73,7 @@ const TreeView = ({
         </div>
       )}
       <FolderItem
-        folder={jsonData}
+        folder={data}
         onSelect={handleFolderSelect}
         // onToggle={handleFolderToggle}
         selected={selectedFolder?.path}
