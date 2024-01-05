@@ -76,7 +76,7 @@ export const menuDeletePOST = async (
     res.status(200);
     res.json(response);
   } catch (error) {
-    res.status(500);
+    res.status(error.code);
     res.json(error);
     return res;
   }
