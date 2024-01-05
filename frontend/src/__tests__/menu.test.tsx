@@ -94,24 +94,5 @@ describe('Menu', () => {
 
       expect(grandchildrenFolder).toBeInTheDocument();
     });
-
-    // await waitFor(async () => {
-    //   const grandchildrenFolder = screen.getByText('📁 grandchildren');
-    //   fireEvent.contextMenu(grandchildrenFolder);
-
-    //   const renameOption = screen.getByText('Rename');
-
-    //   expect(renameOption).toBeInTheDocument();
-
-    //   await user.click(renameOption);
-
-    //   const renameInput = document.querySelector(
-    //     '.tree-item__input-rename',
-    //   ) as HTMLInputElement;
-
-    //   expect(renameInput).toBeInTheDocument();
-
-    //   await user.type(renameInput, 'something else');
-    // });
   });
 });
