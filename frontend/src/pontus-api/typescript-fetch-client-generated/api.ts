@@ -58,7 +58,7 @@ export interface FetchArgs {
  * @class BaseAPI
  */
 export class BaseAPI {
-  protected configuration: Configuration;
+  protected configuration?: Configuration;
 
   constructor(
     configuration?: Configuration,
@@ -79,7 +79,7 @@ export class BaseAPI {
  * @extends {Error}
  */
 export class RequiredError extends Error {
-  name: 'RequiredError';
+  name: 'RequiredError' = 'RequiredError';
   constructor(public field: string, msg?: string) {
     super(msg);
   }
@@ -914,7 +914,7 @@ export interface MenuItemTreeRef {
    * @type {string}
    * @memberof MenuItemTreeRef
    */
-  kind?: MenuItemTreeRef.KindEnum;
+  kind?: KindEnum;
   /**
    *
    * @type {string}
@@ -929,20 +929,8 @@ export interface MenuItemTreeRef {
   children?: Array<MenuItemTreeRef>;
 }
 
-/**
- * @export
- * @namespace MenuItemTreeRef
- */
-export namespace MenuItemTreeRef {
-  /**
-   * @export
-   * @enum {string}
-   */
-  export enum KindEnum {
-    Folder = <any>'folder',
-    File = <any>'file',
-  }
-}
+export type KindEnum = 'folder' | 'file';
+
 /**
  *
  * @export
@@ -1523,7 +1511,11 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
+      if (localVarUrlObj?.search && localVarUrlObj?.search !== null) {
+        // @ts-ignore
+        // @ts-ignore
+        delete localVarUrlObj.search;
+      }
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
@@ -1573,6 +1565,8 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1623,6 +1617,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1673,6 +1668,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1726,6 +1722,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1776,6 +1773,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1826,6 +1824,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1876,6 +1875,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1926,6 +1926,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1979,6 +1980,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2032,6 +2034,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2085,6 +2088,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2138,6 +2142,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2191,6 +2196,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2244,6 +2250,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2297,6 +2304,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2347,6 +2355,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2400,6 +2409,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2450,6 +2460,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2490,6 +2501,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2532,6 +2544,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2574,6 +2587,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2616,6 +2630,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2658,6 +2673,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2701,6 +2717,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2751,6 +2768,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2801,6 +2819,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2851,6 +2870,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2901,6 +2921,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2951,6 +2972,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -3001,6 +3023,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -3051,6 +3074,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
