@@ -9,7 +9,6 @@ module.exports = {
     '.*test-utils.ts',
   ],
   // testNamePattern: 'testing tables',
-  coverage: true,
   // collectCoverageFrom: ['**/*.{ts}', '!**/node_modules/**', '!**/vendor/**'],
   coverageProvider: 'v8',
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',

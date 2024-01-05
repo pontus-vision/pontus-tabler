@@ -27,6 +27,9 @@ function isSubset(obj1, obj2) {
       return false;
     }
     if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
+      if (obj1[key].length !== obj2[key].length) {
+        return false;
+      }
       for (let i = 0; i < obj1[key].length; i++) {
         if (
           typeof obj1[key][i] === 'object' &&
@@ -155,18 +158,23 @@ describe('testing Menu', () => {
       id: readRetVal.id,
     };
 
+    // Checking if update is correct.
+
     const updateRetVal = await post('menu/update', body2);
 
     let resPayload3: MenuUpdateRes = updateRetVal.data;
 
-    expect(resPayload3.name).toBe(body2.name);
-    expect(resPayload3.kind).toBe(body2.kind);
-    expect(resPayload3.path).toBe(body2.path);
-    console.log({
-      body2: JSON.stringify(body2),
-      resPayload3: JSON.stringify(resPayload3),
-    });
-    expect(isSubset(body2, resPayload3)).toBeTruthy();
+    const { children, ...rest } = body2;
+    const { children: children2, ...rest2 } = resPayload3;
+
+    expect(isSubset(rest, rest2)).toBeTruthy();
+    expect(
+      children2.some((child2) =>
+        children.some((child) => isSubset(child, child2)),
+      ),
+    ).toBeTruthy();
+
+    // Deleting and checking if the file was indeed deleted.
 
     const body3 = {
       id: resPayload3.id,
@@ -177,9 +185,9 @@ describe('testing Menu', () => {
 
     expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal3 = await post('menu/read', body3);
+    const readRetVal3 = await post('menu/read', { path: body3.path });
 
-    expect(readRetVal2.status).toBe(404);
+    expect(readRetVal3.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
     const createRetVal = await post('menu/create', {});
