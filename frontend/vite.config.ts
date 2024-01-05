@@ -20,7 +20,7 @@ export default defineConfig({
     //     '.*test-utils.ts',
     //   ],
     // },
-    testNamePattern: 'TableViews',
+    testNamePattern: 'Menu',
     coverage: {
       reporter: ['text', 'json', 'html'],
     },

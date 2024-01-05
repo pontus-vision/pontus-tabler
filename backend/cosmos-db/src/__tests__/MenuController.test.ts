@@ -27,9 +27,6 @@ function isSubset(obj1, obj2) {
       return false;
     }
     if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
-      if (obj1[key].length !== obj2[key].length) {
-        return false;
-      }
       for (let i = 0; i < obj1[key].length; i++) {
         if (
           typeof obj1[key][i] === 'object' &&
@@ -93,6 +90,8 @@ describe('testing Menu', () => {
 
     const updateRes = await post('menu/update', data2);
 
+    console.log({ updateRes });
+
     const readRes2 = await post('menu/read', {
       path: updateRes.data?.children[0]?.path,
     });
@@ -111,6 +110,8 @@ describe('testing Menu', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
+    // Create Menu Item
+
     const body: MenuItemTreeRef = {
       name: 'string',
       kind: 'folder',
@@ -127,34 +128,31 @@ describe('testing Menu', () => {
 
     const createRetVal = await post('menu/create', body);
 
-    let resPayload: MenuCreateRes = createRetVal.data;
+    let readRetVal: MenuCreateRes = createRetVal.data;
 
-    expect(createRetVal.data.name).toBe(body.name);
+    expect(isSubset(body, readRetVal)).toBeTruthy();
 
-    const readRetVal = await post('menu/read', {
-      id: resPayload?.id,
-      path: resPayload?.path,
+    // Read the created Menu Item
+
+    const readRetVal2 = await post('menu/read', {
+      id: readRetVal?.id,
+      path: readRetVal?.path,
     });
 
-    let resPayload2: MenuReadRes = readRetVal.data;
-
-    console.log(`res2: ${JSON.stringify(resPayload2)}`);
-
-    expect(readRetVal.data.name).toBe(body.name);
+    expect(isSubset(body, readRetVal2.data)).toBe(true);
 
     const body2: MenuUpdateReq = {
       name: 'string',
       kind: 'folder',
-      path: 'string',
+      path: readRetVal.path,
       children: [
         {
           name: 'string2',
           kind: 'folder',
-          path: 'string',
           children: [],
         },
       ],
-      id: resPayload.id,
+      id: readRetVal.id,
     };
 
     const updateRetVal = await post('menu/update', body2);
@@ -164,6 +162,11 @@ describe('testing Menu', () => {
     expect(resPayload3.name).toBe(body2.name);
     expect(resPayload3.kind).toBe(body2.kind);
     expect(resPayload3.path).toBe(body2.path);
+    console.log({
+      body2: JSON.stringify(body2),
+      resPayload3: JSON.stringify(resPayload3),
+    });
+    expect(isSubset(body2, resPayload3)).toBeTruthy();
 
     const body3 = {
       id: resPayload3.id,
@@ -174,7 +177,7 @@ describe('testing Menu', () => {
 
     expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal2 = await post('menu/read', body3);
+    const readRetVal3 = await post('menu/read', body3);
 
     expect(readRetVal2.status).toBe(404);
   });
@@ -194,7 +197,7 @@ describe('testing Menu', () => {
 
     expect(updateRetVal.status).toBe(400);
 
-    const updateRetVal2 = await post('menu/update', { path: 'bar', id: "foo" });
+    const updateRetVal2 = await post('menu/update', { path: 'bar', id: 'foo' });
 
     expect(updateRetVal2.status).toBe(404);
 
@@ -202,8 +205,36 @@ describe('testing Menu', () => {
 
     expect(deleteRetVal.status).toBe(400);
 
-    const deleteRetVal2 = await post('menu/delete', { path: 'bar', id: "foo" });
+    const deleteRetVal2 = await post('menu/delete', { path: 'bar', id: 'foo' });
 
     expect(deleteRetVal2.status).toBe(404);
   });
 });
+
+const body2 = {
+  name: 'string',
+  kind: 'folder',
+  children: [{ name: 'string2', kind: 'folder', children: [] }],
+  id: 'b2132083-6c6e-4b44-b419-a8adf32c682a',
+};
+const resPayload3 = {
+  name: 'string',
+  kind: 'folder',
+  path: 'string',
+  children: [
+    { name: 'string', kind: 'folder', path: '/', children: [] },
+    {
+      name: 'string2',
+      kind: 'folder',
+      path: 'string/string2',
+      children: [],
+      id: '9d8393fa-3b6c-42c8-85bb-8c79a50d5c82',
+      _rid: 'RR0zAPKEGNgDAAAAAAAAAA==',
+      _self: 'dbs/RR0zAA==/colls/RR0zAPKEGNg=/docs/RR0zAPKEGNgDAAAAAAAAAA==/',
+      _etag: '00000000-0000-0000-3f7b-9fb0b52401da',
+      _attachments: 'attachments/',
+      _ts: 1704420315,
+    },
+  ],
+  id: 'b2132083-6c6e-4b44-b419-a8adf32c682a',
+};

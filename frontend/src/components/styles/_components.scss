@@ -177,11 +177,9 @@
 }
 
 .menu-tree {
-  &.opened {
-  }
+  transform: translateX(-104%);
   &#messageBox {
     transition: transform 300ms ease-in-out;
-    transform: translateX(-104%);
     position: absolute;
     right: 3%;
     top: 11%;
@@ -192,6 +190,9 @@
     border-radius: 8px;
     text-align: center;
     z-index: 4;
+  }
+  &.opened {
+    transform: translateX(0%);
   }
 }
 

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { readMenu, createMenu } from '../client';
+import { readMenu, createMenu, updateMenu } from '../client';
 import {
   MenuItemTreeRef,
-  MenuReadRes,
+  MenuUpdateReq,
 } from '../pontus-api/typescript-fetch-client-generated';
 import TreeView from './Tree/TreeView';
 import { IoMdClose } from 'react-icons/io';
@@ -22,7 +22,7 @@ const MenuTree = () => {
         } else if (res?.status === 404) {
           await createMenu({
             name: '/',
-            kind: MenuItemTreeRef.KindEnum.Folder,
+            kind: 'folder',
             path: '/',
           });
         }
@@ -65,10 +65,10 @@ const MenuTree = () => {
 
   const handleCreate = async (folder: MenuItemTreeRef) => {
     try {
-      const obj = {
+      const obj: MenuUpdateReq = {
         ...selectedItem,
+        id: selectedItem?.id || '',
         children: [
-          ...(selectedItem?.children || []),
           {
             ...folder,
             path: `${selectedItem?.path}${
@@ -78,7 +78,7 @@ const MenuTree = () => {
         ],
       };
 
-      const res = await createMenu(obj);
+      const res = await updateMenu(obj);
 
       if (res?.status === 200) {
         setData((prevState) => {
@@ -90,9 +90,6 @@ const MenuTree = () => {
       }
       if (res?.status === 409) {
         createMessage(
-          // `${selectedItem?.path}${
-          //   selectedItem?.path?.endsWith('/') ? '' : '/'
-          // }${folder.name} already exist.`,
           `"${folder.name}" already taken in this directory. (${selectedItem?.path})`,
         );
       }
@@ -100,6 +97,11 @@ const MenuTree = () => {
       console.error({ error });
     }
   };
+  useEffect(() => {
+    console.log({ message });
+  }, [message]);
+
+  const handleUpdate = async () => {};
 
   const handleSelect = async (selection: MenuItemTreeRef) => {
     setSelectedItem(selection);
@@ -122,6 +124,7 @@ const MenuTree = () => {
           actionsMode={true}
           onSelect={handleSelect}
           onCreate={handleCreate}
+          onUpdate={(e) => console.log(e)}
         />
       )}
 

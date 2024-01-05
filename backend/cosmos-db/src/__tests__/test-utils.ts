@@ -56,6 +56,5 @@ export const post = async (
     status: res.status,
     data: typeof res.body === 'string' ? JSON.parse(res.body) : res.body,
   };
-  console.log(`Ret val is ${JSON.stringify(retVal)}`);
   return retVal;
 };

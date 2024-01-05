@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { DataRoot, Child } from '../../types';
 import FileItem from './FileItem';
 import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
@@ -29,7 +28,7 @@ type FolderItemProps = {
   index?: number;
   path?: string;
   actionsMode: boolean;
-  onEditInputChange?: (e: MenuItemTreeRef) => void;
+  onUpdate?: (data: MenuItemTreeRef) => void;
 };
 
 const FolderItem = ({
@@ -40,7 +39,7 @@ const FolderItem = ({
   index,
   path,
   actionsMode,
-  onEditInputChange,
+  onUpdate,
 }: FolderItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -128,11 +127,11 @@ const FolderItem = ({
           defaultValue={editedName}
           onChange={(e) => {
             // setEditedName(e?.target?.value);
-            onEditInputChange &&
-              onEditInputChange({
+            onUpdate &&
+              onUpdate({
                 ...folder,
                 name: e?.target?.value,
-                kind: MenuItemTreeRef.KindEnum.Folder,
+                kind: 'folder',
                 path: `${changeLastPart(folder.path, e?.target?.value)}`,
               });
           }}
@@ -153,7 +152,7 @@ const FolderItem = ({
         <ul className="pl-4 ">
           {folder?.children.map((child, index) => (
             <li key={child.id}>
-              {child.kind === MenuItemTreeRef.KindEnum.Folder ? (
+              {child.kind === 'folder' ? (
                 <FolderItem
                   onDragStart={onDragStart}
                   index={index}
