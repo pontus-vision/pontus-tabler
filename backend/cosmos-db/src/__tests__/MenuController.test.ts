@@ -7,7 +7,7 @@ import {
   MenuReadReq,
   MenuCreateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { post } from './test-utils';
+import { isSubset, post } from './test-utils';
 import { deleteDatabase } from '../utils/cosmos-utils';
 import { srv } from '../index';
 
@@ -21,37 +21,6 @@ import { srv } from '../index';
 //   dashboardUpdatePOST: jest.fn(),
 //   dashboardsReadPOST: jest.fn(),
 // }));
-function isSubset(obj1, obj2) {
-  for (let key in obj1) {
-    if (!obj2.hasOwnProperty(key)) {
-      return false;
-    }
-    if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
-      if (obj1[key].length !== obj2[key].length) {
-        return false;
-      }
-      for (let i = 0; i < obj1[key].length; i++) {
-        if (
-          typeof obj1[key][i] === 'object' &&
-          typeof obj2[key][i] === 'object'
-        ) {
-          if (!isSubset(obj1[key][i], obj2[key][i])) {
-            return false;
-          }
-        } else if (obj1[key][i] !== obj2[key][i]) {
-          return false;
-        }
-      }
-    } else if (typeof obj1[key] === 'object' && typeof obj2[key] === 'object') {
-      if (!isSubset(obj1[key], obj2[key])) {
-        return false;
-      }
-    } else if (obj2[key] !== obj1[key]) {
-      return false;
-    }
-  }
-  return true;
-}
 
 jest.setTimeout(1000000);
 
