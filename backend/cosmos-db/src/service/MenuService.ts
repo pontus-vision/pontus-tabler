@@ -117,7 +117,7 @@ export const readMenuItemByPath = async (
     return resources[0];
   } else if (resources.length === 0) {
     throw { code: 404, message: `No menu item found at path "${path}".` };
-  } 
+  }
 };
 
 export const deleteMenuItem = async (data: MenuDeleteReq) => {

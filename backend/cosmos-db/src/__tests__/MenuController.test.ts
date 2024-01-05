@@ -218,31 +218,3 @@ describe('testing Menu', () => {
     expect(deleteRetVal2.status).toBe(404);
   });
 });
-
-const body2 = {
-  name: 'string',
-  kind: 'folder',
-  children: [{ name: 'string2', kind: 'folder', children: [] }],
-  id: 'b2132083-6c6e-4b44-b419-a8adf32c682a',
-};
-const resPayload3 = {
-  name: 'string',
-  kind: 'folder',
-  path: 'string',
-  children: [
-    { name: 'string', kind: 'folder', path: '/', children: [] },
-    {
-      name: 'string2',
-      kind: 'folder',
-      path: 'string/string2',
-      children: [],
-      id: '9d8393fa-3b6c-42c8-85bb-8c79a50d5c82',
-      _rid: 'RR0zAPKEGNgDAAAAAAAAAA==',
-      _self: 'dbs/RR0zAA==/colls/RR0zAPKEGNg=/docs/RR0zAPKEGNgDAAAAAAAAAA==/',
-      _etag: '00000000-0000-0000-3f7b-9fb0b52401da',
-      _attachments: 'attachments/',
-      _ts: 1704420315,
-    },
-  ],
-  id: 'b2132083-6c6e-4b44-b419-a8adf32c682a',
-};
