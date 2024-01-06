@@ -1,28 +1,24 @@
 {
-  "name": "oas3-tools",
+  "name": "pvhome-database",
   "version": "2.2.0",
   "description": "Swagger-UI and API Rest Routing for Open API v3.",
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf dist/ && tsc && cp -a src/api docs ./dist/",
     "install-frontend": "cd ../../frontend && npm install",
+    "test": "/usr/bin/env NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0  jest DashboardController.test --coverage --detectOpenHandles --runInBand  --config jest.config.js ",
+        "watch": "tsc -w",
+    "clean": "rimraf dist",
+        "prestart": "npm run clean && npm run build",
     "jest": "/usr/bin/env NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0  jest --coverage --detectOpenHandles --runInBand  --config jest.config.js ",
     "refresh": "npm uninstall ../../frontend/ && npm install ../../frontend/"
   },
   "author": {
-    "name": "Hugo Mercado",
-    "email": "hugo.mario.mercado@gmail.com",
-    "url": "https://github.com/HugoMario"
+    "name": "Leo Martins",
+    "email": "lmartins@pontusvision.com"
   },
-  "bugs": {
-    "url": "https://github.com/bug-hunters/oas3-tools/issues"
-  },
-  "homepage": "https://github.com/bug-hunters/oas3-tools",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:bug-hunters/oas3-tools.git"
-  },
+ 
   "keywords": [
     "api",
     "expressjs",
@@ -65,12 +61,18 @@
     "@types/jest": "^29.5.5",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.149",
+    "@types/node": "18.x",
+
     "@types/parseurl": "^1.3.1",
     "@types/qs": "^6.9.0",
     "@types/serve-static": "^1.13.3",
+    "azure-functions-core-tools": "^4.x",
+
     "jest": "^29.7.0",
     "source-map-loader": "^3.0.1",
     "ts-jest": "^29.1.1",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+        "rimraf": "^5.0.0"
+
   }
 }
