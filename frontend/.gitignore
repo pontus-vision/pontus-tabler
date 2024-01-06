@@ -1,0 +1,5 @@
+app_dist
+.vscode
+coverage
+vite.config.ts.timestamp-1701711593208-47637c0cc20cf.mjs
+tsconfig.node.tsbuildinfo

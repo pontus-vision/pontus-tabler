@@ -40,8 +40,6 @@ export const readTableById = async (data: TableReadReq) => {
     return resources[0];
   } else if (resources.length === 0) {
     throw { code: 404, message: 'No table found.' };
-  } else {
-    throw { code: 409, message: 'There is more than 1 table' };
   }
 };
 

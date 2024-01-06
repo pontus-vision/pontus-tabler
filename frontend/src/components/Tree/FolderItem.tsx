@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { DataRoot, Child } from '../../types';
 import FileItem from './FileItem';
+import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
 
 export type Folder = {
   id: string;
@@ -17,17 +17,18 @@ export type File = {
 };
 
 type FolderItemProps = {
-  folder: Child | DataRoot;
-  onSelect?: (folderId: DataRoot | Child) => void;
+  folder: MenuItemTreeRef;
+  onSelect?: (folderId: MenuItemTreeRef) => void;
   selected?: string;
   onDragStart?: (
     event: React.DragEvent<HTMLDivElement>,
     index: number,
-    item: Child | DataRoot,
+    item: MenuItemTreeRef,
   ) => void;
   index?: number;
   path?: string;
   actionsMode: boolean;
+  onUpdate?: (data: MenuItemTreeRef) => void;
 };
 
 const FolderItem = ({
@@ -38,13 +39,18 @@ const FolderItem = ({
   index,
   path,
   actionsMode,
+  onUpdate,
 }: FolderItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(folder.name);
-  const [contextMenu, setContextMenu] = useState(null); // Track context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+  } | null>(); // Track context menu state
   const [selectedItem, setSelectedItem] = useState();
-  const [currentPath, setCurrentPath] = useState(path + '/' + folder.id);
+  const [currentPath, setCurrentPath] = useState(folder.path);
+  const [updatedFolder, setUpdatedFolder] = useState<MenuItemTreeRef>();
 
   const toggleFolder = () => {
     setIsOpen(!isOpen);
@@ -52,16 +58,7 @@ const FolderItem = ({
 
   const handleSelect = () => {
     toggleFolder();
-    onSelect && onSelect({ ...folder, path: path || '/' });
-  };
-
-  const handleEdit = () => {
-    if (!actionsMode) return;
-    setIsEditing(true);
-  };
-
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditedName(e.target.value);
+    onSelect && onSelect(folder);
   };
 
   const handleEditSave = () => {
@@ -103,19 +100,22 @@ const FolderItem = ({
 
     // Add the event listener when the component mounts
     window.addEventListener('click', handleWindowClick);
-
-    // Remove the event listener when the component unmounts
-    return () => {
-      window.removeEventListener('click', handleWindowClick);
-    };
   }, []);
+
+  function changeLastPart(str?: string, newPart?: string) {
+    if (!str || !newPart) return;
+
+    var n = str.lastIndexOf('/');
+    var result = str.substring(0, n + 1) + newPart;
+    return result;
+  }
+
   useEffect(() => {
-    console.log(selected === folder.path, { selected, path });
-  }, [selected]);
+    console.log(onUpdate);
+  }, [onUpdate]);
 
   return (
     <div
-      className={'mb-2 '}
       onBlur={() => setContextMenu(null)}
       // actionsMode={actionsMode}
       onContextMenu={handleContextMenu}
@@ -127,19 +127,30 @@ const FolderItem = ({
     >
       {isEditing ? (
         <input
+          className="tree-item__input-rename"
           type="text"
-          value={editedName}
-          onChange={handleEditInputChange}
-          onBlur={handleEditSave}
+          defaultValue={editedName}
+          onChange={(e) => {
+            // setEditedName(e?.target?.value);
+            setUpdatedFolder &&
+              setUpdatedFolder({
+                id: folder?.id || '',
+                name: e?.target?.value,
+                path: folder.path,
+              });
+          }}
+          onBlur={() => {
+            console.log({ updatedFolder, onUpdate });
+            updatedFolder && onUpdate && onUpdate(updatedFolder);
+          }}
         />
       ) : (
         <span
           className={`cursor-pointer ${
             selected === path ? 'text-blue-500' : ''
-          }`}
+          } ${selected === folder.path ? 'tree-item__highlighted' : ''}`}
           onClick={onSelect ? handleSelect : toggleFolder}
           onDragStart={() => console.log('Dragging')}
-          onDoubleClick={handleEdit}
         >
           {isOpen ? '📂' : '📁'} {folder.name}
         </span>
@@ -155,6 +166,7 @@ const FolderItem = ({
                   folder={child}
                   onSelect={onSelect}
                   selected={selected}
+                  onUpdate={onUpdate}
                   path={`${!!path ? path : ''}/${child.name}`}
                   actionsMode={actionsMode}
                 />
@@ -171,9 +183,9 @@ const FolderItem = ({
           ))}
         </ul>
       )}
-      {contextMenu && (
+      {contextMenu && selected === folder.path && (
         <div
-          className="fixed bg-white border border-gray-300 shadow-lg p-2"
+          className="menu-right-click"
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
           <div

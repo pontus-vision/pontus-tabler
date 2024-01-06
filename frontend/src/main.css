@@ -216,8 +216,8 @@
 .sidebar .tree-view {
   overflow-y: auto;
   width: 80%;
-  max-height: 15rem;
-  min-height: 5rem;
+  max-height: 50%;
+  min-height: 30%;
 }
 .sidebar__items-list {
   list-style: none;
@@ -441,6 +441,68 @@
     display: block;
   }
 }
+.menu-tree {
+  transform: translateX(-104%);
+}
+.menu-tree#messageBox {
+  transition: transform 300ms ease-in-out;
+  position: absolute;
+  right: 3%;
+  top: 11%;
+  left: 3%;
+  padding: 10px;
+  background-color: rgba(249, 237, 190, 0.7882352941);
+  border: solid 1px #f0c36d;
+  border-radius: 8px;
+  text-align: center;
+  z-index: 4;
+}
+.menu-tree.opened {
+  transform: translateX(0%);
+}
+
+.tree-view {
+  position: relative;
+}
+.tree-view__create-view {
+  display: flex;
+  justify-content: flex-end;
+}
+.tree-view__open-box-btn {
+  font-size: 1.875rem; /* 30px */
+  line-height: 2.25rem; /* 36px */
+}
+.tree-view__create-box {
+  box-shadow: 0px 0px 2px black;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  top: 2rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.6509803922);
+  border-width: 1px;
+  border-radius: 0.2rem;
+  width: 100%;
+}
+.tree-view__create-box.hidden {
+  display: none;
+}
+.tree-view__create-box__create-box__input {
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.tree-view__create-box__create-box__input:hover {
+  background-color: #1e40af;
+}
+.tree-view .tree-item__highlighted {
+  background-color: rgba(0, 124, 255, 0.2784313725);
+  padding-inline: 0.2rem;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }
