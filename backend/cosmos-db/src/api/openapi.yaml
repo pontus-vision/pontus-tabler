@@ -247,6 +247,38 @@ paths:
       security:
         - bearerAuth: []
       x-swagger-router-controller: TableController
+  /table/data/create:
+    post:
+      summary: Create a new row
+      description: 'Create a new row data, by using key/value pair for each column.'
+      operationId: tableDataCreatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableDataCreateReq'
+            # examples:
+            #   example-01:
+            #     value:
+            #       id: mapeamentoDeProcessos
+            #       cols:
+            #         mapeamentoDeProcessoCol1: New value
+            #         mapeamentoDeProcessoCol2: New value
+        required: true
+      responses:
+        '201':
+          description: Table row created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDataCreateRes'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: TableDataController
   /table/data/read:
     post:
       description: ''
@@ -256,65 +288,65 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/agGridReadReq'
-            examples:
-              example-0001:
-                value:
-                  dataType: Person_Natural
-                  filters:
-                    - colId: Person_Natural_Full_Name
-                      condition1:
-                        filter: JO
-                        filterType: text
-                        type: contains
-                      condition2:
-                        filter: SE
-                        filterType: text
-                        type: contains
-                      filterType: text
-                      operator: AND
-                  from: 0
-                  search:
-                    cols:
-                      - field: Person_Natural_Full_Name
-                        filter: true
-                        headerName: Full Name
-                        id: Person_Natural_Full_Name
-                        name: Full Name
-                        sortable: true
-                      - field: Person_Natural_Customer_ID
-                        filter: true
-                        headerName: Customer ID
-                        id: Person_Natural_Customer_ID
-                        name: Customer ID
-                        sortable: true
-                    extraSearch:
-                      label: Person_Natural
-                      value: Person_Natural
-                    searchExact: true
-                    searchStr: ''
-                  sortCol: Person_Natural_Full_Name
-                  sortDir: +asc
-                  to: 100
+              $ref: '#/components/schemas/TableDataReadReq'
+            # examples:
+            #   example-0001:
+            #     value:
+            #       dataType: Person_Natural
+            #       filters:
+            #         - colId: Person_Natural_Full_Name
+            #           condition1:
+            #             filter: JO
+            #             filterType: text
+            #             type: contains
+            #           condition2:
+            #             filter: SE
+            #             filterType: text
+            #             type: contains
+            #           filterType: text
+            #           operator: AND
+            #       from: 0
+            #       search:
+            #         cols:
+            #           - field: Person_Natural_Full_Name
+            #             filter: true
+            #             headerName: Full Name
+            #             id: Person_Natural_Full_Name
+            #             name: Full Name
+            #             sortable: true
+            #           - field: Person_Natural_Customer_ID
+            #             filter: true
+            #             headerName: Customer ID
+            #             id: Person_Natural_Customer_ID
+            #             name: Customer ID
+            #             sortable: true
+            #         extraSearch:
+            #           label: Person_Natural
+            #           value: Person_Natural
+            #         searchExact: true
+            #         searchStr: ''
+            #       sortCol: Person_Natural_Full_Name
+            #       sortDir: +asc
+            #       to: 100
       responses:
         '200':
           description: AG Record data
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/agGridReadRes'
-              examples:
-                example-0001:
-                  value:
-                    type: recordReply
-                    from: 0
-                    records:
-                      - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
-                        ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
-                      - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
-                        ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
-                    to: 2
-                    totalAvailable: 4242
+                $ref: '#/components/schemas/TableDataReadRes'
+              # examples:
+              #   example-0001:
+              #     value:
+              #       type: recordReply
+              #       from: 0
+              #       records:
+              #         - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
+              #           ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
+              #         - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
+              #           ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
+              #       to: 2
+              #       totalAvailable: 4242
         '400':
           description: Invalid search supplied
         '401':
@@ -325,35 +357,7 @@ paths:
           description: Method Not Allowed
         '500':
           description: Internal error
-      x-swagger-router-controller: Default
-  /table/data/create:
-    post:
-      summary: Create a new row
-      description: 'Create a new row data, by using key/value pair for each column.'
-      operationId: tableDataCreatePOST
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewTableRow'
-            examples:
-              example-01:
-                value:
-                  id: mapeamentoDeProcessos
-                  cols:
-                    mapeamentoDeProcessoCol1: New value
-                    mapeamentoDeProcessoCol2: New value
-        required: true
-      responses:
-        '201':
-          description: Table row created successfully
-        '400':
-          description: Bad request
-        '500':
-          description: Internal server error
-      security:
-        - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableDataController
   /table/data/update:
     post:
       summary: Update a row
@@ -363,26 +367,30 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTableRow'
-            examples:
-              example-01:
-                value:
-                  id: mapeamentoDeProcessos
-                  rowId: 15
-                  cols:
-                    mapeamentoDeProcessoCol1: Value Overwritten
-                    mapeamentoDeProcessoCol2: Value Overwritten
+              $ref: '#/components/schemas/TableDataUpdateReq'
+            # examples:
+            #   example-01:
+            #     value:
+            #       id: mapeamentoDeProcessos
+            #       rowId: 15
+            #       cols:
+            #         mapeamentoDeProcessoCol1: Value Overwritten
+            #         mapeamentoDeProcessoCol2: Value Overwritten
         required: true
       responses:
         '201':
           description: Table row updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDataUpdateRes'
         '400':
           description: Bad request
         '500':
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableDataController
   /table/data/delete:
     post:
       summary: Update a row
@@ -392,7 +400,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteTableRow'
+              $ref: '#/components/schemas/TableDataDeleteReq'
             examples:
               example-01:
                 value:
@@ -408,7 +416,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableDataController
   /dashboard/create:
     post:
       summary: Create a new dashboard
@@ -939,7 +947,6 @@ components:
           type: string
         kind:
           type: string
-          enum: [folder, file]
         path:
           type: string
         children:
@@ -1033,6 +1040,9 @@ components:
         sortDir:
           type: string
           example: +desc
+    TableDataReadReq:
+      allOf:
+        - $ref: '#/components/schemas/ReadPaginationFilter'
     agGridReadRes:
       type: object
       properties:
@@ -1149,26 +1159,32 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
-    NewTableRow:
+    TableDataCreateReq:
       type: object
       properties:
-        id:
+        tableId:
           type: string
-        cols:
-          $ref: '#/components/schemas/NewTableRow_cols'
-    UpdateTableRow:
+        rows:
+          $ref: '#/components/schemas/TableDataRowRef'
+    TableDataCreateRes:
+      allOf:
+        - $ref: '#/components/schemas/TableDataRowRef'
+    TableDataUpdateReq:
       type: object
       properties:
-        id:
+        tableId:
           type: string
         rowId:
           type: string
         cols:
-          $ref: '#/components/schemas/NewTableRow_cols'
-    DeleteTableRow:
+          $ref: '#/components/schemas/TableDataRowRef'
+    TableDataUpdateRes:
+      allOf:
+        - $ref: '#/components/schemas/TableDataRowRef'
+    TableDataDeleteReq:
       type: object
       properties:
-        id:
+        tableId:
           type: string
         rowId:
           type: string
@@ -1268,7 +1284,6 @@ components:
     TableReadReq:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
-
     ReadPaginationFilter:
       type: object
       additionalProperties: false
@@ -1281,7 +1296,26 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/ReadPaginationFilter_filters'
-
+    TableDataReadRes:
+      type: object
+      properties:
+        totalRows:
+          type: integer
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableDataRowRef'
+      # example:
+      #   totalDashboards: 0
+      #   dashboards:
+      #     - owner: owner
+      #       folder: folder
+      #       name: name
+      #       id: id
+      #     - owner: owner
+      #       folder: folder
+      #       name: name
+      #       id: id
     TablesReadRes:
       type: object
       properties:
@@ -1668,6 +1702,9 @@ components:
         folder: folder
         name: name
         id: id
+    TableDataRowRef:
+      type: object
+      additionalProperties: true
   securitySchemes:
     bearerAuth:
       type: http
