@@ -692,25 +692,6 @@ export interface DashboardsReadRes {
 /**
  *
  * @export
- * @interface DeleteTableRow
- */
-export interface DeleteTableRow {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableRow
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTableRow
-   */
-  rowId?: string;
-}
-/**
- *
- * @export
  * @interface DeleteUser
  */
 export interface DeleteUser {
@@ -847,12 +828,6 @@ export interface InlineResponse2002 {
  * @interface MenuCreateReq
  */
 export interface MenuCreateReq extends MenuItemTreeRef {}
-
-/**
- * @export
- * @namespace MenuCreateReq
- */
-export namespace MenuCreateReq {}
 /**
  *
  * @export
@@ -867,11 +842,6 @@ export interface MenuCreateRes extends MenuItemTreeRef {
   id: string;
 }
 
-/**
- * @export
- * @namespace MenuCreateRes
- */
-export namespace MenuCreateRes {}
 /**
  *
  * @export
@@ -914,7 +884,7 @@ export interface MenuItemTreeRef {
    * @type {string}
    * @memberof MenuItemTreeRef
    */
-  kind?: KindEnum;
+  kind?: string;
   /**
    *
    * @type {string}
@@ -928,9 +898,6 @@ export interface MenuItemTreeRef {
    */
   children?: Array<MenuItemTreeRef>;
 }
-
-export type KindEnum = 'folder' | 'file';
-
 /**
  *
  * @export
@@ -957,12 +924,6 @@ export interface MenuReadRes extends MenuItemTreeRef {
    */
   id: string;
 }
-
-/**
- * @export
- * @namespace MenuReadRes
- */
-export namespace MenuReadRes {}
 /**
  *
  * @export
@@ -976,12 +937,6 @@ export interface MenuUpdateReq extends MenuItemTreeRef {
    */
   id: string;
 }
-
-/**
- * @export
- * @namespace MenuUpdateReq
- */
-export namespace MenuUpdateReq {}
 /**
  *
  * @export
@@ -994,31 +949,6 @@ export interface MenuUpdateRes extends MenuItemTreeRef {
    * @memberof MenuUpdateRes
    */
   id: string;
-}
-
-/**
- * @export
- * @namespace MenuUpdateRes
- */
-export namespace MenuUpdateRes {}
-/**
- *
- * @export
- * @interface NewTableRow
- */
-export interface NewTableRow {
-  /**
-   *
-   * @type {string}
-   * @memberof NewTableRow
-   */
-  id?: string;
-  /**
-   *
-   * @type {NewTableRowCols}
-   * @memberof NewTableRow
-   */
-  cols?: NewTableRowCols;
 }
 /**
  *
@@ -1234,29 +1164,14 @@ export interface TableColumnRef {
    * @type {string}
    * @memberof TableColumnRef
    */
-  kind?: TableColumnRef.KindEnum;
+  kind?: KindEnum;
 }
 
 /**
  * @export
  * @namespace TableColumnRef
  */
-export namespace TableColumnRef {
-  /**
-   * @export
-   * @enum {string}
-   */
-  export enum KindEnum {
-    Checkboxes = <any>'checkboxes',
-    Selectbox = <any>'selectbox',
-    Text = <any>'text',
-    Number = <any>'number',
-    Phone = <any>'phone',
-    Zipcode = <any>'zipcode',
-    Email = <any>'email',
-    Zipcode_7 = <any>'zipcode',
-  }
-}
+export type KindEnum = 'folder' | 'file';
 /**
  *
  * @export
@@ -1295,6 +1210,114 @@ export interface TableCreateRes extends BaseModelRef {
    */
   cols?: Array<TableColumnRef>;
 }
+/**
+ *
+ * @export
+ * @interface TableDataCreateReq
+ */
+export interface TableDataCreateReq {
+  /**
+   *
+   * @type {string}
+   * @memberof TableDataCreateReq
+   */
+  tableId?: string;
+  /**
+   *
+   * @type {TableDataRowRef}
+   * @memberof TableDataCreateReq
+   */
+  rows?: TableDataRowRef;
+}
+/**
+ *
+ * @export
+ * @interface TableDataCreateRes
+ */
+export interface TableDataCreateRes extends TableDataRowRef {}
+/**
+ *
+ * @export
+ * @interface TableDataDeleteReq
+ */
+export interface TableDataDeleteReq {
+  /**
+   *
+   * @type {string}
+   * @memberof TableDataDeleteReq
+   */
+  tableId?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof TableDataDeleteReq
+   */
+  rowId?: string;
+}
+/**
+ *
+ * @export
+ * @interface TableDataReadReq
+ */
+export interface TableDataReadReq extends ReadPaginationFilter {}
+/**
+ *
+ * @export
+ * @interface TableDataReadRes
+ */
+export interface TableDataReadRes {
+  /**
+   *
+   * @type {number}
+   * @memberof TableDataReadRes
+   */
+  totalRows?: number;
+  /**
+   *
+   * @type {Array<TableDataRowRef>}
+   * @memberof TableDataReadRes
+   */
+  rows?: Array<TableDataRowRef>;
+}
+/**
+ *
+ * @export
+ * @interface TableDataRowRef
+ */
+export interface TableDataRowRef {
+  [key: string]: any;
+}
+/**
+ *
+ * @export
+ * @interface TableDataUpdateReq
+ */
+export interface TableDataUpdateReq {
+  /**
+   *
+   * @type {string}
+   * @memberof TableDataUpdateReq
+   */
+  tableId?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof TableDataUpdateReq
+   */
+  rowId?: string;
+  /**
+   *
+   * @type {TableDataRowRef}
+   * @memberof TableDataUpdateReq
+   */
+  cols?: TableDataRowRef;
+}
+/**
+ *
+ * @export
+ * @interface TableDataUpdateRes
+ */
+export interface TableDataUpdateRes extends TableDataRowRef {}
 /**
  *
  * @export
@@ -1382,31 +1405,6 @@ export interface TablesReadRes {
    * @memberof TablesReadRes
    */
   tables?: Array<BaseModelRef & TableRef>;
-}
-/**
- *
- * @export
- * @interface UpdateTableRow
- */
-export interface UpdateTableRow {
-  /**
-   *
-   * @type {string}
-   * @memberof UpdateTableRow
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof UpdateTableRow
-   */
-  rowId?: string;
-  /**
-   *
-   * @type {NewTableRowCols}
-   * @memberof UpdateTableRow
-   */
-  cols?: NewTableRowCols;
 }
 /**
  *
@@ -2743,7 +2741,10 @@ export const DefaultApiFetchParamCreator = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDataCreatePOST(body: NewTableRow, options: any = {}): FetchArgs {
+    tableDataCreatePOST(
+      body: TableDataCreateReq,
+      options: any = {},
+    ): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2794,7 +2795,10 @@ export const DefaultApiFetchParamCreator = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDataDeletePOST(body: DeleteTableRow, options: any = {}): FetchArgs {
+    tableDataDeletePOST(
+      body: TableDataDeleteReq,
+      options: any = {},
+    ): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2845,7 +2849,10 @@ export const DefaultApiFetchParamCreator = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDataUpdatePOST(body: UpdateTableRow, options: any = {}): FetchArgs {
+    tableDataUpdatePOST(
+      body: TableDataUpdateReq,
+      options: any = {},
+    ): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -3855,7 +3862,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     tableDataCreatePOST(
-      body: NewTableRow,
+      body: TableDataCreateReq,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3885,7 +3892,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     tableDataDeletePOST(
-      body: DeleteTableRow,
+      body: TableDataDeleteReq,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3915,7 +3922,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     tableDataUpdatePOST(
-      body: UpdateTableRow,
+      body: TableDataUpdateReq,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -4397,7 +4404,7 @@ export const DefaultApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDataCreatePOST(body: NewTableRow, options?: any) {
+    tableDataCreatePOST(body: TableDataCreateReq, options?: any) {
       return DefaultApiFp(configuration).tableDataCreatePOST(body, options)(
         fetch,
         basePath,
@@ -4410,7 +4417,7 @@ export const DefaultApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDataDeletePOST(body: DeleteTableRow, options?: any) {
+    tableDataDeletePOST(body: TableDataDeleteReq, options?: any) {
       return DefaultApiFp(configuration).tableDataDeletePOST(body, options)(
         fetch,
         basePath,
@@ -4423,7 +4430,7 @@ export const DefaultApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDataUpdatePOST(body: UpdateTableRow, options?: any) {
+    tableDataUpdatePOST(body: TableDataUpdateReq, options?: any) {
       return DefaultApiFp(configuration).tableDataUpdatePOST(body, options)(
         fetch,
         basePath,
@@ -4869,7 +4876,7 @@ export class DefaultApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableDataCreatePOST(body: NewTableRow, options?: any) {
+  public tableDataCreatePOST(body: TableDataCreateReq, options?: any) {
     return DefaultApiFp(this.configuration).tableDataCreatePOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4884,7 +4891,7 @@ export class DefaultApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableDataDeletePOST(body: DeleteTableRow, options?: any) {
+  public tableDataDeletePOST(body: TableDataDeleteReq, options?: any) {
     return DefaultApiFp(this.configuration).tableDataDeletePOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4899,7 +4906,7 @@ export class DefaultApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableDataUpdatePOST(body: UpdateTableRow, options?: any) {
+  public tableDataUpdatePOST(body: TableDataDeleteReq, options?: any) {
     return DefaultApiFp(this.configuration).tableDataUpdatePOST(body, options)(
       this.fetch,
       this.basePath,
