@@ -11,6 +11,7 @@ import * as http from 'http';
 import * as express from 'express';
 import * as cors from 'cors';
 import { SwaggerUiOptions } from './middleware/swagger.ui.options';
+
 const validate = (_request, _scopes, _schema) => {
   // security stuff here
   return true;
@@ -19,7 +20,9 @@ const validate = (_request, _scopes, _schema) => {
 const serverPort = 8080;
 const openApiApp = express();
 
-const currDir = __dirname.replace(/src/, 'dist' )
+const currDir = __dirname.replace(/src/, 'dist');
+
+console.log('Started express app');
 
 // swaggerRouter configuration
 const options: Oas3AppOptions = {
@@ -42,20 +45,13 @@ const options: Oas3AppOptions = {
       },
     },
   },
-  swaggerUI: new SwaggerUiOptions(
-    '/api',
-    '/docs',
-    path.join(currDir, 'docs'),
-  ),
+  swaggerUI: new SwaggerUiOptions('/api', '/docs', path.join(currDir, 'docs')),
   cors: undefined,
 };
 
-const pathName =  path.join(currDir, 'api/openapi.yaml');
+const pathName = path.join(currDir, 'api/openapi.yaml');
 
-let expressAppConfig = new ExpressAppConfig(
-  pathName,
-  options,
-);
+let expressAppConfig = new ExpressAppConfig(pathName, options);
 let app = expressAppConfig.getApp();
 app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
 
@@ -63,7 +59,7 @@ app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
 //   app._router.stack.push(openApiApp._router.stack[i]);
 // }
 // Initialize the Swagger middleware
-export const srv  = http.createServer(app).listen(serverPort, function () {
+export const srv = http.createServer(app).listen(serverPort, function () {
   console.log(
     'Your server is listening on port %d (http://localhost:%d)',
     serverPort,
@@ -85,6 +81,8 @@ const httpTrigger = async (
 ): Promise<HttpResponseInit> => {
   context.log(`Http function processed request for url "${request.url}"`);
 
+  srv.closeIdleConnections();
+
   const data = await request.text();
   const url = new URL(request.url);
   const headers: http.OutgoingHttpHeaders = {};
@@ -101,36 +99,37 @@ const httpTrigger = async (
     headers: headers,
   };
 
-
   const ret = await fetch(
-      // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
-      'http://localhost:8080' + url.pathname,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer 123456',
-        },
-        body:data,
+    // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
+    'http://localhost:8080' + url.pathname,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer 123456',
       },
-    );
+      body: data,
+    },
+  );
 
-    const respHeaders: HeadersInit= {};
+  const respHeaders: HeadersInit = {};
 
-    ret.headers.forEach((value: string, key: string) => {
-      respHeaders[key] = value;
-    });
-  
-    const resp: HttpResponseInit = {
-      body: await ret.text(),
-      cookies: undefined,
-      enableContentNegotiation: undefined,
-      headers: respHeaders,
-      // jsonBody: await ret.json(),
-      status: ret.status,
-    };
-  
-    return resp;
+  ret.headers.forEach((value: string, key: string) => {
+    respHeaders[key] = value;
+  });
+
+  const resp: HttpResponseInit = {
+    body: await ret.text(),
+    cookies: undefined,
+    enableContentNegotiation: undefined,
+    headers: respHeaders,
+    // jsonBody: await ret.json(),
+    status: ret.status,
+  };
+
+  srv.closeIdleConnections();
+
+  return resp;
   //   const resp: HttpResponseInit = {
   //     body: "",
   //     cookies: undefined,
@@ -145,8 +144,6 @@ const httpTrigger = async (
   //     resolve: (value: HttpResponseInit | PromiseLike<HttpResponseInit>) => void,
   //     reject: (reason: any) => void,
   //   ) => {
-
-
 
   //     const req = http.request(reqOpts, (res: http.IncomingMessage) => {
   //       resp.status = res.statusCode;
@@ -187,3 +184,16 @@ azureApp.http('httpTrigger', {
 });
 
 export default httpTrigger;
+
+// (async () => {
+//   const readRes = await readMenuItemByPath('/');
+
+//   if (!readRes) {
+//     await upsertMenuItem({
+//       name: '/',
+//       path: '/',
+//       children: [],
+//       kind: MenuDirectoryTreeRef.KindEnum.Folder,
+//     });
+//   }
+// })();

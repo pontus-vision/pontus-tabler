@@ -216,8 +216,8 @@
 .sidebar .tree-view {
   overflow-y: auto;
   width: 80%;
-  max-height: 15rem;
-  min-height: 5rem;
+  max-height: 50%;
+  min-height: 30%;
 }
 .sidebar__items-list {
   list-style: none;
@@ -441,6 +441,68 @@
     display: block;
   }
 }
+.menu-tree {
+  transform: translateX(-104%);
+}
+.menu-tree#messageBox {
+  transition: transform 300ms ease-in-out;
+  position: absolute;
+  right: 3%;
+  top: 11%;
+  left: 3%;
+  padding: 10px;
+  background-color: rgba(249, 237, 190, 0.7882352941);
+  border: solid 1px #f0c36d;
+  border-radius: 8px;
+  text-align: center;
+  z-index: 4;
+}
+.menu-tree.opened {
+  transform: translateX(0%);
+}
+
+.tree-view {
+  position: relative;
+}
+.tree-view__create-view {
+  display: flex;
+  justify-content: flex-end;
+}
+.tree-view__open-box-btn {
+  font-size: 1.875rem; /* 30px */
+  line-height: 2.25rem; /* 36px */
+}
+.tree-view__create-box {
+  box-shadow: 0px 0px 2px black;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  top: 2rem;
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.6509803922);
+  border-width: 1px;
+  border-radius: 0.2rem;
+  width: 100%;
+}
+.tree-view__create-box.hidden {
+  display: none;
+}
+.tree-view__create-box__create-box__input {
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+.tree-view__create-box__create-box__input:hover {
+  background-color: #1e40af;
+}
+.tree-view .tree-item__highlighted {
+  background-color: rgba(0, 124, 255, 0.2784313725);
+  padding-inline: 0.2rem;
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }
@@ -1060,6 +1122,38 @@
   padding: 0 2rem;
 }
 
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.create-table__name-input {
+  /* set width, padding, and margin */
+  width: 50%;
+  padding: 10px;
+  margin: 10px 0;
+  /* set border */
+  border: none;
+  border-bottom: 2px solid #3cbc8d;
+  /* set background color and text color */
+  background-color: #f5f5f5;
+  color: #333;
+  /* set font */
+  font-family: "Courier New", Courier, monospace;
+  font-size: 20px;
+  /* set box shadow */
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+  /* add transition for smoother change of styles */
+  transition: width 0.4s ease-in-out;
+}
+
+.create-table__name-input:focus {
+  /* change width when input is focused */
+  width: 100%;
+}
+
 .create-new-table-input {
   background-color: #f7fafc;
   border: 1px solid #cbd5e0;
@@ -1231,6 +1325,9 @@
   align-items: center;
   padding-top: 3rem;
 }
+.update-table__tables-read-btn {
+  cursor: pointer;
+}
 
 .update-table-overflow-container {
   overflow-x: auto;
@@ -1324,6 +1421,64 @@
   font-size: 0.875rem;
 }
 
+/* Add these styles to your existing CSS file or create a new one */
+.table-row {
+  /* Add general styles for the table row */
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f7fafc;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.table-row__data--padded {
+  /* Add styles for the first column (padded) */
+  padding-left: 1.5rem;
+}
+
+.table-row__data--left {
+  /* Add styles for the second column (left-aligned) */
+  text-align: left;
+  padding-left: 1.5rem;
+}
+
+.table-row__data--center {
+  /* Add styles for the third, fourth, and fifth columns (center-aligned) */
+  text-align: center;
+}
+
+.table-row__flex-container {
+  /* Add styles for the flex container inside the columns */
+  display: flex;
+  align-items: center;
+  height: 75%;
+}
+
+.table-row__input-field {
+  /* Add styles for the input field */
+  /* Example styles: */
+  width: 100%;
+  padding: 0.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.375rem;
+}
+
+.table-row__icon--full-size {
+  /* Add styles for the full-size icons */
+  /* Example styles: */
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.table-row__icon--transform {
+  /* Add styles for the transformed icon */
+  /* Example styles: */
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  transform: scale(1.1); /* Example transformation, adjust as needed */
+}
+
+/* Add any additional styles or modifications as per your design requirements */
 .unauthorized {
   background-color: #f8f9fa;
 }

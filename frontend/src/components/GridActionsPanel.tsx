@@ -6,21 +6,21 @@ import { FaPlusCircle } from 'react-icons/fa';
 import { IRowNode } from 'ag-grid-community';
 
 type Props = {
-  deleteMode: boolean;
-  updateMode: boolean;
-  setGridKey: Dispatch<React.SetStateAction<number>>;
-  setFlexModelId: Dispatch<React.SetStateAction<string | undefined>>;
-  setOpenNewEntryView: React.Dispatch<React.SetStateAction<boolean>>;
-  setModelId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  updateModelId: string | undefined;
-  setDeletion: Dispatch<React.SetStateAction<boolean>>;
-  id: string;
-  setShowColumnSelector: Dispatch<React.SetStateAction<boolean>>;
-  setDeleteMode: Dispatch<React.SetStateAction<boolean>>;
-  setUpdateMode: Dispatch<React.SetStateAction<boolean>>;
+  deleteMode?: boolean;
+  updateMode?: boolean;
+  setGridKey?: Dispatch<React.SetStateAction<number>>;
+  setFlexModelId?: Dispatch<React.SetStateAction<string | undefined>>;
+  setOpenNewEntryView?: React.Dispatch<React.SetStateAction<boolean>>;
+  setModelId?: React.Dispatch<React.SetStateAction<string | undefined>>;
+  updateModelId?: string | undefined;
+  setDeletion?: Dispatch<React.SetStateAction<boolean>>;
+  id?: string;
+  setShowColumnSelector?: Dispatch<React.SetStateAction<boolean>>;
+  setDeleteMode?: Dispatch<React.SetStateAction<boolean>>;
+  setUpdateMode?: Dispatch<React.SetStateAction<boolean>>;
   onRefresh?: () => void;
-  configTableId: string;
-  add: () => void;
+  configTableId?: string;
+  add?: () => void;
   permissions?: {
     updateAction: boolean;
     createAction: boolean;
@@ -29,6 +29,7 @@ type Props = {
   };
   onDelete?: (arr: any[]) => void;
   entriesToBeDeleted: IRowNode<any>[];
+  testId?: string;
 };
 
 const GridActionsPanel = ({
@@ -50,13 +51,14 @@ const GridActionsPanel = ({
   entriesToBeDeleted,
   permissions,
   onDelete,
+  testId,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
 
   var windowWidth = window.innerWidth;
 
-  const burguerMenu = useRef<HTMLInputElement>();
+  const burguerMenu = useRef<any>();
 
   useEffect(() => {
     console.log({ permissions });
@@ -103,18 +105,18 @@ const GridActionsPanel = ({
             >
               <BsFillTrash2Fill
                 onClick={() => {
-                  setModelId(configTableId);
+                  setModelId && setModelId(configTableId);
                   console.log('whatever');
                   // entriesToBeDeleted &&
                   //   entriesToBeDeleted.length > 0 &&
-                  setDeletion(true);
+                  setDeletion && setDeletion(true);
                 }}
               />
               <i
                 className="fa-solid fa-x "
                 onClick={() => {
                   changeBurguerMenuValue(true, 'flex');
-                  setDeleteMode(false);
+                  setDeleteMode && setDeleteMode(false);
                 }}
               ></i>
             </div>
@@ -125,7 +127,7 @@ const GridActionsPanel = ({
                 className="fa-solid fa-x"
                 onClick={() => {
                   changeBurguerMenuValue(true, 'flex');
-                  setUpdateMode(false);
+                  setUpdateMode && setUpdateMode(false);
                 }}
               ></i>
             </div>
@@ -138,16 +140,18 @@ const GridActionsPanel = ({
           {deleteMode || updateMode || (
             <Button
               className="grid-actions-panel__plus-btn btn"
+              data-testid={`${testId}-add-btn`}
               onClick={() => {
-                setFlexModelId(id);
+                setFlexModelId && setFlexModelId(id);
                 console.log('add entry');
-                setOpenNewEntryView(true);
-                setModelId((prevState) =>
-                  updateModelId
-                    ? (prevState = updateModelId)
-                    : (prevState = configTableId),
-                );
-                add();
+                setOpenNewEntryView && setOpenNewEntryView(true);
+                setModelId &&
+                  setModelId((prevState) =>
+                    updateModelId
+                      ? (prevState = updateModelId)
+                      : (prevState = configTableId),
+                  );
+                add && add();
               }}
             >
               +
@@ -157,7 +161,7 @@ const GridActionsPanel = ({
             <Button
               className="grid-actions-panel__restore-btn btn"
               onClick={() => {
-                setGridKey((prevState) => prevState + 1);
+                setGridKey && setGridKey((prevState) => prevState + 1);
                 console.log('restore');
               }}
             >
@@ -168,7 +172,7 @@ const GridActionsPanel = ({
             <Button
               className="grid-actions-panel__select-btn btn"
               onClick={() => {
-                setShowColumnSelector(true);
+                setShowColumnSelector && setShowColumnSelector(true);
               }}
             >
               Select Columns
@@ -179,7 +183,7 @@ const GridActionsPanel = ({
               className="grid-actions-panel__delete-btn btn"
               onClick={() => {
                 changeBurguerMenuValue(false, 'none');
-                setDeleteMode(!deleteMode);
+                setDeleteMode && setDeleteMode(!deleteMode);
               }}
             >
               Delete Mode
@@ -190,7 +194,7 @@ const GridActionsPanel = ({
               className="grid-actions-panel__update-btn btn"
               onClick={() => {
                 changeBurguerMenuValue(false, 'none');
-                setUpdateMode(!updateMode);
+                setUpdateMode && setUpdateMode(!updateMode);
               }}
             >
               Update Mode
@@ -207,6 +211,7 @@ const GridActionsPanel = ({
         updateMode ||
         (permissions?.createAction && (
           <FaPlusCircle
+            data-testid={`${testId}-add-btn`}
             className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
             // style={{
             //   display: 'flex',
@@ -226,7 +231,7 @@ const GridActionsPanel = ({
                     ? (prevState = updateModelId)
                     : (prevState = configTableId),
                 );
-              add();
+              add && add();
             }}
           />
         ))}
@@ -236,13 +241,14 @@ const GridActionsPanel = ({
           onClick={() => {
             onRefresh && onRefresh();
           }}
+          data-testid={`${testId}-refresh-btn`}
         />
       )}
       {updateMode || deleteMode || (
         <button
           className="grid-actions-panel__select-btn"
           onClick={() => {
-            setShowColumnSelector(true);
+            setShowColumnSelector && setShowColumnSelector(true);
           }}
         >
           Select Columns
@@ -252,9 +258,10 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.deleteAction && (
           <button
+            data-testid={`${testId}-delete-mode`}
             className="grid-actions-panel__delete-btn"
             onClick={() => {
-              setDeleteMode(true);
+              setDeleteMode && setDeleteMode(true);
             }}
           >
             Delete Mode
@@ -264,9 +271,10 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.updateAction && (
           <button
+            data-testid={`${testId}-update-mode`}
             className="grid-actions-panel__update-btn"
             onClick={() => {
-              setUpdateMode(!updateMode);
+              setUpdateMode && setUpdateMode(!updateMode);
             }}
           >
             Update Mode
@@ -285,6 +293,7 @@ const GridActionsPanel = ({
         >
           <i
             className="fa-solid fa-trash"
+            data-testid={`${testId}-delete-btn`}
             onClick={() => {
               if (entriesToBeDeleted && onDelete) {
                 onDelete(entriesToBeDeleted);
@@ -296,7 +305,7 @@ const GridActionsPanel = ({
             className="fa-solid fa-x"
             style={{ fontSize: '1.8rem', cursor: 'pointer' }}
             onClick={() => {
-              setDeleteMode(false);
+              setDeleteMode && setDeleteMode(false);
             }}
           ></i>
         </div>
@@ -313,7 +322,7 @@ const GridActionsPanel = ({
               alignItems: 'center',
             }}
             onClick={() => {
-              setUpdateMode(false);
+              setUpdateMode && setUpdateMode(false);
             }}
           ></i>
         </div>

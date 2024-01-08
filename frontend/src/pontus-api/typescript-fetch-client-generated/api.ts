@@ -58,7 +58,7 @@ export interface FetchArgs {
  * @class BaseAPI
  */
 export class BaseAPI {
-  protected configuration: Configuration;
+  protected configuration?: Configuration;
 
   constructor(
     configuration?: Configuration,
@@ -79,7 +79,7 @@ export class BaseAPI {
  * @extends {Error}
  */
 export class RequiredError extends Error {
-  name: 'RequiredError';
+  name: 'RequiredError' = 'RequiredError';
   constructor(public field: string, msg?: string) {
     super(msg);
   }
@@ -437,43 +437,6 @@ export interface BaseModelRef {
 /**
  *
  * @export
- * @interface Child
- */
-export interface Child {
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  type?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Child
-   */
-  path?: string;
-  /**
-   *
-   * @type {Array<Child>}
-   * @memberof Child
-   */
-  children?: Array<Child>;
-}
-/**
- *
- * @export
  * @interface Dashboard
  */
 export interface Dashboard {
@@ -729,56 +692,6 @@ export interface DashboardsReadRes {
 /**
  *
  * @export
- * @interface DataRoot
- */
-export interface DataRoot {
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  type?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DataRoot
-   */
-  path?: string;
-  /**
-   *
-   * @type {Array<Child>}
-   * @memberof DataRoot
-   */
-  children?: Array<Child>;
-}
-/**
- *
- * @export
- * @interface DeleteTable
- */
-export interface DeleteTable {
-  /**
-   *
-   * @type {string}
-   * @memberof DeleteTable
-   */
-  tableId?: string;
-}
-/**
- *
- * @export
  * @interface DeleteTableRow
  */
 export interface DeleteTableRow {
@@ -787,7 +700,7 @@ export interface DeleteTableRow {
    * @type {string}
    * @memberof DeleteTableRow
    */
-  tableId?: string;
+  id?: string;
   /**
    *
    * @type {string}
@@ -807,38 +720,6 @@ export interface DeleteUser {
    * @memberof DeleteUser
    */
   userId?: string;
-}
-/**
- *
- * @export
- * @interface GetTable
- */
-export interface GetTable {
-  /**
-   *
-   * @type {string}
-   * @memberof GetTable
-   */
-  tableId?: string;
-}
-/**
- *
- * @export
- * @interface GetTablesResponse
- */
-export interface GetTablesResponse {
-  /**
-   *
-   * @type {number}
-   * @memberof GetTablesResponse
-   */
-  totalTables?: number;
-  /**
-   * Table columns associated with the table
-   * @type {Array<TableRef>}
-   * @memberof GetTablesResponse
-   */
-  tables?: Array<TableRef>;
 }
 /**
  *
@@ -963,22 +844,163 @@ export interface InlineResponse2002 {
 /**
  *
  * @export
- * @interface NewTable
+ * @interface MenuCreateReq
  */
-export interface NewTable {
+export interface MenuCreateReq extends MenuItemTreeRef {}
+
+/**
+ * @export
+ * @namespace MenuCreateReq
+ */
+export namespace MenuCreateReq {}
+/**
+ *
+ * @export
+ * @interface MenuCreateRes
+ */
+export interface MenuCreateRes extends MenuItemTreeRef {
   /**
-   * Name of the table
+   * Unique identifier
    * @type {string}
-   * @memberof NewTable
+   * @memberof MenuCreateRes
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuCreateRes
+ */
+export namespace MenuCreateRes {}
+/**
+ *
+ * @export
+ * @interface MenuDeleteReq
+ */
+export interface MenuDeleteReq {
+  /**
+   *
+   * @type {string}
+   * @memberof MenuDeleteReq
+   */
+  path: string;
+  /**
+   *
+   * @type {string}
+   * @memberof MenuDeleteReq
+   */
+  id: string;
+}
+/**
+ *
+ * @export
+ * @interface MenuItemTreeRef
+ */
+export interface MenuItemTreeRef {
+  /**
+   *
+   * @type {string}
+   * @memberof MenuItemTreeRef
+   */
+  id?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof MenuItemTreeRef
    */
   name?: string;
   /**
-   * Table columns to be associated with the table during creation
-   * @type {Array<TableColumnRef>}
-   * @memberof NewTable
+   *
+   * @type {string}
+   * @memberof MenuItemTreeRef
    */
-  cols?: Array<TableColumnRef>;
+  kind?: KindEnum;
+  /**
+   *
+   * @type {string}
+   * @memberof MenuItemTreeRef
+   */
+  path?: string;
+  /**
+   *
+   * @type {Array<MenuItemTreeRef>}
+   * @memberof MenuItemTreeRef
+   */
+  children?: Array<MenuItemTreeRef>;
 }
+
+export type KindEnum = 'folder' | 'file';
+
+/**
+ *
+ * @export
+ * @interface MenuReadReq
+ */
+export interface MenuReadReq {
+  /**
+   *
+   * @type {string}
+   * @memberof MenuReadReq
+   */
+  path: string;
+}
+/**
+ *
+ * @export
+ * @interface MenuReadRes
+ */
+export interface MenuReadRes extends MenuItemTreeRef {
+  /**
+   * Unique identifier
+   * @type {string}
+   * @memberof MenuReadRes
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuReadRes
+ */
+export namespace MenuReadRes {}
+/**
+ *
+ * @export
+ * @interface MenuUpdateReq
+ */
+export interface MenuUpdateReq extends MenuItemTreeRef {
+  /**
+   * Unique identifier
+   * @type {string}
+   * @memberof MenuUpdateReq
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuUpdateReq
+ */
+export namespace MenuUpdateReq {}
+/**
+ *
+ * @export
+ * @interface MenuUpdateRes
+ */
+export interface MenuUpdateRes extends MenuItemTreeRef {
+  /**
+   * Unique identifier
+   * @type {string}
+   * @memberof MenuUpdateRes
+   */
+  id: string;
+}
+
+/**
+ * @export
+ * @namespace MenuUpdateRes
+ */
+export namespace MenuUpdateRes {}
 /**
  *
  * @export
@@ -990,7 +1012,7 @@ export interface NewTableRow {
    * @type {string}
    * @memberof NewTableRow
    */
-  tableId?: string;
+  id?: string;
   /**
    *
    * @type {NewTableRowCols}
@@ -1207,6 +1229,102 @@ export interface TableColumnRef {
    * @memberof TableColumnRef
    */
   filter?: boolean;
+  /**
+   * Indicates the kind of column input
+   * @type {string}
+   * @memberof TableColumnRef
+   */
+  kind?: TableColumnRef.KindEnum;
+}
+
+/**
+ * @export
+ * @namespace TableColumnRef
+ */
+export namespace TableColumnRef {
+  /**
+   * @export
+   * @enum {string}
+   */
+  export enum KindEnum {
+    Checkboxes = <any>'checkboxes',
+    Selectbox = <any>'selectbox',
+    Text = <any>'text',
+    Number = <any>'number',
+    Phone = <any>'phone',
+    Zipcode = <any>'zipcode',
+    Email = <any>'email',
+    Zipcode_7 = <any>'zipcode',
+  }
+}
+/**
+ *
+ * @export
+ * @interface TableCreateReq
+ */
+export interface TableCreateReq {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableCreateReq
+   */
+  name?: string;
+  /**
+   * Table columns to be associated with the table during creation
+   * @type {Array<TableColumnRef>}
+   * @memberof TableCreateReq
+   */
+  cols?: Array<TableColumnRef>;
+}
+/**
+ *
+ * @export
+ * @interface TableCreateRes
+ */
+export interface TableCreateRes extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableCreateRes
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableCreateRes
+   */
+  cols?: Array<TableColumnRef>;
+}
+/**
+ *
+ * @export
+ * @interface TableDeleteReq
+ */
+export interface TableDeleteReq extends BaseModelRef {}
+/**
+ *
+ * @export
+ * @interface TableReadReq
+ */
+export interface TableReadReq extends BaseModelRef {}
+/**
+ *
+ * @export
+ * @interface TableReadRes
+ */
+export interface TableReadRes extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableReadRes
+   */
+  name?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableReadRes
+   */
+  cols?: Array<TableColumnRef>;
 }
 /**
  *
@@ -1214,12 +1332,6 @@ export interface TableColumnRef {
  * @interface TableRef
  */
 export interface TableRef {
-  /**
-   * Unique identifier of the table
-   * @type {string}
-   * @memberof TableRef
-   */
-  tableId?: string;
   /**
    * Name of the table
    * @type {string}
@@ -1236,27 +1348,40 @@ export interface TableRef {
 /**
  *
  * @export
- * @interface UpdateTable
+ * @interface TableUpdateReq
  */
-export interface UpdateTable {
+export interface TableUpdateReq extends BaseModelRef {
   /**
-   * ID of the table to update
+   * Name of the table
    * @type {string}
-   * @memberof UpdateTable
-   */
-  tableId?: string;
-  /**
-   * Updated name of the table
-   * @type {string}
-   * @memberof UpdateTable
+   * @memberof TableUpdateReq
    */
   name?: string;
   /**
-   * Updated table columns to associate with the table during update
+   * Table columns associated with the table
    * @type {Array<TableColumnRef>}
-   * @memberof UpdateTable
+   * @memberof TableUpdateReq
    */
   cols?: Array<TableColumnRef>;
+}
+/**
+ *
+ * @export
+ * @interface TablesReadRes
+ */
+export interface TablesReadRes {
+  /**
+   *
+   * @type {number}
+   * @memberof TablesReadRes
+   */
+  totalTables?: number;
+  /**
+   * Table columns associated with the table
+   * @type {Array<BaseModelRef & TableRef>}
+   * @memberof TablesReadRes
+   */
+  tables?: Array<BaseModelRef & TableRef>;
 }
 /**
  *
@@ -1269,7 +1394,7 @@ export interface UpdateTableRow {
    * @type {string}
    * @memberof UpdateTableRow
    */
-  tableId?: string;
+  id?: string;
   /**
    *
    * @type {string}
@@ -1386,7 +1511,11 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
-      delete localVarUrlObj.search;
+      if (localVarUrlObj?.search && localVarUrlObj?.search !== null) {
+        // @ts-ignore
+        // @ts-ignore
+        delete localVarUrlObj.search;
+      }
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
@@ -1436,6 +1565,8 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1486,6 +1617,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1536,6 +1668,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1589,6 +1722,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1639,6 +1773,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1689,6 +1824,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1739,6 +1875,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1789,6 +1926,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1842,6 +1980,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1895,6 +2034,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -1948,6 +2088,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2001,6 +2142,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2054,6 +2196,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2107,6 +2250,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2160,6 +2304,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2210,6 +2355,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2263,6 +2409,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2313,6 +2460,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2353,6 +2501,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2373,17 +2522,20 @@ export const DefaultApiFetchParamCreator = function (
     },
     /**
      *
+     * @param {MenuCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    menuPOST(options: any = {}): FetchArgs {
-      const localVarPath = `/menu`;
+    menuCreatePOST(body?: MenuCreateReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/create`;
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
       // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
 
       localVarUrlObj.query = Object.assign(
         {},
@@ -2392,12 +2544,148 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
         localVarHeaderParameter,
         options.headers,
       );
+      const needsSerialization =
+        <any>'MenuCreateReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {MenuDeleteReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuDeletePOST(body?: MenuDeleteReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/delete`;
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'MenuDeleteReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {MenuReadReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuReadPOST(body?: MenuReadReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/read`;
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'MenuReadReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
+
+      return {
+        url: url.format(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     *
+     * @param {MenuUpdateReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuUpdatePOST(body?: MenuUpdateReq, options: any = {}): FetchArgs {
+      const localVarPath = `/menu/update`;
+      const localVarUrlObj = url.parse(localVarPath, true);
+      const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication bearerAuth required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json';
+
+      localVarUrlObj.query = Object.assign(
+        {},
+        localVarUrlObj.query,
+        localVarQueryParameter,
+        options.query,
+      );
+      // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
+      delete localVarUrlObj.search;
+      localVarRequestOptions.headers = Object.assign(
+        {},
+        localVarHeaderParameter,
+        options.headers,
+      );
+      const needsSerialization =
+        <any>'MenuUpdateReq' !== 'string' ||
+        localVarRequestOptions.headers['Content-Type'] === 'application/json';
+      localVarRequestOptions.body = needsSerialization
+        ? JSON.stringify(body || {})
+        : body || '';
 
       return {
         url: url.format(localVarUrlObj),
@@ -2407,11 +2695,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Create a new table with properties and associated columns
      * @summary Create a new table
-     * @param {NewTable} [body]
+     * @param {TableCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableCreatePOST(body?: NewTable, options: any = {}): FetchArgs {
+    tableCreatePOST(body?: TableCreateReq, options: any = {}): FetchArgs {
       const localVarPath = `/table/create`;
       const localVarUrlObj = url.parse(localVarPath, true);
       const localVarRequestOptions = Object.assign({ method: 'POST' }, options);
@@ -2429,6 +2717,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2436,7 +2725,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'NewTable' !== 'string' ||
+        <any>'TableCreateReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2479,6 +2768,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2529,6 +2819,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2579,6 +2870,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2600,11 +2892,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Delete a table by ID
      * @summary Delete a table
-     * @param {DeleteTable} body
+     * @param {TableDeleteReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDeletePOST(body: DeleteTable, options: any = {}): FetchArgs {
+    tableDeletePOST(body: TableDeleteReq, options: any = {}): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2629,6 +2921,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2636,7 +2929,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'DeleteTable' !== 'string' ||
+        <any>'TableDeleteReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2650,11 +2943,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Get table by id
      * @summary Get table by id
-     * @param {GetTable} body
+     * @param {TableReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableReadPOST(body: GetTable, options: any = {}): FetchArgs {
+    tableReadPOST(body: TableReadReq, options: any = {}): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2679,6 +2972,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2686,7 +2980,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'GetTable' !== 'string' ||
+        <any>'TableReadReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2700,11 +2994,11 @@ export const DefaultApiFetchParamCreator = function (
     /**
      * Update table properties and associated columns by ID
      * @summary Update table by ID
-     * @param {UpdateTable} body
+     * @param {TableUpdateReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableUpdatePOST(body: UpdateTable, options: any = {}): FetchArgs {
+    tableUpdatePOST(body: TableUpdateReq, options: any = {}): FetchArgs {
       // verify required parameter 'body' is not null or undefined
       if (body === null || body === undefined) {
         throw new RequiredError(
@@ -2729,6 +3023,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -2736,7 +3031,7 @@ export const DefaultApiFetchParamCreator = function (
         options.headers,
       );
       const needsSerialization =
-        <any>'UpdateTable' !== 'string' ||
+        <any>'TableUpdateReq' !== 'string' ||
         localVarRequestOptions.headers['Content-Type'] === 'application/json';
       localVarRequestOptions.body = needsSerialization
         ? JSON.stringify(body || {})
@@ -2779,6 +3074,7 @@ export const DefaultApiFetchParamCreator = function (
         options.query,
       );
       // fix override query string Detail: https://stackoverflow.com/a/7517673/1077943
+      // @ts-ignore
       delete localVarUrlObj.search;
       localVarRequestOptions.headers = Object.assign(
         {},
@@ -3407,14 +3703,104 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @param {MenuCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    menuPOST(
+    menuCreatePOST(
+      body?: MenuCreateReq,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<DataRoot> {
-      const localVarFetchArgs =
-        DefaultApiFetchParamCreator(configuration).menuPOST(options);
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<MenuCreateRes> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuCreatePOST(body, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     *
+     * @param {MenuDeleteReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuDeletePOST(
+      body?: MenuDeleteReq,
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuDeletePOST(body, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response;
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     *
+     * @param {MenuReadReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuReadPOST(
+      body?: MenuReadReq,
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<MenuReadRes> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuReadPOST(body, options);
+      return (
+        fetch: FetchAPI = isomorphicFetch,
+        basePath: string = BASE_PATH,
+      ) => {
+        return fetch(
+          basePath + localVarFetchArgs.url,
+          localVarFetchArgs.options,
+        ).then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            throw response;
+          }
+        });
+      };
+    },
+    /**
+     *
+     * @param {MenuUpdateReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuUpdatePOST(
+      body?: MenuUpdateReq,
+      options?: any,
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<MenuUpdateRes> {
+      const localVarFetchArgs = DefaultApiFetchParamCreator(
+        configuration,
+      ).menuUpdatePOST(body, options);
       return (
         fetch: FetchAPI = isomorphicFetch,
         basePath: string = BASE_PATH,
@@ -3434,14 +3820,14 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Create a new table with properties and associated columns
      * @summary Create a new table
-     * @param {NewTable} [body]
+     * @param {TableCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableCreatePOST(
-      body?: NewTable,
+      body?: TableCreateReq,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableRef> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableCreateRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).tableCreatePOST(body, options);
@@ -3554,12 +3940,12 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Delete a table by ID
      * @summary Delete a table
-     * @param {DeleteTable} body
+     * @param {TableDeleteReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableDeletePOST(
-      body: DeleteTable,
+      body: TableDeleteReq,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3584,14 +3970,14 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Get table by id
      * @summary Get table by id
-     * @param {GetTable} body
+     * @param {TableReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableReadPOST(
-      body: GetTable,
+      body: TableReadReq,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableRef> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<TableReadRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).tableReadPOST(body, options);
@@ -3614,12 +4000,12 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     /**
      * Update table properties and associated columns by ID
      * @summary Update table by ID
-     * @param {UpdateTable} body
+     * @param {TableUpdateReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     tableUpdatePOST(
-      body: UpdateTable,
+      body: TableUpdateReq,
       options?: any,
     ): (fetch?: FetchAPI, basePath?: string) => Promise<Response> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
@@ -3651,7 +4037,7 @@ export const DefaultApiFp = function (configuration?: Configuration) {
     tablesReadPOST(
       body: ReadPaginationFilter,
       options?: any,
-    ): (fetch?: FetchAPI, basePath?: string) => Promise<GetTablesResponse> {
+    ): (fetch?: FetchAPI, basePath?: string) => Promise<TablesReadRes> {
       const localVarFetchArgs = DefaultApiFetchParamCreator(
         configuration,
       ).tablesReadPOST(body, options);
@@ -3945,20 +4331,60 @@ export const DefaultApiFactory = function (
     },
     /**
      *
+     * @param {MenuCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    menuPOST(options?: any) {
-      return DefaultApiFp(configuration).menuPOST(options)(fetch, basePath);
+    menuCreatePOST(body?: MenuCreateReq, options?: any) {
+      return DefaultApiFp(configuration).menuCreatePOST(body, options)(
+        fetch,
+        basePath,
+      );
+    },
+    /**
+     *
+     * @param {MenuDeleteReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuDeletePOST(body?: MenuDeleteReq, options?: any) {
+      return DefaultApiFp(configuration).menuDeletePOST(body, options)(
+        fetch,
+        basePath,
+      );
+    },
+    /**
+     *
+     * @param {MenuReadReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuReadPOST(body?: MenuReadReq, options?: any) {
+      return DefaultApiFp(configuration).menuReadPOST(body, options)(
+        fetch,
+        basePath,
+      );
+    },
+    /**
+     *
+     * @param {MenuUpdateReq} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    menuUpdatePOST(body?: MenuUpdateReq, options?: any) {
+      return DefaultApiFp(configuration).menuUpdatePOST(body, options)(
+        fetch,
+        basePath,
+      );
     },
     /**
      * Create a new table with properties and associated columns
      * @summary Create a new table
-     * @param {NewTable} [body]
+     * @param {TableCreateReq} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableCreatePOST(body?: NewTable, options?: any) {
+    tableCreatePOST(body?: TableCreateReq, options?: any) {
       return DefaultApiFp(configuration).tableCreatePOST(body, options)(
         fetch,
         basePath,
@@ -4006,11 +4432,11 @@ export const DefaultApiFactory = function (
     /**
      * Delete a table by ID
      * @summary Delete a table
-     * @param {DeleteTable} body
+     * @param {TableDeleteReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableDeletePOST(body: DeleteTable, options?: any) {
+    tableDeletePOST(body: TableDeleteReq, options?: any) {
       return DefaultApiFp(configuration).tableDeletePOST(body, options)(
         fetch,
         basePath,
@@ -4019,11 +4445,11 @@ export const DefaultApiFactory = function (
     /**
      * Get table by id
      * @summary Get table by id
-     * @param {GetTable} body
+     * @param {TableReadReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableReadPOST(body: GetTable, options?: any) {
+    tableReadPOST(body: TableReadReq, options?: any) {
       return DefaultApiFp(configuration).tableReadPOST(body, options)(
         fetch,
         basePath,
@@ -4032,11 +4458,11 @@ export const DefaultApiFactory = function (
     /**
      * Update table properties and associated columns by ID
      * @summary Update table by ID
-     * @param {UpdateTable} body
+     * @param {TableUpdateReq} body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    tableUpdatePOST(body: UpdateTable, options?: any) {
+    tableUpdatePOST(body: TableUpdateReq, options?: any) {
       return DefaultApiFp(configuration).tableUpdatePOST(body, options)(
         fetch,
         basePath,
@@ -4366,12 +4792,55 @@ export class DefaultApi extends BaseAPI {
 
   /**
    *
+   * @param {MenuCreateReq} [body]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public menuPOST(options?: any) {
-    return DefaultApiFp(this.configuration).menuPOST(options)(
+  public menuCreatePOST(body?: MenuCreateReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuCreatePOST(body, options)(
+      this.fetch,
+      this.basePath,
+    );
+  }
+
+  /**
+   *
+   * @param {MenuDeleteReq} [body]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public menuDeletePOST(body?: MenuDeleteReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuDeletePOST(body, options)(
+      this.fetch,
+      this.basePath,
+    );
+  }
+
+  /**
+   *
+   * @param {MenuReadReq} [body]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public menuReadPOST(body?: MenuReadReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuReadPOST(body, options)(
+      this.fetch,
+      this.basePath,
+    );
+  }
+
+  /**
+   *
+   * @param {MenuUpdateReq} [body]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public menuUpdatePOST(body?: MenuUpdateReq, options?: any) {
+    return DefaultApiFp(this.configuration).menuUpdatePOST(body, options)(
       this.fetch,
       this.basePath,
     );
@@ -4380,12 +4849,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Create a new table with properties and associated columns
    * @summary Create a new table
-   * @param {NewTable} [body]
+   * @param {TableCreateReq} [body]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableCreatePOST(body?: NewTable, options?: any) {
+  public tableCreatePOST(body?: TableCreateReq, options?: any) {
     return DefaultApiFp(this.configuration).tableCreatePOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4440,12 +4909,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Delete a table by ID
    * @summary Delete a table
-   * @param {DeleteTable} body
+   * @param {TableDeleteReq} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableDeletePOST(body: DeleteTable, options?: any) {
+  public tableDeletePOST(body: TableDeleteReq, options?: any) {
     return DefaultApiFp(this.configuration).tableDeletePOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4455,12 +4924,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Get table by id
    * @summary Get table by id
-   * @param {GetTable} body
+   * @param {TableReadReq} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableReadPOST(body: GetTable, options?: any) {
+  public tableReadPOST(body: TableReadReq, options?: any) {
     return DefaultApiFp(this.configuration).tableReadPOST(body, options)(
       this.fetch,
       this.basePath,
@@ -4470,12 +4939,12 @@ export class DefaultApi extends BaseAPI {
   /**
    * Update table properties and associated columns by ID
    * @summary Update table by ID
-   * @param {UpdateTable} body
+   * @param {TableUpdateReq} body
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableUpdatePOST(body: UpdateTable, options?: any) {
+  public tableUpdatePOST(body: TableUpdateReq, options?: any) {
     return DefaultApiFp(this.configuration).tableUpdatePOST(body, options)(
       this.fetch,
       this.basePath,

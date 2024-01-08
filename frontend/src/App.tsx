@@ -1,20 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
-import reactLogo from './assets/react.svg';
+import { useContext, useState } from 'react';
 import './App.css';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminView from './views/AdminView';
-import Form from './components/Form';
 import DashboardView from './views/DashboardView';
-import NewEntryView from './views/NewEntryView';
 import Login from './views/Login';
 import { AuthContext, AuthProvider } from './AuthContext';
 import ProtectedLayout from './ProtectedLayout';
-import PrivateRoute from './PrivateRoutes';
 import Unauthorized from './views/Unauthorized';
-import CreateNewTable from './views/CreateNewTable';
-import UpdateTable from './views/UpdateTable';
+import UpdateTable from './views/tables/UpdateTable';
 import DeleteTableView from './views/DeleteTableView';
 import TablesReadView from './views/tables/ReadTables';
 import Dashboards from './views/dashboards/Dashboards';
@@ -27,6 +20,7 @@ import UpdateAuthGroup from './views/authGroups/UpdateAuthGroup';
 import DashboardAuthGroup from './views/dashboard/DashboardAuthGroup';
 import CreateDashboard from './views/dashboard/CreateDashboard';
 import UpdateDashboard from './views/dashboard/UpdateDashboard';
+import CreateTableView from './views/tables/CreateTable';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -66,8 +60,9 @@ function App() {
           </Route>
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
-            <Route path="/table/create" element={<CreateNewTable />} />
             <Route path="/table/update/:id" element={<UpdateTable />} />
+            <Route path="/table/read/:id" element={<UpdateTable />} />
+            <Route path="/table/create" element={<CreateTableView />} />
             <Route path="/table/delete" element={<DeleteTableView />} />
             <Route path="/dashboards/read" element={<Dashboards />} />
             <Route path="/dashboard/create" element={<CreateDashboard />} />

@@ -4,10 +4,10 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface ColumnSelectorProps {
   columns: Array<ColDef | undefined>;
-  showColumnSelector: boolean;
+  showColumnSelector?: boolean;
   columnState?: ColumnState[];
   onColumnSelect: (selectedColumns: Array<string | undefined>) => void;
-  setShowColumnSelector: Dispatch<SetStateAction<boolean>>;
+  setShowColumnSelector?: Dispatch<SetStateAction<boolean>>;
 }
 
 const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
@@ -37,11 +37,10 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   };
 
   const handleCancel = () => {
-    setShowColumnSelector(false);
+    setShowColumnSelector && setShowColumnSelector(false);
   };
 
   useEffect(() => {
-    console.log({ columnState });
     if (columnState) {
       setSelectedColumns(
         columnState.filter((col) => !col.hide).map((el) => el.colId),

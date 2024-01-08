@@ -3,6 +3,9 @@
   flex-direction: column;
   align-items: center;
   padding-top: 3rem;
+  &__tables-read-btn {
+    cursor: pointer;
+  }
 }
 
 .update-table-overflow-container {
@@ -96,3 +99,63 @@
 .update-table-alert-content {
   font-size: 0.875rem;
 }
+
+/* Add these styles to your existing CSS file or create a new one */
+
+.table-row {
+  /* Add general styles for the table row */
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f7fafc;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.table-row__data--padded {
+  /* Add styles for the first column (padded) */
+  padding-left: 1.5rem;
+}
+
+.table-row__data--left {
+  /* Add styles for the second column (left-aligned) */
+  text-align: left;
+  padding-left: 1.5rem;
+}
+
+.table-row__data--center {
+  /* Add styles for the third, fourth, and fifth columns (center-aligned) */
+  text-align: center;
+}
+
+.table-row__flex-container {
+  /* Add styles for the flex container inside the columns */
+  display: flex;
+  align-items: center;
+  height: 75%;
+}
+
+.table-row__input-field {
+  /* Add styles for the input field */
+  /* Example styles: */
+  width: 100%;
+  padding: 0.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.375rem;
+}
+
+.table-row__icon--full-size {
+  /* Add styles for the full-size icons */
+  /* Example styles: */
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.table-row__icon--transform {
+  /* Add styles for the transformed icon */
+  /* Example styles: */
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  transform: scale(1.1); /* Example transformation, adjust as needed */
+}
+
+/* Add any additional styles or modifications as per your design requirements */

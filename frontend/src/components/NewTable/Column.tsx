@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { BsCheckCircleFill } from 'react-icons/bs';
 import { FaRegCircleXmark } from 'react-icons/fa6';
-import { NewTableColumn } from '../../pontus-api/typescript-fetch-client-generated';
+import { TableColumnRef } from '../../pontus-api/typescript-fetch-client-generated';
 
 export interface TableCol {
   column: string;
@@ -11,112 +11,125 @@ export interface TableCol {
 }
 
 type Props = {
-  setCols: Dispatch<
-    SetStateAction<{ colId: string; colDef: NewTableColumn }[]>
-  >;
+  setCols?: Dispatch<SetStateAction<TableColumnRef[]>>;
   index: number;
-
-  colDef?: NewTableColumn;
+  colDef?: TableColumnRef;
+  testId?: string;
 };
 
-const NewTableCol = ({ setCols, index, colDef }: Props) => {
-  const [header, setHeader] = useState<string>();
+const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
+  const [header, setHeader] = useState<string>(colDef?.headerName || '');
   const [filter, setFilter] = useState(colDef?.filter || false);
   const [sortable, setSortable] = useState(colDef?.sortable || false);
+  const [kind, setKind] = useState<TableColumnRef.KindEnum>(
+    colDef?.kind || TableColumnRef.KindEnum.Checkboxes,
+  );
 
   useEffect(() => {
+    if (!setCols) return;
     setCols((prevState) =>
-      prevState.map((col, idx) =>
+      prevState?.map((col, idx) =>
         idx === index
           ? {
-              colId: col.colId,
-              colDef: {
-                field: header,
-                filter: filter,
-                sortable: sortable,
-                headerName: header,
-                name: header,
-                tableId: header,
-              },
+              field: header,
+              filter: filter,
+              sortable: sortable,
+              headerName: header,
+              name: header,
+              id: col.id,
+              kind,
             }
           : col,
       ),
     );
-  }, [header, filter, sortable]);
+  }, [header, filter, sortable, kind]);
 
   useEffect(() => {
     console.log({ colDef });
   }, [colDef]);
 
   const deleteCol = () => {
-    console.log('delete');
-    setCols((prevState) => prevState.filter((col, idx) => idx !== index));
+    if (!setCols) return;
+    setCols((prevState) => prevState?.filter((col, idx) => idx !== index));
   };
 
   return (
-    <tr className="border-b border-gray-200 bg-gray-50 hover:bg-gray-100">
-      <td className=" px-6 text-left py-0">
-        <div className="flex items-center h-3/4">
+    <tr data-testid={testId} className="table-row">
+      <td className="table-row__data--padded">
+        <div className="table-row__flex-container">
           <input
             onChange={(e) => setHeader(e.target.value)}
             type="text"
-            className="bg-transparent border-2 font-normal"
+            data-testid={`${testId}-input`}
+            className="table-row__input-field"
             defaultValue={colDef?.headerName ? colDef?.headerName : ''}
           />
         </div>
       </td>
-      <td className="py-3 px-6 text-left">
-        <div className="flex items-center">
-          <select name="" id="">
-            <option>Checkboxes</option>
-            <option>Selectbox</option>
-            <option>Text</option>
-            <option>Number</option>
-            <option>Phone</option>
-            <option>E-mail</option>
-            <option>Zipcode</option>
+      <td className="table-row__data--left">
+        <div className="table-row__flex-container">
+          <select
+            defaultValue={colDef?.kind || 'checkboxes'}
+            onChange={(e) => {
+              const value = e.target.value as any;
+              setKind(value);
+            }}
+            data-testid={`${testId}-dropdown`}
+            name=""
+            id=""
+          >
+            <option value={TableColumnRef.KindEnum.Checkboxes}>
+              Checkboxes
+            </option>
+            <option value={TableColumnRef.KindEnum.Selectbox}>Selectbox</option>
+            <option value={TableColumnRef.KindEnum.Text}>Text</option>
+            <option value={TableColumnRef.KindEnum.Number}>Number</option>
+            <option value={TableColumnRef.KindEnum.Phone}>Phone</option>
+            <option value={TableColumnRef.KindEnum.Email}>E-mail</option>
+            <option value={TableColumnRef.KindEnum.Zipcode}>Zipcode</option>
           </select>
         </div>
       </td>
-      <td className="py-3 px-6 text-center p-0 flex justify-center">
+      <td className="table-row__data--center">
         {filter ? (
           <BsCheckCircleFill
-            className="w-8 h-full"
+            className="table-row__filter-icon--checked"
             onClick={() => {
               setFilter(false);
             }}
           />
         ) : (
           <FaRegCircleXmark
-            className="w-8 h-full"
+            className="table-row__filter-icon--unchecked"
             onClick={() => {
               setFilter(true);
             }}
           />
         )}
       </td>
-      <td className="py-3 px-6 text-center">
+      <td className="table-row__data--center">
         {sortable ? (
           <BsCheckCircleFill
-            className="w-8 h-full left-1/2 relative -translate-x-1/2"
+            className="table-row__sort-icon--checked"
             onClick={() => {
               setSortable(false);
             }}
           />
         ) : (
           <FaRegCircleXmark
-            className="w-8 h-full left-1/2 relative -translate-x-1/2"
+            className="table-row__sort-icon--unchecked"
             onClick={() => {
               setSortable(true);
             }}
           />
         )}
       </td>
-      <td className="py-3 px-6 text-center">
-        <div className="flex item-center justify-center">
-          <div className="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
+      <td className="table-row__data--center">
+        <div className="table-row__flex-container">
+          <div className="table-row__icon--transform">
             <svg
               onClick={() => deleteCol()}
+              data-testid={`${testId}-delete-btn`}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"

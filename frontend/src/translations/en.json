@@ -28,9 +28,10 @@
   "sortable": "sortable",
   "submit-form": "Submit",
   "table": "table",
-  "tables": "Tables",
+  "Tables": "Tables",
   "table-name": "Table name",
   "yes": "Yes",
+  "Back": "Back",
 
   "Select Group": "Select Group",
 
@@ -648,6 +649,8 @@
   "Last 5 days": "Last 5 days",
   "Delete": "Delete",
   "Update": "Update",
+  "update": "update",
+  "Criar": "Criar",
   "Completed": "Completed",
   "Data Owner": "Data Owner",
   "Object Data Procedures Why Is It Collected": "Why Is the Data Collected",

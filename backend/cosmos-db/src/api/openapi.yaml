@@ -21,42 +21,92 @@ tags:
     description: Secured Admin-only calls
   - name: developers
     description: Operations available to regular developers
-# jsonSchemaDialect: 'https://json-schema.org/draft/2020-12/schema'
 paths:
-  /menu:
+  /menu/create:
     post:
-      operationId: menuPOST
+      operationId: menuCreatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuCreateReq'
       responses:
         '201':
-          description: Table created successfully
+          description: Menu item created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DataRoot'
-              examples:
-                DataRootExample1:
-                  value:
-                    id: root
-                    name: Root
-                    type: folder
-                    path: /
-                    children:
-                      - id: folder1
-                        name: Folder 1
-                        type: folder
-                        path: /folder1
-                        children: []
-                      - id: file1
-                        name: File 1
-                        type: file
-                        path: /file1.txt
+                $ref: '#/components/schemas/MenuCreateRes'
         '400':
           description: Bad request
         '500':
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: MenuController
+  /menu/read:
+    post:
+      operationId: menuReadPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuReadReq'
+      responses:
+        '201':
+          description: Menu item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuReadRes'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: MenuController
+  /menu/update:
+    post:
+      operationId: menuUpdatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuUpdateReq'
+      responses:
+        '201':
+          description: Menu item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuUpdateRes'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: MenuController
+  /menu/delete:
+    post:
+      operationId: menuDeletePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuDeleteReq'
+      responses:
+        '201':
+          description: Menu item deleted successfully
+
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: MenuController
   /table/create:
     post:
       summary: Create a new table
@@ -66,7 +116,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewTable'
+              $ref: '#/components/schemas/TableCreateReq'
             examples:
               example-0001:
                 value:
@@ -90,7 +140,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TableRef'
+                $ref: '#/components/schemas/TableCreateRes'
 
         '400':
           description: Bad request
@@ -98,7 +148,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/read:
     post:
       summary: Get table by id
@@ -108,11 +158,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetTable'
+              $ref: '#/components/schemas/TableReadReq'
             examples:
               example-0001:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
         required: true
       responses:
         '200':
@@ -120,32 +170,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TableRef'
-              examples:
-                example-01:
-                  value:
-                    tableId: mapeamentoDeProcessos
-                    name: Mapeamento de Processos
-                    cols:
-                      - field: Person_Natural_Full_Name
-                        filter: true
-                        headerName: Full Name
-                        id: Person_Natural_Full_Name
-                        name: Full Name
-                        sortable: true
-                      - field: Person_Natural_Customer_ID
-                        filter: true
-                        headerName: Customer ID
-                        id: Person_Natural_Customer_ID
-                        name: Customer ID
-                        sortable: true
+                $ref: '#/components/schemas/TableReadRes'
         '400':
           description: Bad request
         '500':
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/update:
     post:
       summary: Update table by ID
@@ -155,7 +187,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTable'
+              $ref: '#/components/schemas/TableUpdateReq'
         required: true
       responses:
         '204':
@@ -168,7 +200,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/delete:
     post:
       summary: Delete a table
@@ -178,7 +210,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteTable'
+              $ref: '#/components/schemas/TableDeleteReq'
         required: true
       responses:
         '204':
@@ -189,7 +221,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /tables/read:
     post:
       summary: Get all tables
@@ -207,14 +239,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetTablesResponse'
+                $ref: '#/components/schemas/TablesReadRes'
         '400':
           description: Bad request
         '500':
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableController
   /table/data/read:
     post:
       description: ''
@@ -307,7 +339,7 @@ paths:
             examples:
               example-01:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
                   cols:
                     mapeamentoDeProcessoCol1: New value
                     mapeamentoDeProcessoCol2: New value
@@ -335,7 +367,7 @@ paths:
             examples:
               example-01:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
                   rowId: 15
                   cols:
                     mapeamentoDeProcessoCol1: Value Overwritten
@@ -364,7 +396,7 @@ paths:
             examples:
               example-01:
                 value:
-                  tableId: mapeamentoDeProcessos
+                  id: mapeamentoDeProcessos
                   rowId: 15
         required: true
       responses:
@@ -840,64 +872,87 @@ paths:
       x-swagger-router-controller: Default
 components:
   schemas:
-    DataRoot:
+    MenuCreateReq:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+      # example:
+      #   path: path
+      #   children:
+      #     - path: path
+      #       children:
+      #         - null
+      #         - null
+      #       name: name
+      #       id: id
+      #       type: type
+      #     - path: path
+      #       children:
+      #         - null
+      #         - null
+      #       name: name
+      #       id: id
+      #       type: type
+      #   name: name
+      #   id: id
+      #   type: type
+    MenuCreateRes:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuReadReq:
+      type: object
+      properties:
+        path:
+          type: string
+      required:
+        - path
+      example:
+        path: /folder1/file1
+    MenuReadRes:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuUpdateReq:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuUpdateRes:
+      allOf:
+        - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    MenuDeleteReq:
+      type: object
+      properties:
+        path:
+          type: string
+        id:
+          type: string
+      required:
+        - path
+        - id
+    MenuItemTreeRef:
       type: object
       properties:
         id:
           type: string
         name:
           type: string
-        type:
+        kind:
           type: string
+          enum: [folder, file]
         path:
           type: string
         children:
           type: array
           items:
-            $ref: '#/components/schemas/Child'
-      example:
-        path: path
-        children:
-          - path: path
-            children:
-              - null
-              - null
-            name: name
-            id: id
-            type: type
-          - path: path
-            children:
-              - null
-              - null
-            name: name
-            id: id
-            type: type
-        name: name
-        id: id
-        type: type
-    Child:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        type:
-          type: string
-        path:
-          type: string
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/Child'
-      example:
-        path: path
-        children:
-          - null
-          - null
-        name: name
-        id: id
-        type: type
+            $ref: '#/components/schemas/MenuItemTreeRef'
+      # example:
+      #   path: path
+      #   children:
+      #     - null
+      #     - null
+      #   name: name
+      #   type: type
     authGroupRef:
       type: object
       properties:
@@ -1025,19 +1080,23 @@ components:
         filter:
           type: boolean
           description: Indicates if the table column is filterable
-      example:
-        filter: true
-        headerName: headerName
-        field: field
-        name: name
-        id: id
-        sortable: true
+        kind:
+          type: string
+          enum:
+            [
+              checkboxes,
+              selectbox,
+              text,
+              number,
+              phone,
+              zipcode,
+              email,
+              zipcode,
+            ]
+          description: Indicates the kind of column input
     TableRef:
       type: object
       properties:
-        tableId:
-          type: string
-          description: Unique identifier of the table
         name:
           type: string
           description: Name of the table
@@ -1048,21 +1107,27 @@ components:
             $ref: '#/components/schemas/TableColumnRef'
       example:
         name: name
-        tableId: tableId
+        id: id
         cols:
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
+          - field: Person_Natural_Full_Name
+            filter: true
+            headerName: Full Name
+            id: Person_Natural_Full_Name
+            name: Full Name
             sortable: true
-          - filter: true
-            headerName: headerName
-            field: field
-            name: name
-            id: id
+            kind: checkboxes
+          - field: Person_Natural_Full_Name
+            filter: true
+            headerName: Full Name
+            id: Person_Natural_Full_Name
+            name: Full Name
             sortable: true
-    NewTable:
+            kind: checkboxes
+    TableReadRes:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
+    TableCreateReq:
       type: object
       properties:
         name:
@@ -1073,36 +1138,28 @@ components:
           description: Table columns to be associated with the table during creation
           items:
             $ref: '#/components/schemas/TableColumnRef'
-    DeleteTable:
-      type: object
-      properties:
-        tableId:
-          type: string
-    UpdateTable:
-      type: object
-      properties:
-        tableId:
-          type: string
-          description: ID of the table to update
-        name:
-          type: string
-          description: Updated name of the table
-        cols:
-          type: array
-          description: Updated table columns to associate with the table during update
-          items:
-            $ref: '#/components/schemas/TableColumnRef'
+    TableCreateRes:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
+    TableDeleteReq:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+    TableUpdateReq:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
     NewTableRow:
       type: object
       properties:
-        tableId:
+        id:
           type: string
         cols:
           $ref: '#/components/schemas/NewTableRow_cols'
     UpdateTableRow:
       type: object
       properties:
-        tableId:
+        id:
           type: string
         rowId:
           type: string
@@ -1111,7 +1168,7 @@ components:
     DeleteTableRow:
       type: object
       properties:
-        tableId:
+        id:
           type: string
         rowId:
           type: string
@@ -1208,12 +1265,10 @@ components:
         delete:
           - delete
           - delete
-    GetTable:
-      type: object
-      additionalProperties: false
-      properties:
-        tableId:
-          type: string
+    TableReadReq:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+
     ReadPaginationFilter:
       type: object
       additionalProperties: false
@@ -1227,7 +1282,7 @@ components:
           additionalProperties:
             $ref: '#/components/schemas/ReadPaginationFilter_filters'
 
-    GetTablesResponse:
+    TablesReadRes:
       type: object
       properties:
         totalTables:
@@ -1236,11 +1291,13 @@ components:
           type: array
           description: Table columns associated with the table
           items:
-            $ref: '#/components/schemas/TableRef'
+            allOf:
+              - $ref: '#/components/schemas/BaseModelRef'
+              - $ref: '#/components/schemas/TableRef'
       example:
         tables:
           - name: name
-            tableId: tableId
+            id: tableId
             cols:
               - filter: true
                 headerName: headerName
@@ -1255,7 +1312,7 @@ components:
                 id: id
                 sortable: true
           - name: name
-            tableId: tableId
+            id: tableId
             cols:
               - filter: true
                 headerName: headerName

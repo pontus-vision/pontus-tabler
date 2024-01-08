@@ -3,6 +3,8 @@ import {
   CosmosClient,
   Database,
   DatabaseResponse,
+  PartitionKeyDefinition,
+  UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 
@@ -18,6 +20,8 @@ const cosmosClient = new CosmosClient({
     'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==',
 });
 
+const cosmosDbName = process.env.COSMOSDB_NAME || 'pv_db';
+
 export const fetchDatabase = async (
   db_name: string,
 ): Promise<Database | undefined> => {
@@ -31,46 +35,46 @@ export const fetchDatabase = async (
     throw error;
   }
 };
+
 export const fetchContainer = async (
-  databaseId: string,
   containerId: string,
-  partitionKey?: string[],
+  partitionKey: string | PartitionKeyDefinition = {
+    paths: ['/id'],
+  },
+  uniqueKeyPolicy: UniqueKeyPolicy | undefined = undefined,
+  initialDoc?: Record<any, any>,
 ): Promise<Container | undefined> => {
-  try {
-    const database = await fetchDatabase(databaseId);
+  const database = await fetchDatabase(cosmosDbName);
 
-    const { container } = await database.containers.createIfNotExists({
+  const { container, statusCode } = await database.containers.createIfNotExists(
+    {
       id: containerId,
-      partitionKey: {
-        paths: partitionKey || ['/id'],
-      },
-    });
-    return container;
-  } catch (error) {
-    throw error;
+      partitionKey,
+      uniqueKeyPolicy,
+    },
+  );
+
+  // Creating initial document when container is created
+  if (statusCode === 201 && initialDoc) {
+    const res = await container.items.create(initialDoc);
   }
+
+  return container;
 };
-
-export const fetchDashboardsContainer = async (): Promise<
-  Container | undefined
-> => {
-  try {
-    const dashboardContainer = await fetchContainer('pv_db', 'dashboards');
-
-    return dashboardContainer;
-  } catch (error) {
-    throw error;
-  }
+export const deleteDatabase = async (
+  databaseId: string,
+): Promise<DatabaseResponse | undefined> => {
+  const database = await fetchDatabase(databaseId);
+  return database.delete({});
 };
 
 export const fetchData = async (
   filter: ReadPaginationFilter,
   table: string,
-  database: string = 'pv_db',
 ): Promise<FetchData | undefined> => {
   try {
     const query = filterToQuery(filter);
-    const dashboardContainer = await fetchContainer(database, table);
+    const dashboardContainer = await fetchContainer(table);
 
     const countStr = `select VALUE COUNT(1) from ${table} d ${query}`;
 
