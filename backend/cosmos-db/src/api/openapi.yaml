@@ -282,7 +282,7 @@ paths:
   /table/data/read:
     post:
       description: ''
-      operationId: get-table-data
+      operationId: tableDataReadPOST
       parameters: []
       requestBody:
         content:
@@ -1041,8 +1041,14 @@ components:
           type: string
           example: +desc
     TableDataReadReq:
+      type: object
+      properties:
+        tableName:
+          type: string
       allOf:
         - $ref: '#/components/schemas/ReadPaginationFilter'
+      required:
+        - tableName
     agGridReadRes:
       type: object
       properties:
@@ -1159,35 +1165,44 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
+
     TableDataCreateReq:
       type: object
       properties:
-        tableId:
+        tableName:
           type: string
-        rows:
+        cols:
           $ref: '#/components/schemas/TableDataRowRef'
+      required:
+        - tableName
     TableDataCreateRes:
       allOf:
         - $ref: '#/components/schemas/TableDataRowRef'
     TableDataUpdateReq:
       type: object
       properties:
-        tableId:
+        tableName:
           type: string
         rowId:
           type: string
         cols:
           $ref: '#/components/schemas/TableDataRowRef'
+      required:
+        - tableName
+        - rowId
     TableDataUpdateRes:
       allOf:
         - $ref: '#/components/schemas/TableDataRowRef'
     TableDataDeleteReq:
       type: object
       properties:
-        tableId:
+        id:
           type: string
-        rowId:
+        tableName:
           type: string
+      required:
+        - id
+        - tableName
     BaseModelRef:
       type: object
       properties:
@@ -1286,7 +1301,6 @@ components:
         - $ref: '#/components/schemas/BaseModelRef'
     ReadPaginationFilter:
       type: object
-      additionalProperties: false
       properties:
         from:
           type: integer
@@ -1299,7 +1313,7 @@ components:
     TableDataReadRes:
       type: object
       properties:
-        totalRows:
+        rowsCount:
           type: integer
         rows:
           type: array
