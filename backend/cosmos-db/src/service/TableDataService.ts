@@ -93,7 +93,7 @@ export const deleteTableData = async (data: TableDataDeleteReq) => {
     const tableDataContainer = await fetchContainer(data.tableName);
     const res = await tableDataContainer.item(data.id, data.id).delete();
 
-    return 'Table deleted!';
+    return 'Row deleted!';
   } catch (error) {
     throw error;
   }
