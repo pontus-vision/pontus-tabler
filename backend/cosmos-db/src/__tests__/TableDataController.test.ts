@@ -44,6 +44,7 @@ describe('testing tabledata', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
+    // Creating our first record.
     const body: TableDataCreateReq = {
       tableName: 'Person_Natural',
       cols: {
@@ -55,6 +56,8 @@ describe('testing tabledata', () => {
 
     expect(createRetVal.status).toBe(201);
     expect(isSubset(body.cols, createRetVal.data)).toBe(true);
+
+    // Reading accordingly and checking if it will be listed.
 
     const body2: TableDataReadReq = {
       from: 1,
@@ -75,162 +78,78 @@ describe('testing tabledata', () => {
       readRetVal.data.values.some((value) => isSubset(body.cols, value)),
     ).toBe(true);
 
-    // const bodyUpdate: TableDataUpdateReq = {
-    //   tableName: body.tableName,
-    //   rowId: createRetVal.data.id
-    //   cols: {
+    // Updating it.
 
-    //   }
-    // }
+    const bodyUpdate: TableDataUpdateReq = {
+      tableName: body.tableName,
+      rowId: createRetVal.data.id,
+      cols: {
+        foo: 'john',
+      },
+    };
 
-    // console.log(`res2: ${JSON.stringify(resPayload2)}`);
+    const updateRetVal = await post('table/data/update', bodyUpdate);
 
-    // expect(readRetVal.data.name).toBe(body.name);
+    expect(isSubset(bodyUpdate.cols, updateRetVal.data)).toBe(true);
 
-    // const body2: TableUpdateReq = {
-    //   name: 'name2',
-    //   id: id,
-    //   cols: [
-    //     {
-    //       filter: true,
-    //       headerName: 'headerName',
-    //       field: 'field',
-    //       name: 'name',
-    //       id: 'id',
-    //       sortable: true,
-    //     },
-    //     {
-    //       filter: true,
-    //       headerName: 'headerName',
-    //       field: 'field',
-    //       name: 'name',
-    //       id: 'id',
-    //       sortable: true,
-    //     },
-    //   ],
-    // };
+    // Reading it again
 
-    // const updateRetVal = await post('table/update', body2);
+    const bodyRead2: TableDataReadReq = {
+      from: 1,
+      to: 10,
+      filters: {
+        foo: {
+          filter: 'john',
+          filterType: 'text',
+          type: 'contains',
+        },
+      },
+      tableName: body.tableName,
+    };
 
-    // let resPayload3: TableUpdateReq = updateRetVal.data;
+    const readRetVal3 = await post('table/data/read', bodyRead2);
 
-    // expect(resPayload3.name).toBe(body2.name);
+    expect(
+      readRetVal3.data.values.some((value) => isSubset(bodyUpdate.cols, value)),
+    ).toBe(true);
 
-    // const body3 = {
-    //   id: resPayload3.id,
-    // };
+    // and finally deleting it.
 
-    // const deleteRetVal = await post('table/delete', body3);
+    const deleteRetVal = await post('table/data/delete', {
+      id: createRetVal.data.id,
+      tableName: body.tableName,
+    });
 
-    // let resPayload4 = deleteRetVal.data;
-
-    // expect(deleteRetVal.status).toBe(200);
-
-    // const readRetVal2 = await post('table/read', body3);
-
-    // expect(readRetVal2.status).toBe(404);
+    expect(deleteRetVal.status).toBe(200);
   });
-  it.skip('should do the CRUD "sad path"', async () => {
-    const createRetVal = await post('table/create', {});
+  it('should do the CRUD "sad path"', async () => {
+    const createRetVal = await post('table/data/create', {});
 
     expect(createRetVal.status).toBe(400);
 
-    const readRetVal = await post('table/read', {
-      id: 'foo',
+    const readRetVal = await post('table/data/read', {
+      from: 1,
+      to: 10,
+      filters: {
+        foo: {
+          filter: 'john',
+          filterType: 'text',
+          type: 'contains',
+        },
+      },
+      tableName: 'table',
     });
 
     expect(readRetVal.status).toBe(404);
 
-    const updateRetVal = await post('table/update', { foo: 'bar' });
+    const updateRetVal = await post('table/data/update', { foo: 'bar' });
 
     expect(updateRetVal.status).toBe(400);
 
-    const deleteRetVal = await post('table/delete', { foo: 'bar' });
+    const deleteRetVal = await post('table/data/delete', { foo: 'bar' });
 
     let resPayload4 = deleteRetVal.data;
 
     expect(deleteRetVal.status).toBe(400);
-  });
-  it.skip('should read dashboards', async () => {
-    const body: TableCreateReq = {
-      name: 'Person Natural',
-      cols: [
-        {
-          field: 'Person_Natural_Full_Name',
-          filter: true,
-          headerName: 'Full Name',
-          id: 'Person_Natural_Full_Name',
-          name: 'Full Name',
-          sortable: true,
-        },
-        {
-          field: 'Person_Natural_Customer_ID',
-          filter: true,
-          headerName: 'Customer ID',
-          id: 'Person_Natural_Customer_ID',
-          name: 'Customer ID',
-          sortable: true,
-        },
-      ],
-    };
-
-    const createRetVal = await post('table/create', body);
-
-    const createRetVal2 = await post('table/create', {
-      ...body,
-      name: 'Person Natural2',
-    });
-
-    const readBody = {
-      filters: {
-        name: {
-          condition1: {
-            filter: 'Person Natural',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-      },
-    };
-
-    const readRetVal: { data: TablesReadRes } = await post(
-      'tables/read',
-      readBody,
-    );
-
-    expect(readRetVal.data.totalTables).toBe(2);
-
-    const readBody2 = {
-      filters: {
-        name: {
-          condition1: {
-            filter: 'PontusVision',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-        folder: {
-          condition1: {
-            filter: 'folder 1',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-      },
-    };
-
-    const deleteVal = await post('table/delete', {
-      id: createRetVal.data.id,
-    });
-
-    expect(deleteVal.status).toBe(200);
-    const deleteVal2 = await post('table/delete', {
-      id: createRetVal2.data.id,
-    });
-
-    expect(deleteVal2.status).toBe(200);
   });
 });
