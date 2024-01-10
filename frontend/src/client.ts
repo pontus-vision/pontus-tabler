@@ -40,6 +40,8 @@ import {
   MenuReadReq,
   MenuCreateReq,
   MenuCreateRes,
+  TableDataReadReq,
+  TableDataReadRes,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -156,9 +158,9 @@ export const createDataTable = async (body: NewTableRow) => {
   return post('/table/data/create', body);
 };
 
-export const readDataTable = async (
-  body: AgGridInput,
-): Promise<AxiosResponse<AgGridOutput> | undefined> => {
+export const readTableData = async (
+  body: TableDataReadReq,
+): Promise<AxiosResponse<TableDataReadRes> | undefined> => {
   return post('/table/data/read', {});
 };
 
