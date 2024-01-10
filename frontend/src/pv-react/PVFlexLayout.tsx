@@ -21,7 +21,7 @@ import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import DeleteEntriesModal from '../components/DeleteEntriesModal';
 import GridActionsPanel from '../components/GridActionsPanel';
-import { getTable, readDataTable } from '../client';
+import { getTable, readTableData } from '../client';
 import {
   AgGridInput,
   ReadPaginationFilter,
@@ -149,7 +149,7 @@ const PVFlexLayout = ({
           };
           const colsRes = await getTable(config.tableId);
 
-          const readDataTableRes = await readDataTable(input);
+          const readDataTableRes = await readTableData(input);
 
           const colsData = colsRes?.data;
 

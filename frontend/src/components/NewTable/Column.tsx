@@ -1,7 +1,10 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { BsCheckCircleFill } from 'react-icons/bs';
 import { FaRegCircleXmark } from 'react-icons/fa6';
-import { TableColumnRef } from '../../pontus-api/typescript-fetch-client-generated';
+import {
+  TableColumnRef,
+  TableColumnRefKindEnum,
+} from '../../pontus-api/typescript-fetch-client-generated';
 
 export interface TableCol {
   column: string;
@@ -21,8 +24,8 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
   const [header, setHeader] = useState<string>(colDef?.headerName || '');
   const [filter, setFilter] = useState(colDef?.filter || false);
   const [sortable, setSortable] = useState(colDef?.sortable || false);
-  const [kind, setKind] = useState<TableColumnRef.KindEnum>(
-    colDef?.kind || TableColumnRef.KindEnum.Checkboxes,
+  const [kind, setKind] = useState<TableColumnRefKindEnum>(
+    colDef?.kind || 'checkboxes',
   );
 
   useEffect(() => {
@@ -78,15 +81,13 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
             name=""
             id=""
           >
-            <option value={TableColumnRef.KindEnum.Checkboxes}>
-              Checkboxes
-            </option>
-            <option value={TableColumnRef.KindEnum.Selectbox}>Selectbox</option>
-            <option value={TableColumnRef.KindEnum.Text}>Text</option>
-            <option value={TableColumnRef.KindEnum.Number}>Number</option>
-            <option value={TableColumnRef.KindEnum.Phone}>Phone</option>
-            <option value={TableColumnRef.KindEnum.Email}>E-mail</option>
-            <option value={TableColumnRef.KindEnum.Zipcode}>Zipcode</option>
+            <option value={'checkboxes'}>Checkboxes</option>
+            <option value={'selectbox'}>Selectbox</option>
+            <option value={'text'}>Text</option>
+            <option value={'number'}>Number</option>
+            <option value={'phone'}>Phone</option>
+            <option value={'email'}>E-mail</option>
+            <option value={'zipcode'}>Zipcode</option>
           </select>
         </div>
       </td>

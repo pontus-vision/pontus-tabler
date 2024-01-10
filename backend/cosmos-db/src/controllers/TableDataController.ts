@@ -41,16 +41,14 @@ export async function tableDataReadPOST(
   body: TableDataReadReq,
 ) {
   try {
-    console.log({ filters2: body.filters });
     const response = await readTableData(body);
 
-    res.status(201);
+    res.status(200);
     res.json(response);
     return res;
   } catch (error) {
-    console.log({ errorCode: error.code, error });
     res.status(error.code);
-    res.json(error);
+    res.json(error.message);
     return res;
   }
 }

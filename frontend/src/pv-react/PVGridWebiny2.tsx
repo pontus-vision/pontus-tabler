@@ -330,6 +330,7 @@ const PVGridWebiny2 = ({
   function onFilterChanged() {
     if (gridApi) {
       setFilterState(gridApi.getFilterModel());
+      console.log({ filterModel: gridApi.getFilterModel() });
     }
   }
 
@@ -479,6 +480,7 @@ const PVGridWebiny2 = ({
           ref={gridContainerRef}
           rowSelection="multiple"
           onSelectionChanged={onSelectionChanged}
+          onCellValueChanged={(e) => console.log({ e })}
         ></AgGridReact>
       </div>
     </>
