@@ -28,7 +28,6 @@ export const tableDataCreatePOST = async (
 
     return res;
   } catch (error) {
-    console.log({ error });
     res.status(error.code);
     res.json(error?.message || error);
     return res;
@@ -86,7 +85,6 @@ export const tableDataDeletePOST = async (
 
     return res;
   } catch (error) {
-    console.log({ error, body });
     res.status(error.code || error);
     res.json(error.message || error);
     return res;
