@@ -1084,6 +1084,7 @@ components:
         name:
           type: string
           description: Name of the table column
+          pattern: '^[a-zA-Z0-9]+(?:[a-zA-Z0-9]|(?<![-_])[-_](?![-_]))*$'
         field:
           type: string
           description: Field name of the table column
@@ -1115,15 +1116,19 @@ components:
       properties:
         name:
           type: string
+          pattern: '^[a-zA-Z0-9]+(?:[a-zA-Z0-9]|(?<![-_])[-_](?![-_]))*$'
           description: Name of the table
+        label:
+          type: string
         cols:
           type: array
           description: Table columns associated with the table
           items:
             $ref: '#/components/schemas/TableColumnRef'
       example:
-        name: name
+        name: Person_Natural
         id: id
+        label: Person Natural
         cols:
           - field: Person_Natural_Full_Name
             filter: true
@@ -1148,12 +1153,19 @@ components:
       properties:
         name:
           type: string
+          pattern: '^[a-zA-Z0-9]+(?:[a-zA-Z0-9]|(?<![-_])[-_](?![-_]))*$'
           description: Name of the table
+        label:
+          type: string
         cols:
           type: array
           description: Table columns to be associated with the table during creation
           items:
             $ref: '#/components/schemas/TableColumnRef'
+      required:
+        - name
+        - label
+        - cols
     TableCreateRes:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
@@ -1196,12 +1208,12 @@ components:
     TableDataDeleteReq:
       type: object
       properties:
-        id:
+        rowId:
           type: string
         tableName:
           type: string
       required:
-        - id
+        - rowId
         - tableName
     BaseModelRef:
       type: object
