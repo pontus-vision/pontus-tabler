@@ -1171,7 +1171,14 @@ export interface TableColumnRef {
  * @export
  * @namespace TableColumnRef
  */
-export type KindEnum = 'folder' | 'file';
+export type KindEnum =
+  | 'checkboxes'
+  | 'selectbox'
+  | 'text'
+  | 'number'
+  | 'phone'
+  | 'email'
+  | 'zipcode';
 /**
  *
  * @export
@@ -1183,7 +1190,13 @@ export interface TableCreateReq {
    * @type {string}
    * @memberof TableCreateReq
    */
-  name?: string;
+  name: string;
+  /**
+   *
+   * @type {string}
+   * @memberof TableCreateReq
+   */
+  label: string;
   /**
    * Table columns to be associated with the table during creation
    * @type {Array<TableColumnRef>}
@@ -1221,13 +1234,13 @@ export interface TableDataCreateReq {
    * @type {string}
    * @memberof TableDataCreateReq
    */
-  tableId?: string;
+  tableName?: string;
   /**
    *
    * @type {TableDataRowRef}
    * @memberof TableDataCreateReq
    */
-  rows?: TableDataRowRef;
+  cols?: TableDataRowRef;
 }
 /**
  *
@@ -1246,20 +1259,22 @@ export interface TableDataDeleteReq {
    * @type {string}
    * @memberof TableDataDeleteReq
    */
-  tableId?: string;
+  tableName: string;
   /**
    *
    * @type {string}
    * @memberof TableDataDeleteReq
    */
-  rowId?: string;
+  rowId: string;
 }
 /**
  *
  * @export
  * @interface TableDataReadReq
  */
-export interface TableDataReadReq extends ReadPaginationFilter {}
+export interface TableDataReadReq extends ReadPaginationFilter {
+  tableName: string;
+}
 /**
  *
  * @export
@@ -1277,7 +1292,7 @@ export interface TableDataReadRes {
    * @type {Array<TableDataRowRef>}
    * @memberof TableDataReadRes
    */
-  rows?: Array<TableDataRowRef>;
+  cols?: Array<TableDataRowRef>;
 }
 /**
  *
@@ -1298,13 +1313,13 @@ export interface TableDataUpdateReq {
    * @type {string}
    * @memberof TableDataUpdateReq
    */
-  tableId?: string;
+  tableName: string;
   /**
    *
    * @type {string}
    * @memberof TableDataUpdateReq
    */
-  rowId?: string;
+  rowId: string;
   /**
    *
    * @type {TableDataRowRef}
@@ -4906,7 +4921,7 @@ export class DefaultApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof DefaultApi
    */
-  public tableDataUpdatePOST(body: TableDataDeleteReq, options?: any) {
+  public tableDataUpdatePOST(body: TableDataUpdateReq, options?: any) {
     return DefaultApiFp(this.configuration).tableDataUpdatePOST(body, options)(
       this.fetch,
       this.basePath,
