@@ -73,7 +73,7 @@ describe('testing tables', () => {
 
     let resPayload2: TableReadRes = readRetVal.data;
 
-    console.log(`res2: ${JSON.stringify(resPayload2)}`);
+    // console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
     expect(readRetVal.data.name).toBe(body.name);
 
@@ -143,7 +143,8 @@ describe('testing tables', () => {
   });
   it('should read dashboards', async () => {
     const body: TableCreateReq = {
-      name: 'Person Natural',
+      name: 'Person_Natural',
+      label: 'Person Natural',
       cols: [
         {
           field: 'Person_Natural_Full_Name',
