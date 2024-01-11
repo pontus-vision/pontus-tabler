@@ -19,21 +19,24 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
 
   const colsChecked = [];
 
-  // console.log({ res: resTable, tableName, cols });
+  console.log({ res: resTable, tableName, cols });
 
-  // for (const colReq of resTable?.cols) {
-  //   for (const col in cols) {
-  //     if (col !== colReq.name) {
-  //       colsChecked.push(col);
-  //     }
-  //   }
-  // }
-  // if (colsChecked?.length > 0) {
-  //   throw {
-  //     code: 400,
-  //     message: `Cols are not defined in table: ${colsChecked.join(', ')}`,
-  //   };
-  // }
+  for (const colReq of resTable?.cols) {
+    for (const col in cols) {
+      if (col !== colReq.name) {
+        colsChecked.push(col);
+      }
+    }
+  }
+  if (colsChecked?.length > 0) {
+    throw {
+      code: 400,
+      message: {
+        string: `Cols are not defined in table: ${colsChecked.join(', ')}`,
+        nonExistingFields: Object.keys(cols),
+      },
+    };
+  }
 };
 export const upsertTableData = async (data: TableDataCreateReq) => {
   try {
