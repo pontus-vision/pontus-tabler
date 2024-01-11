@@ -44,11 +44,31 @@ describe('testing tabledata', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
+    const table: TableCreateReq = {
+      name: 'Person_Natural',
+      label: 'Person Natural',
+      cols: [
+        {
+          field: 'column 1',
+          filter: false,
+          sortable: false,
+          headerName: 'column 1',
+          name: 'column1',
+          kind: 'checkboxes',
+        },
+      ],
+    };
+
+    const creatTableRetVal = await post('table/create', table);
+    console.log({ creatTableRetVal });
+
+    expect(creatTableRetVal.status).toBe(201);
+
     // Creating our first record.
     const body: TableDataCreateReq = {
       tableName: 'Person_Natural',
       cols: {
-        foo: 'bar',
+        column1: 'bar',
       },
     };
 
@@ -63,7 +83,7 @@ describe('testing tabledata', () => {
       from: 1,
       to: 10,
       filters: {
-        foo: {
+        column1: {
           filter: 'bar',
           filterType: 'text',
           type: 'contains',
@@ -84,7 +104,7 @@ describe('testing tabledata', () => {
       tableName: body.tableName,
       rowId: createRetVal.data.id,
       cols: {
-        foo: 'john',
+        column1: 'john',
       },
     };
 
@@ -98,7 +118,7 @@ describe('testing tabledata', () => {
       from: 1,
       to: 10,
       filters: {
-        foo: {
+        column1: {
           filter: 'john',
           filterType: 'text',
           type: 'contains',
@@ -116,7 +136,7 @@ describe('testing tabledata', () => {
     // and finally deleting it.
 
     const deleteRetVal = await post('table/data/delete', {
-      id: createRetVal.data.id,
+      rowId: createRetVal.data.id,
       tableName: body.tableName,
     });
 
