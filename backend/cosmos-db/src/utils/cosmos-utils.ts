@@ -87,7 +87,7 @@ export const fetchData = async (
       .fetchAll();
 
     if (values.resources.length === 0) {
-      throw { code: 404, message: 'No dashboard has been found.' };
+      throw { code: 404, message: `No ${table} has been found.` };
     }
 
     return { count: count.resources[0], values: values.resources };
