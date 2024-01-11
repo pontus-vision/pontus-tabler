@@ -25,8 +25,8 @@ export const tableCreatePOST = async (
       throw { code: 400, message: 'No properties defined' };
     }
     const response = await upsertTable(body);
+    res.status(201);
     res.json(response);
-    res.status(200);
 
     return res;
   } catch (error) {
