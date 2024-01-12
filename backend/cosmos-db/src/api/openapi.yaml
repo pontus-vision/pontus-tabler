@@ -289,45 +289,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TableDataReadReq'
-            # examples:
-            #   example-0001:
-            #     value:
-            #       dataType: Person_Natural
-            #       filters:
-            #         - colId: Person_Natural_Full_Name
-            #           condition1:
-            #             filter: JO
-            #             filterType: text
-            #             type: contains
-            #           condition2:
-            #             filter: SE
-            #             filterType: text
-            #             type: contains
-            #           filterType: text
-            #           operator: AND
-            #       from: 0
-            #       search:
-            #         cols:
-            #           - field: Person_Natural_Full_Name
-            #             filter: true
-            #             headerName: Full Name
-            #             id: Person_Natural_Full_Name
-            #             name: Full Name
-            #             sortable: true
-            #           - field: Person_Natural_Customer_ID
-            #             filter: true
-            #             headerName: Customer ID
-            #             id: Person_Natural_Customer_ID
-            #             name: Customer ID
-            #             sortable: true
-            #         extraSearch:
-            #           label: Person_Natural
-            #           value: Person_Natural
-            #         searchExact: true
-            #         searchStr: ''
-            #       sortCol: Person_Natural_Full_Name
-            #       sortDir: +asc
-            #       to: 100
+            examples:
+              example-0001:
+                value:
+                  tableName: Person_Natural
+                  filters:
+                    - colId: Person_Natural_Full_Name
+                      condition1:
+                        filter: JO
+                        filterType: text
+                        type: contains
+                      condition2:
+                        filter: SE
+                        filterType: text
+                        type: contains
+                      filterType: text
+                      operator: AND
+                  from: 0
+                  search:
+                    cols:
+                      - field: Person_Natural_Full_Name
+                        filter: true
+                        headerName: Full Name
+                        id: Person_Natural_Full_Name
+                        name: Full Name
+                        sortable: true
+                      - field: Person_Natural_Customer_ID
+                        filter: true
+                        headerName: Customer ID
+                        id: Person_Natural_Customer_ID
+                        name: Customer ID
+                        sortable: true
+                    extraSearch:
+                      label: Person_Natural
+                      value: Person_Natural
+                    searchExact: true
+                    searchStr: ''
+                  sortCol: Person_Natural_Full_Name
+                  sortDir: +asc
+                  to: 100
       responses:
         '200':
           description: AG Record data
@@ -335,18 +335,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TableDataReadRes'
-              # examples:
-              #   example-0001:
-              #     value:
-              #       type: recordReply
-              #       from: 0
-              #       records:
-              #         - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
-              #           ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
-              #         - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
-              #           ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
-              #       to: 2
-              #       totalAvailable: 4242
+              examples:
+                example-0001:
+                  value:
+                    rows:
+                      - Person_Natural_Name: John Doe
+                        Person_Natural_Email: foo@bar.com
+                    rowsCount: 1
         '400':
           description: Invalid search supplied
         '401':
