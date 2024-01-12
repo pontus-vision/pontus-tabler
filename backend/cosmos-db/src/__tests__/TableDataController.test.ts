@@ -11,11 +11,13 @@ import {
   TableDataReadReq,
   TableDataUpdateReq,
   TableDataDeleteReq,
+  TableDataReadRes,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 
 import { isSubset, post } from './test-utils';
 import { deleteDatabase } from '../utils/cosmos-utils';
 import { srv } from '..';
+import { AxiosResponse } from 'axios';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -93,10 +95,13 @@ describe('testing tabledata', () => {
       tableName: body.tableName,
     };
 
-    const readRetVal = await post('table/data/read', body2);
+    const readRetVal = (await post(
+      'table/data/read',
+      body2,
+    )) as AxiosResponse<TableDataReadRes>;
 
     expect(
-      readRetVal.data.values.some((value) => isSubset(body.cols, value)),
+      readRetVal.data.rows.some((value) => isSubset(body.cols, value)),
     ).toBe(true);
 
     // Updating it.
@@ -128,11 +133,16 @@ describe('testing tabledata', () => {
       tableName: body.tableName,
     };
 
-    const readRetVal3 = await post('table/data/read', bodyRead2);
+    const readRetVal3 = (await post(
+      'table/data/read',
+      bodyRead2,
+    )) as AxiosResponse<TableDataReadRes>;
 
     expect(
-      readRetVal3.data.values.some((value) => isSubset(bodyUpdate.cols, value)),
+      readRetVal3.data.rows.some((value) => isSubset(bodyUpdate.cols, value)),
     ).toBe(true);
+
+    expect(readRetVal3.data.rowsCount).toBe(1);
 
     // and finally deleting it.
 
