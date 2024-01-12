@@ -1167,10 +1167,6 @@ export interface TableColumnRef {
   kind?: KindEnum;
 }
 
-/**
- * @export
- * @namespace TableColumnRef
- */
 export type KindEnum =
   | 'checkboxes'
   | 'selectbox'
