@@ -1276,23 +1276,23 @@ export interface TableDataReadReq extends ReadPaginationFilter {
   tableName: string;
 }
 /**
- *
+ * 
  * @export
  * @interface TableDataReadRes
  */
 export interface TableDataReadRes {
   /**
-   *
+   * 
    * @type {number}
    * @memberof TableDataReadRes
    */
-  totalRows?: number;
+  rowsCount?: number;
   /**
-   *
+   * 
    * @type {Array<TableDataRowRef>}
    * @memberof TableDataReadRes
    */
-  cols?: Array<TableDataRowRef>;
+  rows?: Array<TableDataRowRef>;
 }
 /**
  *
