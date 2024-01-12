@@ -4,6 +4,7 @@ import {
   TableDataCreateReq,
   TableDataDeleteReq,
   TableDataReadReq,
+  TableDataReadRes,
   TableDataRowRef,
   TableDataUpdateReq,
   TableDeleteReq,
@@ -120,10 +121,14 @@ export const deleteTableData = async (data: TableDataDeleteReq) => {
   }
 };
 
-export const readTableData = async (body: TableDataReadReq): Promise<any> => {
+export const readTableData = async (
+  body: TableDataReadReq,
+): Promise<TableDataReadRes> => {
   try {
     await checkTableCols(body.tableName, body.filters);
-    return fetchData(body, body.tableName);
+    const res = await fetchData(body, body.tableName);
+
+    return { rowsCount: res.count, rows: res.values };
   } catch (error) {
     throw error;
   }
