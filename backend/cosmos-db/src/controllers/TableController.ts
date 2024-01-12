@@ -21,9 +21,6 @@ export const tableCreatePOST = async (
   body: TableCreateReq,
 ): Promise<Response> => {
   try {
-    if (body === undefined) {
-      throw { code: 400, message: 'No properties defined' };
-    }
     const response = await upsertTable(body);
     res.status(201);
     res.json(response);
@@ -48,9 +45,6 @@ export const tableReadPOST = async (
   body: TableReadReq,
 ) => {
   try {
-    if (body === undefined) {
-      throw { code: 400, message: 'No properties defined' };
-    }
     const response = await readTableById(body);
 
     res.status(200);
@@ -58,13 +52,8 @@ export const tableReadPOST = async (
 
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
-    res.json(error);
+    res.status(error.code || error);
+    res.json(error.message || error);
     return res;
   }
 };
