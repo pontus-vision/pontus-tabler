@@ -232,6 +232,32 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReadPaginationFilter'
+            examples:
+              example-01:
+                value:
+                  from: 1
+                  to: 2
+                  filters:
+                    name:
+                      filter: 'person_Natural'
+                      filterType: 'text'
+                      type: 'contains'
+              example-02:
+                value:
+                  from: 1
+                  to: 2
+                  filters:
+                    name:
+                      condition1:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: contains
+                      condition2:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: contains
+                    filterType: 'text'
+                    operator: 'AND'
         required: true
       responses:
         '200':
@@ -257,13 +283,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TableDataCreateReq'
-            # examples:
-            #   example-01:
-            #     value:
-            #       id: mapeamentoDeProcessos
-            #       cols:
-            #         mapeamentoDeProcessoCol1: New value
-            #         mapeamentoDeProcessoCol2: New value
+            examples:
+              example-01:
+                value:
+                  id: mapeamentoDeProcessos
+                  cols:
+                    mapeamentoDeProcessoCol1: New value
+                    mapeamentoDeProcessoCol2: New value
         required: true
       responses:
         '201':
@@ -363,14 +389,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TableDataUpdateReq'
-            # examples:
-            #   example-01:
-            #     value:
-            #       id: mapeamentoDeProcessos
-            #       rowId: 15
-            #       cols:
-            #         mapeamentoDeProcessoCol1: Value Overwritten
-            #         mapeamentoDeProcessoCol2: Value Overwritten
+            examples:
+              example-01:
+                value:
+                  id: mapeamentoDeProcessos
+                  rowId: 15
+                  cols:
+                    mapeamentoDeProcessoCol1: Value Overwritten
+                    mapeamentoDeProcessoCol2: Value Overwritten
         required: true
       responses:
         '201':
@@ -634,6 +660,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardsReadRes'
+              examples:
+                example-01:
+                  value:
+                    from: 1
+                    to: 2
+                    filters:
+                      name:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: 'contains'
+                example-02:
+                  value:
+                    from: 1
+                    to: 2
+                    filters:
+                      name:
+                        condition1:
+                          filter: 'person_Natural'
+                          filterType: 'text'
+                          type: contains
+                        condition2:
+                          filter: 'person_Natural'
+                          filterType: 'text'
+                          type: contains
+                      filterType: 'text'
+                      operator: 'AND'
         '400':
           description: Bad request
         '500':
@@ -948,13 +1000,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MenuItemTreeRef'
-      # example:
-      #   path: path
-      #   children:
-      #     - null
-      #     - null
-      #   name: name
-      #   type: type
     authGroupRef:
       type: object
       properties:
@@ -1326,17 +1371,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TableDataRowRef'
-      # example:
-      #   totalDashboards: 0
-      #   dashboards:
-      #     - owner: owner
-      #       folder: folder
-      #       name: name
-      #       id: id
-      #     - owner: owner
-      #       folder: folder
-      #       name: name
-      #       id: id
     TablesReadRes:
       type: object
       properties:
