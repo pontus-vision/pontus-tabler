@@ -106,7 +106,6 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
   let colSortStr = '';
 
   for (const colId in cols) {
-    console.log(colId);
     if (cols.hasOwnProperty(colId)) {
       const condition1Filter = cols[colId]?.condition1?.filter;
       const condition2Filter = cols[colId]?.condition2?.filter;
