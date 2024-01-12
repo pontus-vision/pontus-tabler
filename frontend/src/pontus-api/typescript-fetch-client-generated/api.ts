@@ -1276,19 +1276,19 @@ export interface TableDataReadReq extends ReadPaginationFilter {
   tableName: string;
 }
 /**
- * 
+ *
  * @export
  * @interface TableDataReadRes
  */
 export interface TableDataReadRes {
   /**
-   * 
+   *
    * @type {number}
    * @memberof TableDataReadRes
    */
   rowsCount?: number;
   /**
-   * 
+   *
    * @type {Array<TableDataRowRef>}
    * @memberof TableDataReadRes
    */
@@ -1377,6 +1377,12 @@ export interface TableRef {
    */
   name?: string;
   /**
+   *
+   * @type {string}
+   * @memberof TableRef
+   */
+  label?: string;
+  /**
    * Table columns associated with the table
    * @type {Array<TableColumnRef>}
    * @memberof TableRef
@@ -1395,6 +1401,12 @@ export interface TableUpdateReq extends BaseModelRef {
    * @memberof TableUpdateReq
    */
   name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof TableUpdateReq
+   */
+  label?: string;
   /**
    * Table columns associated with the table
    * @type {Array<TableColumnRef>}
