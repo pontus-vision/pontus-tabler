@@ -21,6 +21,7 @@ import DashboardAuthGroup from './views/dashboard/DashboardAuthGroup';
 import CreateDashboard from './views/dashboard/CreateDashboard';
 import UpdateDashboard from './views/dashboard/UpdateDashboard';
 import CreateTableView from './views/tables/CreateTable';
+import TableDataRead from './views/tables/table-data/TableDataRead';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -67,6 +68,7 @@ function App() {
             <Route path="/dashboards/read" element={<Dashboards />} />
             <Route path="/dashboard/create" element={<CreateDashboard />} />
             <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
+            <Route path="/table/data/read/:id" element={<TableDataRead />} />
             <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
             <Route path="/auth/group/create" element={<CreateAuthGroup />} />
             <Route
