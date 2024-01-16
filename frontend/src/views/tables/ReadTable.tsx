@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import NewTableCol from '../../components/NewTable/Column';
 
-import { getTable, getTables, updateTable } from '../../client';
+import { tableRead, getTables, updateTable } from '../../client';
 import { useTranslation } from 'react-i18next';
 import { capitalizeFirstLetter } from '../../webinyApi';
 import { useLocation, useParams } from 'react-router-dom';
@@ -24,7 +24,7 @@ const ReadTableView = () => {
   const { t, i18n } = useTranslation();
 
   const fetchTable = async (id: string) => {
-    const data = await getTable(id);
+    const data = await tableRead(id);
     setTable(data?.data);
     console.log({ data });
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import NewTableCol from '../../components/NewTable/Column';
 import { IoChevronBackOutline } from 'react-icons/io5';
-import { getTable, getTables, updateTable } from '../../client';
+import { tableRead, getTables, updateTable } from '../../client';
 import { useTranslation } from 'react-i18next';
 import { capitalizeFirstLetter } from '../../webinyApi';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -28,7 +28,7 @@ const UpdateTableView = ({ tableId }: Props) => {
   const { t, i18n } = useTranslation();
 
   const fetchTable = async (id: string) => {
-    const data = await getTable(id);
+    const data = await tableRead(id);
     setTable(data?.data);
 
     data?.data.cols && setCols(data?.data.cols);

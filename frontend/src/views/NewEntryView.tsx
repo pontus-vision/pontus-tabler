@@ -12,7 +12,7 @@ import { ColumnState } from 'ag-grid-community';
 import { selectCount } from '../store/slice';
 import { newRowState, selectRowState } from '../store/sliceGridUpdate';
 import { cmsGetContentModel } from '../webinyApi';
-import { getModelFields, getTable } from '../client';
+import { getModelFields, tableRead } from '../client';
 import { TableColumn } from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
@@ -55,7 +55,7 @@ const NewEntryView = ({
   const getModelContent = async (modelId: string) => {
     try {
       setIsLoading(true);
-      const data = await getTable(modelId);
+      const data = await tableRead(modelId);
       console.log({ data });
 
       if (!data?.data.cols) return;

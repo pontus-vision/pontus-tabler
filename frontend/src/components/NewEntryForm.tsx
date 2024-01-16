@@ -14,7 +14,7 @@ import {
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import {
-  createDataTable,
+  tableDataCreate,
   getModelData,
   postNewEntry,
   updateDataTableRow,
@@ -431,7 +431,7 @@ const NewEntryForm = ({
           tableId: contentModel.name,
         };
 
-        const publishData = await createDataTable(obj);
+        const publishData = await tableDataCreate(obj);
         if (!!publishData) {
           handleUpdatedGrid();
           setSuccessMsg(t('entry-registered') as string);
