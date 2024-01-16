@@ -14,12 +14,12 @@ import {
   upsertTableData,
 } from '../service/TableDataService';
 
-export async function tableDataCreatePOST(
+export const tableDataCreatePOST = async (
   req: Request,
   res: Response,
   next: NextFunction,
   body: TableDataCreateReq,
-) {
+) => {
   try {
     const response = await upsertTableData(body);
 
@@ -29,17 +29,17 @@ export async function tableDataCreatePOST(
     return res;
   } catch (error) {
     res.status(error.code);
-    res.json(error);
+    res.json(error?.message || error);
     return res;
   }
-}
+};
 
-export async function tableDataReadPOST(
+export const tableDataReadPOST = async (
   req: Request,
   res: Response,
   next: NextFunction,
   body: TableDataReadReq,
-) {
+) => {
   try {
     const response = await readTableData(body);
 
@@ -48,17 +48,17 @@ export async function tableDataReadPOST(
     return res;
   } catch (error) {
     res.status(error.code);
-    res.json(error.message);
+    res.json(error.message || error);
     return res;
   }
-}
+};
 
-export async function tableDataUpdatePOST(
+export const tableDataUpdatePOST = async (
   req: Request,
   res: Response,
   next: NextFunction,
   body: TableDataUpdateReq,
-) {
+) => {
   try {
     const response = await updateTableData(body);
 
@@ -70,13 +70,13 @@ export async function tableDataUpdatePOST(
     res.json(error);
     return res;
   }
-}
-export async function tableDataDeletePOST(
+};
+export const tableDataDeletePOST = async (
   req: Request,
   res: Response,
   next: NextFunction,
   body: TableDataDeleteReq,
-) {
+) => {
   try {
     const response = await deleteTableData(body);
 
@@ -85,8 +85,8 @@ export async function tableDataDeletePOST(
 
     return res;
   } catch (error) {
-    res.status(error.code);
-    res.json(error);
+    res.status(error.code || error);
+    res.json(error.message || error);
     return res;
   }
-}
+};

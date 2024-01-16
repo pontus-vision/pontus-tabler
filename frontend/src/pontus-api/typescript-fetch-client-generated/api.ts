@@ -1187,7 +1187,13 @@ export interface TableCreateReq {
    * @type {string}
    * @memberof TableCreateReq
    */
-  name?: string;
+  name: string;
+  /**
+   *
+   * @type {string}
+   * @memberof TableCreateReq
+   */
+  label: string;
   /**
    * Table columns to be associated with the table during creation
    * @type {Array<TableColumnRef>}
@@ -1250,13 +1256,13 @@ export interface TableDataDeleteReq {
    * @type {string}
    * @memberof TableDataDeleteReq
    */
-  id: string;
+  tableName: string;
   /**
    *
    * @type {string}
    * @memberof TableDataDeleteReq
    */
-  tableName: string;
+  rowId: string;
 }
 /**
  *
@@ -1277,7 +1283,7 @@ export interface TableDataReadRes {
    * @type {number}
    * @memberof TableDataReadRes
    */
-  totalRows?: number;
+  rowsCount?: number;
   /**
    *
    * @type {Array<TableDataRowRef>}
@@ -1368,6 +1374,12 @@ export interface TableRef {
    */
   name?: string;
   /**
+   *
+   * @type {string}
+   * @memberof TableRef
+   */
+  label?: string;
+  /**
    * Table columns associated with the table
    * @type {Array<TableColumnRef>}
    * @memberof TableRef
@@ -1386,6 +1398,12 @@ export interface TableUpdateReq extends BaseModelRef {
    * @memberof TableUpdateReq
    */
   name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof TableUpdateReq
+   */
+  label?: string;
   /**
    * Table columns associated with the table
    * @type {Array<TableColumnRef>}

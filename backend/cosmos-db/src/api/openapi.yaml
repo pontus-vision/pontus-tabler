@@ -232,6 +232,32 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReadPaginationFilter'
+            examples:
+              example-01:
+                value:
+                  from: 1
+                  to: 2
+                  filters:
+                    name:
+                      filter: 'person_Natural'
+                      filterType: 'text'
+                      type: 'contains'
+              example-02:
+                value:
+                  from: 1
+                  to: 2
+                  filters:
+                    name:
+                      condition1:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: contains
+                      condition2:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: contains
+                    filterType: 'text'
+                    operator: 'AND'
         required: true
       responses:
         '200':
@@ -257,13 +283,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TableDataCreateReq'
-            # examples:
-            #   example-01:
-            #     value:
-            #       id: mapeamentoDeProcessos
-            #       cols:
-            #         mapeamentoDeProcessoCol1: New value
-            #         mapeamentoDeProcessoCol2: New value
+            examples:
+              example-01:
+                value:
+                  id: mapeamentoDeProcessos
+                  cols:
+                    mapeamentoDeProcessoCol1: New value
+                    mapeamentoDeProcessoCol2: New value
         required: true
       responses:
         '201':
@@ -289,45 +315,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TableDataReadReq'
-            # examples:
-            #   example-0001:
-            #     value:
-            #       dataType: Person_Natural
-            #       filters:
-            #         - colId: Person_Natural_Full_Name
-            #           condition1:
-            #             filter: JO
-            #             filterType: text
-            #             type: contains
-            #           condition2:
-            #             filter: SE
-            #             filterType: text
-            #             type: contains
-            #           filterType: text
-            #           operator: AND
-            #       from: 0
-            #       search:
-            #         cols:
-            #           - field: Person_Natural_Full_Name
-            #             filter: true
-            #             headerName: Full Name
-            #             id: Person_Natural_Full_Name
-            #             name: Full Name
-            #             sortable: true
-            #           - field: Person_Natural_Customer_ID
-            #             filter: true
-            #             headerName: Customer ID
-            #             id: Person_Natural_Customer_ID
-            #             name: Customer ID
-            #             sortable: true
-            #         extraSearch:
-            #           label: Person_Natural
-            #           value: Person_Natural
-            #         searchExact: true
-            #         searchStr: ''
-            #       sortCol: Person_Natural_Full_Name
-            #       sortDir: +asc
-            #       to: 100
+            examples:
+              example-0001:
+                value:
+                  tableName: Person_Natural
+                  filters:
+                    - colId: Person_Natural_Full_Name
+                      condition1:
+                        filter: JO
+                        filterType: text
+                        type: contains
+                      condition2:
+                        filter: SE
+                        filterType: text
+                        type: contains
+                      filterType: text
+                      operator: AND
+                  from: 0
+                  search:
+                    cols:
+                      - field: Person_Natural_Full_Name
+                        filter: true
+                        headerName: Full Name
+                        id: Person_Natural_Full_Name
+                        name: Full Name
+                        sortable: true
+                      - field: Person_Natural_Customer_ID
+                        filter: true
+                        headerName: Customer ID
+                        id: Person_Natural_Customer_ID
+                        name: Customer ID
+                        sortable: true
+                    extraSearch:
+                      label: Person_Natural
+                      value: Person_Natural
+                    searchExact: true
+                    searchStr: ''
+                  sortCol: Person_Natural_Full_Name
+                  sortDir: +asc
+                  to: 100
       responses:
         '200':
           description: AG Record data
@@ -335,18 +361,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TableDataReadRes'
-              # examples:
-              #   example-0001:
-              #     value:
-              #       type: recordReply
-              #       from: 0
-              #       records:
-              #         - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
-              #           ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
-              #         - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
-              #           ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
-              #       to: 2
-              #       totalAvailable: 4242
+              examples:
+                example-0001:
+                  value:
+                    rows:
+                      - Person_Natural_Name: John Doe
+                        Person_Natural_Email: foo@bar.com
+                    rowsCount: 1
         '400':
           description: Invalid search supplied
         '401':
@@ -368,14 +389,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TableDataUpdateReq'
-            # examples:
-            #   example-01:
-            #     value:
-            #       id: mapeamentoDeProcessos
-            #       rowId: 15
-            #       cols:
-            #         mapeamentoDeProcessoCol1: Value Overwritten
-            #         mapeamentoDeProcessoCol2: Value Overwritten
+            examples:
+              example-01:
+                value:
+                  id: mapeamentoDeProcessos
+                  rowId: 15
+                  cols:
+                    mapeamentoDeProcessoCol1: Value Overwritten
+                    mapeamentoDeProcessoCol2: Value Overwritten
         required: true
       responses:
         '201':
@@ -639,6 +660,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardsReadRes'
+              examples:
+                example-01:
+                  value:
+                    from: 1
+                    to: 2
+                    filters:
+                      name:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: 'contains'
+                example-02:
+                  value:
+                    from: 1
+                    to: 2
+                    filters:
+                      name:
+                        condition1:
+                          filter: 'person_Natural'
+                          filterType: 'text'
+                          type: contains
+                        condition2:
+                          filter: 'person_Natural'
+                          filterType: 'text'
+                          type: contains
+                      filterType: 'text'
+                      operator: 'AND'
         '400':
           description: Bad request
         '500':
@@ -953,13 +1000,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MenuItemTreeRef'
-      # example:
-      #   path: path
-      #   children:
-      #     - null
-      #     - null
-      #   name: name
-      #   type: type
     authGroupRef:
       type: object
       properties:
@@ -1084,6 +1124,7 @@ components:
         name:
           type: string
           description: Name of the table column
+          pattern: '^[a-zA-Z0-9]+(?:[a-zA-Z0-9]|(?<![-_])[-_](?![-_]))*$'
         field:
           type: string
           description: Field name of the table column
@@ -1115,15 +1156,19 @@ components:
       properties:
         name:
           type: string
+          pattern: '^[a-zA-Z0-9]+(?:[a-zA-Z0-9]|(?<![-_])[-_](?![-_]))*$'
           description: Name of the table
+        label:
+          type: string
         cols:
           type: array
           description: Table columns associated with the table
           items:
             $ref: '#/components/schemas/TableColumnRef'
       example:
-        name: name
+        name: Person_Natural
         id: id
+        label: Person Natural
         cols:
           - field: Person_Natural_Full_Name
             filter: true
@@ -1148,12 +1193,19 @@ components:
       properties:
         name:
           type: string
+          pattern: '^[a-zA-Z0-9]+(?:[a-zA-Z0-9]|(?<![-_])[-_](?![-_]))*$'
           description: Name of the table
+        label:
+          type: string
         cols:
           type: array
           description: Table columns to be associated with the table during creation
           items:
             $ref: '#/components/schemas/TableColumnRef'
+      required:
+        - name
+        - label
+        - cols
     TableCreateRes:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
@@ -1196,12 +1248,12 @@ components:
     TableDataDeleteReq:
       type: object
       properties:
-        id:
+        rowId:
           type: string
         tableName:
           type: string
       required:
-        - id
+        - rowId
         - tableName
     BaseModelRef:
       type: object
@@ -1319,17 +1371,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TableDataRowRef'
-      # example:
-      #   totalDashboards: 0
-      #   dashboards:
-      #     - owner: owner
-      #       folder: folder
-      #       name: name
-      #       id: id
-      #     - owner: owner
-      #       folder: folder
-      #       name: name
-      #       id: id
     TablesReadRes:
       type: object
       properties:

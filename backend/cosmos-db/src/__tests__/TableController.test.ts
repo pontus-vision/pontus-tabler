@@ -7,9 +7,10 @@ import {
   TableCreateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 
-import { post } from './test-utils';
+import { isSubset, post } from './test-utils';
 import { deleteDatabase } from '../utils/cosmos-utils';
 import { srv } from '..';
+import { AxiosResponse } from 'axios';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -23,7 +24,7 @@ import { srv } from '..';
 // }));
 jest.setTimeout(1000000);
 
-describe('testing tables', () => {
+describe('tableControllerTest', () => {
   const OLD_ENV = process.env;
 
   beforeEach(async () => {
@@ -38,15 +39,16 @@ describe('testing tables', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
-    const body: TableRef = {
-      name: 'Person Natural',
+    const body: TableCreateReq = {
+      name: 'person_Natural',
+      label: 'Person Natural',
       cols: [
         {
           field: 'Person_Natural_Full_Name',
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
-          name: 'Full Name',
+          name: 'full_Name',
           sortable: true,
         },
         {
@@ -54,18 +56,21 @@ describe('testing tables', () => {
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
-          name: 'Customer ID',
+          name: 'customer_ID',
           sortable: true,
         },
       ],
     };
 
-    const createRetVal = await post('table/create', body);
+    const createRetVal = (await post(
+      'table/create',
+      body,
+    )) as AxiosResponse<TableCreateRes>;
 
     let resPayload: TableCreateRes = createRetVal.data;
     let id = resPayload.id;
 
-    expect(createRetVal.data.name).toBe(body.name);
+    expect(isSubset(body, createRetVal.data)).toBe(true);
 
     const readRetVal = await post('table/read', {
       id,
@@ -73,12 +78,13 @@ describe('testing tables', () => {
 
     let resPayload2: TableReadRes = readRetVal.data;
 
-    console.log(`res2: ${JSON.stringify(resPayload2)}`);
+    // console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
-    expect(readRetVal.data.name).toBe(body.name);
+    expect(isSubset(body, readRetVal.data)).toBe(true);
 
     const body2: TableUpdateReq = {
       name: 'name2',
+      label: 'name 2',
       id: id,
       cols: [
         {
@@ -104,7 +110,7 @@ describe('testing tables', () => {
 
     let resPayload3: TableUpdateReq = updateRetVal.data;
 
-    expect(resPayload3.name).toBe(body2.name);
+    expect(isSubset(body2, resPayload3)).toBe(true);
 
     const body3 = {
       id: resPayload3.id,
@@ -141,16 +147,17 @@ describe('testing tables', () => {
 
     expect(deleteRetVal.status).toBe(400);
   });
-  it('should read dashboards', async () => {
+  it('should read tables', async () => {
     const body: TableCreateReq = {
-      name: 'Person Natural',
+      name: 'person_Natural',
+      label: 'Person Natural',
       cols: [
         {
           field: 'Person_Natural_Full_Name',
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
-          name: 'Full Name',
+          name: 'full_Name',
           sortable: true,
         },
         {
@@ -158,7 +165,7 @@ describe('testing tables', () => {
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
-          name: 'Customer ID',
+          name: 'customer_ID',
           sortable: true,
         },
       ],
@@ -168,14 +175,14 @@ describe('testing tables', () => {
 
     const createRetVal2 = await post('table/create', {
       ...body,
-      name: 'Person Natural2',
+      name: 'person_Natural2',
     });
 
     const readBody = {
       filters: {
         name: {
           condition1: {
-            filter: 'Person Natural',
+            filter: 'person_Natural',
             filterType: 'text',
             type: 'contains',
           },
@@ -190,27 +197,6 @@ describe('testing tables', () => {
     );
 
     expect(readRetVal.data.totalTables).toBe(2);
-
-    const readBody2 = {
-      filters: {
-        name: {
-          condition1: {
-            filter: 'PontusVision',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-        folder: {
-          condition1: {
-            filter: 'folder 1',
-            filterType: 'text',
-            type: 'contains',
-          },
-          filterType: 'text',
-        },
-      },
-    };
 
     const deleteVal = await post('table/delete', {
       id: createRetVal.data.id,

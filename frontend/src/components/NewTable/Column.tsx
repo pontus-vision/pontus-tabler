@@ -1,10 +1,14 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { BsCheckCircleFill } from 'react-icons/bs';
 import { FaRegCircleXmark } from 'react-icons/fa6';
+<<<<<<< HEAD
 import {
   TableColumnRef,
   TableColumnRefKindEnum,
 } from '../../pontus-api/typescript-fetch-client-generated';
+=======
+import { KindEnum, TableColumnRef } from '../../pontus-api/typescript-fetch-client-generated';
+>>>>>>> 41768da51da27328a7d650af8aa3b7c9dacb4cad
 
 export interface TableCol {
   column: string;
@@ -81,7 +85,13 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
             name=""
             id=""
           >
+<<<<<<< HEAD
             <option value={'checkboxes'}>Checkboxes</option>
+=======
+            <option value={'checkboxes'}>
+              Checkboxes
+            </option>
+>>>>>>> 41768da51da27328a7d650af8aa3b7c9dacb4cad
             <option value={'selectbox'}>Selectbox</option>
             <option value={'text'}>Text</option>
             <option value={'number'}>Number</option>

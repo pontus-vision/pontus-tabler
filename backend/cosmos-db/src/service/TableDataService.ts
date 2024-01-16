@@ -4,6 +4,8 @@ import {
   TableDataCreateReq,
   TableDataDeleteReq,
   TableDataReadReq,
+  TableDataReadRes,
+  TableDataRowRef,
   TableDataUpdateReq,
   TableDeleteReq,
   TableReadReq,
@@ -11,9 +13,36 @@ import {
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
 import { PatchOperation } from '@azure/cosmos';
+import { readTableByName } from './TableService';
 
+const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
+  const resTable = await readTableByName(tableName);
+
+  const colsChecked = [];
+
+  console.log({ res: resTable, tableName, cols });
+
+  for (const colReq of resTable?.cols) {
+    for (const col in cols) {
+      if (col !== colReq.name) {
+        colsChecked.push(col);
+      }
+    }
+  }
+  if (colsChecked?.length > 0) {
+    throw {
+      code: 400,
+      message: {
+        string: `Cols are not defined in table: ${colsChecked.join(', ')}`,
+        nonExistingFields: Object.keys(cols),
+      },
+    };
+  }
+};
 export const upsertTableData = async (data: TableDataCreateReq) => {
   try {
+    await checkTableCols(data.tableName, data?.cols);
+
     const tableDataContainer = await fetchContainer(data.tableName);
 
     const res = await tableDataContainer.items.upsert(data.cols);
@@ -30,14 +59,7 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
   try {
     const tableDataContainer = await fetchContainer(data.tableName);
 
-    // const res = await tableDataContainer.items.upsert({
-    //   ...data.cols,
-    //   id: data.rowId,
-    // });
-    // const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    //   res.resource as any;
-
-    // return rest;
+    await checkTableCols(data.tableName, data.cols);
 
     const patchArr: PatchOperation[] = [];
 
@@ -91,7 +113,7 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
 export const deleteTableData = async (data: TableDataDeleteReq) => {
   try {
     const tableDataContainer = await fetchContainer(data.tableName);
-    const res = await tableDataContainer.item(data.id, data.id).delete();
+    const res = await tableDataContainer.item(data.rowId, data.rowId).delete();
 
     return 'Row deleted!';
   } catch (error) {
@@ -101,10 +123,12 @@ export const deleteTableData = async (data: TableDataDeleteReq) => {
 
 export const readTableData = async (
   body: TableDataReadReq,
-): Promise<FetchData> => {
+): Promise<TableDataReadRes> => {
   try {
-    console.log({ body });
-    return fetchData(body, body.tableName);
+    await checkTableCols(body.tableName, body.filters);
+    const res = await fetchData(body, body.tableName);
+
+    return { rowsCount: res.count, rows: res.values };
   } catch (error) {
     throw error;
   }

@@ -22,7 +22,7 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
 
   useEffect(() => {
     const name = cols.length > 0 ? cols[0]?.name : '';
-    console.log({ name });
+    console.log({ cols });
   }, [cols]);
 
   useEffect(() => {
