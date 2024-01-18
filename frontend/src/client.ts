@@ -5,6 +5,7 @@ import {
   ICmsGetContentModelDataField,
   IListModelResponseData,
   Meta,
+  OpenApiValidationFail,
 } from './types';
 
 import {
@@ -44,6 +45,8 @@ import {
   TableDataReadRes,
   TableReadReq,
   TableReadRes,
+  TableDataCreateReq,
+  TableDataCreateRes,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -140,7 +143,7 @@ export const tableRead = async (
 
 export const createTable = async (
   data: TableCreateReq,
-): Promise<AxiosResponse<TableCreateRes, any> | undefined> => {
+): Promise<AxiosResponse<TableCreateRes, any> | OpenApiValidationFail> => {
   return post('/table/create', data);
 };
 
@@ -156,7 +159,9 @@ export const deleteTable = async (
   return post('/table/delete', data);
 };
 
-export const tableDataCreate = async (body: NewTableRow) => {
+export const tableDataCreate = async (
+  body: TableDataCreateReq,
+): Promise<AxiosResponse<TableDataCreateRes> | undefined> => {
   return post('/table/data/create', body);
 };
 

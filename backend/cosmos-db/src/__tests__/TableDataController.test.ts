@@ -152,6 +152,15 @@ describe('testing tabledata', () => {
     });
 
     expect(deleteRetVal.status).toBe(200);
+
+    const readRetVal4 = (await post('table/data/read', {
+      from: 1,
+      to: 10,
+      filters: {},
+      tableName: body.tableName,
+    })) as AxiosResponse<TableDataReadRes>;
+
+    expect(readRetVal4.status).toBe(200);
   });
   it('should do the CRUD "sad path"', async () => {
     const table: TableCreateReq = {

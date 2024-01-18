@@ -1355,6 +1355,12 @@ export interface TableReadRes extends BaseModelRef {
    */
   name?: string;
   /**
+   *
+   * @type {string}
+   * @memberof TableReadRes
+   */
+  label?: string;
+  /**
    * Table columns associated with the table
    * @type {Array<TableColumnRef>}
    * @memberof TableReadRes

@@ -343,4 +343,19 @@ describe('Filter to SQL', () => {
       `where ((d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z") OR (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z")) and ((d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z") OR (d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z")) ORDER BY d.folder asc OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
     );
   });
+  it('should test query with hyphen', () => {
+    const readBody2 = {
+      filters: {
+        ['foo-bar']: {
+          filter: 'PontusVision',
+          filterType: 'text',
+          type: 'contains',
+        },
+      },
+    };
+
+    const query = filterToQuery(readBody2);
+
+    console.log({ query });
+  });
 });

@@ -1,14 +1,10 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { BsCheckCircleFill } from 'react-icons/bs';
 import { FaRegCircleXmark } from 'react-icons/fa6';
-<<<<<<< HEAD
 import {
   TableColumnRef,
   TableColumnRefKindEnum,
 } from '../../pontus-api/typescript-fetch-client-generated';
-=======
-import { KindEnum, TableColumnRef } from '../../pontus-api/typescript-fetch-client-generated';
->>>>>>> 41768da51da27328a7d650af8aa3b7c9dacb4cad
 
 export interface TableCol {
   column: string;
@@ -22,9 +18,18 @@ type Props = {
   index: number;
   colDef?: TableColumnRef;
   testId?: string;
+  onInputChange?: (e: any, field: string) => void;
+  validationError?: Record<string, any>;
 };
 
-const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
+const NewTableCol = ({
+  onInputChange,
+  validationError,
+  setCols,
+  index,
+  colDef,
+  testId,
+}: Props) => {
   const [header, setHeader] = useState<string>(colDef?.headerName || '');
   const [filter, setFilter] = useState(colDef?.filter || false);
   const [sortable, setSortable] = useState(colDef?.sortable || false);
@@ -51,13 +56,13 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
     );
   }, [header, filter, sortable, kind]);
 
-  useEffect(() => {
-    console.log({ colDef });
-  }, [colDef]);
-
   const deleteCol = () => {
     if (!setCols) return;
     setCols((prevState) => prevState?.filter((col, idx) => idx !== index));
+  };
+
+  const formatToCosmosDBPattern = (inputString: string) => {
+    return inputString.trim().replace(/ /g, '-').toLowerCase();
   };
 
   return (
@@ -65,12 +70,25 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
       <td className="table-row__data--padded">
         <div className="table-row__flex-container">
           <input
-            onChange={(e) => setHeader(e.target.value)}
+            onBlur={(e) =>
+              onInputChange && onInputChange(e, `header-col-${index}`)
+            }
+            onChange={(e) => {
+              setHeader(e.target.value);
+              header?.length > 3 &&
+                onInputChange &&
+                onInputChange(e, `header-col-${index}`);
+            }}
             type="text"
             data-testid={`${testId}-input`}
             className="table-row__input-field"
             defaultValue={colDef?.headerName ? colDef?.headerName : ''}
           />
+          {validationError?.[`header-col-${index}`] && (
+            <p className="table-row__flex-container__tooltip">
+              {validationError?.[`header-col-${index}`]}
+            </p>
+          )}
         </div>
       </td>
       <td className="table-row__data--left">
@@ -85,13 +103,7 @@ const NewTableCol = ({ setCols, index, colDef, testId }: Props) => {
             name=""
             id=""
           >
-<<<<<<< HEAD
             <option value={'checkboxes'}>Checkboxes</option>
-=======
-            <option value={'checkboxes'}>
-              Checkboxes
-            </option>
->>>>>>> 41768da51da27328a7d650af8aa3b7c9dacb4cad
             <option value={'selectbox'}>Selectbox</option>
             <option value={'text'}>Text</option>
             <option value={'number'}>Number</option>

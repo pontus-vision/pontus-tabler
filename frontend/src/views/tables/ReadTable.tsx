@@ -24,15 +24,17 @@ const ReadTableView = () => {
   const { t, i18n } = useTranslation();
 
   const fetchTable = async (id: string) => {
-    const data = await tableRead(id);
-    setTable(data?.data);
-    console.log({ data });
+    console.log({ id });
+    // const data = await tableRead({ id });
+    // setTable(data?.data);
+    // console.log({ data });
 
-    data?.data.cols && setCols(data?.data.cols);
+    // data?.data.cols && setCols(data?.data.cols);
   };
 
   useEffect(() => {
     if (!params.id) return;
+    console.log({ id: params.id });
     fetchTable(params.id);
   }, [params]);
 
@@ -52,7 +54,7 @@ const ReadTableView = () => {
 
   return (
     <>
-      <PVGridWebiny2 cols={cols}  />
+      <PVGridWebiny2 cols={cols} />
     </>
   );
 };

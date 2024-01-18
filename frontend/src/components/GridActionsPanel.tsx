@@ -22,10 +22,10 @@ type Props = {
   configTableId?: string;
   add?: () => void;
   permissions?: {
-    updateAction: boolean;
-    createAction: boolean;
-    deleteAction: boolean;
-    readAction: boolean;
+    updateAction?: boolean;
+    createAction?: boolean;
+    deleteAction?: boolean;
+    readAction?: boolean;
   };
   onDelete?: (arr: any[]) => void;
   entriesToBeDeleted: IRowNode<any>[];

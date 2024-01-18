@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import PVGridWebiny2 from '../pv-react/PVGridWebiny2';
 import { useEffect, useState } from 'react';
-import { tableDataRead } from '../client';
+import { tableDataRead, tableRead } from '../client';
 import { ColDef } from 'ag-grid-community';
 import {
   ReadPaginationFilter,
@@ -12,11 +12,11 @@ const TableDataReadView = () => {
   const tableId = useParams().id;
   const [colDefs, setColDefs] = useState<ColDef[]>();
   const [tableName, setTableName] = useState<string>('');
-  const [filters, setFilters] = useState<ReadPaginationFilter>({});
+  const [filters, setFilters] = useState<ReadPaginationFilter>();
 
   useEffect(() => {
     const fetchTable = async (tableId: string) => {
-      const res = await getTable(tableId);
+      const res = await tableRead({ id: tableId });
 
       setColDefs(
         res?.data.cols?.map((col) => {
@@ -31,9 +31,9 @@ const TableDataReadView = () => {
 
   useEffect(() => {
     const fetchTableData = async () => {
-      const res = await readTableData({
+      const res = await tableDataRead({
         tableName: tableName,
-        filters,
+        ...filters,
       });
     };
   }, [tableName, filters]);

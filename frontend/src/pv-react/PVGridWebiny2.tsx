@@ -60,10 +60,10 @@ type Props = {
   onUpdate?: (data: any) => void;
   onRowClicked?: (row: RowEvent<any, any>) => void;
   permissions?: {
-    updateAction: boolean;
-    createAction: boolean;
-    deleteAction: boolean;
-    readAction: boolean;
+    updateAction?: boolean;
+    createAction?: boolean;
+    deleteAction?: boolean;
+    readAction?: boolean;
   };
   onFiltersChange?: (filters: {
     [key: string]: ReadPaginationFilterFilters;
@@ -254,7 +254,7 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (!rows) return;
-    // console.log({ rows, totalCount });
+    console.log({ rows, totalCount });
     cachedRowParams?.successCallback(rows, totalCount);
   }, [rows, filterState]);
 
@@ -329,6 +329,7 @@ const PVGridWebiny2 = ({
 
   function onFilterChanged() {
     if (gridApi) {
+      onFiltersChange && onFiltersChange(gridApi.getFilterModel());
       setFilterState(gridApi.getFilterModel());
       console.log({ filterModel: gridApi.getFilterModel() });
     }

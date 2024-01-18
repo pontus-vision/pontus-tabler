@@ -503,6 +503,30 @@
   padding-inline: 0.2rem;
 }
 
+.alert {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  transition: opacity 500ms, transform 500ms;
+}
+.alert-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+.alert-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.alert-leave {
+  opacity: 0;
+  transform: translateY(-100%);
+  z-index: 0;
+}
+.alert-leave-active {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }
@@ -1115,6 +1139,11 @@
 }
 
 /* CreateNewTable.css */
+.create-table__form {
+  z-index: 1;
+  position: relative;
+}
+
 .create-new-table {
   display: flex;
   flex-direction: column;
@@ -1426,6 +1455,7 @@
   /* Add general styles for the table row */
   border-bottom: 1px solid #e2e8f0;
   background-color: #f7fafc;
+  height: 7rem;
   transition: background-color 0.3s ease-in-out;
 }
 
@@ -1450,6 +1480,19 @@
   display: flex;
   align-items: center;
   height: 75%;
+  position: relative;
+}
+.table-row__flex-container__tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ff5555; /* Tooltip background color */
+  color: #fff; /* Tooltip text color */
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .table-row__input-field {

@@ -79,7 +79,7 @@ const TablesReadView = ({ rowsTested }: Props) => {
   };
 
   const handleRowClicked = (row: RowEvent<any, any>) => {
-    row?.data?.id && navigate(`/table/read/${row.data.id}`);
+    row?.data?.id && navigate(`/table/data/read/${row.data.id}`);
   };
   const handleAddition = () => {
     navigate('/table/create');

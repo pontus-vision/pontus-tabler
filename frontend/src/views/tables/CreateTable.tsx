@@ -7,57 +7,142 @@ import {
   TableRef,
 } from '../../pontus-api/typescript-fetch-client-generated';
 import TableView from '../TableView';
+import { OpenApiValidationFailError } from '../../types';
+import { capitalizeFirstLetter } from '../../webinyApi';
+import Alert, { AlertProps } from '../../components/MessageDisplay';
 
 type Props = {
   testId?: string;
 };
 
+export const formatToCosmosDBPattern = (inputString: string) => {
+  return inputString.trim().replace(/ /g, '-').toLowerCase();
+};
+
 const CreateTableView = ({ testId }: Props) => {
   const [cols, setCols] = useState<TableColumnRef[]>([]);
   const [name, setName] = useState<string>();
+  const [errors, setErrors] = useState<OpenApiValidationFailError>();
 
   const [tables, setTables] = useState<TableRef[]>();
+  const [validationError, setValidationError] = useState<Record<string, any>>(
+    {},
+  );
+  const [message, setMessage] = useState<AlertProps>();
 
   const { t, i18n } = useTranslation();
 
-  function modifyString(str) {
-    // Step 1: Remove any character that doesn't match the pattern [a-zA-Z0-9]
-    let modifiedStr = str.replace(/[^a-zA-Z0-9_-]/g, '');
- 
-    // Step 2: Replace all instances of '-' that are not preceded by '_' or '-' and are not followed by '_' or '-'
-    // Since JavaScript does not support negative lookbehind and lookahead in all environments,
-    // we need to handle this in a different way.
-    // We can split the string by '-', then filter out any element that starts or ends with '_'
-    // Then join them back together with '-'
-    modifiedStr = modifiedStr.split('-').filter(word => !word.startsWith('_') && !word.endsWith('_')).join('-');
- 
-    return modifiedStr;
- }
+  const handleInputChange = (e, field: string) => {
+    const inputValue = e.target.value;
+
+    const pattern = /^[a-zA-Z0-9 ]{3,63}$/;
+    if (!pattern.test(inputValue)) {
+      setValidationError((prevState) => ({
+        ...prevState,
+        [field]:
+          'Please enter only letters, numbers, and spaces (3 to 63 characters).',
+      }));
+    } else {
+      setValidationError((prevState) => ({
+        ...prevState,
+        [field]: '',
+      }));
+    }
+  };
 
   const handleCreate = async (data: TableColumnRef[]) => {
-    setName('');
+    const isAnyFieldInvalid = Object.values(validationError).some(
+      (field) => field,
+    );
+    if (isAnyFieldInvalid) return;
+
     try {
-      const obj = { ...data, name }
-      console.log({obj})
-      const createRes = await createTable({
-        label: name || "",
-        name: modifyString(name),
-        cols: data.map(col=>{return {...col, name: modifyString(col.name)}})
+      const obj = {
+        label: name || '',
+        name: formatToCosmosDBPattern(name || ''),
+        cols: data.map((col) => {
+          return {
+            ...col,
+            name: formatToCosmosDBPattern(col.name || ''),
+            field: formatToCosmosDBPattern(col.name || ''),
+          };
+        }),
+      };
+      const createRes = await createTable(obj);
+
+      if (createRes?.status === 400) {
+        throw new Error();
+      } else if (createRes?.status === 409) {
+        throw 'There is already a table with that Name';
+      }
+
+      setMessage({ message: 'Table created successfully!', type: 'success' });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        message: typeof error === 'string' ? error : '',
       });
-    } catch {}
+      setTimeout(() => {
+        setMessage({ message: '', type: undefined });
+      }, 5000);
+    }
   };
+
+  const checkValidationError = (message: string) => {
+    if (message.startsWith('required')) {
+      return 'This field is required';
+    } else if (message.startsWith('pattern')) {
+      return 'Special characters are not allowed';
+    }
+  };
+
+  const handleColsCreation = (data: TableColumnRef[]) => {
+    setCols(data);
+  };
+
+  useEffect(() => {
+    console.log({ validationError });
+  }, [validationError]);
 
   return (
     <>
-      <label htmlFor="">Name</label>
-      <input
-        data-testid={`${testId}-input`}
-        onChange={(e) => setName(e.target.value)}
-        value={name}
-        type="text"
-        className="create-table__name-input"
-      />
-      <TableView testId="table-view" onCreate={handleCreate} />
+      <form
+        className="create-table__form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          cols.length > 0 && handleCreate(cols);
+        }}
+      >
+        <label htmlFor="">Name</label>
+        <input
+          data-testid={`${testId}-input`}
+          onChange={(e) => {
+            setName(e.target.value);
+            name &&
+              name?.length > 3 &&
+              handleInputChange &&
+              handleInputChange(e, 'name');
+          }}
+          onBlur={(e) => handleInputChange(e, 'name')}
+          value={name}
+          type="text"
+          // pattern="^[a-z0-9]([-a-z0-9]{3,63}[a-z0-9])?$"
+          // title="Please do not use special characters"
+          // required
+          className="create-table__name-input"
+        />
+        {validationError?.name && <p>{validationError.name}</p>}
+        <TableView
+          testId="table-view"
+          onCreate={handleCreate}
+          errors={errors}
+          onColsCreation={handleColsCreation}
+          validationError={validationError}
+          onInputChange={handleInputChange}
+        />
+      </form>
+
+      <Alert message={message?.message} type={message?.type} />
     </>
   );
 };

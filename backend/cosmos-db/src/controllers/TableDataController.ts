@@ -41,7 +41,12 @@ export const tableDataReadPOST = async (
   body: TableDataReadReq,
 ) => {
   try {
-    const response = await readTableData(body);
+    const response = await readTableData({
+      tableName: body.tableName,
+      filters: body?.filters || {},
+      from: body?.from || 1,
+      to: body?.to || 100,
+    });
 
     res.status(200);
     res.json(response);

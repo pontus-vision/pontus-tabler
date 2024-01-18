@@ -239,6 +239,35 @@
   }
 }
 
+.alert {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  transition: opacity 500ms, transform 500ms;
+
+  &-enter {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &-leave {
+    opacity: 0;
+    transform: translateY(-100%);
+    // visibility: hidden;
+    z-index: 0;
+  }
+
+  &-leave-active {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }

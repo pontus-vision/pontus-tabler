@@ -7,12 +7,25 @@ import {
   TableUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
+import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
 
 const TABLES = 'tables';
 
+const partitionKey: string | PartitionKeyDefinition = {
+  paths: ['/name'],
+};
+
+const uniqueKeyPolicy: UniqueKeyPolicy = {
+  uniqueKeys: [{ paths: ['/name'] }],
+};
+
 export const upsertTable = async (data: TableCreateReq | TableUpdateReq) => {
   try {
-    const tableContainer = await fetchContainer(TABLES);
+    const tableContainer = await fetchContainer(
+      TABLES,
+      partitionKey,
+      uniqueKeyPolicy,
+    );
 
     const res = await tableContainer.items.upsert(data);
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
@@ -34,7 +47,11 @@ export const readTableById = async (data: TableReadReq) => {
       },
     ],
   };
-  const tableContainer = await fetchContainer(TABLES);
+  const tableContainer = await fetchContainer(
+    TABLES,
+    partitionKey,
+    uniqueKeyPolicy,
+  );
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
   if (resources.length === 1) {
@@ -54,10 +71,15 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
       },
     ],
   };
-  const tableContainer = await fetchContainer(TABLES);
+
+  const tableContainer = await fetchContainer(
+    TABLES,
+    partitionKey,
+    uniqueKeyPolicy,
+  );
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-
+  console.log({ resources });
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {

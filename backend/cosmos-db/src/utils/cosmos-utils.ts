@@ -74,15 +74,21 @@ export const fetchData = async (
 ): Promise<FetchData | undefined> => {
   try {
     const query = filterToQuery(filter);
-    const dashboardContainer = await fetchContainer(table);
 
-    const countStr = `select VALUE COUNT(1) from ${table} d ${query}`;
+    const container = await fetchContainer(table);
 
-    const values = await dashboardContainer.items
-      .query({ query: `select * from ${table} d ${query}`, parameters: [] })
+    const countStr = `select VALUE COUNT(1) from c ${query}`;
+
+    const valuesStr = `select * from c ${query}`;
+
+    const values = await container.items
+      .query({
+        query: valuesStr,
+        parameters: [],
+      })
       .fetchAll();
 
-    const count = await dashboardContainer.items
+    const count = await container.items
       .query({ query: countStr, parameters: [] })
       .fetchAll();
 
@@ -99,7 +105,7 @@ export const fetchData = async (
 export const filterToQuery = (body: ReadPaginationFilter) => {
   const query = [];
 
-  const cols = body?.filters;
+  let cols = body?.filters;
 
   const { from, to } = body;
 
