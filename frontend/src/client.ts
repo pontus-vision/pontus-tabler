@@ -47,6 +47,7 @@ import {
   TableReadRes,
   TableDataCreateReq,
   TableDataCreateRes,
+  TableDataDeleteReq,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -175,8 +176,8 @@ export const updateDataTableRow = async (body: UpdateTableRow) => {
   return post('/table/data/update');
 };
 
-export const deleteDataTableRow = async (
-  body: DeleteTableRow,
+export const tableDataDelete = async (
+  body: TableDataDeleteReq,
 ): Promise<AxiosResponse<string> | undefined> => {
   return post('/table/data/delete', body);
 };
@@ -277,11 +278,11 @@ export const readDashboardGroupAuth = async (
   return post('/dashboard/group/auth/read', { dashboardId });
 };
 
-export const getApiKeys = async () => {
-  const data = await listApiKeys();
+// export const getApiKeys = async () => {
+//   const data = await listApiKeys();
 
-  return data;
-};
+//   return data;
+// };
 
 export const getModelFields = async (
   tableId: string,
