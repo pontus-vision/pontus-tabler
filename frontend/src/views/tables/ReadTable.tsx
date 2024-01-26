@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import NewTableCol from '../../components/NewTable/Column';
+import NewTableCol from '../../components/NewTable/ColumnDef';
 
 import { tableRead, getTables, updateTable } from '../../client';
 import { useTranslation } from 'react-i18next';
