@@ -349,7 +349,7 @@ const DashboardView = ({
         {successMsg}
       </Alert>
 
-      {modelId && <NewEntryView setModelId={setModelId} tableId={modelId} />}
+      {modelId && <NewEntryView setModelId={setModelId} modelId={modelId} />}
     </div>
   );
 };
