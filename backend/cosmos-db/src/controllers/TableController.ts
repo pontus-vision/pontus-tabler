@@ -7,6 +7,7 @@ import {
   TablesReadRes,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import {
+  createTable,
   deleteTable,
   readTableById,
   readTables,
@@ -21,9 +22,10 @@ export const tableCreatePOST = async (
   body: TableCreateReq,
 ): Promise<Response> => {
   try {
-    const response = await upsertTable(body);
-    res.status(201);
-    res.json(response);
+    const response = await createTable(body);
+
+    res.status(response?.code || 201);
+    res.json(response?.body || response);
 
     return res;
   } catch (error) {
@@ -32,7 +34,7 @@ export const tableCreatePOST = async (
       res.json(error.message);
       return res;
     }
-    res.status(500);
+    res.status(error);
     res.json(error);
     return res;
   }
@@ -69,6 +71,7 @@ export const tableDeletePOST = async (
 
     res.status(200);
     res.json(response);
+    return res;
   } catch (error) {
     res.status(500);
     res.json(error);
