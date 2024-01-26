@@ -1,7 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import PVGridWebiny2 from '../../../pv-react/PVGridWebiny2';
-import { useEffect, useState } from 'react';
-import { tableDataCreate, tableDataRead, tableRead } from '../../../client';
+import { useEffect, useRef, useState } from 'react';
+import {
+  deleteTable,
+  tableDataCreate,
+  tableDataDelete,
+  tableDataRead,
+  tableRead,
+} from '../../../client';
 import {
   ReadPaginationFilter,
   ReadPaginationFilterFilters,
@@ -13,6 +19,9 @@ import {
 } from '../../../pontus-api/typescript-fetch-client-generated';
 import { IGetRowsParams } from 'ag-grid-community';
 import NewEntryView from '../../NewEntryView';
+import NotificationManager, {
+  MessageRefs,
+} from '../../../components/NotificationManager';
 
 const TableDataReadView = () => {
   const [cols, setCols] = useState<TableColumnRef[]>();
@@ -25,9 +34,9 @@ const TableDataReadView = () => {
   const [rowCount, setRowCount] = useState<number>();
   const navigate = useNavigate();
   const [table, setTable] = useState<TableRef>();
-
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(8);
+  const notificationManagerRef = useRef<MessageRefs>();
 
   useEffect(() => {
     if (!tableId) return;
@@ -40,10 +49,17 @@ const TableDataReadView = () => {
         });
 
         setTable(res?.data);
-        console.log({ res: res?.data });
         setCols(colsRes);
         setTableName(res?.data.name || '');
-      } catch (error) {}
+
+        console.log({ res: res?.data });
+      } catch (error: any) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Could not fetch meta-data',
+        );
+      }
     };
     fetchTable(tableId);
   }, [tableId]);
@@ -57,7 +73,7 @@ const TableDataReadView = () => {
         to,
       };
       const res = await tableDataRead(obj);
-      console.log({ res });
+
       if (res?.status === 404) {
         setRowCount(1);
         setRows([]);
@@ -72,14 +88,20 @@ const TableDataReadView = () => {
 
       setRows(dataRows);
       setRowCount(res?.data.rowsCount);
-    } catch (error) {
-      console.error({ error });
+      console.log({ res: dataRows });
+    } catch (error: any) {
+      if (error?.code === 500) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Could not fetch Table data.',
+        );
+      }
     }
   };
 
   useEffect(() => {
     if (!tableName) return;
-    console.log({ tableName });
     fetchTableData();
   }, [tableName, filters, to, from]);
 
@@ -102,27 +124,77 @@ const TableDataReadView = () => {
   const createTableDataRow = async (data: TableDataRowRef) => {
     try {
       if (!table?.name) return;
-      const res = await tableDataCreate({
+      const obj: TableDataCreateReq = {
         tableName: table?.name,
         cols: data,
-      });
+      };
+      const res = await tableDataCreate(obj);
 
-      console.log({ res, cols: data });
-    } catch (error) {}
+      if (res?.status === 201) {
+        fetchTableData();
+        notificationManagerRef?.current?.addMessage(
+          'success',
+          'Sucess',
+          'Table row created.',
+        );
+        closeNewEntryView();
+      }
+    } catch (error) {
+      notificationManagerRef?.current?.addMessage(
+        'error',
+        'Error',
+        'Table row could not be created.',
+      );
+    }
+  };
+
+  const handleDelete = (arr: TableColumnRef[]) => {
+    arr.forEach(async (el, index) => {
+      if (!el?.id || !table?.name) return;
+      try {
+        const res = await tableDataDelete({
+          rowId: el?.id,
+          tableName: table?.name,
+        });
+        if (index === arr.length - 1) {
+          notificationManagerRef?.current?.addMessage(
+            'success',
+            'Sucess',
+            `Row${arr.length > 1 ? 's' : ''} deleted successfully`,
+          );
+        }
+      } catch (error: any) {
+        if (error?.code === 500) {
+          notificationManagerRef?.current?.addMessage(
+            'error',
+            'Error',
+            `Could not delete row${arr.length > 1 ? 's' : ''}`,
+          );
+        }
+      }
+    });
+
+    fetchTableData();
   };
 
   return (
     <>
-      {table?.cols && (
-        <PVGridWebiny2
-          onParamsChange={handleParamsChange}
-          rows={rows}
-          cols={table?.cols}
-          add={goToCreateTableDataView}
-          permissions={{ createAction: true }}
-          totalCount={rowCount}
-        />
-      )}
+      <div className="table-data-read-view">
+        <label className="table-data-read-view__title">{table?.label}</label>
+        {table?.cols && (
+          <PVGridWebiny2
+            onParamsChange={handleParamsChange}
+            rows={rows}
+            cols={cols}
+            add={goToCreateTableDataView}
+            onDelete={handleDelete}
+            permissions={{ createAction: true, deleteAction: true }}
+            totalCount={rowCount}
+            onRefresh={fetchTableData}
+          />
+        )}
+      </div>
+      <NotificationManager ref={notificationManagerRef} />
       {createRow && table && (
         <NewEntryView
           onSubmit={createTableDataRow}
