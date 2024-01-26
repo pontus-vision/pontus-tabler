@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import {
   TableColumnRef,
   TableRef,
 } from '../pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
-import NewTableCol from '../components/NewTable/Column';
+import NewTableCol from '../components/NewTable/ColumnDef';
 import { capitalizeFirstLetter } from '../webinyApi';
 import { OpenApiValidationFail } from '../types';
 
 type Props = {
-  onUpdate?: (data: TableRef) => void;
-  onCreate?: (data: TableRef) => void;
+  onUpdate?: (data: TableColumnRef[]) => void;
+  onCreate?: (data: TableColumnRef[]) => void;
   table?: TableRef;
   testId?: string;
   onColsCreation?: (data: TableColumnRef[]) => void;
-  onInputChange?: (e: any, field: string) => void;
+  onInputChange?: (e: ChangeEvent<HTMLInputElement>, field: string) => void;
   validationError?: Record<string, any>;
 };
 
@@ -89,6 +89,7 @@ const TableView = ({
               <button
                 type="button"
                 data-testid={`${testId}-add-col-btn`}
+                data-cy="grid-add-btn"
                 onClick={() =>
                   setCols((prevState) => {
                     return [
@@ -127,10 +128,11 @@ const TableView = ({
 
       {cols && onCreate && (
         <button
-          type="submit"
+          type="button"
           data-testid={`${testId}-create-btn`}
+          data-cy={`create-table-btn`}
           onClick={() => {
-            cols && onCreate(cols);
+            onCreate && cols && onCreate(cols);
           }}
           className="update-table-update-button"
         >
