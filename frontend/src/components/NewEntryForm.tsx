@@ -26,40 +26,32 @@ type Props = {
   onSubmit: (data: TableDataRowRef) => void;
   handleUpdatedGrid?: () => void;
   setSuccessMsg: Dispatch<SetStateAction<string | undefined>>;
+  rowState: Record<string, any>[];
 };
 
-const NewEntryForm = ({ table, setIsloading, onSubmit, isLoading }: Props) => {
+const NewEntryForm = ({
+  table,
+  setIsloading,
+  onSubmit,
+  isLoading,
+  rowState,
+}: Props) => {
   const [formInputs, setFormInputs] = useState<{ [key: string]: any }>({});
   const [formObjField, setFormObjField] = useState<{ [key: string]: unknown }>(
     {},
   );
 
-  const {
-    tableId: updateTableId,
-    rowId,
-    rowState,
-  } = useSelector((state: RootState) => state.updateRow);
+  //  const {
+  //    tableId: updateTableId,
+  //    rowId,
+  //    rowState,
+  //  } = useSelector((state: RootState) => state.updateRow);
 
   const { t } = useTranslation();
 
-  useEffect(() => {
-    console.log({ ...formInputs, ...rowState });
-  }, [formInputs]);
-
-  useEffect(() => {
-    console.log({ contentModel: table });
-  }, [table]);
-
-  useEffect(() => {
-    console.log({
-      updateModelId: updateTableId,
-      rowId,
-      inputs: { ...formInputs, ...rowState },
-    });
-  }, [updateTableId, rowId, rowState]);
-
   const renderField = (
     field: TableColumn,
+    index: number,
     objFieldId: string | null = null,
   ): ReactElement<any, any> | undefined => {
     // const validationRules = field.validation?.map(valid=> valid.settings?.preset)
@@ -73,6 +65,7 @@ const NewEntryForm = ({ table, setIsloading, onSubmit, isLoading }: Props) => {
       <div className="field form__text-input">
         <Form.Label>{field.headerName}</Form.Label>
         <Form.Control
+          data-cy={`new-entry-form-${index}-text-input`}
           defaultValue={{ ...formInputs, ...rowState }[field?.name || '']}
           onChange={(e) => {
             if (objFieldId) {
@@ -432,7 +425,7 @@ const NewEntryForm = ({ table, setIsloading, onSubmit, isLoading }: Props) => {
       setIsloading(false);
     }
     return table?.cols?.map((field, index, arr) => {
-      return renderField(field);
+      return renderField(field, index);
     });
   };
 
@@ -451,10 +444,12 @@ const NewEntryForm = ({ table, setIsloading, onSubmit, isLoading }: Props) => {
         >
           <Form.Group className="new-entry-form__group mb-3">
             {table?.cols?.map((field, index, arr) => {
-              return renderField(field);
+              return renderField(field, index);
             })}
           </Form.Group>
-          <button>{t('submit-form')}</button>
+          <button data-cy={`new-entry-form-submit-btn`}>
+            {t('submit-form')}
+          </button>
         </Form>
       </div>
     </>
