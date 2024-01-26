@@ -21,15 +21,19 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
 
     const colsChecked = [];
 
-    console.log({ res: resTable, tableName, cols });
-
-    for (const colReq of resTable?.cols) {
-      for (const col in cols) {
-        if (col !== colReq?.name) {
-          colsChecked.push(col);
+    for (const col in cols) {
+      let found = false;
+      for (const colReq of resTable?.cols) {
+        if (col === colReq?.name) {
+          found = true;
+          continue;
         }
       }
+      if (!found) {
+        colsChecked.push(col);
+      }
     }
+
     if (colsChecked?.length > 0) {
       throw {
         code: 400,
@@ -131,7 +135,7 @@ export const readTableData = async (
   try {
     console.log({ tableName: body.tableName, filters: body.filters });
     const res1 = await checkTableCols(body.tableName, body.filters);
-    console.log({ res1 });
+    // console.log({ res1 });
     const res2 = await fetchData(body, body.tableName);
     console.log({ res2 });
 
