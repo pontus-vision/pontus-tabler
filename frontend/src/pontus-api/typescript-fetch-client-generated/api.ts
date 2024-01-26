@@ -1214,6 +1214,12 @@ export interface TableCreateRes extends BaseModelRef {
    */
   name?: string;
   /**
+   * Label of the table
+   * @type {string}
+   * @memberof TableCreateRes
+   */
+  label?: string;
+  /**
    * Table columns associated with the table
    * @type {Array<TableColumnRef>}
    * @memberof TableCreateRes
@@ -1331,11 +1337,24 @@ export interface TableDataUpdateReq {
  */
 export interface TableDataUpdateRes extends TableDataRowRef {}
 /**
- *
+ * 
  * @export
  * @interface TableDeleteReq
  */
-export interface TableDeleteReq extends BaseModelRef {}
+export interface TableDeleteReq {
+  /**
+   * 
+   * @type {string}
+   * @memberof TableDeleteReq
+   */
+  name: string;
+  /**
+   * 
+   * @type {string}
+   * @memberof TableDeleteReq
+   */
+  id: string;
+}
 /**
  *
  * @export
@@ -1414,6 +1433,31 @@ export interface TableUpdateReq extends BaseModelRef {
    * Table columns associated with the table
    * @type {Array<TableColumnRef>}
    * @memberof TableUpdateReq
+   */
+  cols?: Array<TableColumnRef>;
+}
+/**
+ *
+ * @export
+ * @interface TableUpdateRes
+ */
+export interface TableUpdateRes extends BaseModelRef {
+  /**
+   * Name of the table
+   * @type {string}
+   * @memberof TableUpdateRes
+   */
+  name?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof TableUpdateRes
+   */
+  label?: string;
+  /**
+   * Table columns associated with the table
+   * @type {Array<TableColumnRef>}
+   * @memberof TableUpdateRes
    */
   cols?: Array<TableColumnRef>;
 }
