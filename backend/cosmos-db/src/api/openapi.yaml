@@ -189,22 +189,22 @@ paths:
             schema:
               $ref: '#/components/schemas/TableUpdateReq'
             example:
-              name: Person_Natural
+              name: person-natural
               id: id
               label: Person Natural
               cols:
-                - field: Person_Natural_Full_Name
+                - field: full-name
                   filter: true
                   headerName: Full Name
-                  id: Person_Natural_Full_Name
-                  name: Full Name
+                  id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                  name: full-name
                   sortable: true
                   kind: checkboxes
-                - field: Person_Natural_Full_Name
+                - field: full-name
                   filter: true
                   headerName: Full Name
-                  id: Person_Natural_Full_Name
-                  name: Full Name
+                  id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                  name: full-name
                   sortable: true
                   kind: checkboxes
         required: true
@@ -212,6 +212,29 @@ paths:
       responses:
         '204':
           description: Table updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableUpdateRes'
+              example:
+                name: Person_Natural
+                id: id
+                label: Person Natural
+                cols:
+                  - field: full-name-2
+                    filter: true
+                    headerName: Full Name
+                    id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                    name: full-name
+                    sortable: true
+                    kind: checkboxes
+                  - field: full-name-2
+                    filter: true
+                    headerName: 'Full Name 2'
+                    id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                    name: full-name-2
+                    sortable: true
+                    kind: text
         '400':
           description: Bad request
         '404':
@@ -973,7 +996,6 @@ components:
     MenuCreateRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuReadReq:
       type: object
       properties:
@@ -986,15 +1008,12 @@ components:
     MenuReadRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuUpdateReq:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuUpdateRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuDeleteReq:
       type: object
       properties:
@@ -1144,7 +1163,7 @@ components:
         name:
           type: string
           description: Name of the table column
-          pattern: '^[a-z0-9]([-a-z0-9]{3,63}[a-z0-9])?$'
+          pattern: '^(?=.{3,63}$)(?=[a-z0-9])[a-z0-9]([-]?[a-z0-9]+)*$'
         field:
           type: string
           description: Field name of the table column
@@ -1176,7 +1195,7 @@ components:
       properties:
         name:
           type: string
-          pattern: '^[a-z0-9]([-a-z0-9]{3,63}[a-z0-9])?$'
+          pattern: '^(?=.{3,63}$)(?=[a-z0-9])[a-z0-9]([-]?[a-z0-9]+)*$'
           description: Name of the table
         label:
           type: string
@@ -1195,10 +1214,9 @@ components:
       properties:
         name:
           type: string
-          pattern: '^[a-z0-9]([-a-z0-9]{3,63}[a-z0-9])?$'
+          pattern: '^(?=.{3,63}$)(?=[a-z0-9])[a-z0-9]([-]?[a-z0-9]+)*$'
           description: >
             Name of the table
-
         label:
           type: string
         cols:
@@ -1215,13 +1233,23 @@ components:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
     TableDeleteReq:
-      allOf:
-        - $ref: '#/components/schemas/BaseModelRef'
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+      required:
+        - name
+        - id
     TableUpdateReq:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
-
+    TableUpdateRes:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
     TableDataCreateReq:
       type: object
       properties:
