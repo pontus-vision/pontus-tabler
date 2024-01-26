@@ -45,7 +45,7 @@ const TableDataReadView = () => {
   return (
     <>
       {colDefs && (
-        <PVGridWebiny2 onFiltersChange={handleFiltersChange} cols={colDefs} />
+        <PVGridWebiny2 permissions={{readAction: true, createAction: true, deleteAction: true, updateAction: true}} onFiltersChange={handleFiltersChange} cols={colDefs} />
       )}
     </>
   );
