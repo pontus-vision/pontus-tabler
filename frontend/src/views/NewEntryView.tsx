@@ -62,18 +62,17 @@ const NewEntryView = ({
   }, [aggridColumnsState]);
 
   return (
-    <div className="new-entry-view">
-      (
+    <div className="new-entry-view" style={{ position: 'absolute' }}>
       <div
         className="shadow"
         onClick={() => {
           onClose();
         }}
       ></div>
-      )
+
       {table && (
         <Form.Label className="new-entry new-entry-form__title">
-          {table?.name}
+          {table?.label}
         </Form.Label>
       )}
       {table && (
