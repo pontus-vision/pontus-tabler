@@ -34,7 +34,7 @@ export const tableCreatePOST = async (
       res.json(error.message);
       return res;
     }
-    res.status(error);
+    res.status(500);
     res.json(error);
     return res;
   }
