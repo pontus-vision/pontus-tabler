@@ -10,6 +10,7 @@ import { OpenApiValidationFailError } from '../../types';
 import NotificationManager, {
   MessageRefs,
 } from '../../components/NotificationManager';
+import { handleInputChange } from '../../../utils';
 
 type Props = {
   testId?: string;
@@ -28,27 +29,6 @@ const CreateTableView = ({ testId }: Props) => {
   );
 
   const { t, i18n } = useTranslation();
-
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    field: string,
-  ) => {
-    const inputValue = e.target.value;
-
-    const pattern = /^[a-zA-Z0-9 ]{3,63}$/;
-    if (!pattern.test(inputValue)) {
-      setValidationError((prevState) => ({
-        ...prevState,
-        [field]:
-          'Please enter only letters, numbers, and spaces (3 to 63 characters).',
-      }));
-    } else {
-      setValidationError((prevState) => ({
-        ...prevState,
-        [field]: '',
-      }));
-    }
-  };
 
   const handleCreate = async (data: TableColumnRef[]) => {
     const isAnyFieldInvalid = Object.values(validationError).some(
@@ -112,12 +92,9 @@ const CreateTableView = ({ testId }: Props) => {
           data-cy="create-table-name-input"
           onChange={(e) => {
             setName(e.target.value);
-            name &&
-              //   name?.length > 3 &&
-              handleInputChange &&
-              handleInputChange(e, 'name');
+            name && handleInputChange(e, 'name', setValidationError);
           }}
-          onBlur={(e) => handleInputChange(e, 'name')}
+          onBlur={(e) => handleInputChange(e, 'name', setValidationError)}
           value={name}
           type="text"
           className="create-table__name-input"
@@ -129,6 +106,7 @@ const CreateTableView = ({ testId }: Props) => {
           testId="table-view"
           onCreate={handleCreate}
           validationError={validationError}
+          setValidationError={setValidationError}
           onInputChange={handleInputChange}
         />
       </div>
