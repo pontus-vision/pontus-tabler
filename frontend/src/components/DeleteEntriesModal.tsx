@@ -1,6 +1,6 @@
 import { Dispatch, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { deleteDataTableRow, deleteEntry } from '../client';
+import { tableDataDelete, deleteEntry } from '../client';
 
 type Props = {
   entries: string[];
@@ -26,7 +26,7 @@ const DeleteEntriesModal = ({
     if (!entries || !modelId) return;
 
     entries.forEach(async (entry) => {
-      const { data } = await deleteDataTableRow(modelId, entry);
+      const { data } = await tableDataDelete(modelId, entry);
 
       updateGridKey((prevState) => ({
         key: prevState?.key + 1,

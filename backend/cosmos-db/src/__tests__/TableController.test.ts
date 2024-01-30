@@ -40,7 +40,7 @@ describe('tableControllerTest', () => {
 
   it('should do the CRUD "happy path"', async () => {
     const body: TableCreateReq = {
-      name: 'person_Natural',
+      name: 'person-natural',
       label: 'Person Natural',
       cols: [
         {
@@ -48,7 +48,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
-          name: 'full_Name',
+          name: 'full-name',
           sortable: true,
         },
         {
@@ -56,7 +56,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
-          name: 'customer_ID',
+          name: 'customer-id',
           sortable: true,
         },
       ],
@@ -83,7 +83,7 @@ describe('tableControllerTest', () => {
     expect(isSubset(body, readRetVal.data)).toBe(true);
 
     const body2: TableUpdateReq = {
-      name: 'name2',
+      name: 'person-natural',
       label: 'name 2',
       id: id,
       cols: [
@@ -114,6 +114,7 @@ describe('tableControllerTest', () => {
 
     const body3 = {
       id: resPayload3.id,
+      name: resPayload3.name,
     };
 
     const deleteRetVal = await post('table/delete', body3);
@@ -149,7 +150,7 @@ describe('tableControllerTest', () => {
   });
   it('should read tables', async () => {
     const body: TableCreateReq = {
-      name: 'person_Natural',
+      name: 'person-natural',
       label: 'Person Natural',
       cols: [
         {
@@ -157,7 +158,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
-          name: 'full_Name',
+          name: 'full-name',
           sortable: true,
         },
         {
@@ -165,7 +166,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
-          name: 'customer_ID',
+          name: 'customer-id',
           sortable: true,
         },
       ],
@@ -175,18 +176,17 @@ describe('tableControllerTest', () => {
 
     const createRetVal2 = await post('table/create', {
       ...body,
-      name: 'person_Natural2',
+      name: 'person-natural2',
     });
 
     const readBody = {
+      from: 1,
+      to: 20,
       filters: {
         name: {
-          condition1: {
-            filter: 'person_Natural',
-            filterType: 'text',
-            type: 'contains',
-          },
+          filter: 'person-natural',
           filterType: 'text',
+          type: 'contains',
         },
       },
     };
@@ -200,11 +200,13 @@ describe('tableControllerTest', () => {
 
     const deleteVal = await post('table/delete', {
       id: createRetVal.data.id,
+      name: createRetVal.data.name,
     });
 
     expect(deleteVal.status).toBe(200);
     const deleteVal2 = await post('table/delete', {
       id: createRetVal2.data.id,
+      name: createRetVal2.data.name,
     });
 
     expect(deleteVal2.status).toBe(200);

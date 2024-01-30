@@ -110,10 +110,6 @@ const FolderItem = ({
     return result;
   }
 
-  useEffect(() => {
-    console.log(onUpdate);
-  }, [onUpdate]);
-
   return (
     <div
       onBlur={() => setContextMenu(null)}
@@ -140,7 +136,6 @@ const FolderItem = ({
               });
           }}
           onBlur={() => {
-            console.log({ updatedFolder, onUpdate });
             updatedFolder && onUpdate && onUpdate(updatedFolder);
           }}
         />

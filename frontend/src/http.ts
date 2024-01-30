@@ -214,8 +214,15 @@ export const sendHttpRequest = async (
       await new Promise((resolve) => setTimeout(resolve, 200 * i + 1));
     }
   }
-  if (errorResponse?.status !== 404 && errorResponse?.status !== 409) {
-    throw new Error(`Max retries exceeded - Req Url:${reqUrl} - Data: ${data}`);
+  if (
+    errorResponse?.status !== 404 &&
+    errorResponse?.status !== 409 &&
+    errorResponse?.status !== 400
+  ) {
+    throw {
+      code: 500,
+      message: `Max retries exceeded - Req Url:${reqUrl} - Data: ${data}`,
+    };
   } else {
     return errorResponse;
   }

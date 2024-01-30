@@ -196,19 +196,19 @@ paths:
                 - field: full-name
                   filter: true
                   headerName: Full Name
-                  id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                  id: "ds67a8gasiyudhsay78dgasiuhdsa897h"
                   name: full-name
                   sortable: true
                   kind: checkboxes
                 - field: full-name
                   filter: true
                   headerName: Full Name
-                  id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                  id: "ds67a8gasiyudhsay78dgasiuhdsa897h"
                   name: full-name
                   sortable: true
                   kind: checkboxes
         required: true
-
+        
       responses:
         '204':
           description: Table updated successfully
@@ -224,14 +224,14 @@ paths:
                   - field: full-name-2
                     filter: true
                     headerName: Full Name
-                    id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                    id: "ds67a8gasiyudhsay78dgasiuhdsa897h"
                     name: full-name
                     sortable: true
                     kind: checkboxes
                   - field: full-name-2
                     filter: true
-                    headerName: 'Full Name 2'
-                    id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                    headerName: "Full Name 2"
+                    id: "ds67a8gasiyudhsay78dgasiuhdsa897h"
                     name: full-name-2
                     sortable: true
                     kind: text
@@ -283,8 +283,8 @@ paths:
                   filters:
                     name:
                       filter: 'person_Natural'
-                      filterType: 'text'
-                      type: 'contains'
+                      filterType: "text"
+                      type: "contains"
               example-02:
                 value:
                   from: 1
@@ -711,8 +711,8 @@ paths:
                     filters:
                       name:
                         filter: 'person_Natural'
-                        filterType: 'text'
-                        type: 'contains'
+                        filterType: "text"
+                        type: "contains"
                 example-02:
                   value:
                     from: 1
@@ -996,6 +996,7 @@ components:
     MenuCreateRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
     MenuReadReq:
       type: object
       properties:
@@ -1008,12 +1009,15 @@ components:
     MenuReadRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
     MenuUpdateReq:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
     MenuUpdateRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
+        - $ref: '#/components/schemas/BaseModelRef'
     MenuDeleteReq:
       type: object
       properties:
@@ -1121,7 +1125,7 @@ components:
           example: +desc
     TableDataReadReq:
       type: object
-      properties:
+      properties: 
         tableName:
           type: string
       allOf:
@@ -1204,6 +1208,7 @@ components:
           description: Table columns associated with the table
           items:
             $ref: '#/components/schemas/TableColumnRef'
+      
     TableReadRes:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
@@ -1212,11 +1217,11 @@ components:
       type: object
       properties:
         name:
-          type: string
+          type: string 
           pattern: '^(?=.{3,63}$)(?=[a-z0-9])[a-z0-9]([-]?[a-z0-9]+)*$'
-          description: >
+          description: > 
             Name of the table
-        label:
+        label: 
           type: string
         cols:
           type: array
@@ -1232,15 +1237,8 @@ components:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
     TableDeleteReq:
-      type: object
-      properties:
-        name:
-          type: string
-        id:
-          type: string
-      required:
-        - name
-        - id
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
     TableUpdateReq:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
@@ -1270,7 +1268,7 @@ components:
           type: string
         cols:
           $ref: '#/components/schemas/TableDataRowRef'
-      required:
+      required: 
         - tableName
         - rowId
     TableDataUpdateRes:
@@ -1284,8 +1282,8 @@ components:
         tableName:
           type: string
       required:
-        - rowId
-        - tableName
+       - rowId 
+       - tableName
     BaseModelRef:
       type: object
       properties:
@@ -1775,7 +1773,7 @@ components:
     Dashboard:
       type: object
       properties:
-        owner:
+        owner:                       
           type: string
         folder:
           type: string

@@ -16,27 +16,35 @@ import { PatchOperation } from '@azure/cosmos';
 import { readTableByName } from './TableService';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
-  const resTable = await readTableByName(tableName);
+  try {
+    const resTable = await readTableByName(tableName);
 
-  const colsChecked = [];
+    const colsChecked = [];
 
-  console.log({ res: resTable, tableName, cols });
-
-  for (const colReq of resTable?.cols) {
     for (const col in cols) {
-      if (col !== colReq.name) {
+      let found = false;
+      for (const colReq of resTable?.cols) {
+        if (col === colReq?.name) {
+          found = true;
+          continue;
+        }
+      }
+      if (!found) {
         colsChecked.push(col);
       }
     }
-  }
-  if (colsChecked?.length > 0) {
-    throw {
-      code: 400,
-      message: {
-        string: `Cols are not defined in table: ${colsChecked.join(', ')}`,
-        nonExistingFields: Object.keys(cols),
-      },
-    };
+
+    if (colsChecked?.length > 0) {
+      throw {
+        code: 400,
+        message: {
+          string: `Cols are not defined in table: ${colsChecked.join(', ')}`,
+          nonExistingFields: Object.keys(cols),
+        },
+      };
+    }
+  } catch (error) {
+    throw error;
   }
 };
 export const upsertTableData = async (data: TableDataCreateReq) => {
@@ -125,10 +133,13 @@ export const readTableData = async (
   body: TableDataReadReq,
 ): Promise<TableDataReadRes> => {
   try {
-    await checkTableCols(body.tableName, body.filters);
-    const res = await fetchData(body, body.tableName);
+    console.log({ tableName: body.tableName, filters: body.filters });
+    const res1 = await checkTableCols(body.tableName, body.filters);
+    // console.log({ res1 });
+    const res2 = await fetchData(body, body.tableName);
+    console.log({ res2 });
 
-    return { rowsCount: res.count, rows: res.values };
+    return { rowsCount: res2.count, rows: res2.values };
   } catch (error) {
     throw error;
   }

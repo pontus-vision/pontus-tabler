@@ -503,6 +503,74 @@
   padding-inline: 0.2rem;
 }
 
+.alert {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  transition: opacity 500ms, transform 500ms;
+}
+.alert-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+.alert-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.alert-leave {
+  opacity: 0;
+  transform: translateY(-100%);
+  z-index: 0;
+}
+.alert-leave-active {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.notification {
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.notification-manager {
+  position: fixed;
+  top: 4rem;
+  right: 1rem;
+  z-index: 1000;
+}
+.notification.success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+.notification.error {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+.notification.info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+.notification-content {
+  margin-left: 0.5rem;
+}
+.notification.leave {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.notification.enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }
@@ -1103,6 +1171,17 @@
   padding-top: 3rem;
 }
 
+.table-data-read-view {
+  z-index: 1;
+  position: relative;
+}
+.table-data-read-view__title {
+  width: fit-content;
+  display: block;
+  font-size: 3rem;
+  margin-inline: auto;
+}
+
 .admin-view__container {
   display: flex;
   flex-direction: column;
@@ -1115,6 +1194,16 @@
 }
 
 /* CreateNewTable.css */
+.create-table-view {
+  z-index: 1;
+  position: relative;
+}
+
+.create-table__form {
+  z-index: 1;
+  position: relative;
+}
+
 .create-new-table {
   display: flex;
   flex-direction: column;
@@ -1426,6 +1515,7 @@
   /* Add general styles for the table row */
   border-bottom: 1px solid #e2e8f0;
   background-color: #f7fafc;
+  height: 7rem;
   transition: background-color 0.3s ease-in-out;
 }
 
@@ -1450,6 +1540,19 @@
   display: flex;
   align-items: center;
   height: 75%;
+  position: relative;
+}
+.table-row__flex-container__tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ff5555; /* Tooltip background color */
+  color: #fff; /* Tooltip text color */
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .table-row__input-field {
@@ -1514,6 +1617,18 @@
 }
 .success-msg.active {
   left: -1rem;
+}
+
+.table-input-tooltip {
+  position: absolute;
+  left: 0;
+  background-color: #ff5555; /* Tooltip background color */
+  color: #fff; /* Tooltip text color */
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 /*# sourceMappingURL=main.css.map */

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import NewTableCol from '../../components/NewTable/Column';
+import NewTableCol from '../../components/NewTable/ColumnDef';
 
-import { getTable, getTables, updateTable } from '../../client';
+import { tableRead, getTables, updateTable } from '../../client';
 import { useTranslation } from 'react-i18next';
 import { capitalizeFirstLetter } from '../../webinyApi';
 import { useLocation, useParams } from 'react-router-dom';
@@ -24,15 +24,14 @@ const ReadTableView = () => {
   const { t, i18n } = useTranslation();
 
   const fetchTable = async (id: string) => {
-    const data = await getTable(id);
-    setTable(data?.data);
-    console.log({ data });
-
-    data?.data.cols && setCols(data?.data.cols);
+    // const data = await tableRead({ id });
+    // setTable(data?.data);
+    // data?.data.cols && setCols(data?.data.cols);
   };
 
   useEffect(() => {
     if (!params.id) return;
+    console.log({ id: params.id });
     fetchTable(params.id);
   }, [params]);
 
@@ -52,7 +51,7 @@ const ReadTableView = () => {
 
   return (
     <>
-      <PVGridWebiny2 cols={cols}  />
+      <PVGridWebiny2 cols={cols} />
     </>
   );
 };

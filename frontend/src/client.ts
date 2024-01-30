@@ -5,6 +5,7 @@ import {
   ICmsGetContentModelDataField,
   IListModelResponseData,
   Meta,
+  OpenApiValidationFail,
 } from './types';
 
 import {
@@ -40,6 +41,13 @@ import {
   MenuReadReq,
   MenuCreateReq,
   MenuCreateRes,
+  TableDataReadReq,
+  TableDataReadRes,
+  TableReadReq,
+  TableReadRes,
+  TableDataCreateReq,
+  TableDataCreateRes,
+  TableDataDeleteReq,
 } from './pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
@@ -128,15 +136,15 @@ export const getTables = async (
   return post('/tables/read', body);
 };
 
-export const getTable = async (
-  id: string,
-): Promise<AxiosResponse<TableRef> | undefined> => {
-  return post('/table/read', { id });
+export const tableRead = async (
+  body: TableReadReq,
+): Promise<AxiosResponse<TableReadRes> | undefined> => {
+  return post('/table/read', body);
 };
 
 export const createTable = async (
   data: TableCreateReq,
-): Promise<AxiosResponse<TableCreateRes, any> | undefined> => {
+): Promise<AxiosResponse<TableCreateRes, any> | OpenApiValidationFail> => {
   return post('/table/create', data);
 };
 
@@ -152,22 +160,24 @@ export const deleteTable = async (
   return post('/table/delete', data);
 };
 
-export const createDataTable = async (body: NewTableRow) => {
+export const tableDataCreate = async (
+  body: TableDataCreateReq,
+): Promise<AxiosResponse<TableDataCreateRes> | undefined> => {
   return post('/table/data/create', body);
 };
 
-export const readDataTable = async (
-  body: AgGridInput,
-): Promise<AxiosResponse<AgGridOutput> | undefined> => {
-  return post('/table/data/read', {});
+export const tableDataRead = async (
+  body: TableDataReadReq,
+): Promise<AxiosResponse<TableDataReadRes> | undefined> => {
+  return post('/table/data/read', body);
 };
 
 export const updateDataTableRow = async (body: UpdateTableRow) => {
   return post('/table/data/update');
 };
 
-export const deleteDataTableRow = async (
-  body: DeleteTableRow,
+export const tableDataDelete = async (
+  body: TableDataDeleteReq,
 ): Promise<AxiosResponse<string> | undefined> => {
   return post('/table/data/delete', body);
 };
@@ -268,11 +278,11 @@ export const readDashboardGroupAuth = async (
   return post('/dashboard/group/auth/read', { dashboardId });
 };
 
-export const getApiKeys = async () => {
-  const data = await listApiKeys();
+// export const getApiKeys = async () => {
+//   const data = await listApiKeys();
 
-  return data;
-};
+//   return data;
+// };
 
 export const getModelFields = async (
   tableId: string,
