@@ -1,4 +1,10 @@
-import { ChangeEvent, useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import {
   TableColumnRef,
   TableRef,
@@ -14,8 +20,13 @@ type Props = {
   table?: TableRef;
   testId?: string;
   onColsCreation?: (data: TableColumnRef[]) => void;
-  onInputChange?: (e: ChangeEvent<HTMLInputElement>, field: string) => void;
-  validationError?: Record<string, any>;
+  onInputChange?: (
+    e: ChangeEvent<HTMLInputElement>,
+    field: string,
+    setValidationError: Dispatch<SetStateAction<Record<string, any>>>,
+  ) => void;
+  validationError: Record<string, any>;
+  setValidationError: Dispatch<SetStateAction<Record<string, any>>>;
 };
 
 const TableView = ({
@@ -26,6 +37,7 @@ const TableView = ({
   onColsCreation,
   onInputChange,
   validationError,
+  setValidationError,
 }: Props) => {
   let [cols, setCols] = useState<TableColumnRef[]>([]);
 
@@ -75,6 +87,7 @@ const TableView = ({
                   {cols &&
                     cols.map((col, index) => (
                       <NewTableCol
+                        setValidationError={setValidationError}
                         onInputChange={onInputChange}
                         validationError={validationError}
                         key={col.id}
