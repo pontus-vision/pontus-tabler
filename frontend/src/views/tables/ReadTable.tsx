@@ -24,11 +24,8 @@ const ReadTableView = () => {
   const { t, i18n } = useTranslation();
 
   const fetchTable = async (id: string) => {
-    console.log({ id });
     // const data = await tableRead({ id });
     // setTable(data?.data);
-    // console.log({ data });
-
     // data?.data.cols && setCols(data?.data.cols);
   };
 
