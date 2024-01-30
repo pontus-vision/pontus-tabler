@@ -24,8 +24,13 @@ type Props = {
   index: number;
   colDef?: TableColumnRef;
   testId?: string;
-  onInputChange?: (e: ChangeEvent<HTMLInputElement>, field: string) => void;
-  validationError?: Record<string, any>;
+  onInputChange?: (
+    e: ChangeEvent<HTMLInputElement>,
+    field: string,
+    setValidationError: Dispatch<SetStateAction<Record<string, any>>>,
+  ) => void;
+  validationError: Record<string, any>;
+  setValidationError: Dispatch<SetStateAction<Record<string, any>>>;
 };
 
 const NewTableCol = ({
@@ -35,6 +40,7 @@ const NewTableCol = ({
   index,
   colDef,
   testId,
+  setValidationError,
 }: Props) => {
   const [header, setHeader] = useState<string>(colDef?.headerName || '');
   const [filter, setFilter] = useState(colDef?.filter || false);
@@ -77,13 +83,14 @@ const NewTableCol = ({
         <div className="table-row__flex-container">
           <input
             onBlur={(e) =>
-              onInputChange && onInputChange(e, `header-col-${index}`)
+              onInputChange &&
+              onInputChange(e, `header-col-${index}`, setValidationError)
             }
             onChange={(e) => {
               setHeader(e.target.value);
               header?.length > 3 &&
                 onInputChange &&
-                onInputChange(e, `header-col-${index}`);
+                onInputChange(e, `header-col-${index}`, setValidationError);
             }}
             type="text"
             data-testid={`${testId}-input`}
