@@ -90,6 +90,13 @@ export const updateMenuItem = async (
     }
   }
 
+  if (patchArr.length === 0) {
+    throw {
+      code: 400,
+      message: 'No menu item body property to be updated defined',
+    };
+  }
+
   const res = await menuContainer.item(data.id, data.path).patch(patchArr);
 
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =

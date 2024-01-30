@@ -87,7 +87,7 @@ describe('testing Menu', () => {
     const body: MenuItemTreeRef = {
       name: 'string',
       kind: 'folder',
-      path: 'string',
+      path: '/string',
       children: [
         {
           name: 'string',
@@ -174,7 +174,11 @@ describe('testing Menu', () => {
 
     expect(updateRetVal.status).toBe(400);
 
-    const updateRetVal2 = await post('menu/update', { path: 'bar', id: 'foo' });
+    const updateRetVal2 = await post('menu/update', {
+      path: 'bar',
+      id: 'foo',
+      name: 'john',
+    });
 
     expect(updateRetVal2.status).toBe(404);
 

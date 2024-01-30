@@ -6,77 +6,52 @@ import {
   useState,
 } from 'react';
 import Form from 'react-bootstrap/Form';
-import {
-  ICmsGetContentModelData,
-  ICmsGetContentModelDataField,
-  WebinyRefInput,
-} from '../types';
+import { WebinyRefInput } from '../types';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import {
-  createDataTable,
-  getModelData,
-  postNewEntry,
-  updateDataTableRow,
-  updateEntry,
-} from '../client';
+import { getModelData } from '../client';
 import FloatingLabel from 'react-bootstrap/esm/FloatingLabel';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 import {
-  NewTableRow,
-  TableColumn,
-  UpdateTableRow,
+  TableDataRowRef,
+  TableRef,
 } from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   setIsloading: Dispatch<SetStateAction<boolean>>;
-  contentModel: ICmsGetContentModelData;
+  table: TableRef;
   isLoading: boolean;
-  handleUpdatedGrid: () => void;
+  onSubmit: (data: TableDataRowRef) => void;
+  handleUpdatedGrid?: () => void;
   setSuccessMsg: Dispatch<SetStateAction<string | undefined>>;
+  rowState: Record<string, any>[];
 };
 
 const NewEntryForm = ({
-  contentModel,
-  setSuccessMsg,
-  handleUpdatedGrid,
+  table,
   setIsloading,
+  onSubmit,
   isLoading,
+  rowState,
 }: Props) => {
   const [formInputs, setFormInputs] = useState<{ [key: string]: any }>({});
   const [formObjField, setFormObjField] = useState<{ [key: string]: unknown }>(
     {},
   );
-  const [formObjFieldName, setFormObjFieldName] = useState<string>();
 
-  const {
-    tableId: updateTableId,
-    rowId,
-    rowState,
-  } = useSelector((state: RootState) => state.updateRow);
+  //  const {
+  //    tableId: updateTableId,
+  //    rowId,
+  //    rowState,
+  //  } = useSelector((state: RootState) => state.updateRow);
 
   const { t } = useTranslation();
 
-  useEffect(() => {
-    console.log({ ...formInputs, ...rowState });
-  }, [formInputs]);
-
-  useEffect(() => {
-    console.log({ contentModel });
-  }, [contentModel]);
-
-  useEffect(() => {
-    console.log({
-      updateModelId: updateTableId,
-      rowId,
-      inputs: { ...formInputs, ...rowState },
-    });
-  }, [updateTableId, rowId, rowState]);
-
   const renderField = (
     field: TableColumn,
+    index: number,
     objFieldId: string | null = null,
   ): ReactElement<any, any> | undefined => {
     // const validationRules = field.validation?.map(valid=> valid.settings?.preset)
@@ -88,9 +63,10 @@ const NewEntryForm = ({
     // });
     return (
       <div className="field form__text-input">
-        <Form.Label>{field.name}</Form.Label>
+        <Form.Label>{field.headerName}</Form.Label>
         <Form.Control
-          defaultValue={{ ...formInputs, ...rowState }[field?.field || '']}
+          data-cy={`new-entry-form-${index}-text-input`}
+          defaultValue={{ ...formInputs, ...rowState }[field?.name || '']}
           onChange={(e) => {
             if (objFieldId) {
               setFormInputs((prevState: { [key: string]: unknown }) => ({
@@ -103,7 +79,7 @@ const NewEntryForm = ({
             } else {
               setFormInputs((prevState) => ({
                 ...prevState,
-                [`${field.field}`]: e.target.value,
+                [`${field.name}`]: e.target.value,
               }));
             }
           }}
@@ -410,46 +386,46 @@ const NewEntryForm = ({
     }
   };
 
-  const onSubmit = async () => {
-    try {
-      const formNewInputs = { ...rowState, ...formInputs };
-      if (updateTableId && rowId) {
-        const body: UpdateTableRow = {
-          rowId,
-          cols: formNewInputs,
-          tableId: updateTableId,
-        };
+  // const onSubmit = async () => {
+  //   try {
+  //     const formNewInputs = { ...rowState, ...formInputs };
+  //     if (updateTableId && rowId) {
+  //       const body: UpdateTableRow = {
+  //         rowId,
+  //         cols: formNewInputs,
+  //         tableId: updateTableId,
+  //       };
 
-        const publishData = await updateDataTableRow(body);
-        if (!!publishData) {
-          handleUpdatedGrid();
-          setSuccessMsg(t('entry-updated') as string);
-        }
-      } else {
-        const obj: NewTableRow = {
-          cols: formInputs,
-          tableId: contentModel.name,
-        };
+  //       const publishData = await updateDataTableRow(body);
+  //       if (!!publishData) {
+  //         handleUpdatedGrid();
+  //         setSuccessMsg(t('entry-updated') as string);
+  //       }
+  //     } else {
+  //       const obj: NewTableRow = {
+  //         cols: formInputs,
+  //         tableId: contentModel.name,
+  //       };
 
-        const publishData = await createDataTable(obj);
-        if (!!publishData) {
-          handleUpdatedGrid();
-          setSuccessMsg(t('entry-registered') as string);
-        }
-      }
-      console.log({ formInputs, updateModelId: updateTableId });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  //       const publishData = await tableDataCreate(obj);
+  //       if (!!publishData) {
+  //         handleUpdatedGrid();
+  //         setSuccessMsg(t('entry-registered') as string);
+  //       }
+  //     }
+  //     console.log({ formInputs, updateModelId: updateTableId });
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const fields = () => {
     let num = 0;
-    if (num === contentModel.fields.length + 1) {
+    if (num === table?.cols?.length + 1) {
       setIsloading(false);
     }
-    return contentModel.fields.map((field, index, arr) => {
-      return renderField(field);
+    return table?.cols?.map((field, index, arr) => {
+      return renderField(field, index);
     });
   };
 
@@ -463,15 +439,17 @@ const NewEntryForm = ({
           className="new-entry "
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit();
+            onSubmit(formInputs);
           }}
         >
           <Form.Group className="new-entry-form__group mb-3">
-            {contentModel.fields.map((field, index, arr) => {
-              return renderField(field);
+            {table?.cols?.map((field, index, arr) => {
+              return renderField(field, index);
             })}
           </Form.Group>
-          <button>{t('submit-form')}</button>
+          <button data-cy={`new-entry-form-submit-btn`}>
+            {t('submit-form')}
+          </button>
         </Form>
       </div>
     </>

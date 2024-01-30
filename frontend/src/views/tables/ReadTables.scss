@@ -3,3 +3,13 @@
     padding-top: 3rem;
   }
 }
+.table-data-read-view {
+  z-index: 1;
+  position: relative;
+  &__title {
+    width: fit-content;
+    display: block;
+    font-size: 3rem;
+    margin-inline: auto;
+  }
+}

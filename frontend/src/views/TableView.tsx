@@ -1,28 +1,51 @@
-import { useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import {
   TableColumnRef,
   TableRef,
 } from '../pontus-api/typescript-fetch-client-generated';
 import { useTranslation } from 'react-i18next';
-import NewTableCol from '../components/NewTable/Column';
+import NewTableCol from '../components/NewTable/ColumnDef';
 import { capitalizeFirstLetter } from '../webinyApi';
+import { OpenApiValidationFail } from '../types';
 
 type Props = {
-  onUpdate?: (data: TableRef) => void;
-  onCreate?: (data: TableRef) => void;
+  onUpdate?: (data: TableColumnRef[]) => void;
+  onCreate?: (data: TableColumnRef[]) => void;
   table?: TableRef;
   testId?: string;
+  onColsCreation?: (data: TableColumnRef[]) => void;
+  onInputChange?: (
+    e: ChangeEvent<HTMLInputElement>,
+    field: string,
+    setValidationError: Dispatch<SetStateAction<Record<string, any>>>,
+  ) => void;
+  validationError: Record<string, any>;
+  setValidationError: Dispatch<SetStateAction<Record<string, any>>>;
 };
 
-const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
-  const [successMessage, setSuccessMessage] = useState('');
+const TableView = ({
+  onCreate,
+  onUpdate,
+  table,
+  testId,
+  onColsCreation,
+  onInputChange,
+  validationError,
+  setValidationError,
+}: Props) => {
   let [cols, setCols] = useState<TableColumnRef[]>([]);
 
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const name = cols.length > 0 ? cols[0]?.name : '';
-    console.log({ name });
+    console.log({ cols });
   }, [cols]);
 
   useEffect(() => {
@@ -31,6 +54,10 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
       table?.cols && setCols(table?.cols);
     }
   }, [table]);
+
+  useEffect(() => {
+    onColsCreation && onColsCreation(cols);
+  }, [cols]);
 
   return (
     <div className="update-table" data-testid={testId}>
@@ -60,6 +87,9 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
                   {cols &&
                     cols.map((col, index) => (
                       <NewTableCol
+                        setValidationError={setValidationError}
+                        onInputChange={onInputChange}
+                        validationError={validationError}
                         key={col.id}
                         colDef={col}
                         setCols={setCols}
@@ -70,7 +100,9 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
                 </tbody>
               </table>
               <button
+                type="button"
                 data-testid={`${testId}-add-col-btn`}
+                data-cy="grid-add-btn"
                 onClick={() =>
                   setCols((prevState) => {
                     return [
@@ -111,28 +143,14 @@ const TableView = ({ onCreate, onUpdate, table, testId }: Props) => {
         <button
           type="button"
           data-testid={`${testId}-create-btn`}
+          data-cy={`create-table-btn`}
           onClick={() => {
-            cols && onCreate(cols);
+            onCreate && cols && onCreate(cols);
           }}
           className="update-table-update-button"
         >
           {t('Create')}
         </button>
-      )}
-      {successMessage && (
-        <div className="update-table-alert" role="alert">
-          <svg
-            className="update-table-alert-icon"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
-          </svg>
-          <span className="update-table-alert-title">Success alert!</span>{' '}
-          {capitalizeFirstLetter(successMessage)}
-        </div>
       )}
     </div>
   );

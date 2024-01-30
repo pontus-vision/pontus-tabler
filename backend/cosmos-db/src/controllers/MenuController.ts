@@ -65,6 +65,8 @@ export const menuDeletePOST = async (
 
     res.status(200);
     res.json(response);
+
+    return res;
   } catch (error) {
     res.status(error.code);
     res.json(error);
@@ -86,8 +88,8 @@ export const menuUpdatePOST = async (
 
     return res;
   } catch (error) {
-    res.status(error.code);
-    res.json(error.message);
+    res.status(error?.code || error);
+    res.json(error?.message || error);
     return res;
   }
 };
