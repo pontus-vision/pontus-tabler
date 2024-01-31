@@ -884,11 +884,7 @@ export interface MenuItemTreeRef {
    * @type {string}
    * @memberof MenuItemTreeRef
    */
-<<<<<<< HEAD
-  kind?: string;
-=======
   kind?: MenuItemTreeRefKindEnum;
->>>>>>> origin/main
   /**
    *
    * @type {string}
@@ -1168,19 +1164,6 @@ export interface TableColumnRef {
    * @type {string}
    * @memberof TableColumnRef
    */
-<<<<<<< HEAD
-  kind?: KindEnum;
-}
-
-export type KindEnum =
-  | 'checkboxes'
-  | 'selectbox'
-  | 'text'
-  | 'number'
-  | 'phone'
-  | 'email'
-  | 'zipcode';
-=======
   kind?: TableColumnRefKindEnum;
 }
 
@@ -1193,7 +1176,6 @@ export type TableColumnRefKindEnum =
   | 'zipcode';
 
 export type MenuItemTreeRefKindEnum = 'folder' | 'file';
->>>>>>> origin/main
 /**
  *
  * @export
@@ -1255,11 +1237,7 @@ export interface TableDataCreateReq {
    * @type {string}
    * @memberof TableDataCreateReq
    */
-<<<<<<< HEAD
-  tableName?: string;
-=======
   tableName: string;
->>>>>>> origin/main
   /**
    *
    * @type {TableDataRowRef}
@@ -1359,23 +1337,19 @@ export interface TableDataUpdateReq {
  */
 export interface TableDataUpdateRes extends TableDataRowRef {}
 /**
-<<<<<<< HEAD
  *
-=======
- * 
->>>>>>> origin/main
  * @export
  * @interface TableDeleteReq
  */
 export interface TableDeleteReq {
   /**
-   * 
+   *
    * @type {string}
    * @memberof TableDeleteReq
    */
   name: string;
   /**
-   * 
+   *
    * @type {string}
    * @memberof TableDeleteReq
    */
