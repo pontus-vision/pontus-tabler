@@ -1,5 +1,5 @@
 import { HttpRequest, InvocationContext } from '@azure/functions';
-import httpTrigger from '..';
+import httpTrigger from '../server';
 
 export const post = async (
   endpoint: string,

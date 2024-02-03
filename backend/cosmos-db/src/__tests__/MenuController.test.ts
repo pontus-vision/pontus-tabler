@@ -8,8 +8,8 @@ import {
   MenuCreateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../utils/cosmos-utils';
-import { srv } from '../index';
+import { deleteDatabase } from '../cosmos-utils';
+import { app, srv } from '../server';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -33,7 +33,7 @@ describe('testing Menu', () => {
     await deleteDatabase('pv_db');
   });
 
-  afterAll(() => {
+  afterAll((done) => {
     process.env = OLD_ENV; // Restore old environment
     srv.close();
   });

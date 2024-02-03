@@ -6,7 +6,7 @@ import {
   TableReadRes,
   TableUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
+import { FetchData, fetchContainer, fetchData } from './cosmos-utils';
 import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
 
 const TABLES = 'tables';

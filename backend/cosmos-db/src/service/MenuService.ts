@@ -5,8 +5,8 @@ import {
   MenuCreateRes,
   MenuReadRes,
   MenuItemTreeRef,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { fetchContainer } from '../utils/cosmos-utils';
+} from '../typescript/api/index';
+import { fetchContainer } from '../cosmos-utils';
 import {
   Container,
   PartitionKeyDefinition,
@@ -43,7 +43,7 @@ const initiateMenuContainer = async (): Promise<Container> => {
 
 export const createMenuItem = async (
   data: MenuCreateReq,
-): Promise<MenuCreateRes | any> => {
+): Promise<MenuCreateReq | any> => {
   const menuContainer = await initiateMenuContainer();
 
   const res = await menuContainer.items.create(data);
@@ -73,7 +73,7 @@ export const updateMenuItem = async (
         const child = data[prop][0];
         const res = await menuContainer.items.upsert({
           ...child,
-          path: `${data.path}${data.path.endsWith('/') ? '' : '/'}${
+          path: `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
             child.name
           }`,
         });
@@ -120,7 +120,7 @@ export const readMenuItemByPath = async (
   }
 };
 
-export const deleteMenuItem = async (data: MenuDeleteReq) => {
+export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
   try {
     const menuContainer = await initiateMenuContainer();
 

@@ -9,7 +9,7 @@ import {
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import { srv } from '../index';
+import { srv } from '../server';
 
 import { post } from './test-utils';
 

@@ -11,7 +11,7 @@ import {
   TableReadReq,
   TableUpdateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
+import { FetchData, fetchContainer, fetchData } from './cosmos-utils';
 import { PatchOperation } from '@azure/cosmos';
 import { readTableByName } from './TableService';
 
