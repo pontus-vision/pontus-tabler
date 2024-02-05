@@ -9,9 +9,11 @@ import {
 import { fetchContainer } from '../cosmos-utils';
 import {
   Container,
+  ItemResponse,
   PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
+import { BadRequestError, NotFoundError } from '../generated/api';
 
 const MENU = 'menu';
 
@@ -54,7 +56,8 @@ export const createMenuItem = async (
 
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
-): Promise<MenuCreateRes> => {
+): Promise<ItemResponse<MenuCreateRes>> => {
+  console.log({ body: data });
   const menuContainer = await initiateMenuContainer();
 
   const patchArr = [];
@@ -90,12 +93,21 @@ export const updateMenuItem = async (
     }
   }
 
+  if (patchArr.length === 0) {
+    throw { code: 400, message: 'No menu item property defined' };
+  }
+  console.log({ patchArr });
   const res = await menuContainer.item(data.id, data.path).patch(patchArr);
 
+  console.log({ menuRes: res });
+  if (res.statusCode === 404) {
+    throw new NotFoundError('not found');
+  }
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
+  console.log({ rest });
 
-  return rest;
+  return res;
 };
 
 export const readMenuItemByPath = async (
@@ -125,7 +137,6 @@ export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
     const menuContainer = await initiateMenuContainer();
 
     const res = await menuContainer.item(data.id, data.path).delete();
-
     return 'menu item deleted!';
   } catch (error) {
     throw error;
