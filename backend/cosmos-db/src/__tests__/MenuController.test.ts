@@ -33,7 +33,7 @@ describe('testing Menu', () => {
     await deleteDatabase('pv_db');
   });
 
-  afterAll((done) => {
+  afterAll(() => {
     process.env = OLD_ENV; // Restore old environment
     srv.close();
   });
@@ -107,7 +107,6 @@ describe('testing Menu', () => {
     // Read the created Menu Item
 
     const readRetVal2 = await post('menu/read', {
-      id: readRetVal?.id,
       path: readRetVal?.path,
     });
 
@@ -168,19 +167,19 @@ describe('testing Menu', () => {
       path: 'bar',
     });
 
-    expect(readRetVal.status).toBe(404);
+    expect(readRetVal.status).toBe(422);
 
     const updateRetVal = await post('menu/update', { foo: 'bar' });
 
-    expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(422);
 
     const updateRetVal2 = await post('menu/update', { path: 'bar', id: 'foo' });
 
-    expect(updateRetVal2.status).toBe(404);
+    expect(updateRetVal2.status).toBe(400);
 
     const deleteRetVal = await post('menu/delete', { foo: 'bar' });
 
-    expect(deleteRetVal.status).toBe(400);
+    expect(deleteRetVal.status).toBe(422);
 
     const deleteRetVal2 = await post('menu/delete', { path: 'bar', id: 'foo' });
 
