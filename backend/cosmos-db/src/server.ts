@@ -22,6 +22,10 @@ app.use(express.json());
 
 register(app, { pontus });
 
+// app.listen(port, () => {
+//   console.log(`listening on port ${port}`);
+// });
+
 const validate = (_request, _scopes, _schema) => {
   return true;
 };
@@ -58,7 +62,6 @@ const httpTrigger = async (
     path: url.pathname,
     method: request.method,
     headers: headers,
-    agent,
   };
 
   const ret = await fetch(
