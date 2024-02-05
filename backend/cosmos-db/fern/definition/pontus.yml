@@ -26,10 +26,10 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - MenuItemNotFoundError
       examples:
         - request:
             path: /folder1/file1
-            id: 'jkn4fjklkfljenerwkljfnwrlkj4'
           response:
             body: {}
     menuUpdatePOST:
@@ -53,18 +53,21 @@ service:
       method: POST
       auth: true
       request:
-        name: MenuDeleteReq
-        body:
-          properties:
-            path: string
-            id: string
+        body: MenuDeleteReq
+      response:
+        docs: Menu item deleted successfully
+        type: MenuDeleteRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request:
-            path: string
-            id: string
+      # examples:
+      #   - request:
+      #       path: string
+      #       id: string
+      #     response:
+      #       body:
+      #         properties:
+      #           message: string
     tableCreatePOST:
       path: /table/create
       method: POST
@@ -924,10 +927,15 @@ types:
   MenuReadRes: MenuItemTreeRef
   MenuReadReq:
     properties:
-      id: string
       path: string
   MenuUpdateReq: MenuItemTreeRef
   MenuUpdateRes: MenuItemTreeRef
+  MenuDeleteReq:
+    properties:
+      id: string
+      path: string
+  MenuDeleteRes: string
+
   MenuItemTreeRef:
     properties:
       id: optional<string>
@@ -1218,10 +1226,13 @@ types:
       name: optional<string>
       id: optional<string>
   TableDataRowRef: map<string, unknown>
+  MenuItemNotFoundBody:
+    properties:
+      message: string
 errors:
   BadRequestError:
     status-code: 400
-    type: unknown
+    type: string
   UnauthorizedError:
     status-code: 401
     type: unknown
@@ -1231,3 +1242,6 @@ errors:
   InternalServerError:
     status-code: 500
     type: unknown
+  MenuItemNotFoundError:
+    status-code: 404
+    type: string
