@@ -5,14 +5,20 @@ import {
   NotFoundError,
 } from './generated/api';
 import { PontusService } from './generated/api/resources/pontus/service/PontusService';
-// import { MenuItemNotFoundError } from './generated/serialization';
-
 import {
   createMenuItem,
   deleteMenuItem,
   readMenuItemByPath,
   updateMenuItem,
 } from './service/MenuService';
+import {
+  createTable,
+  deleteTable,
+  readTableById,
+  readTables,
+  updateTable,
+} from './service/TableService';
+
 export default new PontusService({
   authGroupCreatePost(req, res) {},
   authGroupDeletePost(req, res) {},
@@ -34,9 +40,6 @@ export default new PontusService({
   dashboardsReadPost(req, res) {},
   dashboardUpdatePost(req, res) {},
   menuCreatePost: async (req, res) => {
-    console.log({
-      res: Object.keys(req.body).length,
-    });
     if (Object.keys(req.body).length === 0) {
       throw new BadRequestError('Please, insert request body');
     }
@@ -88,13 +91,44 @@ export default new PontusService({
       throw new InternalServerError(error);
     }
   },
-  tableCreatePost(req, res) {},
+  tableCreatePost: async (req, res) => {
+    const response = await createTable(req.body);
+
+    res.send(response);
+  },
+  tableReadPost: async (req, res) => {
+    const response = await readTableById(req.body);
+
+    res.send(response);
+  },
+  tableUpdatePost: async (req, res) => {
+    const response = await updateTable(req.body);
+
+    res.send(response);
+  },
+  tableDeletePost: async (req, res) => {
+    try {
+      const response = await deleteTable(req.body);
+      res.send('Table deleted.');
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError('Table not found.');
+      }
+    }
+  },
+  tablesReadPost: async (req, res) => {
+    try {
+      const response = await readTables(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError('Table not found.');
+      }
+    }
+  },
   tableDataCreatePost(req, res) {},
   tableDataDeletePost(req, res) {},
   tableDataReadPost(req, res) {},
   tableDataUpdatePost(req, res) {},
-  tableDeletePost(req, res) {},
-  tableReadPost(req, res) {},
-  tablesReadPost(req, res) {},
-  tableUpdatePost(req, res) {},
 });
