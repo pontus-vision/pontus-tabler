@@ -5,11 +5,10 @@ import {
   TableReadRes,
   TableUpdateReq,
   TableCreateReq,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-
+} from '../typescript/api';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../utils/cosmos-utils';
-import { srv } from '..';
+import { deleteDatabase } from '../cosmos-utils';
+import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
 
 // // Mock the utils.writeJson function
@@ -40,7 +39,7 @@ describe('tableControllerTest', () => {
 
   it('should do the CRUD "happy path"', async () => {
     const body: TableCreateReq = {
-      name: 'person_Natural',
+      name: 'person-natural',
       label: 'Person Natural',
       cols: [
         {
@@ -48,7 +47,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
-          name: 'full_Name',
+          name: 'full-name',
           sortable: true,
         },
         {
@@ -56,7 +55,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
-          name: 'customer_ID',
+          name: 'customer-id',
           sortable: true,
         },
       ],
@@ -83,7 +82,7 @@ describe('tableControllerTest', () => {
     expect(isSubset(body, readRetVal.data)).toBe(true);
 
     const body2: TableUpdateReq = {
-      name: 'name2',
+      name: 'person-natural',
       label: 'name 2',
       id: id,
       cols: [
@@ -114,6 +113,7 @@ describe('tableControllerTest', () => {
 
     const body3 = {
       id: resPayload3.id,
+      name: resPayload3.name,
     };
 
     const deleteRetVal = await post('table/delete', body3);
@@ -122,14 +122,14 @@ describe('tableControllerTest', () => {
 
     expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal2 = await post('table/read', body3);
+    const readRetVal2 = await post('table/read', { id: body3.id });
 
     expect(readRetVal2.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
     const createRetVal = await post('table/create', {});
 
-    expect(createRetVal.status).toBe(400);
+    expect(createRetVal.status).toBe(422);
 
     const readRetVal = await post('table/read', {
       id: 'foo',
@@ -139,17 +139,17 @@ describe('tableControllerTest', () => {
 
     const updateRetVal = await post('table/update', { foo: 'bar' });
 
-    expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(422);
 
     const deleteRetVal = await post('table/delete', { foo: 'bar' });
 
     let resPayload4 = deleteRetVal.data;
 
-    expect(deleteRetVal.status).toBe(400);
+    expect(deleteRetVal.status).toBe(422);
   });
   it('should read tables', async () => {
     const body: TableCreateReq = {
-      name: 'person_Natural',
+      name: 'person-natural',
       label: 'Person Natural',
       cols: [
         {
@@ -157,7 +157,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
-          name: 'full_Name',
+          name: 'full-name',
           sortable: true,
         },
         {
@@ -165,7 +165,7 @@ describe('tableControllerTest', () => {
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
-          name: 'customer_ID',
+          name: 'customer-id',
           sortable: true,
         },
       ],
@@ -175,18 +175,17 @@ describe('tableControllerTest', () => {
 
     const createRetVal2 = await post('table/create', {
       ...body,
-      name: 'person_Natural2',
+      name: 'person-natural2',
     });
 
     const readBody = {
+      from: 1,
+      to: 20,
       filters: {
         name: {
-          condition1: {
-            filter: 'person_Natural',
-            filterType: 'text',
-            type: 'contains',
-          },
+          filter: 'person-natural',
           filterType: 'text',
+          type: 'contains',
         },
       },
     };
@@ -200,11 +199,13 @@ describe('tableControllerTest', () => {
 
     const deleteVal = await post('table/delete', {
       id: createRetVal.data.id,
+      name: createRetVal.data.name,
     });
 
     expect(deleteVal.status).toBe(200);
     const deleteVal2 = await post('table/delete', {
       id: createRetVal2.data.id,
+      name: createRetVal2.data.name,
     });
 
     expect(deleteVal2.status).toBe(200);
