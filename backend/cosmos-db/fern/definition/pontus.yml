@@ -206,15 +206,20 @@ service:
         name: TableDeleteReq
         body:
           properties:
-            name: string
             id: string
+            name: string
+      response:
+        docs: Menu item deleted successfully
+        type: TableDeleteRes
       errors:
         - NotFoundError
         - InternalServerError
       examples:
         - request:
-            name: string
             id: string
+            name: string
+          response:
+            body: string
     tablesReadPOST:
       path: /tables/read
       method: POST
@@ -1092,6 +1097,8 @@ types:
       tables:
         docs: Table columns associated with the table
         type: optional<list<TablesReadResTablesItem>>
+  TableDeleteRes: string
+
   User:
     properties:
       userId:
