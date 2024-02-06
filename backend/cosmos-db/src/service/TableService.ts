@@ -8,12 +8,7 @@ import {
   TableUpdateReq,
   TablesReadRes,
 } from '../typescript/api';
-import {
-  FetchData,
-  deleteContainer,
-  fetchContainer,
-  fetchData,
-} from '../cosmos-utils';
+import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
 import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
 import { NotFoundError } from '../generated/api';
 
