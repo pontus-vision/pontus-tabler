@@ -2,6 +2,17 @@ import { ColumnApi, GridApi } from 'ag-grid-community';
 import { IJsonModel } from 'flexlayout-react';
 import { TableRef } from './pontus-api/typescript-fetch-client-generated';
 
+export interface OpenApiValidationFailError {
+  path: string;
+  message: string;
+  errorCode: string;
+}
+
+export interface OpenApiValidationFail {
+  message: string;
+  errors: OpenApiValidationFailError[];
+}
+
 export interface AgGrigFirstDataRenderedEvent<TData = any, TContext = any> {
   // Index of the first rendered row
   firstRow: number;

@@ -21,7 +21,7 @@ describe('Filter to SQL', () => {
     const query = filterToQuery(readBody2);
 
     expect(query.toLocaleLowerCase()).toBe(
-      'where contains(d.name, "pontusvision") and contains(d.folder, "folder 1")',
+      'where contains(c.name, "pontusvision") and contains(c.folder, "folder 1")',
     );
 
     const query2 = filterToQuery({
@@ -40,7 +40,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query2.toLocaleLowerCase()).toBe(
-      'where d.name = "pontusvision" and d.folder = "folder 1"',
+      'where c.name = "pontusvision" and c.folder = "folder 1"',
     );
 
     const query3 = filterToQuery({
@@ -59,7 +59,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query3.toLocaleLowerCase()).toBe(
-      'where not contains(d.name, "pontusvision") and not contains(d.folder, "folder 1")',
+      'where not contains(c.name, "pontusvision") and not contains(c.folder, "folder 1")',
     );
 
     const query4 = filterToQuery({
@@ -78,7 +78,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query4.toLocaleLowerCase()).toBe(
-      'where not d.name = "pontusvision" and not d.folder = "folder 1"',
+      'where not c.name = "pontusvision" and not c.folder = "folder 1"',
     );
 
     const date = '2023-10-19 00:00:00';
@@ -117,7 +117,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query5.toLocaleLowerCase()).toBe(
-      `where (d.name > "2023-10-19T00:00:00Z" and d.name > "2023-10-19T00:00:00Z") and (d.folder < "2023-10-19T00:00:00Z" and d.folder < "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
+      `where (c.name > "2023-10-19T00:00:00Z" and c.name > "2023-10-19T00:00:00Z") and (c.folder < "2023-10-19T00:00:00Z" and c.folder < "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
     );
 
     const query6 = filterToQuery({
@@ -154,7 +154,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query6.toLocaleLowerCase()).toBe(
-      `where (d.name > "2023-10-19T00:00:00Z" or d.name > "2023-10-19T00:00:00Z") and (d.folder < "2023-10-19T00:00:00Z" or d.folder < "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
+      `where (c.name > "2023-10-19T00:00:00Z" or c.name > "2023-10-19T00:00:00Z") and (c.folder < "2023-10-19T00:00:00Z" or c.folder < "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
     );
 
     const query7 = filterToQuery({
@@ -170,7 +170,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query7.toLocaleLowerCase()).toBe(
-      `where d.name > "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
+      `where c.name > "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
     );
 
     const query8 = filterToQuery({
@@ -187,7 +187,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query8.toLocaleLowerCase()).toBe(
-      `where d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
+      `where c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z"`.toLocaleLowerCase(),
     );
 
     const query9 = filterToQuery({
@@ -212,7 +212,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query9.toLocaleLowerCase()).toBe(
-      `where (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z") OR (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
+      `where (c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z") OR (c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z")`.toLocaleLowerCase(),
     );
 
     const query10 = filterToQuery({
@@ -253,7 +253,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query10.toLocaleLowerCase()).toBe(
-      `where ((d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z") OR (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z")) and ((d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z") OR (d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z"))`.toLocaleLowerCase(),
+      `where ((c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z") OR (c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z")) and ((c.folder >= "2023-10-19T00:00:00Z" AND c.folder <= "2023-10-19T00:00:00Z") OR (c.folder >= "2023-10-19T00:00:00Z" AND c.folder <= "2023-10-19T00:00:00Z"))`.toLocaleLowerCase(),
     );
 
     const query11 = filterToQuery({
@@ -296,7 +296,7 @@ describe('Filter to SQL', () => {
     });
 
     expect(query11.toLocaleLowerCase()).toBe(
-      `where ((d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z") OR (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z")) and ((d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z") OR (d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z")) OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
+      `where ((c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z") OR (c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z")) and ((c.folder >= "2023-10-19T00:00:00Z" AND c.folder <= "2023-10-19T00:00:00Z") OR (c.folder >= "2023-10-19T00:00:00Z" AND c.folder <= "2023-10-19T00:00:00Z")) OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
     );
 
     const query12 = filterToQuery({
@@ -340,7 +340,22 @@ describe('Filter to SQL', () => {
     });
 
     expect(query12.toLocaleLowerCase()).toBe(
-      `where ((d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z") OR (d.name >= "2023-10-19T00:00:00Z" AND d.name <= "2023-10-19T00:00:00Z")) and ((d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z") OR (d.folder >= "2023-10-19T00:00:00Z" AND d.folder <= "2023-10-19T00:00:00Z")) ORDER BY d.folder asc OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
+      `where ((c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z") OR (c.name >= "2023-10-19T00:00:00Z" AND c.name <= "2023-10-19T00:00:00Z")) and ((c.folder >= "2023-10-19T00:00:00Z" AND c.folder <= "2023-10-19T00:00:00Z") OR (c.folder >= "2023-10-19T00:00:00Z" AND c.folder <= "2023-10-19T00:00:00Z")) ORDER BY c.folder asc OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
     );
+  });
+  it('should test query with hyphen', () => {
+    const readBody2 = {
+      filters: {
+        ['foo-bar']: {
+          filter: 'PontusVision',
+          filterType: 'text',
+          type: 'contains',
+        },
+      },
+    };
+
+    const query = filterToQuery(readBody2);
+
+    console.log({ query });
   });
 });

@@ -21,6 +21,7 @@ import DashboardAuthGroup from './views/dashboard/DashboardAuthGroup';
 import CreateDashboard from './views/dashboard/CreateDashboard';
 import UpdateDashboard from './views/dashboard/UpdateDashboard';
 import CreateTableView from './views/tables/CreateTable';
+import TableDataReadView from './views/tables/table-data/TableDataRead';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -52,6 +53,10 @@ function App() {
           <Route element={<ProtectedLayout allowedRoles={['Admin']} />}>
             <Route path="/admin" element={<AdminView />} />
             <Route path="/tables/read" element={<TablesReadView />} />
+            <Route
+              path="/table/data/read/:id"
+              element={<TableDataReadView />}
+            />
             <Route path="/dashboard/:id" element={<DashboardView />} />
             <Route path="/users/read" element={<ReadUsers />} />
             <Route path="/user/create" element={<CreateUser />} />
@@ -67,6 +72,10 @@ function App() {
             <Route path="/dashboards/read" element={<Dashboards />} />
             <Route path="/dashboard/create" element={<CreateDashboard />} />
             <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
+            <Route
+              path="/table/data/read/:id"
+              element={<TableDataReadView />}
+            />
             <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
             <Route path="/auth/group/create" element={<CreateAuthGroup />} />
             <Route

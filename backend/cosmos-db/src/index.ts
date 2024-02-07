@@ -85,7 +85,9 @@ const httpTrigger = async (
 
   const data = await request.text();
   const url = new URL(request.url);
-  const headers: http.OutgoingHttpHeaders = {};
+
+  const headers: HeadersInit = {};
+  // const headers: http.OutgoingHttpHeaders = {};
 
   request.headers.forEach((value: string, key: string) => {
     headers[key] = value;

@@ -46,7 +46,6 @@ type Props = {
   lastState?: ColumnState[];
   showColumnSelector?: boolean;
   setShowColumnSelector?: Dispatch<React.SetStateAction<boolean>>;
-  deleteMode?: boolean;
   containerHeight?: string;
   updateMode?: boolean;
   setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
@@ -60,17 +59,16 @@ type Props = {
   onUpdate?: (data: any) => void;
   onRowClicked?: (row: RowEvent<any, any>) => void;
   permissions?: {
-    updateAction: boolean;
-    createAction: boolean;
-    deleteAction: boolean;
-    readAction: boolean;
+    updateAction?: boolean;
+    createAction?: boolean;
+    deleteAction?: boolean;
+    readAction?: boolean;
   };
   onFiltersChange?: (filters: {
     [key: string]: ReadPaginationFilterFilters;
   }) => void;
   onFromChange?: (num: number) => void;
   onToChange?: (num: number) => void;
-  setDeletion?: Dispatch<SetStateAction<boolean>>;
   setGridHeight?: Dispatch<React.SetStateAction<undefined | number>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
   testId?: string;
@@ -100,6 +98,7 @@ const PVGridWebiny2 = ({
   onParamsChange,
   testId,
 }: Props) => {
+  const [deleteMode, setDeleteMode] = useState(false);
   const [columnState, setColumnState] = useState<ColumnState[]>();
   const [filterState, setFilterState] = useState<ReadPaginationFilterFilters>();
   const [columnApi, setColumnApi] = useState<ColumnApi>();
@@ -110,7 +109,7 @@ const PVGridWebiny2 = ({
   const [cachedRowParams, setCachedRowParams] = useState<IGetRowsParams>();
   const [to, setTo] = useState();
   const [from, setFrom] = useState();
-  const [deleteMode, setDeleteMode] = useState(false);
+  // const [deleteMode, setDeleteMode] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
   const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<IRowNode<any>[]>(
     [],
@@ -254,7 +253,6 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (!rows) return;
-    // console.log({ rows, totalCount });
     cachedRowParams?.successCallback(rows, totalCount);
   }, [rows, filterState]);
 
@@ -329,6 +327,7 @@ const PVGridWebiny2 = ({
 
   function onFilterChanged() {
     if (gridApi) {
+      onFiltersChange && onFiltersChange(gridApi.getFilterModel());
       setFilterState(gridApi.getFilterModel());
     }
   }
@@ -354,9 +353,9 @@ const PVGridWebiny2 = ({
       columnApi?.setColumnVisible('delete-mode', true);
     } else {
       columnApi?.setColumnVisible('delete-mode', false);
-      selectedRows.forEach((row) => {
-        row.setSelected(false);
-      });
+      // selectedRows.forEach((row) => {
+      //   row.setSelected(false);
+      // });
     }
   }, [deleteMode]);
 
@@ -479,6 +478,7 @@ const PVGridWebiny2 = ({
           ref={gridContainerRef}
           rowSelection="multiple"
           onSelectionChanged={onSelectionChanged}
+          onCellValueChanged={(e) => console.log({ e })}
         ></AgGridReact>
       </div>
     </>

@@ -7,6 +7,7 @@ import {
   TablesReadRes,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import {
+  createTable,
   deleteTable,
   readTableById,
   readTables,
@@ -21,12 +22,10 @@ export const tableCreatePOST = async (
   body: TableCreateReq,
 ): Promise<Response> => {
   try {
-    if (body === undefined) {
-      throw { code: 400, message: 'No properties defined' };
-    }
-    const response = await upsertTable(body);
-    res.json(response);
-    res.status(200);
+    const response = await createTable(body);
+
+    res.status(response?.code || 201);
+    res.json(response?.body || response);
 
     return res;
   } catch (error) {
@@ -48,9 +47,6 @@ export const tableReadPOST = async (
   body: TableReadReq,
 ) => {
   try {
-    if (body === undefined) {
-      throw { code: 400, message: 'No properties defined' };
-    }
     const response = await readTableById(body);
 
     res.status(200);
@@ -58,13 +54,8 @@ export const tableReadPOST = async (
 
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
-    res.json(error);
+    res.status(error.code || error);
+    res.json(error.message || error);
     return res;
   }
 };
@@ -80,6 +71,7 @@ export const tableDeletePOST = async (
 
     res.status(200);
     res.json(response);
+    return res;
   } catch (error) {
     res.status(500);
     res.json(error);

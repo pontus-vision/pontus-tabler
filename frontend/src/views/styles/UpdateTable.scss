@@ -106,6 +106,7 @@
   /* Add general styles for the table row */
   border-bottom: 1px solid #e2e8f0;
   background-color: #f7fafc;
+  height: 7rem;
   transition: background-color 0.3s ease-in-out;
 }
 
@@ -130,6 +131,19 @@
   display: flex;
   align-items: center;
   height: 75%;
+  position: relative;
+  &__tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #ff5555; /* Tooltip background color */
+    color: #fff; /* Tooltip text color */
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+    font-size: 14px;
+    white-space: nowrap;
+  }
 }
 
 .table-row__input-field {
