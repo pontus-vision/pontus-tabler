@@ -45,9 +45,7 @@ export const readDashboardById = async (dashboardId: string) => {
     return resources[0];
   } else if (resources.length === 0) {
     throw new NotFoundError('No dashboard found.');
-  } else {
-    throw { code: 409, message: 'There is more than 1 dashboard' };
-  }
+  } 
 };
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
