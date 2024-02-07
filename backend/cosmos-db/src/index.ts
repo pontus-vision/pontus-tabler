@@ -127,6 +127,8 @@ export default new PontusService({
     } catch (error) {
       if (error?.code === 400) {
         throw new BadRequestError(error?.message);
+      } else if (error?.code === 404) {
+        throw new NotFoundError('Menu item not found.');
       }
 
       console.error({ catch: error });
