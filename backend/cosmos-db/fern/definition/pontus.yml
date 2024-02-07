@@ -1257,6 +1257,3 @@ errors:
   ConflictEntityError:
     status-code: 409
     type: string
-  # ConflictEntityError:
-  #   status-code: 404
-  #   type: string
