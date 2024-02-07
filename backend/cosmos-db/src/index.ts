@@ -24,6 +24,12 @@ import {
   updateTableData,
   upsertTableData,
 } from './service/TableDataService';
+import {
+  deleteDashboard,
+  readDashboardById,
+  readDashboards,
+  upsertDashboard,
+} from './service/DashboardService';
 
 export default new PontusService({
   authGroupCreatePost(req, res) {},
@@ -36,15 +42,46 @@ export default new PontusService({
   authUserReadPost(req, res) {},
   authUsersReadPost(req, res) {},
   authUserUpdatePost(req, res) {},
-  dashboardCreatePost(req, res) {},
-  dashboardDeletePost(req, res) {},
   dashboardGroupAuthCreatePost(req, res) {},
   dashboardGroupAuthDeletePost(req, res) {},
   dashboardGroupAuthReadPost(req, res) {},
   dashboardGroupAuthUpdatePost(req, res) {},
-  dashboardReadPost(req, res) {},
-  dashboardsReadPost(req, res) {},
-  dashboardUpdatePost(req, res) {},
+  dashboardCreatePost: async (req, res) => {
+    if (Object.keys(req.body).length === 0) {
+      throw new BadRequestError(
+        'Please, send dashboard properties in the body.',
+      );
+    }
+    const response = await upsertDashboard(req.body);
+
+    res.send(response);
+  },
+  dashboardDeletePost: async (req, res) => {
+    try {
+      const response = await deleteDashboard(req.body);
+
+      res.send(response);
+    } catch (error) {}
+  },
+  dashboardReadPost: async (req, res) => {
+    const response = await readDashboardById(req.body.id);
+
+    res.send(response);
+  },
+  dashboardsReadPost: async (req, res) => {
+    try {
+      const response = await readDashboards(req.body);
+
+      res.send(response);
+    } catch (error) {}
+  },
+  dashboardUpdatePost: async (req, res) => {
+    try {
+      const response = await upsertDashboard(req.body);
+
+      res.send(response);
+    } catch (error) {}
+  },
   menuCreatePost: async (req, res) => {
     if (Object.keys(req.body).length === 0) {
       throw new BadRequestError('Please, insert request body');
