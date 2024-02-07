@@ -96,12 +96,8 @@ export const updateMenuItem = async (
   if (patchArr.length === 0) {
     throw { code: 400, message: 'No menu item property defined' };
   }
-  console.log({ patchArr });
   const res = await menuContainer.item(data.id, data.path).patch(patchArr);
 
-  if (res.statusCode === 404) {
-    throw { code: 404, message: 'No menu item property defined' };
-  }
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
   console.log({ rest });
