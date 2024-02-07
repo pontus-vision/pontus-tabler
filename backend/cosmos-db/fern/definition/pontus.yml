@@ -26,7 +26,6 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
-        - MenuItemNotFoundError
       examples:
         - request:
             path: /folder1/file1
@@ -92,6 +91,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - ConflictEntityError
       examples:
         - name: example-0001
           request:
@@ -394,6 +394,8 @@ service:
           properties:
             rowId: string
             tableName: string
+      response:
+        type: TableDataDeleteRes
       errors:
         - BadRequestError
         - InternalServerError
@@ -402,6 +404,8 @@ service:
           request:
             rowId: string
             tableName: string
+          response:
+            body: string
     dashboardCreatePOST:
       path: /dashboard/create
       method: POST
@@ -1082,6 +1086,7 @@ types:
       from: optional<integer>
       to: optional<integer>
       filters: optional<map<string, ReadPaginationFilterFilters>>
+  TableDataDeleteRes: string
   TableDataReadRes:
     properties:
       rowsCount: optional<integer>
@@ -1249,6 +1254,9 @@ errors:
   InternalServerError:
     status-code: 500
     type: unknown
-  MenuItemNotFoundError:
-    status-code: 404
+  ConflictEntityError:
+    status-code: 409
     type: string
+  # ConflictEntityError:
+  #   status-code: 404
+  #   type: string
