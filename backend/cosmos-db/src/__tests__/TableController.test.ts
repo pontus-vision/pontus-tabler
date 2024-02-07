@@ -146,6 +146,27 @@ describe('tableControllerTest', () => {
     let resPayload4 = deleteRetVal.data;
 
     expect(deleteRetVal.status).toBe(422);
+
+    const table: TableCreateReq = {
+      name: 'person-natural',
+      label: 'Person Natural',
+      cols: [
+        {
+          field: 'column 1',
+          filter: false,
+          sortable: false,
+          headerName: 'column 1',
+          name: 'column1',
+          kind: 'checkboxes',
+        },
+      ],
+    };
+
+    await post('table/create', table);
+
+    const createRetVal2 = await post('table/create', table);
+
+    expect(createRetVal2.status).toBe(409);
   });
   it('should read tables', async () => {
     const body: TableCreateReq = {
