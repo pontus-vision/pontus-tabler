@@ -3,8 +3,6 @@ import { useAuth } from './AuthContext';
 import { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from './store/store';
 
 type Props = {
   allowedRoles: string[];

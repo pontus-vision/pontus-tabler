@@ -6,11 +6,23 @@ import {
   TableReadReq,
   TableReadRes,
   TableUpdateReq,
+<<<<<<< HEAD
   TablesReadRes,
 } from '../typescript/api';
 import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
 import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
 import { NotFoundError } from '../generated/api';
+=======
+} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
+import {
+  FetchData,
+  fetchContainer,
+  fetchData,
+  deleteContainer,
+} from '../utils/cosmos-utils';
+import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
+import { deleteTableData } from './TableDataService';
+>>>>>>> origin/main
 
 const TABLES = 'tables';
 
@@ -24,7 +36,11 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
 
 export const createTable = async (
   data: TableCreateReq,
+<<<<<<< HEAD
 ): Promise<TableCreateRes> => {
+=======
+): Promise<{ code: number; body: TableCreateRes }> => {
+>>>>>>> origin/main
   const tableContainer = await fetchContainer(
     TABLES,
     partitionKey,
@@ -37,10 +53,17 @@ export const createTable = async (
 
   // return rest;
 
+<<<<<<< HEAD
   return rest;
 };
 
 export const updateTable = async (data: TableUpdateReq) => {
+=======
+  return { code: res.statusCode, body: rest };
+};
+
+export const upsertTable = async (data: TableCreateReq | TableUpdateReq) => {
+>>>>>>> origin/main
   try {
     const tableContainer = await fetchContainer(
       TABLES,
@@ -79,6 +102,32 @@ export const readTableById = async (data: TableReadReq) => {
     return resources[0];
   } else if (resources.length === 0) {
     throw new NotFoundError('Table not found');
+  }
+};
+
+export const readTableByName = async (name: string): Promise<TableReadRes> => {
+  const querySpec = {
+    query: 'select * from tables p where p.name=@tableName',
+    parameters: [
+      {
+        name: '@tableName',
+        value: name,
+      },
+    ],
+  };
+
+  const tableContainer = await fetchContainer(
+    TABLES,
+    partitionKey,
+    uniqueKeyPolicy,
+  );
+
+  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
+
+  if (resources.length === 1) {
+    return resources[0];
+  } else if (resources.length === 0) {
+    throw { code: 404, message: 'No table found.' };
   }
 };
 

@@ -3,10 +3,10 @@ import { useAuth } from '../AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Select } from 'semantic-ui-react';
 import FormSelect from 'react-bootstrap/esm/FormSelect';
-import { listApiKeys } from '../webinyApi';
+// import { listApiKeys } from '../webinyApi';
 import { useDispatch } from 'react-redux';
 import { defineConfig } from 'vite';
-import { getApiKeys } from '../client';
+// import { getApiKeys } from '../client';
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -23,14 +23,14 @@ const LoginPage = () => {
     login(role);
   };
 
-  useEffect(() => {
-    const func = async () => {
-      const { data } = await getApiKeys();
-      console.log({ data });
-      setApiKeys(data);
-    };
-    func();
-  }, []);
+  // useEffect(() => {
+  //   const func = async () => {
+  //     const { data } = await getApiKeys();
+  //     console.log({ data });
+  //     setApiKeys(data);
+  //   };
+  //   func();
+  // }, []);
 
   const setSelectedApiKey = (apiKey: string) => {
     apiKey = JSON.parse(apiKey);

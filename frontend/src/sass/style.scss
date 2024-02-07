@@ -39,3 +39,15 @@
     left: -1rem;
   }
 }
+
+.table-input-tooltip{
+    position: absolute;
+    left: 0;
+    background-color: #ff5555; /* Tooltip background color */
+    color: #fff; /* Tooltip text color */
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+    font-size: 14px;
+    white-space: nowrap; 
+}

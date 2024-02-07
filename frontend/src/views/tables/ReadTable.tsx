@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import NewTableCol from '../../components/NewTable/Column';
+import NewTableCol from '../../components/NewTable/ColumnDef';
 
 import { tableRead, getTables, updateTable } from '../../client';
 import { useTranslation } from 'react-i18next';
@@ -24,11 +24,8 @@ const ReadTableView = () => {
   const { t, i18n } = useTranslation();
 
   const fetchTable = async (id: string) => {
-    console.log({ id });
     // const data = await tableRead({ id });
     // setTable(data?.data);
-    // console.log({ data });
-
     // data?.data.cols && setCols(data?.data.cols);
   };
 

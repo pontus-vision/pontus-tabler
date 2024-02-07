@@ -268,6 +268,57 @@
   }
 }
 
+.notification {
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+
+  &-manager {
+    position: fixed;
+    top: 4rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  &.success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+  }
+
+  &.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+  }
+
+  &.info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+  }
+
+  &-content {
+    margin-left: 0.5rem;
+  }
+
+  &.leave {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  &.enter {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
   /* CSS styles for iPhone landscape mode */
 }

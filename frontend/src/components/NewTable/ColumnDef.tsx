@@ -1,4 +1,10 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { BsCheckCircleFill } from 'react-icons/bs';
 import { FaRegCircleXmark } from 'react-icons/fa6';
 import {
@@ -18,8 +24,13 @@ type Props = {
   index: number;
   colDef?: TableColumnRef;
   testId?: string;
-  onInputChange?: (e: any, field: string) => void;
-  validationError?: Record<string, any>;
+  onInputChange?: (
+    e: ChangeEvent<HTMLInputElement>,
+    field: string,
+    setValidationError: Dispatch<SetStateAction<Record<string, any>>>,
+  ) => void;
+  validationError: Record<string, any>;
+  setValidationError: Dispatch<SetStateAction<Record<string, any>>>;
 };
 
 const NewTableCol = ({
@@ -29,6 +40,7 @@ const NewTableCol = ({
   index,
   colDef,
   testId,
+  setValidationError,
 }: Props) => {
   const [header, setHeader] = useState<string>(colDef?.headerName || '');
   const [filter, setFilter] = useState(colDef?.filter || false);
@@ -71,16 +83,18 @@ const NewTableCol = ({
         <div className="table-row__flex-container">
           <input
             onBlur={(e) =>
-              onInputChange && onInputChange(e, `header-col-${index}`)
+              onInputChange &&
+              onInputChange(e, `header-col-${index}`, setValidationError)
             }
             onChange={(e) => {
               setHeader(e.target.value);
               header?.length > 3 &&
                 onInputChange &&
-                onInputChange(e, `header-col-${index}`);
+                onInputChange(e, `header-col-${index}`, setValidationError);
             }}
             type="text"
             data-testid={`${testId}-input`}
+            data-cy={`create-table-col-def-input-${index}`}
             className="table-row__input-field"
             defaultValue={colDef?.headerName ? colDef?.headerName : ''}
           />
@@ -100,6 +114,7 @@ const NewTableCol = ({
               setKind(value);
             }}
             data-testid={`${testId}-dropdown`}
+            data-cy={`create-table-col-def-type-${index}`}
             name=""
             id=""
           >
@@ -117,6 +132,7 @@ const NewTableCol = ({
         {filter ? (
           <BsCheckCircleFill
             className="table-row__filter-icon--checked"
+            data-cy={`create-table-col-def-filter-on-${index}`}
             onClick={() => {
               setFilter(false);
             }}
@@ -124,6 +140,7 @@ const NewTableCol = ({
         ) : (
           <FaRegCircleXmark
             className="table-row__filter-icon--unchecked"
+            data-cy={`create-table-col-def-filter-off-${index}`}
             onClick={() => {
               setFilter(true);
             }}
@@ -134,6 +151,7 @@ const NewTableCol = ({
         {sortable ? (
           <BsCheckCircleFill
             className="table-row__sort-icon--checked"
+            data-cy={`create-table-col-def-sort-on-${index}`}
             onClick={() => {
               setSortable(false);
             }}
@@ -141,6 +159,7 @@ const NewTableCol = ({
         ) : (
           <FaRegCircleXmark
             className="table-row__sort-icon--unchecked"
+            data-cy={`create-table-col-def-sort-off-${index}`}
             onClick={() => {
               setSortable(true);
             }}

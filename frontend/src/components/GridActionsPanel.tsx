@@ -60,10 +60,6 @@ const GridActionsPanel = ({
 
   const burguerMenu = useRef<any>();
 
-  useEffect(() => {
-    console.log({ permissions });
-  }, []);
-
   const changeBurguerMenuValue = (value: boolean, display?: string) => {
     if (burguerMenu.current) {
       burguerMenu.current.checked = value;
@@ -180,6 +176,7 @@ const GridActionsPanel = ({
           )}
           {updateMode || deleteMode || (
             <Button
+              name="delete-mode"
               className="grid-actions-panel__delete-btn btn"
               onClick={() => {
                 changeBurguerMenuValue(false, 'none');
@@ -212,6 +209,7 @@ const GridActionsPanel = ({
         (permissions?.createAction && (
           <FaPlusCircle
             data-testid={`${testId}-add-btn`}
+            data-cy="grid-add-btn"
             className="grid-actions-panel__plus-btn text-5xl cursor-pointer"
             // style={{
             //   display: 'flex',
@@ -258,6 +256,7 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.deleteAction && (
           <button
+            name="delete-mode"
             data-testid={`${testId}-delete-mode`}
             className="grid-actions-panel__delete-btn"
             onClick={() => {
@@ -294,6 +293,9 @@ const GridActionsPanel = ({
           <i
             className="fa-solid fa-trash"
             data-testid={`${testId}-delete-btn`}
+            data-cy={`grid-delete-btn`}
+            aria-label="trash-icon"
+            aria-hidden="true"
             onClick={() => {
               if (entriesToBeDeleted && onDelete) {
                 onDelete(entriesToBeDeleted);

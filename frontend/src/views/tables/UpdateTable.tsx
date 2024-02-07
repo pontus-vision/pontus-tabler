@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
-import NewTableCol from '../../components/NewTable/Column';
+import { useEffect, useRef, useState } from 'react';
 import { IoChevronBackOutline } from 'react-icons/io5';
-import { tableRead, getTables, updateTable } from '../../client';
+import { tableRead, updateTable } from '../../client';
 import { useTranslation } from 'react-i18next';
-import { capitalizeFirstLetter } from '../../webinyApi';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   TableColumnRef,
   TableRef,
@@ -12,7 +10,9 @@ import {
 } from '../../pontus-api/typescript-fetch-client-generated';
 import TableView from '../TableView';
 import { formatToCosmosDBPattern } from './CreateTable';
-import Alert, { AlertProps } from '../../components/MessageDisplay';
+import NotificationManager, {
+  MessageRefs,
+} from '../../components/NotificationManager';
 
 type Props = {
   tableId?: string;
@@ -27,11 +27,11 @@ const UpdateTableView = ({ tableId }: Props) => {
   const [validationError, setValidationError] = useState<Record<string, any>>(
     {},
   );
-  const [message, setMessage] = useState<AlertProps>();
-
   const params = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+
+  const notificationManagerRef = useRef<MessageRefs>();
 
   const fetchTable = async (id: string) => {
     const data = await tableRead({ id });
@@ -87,22 +87,19 @@ const UpdateTableView = ({ tableId }: Props) => {
         throw 'There is already a table with that Name';
       }
 
-      setMessage({ message: 'Table updated successfully!', type: 'success' });
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        message: typeof error === 'string' ? error : '',
-      });
-      setTimeout(() => {
-        setMessage({ message: '', type: undefined });
-      }, 5000);
+      notificationManagerRef?.current?.addMessage(
+        'success',
+        'Success',
+        'Table updated successfully',
+      );
+    } catch (error: any) {
+      notificationManagerRef?.current?.addMessage('error', 'Success', error);
     }
   };
 
   const navigateToTables = () => {
     navigate('/tables/read');
   };
-  console.log('rendering');
 
   return (
     <>
@@ -124,7 +121,7 @@ const UpdateTableView = ({ tableId }: Props) => {
         <IoChevronBackOutline />
         {t('Tables')}
       </div>
-      <Alert message={message?.message} type={message?.type} />
+      <NotificationManager ref={notificationManagerRef} />
     </>
   );
 };

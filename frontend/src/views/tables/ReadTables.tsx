@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PVFlexLayout from '../../pv-react/PVFlexLayout';
 import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
 import {
@@ -15,13 +15,17 @@ import { ColDef, IGetRowsParams, RowEvent } from 'ag-grid-community';
 import { useNavigate } from 'react-router-dom';
 import { isEmpty } from '../../helpers/functions';
 
+import NotificationManager, {
+  MessageRefs,
+} from '../../components/NotificationManager';
+
 type Props = {
   rowsTested?: any[];
 };
 
 const TablesReadView = ({ rowsTested }: Props) => {
   const [cols, setCols] = useState<ColDef[]>([
-    { headerName: 'Name', field: 'name', filter: true },
+    { headerName: 'Name', field: 'label', filter: true },
   ]);
   const [rows, setRows] = useState<TableRef[]>();
   const [filters, setFilters] = useState<{
@@ -30,9 +34,7 @@ const TablesReadView = ({ rowsTested }: Props) => {
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(8);
   const [totalCount, setTotalCount] = useState<number>();
-  const [deleteMode, setDeleteMode] = useState(false);
-  const [deletion, setDeletion] = useState(false);
-  const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<User[]>([]);
+  const notificationManagerRef = useRef<MessageRefs>();
   const navigate = useNavigate();
 
   const fetchTables = async () => {
@@ -46,15 +48,13 @@ const TablesReadView = ({ rowsTested }: Props) => {
         to,
         filters,
       };
-      console.log({ req });
 
       const data = await getTables(req);
 
-      const entries = data?.data.tables;
-      // setCols([...cols, ...data?.data.tables?.map()])
+      const entries = data?.data?.tables; // setCols([...cols, ...data?.data.tables?.map()])
 
-      setRows(entries);
-      setTotalCount(data?.data.totalTables || 2);
+      setRows(entries || []);
+      setTotalCount(data?.data.totalTables || 1);
     } catch {
       setRows([]);
     }
@@ -85,39 +85,60 @@ const TablesReadView = ({ rowsTested }: Props) => {
     navigate('/table/create');
   };
 
-  const handleDelete = async (arr: TableDeleteReq[]) => {
-    console.log({ arr });
-    arr.forEach(async (el) => {
-      console.log({ el });
-      await deleteTable(el);
+  const handleDelete = async (arr: { id: string; name: string }[]) => {
+    arr.forEach(async (el, index) => {
+      try {
+        console.log({ el });
+        const res = await deleteTable(el);
+        if (index === arr.length - 1 && res?.status === 200) {
+          const message = `Table${
+            arr.length > 1 ? 's' : ''
+          } deleted successfully.`;
+
+          notificationManagerRef?.current?.addMessage(
+            'success',
+            'Success',
+            message,
+          );
+        }
+      } catch (error: any) {
+        if (error?.code === 500) {
+          notificationManagerRef?.current?.addMessage(
+            'error',
+            'Error',
+            'Could not delete',
+          );
+        }
+      }
     });
+
     fetchTables();
   };
 
   return (
-    <div className="read-tables__container">
-      <PVGridWebiny2
-        testId="read-tables-aggrid"
-        onUpdate={handleUpdate}
-        totalCount={totalCount}
-        onParamsChange={handleParamsChange}
-        onRefresh={handleOnRefresh}
-        cols={cols}
-        onDelete={handleDelete}
-        onRowClicked={handleRowClicked}
-        setEntriesToBeDeleted={setEntriesToBeDeleted}
-        deleteMode={deleteMode}
-        setDeletion={setDeletion}
-        rows={rows}
-        add={handleAddition}
-        permissions={{
-          updateAction: true,
-          createAction: true,
-          deleteAction: true,
-          readAction: true,
-        }}
-      />
-    </div>
+    <>
+      <div className="read-tables__container">
+        <PVGridWebiny2
+          testId="read-tables-aggrid"
+          onUpdate={handleUpdate}
+          totalCount={totalCount}
+          onParamsChange={handleParamsChange}
+          onRefresh={handleOnRefresh}
+          cols={cols}
+          onDelete={handleDelete}
+          onRowClicked={handleRowClicked}
+          rows={rows}
+          add={handleAddition}
+          permissions={{
+            updateAction: true,
+            createAction: true,
+            deleteAction: true,
+            readAction: true,
+          }}
+        />
+        <NotificationManager ref={notificationManagerRef} />
+      </div>
+    </>
   );
 };
 

@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
-import { createTable, tableRead } from '../../client';
+import { ChangeEvent, useRef, useState } from 'react';
+import { createTable } from '../../client';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
 import {
   TableColumnRef,
   TableRef,
 } from '../../pontus-api/typescript-fetch-client-generated';
 import TableView from '../TableView';
 import { OpenApiValidationFailError } from '../../types';
-import { capitalizeFirstLetter } from '../../webinyApi';
-import Alert, { AlertProps } from '../../components/MessageDisplay';
+import NotificationManager, {
+  MessageRefs,
+} from '../../components/NotificationManager';
+import { handleInputChange } from '../../../utils';
 
 type Props = {
   testId?: string;
@@ -20,33 +21,65 @@ export const formatToCosmosDBPattern = (inputString: string) => {
 };
 
 const CreateTableView = ({ testId }: Props) => {
-  const [cols, setCols] = useState<TableColumnRef[]>([]);
   const [name, setName] = useState<string>();
   const [errors, setErrors] = useState<OpenApiValidationFailError>();
-
-  const [tables, setTables] = useState<TableRef[]>();
+  const notificationManagerRef = useRef<MessageRefs>();
   const [validationError, setValidationError] = useState<Record<string, any>>(
     {},
   );
-  const [message, setMessage] = useState<AlertProps>();
 
   const { t, i18n } = useTranslation();
 
-  const handleInputChange = (e, field: string) => {
-    const inputValue = e.target.value;
+  const handleCreate = async (data: TableColumnRef[]) => {
+    const isAnyFieldInvalid = Object.values(validationError).some(
+      (field) => field,
+    );
+    if (isAnyFieldInvalid) return;
 
-    const pattern = /^[a-zA-Z0-9 ]{3,63}$/;
-    if (!pattern.test(inputValue)) {
-      setValidationError((prevState) => ({
-        ...prevState,
-        [field]:
-          'Please enter only letters, numbers, and spaces (3 to 63 characters).',
-      }));
-    } else {
-      setValidationError((prevState) => ({
-        ...prevState,
-        [field]: '',
-      }));
+    let colsEmpty = false;
+
+    for (const [key, value] of Object.entries(data)) {
+      console.log({ key, value });
+      if (!value.headerName) {
+        colsEmpty = true;
+      }
+    }
+
+    try {
+      if (!name || colsEmpty) {
+        throw `Please, there are some empty fields.`;
+      }
+
+      const obj = {
+        label: name || '',
+        name: formatToCosmosDBPattern(name || ''),
+        cols: data.map((col) => {
+          return {
+            ...col,
+            name: formatToCosmosDBPattern(col.name || ''),
+            field: formatToCosmosDBPattern(col.name || ''),
+          };
+        }),
+      };
+      const createRes = await createTable(obj);
+
+      if (createRes?.status === 400) {
+        throw new Error();
+      } else if (createRes?.status === 409) {
+        throw 'There is already a table with that Name';
+      }
+
+      notificationManagerRef?.current?.addMessage(
+        'success',
+        'Success',
+        'Table created!',
+      );
+    } catch (error: any) {
+      notificationManagerRef?.current?.addMessage(
+        'error',
+        'Error',
+        typeof error === 'string' ? error : 'Could not create table',
+      );
     }
   };
 
@@ -106,43 +139,32 @@ const CreateTableView = ({ testId }: Props) => {
 
   return (
     <>
-      <form
-        className="create-table__form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          cols.length > 0 && handleCreate(cols);
-        }}
-      >
+      <div className="create-table-view">
         <label htmlFor="">Name</label>
         <input
           data-testid={`${testId}-input`}
+          data-cy="create-table-name-input"
           onChange={(e) => {
             setName(e.target.value);
-            name &&
-              name?.length > 3 &&
-              handleInputChange &&
-              handleInputChange(e, 'name');
+            name && handleInputChange(e, 'name', setValidationError);
           }}
-          onBlur={(e) => handleInputChange(e, 'name')}
+          onBlur={(e) => handleInputChange(e, 'name', setValidationError)}
           value={name}
           type="text"
-          // pattern="^[a-z0-9]([-a-z0-9]{3,63}[a-z0-9])?$"
-          // title="Please do not use special characters"
-          // required
           className="create-table__name-input"
         />
-        {validationError?.name && <p>{validationError.name}</p>}
+        {validationError?.[`name`] && (
+          <p className="table-input-tooltip">{validationError?.[`name`]}</p>
+        )}
         <TableView
           testId="table-view"
           onCreate={handleCreate}
-          errors={errors}
-          onColsCreation={handleColsCreation}
           validationError={validationError}
+          setValidationError={setValidationError}
           onInputChange={handleInputChange}
         />
-      </form>
-
-      <Alert message={message?.message} type={message?.type} />
+      </div>
+      <NotificationManager ref={notificationManagerRef} />
     </>
   );
 };

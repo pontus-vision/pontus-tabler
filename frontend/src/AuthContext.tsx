@@ -33,9 +33,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = (role: string) => {
     setIsAuthenticated(true);
     setUserRole(role);
-    if (userRole === 'Admin') {
+    if (role === 'Admin') {
       navigate('/admin');
-    } else if (userRole === 'User') {
+    } else if (role === 'User') {
       navigate('/dashboard');
     }
   };
