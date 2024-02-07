@@ -32,10 +32,7 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
     if (colsChecked?.length > 0) {
       throw {
         code: 400,
-        message: {
-          string: `Cols are not defined in table: ${colsChecked.join(', ')}`,
-          nonExistingFields: Object.keys(cols),
-        },
+        message: `Cols are not defined in table: ${colsChecked.join(', ')}`,
       };
     }
   } catch (error) {
