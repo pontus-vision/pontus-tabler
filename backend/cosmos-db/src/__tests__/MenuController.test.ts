@@ -179,7 +179,7 @@ describe('testing Menu', () => {
       name: 'john',
     });
 
-    expect(updateRetVal2.status).toBe(400);
+    expect(updateRetVal2.status).toBe(404);
 
     const deleteRetVal = await post('menu/delete', { foo: 'bar' });
 
