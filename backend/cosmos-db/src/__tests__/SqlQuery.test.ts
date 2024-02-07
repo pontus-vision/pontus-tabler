@@ -1,4 +1,4 @@
-import { filterToQuery } from '../utils/cosmos-utils';
+import { filterToQuery } from '../cosmos-utils';
 
 jest.setTimeout(1000000);
 
