@@ -482,12 +482,16 @@ service:
       display-name: Delete a dashboard
       request:
         body: DashboardDeleteReq
+      response:
+        type: string
       errors:
         - NotFoundError
         - InternalServerError
       examples:
         - request:
             id: string
+          response:
+            body: string
     dashboardGroupAuthCreatePOST:
       path: /dashboard/group/auth/create
       method: POST
