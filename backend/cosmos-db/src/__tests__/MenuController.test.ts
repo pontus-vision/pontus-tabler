@@ -181,6 +181,17 @@ describe('testing Menu', () => {
 
     expect(updateRetVal2.status).toBe(404);
 
+    const updateRetVal3 = await post('menu/update', {
+      path: 'bar',
+      id: 'foo'
+    })
+
+    expect(updateRetVal3.status).toBe(400)
+
+    const updateRetVal4 = await post('menu/update', {})
+
+    expect(updateRetVal3.status).toBe(400)
+
     const deleteRetVal = await post('menu/delete', { foo: 'bar' });
 
     expect(deleteRetVal.status).toBe(422);
