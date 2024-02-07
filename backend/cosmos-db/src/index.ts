@@ -1,7 +1,7 @@
 import { InternalServerError } from 'express-openapi-validator/dist/openapi.validator';
 import {
   BadRequestError,
-  MenuItemNotFoundError,
+  ConflictEntityError,
   NotFoundError,
 } from './generated/api';
 import { PontusService } from './generated/api/resources/pontus/service/PontusService';
@@ -18,6 +18,12 @@ import {
   readTables,
   updateTable,
 } from './service/TableService';
+import {
+  deleteTableData,
+  readTableData,
+  updateTableData,
+  upsertTableData,
+} from './service/TableDataService';
 
 export default new PontusService({
   authGroupCreatePost(req, res) {},
@@ -68,7 +74,7 @@ export default new PontusService({
     } catch (error) {
       if (error?.code === 404) {
         console.error({ error });
-        throw new MenuItemNotFoundError(error?.message);
+        throw new NotFoundError(error?.message);
       }
     }
   },
@@ -92,9 +98,14 @@ export default new PontusService({
     }
   },
   tableCreatePost: async (req, res) => {
-    const response = await createTable(req.body);
-
-    res.send(response);
+    try {
+      const response = await createTable(req.body);
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 409) {
+        throw new ConflictEntityError('Table already declared');
+      }
+    }
   },
   tableReadPost: async (req, res) => {
     const response = await readTableById(req.body);
@@ -127,8 +138,50 @@ export default new PontusService({
       }
     }
   },
-  tableDataCreatePost(req, res) {},
-  tableDataDeletePost(req, res) {},
-  tableDataReadPost(req, res) {},
-  tableDataUpdatePost(req, res) {},
+  tableDataCreatePost: async (req, res) => {
+    try {
+      const response = await upsertTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 400) {
+        throw new BadRequestError(error?.message);
+      } else if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
+  tableDataDeletePost: async (req, res) => {
+    try {
+      const response = await deleteTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
+  tableDataReadPost: async (req, res) => {
+    try {
+      const response = await readTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
+  tableDataUpdatePost: async (req, res) => {
+    try {
+      const response = await updateTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
 });
