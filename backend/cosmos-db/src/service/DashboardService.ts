@@ -3,8 +3,10 @@ import {
   DashboardCreateReq,
   DashboardUpdateReq,
   ReadPaginationFilter,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { FetchData, fetchContainer, fetchData } from './cosmos-utils';
+  DashboardsReadRes,
+} from '../typescript/api';
+import { FetchData, fetchContainer, fetchData } from '../cosmos-utils';
+import { NotFoundError } from '../generated/api';
 
 const DASHBOARDS = 'dashboards';
 
@@ -42,7 +44,7 @@ export const readDashboardById = async (dashboardId: string) => {
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {
-    throw { code: 404, message: 'No dashboard found.' };
+    throw new NotFoundError('No dashboard found.');
   } else {
     throw { code: 409, message: 'There is more than 1 dashboard' };
   }
@@ -61,17 +63,11 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 
 export const readDashboards = async (
   body: ReadPaginationFilter,
-): Promise<FetchData> => {
-  return fetchData(body, DASHBOARDS);
-};
+): Promise<DashboardsReadRes> => {
+  const res = await fetchData(body, DASHBOARDS);
 
-// export const countDashboardsRecords = async (
-//   query: string,
-// ): Promise<number> => {
-//   const dashboardContainer = await fetchDashboardsContainer(query);
-//   const { resources } = await dashboardContainer.items
-//     .query({ query, parameters: [] })
-//     .fetchAll();
+  return { dashboards: res.values, totalDashboards: res.count };
+};
 
 //   return resources[0];
 // };
