@@ -12,11 +12,12 @@ import {
   TableDataUpdateReq,
   TableDataDeleteReq,
   TableDataReadRes,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
+  TableUpdateRes,
+} from '../typescript/api';
 
+import { srv } from '../server';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../utils/cosmos-utils';
-import { srv } from '..';
+import { deleteDatabase } from '../cosmos-utils';
 import { AxiosResponse } from 'axios';
 
 // // Mock the utils.writeJson function
@@ -48,7 +49,7 @@ describe('testing tabledata', () => {
 
   it('should do the CRUD "happy path"', async () => {
     const table: TableCreateReq = {
-      name: 'Person_Natural',
+      name: 'person-natural',
       label: 'Person Natural',
       cols: [
         {
@@ -65,11 +66,11 @@ describe('testing tabledata', () => {
     const creatTableRetVal = await post('table/create', table);
     console.log({ creatTableRetVal });
 
-    expect(creatTableRetVal.status).toBe(201);
+    expect(creatTableRetVal.status).toBe(200);
 
     // Creating our first record.
     const body: TableDataCreateReq = {
-      tableName: 'Person_Natural',
+      tableName: 'person-natural',
       cols: {
         column1: 'bar',
       },
@@ -77,7 +78,7 @@ describe('testing tabledata', () => {
 
     const createRetVal = await post('table/data/create', body);
 
-    expect(createRetVal.status).toBe(201);
+    expect(createRetVal.status).toBe(200);
     expect(isSubset(body.cols, createRetVal.data)).toBe(true);
 
     // Reading accordingly and checking if it will be listed.
@@ -100,6 +101,7 @@ describe('testing tabledata', () => {
       body2,
     )) as AxiosResponse<TableDataReadRes>;
 
+    console.log({ readRetVal });
     expect(
       readRetVal.data.rows.some((value) => isSubset(body.cols, value)),
     ).toBe(true);
@@ -160,11 +162,11 @@ describe('testing tabledata', () => {
       tableName: body.tableName,
     })) as AxiosResponse<TableDataReadRes>;
 
-    expect(readRetVal4.status).toBe(200);
+    expect(readRetVal4.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
     const table: TableCreateReq = {
-      name: 'Person_Natural',
+      name: 'person-natural',
       label: 'Person Natural',
       cols: [
         {
@@ -180,11 +182,11 @@ describe('testing tabledata', () => {
 
     const creatTableRetVal = await post('table/create', table);
 
-    expect(creatTableRetVal.status).toBe(201);
+    expect(creatTableRetVal.status).toBe(200);
 
     // Creating our first record.
     const body: TableDataCreateReq = {
-      tableName: 'Person_Natural',
+      tableName: 'person-natural',
       cols: {
         foo: 'bar',
       },
@@ -194,11 +196,9 @@ describe('testing tabledata', () => {
 
     expect(createRetVal.status).toBe(400);
 
-    expect(
-      createRetVal.data.nonExistingFields.some((field) =>
-        Object.keys(body.cols).some((key) => key === field),
-      ),
-    ).toBe(true);
+    expect(createRetVal.data === 'Cols are not defined in table: foo').toBe(
+      true,
+    );
 
     // Reading accordingly and checking if it will be listed.
 
@@ -231,7 +231,7 @@ describe('testing tabledata', () => {
 
     const updateRetVal = await post('table/data/update', bodyUpdate);
 
-    expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(422);
 
     // Reading it again
 
@@ -262,5 +262,71 @@ describe('testing tabledata', () => {
     const deleteRetVal = await post('table/data/delete', deleteBody);
 
     expect(deleteRetVal.status).toBe(404);
+  });
+  it('should handle table updates', async () => {
+    const table: TableCreateReq = {
+      name: 'person-natural',
+      label: 'Person Natural',
+      cols: [
+        {
+          field: 'column-1',
+          filter: false,
+          sortable: false,
+          headerName: 'column 1',
+          name: 'column-1',
+          kind: 'checkboxes',
+        },
+      ],
+    };
+
+    const createTableRetVal = (await post(
+      'table/create',
+      table,
+    )) as AxiosResponse<TableCreateRes>;
+
+    const createTableData = createTableRetVal.data;
+
+    expect(createTableRetVal.status).toBe(200);
+    const tableUpdateBody: TableUpdateReq = {
+      id: createTableData.id,
+      label: createTableData.label,
+      name: createTableData.name,
+      cols: [
+        ...createTableData.cols,
+        {
+          field: 'column-2',
+          filter: false,
+          sortable: false,
+          headerName: 'column 2',
+          name: 'column-2',
+          kind: 'checkboxes',
+        },
+      ],
+    };
+
+    const updateTableRetVal = (await post(
+      'table/update',
+      tableUpdateBody,
+    )) as AxiosResponse<TableUpdateRes>;
+
+    const updateTableRetData = updateTableRetVal.data;
+
+    expect(updateTableRetVal.status).toBe(200);
+
+    const cols = updateTableRetData.cols;
+
+    const createTableDataBody: TableDataCreateReq = {
+      tableName: updateTableRetData.name,
+      cols: {
+        [`${cols[0].name}`]: 'foo',
+      },
+    };
+
+    const createTableDataRetVal = await post(
+      'table/data/create',
+      createTableDataBody,
+    );
+
+    expect(createTableDataRetVal.status).toBe(200);
   });
 });
