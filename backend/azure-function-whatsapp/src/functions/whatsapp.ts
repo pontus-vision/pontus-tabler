@@ -47,7 +47,7 @@ const azureSearchDeploymentId =
 const azureOpenAISystemRole =
   process.env['AZURE_OPENAI_SYSTEM_ROLE'] ||
   `You are an AI estate agent that helps people find information about new property builds (primary market) in Brazil. 
-You must only provide information about properties built by Exto Incorporação e Construção. `;
+You must only provide information about properties built by Exto Incorporação e Construção by calling the tools defined.`;
 
 // You must only use content from the following sites:
 // GERAL
@@ -159,8 +159,8 @@ SEGURANÇA E INFRAESTRUTURA: Complexo com sistema de monitoramento 24h por dia, 
 LAZER: Complexo aquático com piscina coberta com raia de 20m, piscina descoberta com raia de 25m, observatório em vidro e piscina infantil. Todas climatizadas, Quadra de tênis oficial e Club Tennis com churrasqueira, Quadra poliesportiva, Fitness de 200m² com equipamentos high tech e vista panorâmica para a Ponte Estaiada, Studio funcional fitness, pilates e artes marciais, Pista de caminhada com 300m e piso emborrachado, Brinquedoteca e playground externo, Salão de festas e espaço gourmet, PUB e sala de jogos, Beauty Studio, Spa, sala de massagem e sauna úmida com lounge, Coworking – espaço de trabalho com sala de reunião, Pet place com equipamentos agility, hostel e banho, Mais de 3.400m² de praças, pomar e paisagismo por Benedito Abbud
 OS APARTAMENTOS: Ambientes com ventilação e iluminação natural, Pé-direito com dimensões especiais: 2,80m livres; 3,06m de piso a piso, Hall privativo para todas as unidades, Aquecimento de 100% da demanda de água através de placas solares, sem necessidade de boiler ou aquecedor, Circuito de recirculação que garante água quente disponível de imediato, evitando desperdício, Piso do terraço nivelado com o living, Infraestrutura de ar-condicionado em todas as suítes e no living, Iluminação cênica instalada no living e terraço, Infraestrutura para aspiração central, Fechadura da entrada social com sistema de biometria, Gerador que atende três pontos de energia e dois de iluminação em cada unidade, Projeto de tecnologia para maximização do sinal de wifi, Tomada USB nas suítes, Terraço gourmet entregue com churrasqueira e bancada, Caixilho das suítes com dimensões especiais, persianas integradas e tratamento acústico, Edição especial de metais monocomando Deca linha Only
 SUSTENTABILIDADE: Instalações hidráulicas e elétricas inspecináveis, facilitando eventuais manutenções, Bicicletário, Processos construtivos sustentáveis, Priorização de iluminação e ventilação naturais dos ambientes e subsolos, Caixas de captação para reuso de águas pluviais nas áreas comuns, Torneiras das áreas comuns com temporizadores, Previsão para individualização de água e gás, Blocos cerâmicos, que aumentam o conforto térmico e acústico
-Áreas comuns entregues com iluminação em LED e sensor de presença nas áreas comuns, Estações de recarga elétrica para automóveis, Portas em madeira de reflorestamento de alta qualidade, Certificação do PBQPH- nível A. Classificação máxima de excelência."
-floor plans options:
+Áreas comuns entregues com iluminação em LED e sensor de presença nas áreas comuns, Estações de recarga elétrica para automóveis, Portas em madeira de reflorestamento de alta qualidade, Certificação do PBQPH- nível A. Classificação máxima de excelência.
+Opcoes de plantas:
   - Torre SUNRISE - 186M² - 3 SUÍTES - SUÍTE MASTER, LIVING E COZINHA AMPLIADOS
   - Torre SUNRISE - 186M² - 4 SUÍTES - LIVING AMPLIADO
   - Torre SUNRISE - 186M² - 4 SUÍTES
@@ -354,7 +354,8 @@ const getPropertiesNearLocation = async (
           location.longitude,
           val.latitude,
           val.longitude,
-        ) < (location.radiusInMeters || 10000),
+        ) <  15000
+        // (location.radiusInMeters || 10000),
   );
 
   context.log(`properties within 10K: ${JSON.stringify(properties10K)}`);
@@ -409,34 +410,34 @@ const toolsMap: Record<string, ToolType> = {
     },
   },
 
-  getBuildingCompaniesInLocation: {
-    func: getBuildingCompaniesInLocation,
-    metadata: {
-      type: 'function',
-      function: {
-        name: 'getBuildingCompaniesInLocation',
-        description: 'Lists property development companies in a given location',
-        parameters: {
-          type: 'object',
-          descrition:
-            'The location as latitude and logitude, e.g. { "latitude": -23.6110,  "longitude": -46.6934}',
-          properties: {
-            latitude: {
-              type: 'number',
-              minimum: -90,
-              maximum: 90,
-            },
-            longitude: {
-              type: 'number',
-              minimum: -180,
-              maximum: 180,
-            },
-          },
-          required: ['latitude', 'longitude'],
-        },
-      },
-    },
-  },
+  // getBuildingCompaniesInLocation: {
+  //   func: getBuildingCompaniesInLocation,
+  //   metadata: {
+  //     type: 'function',
+  //     function: {
+  //       name: 'getBuildingCompaniesInLocation',
+  //       description: 'Lists property development companies in a given location',
+  //       parameters: {
+  //         type: 'object',
+  //         descrition:
+  //           'The location as latitude and logitude, e.g. { "latitude": -23.6110,  "longitude": -46.6934}',
+  //         properties: {
+  //           latitude: {
+  //             type: 'number',
+  //             minimum: -90,
+  //             maximum: 90,
+  //           },
+  //           longitude: {
+  //             type: 'number',
+  //             minimum: -180,
+  //             maximum: 180,
+  //           },
+  //         },
+  //         required: ['latitude', 'longitude'],
+  //       },
+  //     },
+  //   },
+  // },
   resetHistory: {
     func: resetHistory,
     metadata: {
