@@ -1023,6 +1023,14 @@ types:
       cols:
         docs: Table columns associated with the table
         type: optional<list<TableColumnRef>>
+      metadata: optional<TableMetadata>
+  TableMetadata: 
+    properties:
+      edges: map<string, list<EdgeConnection>> 
+  EdgeConnection:
+    properties:
+      from: optional<string> 
+      to: optional<string>
   TableReadRes:
     properties: {}
     extends:
