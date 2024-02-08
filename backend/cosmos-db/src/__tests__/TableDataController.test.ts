@@ -13,11 +13,11 @@ import {
   TableDataDeleteReq,
   TableDataReadRes,
   TableUpdateRes,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
+} from '../typescript/api';
 
+import { srv } from '../server';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../utils/cosmos-utils';
-import { srv } from '..';
+import { deleteDatabase } from '../cosmos-utils';
 import { AxiosResponse } from 'axios';
 
 // // Mock the utils.writeJson function
@@ -66,7 +66,7 @@ describe('testing tabledata', () => {
     const creatTableRetVal = await post('table/create', table);
     console.log({ creatTableRetVal });
 
-    expect(creatTableRetVal.status).toBe(201);
+    expect(creatTableRetVal.status).toBe(200);
 
     // Creating our first record.
     const body: TableDataCreateReq = {
@@ -78,7 +78,7 @@ describe('testing tabledata', () => {
 
     const createRetVal = await post('table/data/create', body);
 
-    expect(createRetVal.status).toBe(201);
+    expect(createRetVal.status).toBe(200);
     expect(isSubset(body.cols, createRetVal.data)).toBe(true);
 
     // Reading accordingly and checking if it will be listed.
@@ -182,7 +182,7 @@ describe('testing tabledata', () => {
 
     const creatTableRetVal = await post('table/create', table);
 
-    expect(creatTableRetVal.status).toBe(201);
+    expect(creatTableRetVal.status).toBe(200);
 
     // Creating our first record.
     const body: TableDataCreateReq = {
@@ -196,11 +196,9 @@ describe('testing tabledata', () => {
 
     expect(createRetVal.status).toBe(400);
 
-    expect(
-      createRetVal.data.nonExistingFields.some((field) =>
-        Object.keys(body.cols).some((key) => key === field),
-      ),
-    ).toBe(true);
+    expect(createRetVal.data === 'Cols are not defined in table: foo').toBe(
+      true,
+    );
 
     // Reading accordingly and checking if it will be listed.
 
@@ -233,7 +231,7 @@ describe('testing tabledata', () => {
 
     const updateRetVal = await post('table/data/update', bodyUpdate);
 
-    expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(422);
 
     // Reading it again
 
@@ -288,7 +286,7 @@ describe('testing tabledata', () => {
 
     const createTableData = createTableRetVal.data;
 
-    expect(createTableRetVal.status).toBe(201);
+    expect(createTableRetVal.status).toBe(200);
     const tableUpdateBody: TableUpdateReq = {
       id: createTableData.id,
       label: createTableData.label,
@@ -329,6 +327,6 @@ describe('testing tabledata', () => {
       createTableDataBody,
     );
 
-    expect(createTableDataRetVal.status).toBe(201);
+    expect(createTableDataRetVal.status).toBe(200);
   });
 });

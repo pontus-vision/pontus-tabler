@@ -6,15 +6,11 @@ import {
   TableReadReq,
   TableReadRes,
   TableUpdateReq,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import {
-  FetchData,
-  fetchContainer,
-  fetchData,
-  deleteContainer,
-} from '../utils/cosmos-utils';
+  TablesReadRes,
+} from '../typescript/api';
+import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
 import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
-import { deleteTableData } from './TableDataService';
+import { NotFoundError } from '../generated/api';
 
 const TABLES = 'tables';
 
@@ -28,7 +24,7 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
 
 export const createTable = async (
   data: TableCreateReq,
-): Promise<{ code: number; body: TableCreateRes }> => {
+): Promise<TableCreateRes> => {
   const tableContainer = await fetchContainer(
     TABLES,
     partitionKey,
@@ -41,10 +37,10 @@ export const createTable = async (
 
   // return rest;
 
-  return { code: res.statusCode, body: rest };
+  return rest;
 };
 
-export const upsertTable = async (data: TableCreateReq | TableUpdateReq) => {
+export const updateTable = async (data: TableUpdateReq) => {
   try {
     const tableContainer = await fetchContainer(
       TABLES,
@@ -82,7 +78,7 @@ export const readTableById = async (data: TableReadReq) => {
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {
-    throw { code: 404, message: 'No table found.' };
+    throw new NotFoundError('Table not found');
   }
 };
 
@@ -137,6 +133,7 @@ export const deleteTable = async (data: TableDeleteReq) => {
 
 export const readTables = async (
   body: ReadPaginationFilter,
-): Promise<FetchData> => {
-  return fetchData(body, 'tables');
+): Promise<TablesReadRes> => {
+  const res = await fetchData(body, 'tables');
+  return { totalTables: res.count, tables: res.values };
 };

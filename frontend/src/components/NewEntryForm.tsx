@@ -386,39 +386,6 @@ const NewEntryForm = ({
     }
   };
 
-  // const onSubmit = async () => {
-  //   try {
-  //     const formNewInputs = { ...rowState, ...formInputs };
-  //     if (updateTableId && rowId) {
-  //       const body: UpdateTableRow = {
-  //         rowId,
-  //         cols: formNewInputs,
-  //         tableId: updateTableId,
-  //       };
-
-  //       const publishData = await updateDataTableRow(body);
-  //       if (!!publishData) {
-  //         handleUpdatedGrid();
-  //         setSuccessMsg(t('entry-updated') as string);
-  //       }
-  //     } else {
-  //       const obj: NewTableRow = {
-  //         cols: formInputs,
-  //         tableId: contentModel.name,
-  //       };
-
-  //       const publishData = await tableDataCreate(obj);
-  //       if (!!publishData) {
-  //         handleUpdatedGrid();
-  //         setSuccessMsg(t('entry-registered') as string);
-  //       }
-  //     }
-  //     console.log({ formInputs, updateModelId: updateTableId });
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
   const fields = () => {
     let num = 0;
     if (num === table?.cols?.length + 1) {

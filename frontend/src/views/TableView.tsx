@@ -141,7 +141,7 @@ const TableView = ({
 
       {cols && onCreate && (
         <button
-          type="button"
+          type="submit"
           data-testid={`${testId}-create-btn`}
           data-cy={`create-table-btn`}
           onClick={() => {

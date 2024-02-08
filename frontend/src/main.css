@@ -43,13 +43,16 @@
 .header__hamburguer-menu.active {
   left: 11.5rem;
 }
-.header__hamburguer-menu::before, .header__hamburguer-menu input, .header__hamburguer-menu::after {
-  content: "";
+.header__hamburguer-menu::before,
+.header__hamburguer-menu input,
+.header__hamburguer-menu::after {
+  content: '';
   width: var(--bar-width);
   height: var(--bar-height);
   background-color: var(--foreground);
   transform-origin: left center;
-  transition: opacity var(--animation-timing), width var(--animation-timing), rotate var(--animation-timing);
+  transition: opacity var(--animation-timing), width var(--animation-timing),
+    rotate var(--animation-timing);
 }
 .header__hamburguer-menu input {
   appearance: none;
@@ -257,7 +260,7 @@
   color: white;
 }
 .sidebar::before {
-  content: "";
+  content: '';
   background-color: white;
 }
 .sidebar.active {
@@ -375,8 +378,10 @@
   width: max-content;
   z-index: 1;
 }
-.hamburguer-menu::after, .hamburguer-menu input, .hamburguer-menu::before {
-  content: "";
+.hamburguer-menu::after,
+.hamburguer-menu input,
+.hamburguer-menu::before {
+  content: '';
   width: 60px;
   height: 8px;
   border-radius: 6px;
@@ -1001,7 +1006,8 @@
   width: 100%;
   border: 1px solid #e2e8f0;
   border-radius: 0.25rem;
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-property: background-color, border-color, color, fill, stroke,
+    opacity, box-shadow, transform;
   transition-duration: 150ms;
 }
 .auth-group-form-field .auth-group-select {
@@ -1081,7 +1087,8 @@
   width: 100%;
   border: 1px solid #e2e8f0;
   border-radius: 0.25rem;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s, fill 0.15s, stroke 0.15s, opacity 0.15s, box-shadow 0.15s, transform 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s,
+    fill 0.15s, stroke 0.15s, opacity 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 .update-user__button {
   width: 100%;
@@ -1141,7 +1148,8 @@
   width: 100%;
   border: 1px solid #e2e8f0;
   border-radius: 0.25rem;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s, fill 0.15s, stroke 0.15s, opacity 0.15s, box-shadow 0.15s, transform 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s,
+    fill 0.15s, stroke 0.15s, opacity 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 .create-user__select {
   /* Add custom select styles here */
@@ -1230,7 +1238,7 @@
   background-color: #f5f5f5;
   color: #333;
   /* set font */
-  font-family: "Courier New", Courier, monospace;
+  font-family: 'Courier New', Courier, monospace;
   font-size: 20px;
   /* set box shadow */
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
