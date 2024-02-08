@@ -1,5 +1,15 @@
 /* CreateNewTable.css */
 
+.create-table-view {
+  z-index: 1;
+  position: relative;
+}
+
+.create-table__form {
+  z-index: 1;
+  position: relative;
+}
+
 .create-new-table {
   display: flex;
   flex-direction: column;

@@ -65,7 +65,6 @@ const Dashboards = () => {
         filters,
       };
       const res = await getAllDashboards(req);
-      console.log({ res, req });
 
       const rowsVal = res?.data?.dashboards?.map((dashboard) => {
         return {
@@ -104,10 +103,6 @@ const Dashboards = () => {
   useEffect(() => {
     fetchDashboars();
   }, [filters, to, from]);
-
-  useEffect(() => {
-    console.log({ rows, cols });
-  }, [rows, cols]);
 
   const handleRowClicked = async (row: RowEvent<any, any>) => {
     if (!row) return;

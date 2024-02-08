@@ -1,4 +1,3 @@
-import * as utils from '../utils/writer';
 import { ZodType, z } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import {
@@ -33,13 +32,8 @@ export const dashboardCreatePOST = async (
     res.json(response);
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
-    res.json(error);
+    res.status(error?.code || 500);
+    res.json(error?.message || error);
     return res;
   }
 };
@@ -57,14 +51,8 @@ export const dashboardReadPOST = async (
     res.json(response);
     return res;
   } catch (error) {
-    if (error?.message && error?.code) {
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-
-    res.status(500);
-    res.json(error);
+    res.status(error?.code || 500);
+    res.json(error?.message || error);
 
     return res;
   }
@@ -83,9 +71,8 @@ export const dashboardDeletePOST = async (
 
     return res;
   } catch (error) {
-    res.status(500);
-    res.json(error);
-
+    res.status(error?.code || 500);
+    res.json(error?.message || error);
     return res;
   }
 };
@@ -106,8 +93,8 @@ export const dashboardUpdatePOST = async (
     res.json(response);
     return res;
   } catch (error) {
-    res.status(500);
-    res.json(error);
+    res.status(error?.code || 500);
+    res.json(error?.message || error);
     return res;
   }
 };
@@ -131,18 +118,9 @@ export const dashboardsReadPOST = async (
 
     return res;
   } catch (error) {
-    if (error?.code && error?.message) {
-      if (error.code === 404) {
-        res.status(error.code);
-        res.json([]);
-        return res;
-      }
-      res.status(error.code);
-      res.json(error.message);
-      return res;
-    }
-    res.status(500);
-    res.json(error);
+    res.status(error?.code || 500);
+    res.json(error?.message || error);
+
     return res;
   }
 };

@@ -1,43 +1,170 @@
-import { useEffect, useState } from 'react';
-import { createTable, getTable } from '../../client';
+import { ChangeEvent, useRef, useState } from 'react';
+import { createTable } from '../../client';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
 import {
   TableColumnRef,
   TableRef,
 } from '../../pontus-api/typescript-fetch-client-generated';
 import TableView from '../TableView';
+import { OpenApiValidationFailError } from '../../types';
+import NotificationManager, {
+  MessageRefs,
+} from '../../components/NotificationManager';
+import { handleInputChange } from '../../../utils';
 
 type Props = {
   testId?: string;
 };
 
-const CreateTableView = ({ testId }: Props) => {
-  const [cols, setCols] = useState<TableColumnRef[]>([]);
-  const [name, setName] = useState<string>();
+export const formatToCosmosDBPattern = (inputString: string) => {
+  return inputString.trim().replace(/ /g, '-').toLowerCase();
+};
 
-  const [tables, setTables] = useState<TableRef[]>();
+const CreateTableView = ({ testId }: Props) => {
+  const [name, setName] = useState<string>();
+  const [errors, setErrors] = useState<OpenApiValidationFailError>();
+  const notificationManagerRef = useRef<MessageRefs>();
+  const [validationError, setValidationError] = useState<Record<string, any>>(
+    {},
+  );
 
   const { t, i18n } = useTranslation();
 
-  const handleCreate = async (data: TableRef) => {
-    setName('');
+  const handleCreate = async (data: TableColumnRef[]) => {
+    const isAnyFieldInvalid = Object.values(validationError).some(
+      (field) => field,
+    );
+    if (isAnyFieldInvalid) return;
+
+    let colsEmpty = false;
+
+    for (const [key, value] of Object.entries(data)) {
+      console.log({ key, value });
+      if (!value.headerName) {
+        colsEmpty = true;
+      }
+    }
+
     try {
-      const createRes = await createTable({ ...data, name });
-    } catch {}
+      if (!name || colsEmpty) {
+        throw `Please, there are some empty fields.`;
+      }
+
+      const obj = {
+        label: name || '',
+        name: formatToCosmosDBPattern(name || ''),
+        cols: data.map((col) => {
+          return {
+            ...col,
+            name: formatToCosmosDBPattern(col.name || ''),
+            field: formatToCosmosDBPattern(col.name || ''),
+          };
+        }),
+      };
+      const createRes = await createTable(obj);
+
+      if (createRes?.status === 400) {
+        throw new Error();
+      } else if (createRes?.status === 409) {
+        throw 'There is already a table with that Name';
+      }
+
+      notificationManagerRef?.current?.addMessage(
+        'success',
+        'Success',
+        'Table created!',
+      );
+    } catch (error: any) {
+      notificationManagerRef?.current?.addMessage(
+        'error',
+        'Error',
+        typeof error === 'string' ? error : 'Could not create table',
+      );
+    }
   };
+
+  const handleCreate = async (data: TableColumnRef[]) => {
+    const isAnyFieldInvalid = Object.values(validationError).some(
+      (field) => field,
+    );
+    if (isAnyFieldInvalid) return;
+
+    try {
+      const obj = {
+        label: name || '',
+        name: formatToCosmosDBPattern(name || ''),
+        cols: data.map((col) => {
+          return {
+            ...col,
+            name: formatToCosmosDBPattern(col.name || ''),
+            field: formatToCosmosDBPattern(col.name || ''),
+          };
+        }),
+      };
+      const createRes = await createTable(obj);
+
+      if (createRes?.status === 400) {
+        throw new Error();
+      } else if (createRes?.status === 409) {
+        throw 'There is already a table with that Name';
+      }
+
+      setMessage({ message: 'Table created successfully!', type: 'success' });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        message: typeof error === 'string' ? error : '',
+      });
+      setTimeout(() => {
+        setMessage({ message: '', type: undefined });
+      }, 5000);
+    }
+  };
+
+  const checkValidationError = (message: string) => {
+    if (message.startsWith('required')) {
+      return 'This field is required';
+    } else if (message.startsWith('pattern')) {
+      return 'Special characters are not allowed';
+    }
+  };
+
+  const handleColsCreation = (data: TableColumnRef[]) => {
+    setCols(data);
+  };
+
+  useEffect(() => {
+    console.log({ validationError });
+  }, [validationError]);
 
   return (
     <>
-      <label htmlFor="">Name</label>
-      <input
-        data-testid={`${testId}-input`}
-        onChange={(e) => setName(e.target.value)}
-        value={name}
-        type="text"
-        className="create-table__name-input"
-      />
-      <TableView testId="table-view" onCreate={handleCreate} />
+      <div className="create-table-view">
+        <label htmlFor="">Name</label>
+        <input
+          data-testid={`${testId}-input`}
+          data-cy="create-table-name-input"
+          onChange={(e) => {
+            setName(e.target.value);
+            name && handleInputChange(e, 'name', setValidationError);
+          }}
+          onBlur={(e) => handleInputChange(e, 'name', setValidationError)}
+          value={name}
+          type="text"
+          className="create-table__name-input"
+        />
+        {validationError?.[`name`] && (
+          <p className="table-input-tooltip">{validationError?.[`name`]}</p>
+        )}
+        <TableView
+          testId="table-view"
+          onCreate={handleCreate}
+          validationError={validationError}
+          setValidationError={setValidationError}
+          onInputChange={handleInputChange}
+        />
+      </div>
+      <NotificationManager ref={notificationManagerRef} />
     </>
   );
 };

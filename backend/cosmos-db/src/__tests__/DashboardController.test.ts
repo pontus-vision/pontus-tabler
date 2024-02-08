@@ -5,11 +5,11 @@ import {
   DashboardRef,
   DashboardUpdateRes,
   DashboardUpdateReq,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
+} from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import { srv } from '../index';
+import { srv } from '../server';
 
 import { post } from './test-utils';
 
@@ -103,13 +103,13 @@ describe('dashboardCreatePOST', () => {
 
     const updateRetVal = await post('dashboard/update', { foo: 'bar' });
 
-    expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(422);
 
     const deleteRetVal = await post('dashboard/delete', { foo: 'bar' });
 
     let resPayload4 = deleteRetVal.data;
 
-    expect(deleteRetVal.status).toBe(400);
+    expect(deleteRetVal.status).toBe(422);
   });
   it('should read dashboards', async () => {
     const body: DashboardCreateReq = {

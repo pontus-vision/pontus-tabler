@@ -5,13 +5,15 @@ import {
   MenuCreateRes,
   MenuReadRes,
   MenuItemTreeRef,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { fetchContainer } from '../utils/cosmos-utils';
+} from '../typescript/api/index';
+import { fetchContainer } from '../cosmos-utils';
 import {
   Container,
+  ItemResponse,
   PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
+import { BadRequestError, NotFoundError } from '../generated/api';
 
 const MENU = 'menu';
 
@@ -43,7 +45,7 @@ const initiateMenuContainer = async (): Promise<Container> => {
 
 export const createMenuItem = async (
   data: MenuCreateReq,
-): Promise<MenuCreateRes | any> => {
+): Promise<MenuCreateReq | any> => {
   const menuContainer = await initiateMenuContainer();
 
   const res = await menuContainer.items.create(data);
@@ -54,7 +56,8 @@ export const createMenuItem = async (
 
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
-): Promise<MenuCreateRes> => {
+): Promise<ItemResponse<MenuCreateRes>> => {
+  console.log({ body: data });
   const menuContainer = await initiateMenuContainer();
 
   const patchArr = [];
@@ -73,7 +76,7 @@ export const updateMenuItem = async (
         const child = data[prop][0];
         const res = await menuContainer.items.upsert({
           ...child,
-          path: `${data.path}${data.path.endsWith('/') ? '' : '/'}${
+          path: `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
             child.name
           }`,
         });
@@ -90,12 +93,16 @@ export const updateMenuItem = async (
     }
   }
 
+  if (patchArr.length === 0) {
+    throw { code: 400, message: 'No menu item property defined' };
+  }
   const res = await menuContainer.item(data.id, data.path).patch(patchArr);
 
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
+  console.log({ rest });
 
-  return rest;
+  return res;
 };
 
 export const readMenuItemByPath = async (
@@ -120,12 +127,11 @@ export const readMenuItemByPath = async (
   }
 };
 
-export const deleteMenuItem = async (data: MenuDeleteReq) => {
+export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
   try {
     const menuContainer = await initiateMenuContainer();
 
     const res = await menuContainer.item(data.id, data.path).delete();
-
     return 'menu item deleted!';
   } catch (error) {
     throw error;

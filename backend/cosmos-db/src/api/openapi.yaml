@@ -188,10 +188,53 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TableUpdateReq'
+            example:
+              name: person-natural
+              id: id
+              label: Person Natural
+              cols:
+                - field: full-name
+                  filter: true
+                  headerName: Full Name
+                  id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                  name: full-name
+                  sortable: true
+                  kind: checkboxes
+                - field: full-name
+                  filter: true
+                  headerName: Full Name
+                  id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                  name: full-name
+                  sortable: true
+                  kind: checkboxes
         required: true
+
       responses:
         '204':
           description: Table updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableUpdateRes'
+              example:
+                name: Person_Natural
+                id: id
+                label: Person Natural
+                cols:
+                  - field: full-name-2
+                    filter: true
+                    headerName: Full Name
+                    id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                    name: full-name
+                    sortable: true
+                    kind: checkboxes
+                  - field: full-name-2
+                    filter: true
+                    headerName: 'Full Name 2'
+                    id: 'ds67a8gasiyudhsay78dgasiuhdsa897h'
+                    name: full-name-2
+                    sortable: true
+                    kind: text
         '400':
           description: Bad request
         '404':
@@ -232,6 +275,32 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReadPaginationFilter'
+            examples:
+              example-01:
+                value:
+                  from: 1
+                  to: 2
+                  filters:
+                    name:
+                      filter: 'person_Natural'
+                      filterType: 'text'
+                      type: 'contains'
+              example-02:
+                value:
+                  from: 1
+                  to: 2
+                  filters:
+                    name:
+                      condition1:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: contains
+                      condition2:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: contains
+                    filterType: 'text'
+                    operator: 'AND'
         required: true
       responses:
         '200':
@@ -247,20 +316,52 @@ paths:
       security:
         - bearerAuth: []
       x-swagger-router-controller: TableController
+  /table/data/create:
+    post:
+      summary: Create a new row
+      description: 'Create a new row data, by using key/value pair for each column.'
+      operationId: tableDataCreatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableDataCreateReq'
+            # examples:
+            #   example-01:
+            #     value:
+            #       id: mapeamentoDeProcessos
+            #       cols:
+            #         mapeamentoDeProcessoCol1: New value
+            #         mapeamentoDeProcessoCol2: New value
+        required: true
+      responses:
+        '201':
+          description: Table row created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDataCreateRes'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+      security:
+        - bearerAuth: []
+      x-swagger-router-controller: TableDataController
   /table/data/read:
     post:
       description: ''
-      operationId: get-table-data
+      operationId: tableDataReadPOST
       parameters: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/agGridReadReq'
+              $ref: '#/components/schemas/TableDataReadReq'
             examples:
               example-0001:
                 value:
-                  dataType: Person_Natural
+                  tableName: Person_Natural
                   filters:
                     - colId: Person_Natural_Full_Name
                       condition1:
@@ -302,19 +403,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/agGridReadRes'
+                $ref: '#/components/schemas/TableDataReadRes'
               examples:
                 example-0001:
                   value:
-                    type: recordReply
-                    from: 0
-                    records:
-                      - "{\"Person_Natural_Customer_ID\":\"12345678999\",\"id\":\"#75:3817\"\
-                        ,\"Person_Natural_Full_Name\":\"MARCO POLO\"}"
-                      - "{\"Person_Natural_Customer_ID\":\"13333333333\",\"id\":\"#75:3911\"\
-                        ,\"Person_Natural_Full_Name\":\"LEONARDO LOOPY\"}"
-                    to: 2
-                    totalAvailable: 4242
+                    rows:
+                      - Person_Natural_Name: John Doe
+                        Person_Natural_Email: foo@bar.com
+                    rowsCount: 1
         '400':
           description: Invalid search supplied
         '401':
@@ -325,35 +421,7 @@ paths:
           description: Method Not Allowed
         '500':
           description: Internal error
-      x-swagger-router-controller: Default
-  /table/data/create:
-    post:
-      summary: Create a new row
-      description: 'Create a new row data, by using key/value pair for each column.'
-      operationId: tableDataCreatePOST
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewTableRow'
-            examples:
-              example-01:
-                value:
-                  id: mapeamentoDeProcessos
-                  cols:
-                    mapeamentoDeProcessoCol1: New value
-                    mapeamentoDeProcessoCol2: New value
-        required: true
-      responses:
-        '201':
-          description: Table row created successfully
-        '400':
-          description: Bad request
-        '500':
-          description: Internal server error
-      security:
-        - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableDataController
   /table/data/update:
     post:
       summary: Update a row
@@ -363,7 +431,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTableRow'
+              $ref: '#/components/schemas/TableDataUpdateReq'
             examples:
               example-01:
                 value:
@@ -376,13 +444,17 @@ paths:
       responses:
         '201':
           description: Table row updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDataUpdateRes'
         '400':
           description: Bad request
         '500':
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableDataController
   /table/data/delete:
     post:
       summary: Update a row
@@ -392,7 +464,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteTableRow'
+              $ref: '#/components/schemas/TableDataDeleteReq'
             examples:
               example-01:
                 value:
@@ -408,7 +480,7 @@ paths:
           description: Internal server error
       security:
         - bearerAuth: []
-      x-swagger-router-controller: Default
+      x-swagger-router-controller: TableDataController
   /dashboard/create:
     post:
       summary: Create a new dashboard
@@ -631,6 +703,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DashboardsReadRes'
+              examples:
+                example-01:
+                  value:
+                    from: 1
+                    to: 2
+                    filters:
+                      name:
+                        filter: 'person_Natural'
+                        filterType: 'text'
+                        type: 'contains'
+                example-02:
+                  value:
+                    from: 1
+                    to: 2
+                    filters:
+                      name:
+                        condition1:
+                          filter: 'person_Natural'
+                          filterType: 'text'
+                          type: contains
+                        condition2:
+                          filter: 'person_Natural'
+                          filterType: 'text'
+                          type: contains
+                      filterType: 'text'
+                      operator: 'AND'
         '400':
           description: Bad request
         '500':
@@ -735,7 +833,7 @@ paths:
       summary: Get all groups
       description:
         Retrieve all groups (nodes that Aggrid is using a new pagination
-        filter model)
+        filter model
       operationId: authGroupsReadPOST
       requestBody:
         content:
@@ -898,7 +996,6 @@ components:
     MenuCreateRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuReadReq:
       type: object
       properties:
@@ -911,15 +1008,12 @@ components:
     MenuReadRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuUpdateReq:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuUpdateRes:
       allOf:
         - $ref: '#/components/schemas/MenuItemTreeRef'
-        - $ref: '#/components/schemas/BaseModelRef'
     MenuDeleteReq:
       type: object
       properties:
@@ -939,20 +1033,12 @@ components:
           type: string
         kind:
           type: string
-          enum: [folder, file]
         path:
           type: string
         children:
           type: array
           items:
             $ref: '#/components/schemas/MenuItemTreeRef'
-      # example:
-      #   path: path
-      #   children:
-      #     - null
-      #     - null
-      #   name: name
-      #   type: type
     authGroupRef:
       type: object
       properties:
@@ -1033,6 +1119,15 @@ components:
         sortDir:
           type: string
           example: +desc
+    TableDataReadReq:
+      type: object
+      properties:
+        tableName:
+          type: string
+      allOf:
+        - $ref: '#/components/schemas/ReadPaginationFilter'
+      required:
+        - tableName
     agGridReadRes:
       type: object
       properties:
@@ -1068,6 +1163,7 @@ components:
         name:
           type: string
           description: Name of the table column
+          pattern: '^(?=.{3,63}$)(?=[a-z0-9])[a-z0-9]([-]?[a-z0-9]+)*$'
         field:
           type: string
           description: Field name of the table column
@@ -1099,30 +1195,16 @@ components:
       properties:
         name:
           type: string
+          pattern: '^(?=.{3,63}$)(?=[a-z0-9])[a-z0-9]([-]?[a-z0-9]+)*$'
           description: Name of the table
+        label:
+          type: string
         cols:
           type: array
           description: Table columns associated with the table
           items:
             $ref: '#/components/schemas/TableColumnRef'
-      example:
-        name: name
-        id: id
-        cols:
-          - field: Person_Natural_Full_Name
-            filter: true
-            headerName: Full Name
-            id: Person_Natural_Full_Name
-            name: Full Name
-            sortable: true
-            kind: checkboxes
-          - field: Person_Natural_Full_Name
-            filter: true
-            headerName: Full Name
-            id: Person_Natural_Full_Name
-            name: Full Name
-            sortable: true
-            kind: checkboxes
+
     TableReadRes:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
@@ -1132,46 +1214,79 @@ components:
       properties:
         name:
           type: string
-          description: Name of the table
+          pattern: '^(?=.{3,63}$)(?=[a-z0-9])[a-z0-9]([-]?[a-z0-9]+)*$'
+          description: >
+            Name of the table
+        label:
+          type: string
         cols:
           type: array
           description: Table columns to be associated with the table during creation
           items:
             $ref: '#/components/schemas/TableColumnRef'
+      required:
+        - name
+        - label
+        - cols
     TableCreateRes:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
     TableDeleteReq:
-      allOf:
-        - $ref: '#/components/schemas/BaseModelRef'
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+      required:
+        - name
+        - id
     TableUpdateReq:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
         - $ref: '#/components/schemas/TableRef'
-    NewTableRow:
+    TableUpdateRes:
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
+    TableDataCreateReq:
       type: object
       properties:
-        id:
+        tableName:
           type: string
         cols:
-          $ref: '#/components/schemas/NewTableRow_cols'
-    UpdateTableRow:
+          $ref: '#/components/schemas/TableDataRowRef'
+      required:
+        - tableName
+    TableDataCreateRes:
+      allOf:
+        - $ref: '#/components/schemas/TableDataRowRef'
+    TableDataUpdateReq:
       type: object
       properties:
-        id:
+        tableName:
           type: string
         rowId:
           type: string
         cols:
-          $ref: '#/components/schemas/NewTableRow_cols'
-    DeleteTableRow:
+          $ref: '#/components/schemas/TableDataRowRef'
+      required:
+        - tableName
+        - rowId
+    TableDataUpdateRes:
+      allOf:
+        - $ref: '#/components/schemas/TableDataRowRef'
+    TableDataDeleteReq:
       type: object
       properties:
-        id:
-          type: string
         rowId:
           type: string
+        tableName:
+          type: string
+      required:
+        - rowId
+        - tableName
     BaseModelRef:
       type: object
       properties:
@@ -1268,10 +1383,8 @@ components:
     TableReadReq:
       allOf:
         - $ref: '#/components/schemas/BaseModelRef'
-
     ReadPaginationFilter:
       type: object
-      additionalProperties: false
       properties:
         from:
           type: integer
@@ -1281,7 +1394,15 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/ReadPaginationFilter_filters'
-
+    TableDataReadRes:
+      type: object
+      properties:
+        rowsCount:
+          type: integer
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableDataRowRef'
     TablesReadRes:
       type: object
       properties:
@@ -1668,6 +1789,9 @@ components:
         folder: folder
         name: name
         id: id
+    TableDataRowRef:
+      type: object
+      additionalProperties: true
   securitySchemes:
     bearerAuth:
       type: http
