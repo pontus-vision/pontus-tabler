@@ -1,0 +1,1263 @@
+service:
+  auth: false
+  base-path: '/PontusTest/1.0.0'
+  endpoints:
+    menuCreatePOST:
+      path: /menu/create
+      method: POST
+      auth: true
+      request:
+        body: MenuCreateReq
+      response:
+        docs: Menu item created successfully
+        type: MenuCreateRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+    menuReadPOST:
+      path: /menu/read
+      method: POST
+      auth: true
+      request:
+        body: MenuReadReq
+      response:
+        docs: Menu item created successfully
+        type: MenuReadRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request:
+            path: /folder1/file1
+          response:
+            body: {}
+    menuUpdatePOST:
+      path: /menu/update
+      method: POST
+      auth: true
+      request:
+        body: MenuUpdateReq
+      response:
+        docs: Menu item updated successfully
+        type: MenuUpdateRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body: {}
+    menuDeletePOST:
+      path: /menu/delete
+      method: POST
+      auth: true
+      request:
+        body: MenuDeleteReq
+      response:
+        docs: Menu item deleted successfully
+        type: MenuDeleteRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       path: string
+      #       id: string
+      #     response:
+      #       body:
+      #         properties:
+      #           message: string
+    tableCreatePOST:
+      path: /table/create
+      method: POST
+      auth: true
+      docs: Create a new table with properties and associated columns
+      display-name: Create a new table
+      request:
+        name: TableCreateReq
+        body:
+          properties:
+            name:
+              type: string
+              docs: |
+                Name of the table
+            label: string
+            cols:
+              docs: Table columns to be associated with the table during creation
+              type: list<TableColumnRef>
+      response:
+        docs: Table created successfully
+        type: TableCreateRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - ConflictEntityError
+      examples:
+        - name: example-0001
+          request:
+            name: Person Natural
+            label: string
+            cols:
+              - id: Person_Natural_Full_Name
+                name: Full Name
+                field: Person_Natural_Full_Name
+                sortable: true
+                headerName: Full Name
+                filter: true
+                kind: checkboxes
+              - id: Person_Natural_Customer_ID
+                name: Customer ID
+                field: Person_Natural_Customer_ID
+                sortable: true
+                headerName: Customer ID
+                filter: true
+                kind: checkboxes
+          response:
+            body:
+              id: string
+    tableReadPOST:
+      path: /table/read
+      method: POST
+      auth: true
+      docs: Get table by id
+      display-name: Get table by id
+      request:
+        body: TableReadReq
+      response:
+        docs: Successful response
+        type: TableReadRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-0001
+          request:
+            id: mapeamentoDeProcessos
+          response:
+            body:
+              id: string
+    tableUpdatePOST:
+      path: /table/update
+      method: POST
+      auth: true
+      docs: Update table properties and associated columns by ID
+      display-name: Update table by ID
+      request:
+        name: TableUpdateReq
+        body:
+          properties: {}
+          extends:
+            - BaseModelRef
+            - TableRef
+      response:
+        docs: Table updated successfully
+        type: TableUpdateRes
+      errors:
+        - BadRequestError
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request:
+            name: person-natural
+            label: Person Natural
+            cols:
+              - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                name: full-name
+                field: full-name
+                sortable: true
+                headerName: Full Name
+                filter: true
+                kind: checkboxes
+              - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                name: full-name
+                field: full-name
+                sortable: true
+                headerName: Full Name
+                filter: true
+                kind: checkboxes
+            id: id
+          response:
+            body:
+              name: Person_Natural
+              label: Person Natural
+              cols:
+                - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                  name: full-name
+                  field: full-name-2
+                  sortable: true
+                  headerName: Full Name
+                  filter: true
+                  kind: checkboxes
+                - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                  name: full-name-2
+                  field: full-name-2
+                  sortable: true
+                  headerName: Full Name 2
+                  filter: true
+                  kind: text
+              id: id
+    tableDeletePOST:
+      path: /table/delete
+      method: POST
+      auth: true
+      docs: Delete a table by ID
+      display-name: Delete a table
+      request:
+        name: TableDeleteReq
+        body:
+          properties:
+            id: string
+            name: string
+      response:
+        docs: Menu item deleted successfully
+        type: TableDeleteRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request:
+            id: string
+            name: string
+          response:
+            body: string
+    tablesReadPOST:
+      path: /tables/read
+      method: POST
+      auth: true
+      docs: Retrieve all tables with pagination and search
+      display-name: Get all tables
+      request:
+        body: ReadPaginationFilter
+      response:
+        docs: Successful response
+        type: TablesReadRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-01
+          request:
+            from: 1
+            to: 2
+            filters:
+              name:
+                filter: person_Natural
+                type: contains
+                condition1: {}
+                condition2: {}
+                filterType: text
+          response:
+            body:
+              totalTables: 0
+              tables:
+                - name: name
+                  cols:
+                    - id: id
+                      name: name
+                      field: field
+                      sortable: true
+                      headerName: headerName
+                      filter: true
+                      kind: checkboxes
+                    - id: id
+                      name: name
+                      field: field
+                      sortable: true
+                      headerName: headerName
+                      filter: true
+                      kind: checkboxes
+                  id: tableId
+                - name: name
+                  cols:
+                    - id: id
+                      name: name
+                      field: field
+                      sortable: true
+                      headerName: headerName
+                      filter: true
+                      kind: checkboxes
+                    - id: id
+                      name: name
+                      field: field
+                      sortable: true
+                      headerName: headerName
+                      filter: true
+                      kind: checkboxes
+                  id: tableId
+    tableDataCreatePOST:
+      path: /table/data/create
+      method: POST
+      auth: true
+      docs: Create a new row data, by using key/value pair for each column.
+      display-name: Create a new row
+      request:
+        name: TableDataCreateReq
+        body:
+          properties:
+            tableName: string
+            cols: optional<TableDataRowRef>
+      response:
+        docs: Table row created successfully
+        type: TableDataCreateRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request:
+            tableName: string
+          response:
+            body:
+              string: {}
+    tableDataReadPOST:
+      path: /table/data/read
+      method: POST
+      auth: false
+      docs: ''
+      request:
+        name: TableDataReadReq
+        body:
+          properties:
+            tableName: string
+          extends:
+            - ReadPaginationFilter
+      response:
+        docs: AG Record data
+        type: TableDataReadRes
+      errors:
+        - BadRequestError
+        - UnauthorizedError
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - name: example-0001
+          request:
+            from: 0
+            to: 100
+            filters:
+              '0':
+                condition1:
+                  filter: JO
+                  filterType: text
+                  type: contains
+                condition2:
+                  filter: SE
+                  filterType: text
+                  type: contains
+                filterType: text
+                operator: AND
+            tableName: Person_Natural
+          response:
+            body:
+              rowsCount: 1
+              rows:
+                - Person_Natural_Name: John Doe
+                  Person_Natural_Email: foo@bar.com
+    tableDataUpdatePOST:
+      path: /table/data/update
+      method: POST
+      auth: true
+      docs: Update a row data, by using key/value pair for each column.
+      display-name: Update a row
+      request:
+        name: TableDataUpdateReq
+        body:
+          properties:
+            tableName: string
+            rowId: string
+            cols: optional<TableDataRowRef>
+      response:
+        docs: Table row updated successfully
+        type: TableDataUpdateRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-01
+          request:
+            tableName: string
+            rowId: string
+            cols:
+              mapeamentoDeProcessoCol1: Value Overwritten
+              mapeamentoDeProcessoCol2: Value Overwritten
+          response:
+            body:
+              string: {}
+    tableDataDeletePOST:
+      path: /table/data/delete
+      method: POST
+      auth: true
+      docs: Update a row data, by using key/value pair for each column.
+      display-name: Update a row
+      request:
+        name: TableDataDeleteReq
+        body:
+          properties:
+            rowId: string
+            tableName: string
+      response:
+        type: TableDataDeleteRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-01
+          request:
+            rowId: string
+            tableName: string
+          response:
+            body: string
+    dashboardCreatePOST:
+      path: /dashboard/create
+      method: POST
+      auth: true
+      docs: Create a new dashboard with properties, auth group, folder, and owner
+      display-name: Create a new dashboard
+      request:
+        body: DashboardCreateReq
+      response:
+        docs: Dashboard created successfully
+        type: DashboardCreateRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request:
+            name: name
+            folder: folder
+            owner: owner
+          response:
+            body:
+              id: string
+    dashboardReadPOST:
+      path: /dashboard/read
+      method: POST
+      auth: true
+      docs: Retrieve dashboard by id
+      display-name: Get dashboard by id
+      request:
+        body: DashboardReadReq
+      response:
+        docs: Successful response
+        type: DashboardReadRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request:
+            id: string
+          response:
+            body:
+              id: string
+    dashboardUpdatePOST:
+      path: /dashboard/update
+      method: POST
+      auth: true
+      docs: Update dashboard properties, auth group, folder, and owner by ID
+      display-name: Update dashboard by ID
+      request:
+        name: DashboardUpdateReq
+        body:
+          properties: {}
+          extends:
+            - BaseModelRef
+            - DashboardRef
+      response:
+        docs: Dashboard updated successfully
+        type: DashboardUpdateRes
+      errors:
+        - BadRequestError
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request:
+            id: string
+          response:
+            body:
+              id: string
+    dashboardDeletePOST:
+      path: /dashboard/delete
+      method: POST
+      auth: true
+      docs: Delete a dashboard by ID
+      display-name: Delete a dashboard
+      request:
+        body: DashboardDeleteReq
+      response:
+        type: string
+      errors:
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request:
+            id: string
+          response:
+            body: string
+    dashboardGroupAuthCreatePOST:
+      path: /dashboard/group/auth/create
+      method: POST
+      auth: true
+      docs: Create a new dashboard state with name and state information
+      display-name: Create a new dashboard state
+      request:
+        name: AuthCreateBody
+        body:
+          properties:
+            dashboardId: optional<string>
+            authGroups: optional<DashboardgroupauthcreateAuthGroups>
+      response:
+        docs: Dashboard state created successfully
+        type: DashboardAuthGroup
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request:
+            authGroups: {}
+          response:
+            body:
+              dashboardId: dashboardId
+              dashboardName: dashboardName
+              authGroups:
+                create:
+                  - create
+                  - create
+                read:
+                  - read
+                  - read
+                update:
+                  - update
+                  - update
+                delete:
+                  - delete
+                  - delete
+    dashboardGroupAuthReadPOST:
+      path: /dashboard/group/auth/read
+      method: POST
+      auth: true
+      docs: Create a new dashboard state with name and state information
+      display-name: Create a new dashboard state
+      request:
+        name: AuthReadBody
+        body:
+          properties:
+            dashboardId: optional<string>
+      response:
+        docs: Dashboard state created successfully
+        type: DashboardAuthGroup
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body:
+              dashboardId: dashboardId
+              dashboardName: dashboardName
+              authGroups:
+                create:
+                  - create
+                  - create
+                read:
+                  - read
+                  - read
+                update:
+                  - update
+                  - update
+                delete:
+                  - delete
+                  - delete
+    dashboardGroupAuthUpdatePOST:
+      path: /dashboard/group/auth/update
+      method: POST
+      auth: true
+      docs: Create a new dashboard state with name and state information
+      display-name: Create a new dashboard state
+      request:
+        name: AuthUpdateBody
+        body:
+          properties:
+            dashboardId: optional<string>
+            authGroups: optional<AuthGroups>
+      response:
+        docs: Dashboard state created successfully
+        type: DashboardAuthGroup
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request:
+            authGroups:
+              create:
+                - create
+                - create
+              read:
+                - read
+                - read
+              update:
+                - update
+                - update
+              delete:
+                - delete
+                - delete
+          response:
+            body:
+              dashboardId: dashboardId
+              dashboardName: dashboardName
+              authGroups:
+                create:
+                  - create
+                  - create
+                read:
+                  - read
+                  - read
+                update:
+                  - update
+                  - update
+                delete:
+                  - delete
+                  - delete
+    dashboardGroupAuthDeletePOST:
+      path: /dashboard/group/auth/delete
+      method: POST
+      auth: true
+      docs: Create a new dashboard state with name and state information
+      display-name: Delete group from dashboard
+      request:
+        body: AuthDeleteBody
+      response:
+        docs: Dashboard Auth Group(s) deleted successfully
+        type: AuthDeleteBody
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request:
+            dashboardId: dashboardId
+            authGroups:
+              create:
+                - create
+                - create
+              read:
+                - read
+                - read
+              update:
+                - update
+                - update
+              delete:
+                - delete
+                - delete
+          response:
+            body:
+              dashboardId: dashboardId
+              authGroups:
+                create:
+                  - create
+                  - create
+                read:
+                  - read
+                  - read
+                update:
+                  - update
+                  - update
+                delete:
+                  - delete
+                  - delete
+    dashboardsReadPOST:
+      path: /dashboards/read
+      method: POST
+      auth: true
+      docs: Retrieve all dashboards with pagination and search
+      display-name: Get all dashboards
+      request:
+        body: DashboardsReadReq
+      response:
+        docs: Successful response
+        type: DashboardsReadRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body: {}
+    authGroupCreatePOST:
+      path: /auth/group/create
+      method: POST
+      auth: true
+      docs: Create a new group with a name, parents, and symlinks
+      display-name: Create a new group
+      request:
+        name: GroupCreateReq
+        body:
+          properties:
+            name:
+              docs: Name of the group
+              type: optional<string>
+            parents:
+              docs: Parent groups of the group (optional)
+              type: optional<list<string>>
+            symlinks:
+              docs: Symlinks associated with the group (optional)
+              type: optional<list<string>>
+      response:
+        docs: Group created successfully
+        type: AuthGroupRef
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body:
+              groupId: groupId
+              name: name
+    authGroupReadPOST:
+      path: /auth/group/read
+      method: POST
+      auth: true
+      docs: Retrieve group by id
+      display-name: Get group by ID
+      request:
+        name: GroupReadBody
+        body:
+          properties:
+            groupId: optional<string>
+      response:
+        docs: Successful response
+        type: AuthGroupRef
+      errors:
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body:
+              groupId: groupId
+              name: name
+    authGroupUpdatePOST:
+      path: /auth/group/update
+      method: POST
+      auth: true
+      docs: Update group details by ID
+      display-name: Update group by ID
+      request:
+        name: GroupUpdateReq
+        body:
+          properties:
+            groupId:
+              docs: ID of the group to update
+              type: optional<string>
+            name:
+              docs: Updated name of the group
+              type: optional<string>
+            parents:
+              docs: Updated parent groups of the group (optional)
+              type: optional<list<string>>
+            symlinks:
+              docs: Updated symlinks associated with the group (optional)
+              type: optional<list<string>>
+      errors:
+        - BadRequestError
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request: {}
+    authGroupDeletePOST:
+      path: /auth/group/delete
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: GroupDeleteReq
+        body:
+          properties:
+            groupId: optional<string>
+      errors:
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request: {}
+    authGroupsReadPOST:
+      path: /auth/groups/read
+      method: POST
+      auth: true
+      docs: >-
+        Retrieve all groups (nodes that Aggrid is using a new pagination filter
+        model
+      display-name: Get all groups
+      request:
+        body: ReadPaginationFilter
+      response:
+        docs: Successful response
+        type: InlineResponse2001
+      errors:
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body:
+              totalGroups: 0
+              authGroups:
+                - groupId: groupId
+                  name: name
+                - groupId: groupId
+                  name: name
+    authUsersReadPOST:
+      path: /auth/users/read
+      method: POST
+      auth: true
+      docs: Retrieve all users
+      display-name: Get all users
+      request:
+        body: ReadPaginationFilter
+      response:
+        docs: Successful response
+        type: InlineResponse2002
+      errors:
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body:
+              totalUsers: 0
+              users:
+                - userId: userId
+                  name: name
+                  authGroups:
+                    - authGroups
+                    - authGroups
+                - userId: userId
+                  name: name
+                  authGroups:
+                    - authGroups
+                    - authGroups
+    authUserCreatePOST:
+      path: /auth/user/create
+      method: POST
+      auth: true
+      docs: Create a new user with a name and associated groups
+      display-name: Create a new user
+      request:
+        name: NewUser
+        body:
+          properties:
+            name:
+              docs: Name of the user
+              type: optional<string>
+            authGroups:
+              docs: IDs of the groups the user belongs to
+              type: optional<list<string>>
+      response:
+        docs: User created successfully
+        type: User
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body:
+              userId: userId
+              name: name
+              authGroups:
+                - authGroups
+                - authGroups
+    authUserUpdatePOST:
+      path: /auth/user/update
+      method: POST
+      auth: true
+      docs: Update user details by ID
+      display-name: Update user by ID
+      request:
+        name: UpdateUser
+        body:
+          properties:
+            userId:
+              docs: ID of the user to update
+              type: optional<string>
+            name:
+              docs: Updated name of the user
+              type: optional<string>
+            authGroups:
+              docs: Updated IDs of the groups the user belongs to
+              type: optional<list<string>>
+      errors:
+        - BadRequestError
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request: {}
+    authUserDeletePOST:
+      path: /auth/user/delete
+      method: POST
+      auth: true
+      docs: Delete a user by ID
+      display-name: Delete a user
+      request:
+        name: DeleteUser
+        body:
+          properties:
+            userId: optional<string>
+      errors:
+        - NotFoundError
+        - InternalServerError
+      examples:
+        - request: {}
+    authUserReadPOST:
+      path: /auth/user/read
+      method: POST
+      auth: true
+      docs: Retrieve user by ID
+      display-name: Get user by ID
+      request:
+        name: UserReadBody
+        body:
+          properties:
+            userId: optional<string>
+      response:
+        docs: Successful response
+        type: User
+      errors:
+        - InternalServerError
+      examples:
+        - request: {}
+          response:
+            body:
+              userId: userId
+              name: name
+              authGroups:
+                - authGroups
+                - authGroups
+types:
+  MenuCreateReq: MenuItemTreeRef
+  MenuCreateRes:
+    properties:
+      id: optional<string>
+      name: optional<string>
+      kind: optional<string>
+      path: optional<string>
+      children: optional<list<MenuItemTreeRef>>
+  MenuReadRes: MenuItemTreeRef
+  MenuReadReq:
+    properties:
+      path: string
+  MenuUpdateReq: MenuItemTreeRef
+  MenuUpdateRes: MenuItemTreeRef
+  MenuDeleteReq:
+    properties:
+      id: string
+      path: string
+  MenuDeleteRes: string
+
+  MenuItemTreeRef:
+    properties:
+      id: optional<string>
+      name: optional<string>
+      kind: optional<string>
+      path: optional<string>
+      children: optional<list<MenuItemTreeRef>>
+  AuthGroupRef:
+    properties:
+      groupId:
+        docs: Unique identifier of the group
+        type: optional<string>
+      name:
+        docs: Name of the group
+        type: optional<string>
+  AgGridReadReq:
+    properties:
+      search: optional<AgGridInputSearch>
+      cols: optional<list<AgGridInputSearchCols>>
+      filters: optional<list<AgGridInputFilters>>
+      dataType: optional<string>
+      from: optional<double>
+      to: optional<double>
+      sortCol: optional<string>
+      sortDir: optional<string>
+  AgGridReadRes:
+    properties:
+      type: optional<string>
+      from: optional<integer>
+      records: optional<list<string>>
+      to: optional<integer>
+      totalAvailable: optional<integer>
+  TableColumnRefKind:
+    enum:
+      - checkboxes
+      - selectbox
+      - text
+      - number
+      - phone
+      - zipcode
+      - email
+    docs: Indicates the kind of column input
+  TableColumnRef:
+    properties:
+      id:
+        docs: Unique identifier of the table column
+        type: optional<string>
+      name:
+        docs: Name of the table column
+        type: optional<string>
+      field:
+        docs: Field name of the table column
+        type: optional<string>
+      sortable:
+        docs: Indicates if the table column is sortable
+        type: optional<boolean>
+      headerName:
+        docs: Header name of the table column
+        type: optional<string>
+      filter:
+        docs: Indicates if the table column is filterable
+        type: optional<boolean>
+      kind:
+        docs: Indicates the kind of column input
+        type: optional<TableColumnRefKind>
+  TableRef:
+    properties:
+      name:
+        docs: Name of the table
+        type: optional<string>
+      label: optional<string>
+      cols:
+        docs: Table columns associated with the table
+        type: optional<list<TableColumnRef>>
+  TableReadRes:
+    properties: {}
+    extends:
+      - BaseModelRef
+      - TableRef
+  TableCreateRes:
+    properties: {}
+    extends:
+      - BaseModelRef
+      - TableRef
+  TableUpdateRes:
+    properties: {}
+    extends:
+      - BaseModelRef
+      - TableRef
+  TableDataCreateRes: TableDataRowRef
+  TableDataUpdateRes: TableDataRowRef
+  BaseModelRef:
+    properties:
+      id:
+        type: string
+        docs: Unique identifier
+  DashboardRef:
+    properties:
+      name:
+        docs: Name of the dashboard
+        type: optional<string>
+      folder:
+        docs: Folder where the dashboard belongs
+        type: optional<string>
+      owner:
+        docs: Owner of the dashboard
+        type: optional<string>
+      state:
+        docs: JSON containing all the dashboard state
+        type: optional<map<string, unknown>>
+  DashboardsReadReq: ReadPaginationFilter
+  DashboardReadReq: BaseModelRef
+  DashboardReadRes:
+    properties: {}
+    extends:
+      - DashboardRef
+      - BaseModelRef
+  DashboardCreateReq: DashboardRef
+  DashboardCreateRes:
+    properties: {}
+    extends:
+      - DashboardRef
+      - BaseModelRef
+  DashboardUpdateRes:
+    properties: {}
+    extends:
+      - BaseModelRef
+      - DashboardRef
+  DashboardDeleteReq: BaseModelRef
+  AuthGroups:
+    properties:
+      create: optional<list<string>>
+      read: optional<list<string>>
+      update: optional<list<string>>
+      delete: optional<list<string>>
+  TableReadReq: BaseModelRef
+  ReadPaginationFilter:
+    properties:
+      from: optional<integer>
+      to: optional<integer>
+      filters: optional<map<string, ReadPaginationFilterFilters>>
+  TableDataDeleteRes: string
+  TableDataReadRes:
+    properties:
+      rowsCount: optional<integer>
+      rows: optional<list<TableDataRowRef>>
+  TablesReadResTablesItem:
+    properties: {}
+    extends:
+      - BaseModelRef
+      - TableRef
+  TablesReadRes:
+    properties:
+      totalTables: optional<integer>
+      tables:
+        docs: Table columns associated with the table
+        type: optional<list<TablesReadResTablesItem>>
+  TableDeleteRes: string
+
+  User:
+    properties:
+      userId:
+        docs: Unique identifier of the user
+        type: optional<string>
+      name:
+        docs: Name of the user
+        type: optional<string>
+      authGroups:
+        docs: IDs of the groups the user belongs to
+        type: optional<list<string>>
+  DashboardAuthGroup:
+    properties:
+      dashboardId:
+        docs: Unique identifier of the dashboard
+        type: optional<string>
+      dashboardName: optional<string>
+      authGroups: optional<AuthGroups>
+  DashboardgroupauthcreateAuthGroups:
+    properties:
+      create: optional<list<string>>
+      read: optional<list<string>>
+      update: optional<list<string>>
+      delete: optional<list<string>>
+  AuthDeleteBody:
+    properties:
+      dashboardId: optional<string>
+      authGroups: optional<AuthGroups>
+  DashboardsReadRes:
+    properties:
+      totalDashboards: optional<integer>
+      dashboards: optional<list<Dashboard>>
+  InlineResponse2001:
+    properties:
+      totalGroups: optional<integer>
+      authGroups: optional<list<AuthGroupRef>>
+  InlineResponse2002:
+    properties:
+      totalUsers: optional<integer>
+      users: optional<list<User>>
+  AgGridInputSearchCols:
+    properties:
+      id: optional<string>
+      name: optional<string>
+      field: optional<string>
+      sortable: optional<boolean>
+      headerName: optional<string>
+      filter: optional<boolean>
+  AgGridInputSearchExtraSearch:
+    properties:
+      label: optional<string>
+      value: optional<string>
+  AgGridInputSearch:
+    properties:
+      searchStr: optional<string>
+      searchExact: optional<boolean>
+      cols: optional<list<AgGridInputSearchCols>>
+      extraSearch: optional<AgGridInputSearchExtraSearch>
+  AgGridInputFilters:
+    properties:
+      colId: optional<string>
+      filterType: optional<string>
+      type: optional<string>
+      filter: optional<string>
+  NewTableRowCols:
+    properties:
+      colId: optional<string>
+  ReadPaginationFilterFiltersColIdConditionDateFrom:
+    discriminated: false
+    union:
+      - datetime
+      - string
+  ReadPaginationFilterFiltersColIdConditionDateTo:
+    discriminated: false
+    union:
+      - datetime
+      - string
+  ReadPaginationFilterFiltersColIdConditionFilter:
+    discriminated: false
+    union:
+      - string
+      - integer
+  ReadPaginationFilterFiltersColIdConditionFilterTo:
+    discriminated: false
+    union:
+      - string
+      - integer
+  ReadPaginationFilterFiltersColIdCondition:
+    properties:
+      dateFrom: optional<ReadPaginationFilterFiltersColIdConditionDateFrom>
+      dateTo: optional<ReadPaginationFilterFiltersColIdConditionDateTo>
+      filter: optional<ReadPaginationFilterFiltersColIdConditionFilter>
+      filterTo: optional<ReadPaginationFilterFiltersColIdConditionFilterTo>
+      filterType: optional<string>
+      type: optional<string>
+  ReadPaginationFilterFiltersFilter:
+    discriminated: false
+    union:
+      - string
+      - integer
+  ReadPaginationFilterFiltersDateFrom:
+    discriminated: false
+    union:
+      - datetime
+      - string
+  ReadPaginationFilterFiltersDateTo:
+    discriminated: false
+    union:
+      - datetime
+      - string
+  ReadPaginationFilterFiltersFilterTo:
+    discriminated: false
+    union:
+      - string
+      - integer
+  ReadPaginationFilterFilters:
+    properties:
+      sort: optional<string>
+      filter: optional<ReadPaginationFilterFiltersFilter>
+      type: optional<string>
+      dateFrom: optional<ReadPaginationFilterFiltersDateFrom>
+      dateTo: optional<ReadPaginationFilterFiltersDateTo>
+      filterTo: optional<ReadPaginationFilterFiltersFilterTo>
+      condition1: optional<ReadPaginationFilterFiltersColIdCondition>
+      condition2: optional<ReadPaginationFilterFiltersColIdCondition>
+      filterType: optional<string>
+      operator: optional<string>
+  Dashboard:
+    properties:
+      owner: optional<string>
+      folder: optional<string>
+      name: optional<string>
+      id: optional<string>
+  TableDataRowRef: map<string, unknown>
+  MenuItemNotFoundBody:
+    properties:
+      message: string
+errors:
+  BadRequestError:
+    status-code: 400
+    type: string
+  UnauthorizedError:
+    status-code: 401
+    type: unknown
+  NotFoundError:
+    status-code: 404
+    type: unknown
+  InternalServerError:
+    status-code: 500
+    type: unknown
+  ConflictEntityError:
+    status-code: 409
+    type: string

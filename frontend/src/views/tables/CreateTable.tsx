@@ -83,6 +83,60 @@ const CreateTableView = ({ testId }: Props) => {
     }
   };
 
+  const handleCreate = async (data: TableColumnRef[]) => {
+    const isAnyFieldInvalid = Object.values(validationError).some(
+      (field) => field,
+    );
+    if (isAnyFieldInvalid) return;
+
+    try {
+      const obj = {
+        label: name || '',
+        name: formatToCosmosDBPattern(name || ''),
+        cols: data.map((col) => {
+          return {
+            ...col,
+            name: formatToCosmosDBPattern(col.name || ''),
+            field: formatToCosmosDBPattern(col.name || ''),
+          };
+        }),
+      };
+      const createRes = await createTable(obj);
+
+      if (createRes?.status === 400) {
+        throw new Error();
+      } else if (createRes?.status === 409) {
+        throw 'There is already a table with that Name';
+      }
+
+      setMessage({ message: 'Table created successfully!', type: 'success' });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        message: typeof error === 'string' ? error : '',
+      });
+      setTimeout(() => {
+        setMessage({ message: '', type: undefined });
+      }, 5000);
+    }
+  };
+
+  const checkValidationError = (message: string) => {
+    if (message.startsWith('required')) {
+      return 'This field is required';
+    } else if (message.startsWith('pattern')) {
+      return 'Special characters are not allowed';
+    }
+  };
+
+  const handleColsCreation = (data: TableColumnRef[]) => {
+    setCols(data);
+  };
+
+  useEffect(() => {
+    console.log({ validationError });
+  }, [validationError]);
+
   return (
     <>
       <div className="create-table-view">

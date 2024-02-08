@@ -39,23 +39,8 @@ const NewEntryView = ({
   onClose,
   onSubmit,
 }: Props) => {
-  // const [table, setTable] = useState<{
-  //   name: string;
-  //   fields: TableColumn[];
-  // }>();
   const [successMsg, setSuccessMsg] = useState<string>();
   const [isLoading, setIsLoading] = useState(false);
-
-  // const handleUpdatedGrid = () => {
-  //   setUpdatedGrid &&
-  //     setUpdatedGrid(
-  //       (prevState) =>
-  //         (prevState = {
-  //           modelId: tableId,
-  //           key: prevState ? prevState?.key + 1 : 0,
-  //         }),
-  //     );
-  // };
 
   useEffect(() => {
     if (!aggridColumnsState) return;

@@ -8,8 +8,8 @@ import {
   MenuCreateReq,
 } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../utils/cosmos-utils';
-import { srv } from '../index';
+import { deleteDatabase } from '../cosmos-utils';
+import { app, srv } from '../server';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -107,7 +107,6 @@ describe('testing Menu', () => {
     // Read the created Menu Item
 
     const readRetVal2 = await post('menu/read', {
-      id: readRetVal?.id,
       path: readRetVal?.path,
     });
 
@@ -168,11 +167,11 @@ describe('testing Menu', () => {
       path: 'bar',
     });
 
-    expect(readRetVal.status).toBe(404);
+    expect(readRetVal.status).toBe(422);
 
     const updateRetVal = await post('menu/update', { foo: 'bar' });
 
-    expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(422);
 
     const updateRetVal2 = await post('menu/update', {
       path: 'bar',
@@ -182,9 +181,20 @@ describe('testing Menu', () => {
 
     expect(updateRetVal2.status).toBe(404);
 
+    const updateRetVal3 = await post('menu/update', {
+      path: 'bar',
+      id: 'foo'
+    })
+
+    expect(updateRetVal3.status).toBe(400)
+
+    const updateRetVal4 = await post('menu/update', {})
+
+    expect(updateRetVal3.status).toBe(400)
+
     const deleteRetVal = await post('menu/delete', { foo: 'bar' });
 
-    expect(deleteRetVal.status).toBe(400);
+    expect(deleteRetVal.status).toBe(422);
 
     const deleteRetVal2 = await post('menu/delete', { path: 'bar', id: 'foo' });
 

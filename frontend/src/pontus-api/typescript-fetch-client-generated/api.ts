@@ -1337,19 +1337,19 @@ export interface TableDataUpdateReq {
  */
 export interface TableDataUpdateRes extends TableDataRowRef {}
 /**
- * 
+ *
  * @export
  * @interface TableDeleteReq
  */
 export interface TableDeleteReq {
   /**
-   * 
+   *
    * @type {string}
    * @memberof TableDeleteReq
    */
   name: string;
   /**
-   * 
+   *
    * @type {string}
    * @memberof TableDeleteReq
    */

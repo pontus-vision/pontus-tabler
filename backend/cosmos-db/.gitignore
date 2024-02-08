@@ -12,3 +12,6 @@ test/*/browser
 package-lock.json
 .project
 .settings/
+src/generated/
+src/typescript/
+src/openapi/

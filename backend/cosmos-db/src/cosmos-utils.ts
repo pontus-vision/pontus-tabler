@@ -7,7 +7,7 @@ import {
   PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
-import { ReadPaginationFilter } from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
+import { ReadPaginationFilter } from './typescript/api';
 
 export interface FetchData {
   count: number;

@@ -1,17 +1,12 @@
 import {
-  ReadPaginationFilter,
-  TableCreateReq,
   TableDataCreateReq,
   TableDataDeleteReq,
   TableDataReadReq,
   TableDataReadRes,
   TableDataRowRef,
   TableDataUpdateReq,
-  TableDeleteReq,
-  TableReadReq,
-  TableUpdateReq,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { FetchData, fetchContainer, fetchData } from '../utils/cosmos-utils';
+} from '../typescript/api';
+import { fetchContainer, fetchData } from '../cosmos-utils';
 import { PatchOperation } from '@azure/cosmos';
 import { readTableByName } from './TableService';
 
@@ -37,10 +32,7 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
     if (colsChecked?.length > 0) {
       throw {
         code: 400,
-        message: {
-          string: `Cols are not defined in table: ${colsChecked.join(', ')}`,
-          nonExistingFields: Object.keys(cols),
-        },
+        message: `Cols are not defined in table: ${colsChecked.join(', ')}`,
       };
     }
   } catch (error) {

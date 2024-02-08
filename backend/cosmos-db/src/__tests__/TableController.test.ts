@@ -5,11 +5,10 @@ import {
   TableReadRes,
   TableUpdateReq,
   TableCreateReq,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-
+} from '../typescript/api';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../utils/cosmos-utils';
-import { srv } from '..';
+import { deleteDatabase } from '../cosmos-utils';
+import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
 
 // // Mock the utils.writeJson function
@@ -123,14 +122,14 @@ describe('tableControllerTest', () => {
 
     expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal2 = await post('table/read', body3);
+    const readRetVal2 = await post('table/read', { id: body3.id });
 
     expect(readRetVal2.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
     const createRetVal = await post('table/create', {});
 
-    expect(createRetVal.status).toBe(400);
+    expect(createRetVal.status).toBe(422);
 
     const readRetVal = await post('table/read', {
       id: 'foo',
@@ -140,13 +139,34 @@ describe('tableControllerTest', () => {
 
     const updateRetVal = await post('table/update', { foo: 'bar' });
 
-    expect(updateRetVal.status).toBe(400);
+    expect(updateRetVal.status).toBe(422);
 
     const deleteRetVal = await post('table/delete', { foo: 'bar' });
 
     let resPayload4 = deleteRetVal.data;
 
-    expect(deleteRetVal.status).toBe(400);
+    expect(deleteRetVal.status).toBe(422);
+
+    const table: TableCreateReq = {
+      name: 'person-natural',
+      label: 'Person Natural',
+      cols: [
+        {
+          field: 'column 1',
+          filter: false,
+          sortable: false,
+          headerName: 'column 1',
+          name: 'column1',
+          kind: 'checkboxes',
+        },
+      ],
+    };
+
+    await post('table/create', table);
+
+    const createRetVal2 = await post('table/create', table);
+
+    expect(createRetVal2.status).toBe(409);
   });
   it('should read tables', async () => {
     const body: TableCreateReq = {

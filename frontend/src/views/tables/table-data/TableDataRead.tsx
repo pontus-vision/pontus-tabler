@@ -73,7 +73,6 @@ const TableDataReadView = () => {
         to,
       };
       const res = await tableDataRead(obj);
-
       if (res?.status === 404) {
         setRowCount(1);
         setRows([]);

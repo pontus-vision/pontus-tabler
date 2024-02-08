@@ -1,201 +1,226 @@
-import { ExpressAppConfig } from './middleware/express.app.config';
-import { Oas3AppOptions } from './middleware/oas3.options';
+import { InternalServerError } from 'express-openapi-validator/dist/openapi.validator';
 import {
-  app as azureApp,
-  HttpRequest,
-  HttpResponseInit,
-  InvocationContext,
-} from '@azure/functions';
-import * as path from 'path';
-import * as http from 'http';
-import * as express from 'express';
-import * as cors from 'cors';
-import { SwaggerUiOptions } from './middleware/swagger.ui.options';
+  BadRequestError,
+  ConflictEntityError,
+  NotFoundError,
+} from './generated/api';
+import { PontusService } from './generated/api/resources/pontus/service/PontusService';
+import {
+  createMenuItem,
+  deleteMenuItem,
+  readMenuItemByPath,
+  updateMenuItem,
+} from './service/MenuService';
+import {
+  createTable,
+  deleteTable,
+  readTableById,
+  readTables,
+  updateTable,
+} from './service/TableService';
+import {
+  deleteTableData,
+  readTableData,
+  updateTableData,
+  upsertTableData,
+} from './service/TableDataService';
+import {
+  deleteDashboard,
+  readDashboardById,
+  readDashboards,
+  upsertDashboard,
+} from './service/DashboardService';
 
-const validate = (_request, _scopes, _schema) => {
-  // security stuff here
-  return true;
-};
+export default new PontusService({
+  authGroupCreatePost(req, res) {},
+  authGroupDeletePost(req, res) {},
+  authGroupReadPost(req, res) {},
+  authGroupsReadPost(req, res) {},
+  authGroupUpdatePost(req, res) {},
+  authUserCreatePost(req, res) {},
+  authUserDeletePost(req, res) {},
+  authUserReadPost(req, res) {},
+  authUsersReadPost(req, res) {},
+  authUserUpdatePost(req, res) {},
+  dashboardGroupAuthCreatePost(req, res) {},
+  dashboardGroupAuthDeletePost(req, res) {},
+  dashboardGroupAuthReadPost(req, res) {},
+  dashboardGroupAuthUpdatePost(req, res) {},
+  dashboardCreatePost: async (req, res) => {
+    if (Object.keys(req.body).length === 0) {
+      throw new BadRequestError(
+        'Please, send dashboard properties in the body.',
+      );
+    }
+    const response = await upsertDashboard(req.body);
 
-const serverPort = 8080;
-const openApiApp = express();
-
-const currDir = __dirname.replace(/src/, 'dist');
-
-console.log('Started express app');
-
-// swaggerRouter configuration
-const options: Oas3AppOptions = {
-  app: openApiApp,
-  routing: {
-    controllers: path.join(currDir, './controllers'),
+    res.send(response);
   },
-  logging: {
-    format: 'combined',
-    errorLimit: 400,
+  dashboardDeletePost: async (req, res) => {
+    try {
+      const response = await deleteDashboard(req.body);
+
+      res.send(response);
+    } catch (error) {}
   },
-  openApiValidator: {
-    apiSpec: path.join(currDir, 'api/openapi.yaml'),
+  dashboardReadPost: async (req, res) => {
+    const response = await readDashboardById(req.body.id);
 
-    validateSecurity: {
-      handlers: {
-        petstore_auth: validate,
-        api_key: validate,
-        bearerAuth: validate,
-      },
-    },
+    res.send(response);
   },
-  swaggerUI: new SwaggerUiOptions('/api', '/docs', path.join(currDir, 'docs')),
-  cors: undefined,
-};
+  dashboardsReadPost: async (req, res) => {
+    try {
+      const response = await readDashboards(req.body);
 
-const pathName = path.join(currDir, 'api/openapi.yaml');
+      res.send(response);
+    } catch (error) {}
+  },
+  dashboardUpdatePost: async (req, res) => {
+    try {
+      const response = await upsertDashboard(req.body);
 
-let expressAppConfig = new ExpressAppConfig(pathName, options);
-let app = expressAppConfig.getApp();
-app.use(/.*/, cors()); /// mudar futuramente para melhor seguranca
+      res.send(response);
+    } catch (error) {}
+  },
+  menuCreatePost: async (req, res) => {
+    if (Object.keys(req.body).length === 0) {
+      throw new BadRequestError('Please, insert request body');
+    }
+    const response = await createMenuItem(req.body);
 
-// for (let i = 2; i < openApiApp._router.stack.length; i++) {
-//   app._router.stack.push(openApiApp._router.stack[i]);
-// }
-// Initialize the Swagger middleware
-export const srv = http.createServer(app).listen(serverPort, function () {
-  console.log(
-    'Your server is listening on port %d (http://localhost:%d)',
-    serverPort,
-    serverPort,
-  );
-  console.log(
-    'HTML docs are available on http://localhost:%d/docs',
-    serverPort,
-  );
-  console.log(
-    'Open API json is  available on http://localhost:%d/api',
-    serverPort,
-  );
+    res.send(response);
+  },
+  menuDeletePost: async (req, res) => {
+    try {
+      const response = await deleteMenuItem(req.body);
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError('Menu item not found');
+      }
+    }
+  },
+  menuReadPost: async (req, res) => {
+    try {
+      if (req.body === undefined) {
+        throw new BadRequestError('Please, insert request body');
+      }
+      const response = (await readMenuItemByPath(req.body.path)) as any;
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        console.error({ error });
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
+  menuUpdatePost: async (req, res) => {
+    try {
+      const response = await updateMenuItem(req.body);
+      console.log({ response });
+      if (response.statusCode === 404) {
+        throw new NotFoundError('Not found');
+      }
+      console.log({ statusCode: response.statusCode });
+      res.send({ ...response.resource, path: response.resource?.path || '' });
+    } catch (error) {
+      if (error?.code === 400) {
+        throw new BadRequestError(error?.message);
+      } else if (error?.code === 404) {
+        throw new NotFoundError('Menu item not found.');
+      }
+
+      console.error({ catch: error });
+
+      throw new InternalServerError(error);
+    }
+  },
+  tableCreatePost: async (req, res) => {
+    try {
+      const response = await createTable(req.body);
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 409) {
+        throw new ConflictEntityError('Table already declared');
+      }
+    }
+  },
+  tableReadPost: async (req, res) => {
+    const response = await readTableById(req.body);
+
+    res.send(response);
+  },
+  tableUpdatePost: async (req, res) => {
+    const response = await updateTable(req.body);
+
+    res.send(response);
+  },
+  tableDeletePost: async (req, res) => {
+    try {
+      const response = await deleteTable(req.body);
+      res.send('Table deleted.');
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError('Table not found.');
+      }
+    }
+  },
+  tablesReadPost: async (req, res) => {
+    try {
+      const response = await readTables(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError('Table not found.');
+      }
+    }
+  },
+  tableDataCreatePost: async (req, res) => {
+    try {
+      const response = await upsertTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 400) {
+        throw new BadRequestError(error?.message);
+      } else if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
+  tableDataDeletePost: async (req, res) => {
+    try {
+      const response = await deleteTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
+  tableDataReadPost: async (req, res) => {
+    try {
+      const response = await readTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
+  tableDataUpdatePost: async (req, res) => {
+    try {
+      const response = await updateTableData(req.body);
+
+      res.send(response);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(error?.message);
+      }
+    }
+  },
 });
-
-const httpTrigger = async (
-  request: HttpRequest,
-  context: InvocationContext,
-): Promise<HttpResponseInit> => {
-  context.log(`Http function processed request for url "${request.url}"`);
-
-  srv.closeIdleConnections();
-
-  const data = await request.text();
-  const url = new URL(request.url);
-
-  const headers: HeadersInit = {};
-  // const headers: http.OutgoingHttpHeaders = {};
-
-  request.headers.forEach((value: string, key: string) => {
-    headers[key] = value;
-  });
-
-  const reqOpts: http.RequestOptions = {
-    hostname: url.hostname,
-    port: url.port,
-    path: url.pathname,
-    method: request.method,
-    headers: headers,
-  };
-
-  const ret = await fetch(
-    // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
-    'http://localhost:8080' + url.pathname,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer 123456',
-      },
-      body: data,
-    },
-  );
-
-  const respHeaders: HeadersInit = {};
-
-  ret.headers.forEach((value: string, key: string) => {
-    respHeaders[key] = value;
-  });
-
-  const resp: HttpResponseInit = {
-    body: await ret.text(),
-    cookies: undefined,
-    enableContentNegotiation: undefined,
-    headers: respHeaders,
-    // jsonBody: await ret.json(),
-    status: ret.status,
-  };
-
-  srv.closeIdleConnections();
-
-  return resp;
-  //   const resp: HttpResponseInit = {
-  //     body: "",
-  //     cookies: undefined,
-  //     enableContentNegotiation: undefined,
-  //     headers: {},
-  //     // jsonBody: await ret.json(),
-  //     status: 200
-  //   };
-
-  // return new Promise<HttpResponseInit>(
-  //   (
-  //     resolve: (value: HttpResponseInit | PromiseLike<HttpResponseInit>) => void,
-  //     reject: (reason: any) => void,
-  //   ) => {
-
-  //     const req = http.request(reqOpts, (res: http.IncomingMessage) => {
-  //       resp.status = res.statusCode;
-  //       resp.headers = res.headers;
-
-  //       context.log(`STATUS: ${res.statusCode}`);
-  //       context.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-  //       res.setEncoding('utf8');
-  //       res.on('data', (chunk) => {
-  //         resp.body += chunk as string;
-  //       });
-  //       res.on('end', () => {
-  //         context.log('No more data in response.');
-  //         resolve(resp);
-  //       });
-  //     });
-
-  //     req.on('error', (e) => {
-  //       context.error(`problem with request: ${e.message}`);
-  //       resp.body = JSON.stringify( {
-  //         error: e.message,
-  //       });
-  //       reject(resp);
-  //     });
-
-  //     // Write data to request body
-  //     req.write(data);
-  //     req.end();
-
-  //   },
-  // );
-};
-
-azureApp.http('httpTrigger', {
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  authLevel: 'function',
-  handler: httpTrigger,
-});
-
-export default httpTrigger;
-
-// (async () => {
-//   const readRes = await readMenuItemByPath('/');
-
-//   if (!readRes) {
-//     await upsertMenuItem({
-//       name: '/',
-//       path: '/',
-//       children: [],
-//       kind: MenuDirectoryTreeRef.KindEnum.Folder,
-//     });
-//   }
-// })();
