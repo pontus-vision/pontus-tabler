@@ -140,134 +140,176 @@ const squareFeetPerSquareMeter = 10.7639;
 
 const sampleProperties: Property[] = [
   {
-    kind: ['house'],
-    floors: 3,
-    latitude: -23.560876,
-    longitude: -46.6937311,
-    descripton: 'Large House With garden',
-    address: 'Rua Morás, 53 - Pinheiros, São Paulo - SP, 05419-001, Brazil',
-    areaSqMeter: 3300 / squareFeetPerSquareMeter,
-    rooms: [
-      {
-        kind: 'bedroom',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-      },
-      {
-        kind: 'bedroom',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-      },
-      {
-        kind: 'bedroom',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-        features: ['air conditioner', 'luxurious', 'modern'],
-      },
-      { kind: 'bathroom' },
-      { kind: 'diningroom' },
-      { kind: 'kitchen' },
-      { kind: 'swimming pool' },
-      { kind: 'garden' },
-    ],
-    features: ['ground pump', 'solar panels', 'fast internet'],
-  },
-  {
-    kind: ['building'],
-    floors: 30,
-    name: 'Excellence Perdizes',
-    latitude: -23.5636879,
-    longitude: -46.6916552,
-    descripton: 'Large House With garden',
-    address:
-      'Av. Pedroso de Morais, 600 - Pinheiros, São Paulo - SP, 05420-001, Brazil',
-    url: 'https://linktr.ee/excellenceperdizes',
-    areaSqMeter: 3300 / squareFeetPerSquareMeter,
-    communalAreas: [
-      {
-        kind: 'sauna',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-        features: ['modern']
+kind: ["building"],
+floors: 30,
+name: "Only Cidade Jardim",
+latitude: -23.615101, longitude: -46.702169,
+short_description: "O Altíssimo Padrão Exto, em frente ao maior cartão postal de São Paulo, a Ponte Estaiada. Apartamentos de 4 suítes prontos para morar. PLANTAS NO CONCEITO INTERNACIONAL DE SALA ABERTA E PÉ DIREITO COM DIMENSÕES ESPECIAIS DE 2,80M LIVRES",
+descripton: `Localização única: em frente à Ponte Estaiada, maior cartão postal de São Paulo, a Ponte Estaiada e a 2 min. do Shopping Cidade Jardim. Também a poucos passos do novo Parque Bruno Covas, complexo de lazer que contará com 650.000m² de lazer, conveniência e do futuro complexo multiuso Usina SP.
+Mobilidade e acesso: entre as pontes Cidade Jardim e do Morumbi
+Apenas duas torres em terreno de aproximadamente 11.000m²
+Vagas escolhidas no ato da compra
+Áreas comuns entregues equipadas e decoradas por Anastassiadis Arquitetos
+Projeto de segurança com a Haganá
+Garagem de altíssimo padrão, com piso em acabamento granilite, um box para cada unidade e recepções sociais decoradas para todos os finais sociais
+Porte cochère, duplo bloqueio de acesso e projeto completo de segurança
+Elevadores sociais com hall privativo para cada unidade, dois elevadores de serviço e duas escadarias por edifício
+Fachada em estilo clássico contemporâneo em massa travertino, impermeabilizada, com molduras, gradis e vidro refletivo e laminado. Pingadeiras de 4cm em granito nas soleiras e peitoris de forma a prevenir manchas. Projeto específico de iluminação e filetes em LED
+SEGURANÇA E INFRAESTRUTURA: Complexo com sistema de monitoramento 24h por dia, Projeto de segurança desenvolvido por consultoria, com sistema de monitoramento 24h por dia e portaria blindada
+LAZER: Complexo aquático com piscina coberta com raia de 20m, piscina descoberta com raia de 25m, observatório em vidro e piscina infantil. Todas climatizadas, Quadra de tênis oficial e Club Tennis com churrasqueira, Quadra poliesportiva, Fitness de 200m² com equipamentos high tech e vista panorâmica para a Ponte Estaiada, Studio funcional fitness, pilates e artes marciais, Pista de caminhada com 300m e piso emborrachado, Brinquedoteca e playground externo, Salão de festas e espaço gourmet, PUB e sala de jogos, Beauty Studio, Spa, sala de massagem e sauna úmida com lounge, Coworking – espaço de trabalho com sala de reunião, Pet place com equipamentos agility, hostel e banho, Mais de 3.400m² de praças, pomar e paisagismo por Benedito Abbud
+OS APARTAMENTOS: Ambientes com ventilação e iluminação natural, Pé-direito com dimensões especiais: 2,80m livres; 3,06m de piso a piso, Hall privativo para todas as unidades, Aquecimento de 100% da demanda de água através de placas solares, sem necessidade de boiler ou aquecedor, Circuito de recirculação que garante água quente disponível de imediato, evitando desperdício, Piso do terraço nivelado com o living, Infraestrutura de ar-condicionado em todas as suítes e no living, Iluminação cênica instalada no living e terraço, Infraestrutura para aspiração central, Fechadura da entrada social com sistema de biometria, Gerador que atende três pontos de energia e dois de iluminação em cada unidade, Projeto de tecnologia para maximização do sinal de wifi, Tomada USB nas suítes, Terraço gourmet entregue com churrasqueira e bancada, Caixilho das suítes com dimensões especiais, persianas integradas e tratamento acústico, Edição especial de metais monocomando Deca linha Only
+SUSTENTABILIDADE: Instalações hidráulicas e elétricas inspecináveis, facilitando eventuais manutenções, Bicicletário, Processos construtivos sustentáveis, Priorização de iluminação e ventilação naturais dos ambientes e subsolos, Caixas de captação para reuso de águas pluviais nas áreas comuns, Torneiras das áreas comuns com temporizadores, Previsão para individualização de água e gás, Blocos cerâmicos, que aumentam o conforto térmico e acústico
+Áreas comuns entregues com iluminação em LED e sensor de presença nas áreas comuns, Estações de recarga elétrica para automóveis, Portas em madeira de reflorestamento de alta qualidade, Certificação do PBQPH- nível A. Classificação máxima de excelência."
+floor plans options:
+  - Torre SUNRISE - 186M² - 3 SUÍTES - SUÍTE MASTER, LIVING E COZINHA AMPLIADOS
+  - Torre SUNRISE - 186M² - 4 SUÍTES - LIVING AMPLIADO
+  - Torre SUNRISE - 186M² - 4 SUÍTES
+  - Torre SUNRISE - 186M² - 3 SUÍTES - SUÍTE MASTER E LIVING AMPLIADOS
+  - Torre SUNRISE - 211M² - 4 SUÍTES
+  - Torre SUNRISE - 211M² - 4 SUÍTES - LIVING E COZINHA INTEGRADOS - SUÍTE 2 AMPLIADA - HOME OFFICE
+  - Torre SUNRISE - 211M² - 3 SUÍTES - SUÍTE MASTER, LIVING E COZINHA AMPLIADOS - HOME OFFICE
+  - Torre SUNRISE - 211M² - 3 SUÍTES - SUÍTE MASTER E LIVING AMPLIADOS - HOME OFFICE
+  - Torre SUNRISE - 211M² - 3 SUÍTES - LIVING AMPLIADO - SALA ÍNTIMA OFFICE
+  - Torre SUNSET - 233M² - 3 SUÍTES - COZINHA GOURMET
+  - Torre SUNSET - 233M² - 3 SUÍTES
+  - Torre SUNSET - 233M² - 4 SUÍTES
+  - Torre SUNSET - 252M² - 2 SUÍTES
+  - Torre SUNSET - 252M² - 3 SUÍTES - SALA ÍNTIMA E TERRAÇO PANORÂMICO
+  - Torre SUNSET - 252M² - 3 SUÍTES - SUÍTE MASTER AMPLIADA - LIVING E COZINHA INTEGRADOS
+  - Torre SUNSET - 252M² - 4 SUÍTES - COZINHA GOURMET
+  - Torre SUNSET - 252M² - 4 SUÍTES - OFFICE - LAVABO INTEGRADO AO JANTAR`,
+address: "Av. Duquesa de Goiás, 825 - Cidade Jardim, São Paulo - SP, 05686-002, Brazil",
+url: "https://www.exto.com.br/empreendimentos/only-cidade-jardim/"
+}
+  // {
+  //   kind: ['house'],
+  //   floors: 3,
+  //   latitude: -23.560876,
+  //   longitude: -46.6937311,
+  //   descripton: 'Large House With garden',
+  //   address: 'Rua Morás, 53 - Pinheiros, São Paulo - SP, 05419-001, Brazil',
+  //   areaSqMeter: 3300 / squareFeetPerSquareMeter,
+  //   rooms: [
+  //     {
+  //       kind: 'bedroom',
+  //       areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //     },
+  //     {
+  //       kind: 'bedroom',
+  //       areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //     },
+  //     {
+  //       kind: 'bedroom',
+  //       areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //       features: ['air conditioner', 'luxurious', 'modern'],
+  //     },
+  //     { kind: 'bathroom' },
+  //     { kind: 'diningroom' },
+  //     { kind: 'kitchen' },
+  //     { kind: 'swimming pool' },
+  //     { kind: 'garden' },
+  //   ],
+  //   features: ['ground pump', 'solar panels', 'fast internet'],
+  // },
+  // {
+  //   kind: ['building'],
+  //   floors: 30,
+  //   name: 'Excellence Perdizes',
+  //   latitude: -23.5636879,
+  //   longitude: -46.6916552,
+  //   descripton: 'Large House With garden',
+  //   address:
+  //     'Av. Pedroso de Morais, 600 - Pinheiros, São Paulo - SP, 05420-001, Brazil',
+  //   url: 'https://linktr.ee/excellenceperdizes',
+  //   areaSqMeter: 3300 / squareFeetPerSquareMeter,
+  //   communalAreas: [
+  //     {
+  //       kind: 'sauna',
+  //       areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //       features: ['modern']
 
-      },
-      {
-        kind: 'gym',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-      },
-      { kind: 'swimming pool' },
-      { kind: 'garden' },
-      { kind: 'playground' },
-    ],
-    features: [
-      'solar panels',
-      'fast internet',
-      '24-hour concierge',
-      '24-hour porter',
-      'convenience store',
-    ],
-    flats: [
-      {
-        floorNumber: 1,
-        kind: ['flat'],
-        areaSqMeter: 300,
-        rooms: [
-          {
-            kind: 'bedroom',
-            areaSqMeter: 300 / squareFeetPerSquareMeter,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 300 / squareFeetPerSquareMeter,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 300 / squareFeetPerSquareMeter,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          { kind: 'bathroom' },
-          { kind: 'diningroom' },
-          { kind: 'kitchen', features: ['modern'] },
-        ],
-      },
-      {
-        floorNumber: 21,
-        kind: ['flat'],
-        areaSqMeter: 300,
-        rooms: [
-          {
-            kind: 'bedroom',
-            areaSqMeter: 20,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 21,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 30,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 15,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 17,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          { kind: 'bathroom' },
-          { kind: 'bathroom' },
-          { kind: 'diningroom' },
-          { kind: 'livingroom' },
-          { kind: 'kitchen', features: ['modern'] },
-          { kind: 'outside kitchen', features: ['modern'] },
-        ],
-      },
-    ],
-  },
+  //     },
+  //     {
+  //       kind: 'gym',
+  //       areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //     },
+  //     { kind: 'swimming pool' },
+  //     { kind: 'garden' },
+  //     { kind: 'playground' },
+  //   ],
+  //   features: [
+  //     'solar panels',
+  //     'fast internet',
+  //     '24-hour concierge',
+  //     '24-hour porter',
+  //     'convenience store',
+  //   ],
+  //   flats: [
+  //     {
+  //       floorNumber: 1,
+  //       kind: ['flat'],
+  //       areaSqMeter: 300,
+  //       rooms: [
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //           features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+  //         },
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //           features: ['air conditioner', 'luxurious', 'modern'],
+  //         },
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 300 / squareFeetPerSquareMeter,
+  //           features: ['air conditioner', 'luxurious', 'modern'],
+  //         },
+  //         { kind: 'bathroom' },
+  //         { kind: 'diningroom' },
+  //         { kind: 'kitchen', features: ['modern'] },
+  //       ],
+  //     },
+  //     {
+  //       floorNumber: 21,
+  //       kind: ['flat'],
+  //       areaSqMeter: 300,
+  //       rooms: [
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 20,
+  //           features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+  //         },
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 21,
+  //           features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+  //         },
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 30,
+  //           features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
+  //         },
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 15,
+  //           features: ['air conditioner', 'luxurious', 'modern'],
+  //         },
+  //         {
+  //           kind: 'bedroom',
+  //           areaSqMeter: 17,
+  //           features: ['air conditioner', 'luxurious', 'modern'],
+  //         },
+  //         { kind: 'bathroom' },
+  //         { kind: 'bathroom' },
+  //         { kind: 'diningroom' },
+  //         { kind: 'livingroom' },
+  //         { kind: 'kitchen', features: ['modern'] },
+  //         { kind: 'outside kitchen', features: ['modern'] },
+  //       ],
+  //     },
+  //   ],
+  // },
 ];
 
 const resetHistory = async (

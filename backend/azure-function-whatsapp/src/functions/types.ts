@@ -151,6 +151,7 @@ export interface CommonData {
   areaSqMeter?: number;
   areaSqFeet?: number;
   descripton?: string;
+  short_description?: string;
   features?: Features[];
   url?: string;
 }

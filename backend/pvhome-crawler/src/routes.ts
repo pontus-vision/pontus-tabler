@@ -41,12 +41,17 @@ router.addHandler(
         'https://linktr.ee/marketplace/**',
         'https://linktr.ee/register/**',
         'https://linktr.ee/blog/**',
-        'https://linktr.ee/login/**',
+        'https://linktr.ee/login**',
         'https://linktr.ee/help/**',
         'https://linktr.ee/creator-report/**',
         'https://linktr.ee/admin',
         'https://linktr.ee/mechanicallyincleyend/**',
+        'https://linktr.ee/hbo/**',
+        'https://linktr.ee/comedycentral',
+        'https://linktr.ee/funkynutmeg',
         'https://linktr.ee/discover/**',
+        'https://linktr.ee/creator-report*/**',
+
       ],
     });
 
