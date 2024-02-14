@@ -110,7 +110,7 @@ export const createTableEdge = async (
           updateRelatedDocumentEdges({
             id: edge.from.id,
             name: edge.from.tableName,
-            edges: { [prop]: [{ to: edge.from }] },
+            edges: { [prop]: [{ to: { id: data.id, tableName: data.name } }] },
           }),
         );
       } else if (edge.to) {
@@ -118,7 +118,9 @@ export const createTableEdge = async (
           updateRelatedDocumentEdges({
             id: edge.to.id,
             name: edge.to.tableName,
-            edges: { [prop]: [{ from: edge.to }] },
+            edges: {
+              [prop]: [{ from: { id: data.id, tableName: data.name } }],
+            },
           }),
         );
       }
