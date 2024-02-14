@@ -67,6 +67,158 @@ service:
       #       body:
       #         properties:
       #           message: string
+    tableEdgeCreatePOST:
+      path: /table/edge/create
+      method: POST
+      auth: true
+      docs: Create a new table with properties and associated columns
+      display-name: Create a new table
+      request:
+        name: TableEdgeCreateReq
+        body:
+          properties:
+            name: string
+          extends:
+            - TableEdgesMetadata
+      response:
+        type: TableEdgeCreateRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - ConflictEntityError
+      # examples:
+      #   - name: example-0001
+      #     request:
+      #       name: Person Natural
+      #       label: string
+      #       cols:
+      #         - id: Person_Natural_Full_Name
+      #           name: Full Name
+      #           field: Person_Natural_Full_Name
+      #           sortable: true
+      #           headerName: Full Name
+      #           filter: true
+      #           kind: checkboxes
+      #         - id: Person_Natural_Customer_ID
+      #           name: Customer ID
+      #           field: Person_Natural_Customer_ID
+      #           sortable: true
+      #           headerName: Customer ID
+      #           filter: true
+      #           kind: checkboxes
+      #     response:
+      #       body:
+      #         id: string
+    tableEdgeReadPOST:
+      path: /table/edge/read
+      method: POST
+      auth: true
+      docs: Get table by id
+      display-name: Get table edge by id
+      request:
+        name: TableEdgeReadReq
+        body:
+          properties:
+            tableId: string
+      response:
+        docs: Successful response
+        type: TableEdgeReadRes
+
+      errors:
+        - BadRequestError
+        - InternalServerError
+      # examples:
+      #   - name: example-0001
+      #     request:
+      #       id: mapeamentoDeProcessos
+      #     response:
+      #       body:
+      #         id: string
+    tableEdgeUpdatePOST:
+      path: /table/edge/update
+      method: POST
+      auth: true
+      docs: Update table edges
+      display-name: Update table edge by ID
+      request:
+        name: TableEdgeUpdateReq
+        body:
+          properties: {}
+          extends:
+            - TableEdgesMetadata
+      response:
+        docs: Table updated successfully
+        type: TableEdgeUpdateRes
+      errors:
+        - BadRequestError
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       name: person-natural
+      #       label: Person Natural
+      #       cols:
+      #         - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+      #           name: full-name
+      #           field: full-name
+      #           sortable: true
+      #           headerName: Full Name
+      #           filter: true
+      #           kind: checkboxes
+      #         - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+      #           name: full-name
+      #           field: full-name
+      #           sortable: true
+      #           headerName: Full Name
+      #           filter: true
+      #           kind: checkboxes
+      #       id: id
+      #     response:
+      #       body:
+      #         name: Person_Natural
+      #         label: Person Natural
+      #         cols:
+      #           - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+      #             name: full-name
+      #             field: full-name-2
+      #             sortable: true
+      #             headerName: Full Name
+      #             filter: true
+      #             kind: checkboxes
+      #           - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+      #             name: full-name-2
+      #             field: full-name-2
+      #             sortable: true
+      #             headerName: Full Name 2
+      #             filter: true
+      #             kind: text
+      #         id: id
+    tableEdgeDeletePOST:
+      path: /table/edge/delete
+      method: POST
+      auth: true
+      docs: Delete a table edge by ID
+      display-name: Delete a table edge
+      request:
+        name: TableEdgeDeleteReq
+        body:
+          properties:
+            edgeIndex: integer
+          extends:
+            - TableEdgesMetadata
+      response:
+        docs: Table edge deleted successfully
+        type: string
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: string
+      #       name: string
+      #     response:
+      #       body: string
+
     tableCreatePOST:
       path: /table/create
       method: POST
@@ -132,7 +284,7 @@ service:
       examples:
         - name: example-0001
           request:
-            id: mapeamentoDeProcessos
+            id: 7d6395d3-ecaf-4608-9e59-6ef3f632e911
           response:
             body:
               id: string
@@ -284,6 +436,7 @@ service:
                       filter: true
                       kind: checkboxes
                   id: tableId
+
     tableDataCreatePOST:
       path: /table/data/create
       method: POST
@@ -929,6 +1082,21 @@ service:
                 - authGroups
                 - authGroups
 types:
+  TableEdgeReadRes:
+    properties:
+      name: string
+    extends:
+      - TableEdgesMetadata
+  TableEdgeCreateRes:
+    properties:
+      name: string
+    extends:
+      - TableEdgesMetadata
+  TableEdgeUpdateRes:
+    properties:
+      name: string
+    extends:
+      - TableEdgesMetadata
   MenuCreateReq: MenuItemTreeRef
   MenuCreateRes:
     properties:
@@ -986,7 +1154,7 @@ types:
       - checkboxes
       - selectbox
       - text
-      - number
+      - integer
       - phone
       - zipcode
       - email
@@ -1016,6 +1184,7 @@ types:
         type: optional<TableColumnRefKind>
   TableRef:
     properties:
+      edges: optional<map<string, list<Edge>>>
       name:
         docs: Name of the table
         type: optional<string>
@@ -1023,14 +1192,6 @@ types:
       cols:
         docs: Table columns associated with the table
         type: optional<list<TableColumnRef>>
-      metadata: optional<TableMetadata>
-  TableMetadata: 
-    properties:
-      edges: map<string, list<EdgeConnection>> 
-  EdgeConnection:
-    properties:
-      from: optional<string> 
-      to: optional<string>
   TableReadRes:
     properties: {}
     extends:
@@ -1048,6 +1209,18 @@ types:
       - TableRef
   TableDataCreateRes: TableDataRowRef
   TableDataUpdateRes: TableDataRowRef
+  Edge:
+    properties:
+      from: optional<EdgeSpec>
+      to: optional<EdgeSpec>
+  EdgeSpec:
+    properties:
+      id: string
+      tableName: string
+  TableEdgesMetadata:
+    properties:
+      id: string
+      edges: map<string, list<Edge>>
   BaseModelRef:
     properties:
       id:
@@ -1092,7 +1265,9 @@ types:
       read: optional<list<string>>
       update: optional<list<string>>
       delete: optional<list<string>>
-  TableReadReq: BaseModelRef
+  TableReadReq:
+    extends:
+      - BaseModelRef
   ReadPaginationFilter:
     properties:
       from: optional<integer>
