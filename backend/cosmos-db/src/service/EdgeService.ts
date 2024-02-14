@@ -39,7 +39,7 @@ const TABLES = 'tables';
 
 // Function to update the edges of related documents
 // Function to update the edges of related documents
-async function updateRelatedDocumentEdges(relatedData: TableEdgeCreateReq) {
+const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
   const tableContainer = await fetchContainer(TABLES);
   const res = (await tableContainer
     .item(relatedData.id, relatedData.name)
@@ -68,7 +68,7 @@ async function updateRelatedDocumentEdges(relatedData: TableEdgeCreateReq) {
   await tableContainer
     .item(relatedData.id, relatedData.name)
     .replace(relatedDocument);
-}
+};
 
 export const createTableEdge = async (
   data: TableEdgeCreateReq,
