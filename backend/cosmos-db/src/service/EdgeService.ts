@@ -1,41 +1,17 @@
 import {
-  ReadPaginationFilter,
-  TableCreateReq,
-  TableCreateRes,
-  TableDeleteReq,
   TableEdgeCreateReq,
-  TableEdgeCreateRes,
   TableEdgeDeleteReq,
   TableEdgeReadReq,
   TableEdgeUpdateReq,
   TableRef,
-  TableReadReq,
   TableReadRes,
-  TableUpdateReq,
-  TablesReadRes,
-  Edge,
   TableEdgeReadRes,
 } from '../typescript/api';
-import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
-import {
-  Item,
-  ItemResponse,
-  PartitionKeyDefinition,
-  PatchOperation,
-  UniqueKeyPolicy,
-} from '@azure/cosmos';
+import { fetchContainer } from '../cosmos-utils';
+import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { NotFoundError } from '../generated/api';
-import { table } from 'console';
 
 const TABLES = 'tables';
-
-// const partitionKey: string | PartitionKeyDefinition = {
-//   paths: ['/name'],
-// };
-
-// const uniqueKeyPolicy: UniqueKeyPolicy = {
-//   uniqueKeys: [{ paths: ['/name'] }],
-// };
 
 const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
   const tableContainer = await fetchContainer(TABLES);
@@ -127,11 +103,7 @@ export const createTableEdge = async (
 
 export const updateTableEdge = async (data: TableEdgeUpdateReq) => {
   try {
-    const tableContainer = await fetchContainer(
-      TABLES,
-      // partitionKey,
-      // uniqueKeyPolicy,
-    );
+    const tableContainer = await fetchContainer(TABLES);
     const res = (await tableContainer
       .item(data.id, data.id)
       .read()) as ItemResponse<TableRef>;
@@ -168,11 +140,7 @@ export const updateTableEdge = async (data: TableEdgeUpdateReq) => {
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
 ): Promise<TableEdgeReadRes> => {
-  const tableContainer = await fetchContainer(
-    TABLES,
-    // partitionKey,
-    // uniqueKeyPolicy,
-  );
+  const tableContainer = await fetchContainer(TABLES);
 
   const res = (await tableContainer
     .item(data.tableId, data.tableId)
@@ -196,11 +164,7 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
     ],
   };
 
-  const tableContainer = await fetchContainer(
-    TABLES,
-    // partitionKey,
-    // uniqueKeyPolicy,
-  );
+  const tableContainer = await fetchContainer(TABLES);
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
 
@@ -213,11 +177,7 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
 
 export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
   try {
-    const tableContainer = await fetchContainer(
-      TABLES,
-      // partitionKey,
-      // uniqueKeyPolicy,
-    );
+    const tableContainer = await fetchContainer(TABLES);
 
     const res = (await tableContainer
       .item(data.id, data.id)
@@ -244,17 +204,8 @@ export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
       res2.resource as any;
 
-    // return rest;
-
     return 'Table deleted!';
   } catch (error) {
     throw error;
   }
 };
-
-// export const readTables = async (
-//   body: ReadPaginationFilter,
-// ): Promise<TablesReadRes> => {
-//   const res = await fetchData(body, 'tables');
-//   return { totalTables: res.count, tables: res.values };
-// };
