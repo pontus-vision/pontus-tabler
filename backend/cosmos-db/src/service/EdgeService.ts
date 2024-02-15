@@ -9,7 +9,7 @@ import {
 } from '../typescript/api';
 import { fetchContainer } from '../cosmos-utils';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
-import { NotFoundError } from '../generated/api';
+import { ConflictEntityError, NotFoundError } from '../generated/api';
 
 const TABLES = 'tables';
 
@@ -51,6 +51,9 @@ export const createTableEdge = async (
     .item(data.id, data.name)
     .read()) as ItemResponse<TableRef>;
 
+  const edgesRes = res.resource.edges;
+  const edgesData = data.edges;
+
   if (res.statusCode === 404) {
     throw new NotFoundError('Table not found');
   }
@@ -63,6 +66,25 @@ export const createTableEdge = async (
   for (const prop in data.edges) {
     if (!Array.isArray(document.edges[prop])) {
       document.edges[prop] = [];
+    }
+
+    const duplicates = data.edges[prop].filter((edge) => {
+      return document.edges[prop].some((existingEdge) => {
+        return (
+          existingEdge?.from?.id === edge?.from?.id &&
+          existingEdge?.to?.id === edge?.to?.id &&
+          existingEdge?.from?.tableName === edge?.from?.tableName &&
+          existingEdge?.to?.tableName === edge?.to?.tableName
+        );
+      });
+    });
+
+    if (duplicates.length > 0) {
+      throw new ConflictEntityError(
+        `Duplicate edge(s) detected for property '${prop}': ${JSON.stringify(
+          duplicates,
+        )}`,
+      );
     }
     document.edges[prop] = document.edges[prop].concat(data.edges[prop]);
   }
@@ -140,17 +162,26 @@ export const updateTableEdge = async (data: TableEdgeUpdateReq) => {
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
 ): Promise<TableEdgeReadRes> => {
+  const querySpec = {
+    query: 'select c.edges, c.id, c.name from c where c.id=@tableId',
+    parameters: [
+      {
+        name: '@tableId',
+        value: data.tableId,
+      },
+    ],
+  };
+
   const tableContainer = await fetchContainer(TABLES);
 
-  const res = (await tableContainer
-    .item(data.tableId, data.tableId)
-    .read()) as ItemResponse<TableRef>;
+  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
+  const resource = resources[0];
 
-  return {
-    edges: res.resource.edges,
-    id: res.resource.id,
-    name: res.resource.name,
-  };
+  if (resources.length === 1) {
+    return resource;
+  } else if (resources.length === 0) {
+    throw { code: 404, message: 'No table found.' };
+  }
 };
 
 export const readTableByName = async (name: string): Promise<TableReadRes> => {
