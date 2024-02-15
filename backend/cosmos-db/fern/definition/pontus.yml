@@ -203,7 +203,7 @@ service:
         name: TableEdgeDeleteReq
         body:
           properties:
-            edgeIndex: integer
+            tableName: string
           extends:
             - TableEdgesMetadata
       response:
@@ -213,11 +213,17 @@ service:
         - NotFoundError
         - InternalServerError
       # examples:
-      #   - request:
-      #       id: string
-      #       name: string
-      #     response:
-      #       body: string
+      # - name: example-0001
+      #   request:
+      #     id: string
+      #     tableName: foo
+      #     edges:
+      #       has_email:
+      #         # - to:
+      #         #   id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         #   tableName: person-natural
+      #   response:
+      #     body: string
 
     tableCreatePOST:
       path: /table/create
