@@ -206,22 +206,33 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
   }
 };
 
-export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
-  try {
-    const tableContainer = await fetchContainer(TABLES);
+const deleteRelatedDocumentEdges = async (relatedData: TableEdgeDeleteReq) => {
+  const tableContainer = await fetchContainer(TABLES);
 
-    const res = (await tableContainer
-      .item(data.id, data.id)
-      .read()) as ItemResponse<TableRef>;
+  console.log({ relatedData: JSON.stringify(relatedData) });
+  const res = (await tableContainer
+    .item(relatedData.id, relatedData.tableName)
+    .read()) as ItemResponse<TableRef>;
 
-    const resource = res.resource;
+  const resource = res.resource;
 
-    const patchArr: PatchOperation[] = [];
+  console.log({ resource: JSON.stringify(resource) });
 
-    for (const prop in data.edges) {
-      const edgeArr = resource.edges[prop];
+  const patchArr: PatchOperation[] = [];
 
-      for (const [index, el] of edgeArr.entries()) {
+  for (const prop in relatedData.edges) {
+    const edgeArr = resource?.edges[prop];
+    const edgeInputArr = relatedData.edges[prop];
+    for (const [index, el] of edgeArr?.entries()) {
+      if (
+        edgeInputArr.some(
+          (edge) =>
+            el?.from?.id === edge?.from?.id &&
+            el?.to?.id === edge?.to?.id &&
+            el?.from?.tableName === edge?.from?.tableName &&
+            el?.to?.tableName === edge?.to?.tableName,
+        )
+      ) {
         const patchOp: PatchOperation = {
           op: 'remove',
           path: `/edges/${prop}/${index}`,
@@ -230,12 +241,87 @@ export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
         patchArr.push(patchOp);
       }
     }
+  }
+  console.log({ patchArr: JSON.stringify(patchArr) });
 
-    const res2 = await tableContainer.item(data.id, data.id).patch(patchArr);
-    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-      res2.resource as any;
+  const res2 = await tableContainer
+    .item(relatedData.id, relatedData.tableName)
+    .patch(patchArr);
 
-    return 'Table deleted!';
+  console.log({ resource2: res2 });
+};
+
+export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
+  try {
+    const tableContainer = await fetchContainer(TABLES);
+
+    const res = (await tableContainer
+      .item(data.id, data.tableName)
+      .read()) as ItemResponse<TableRef>;
+
+    const resource = res.resource;
+
+    const patchArr: PatchOperation[] = [];
+
+    const message = [];
+
+    for (const prop in data?.edges) {
+      const edgeArr = resource?.edges[prop];
+      const edgeInputArr = data?.edges[prop];
+      for (const [index, el] of edgeArr?.entries()) {
+        if (
+          edgeInputArr.some(
+            (edge) =>
+              el?.from?.id === edge?.from?.id &&
+              el?.to?.id === edge?.to?.id &&
+              el?.from?.tableName === edge?.from?.tableName &&
+              el?.to?.tableName === edge?.to?.tableName,
+          )
+        ) {
+          const patchOp: PatchOperation = {
+            op: 'remove',
+            path: `/edges/${prop}/${index}`,
+            value: el,
+          };
+          patchArr.push(patchOp);
+        }
+      }
+    }
+
+    const res2 = await tableContainer
+      .item(data.id, data.tableName)
+      .patch(patchArr);
+
+    const updateRelatedDocumentsPromises = [];
+    for (const prop in data?.edges) {
+      data?.edges[prop].forEach((edge) => {
+        if (edge.from) {
+          updateRelatedDocumentsPromises.push(
+            deleteRelatedDocumentEdges({
+              id: edge.from.id,
+              tableName: edge.from.tableName,
+              edges: {
+                [prop]: [{ to: { id: data.id, tableName: data.tableName } }],
+              },
+            }),
+          );
+        } else if (edge.to) {
+          updateRelatedDocumentsPromises.push(
+            deleteRelatedDocumentEdges({
+              id: edge.to.id,
+              tableName: edge.to.tableName,
+              edges: {
+                [prop]: [{ from: { id: data.id, tableName: data.tableName } }],
+              },
+            }),
+          );
+        }
+      });
+    }
+
+    await Promise.all(updateRelatedDocumentsPromises);
+
+    return `Table edges (from:${data.edges['']}) deleted!`;
   } catch (error) {
     throw error;
   }
