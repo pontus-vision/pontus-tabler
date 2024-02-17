@@ -19,10 +19,6 @@ const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
     .item(relatedData.id, relatedData.name)
     .read()) as ItemResponse<TableRef>;
 
-  if (res.statusCode === 404) {
-    throw new NotFoundError('Related document not found');
-  }
-
   const relatedDocument = res.resource;
   if (!relatedDocument?.hasOwnProperty('edges')) {
     relatedDocument['edges'] = {};
@@ -51,8 +47,6 @@ export const createTableEdge = async (
     .item(data.id, data.name)
     .read()) as ItemResponse<TableRef>;
 
-  const edgesRes = res.resource.edges;
-  const edgesData = data.edges;
 
   if (res.statusCode === 404) {
     throw new NotFoundError('Table not found');
@@ -68,18 +62,28 @@ export const createTableEdge = async (
       document.edges[prop] = [];
     }
 
-    const duplicates = data.edges[prop].filter((edge) => {
-      return document.edges[prop].some((existingEdge) => {
-        return (
-          existingEdge?.from?.id === edge?.from?.id &&
-          existingEdge?.to?.id === edge?.to?.id &&
-          existingEdge?.from?.tableName === edge?.from?.tableName &&
-          existingEdge?.to?.tableName === edge?.to?.tableName
-        );
-      });
-    });
+    const duplicates = data.edges[prop].filter((edge) =>
+      document.edges[prop].some((existingEdge) => {
+        if (!!edge.from) {
+          return (
+            existingEdge?.from?.id === edge?.from?.id &&
+            existingEdge?.from?.tableName === edge?.from?.tableName
+          );
+        } else if (!!edge.to) {
+          return (
+            existingEdge?.to?.id === edge?.to?.id &&
+            existingEdge?.to?.tableName === edge?.to?.tableName
+          );
+        }
+      }),
+    );
 
     if (duplicates.length > 0) {
+      console.log({
+        duplicates: JSON.stringify(duplicates),
+        document: JSON.stringify(document.edges[prop]),
+        data: JSON.stringify(data.edges[prop]),
+      });
       throw new ConflictEntityError(
         `Duplicate edge(s) detected for property '${prop}': ${JSON.stringify(
           duplicates,
@@ -87,6 +91,11 @@ export const createTableEdge = async (
       );
     }
     document.edges[prop] = document.edges[prop].concat(data.edges[prop]);
+    for (const edge of data?.edges[prop]) {
+      await readTableEdgesByTableId({
+        tableId: edge?.from?.id || edge?.to?.id,
+      });
+    }
   }
 
   const res2 = await tableContainer.item(data.id, data.name).replace(document);
@@ -123,41 +132,41 @@ export const createTableEdge = async (
   return rest;
 };
 
-export const updateTableEdge = async (data: TableEdgeUpdateReq) => {
-  try {
-    const tableContainer = await fetchContainer(TABLES);
-    const res = (await tableContainer
-      .item(data.id, data.id)
-      .read()) as ItemResponse<TableRef>;
-
-    const resource = res.resource;
-
-    const patchArr: PatchOperation[] = [];
-
-    for (const prop in data.edges) {
-      const edgeArr = data.edges[prop];
-      const indexUpdate = edgeArr.map((edgeInput) =>
-        resource.edges[prop].findIndex((el) => edgeInput === el),
-      );
-      for (const [index, el] of edgeArr.entries()) {
-        const patchOp: PatchOperation = {
-          op: 'set',
-          path: `/edges/${prop}/${index}`,
-          value: el,
-        };
-        patchArr.push(patchOp);
-      }
-    }
-
-    const res2 = await tableContainer.item(data.id, data.id).patch(patchArr);
-    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-      res.resource as any;
-
-    return rest;
-  } catch (error) {
-    throw error;
-  }
-};
+//export const updateTableEdge = async (data: TableEdgeUpdateReq) => {
+//  try {
+//    const tableContainer = await fetchContainer(TABLES);
+//    const res = (await tableContainer
+//      .item(data.id, data.id)
+//      .read()) as ItemResponse<TableRef>;
+//
+//    const resource = res.resource;
+//
+//    const patchArr: PatchOperation[] = [];
+//
+//    for (const prop in data.edges) {
+//      const edgeArr = data.edges[prop];
+//      const indexUpdate = edgeArr.map((edgeInput) =>
+//        resource.edges[prop].findIndex((el) => edgeInput === el),
+//      );
+//      for (const [index, el] of edgeArr.entries()) {
+//        const patchOp: PatchOperation = {
+//          op: 'set',
+//          path: `/edges/${prop}/${index}`,
+//          value: el,
+//        };
+//        patchArr.push(patchOp);
+//      }
+//    }
+//
+//    const res2 = await tableContainer.item(data.id, data.id).patch(patchArr);
+//    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
+//      res.resource as any;
+//
+//    return rest;
+//  } catch (error) {
+//    throw error;
+//  }
+//};
 
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
@@ -180,29 +189,7 @@ export const readTableEdgesByTableId = async (
   if (resources.length === 1) {
     return resource;
   } else if (resources.length === 0) {
-    throw { code: 404, message: 'No table found.' };
-  }
-};
-
-export const readTableByName = async (name: string): Promise<TableReadRes> => {
-  const querySpec = {
-    query: 'select * from tables p where p.name=@tableName',
-    parameters: [
-      {
-        name: '@tableName',
-        value: name,
-      },
-    ],
-  };
-
-  const tableContainer = await fetchContainer(TABLES);
-
-  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-
-  if (resources.length === 1) {
-    return resources[0];
-  } else if (resources.length === 0) {
-    throw { code: 404, message: 'No table found.' };
+    throw new NotFoundError(`No table found at id: ${data.tableId}`);
   }
 };
 
@@ -252,77 +239,73 @@ const deleteRelatedDocumentEdges = async (relatedData: TableEdgeDeleteReq) => {
 };
 
 export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
-  try {
-    const tableContainer = await fetchContainer(TABLES);
+  const tableContainer = await fetchContainer(TABLES);
 
-    const res = (await tableContainer
-      .item(data.id, data.tableName)
-      .read()) as ItemResponse<TableRef>;
+  const res = (await tableContainer
+    .item(data.id, data.tableName)
+    .read()) as ItemResponse<TableRef>;
 
-    const resource = res.resource;
+  const resource = res.resource;
 
-    const patchArr: PatchOperation[] = [];
+  const patchArr: PatchOperation[] = [];
 
-    const message = [];
+  const message = [];
 
-    for (const prop in data?.edges) {
-      const edgeArr = resource?.edges[prop];
-      const edgeInputArr = data?.edges[prop];
-      for (const [index, el] of edgeArr?.entries()) {
-        if (
-          edgeInputArr.some(
-            (edge) =>
-              el?.from?.id === edge?.from?.id &&
-              el?.to?.id === edge?.to?.id &&
-              el?.from?.tableName === edge?.from?.tableName &&
-              el?.to?.tableName === edge?.to?.tableName,
-          )
-        ) {
-          const patchOp: PatchOperation = {
-            op: 'remove',
-            path: `/edges/${prop}/${index}`,
-            value: el,
-          };
-          patchArr.push(patchOp);
-        }
+  for (const prop in data?.edges) {
+    const edgeArr = resource?.edges[prop];
+    const edgeInputArr = data?.edges[prop];
+    for (const [index, el] of edgeArr?.entries()) {
+      if (
+        edgeInputArr.some(
+          (edge) =>
+            el?.from?.id === edge?.from?.id &&
+            el?.to?.id === edge?.to?.id &&
+            el?.from?.tableName === edge?.from?.tableName &&
+            el?.to?.tableName === edge?.to?.tableName,
+        )
+      ) {
+        const patchOp: PatchOperation = {
+          op: 'remove',
+          path: `/edges/${prop}/${index}`,
+          value: el,
+        };
+        patchArr.push(patchOp);
       }
     }
-
-    const res2 = await tableContainer
-      .item(data.id, data.tableName)
-      .patch(patchArr);
-
-    const updateRelatedDocumentsPromises = [];
-    for (const prop in data?.edges) {
-      data?.edges[prop].forEach((edge) => {
-        if (edge.from) {
-          updateRelatedDocumentsPromises.push(
-            deleteRelatedDocumentEdges({
-              id: edge.from.id,
-              tableName: edge.from.tableName,
-              edges: {
-                [prop]: [{ to: { id: data.id, tableName: data.tableName } }],
-              },
-            }),
-          );
-        } else if (edge.to) {
-          updateRelatedDocumentsPromises.push(
-            deleteRelatedDocumentEdges({
-              id: edge.to.id,
-              tableName: edge.to.tableName,
-              edges: {
-                [prop]: [{ from: { id: data.id, tableName: data.tableName } }],
-              },
-            }),
-          );
-        }
-      });
-    }
-
-    await Promise.all(updateRelatedDocumentsPromises);
-
-    return `Table edges (from:${data.edges['']}) deleted!`;
-  } catch (error) {
-    throw error;
   }
+
+  const res2 = await tableContainer
+    .item(data.id, data.tableName)
+    .patch(patchArr);
+
+  const updateRelatedDocumentsPromises = [];
+  for (const prop in data?.edges) {
+    data?.edges[prop].forEach((edge) => {
+      if (edge.from) {
+        updateRelatedDocumentsPromises.push(
+          deleteRelatedDocumentEdges({
+            id: edge.from.id,
+            tableName: edge.from.tableName,
+            edges: {
+              [prop]: [{ to: { id: data.id, tableName: data.tableName } }],
+            },
+          }),
+        );
+      } else if (edge.to) {
+        updateRelatedDocumentsPromises.push(
+          deleteRelatedDocumentEdges({
+            id: edge.to.id,
+            tableName: edge.to.tableName,
+            edges: {
+              [prop]: [{ from: { id: data.id, tableName: data.tableName } }],
+            },
+          }),
+        );
+      }
+    });
+  }
+
+  await Promise.all(updateRelatedDocumentsPromises);
+
+  return `Table edges (from:${data.edges['']}) deleted!`;
 };
