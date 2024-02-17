@@ -442,10 +442,6 @@ service:
                       filter: true
                       kind: checkboxes
                   id: tableId
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
     tableDataCreatePOST:
       path: /table/data/create
       method: POST
@@ -1091,7 +1087,6 @@ service:
                 - authGroups
                 - authGroups
 types:
-<<<<<<< HEAD
   TableEdgeReadRes:
     properties:
       name: string
@@ -1107,8 +1102,6 @@ types:
       name: string
     extends:
       - TableEdgesMetadata
-=======
->>>>>>> origin/main
   MenuCreateReq: MenuItemTreeRef
   MenuCreateRes:
     properties:
@@ -1166,11 +1159,7 @@ types:
       - checkboxes
       - selectbox
       - text
-<<<<<<< HEAD
       - integer
-=======
-      - number
->>>>>>> origin/main
       - phone
       - zipcode
       - email
@@ -1200,10 +1189,7 @@ types:
         type: optional<TableColumnRefKind>
   TableRef:
     properties:
-<<<<<<< HEAD
       edges: optional<map<string, list<Edge>>>
-=======
->>>>>>> origin/main
       name:
         docs: Name of the table
         type: optional<string>
@@ -1228,7 +1214,6 @@ types:
       - TableRef
   TableDataCreateRes: TableDataRowRef
   TableDataUpdateRes: TableDataRowRef
-<<<<<<< HEAD
   Edge:
     properties:
       from: optional<EdgeSpec>
@@ -1241,8 +1226,6 @@ types:
     properties:
       id: string
       edges: map<string, list<Edge>>
-=======
->>>>>>> origin/main
   BaseModelRef:
     properties:
       id:
@@ -1287,13 +1270,9 @@ types:
       read: optional<list<string>>
       update: optional<list<string>>
       delete: optional<list<string>>
-<<<<<<< HEAD
   TableReadReq:
     extends:
       - BaseModelRef
-=======
-  TableReadReq: BaseModelRef
->>>>>>> origin/main
   ReadPaginationFilter:
     properties:
       from: optional<integer>
