@@ -86,29 +86,24 @@ service:
         - BadRequestError
         - InternalServerError
         - ConflictEntityError
-      # examples:
-      #   - name: example-0001
-      #     request:
-      #       name: Person Natural
-      #       label: string
-      #       cols:
-      #         - id: Person_Natural_Full_Name
-      #           name: Full Name
-      #           field: Person_Natural_Full_Name
-      #           sortable: true
-      #           headerName: Full Name
-      #           filter: true
-      #           kind: checkboxes
-      #         - id: Person_Natural_Customer_ID
-      #           name: Customer ID
-      #           field: Person_Natural_Customer_ID
-      #           sortable: true
-      #           headerName: Customer ID
-      #           filter: true
-      #           kind: checkboxes
-      #     response:
-      #       body:
-      #         id: string
+      examples:
+        - request:
+            id: string
+            name: foo
+            edges:
+              has_email:
+                - to:
+                    id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                    tableName: person-natural
+          response:
+            body:
+              id: string
+              name: foo
+              edges:
+                has_email:
+                  - to:
+                      id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                      tableName: person-natural
     tableEdgeReadPOST:
       path: /table/edge/read
       method: POST
@@ -127,13 +122,19 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
-      # examples:
-      #   - name: example-0001
-      #     request:
-      #       id: mapeamentoDeProcessos
-      #     response:
-      #       body:
-      #         id: string
+      examples:
+        - name: example-0001
+          request:
+            tableId: mapeamentoDeProcessos
+          response:
+            body:
+              id: string
+              name: foo
+              edges:
+                has_email:
+                  - to:
+                      id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                      tableName: person-natural
     tableEdgeUpdatePOST:
       path: /table/edge/update
       method: POST
@@ -143,7 +144,8 @@ service:
       request:
         name: TableEdgeUpdateReq
         body:
-          properties: {}
+          properties:
+            name: string
           extends:
             - TableEdgesMetadata
       response:
@@ -153,46 +155,24 @@ service:
         - BadRequestError
         - NotFoundError
         - InternalServerError
-      # examples:
-      #   - request:
-      #       name: person-natural
-      #       label: Person Natural
-      #       cols:
-      #         - id: ds67a8gasiyudhsay78dgasiuhdsa897h
-      #           name: full-name
-      #           field: full-name
-      #           sortable: true
-      #           headerName: Full Name
-      #           filter: true
-      #           kind: checkboxes
-      #         - id: ds67a8gasiyudhsay78dgasiuhdsa897h
-      #           name: full-name
-      #           field: full-name
-      #           sortable: true
-      #           headerName: Full Name
-      #           filter: true
-      #           kind: checkboxes
-      #       id: id
-      #     response:
-      #       body:
-      #         name: Person_Natural
-      #         label: Person Natural
-      #         cols:
-      #           - id: ds67a8gasiyudhsay78dgasiuhdsa897h
-      #             name: full-name
-      #             field: full-name-2
-      #             sortable: true
-      #             headerName: Full Name
-      #             filter: true
-      #             kind: checkboxes
-      #           - id: ds67a8gasiyudhsay78dgasiuhdsa897h
-      #             name: full-name-2
-      #             field: full-name-2
-      #             sortable: true
-      #             headerName: Full Name 2
-      #             filter: true
-      #             kind: text
-      #         id: id
+      examples:
+        - request:
+            id: string
+            name: foo
+            edges:
+              has_email:
+                - to:
+                    id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                    tableName: person-natural
+          response:
+            body:
+              id: string
+              name: foo
+              edges:
+                has_email:
+                  - to:
+                      id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                      tableName: person-natural
     tableEdgeDeletePOST:
       path: /table/edge/delete
       method: POST
@@ -212,18 +192,18 @@ service:
       errors:
         - NotFoundError
         - InternalServerError
-      # examples:
-      # - name: example-0001
-      #   request:
-      #     id: string
-      #     tableName: foo
-      #     edges:
-      #       has_email:
-      #         # - to:
-      #         #   id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-      #         #   tableName: person-natural
-      #   response:
-      #     body: string
+      examples:
+        - name: example-0001
+          request:
+            id: string
+            tableName: foo
+            edges:
+              has_email:
+                - to:
+                    id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                    tableName: person-natural
+          response:
+            body: string
 
     tableCreatePOST:
       path: /table/create
