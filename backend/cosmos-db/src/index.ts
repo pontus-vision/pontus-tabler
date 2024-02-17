@@ -34,7 +34,7 @@ import {
   createTableEdge,
   deleteTableEdge,
   readTableEdgesByTableId,
-  updateTableEdge,
+  // updateTableEdge,
 } from './service/EdgeService';
 
 export default new PontusService({
@@ -245,8 +245,7 @@ export default new PontusService({
     res.send(response);
   },
   tableEdgeUpdatePost: async (req, res) => {
-    const response = await updateTableEdge(req.body);
-
-    res.send(response);
+    // const response = await updateTableEdge(req.body);
+    // res.send(response);
   },
 });
