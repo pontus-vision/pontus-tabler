@@ -41,7 +41,9 @@ describe('tableControllerTest', () => {
     srv.close();
   });
 
-  it.only('should do the CRUD "happy path"', async () => {
+  it('should do the CRUD "happy path"', async () => {
+    // Creating 2 tables.
+
     const body: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
@@ -78,108 +80,157 @@ describe('tableControllerTest', () => {
     })) as AxiosResponse<TableCreateRes>;
     expect(createTable2.status === 200);
 
-    const table1 = createTable1.data;
-    const table2 = createTable2.data;
+    const table1Data = createTable1.data;
+    const table2Data = createTable2.data;
 
-    const edgesBody: TableEdgeCreateReq = {
-      id: table1.id,
-      name: table1.name,
+    // Creating edges between them
+
+    const edgesBodyTo: TableEdgeCreateReq = {
+      id: table1Data.id,
+      name: table1Data.name,
       edges: {
-        has_email: [{ to: { id: table2.id, tableName: table2.name } }],
+        has_email: [{ to: { id: table2Data.id, tableName: table2Data.name } }],
       },
     };
 
     const createTableEdge = (await post(
       'table/edge/create',
-      edgesBody,
+      edgesBodyTo,
     )) as AxiosResponse<TableEdgeCreateRes>;
 
     expect(createTableEdge.status).toBe(200);
 
+    // Creating edge in the opposite direction
+
+    const edgesBodyFrom: TableEdgeCreateReq = {
+      id: table1Data.id,
+      name: table1Data.name,
+      edges: {
+        has_email: [
+          { from: { id: table2Data.id, tableName: table2Data.name } },
+        ],
+      },
+    };
+
+    const createTableEdge2 = (await post(
+      'table/edge/create',
+      edgesBodyFrom,
+    )) as AxiosResponse<TableEdgeCreateRes>;
+
+    expect(createTableEdge2.status).toBe(200);
+
+    // reading the edge "to" of table 1
+
     const readTableEdge = (await post('table/edge/read', {
-      tableId: createTable1.data.id,
+      tableId: table1Data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
-    expect(isSubset(edgesBody, readTableEdge.data)).toBe(true);
+    expect(
+      isSubset(
+        {
+          ...edgesBodyTo,
+          edges: {
+            has_email: [
+              ...edgesBodyTo.edges.has_email,
+              ...edgesBodyFrom.edges.has_email,
+            ],
+          },
+        },
+        readTableEdge.data,
+      ),
+    ).toBe(true);
+
+    // reading the edge "from" of table 2
+
     const readTableEdge2 = (await post('table/edge/read', {
       tableId: createTable2.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
-    expect(readTableEdge2.data.edges['has_email'][0].from.tableName).toBe(
-      table1.name,
-    );
+    const table2Ref: TableEdgeCreateReq = {
+      name: table2Data.name,
+      edges: {
+        has_email: [
+          {
+            from: {
+              id: table1Data.id,
+              tableName: table1Data.name,
+            },
+          },
+          {
+            to: {
+              id: table1Data.id,
+              tableName: table1Data.name,
+            },
+          },
+        ],
+      },
+      id: table2Data.id,
+    };
 
-    expect(readTableEdge2.data.edges['has_email'][0].from.id).toBe(table1.id);
+    expect(isSubset(table2Ref, readTableEdge2.data)).toBe(true);
 
-    const deleteBody: TableEdgeDeleteReq = {
-      edges: edgesBody.edges,
-      id: edgesBody.id,
-      tableName: edgesBody.name,
+    // Deleting edges
+
+    const deleteEdgeTo: TableEdgeDeleteReq = {
+      edges: edgesBodyTo.edges,
+      id: edgesBodyTo.id,
+      tableName: edgesBodyTo.name,
     };
 
     const deleteTableEdge = (await post(
       'table/edge/delete',
-      deleteBody,
+      deleteEdgeTo,
     )) as AxiosResponse<string>;
 
     expect(deleteTableEdge.status).toBe(200);
 
-    const readTableEdge3 = (await post('table/edge/read', {
+    // Checking if it is indeed deleted
+
+    const readTableEdgeTo = (await post('table/edge/read', {
       tableId: createTable1.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
-    expect(readTableEdge3.data.edges['has_email']?.[0]?.to?.id).toBeFalsy();
+    expect(readTableEdgeTo.data.edges['has_email']?.[0]?.to?.id).toBeFalsy();
 
-    const readTableEdge4 = (await post('table/edge/read', {
+    const readTableEdgeFrom = (await post('table/edge/read', {
       tableId: createTable2.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
-    expect(readTableEdge4.data.edges['has_email']?.[0]?.from?.id).toBeFalsy();
-  });
-  it('should do the CRUD "sad path"', async () => {
-    const createRetVal = await post('table/create', {});
+    expect(
+      readTableEdgeFrom.data.edges['has_email']?.[0]?.from?.id,
+    ).toBeFalsy();
 
-    expect(createRetVal.status).toBe(422);
+    // Deleting the second edge
 
-    const readRetVal = await post('table/read', {
-      id: 'foo',
-    });
-
-    expect(readRetVal.status).toBe(404);
-
-    const updateRetVal = await post('table/update', { foo: 'bar' });
-
-    expect(updateRetVal.status).toBe(422);
-
-    const deleteRetVal = await post('table/delete', { foo: 'bar' });
-
-    let resPayload4 = deleteRetVal.data;
-
-    expect(deleteRetVal.status).toBe(422);
-
-    const table: TableCreateReq = {
-      name: 'person-natural',
-      label: 'Person Natural',
-      cols: [
-        {
-          field: 'column 1',
-          filter: false,
-          sortable: false,
-          headerName: 'column 1',
-          name: 'column1',
-          kind: 'checkboxes',
-        },
-      ],
+    const deleteEdgeFrom: TableEdgeDeleteReq = {
+      edges: edgesBodyFrom.edges,
+      id: edgesBodyFrom.id,
+      tableName: edgesBodyFrom.name,
     };
 
-    await post('table/create', table);
+    const deleteTableEdgeFrom = (await post(
+      'table/edge/delete',
+      deleteEdgeFrom,
+    )) as AxiosResponse<string>;
 
-    const createRetVal2 = await post('table/create', table);
+    expect(deleteTableEdgeFrom.status).toBe(200);
 
-    expect(createRetVal2.status).toBe(409);
+    // Checking if it is indeed deleted
+
+    const readTableEdgeFrom2 = (await post('table/edge/read', {
+      tableId: createTable1.data.id,
+    })) as AxiosResponse<TableEdgeReadRes>;
+
+    expect(readTableEdgeFrom2.data.edges['has_email']?.[0]?.to?.id).toBeFalsy();
+
+    const readTableEdgeTo2 = (await post('table/edge/read', {
+      tableId: createTable2.data.id,
+    })) as AxiosResponse<TableEdgeReadRes>;
+
+    expect(readTableEdgeTo2.data.edges['has_email']?.[0]?.from?.id).toBeFalsy();
   });
-  it('should read tables', async () => {
-    const body: TableCreateReq = {
+  it('should do the CRUD "sad path"', async () => {
+    const table: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
       cols: [
@@ -202,43 +253,82 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createRetVal = await post('table/create', body);
+    const createTable1 = (await post(
+      'table/create',
+      table,
+    )) as AxiosResponse<TableCreateRes>;
+    expect(createTable1.status === 200);
 
-    const createRetVal2 = await post('table/create', {
-      ...body,
-      name: 'person-natural2',
+    const createTable2 = (await post('table/create', {
+      ...table,
+      name: 'person-natural-2',
+      label: 'Person Natural 2',
+    })) as AxiosResponse<TableCreateRes>;
+    expect(createTable2.status === 200);
+
+    const table1 = createTable1.data;
+    const table2 = createTable2.data;
+
+    const createRetVal = await post('table/edge/create', {});
+
+    expect(createRetVal.status).toBe(422);
+
+    const readRetVal = await post('table/edge/read', {
+      tableId: 'foo',
     });
 
-    const readBody = {
-      from: 1,
-      to: 20,
-      filters: {
-        name: {
-          filter: 'person-natural',
-          filterType: 'text',
-          type: 'contains',
-        },
+    expect(readRetVal.status).toBe(404);
+
+    const deleteRetVal = await post('table/edge/delete', { foo: 'bar' });
+
+    expect(deleteRetVal.status).toBe(422);
+
+    const edgesBodyFoo: TableEdgeCreateReq = {
+      id: table1.id,
+      name: table1.name,
+      edges: {
+        has_email: [{ to: { id: 'foo', tableName: 'bar' } }],
       },
     };
 
-    const readRetVal: { data: TablesReadRes } = await post(
-      'tables/read',
-      readBody,
-    );
+    const createEdge1 = await post('table/edge/create', edgesBodyFoo);
 
-    expect(readRetVal.data.totalTables).toBe(2);
+    expect(createEdge1.status).toBe(404);
+    expect(createEdge1.data).toBe('No table found at id: foo');
 
-    const deleteVal = await post('table/delete', {
-      id: createRetVal.data.id,
-      name: createRetVal.data.name,
-    });
+    const edgesBody: TableEdgeCreateReq = {
+      id: table1.id,
+      name: table1.name,
+      edges: {
+        has_email: [{ to: { id: table2.id, tableName: table2.name } }],
+      },
+    };
 
-    expect(deleteVal.status).toBe(200);
-    const deleteVal2 = await post('table/delete', {
-      id: createRetVal2.data.id,
-      name: createRetVal2.data.name,
-    });
+    const createRetVal2 = await post('table/edge/create', edgesBody);
 
-    expect(deleteVal2.status).toBe(200);
+    expect(createRetVal2.status).toBe(200);
+    const createRetVal3 = await post('table/edge/create', edgesBody);
+
+    expect(createRetVal3.status).toBe(409);
+
+    const createEdgeNonExistingTableBody: TableEdgeCreateReq = {
+      id: 'foo',
+      name: 'bar',
+      edges: {
+        has_something: [
+          {
+            from: {
+              id: 'foo2',
+              tableName: 'bar2'
+            }
+          }
+        ]
+      }
+    }
+
+    const createEdgeNonExistingTable = await post('table/edge/create', createEdgeNonExistingTableBody)
+
+    expect(createEdgeNonExistingTable.status).toBe(404)
+    
   });
 });
