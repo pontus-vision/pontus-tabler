@@ -30,15 +30,12 @@ import {
   readDashboards,
   upsertDashboard,
 } from './service/DashboardService';
-<<<<<<< HEAD
 import {
   createTableEdge,
   deleteTableEdge,
   readTableEdgesByTableId,
   // updateTableEdge,
 } from './service/EdgeService';
-=======
->>>>>>> origin/main
 
 export default new PontusService({
   authGroupCreatePost(req, res) {},
