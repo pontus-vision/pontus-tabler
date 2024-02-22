@@ -316,5 +316,5 @@ export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
 
   await Promise.all(updateRelatedDocumentsPromises);
 
-  return `Table edges (from:${data.edges['']}) deleted!`;
+  return `Table edges deleted!`;
 };
