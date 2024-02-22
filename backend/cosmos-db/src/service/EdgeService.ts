@@ -320,7 +320,7 @@ export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
 
   await Promise.all(updateRelatedDocumentsPromises);
 
-  return `Table edges between ${data.tableName} (id:${
+  return `Table edges between ${data.tableName} (id :${
     data.id
   }) and ${tablesLinkedArr
     .map((el) => `${el.tableName} (id: ${el.id})`)
