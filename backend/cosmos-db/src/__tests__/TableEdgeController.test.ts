@@ -221,13 +221,17 @@ describe('tableControllerTest', () => {
       tableId: createTable1.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
-    expect(readTableEdgeFrom2.data.edges['has_email']?.[0]?.to?.id).toBeFalsy();
+    expect(
+      readTableEdgeFrom2.data.edges?.['has_email']?.[0]?.to?.id,
+    ).toBeFalsy();
 
     const readTableEdgeTo2 = (await post('table/edge/read', {
       tableId: createTable2.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
-    expect(readTableEdgeTo2.data.edges['has_email']?.[0]?.from?.id).toBeFalsy();
+    expect(
+      readTableEdgeTo2.data.edges?.['has_email']?.[0]?.from?.id,
+    ).toBeFalsy();
   });
   it('should do the CRUD "sad path"', async () => {
     const table: TableCreateReq = {
@@ -319,16 +323,18 @@ describe('tableControllerTest', () => {
           {
             from: {
               id: 'foo2',
-              tableName: 'bar2'
-            }
-          }
-        ]
-      }
-    }
+              tableName: 'bar2',
+            },
+          },
+        ],
+      },
+    };
 
-    const createEdgeNonExistingTable = await post('table/edge/create', createEdgeNonExistingTableBody)
+    const createEdgeNonExistingTable = await post(
+      'table/edge/create',
+      createEdgeNonExistingTableBody,
+    );
 
-    expect(createEdgeNonExistingTable.status).toBe(404)
-    
+    expect(createEdgeNonExistingTable.status).toBe(404);
   });
 });
