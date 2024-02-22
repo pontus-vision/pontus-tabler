@@ -47,7 +47,6 @@ export const createTableEdge = async (
     .item(data.id, data.name)
     .read()) as ItemResponse<TableRef>;
 
-
   if (res.statusCode === 404) {
     throw new NotFoundError('Table not found');
   }
@@ -196,14 +195,11 @@ export const readTableEdgesByTableId = async (
 const deleteRelatedDocumentEdges = async (relatedData: TableEdgeDeleteReq) => {
   const tableContainer = await fetchContainer(TABLES);
 
-  console.log({ relatedData: JSON.stringify(relatedData) });
   const res = (await tableContainer
     .item(relatedData.id, relatedData.tableName)
     .read()) as ItemResponse<TableRef>;
 
   const resource = res.resource;
-
-  console.log({ resource: JSON.stringify(resource) });
 
   const patchArr: PatchOperation[] = [];
 
@@ -229,13 +225,18 @@ const deleteRelatedDocumentEdges = async (relatedData: TableEdgeDeleteReq) => {
       }
     }
   }
-  console.log({ patchArr: JSON.stringify(patchArr) });
 
   const res2 = await tableContainer
     .item(relatedData.id, relatedData.tableName)
     .patch(patchArr);
 
-  console.log({ resource2: res2 });
+  for (const prop in relatedData?.edges) {
+    if (res2.resource.edges[prop].length === 0) {
+      const res = await tableContainer
+        .item(relatedData.id, relatedData.tableName)
+        .patch([{ op: 'remove', path: `/edges/${prop}` }]);
+    }
+  }
 };
 
 export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
@@ -277,6 +278,14 @@ export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
   const res2 = await tableContainer
     .item(data.id, data.tableName)
     .patch(patchArr);
+
+  for (const prop in data?.edges) {
+    if (res2.resource.edges[prop].length === 0) {
+      const res = await tableContainer
+        .item(data.id, data.tableName)
+        .patch([{ op: 'remove', path: `/edges/${prop}` }]);
+    }
+  }
 
   const updateRelatedDocumentsPromises = [];
   for (const prop in data?.edges) {
