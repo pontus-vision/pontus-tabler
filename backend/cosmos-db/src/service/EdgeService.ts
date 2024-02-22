@@ -6,6 +6,7 @@ import {
   TableRef,
   TableReadRes,
   TableEdgeReadRes,
+  EdgeSpec,
 } from '../typescript/api';
 import { fetchContainer } from '../cosmos-utils';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
@@ -287,9 +288,12 @@ export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
     }
   }
 
+  const tablesLinkedArr: EdgeSpec[] = [];
+
   const updateRelatedDocumentsPromises = [];
   for (const prop in data?.edges) {
     data?.edges[prop].forEach((edge) => {
+      tablesLinkedArr.push(edge?.from || edge?.to);
       if (edge.from) {
         updateRelatedDocumentsPromises.push(
           deleteRelatedDocumentEdges({
@@ -316,5 +320,9 @@ export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
 
   await Promise.all(updateRelatedDocumentsPromises);
 
-  return `Table edges deleted!`;
+  return `Table edges between ${data.tableName} (id:${
+    data.id
+  }) and ${tablesLinkedArr
+    .map((el) => `${el.tableName} (id: ${el.id})`)
+    .join(', ')} deleted!`;
 };
