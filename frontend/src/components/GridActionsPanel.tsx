@@ -69,10 +69,10 @@ const GridActionsPanel = ({
   };
 
   useEffect(() => {
-    const cmpWidth = (
-      document.querySelector('.grid-actions-panel') as HTMLElement
-    )?.offsetWidth;
+    const cmpWidth = (document.querySelector('body') as HTMLElement)
+      ?.offsetWidth;
     setCmpWidth(cmpWidth);
+    console.log({ windowWidth });
   }, [windowWidth]);
 
   if (!!cmpWidth && cmpWidth < 514) {

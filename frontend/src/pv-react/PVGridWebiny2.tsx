@@ -58,6 +58,7 @@ type Props = {
   onDelete?: (arr: any[]) => void;
   onUpdate?: (data: any) => void;
   onRowClicked?: (row: RowEvent<any, any>) => void;
+  selection?: boolean;
   permissions?: {
     updateAction?: boolean;
     createAction?: boolean;
@@ -67,6 +68,8 @@ type Props = {
   onFiltersChange?: (filters: {
     [key: string]: ReadPaginationFilterFilters;
   }) => void;
+  rowsSelected?: IRowNode<any>[];
+  onRowsSelected?: (e: IRowNode<any>[]) => void;
   onFromChange?: (num: number) => void;
   onToChange?: (num: number) => void;
   setGridHeight?: Dispatch<React.SetStateAction<undefined | number>>;
@@ -85,6 +88,7 @@ const PVGridWebiny2 = ({
   setRowClicked,
   cols,
   rows,
+  rowsSelected,
   add,
   totalCount,
   permissions,
@@ -96,6 +100,8 @@ const PVGridWebiny2 = ({
   onRowClicked,
   setGridHeight,
   onParamsChange,
+  onRowsSelected,
+  selection,
   testId,
 }: Props) => {
   const [deleteMode, setDeleteMode] = useState(false);
@@ -121,6 +127,12 @@ const PVGridWebiny2 = ({
     Array<string | undefined>
   >([]);
 
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
+
+  useEffect(() => {
+    console.log({ cols });
+  }, [cols]);
+
   useEffect(() => {
     if (!columnState || !onValueChange || !id) return;
     // onValueChange(id, columnState);
@@ -132,7 +144,22 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     paramsChange();
+    selectRows();
   }, [cachedRowParams]);
+
+  const selectRows = () => {
+    gridApi?.forEachNode((node) => {
+      if (rowsSelected?.some((row) => row.data?.id === node.data?.id)) {
+        console.log({ node });
+        node.setSelected(true);
+      }
+    });
+  };
+
+  useEffect(() => {
+    console.log({ rows, rowsSelected, selectedRows });
+    selectRows();
+  }, [rows]);
 
   const getDataSource = () => {
     const datasource: IDatasource = {
@@ -169,6 +196,18 @@ const PVGridWebiny2 = ({
               checkboxSelection: true,
               width: 30,
               colId: 'delete-mode',
+              sortable: false,
+              filter: false,
+              hide: true,
+              suppressMovable: true,
+              // cellRendererParams: {onChange: handleCheckboxChange,}
+            },
+            {
+              headerName: '',
+              field: 'select',
+              checkboxSelection: true,
+              width: 30,
+              colId: 'selection-mode',
               sortable: false,
               filter: false,
               hide: true,
@@ -296,8 +335,10 @@ const PVGridWebiny2 = ({
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
+    console.log({ params: params.api });
 
     setColumnApi(params.columnApi);
+
     if (gridApi) {
       gridApi.setFilterModel(null);
     }
@@ -313,13 +354,13 @@ const PVGridWebiny2 = ({
     },
   };
 
-  const defaultColDef = useMemo<ColDef>(() => {
-    return {
-      filter: true,
-      sortable: true,
-      resizable: true,
-    };
-  }, []);
+  // const defaultColDef = useMemo<ColDef>(() => {
+  //   return {
+  //     filter: true,
+  //     sortable: true,
+  //     resizable: true,
+  //   };
+  // }, []);
 
   const datasource = useMemo<IDatasource>(() => {
     return getDataSource();
@@ -389,17 +430,37 @@ const PVGridWebiny2 = ({
   }
 
   useEffect(() => {
+    console.log({ columnDefs });
     restoreGridColumnStates();
     updateGridHeight();
+
+    if (selection) {
+      columnApi?.setColumnVisible('selection-mode', true);
+      gridApi?.setColumnVisible('selection-mode', true);
+      // gridApi?.setColumnsVisible(['selection-mode'], true);
+      console.log({
+        selection,
+        selectionMode: gridApi?.getColumn('selection-mode'),
+      });
+    } else {
+      columnApi?.setColumnVisible('selection-mode', false);
+      // selectedRows.forEach((row) => {
+      //   row.setSelected(false);
+      // });
+    }
   }, [columnDefs]);
 
   const onSelectionChanged = (event: SelectionChangedEvent): void => {
     const selectedRows = event.api.getSelectedNodes();
+    onRowsSelected && onRowsSelected(selectedRows);
 
     setSelectedRows(selectedRows);
   };
 
+  useEffect(() => {}, []);
+
   useEffect(() => {
+    console.log({ selectedRows });
     setEntriesToBeDeleted &&
       setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);
@@ -415,6 +476,10 @@ const PVGridWebiny2 = ({
       setGridHeight && setGridHeight(gridHeight);
     }
   };
+
+  useEffect(() => {
+    console.log({ columnState });
+  }, [columnState]);
 
   const [gridId, setGridId] = useState<string>();
 
@@ -432,6 +497,13 @@ const PVGridWebiny2 = ({
       return result;
     }
     setGridId(generateRandomString(16));
+  }, []);
+
+  const defaultColDef = useMemo(() => {
+    return {
+      width: 170,
+      filter: true,
+    };
   }, []);
 
   return (
@@ -459,14 +531,18 @@ const PVGridWebiny2 = ({
           entriesToBeDeleted={entriesToBeDeleted}
         />
         <AgGridReact
+          onCellClicked={(e) => console.log(e)}
           data-testid="ag-grid-component"
           gridOptions={gridOptions}
           // enableRangeSelection={true}
           // paginationAutoPageSize={true}
           paginationPageSize={6}
           defaultColDef={defaultColDef}
+          rowSelection={'multiple'}
+          rowMultiSelectWithClick={true}
           onGridReady={onGridReady}
           onFilterChanged={handleGridStateChanged}
+          onSelectionChanged={onSelectionChanged}
           onColumnMoved={handleGridStateChanged}
           onColumnResized={handleGridStateChanged}
           onColumnPinned={handleGridStateChanged}
@@ -475,11 +551,11 @@ const PVGridWebiny2 = ({
           domLayout="autoHeight"
           pagination={true}
           datasource={datasource}
+          paginationPageSizeSelector={false}
           columnDefs={columnDefs}
           ref={gridContainerRef}
-          rowSelection="multiple"
-          onSelectionChanged={onSelectionChanged}
-          onCellValueChanged={(e) => console.log({ e })}
+          // onSelectionChanged={onSelectionChanged}
+          // onCellValueChanged={(e) => console.log({ e })}
         ></AgGridReact>
       </div>
     </>

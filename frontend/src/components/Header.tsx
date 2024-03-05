@@ -35,6 +35,7 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
           data-testid="toggle-input"
           checked={openedSidebar}
           onClick={(e: any) => {
+            console.log(e.target.checked);
             setOpenedSidebar(e.target.checked);
           }}
           type="checkbox"
