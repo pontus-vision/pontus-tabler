@@ -496,7 +496,7 @@ describe('tableControllerTest', () => {
       ),
     ).toBe(true);
   });
-  it.only('It should test one-to-many edges creation', async () => {
+  it('It should test one-to-many edges creation', async () => {
     const table: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
