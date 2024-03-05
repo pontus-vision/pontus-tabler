@@ -44,6 +44,7 @@ type Props = {
   onValueChange?: (id: string, value: ColumnState[]) => void;
   modelId?: string;
   lastState?: ColumnState[];
+  onColumnState?: (cols: ColumnState[]) => void;
   showColumnSelector?: boolean;
   setShowColumnSelector?: Dispatch<React.SetStateAction<boolean>>;
   containerHeight?: string;
@@ -101,6 +102,7 @@ const PVGridWebiny2 = ({
   setGridHeight,
   onParamsChange,
   onRowsSelected,
+  onColumnState,
   selection,
   testId,
 }: Props) => {
@@ -130,10 +132,6 @@ const PVGridWebiny2 = ({
   const [selectedRowIds, setSelectedRowIds] = useState([]);
 
   useEffect(() => {
-    console.log({ cols });
-  }, [cols]);
-
-  useEffect(() => {
     if (!columnState || !onValueChange || !id) return;
     // onValueChange(id, columnState);
   }, [columnState, id]);
@@ -147,17 +145,20 @@ const PVGridWebiny2 = ({
     selectRows();
   }, [cachedRowParams]);
 
+  useEffect(() => {
+    console.log({ columnState });
+    onColumnState && columnState && onColumnState(columnState);
+  }, [columnState]);
+
   const selectRows = () => {
     gridApi?.forEachNode((node) => {
       if (rowsSelected?.some((row) => row.data?.id === node.data?.id)) {
-        console.log({ node });
         node.setSelected(true);
       }
     });
   };
 
   useEffect(() => {
-    console.log({ rows, rowsSelected, selectedRows });
     selectRows();
   }, [rows]);
 
@@ -335,7 +336,6 @@ const PVGridWebiny2 = ({
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
     setGridApi(params.api);
-    console.log({ params: params.api });
 
     setColumnApi(params.columnApi);
 
@@ -370,7 +370,6 @@ const PVGridWebiny2 = ({
     if (gridApi) {
       onFiltersChange && onFiltersChange(gridApi.getFilterModel());
       setFilterState(gridApi.getFilterModel());
-      console.log({ filterModel: gridApi.getFilterModel() });
     }
   }
 
@@ -410,17 +409,8 @@ const PVGridWebiny2 = ({
   }, [updateMode]);
 
   useEffect(() => {
-    // if (columnApi && columnDefs) {
-    //   columnDefs.forEach((columnDef) => {
-    //     if (!columnDef.field) return;
-    //     if (selectedColumns.includes(columnDef.field)) {
-    //       columnApi.setColumnVisible(columnDef.field, true);
-    //     } else {
-    //       columnApi.setColumnVisible(columnDef.field, false);
-    //     }
-    //   });
-    // }
-  }, [columnApi, selectedColumns]);
+    setColumnState(gridApi?.getColumnState());
+  }, [gridApi]);
 
   // const gridStyle = useMemo(() => ({ height: "25rem", width: "100%" }), []);
   function restoreGridColumnStates() {
@@ -430,7 +420,6 @@ const PVGridWebiny2 = ({
   }
 
   useEffect(() => {
-    console.log({ columnDefs });
     restoreGridColumnStates();
     updateGridHeight();
 
@@ -438,10 +427,6 @@ const PVGridWebiny2 = ({
       columnApi?.setColumnVisible('selection-mode', true);
       gridApi?.setColumnVisible('selection-mode', true);
       // gridApi?.setColumnsVisible(['selection-mode'], true);
-      console.log({
-        selection,
-        selectionMode: gridApi?.getColumn('selection-mode'),
-      });
     } else {
       columnApi?.setColumnVisible('selection-mode', false);
       // selectedRows.forEach((row) => {
@@ -460,7 +445,6 @@ const PVGridWebiny2 = ({
   useEffect(() => {}, []);
 
   useEffect(() => {
-    console.log({ selectedRows });
     setEntriesToBeDeleted &&
       setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);
@@ -476,10 +460,6 @@ const PVGridWebiny2 = ({
       setGridHeight && setGridHeight(gridHeight);
     }
   };
-
-  useEffect(() => {
-    console.log({ columnState });
-  }, [columnState]);
 
   const [gridId, setGridId] = useState<string>();
 
@@ -531,7 +511,6 @@ const PVGridWebiny2 = ({
           entriesToBeDeleted={entriesToBeDeleted}
         />
         <AgGridReact
-          onCellClicked={(e) => console.log(e)}
           data-testid="ag-grid-component"
           gridOptions={gridOptions}
           // enableRangeSelection={true}
