@@ -6,12 +6,227 @@ import {
   TableRef,
   TableReadRes,
   TableEdgeReadRes,
+  TableDataEdgeCreateReq,
+  TableDataEdgeCreateRes,
+  TableDataRowRef,
+  TableDataEdgeReadReq,
+  TableDataEdgeReadRes,
+  TableDataEdgeDeleteReq,
 } from '../typescript/api';
 import { fetchContainer } from '../cosmos-utils';
-import { ItemResponse, PatchOperation } from '@azure/cosmos';
+import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
 import { ConflictEntityError, NotFoundError } from '../generated/api';
 
 const TABLES = 'tables';
+
+export const createTableDataEdge = async (
+  data: TableDataEdgeCreateReq,
+): Promise<TableDataEdgeCreateRes> => {
+  const arrRes = [];
+
+  function getOrCreatePath(obj, path, defaultValue = {}) {
+    const parts = path.split('.');
+    let current = obj;
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (i === parts.length - 1) {
+        // If this is the last part of the path, return or set the value
+        if (current[part] === undefined) {
+          current[part] = defaultValue;
+        }
+        return current[part];
+      } else {
+        // For other parts, ensure they are objects
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
+      }
+    }
+
+    return current;
+  }
+
+  const ensureNestedPathExists = (obj, path) => {
+    const parts = path.split('/');
+    let current = obj;
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (i === parts.length - 1) {
+        if (!Array.isArray(current[part])) {
+          current[part] = [];
+        }
+      } else {
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
+      }
+    }
+
+    return current;
+  };
+
+  const createConnection = async (
+    direction: 'from' | 'to',
+    table1: { rowIds: string[]; tableName: string },
+    table2: { rowIds: string[]; tableName: string },
+  ) => {
+    const container = await fetchContainer(table1.tableName);
+
+    if (data.edgeType === 'oneToOne') {
+      for (const [index, rowId] of table1.rowIds.entries()) {
+        const table2RowId = table2.rowIds.at(index);
+
+        if (!table2RowId) return;
+        const path = `edges/${table2.tableName}/${data.edge}/${direction}`;
+
+        try {
+          await container.item(rowId, rowId).patch([
+            {
+              op: 'add',
+              path: `/${path}/-`,
+              value: table2RowId,
+            },
+          ]);
+          arrRes.push({ from: rowId, to: table2RowId });
+        } catch (error) {
+          const { resource: existingDocument } = await container
+            .item(rowId, rowId)
+            .read();
+
+          ensureNestedPathExists(existingDocument, path);
+
+          existingDocument['edges'][table2.tableName][data.edge][
+            direction
+          ].push(table2RowId);
+
+          await container.item(rowId, rowId).replace(existingDocument);
+          arrRes.push({ from: rowId, to: table2RowId });
+        }
+      }
+    } else if (data.edgeType === 'oneToMany') {
+      for (const [index, rowId] of table1.rowIds.entries()) {
+        for (const [index, rowId2] of table2.rowIds.entries()) {
+          if (!rowId2) return;
+          const path = `edges/${table2.tableName}/${data.edge}/${direction}`;
+
+          try {
+            await container.item(rowId, rowId).patch([
+              {
+                op: 'add',
+                path: `/${path}/-`,
+                value: rowId2,
+              },
+            ]);
+            arrRes.push({ from: rowId, to: rowId2 });
+          } catch (error) {
+            const { resource: existingDocument } = await container
+              .item(rowId, rowId)
+              .read();
+
+            ensureNestedPathExists(existingDocument, path);
+
+            existingDocument['edges'][table2.tableName][data.edge][
+              direction
+            ].push(rowId2);
+
+            await container.item(rowId, rowId).replace(existingDocument);
+            arrRes.push({ from: rowId, to: rowId2 });
+          }
+        }
+      }
+    }
+  };
+
+  await createConnection(
+    'to',
+    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
+    { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
+  );
+  await createConnection(
+    'from',
+    { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
+    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
+  );
+
+  return arrRes;
+};
+
+export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
+  const deleteConnection = async (data: TableDataEdgeDeleteReq) => {
+    const container = await fetchContainer(data.tableName);
+
+    const res = (await container.item(data.rowId, data.rowId).read()).resource;
+
+    const {
+      direction,
+      edgeLabel,
+      rowIds,
+      tableName: edgeTableName,
+    } = data.edge;
+
+    rowIds.forEach((rowId) => {
+      const index = res.edges[edgeTableName][edgeLabel][direction].findIndex(
+        (el) => el === rowId,
+      );
+
+      const resPatch = container.item(data.rowId, data.rowId).patch([
+        {
+          op: 'remove',
+          path: `/edges/${edgeTableName}/${edgeLabel}/${direction}/${index}`,
+        },
+      ]);
+    });
+  };
+
+  data.edge.rowIds.forEach(async (rowId) => {
+    await deleteConnection({
+      tableName: data.edge.tableName,
+      edge: {
+        direction: data.edge.direction === 'from' ? 'to' : 'from',
+        edgeLabel: data.edge.edgeLabel,
+        rowIds: [data.rowId],
+        tableName: data.tableName,
+      },
+      rowId,
+    });
+  });
+
+  await deleteConnection(data);
+};
+
+export const readTableDataEdge = async (
+  data: TableDataEdgeReadReq,
+): Promise<TableDataEdgeReadRes> => {
+  const { direction, edgeLabel, tableName: edgeTableName } = data.edge;
+
+  const querySpec = {
+    query: `select c.edges${edgeTableName ? `["${edgeTableName}"]` : ''}${
+      edgeLabel ? `["${edgeLabel}"]` : ''
+    }${direction ? `["${direction}"]` : ''}, c.id from c where c.id=@rowId`,
+    parameters: [
+      {
+        name: '@rowId',
+        value: data.rowId,
+      },
+    ],
+  };
+
+  const tableContainer = await fetchContainer(data.tableName);
+
+  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
+  const resource = resources[0];
+  console.log({ res: JSON.stringify(resource) });
+
+  return {
+    edges: resource,
+    rowId: resource.id,
+    tableName: data.tableName,
+  };
+};
 
 const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
   const tableContainer = await fetchContainer(TABLES);
