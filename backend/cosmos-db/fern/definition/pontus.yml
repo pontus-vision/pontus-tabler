@@ -67,6 +67,120 @@ service:
       #       body:
       #         properties:
       #           message: string
+    tableDataEdgeCreatePOST:
+      path: /table/edge/connection/create
+      method: POST
+      auth: true
+      docs: Create a new table with properties and associated columns
+      display-name: Create a new table
+      request:
+        name: TableDataEdgeCreateReq
+        body:
+          properties:
+            tableFrom: TableDataEdgeRef
+            edge: string
+            edgeType: EdgeConnectionType
+            tableTo: TableDataEdgeRef
+      response:
+        type: unknown
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - ConflictEntityError
+      # examples:
+      #   - request:
+      #       id: string
+      #       name: foo
+      #       edges:
+      #         has_email:
+      #           - to:
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #               tableName: person-natural
+      #     response:
+      #       body:
+      #         id: string
+      #         name: foo
+      #         edges:
+      #           has_email:
+      #             - to:
+      #                 id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #                 tableName: person-natural
+    tableDataEdgeReadPOST:
+      path: /table/data/edge/read
+      method: POST
+      auth: true
+      docs: Create a new table with properties and associated columns
+      display-name: Create a new table
+      request:
+        name: TableDataEdgeReadReq
+        body:
+          properties:
+            rowId: string
+            tableName: string
+            edge: TableDataEdgeReadEdgeRef
+      response:
+        type: TableDataEdgeReadRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - ConflictEntityError
+      # examples:
+      #   - request:
+      #       id: string
+      #       name: foo
+      #       edges:
+      #         has_email:
+      #           - to:
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #               tableName: person-natural
+      #     response:
+      #       body:
+      #         id: string
+      #         name: foo
+      #         edges:
+      #           has_email:
+      #             - to:
+      #                 id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #                 tableName: person-natural
+    tableDataEdgeDeletePOST:
+      path: /table/data/edge/delete
+      method: POST
+      auth: true
+      docs: Create a new table with properties and associated columns
+      display-name: Create a new table
+      request:
+        name: TableDataEdgeDeleteReq
+        body:
+          properties:
+            rowId: string
+            tableName: string
+            edge: TableDataEdgeDeleteRef
+
+      response:
+        type: string
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - ConflictEntityError
+      # examples:
+      #   - request:
+      #       id: string
+      #       name: foo
+      #       edges:
+      #         has_email:
+      #           - to:
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #               tableName: person-natural
+      #     response:
+      #       body:
+      #         id: string
+      #         name: foo
+      #         edges:
+      #           has_email:
+      #             - to:
+      #                 id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #                 tableName: person-natural
+
     tableEdgeCreatePOST:
       path: /table/edge/create
       method: POST
@@ -1077,6 +1191,17 @@ types:
       name: string
     extends:
       - TableEdgesMetadata
+  TableDataEdgeDeleteRef:
+    properties:
+      tableName: string
+      edgeLabel: string
+      direction: EdgeDirectionEnum
+      rowIds: list<string>
+  TableDataEdgeReadEdgeRef:
+    properties:
+      edgeLabel: optional<string>
+      tableName: optional<string>
+      direction: optional<EdgeDirectionEnum>
   TableEdgeUpdateRes:
     properties:
       name: string
@@ -1134,6 +1259,30 @@ types:
       records: optional<list<string>>
       to: optional<integer>
       totalAvailable: optional<integer>
+  TableDataEdgeCreateRes: list<TableDataEdgeCreateRef>
+  TableDataEdgeCreateRef:
+    properties:
+      from: string
+      to: string
+  EdgeDirectionEnum:
+    enum:
+      - from
+      - to
+  TableDataEdgeReadRes:
+    properties:
+      rowId: string
+      tableName: string
+      edges: unknown
+  # TableDataEdgeDeleteReq:
+  #   properties:
+  #     rowId: string
+  #     tableName: string
+  #     edge:
+  #       properties:
+  #         tableName: string
+  #         edgeLabel: string
+  #         direction: EdgeDirectionEnum
+  #         rowIds: list<string>
   TableColumnRefKind:
     enum:
       - checkboxes
@@ -1194,6 +1343,14 @@ types:
       - TableRef
   TableDataCreateRes: TableDataRowRef
   TableDataUpdateRes: TableDataRowRef
+  EdgeConnectionType:
+    enum:
+      - oneToOne
+      - oneToMany
+  TableDataEdgeRef:
+    properties:
+      tableName: string
+      rowIds: list<string>
   Edge:
     properties:
       from: optional<EdgeSpec>
