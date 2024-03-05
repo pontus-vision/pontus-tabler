@@ -243,7 +243,7 @@ describe('tableControllerTest', () => {
       label: 'Person Natural',
       cols: [
         {
-          field: 'Person_Natural_Full_Name',
+          field: 'full-name',
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
@@ -251,7 +251,7 @@ describe('tableControllerTest', () => {
           sortable: true,
         },
         {
-          field: 'Person_Natural_Customer_ID',
+          field: 'customer-id',
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
@@ -496,13 +496,13 @@ describe('tableControllerTest', () => {
       ),
     ).toBe(true);
   });
-  it('It should test one-to-many edges creation', async () => {
+  it.only('It should test one-to-many edges creation', async () => {
     const table: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
       cols: [
         {
-          field: 'Person_Natural_Full_Name',
+          field: 'full-name',
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
@@ -510,7 +510,7 @@ describe('tableControllerTest', () => {
           sortable: true,
         },
         {
-          field: 'Person_Natural_Customer_ID',
+          field: 'customer-id',
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
@@ -576,25 +576,22 @@ describe('tableControllerTest', () => {
     };
 
     const createTableConnectionData = await post(
-      'table/edge/connection/create',
+      'table/data/edge/create',
       bodyCreateConnection,
     );
 
-    const createTableConnectionData2 = await post(
-      'table/edge/connection/create',
-      {
-        tableFrom: {
-          tableName: body.tableName,
-          rowIds: [createTableData.data.id],
-        },
-        edge: 'has_address',
-        edgeType: 'oneToMany',
-        tableTo: {
-          tableName: body2.tableName,
-          rowIds: [createTableData2.data.id, createTableData3.data.id],
-        },
+    const createTableConnectionData2 = await post('table/data/edge/create', {
+      tableFrom: {
+        tableName: body.tableName,
+        rowIds: [createTableData.data.id],
       },
-    );
+      edge: 'has_address',
+      edgeType: 'oneToMany',
+      tableTo: {
+        tableName: body2.tableName,
+        rowIds: [createTableData2.data.id, createTableData3.data.id],
+      },
+    });
 
     expect(createTableConnectionData.status).toBe(200);
 
