@@ -1,0 +1,69 @@
+// TableRelationshipsPreview.module.scss
+
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab {
+  padding: 12px 24px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #000;
+  }
+}
+
+.activeTab {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #000;
+  cursor: default;
+  border-radius: 4px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+.scrollableTableContainer {
+  max-height: 22.3rem; // Adjust based on your needs
+  overflow-y: auto;
+}
+
+.tableHeader {
+  background-color: #f2f2f2;
+}
+
+.tableHeaderCell {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tableRow {
+  &:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  &:hover {
+    background-color: #ddd;
+  }
+}
+
+.tableCell {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
