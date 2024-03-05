@@ -129,7 +129,7 @@ const TableDataReadView = () => {
       };
       const res = await tableDataCreate(obj);
 
-      if (res?.status === 201) {
+      if (res?.status === 200) {
         fetchTableData();
         notificationManagerRef?.current?.addMessage(
           'success',
