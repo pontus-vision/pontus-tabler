@@ -52,6 +52,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { D } from 'msw/lib/glossary-de6278a9';
 import { sendHttpRequest } from './http';
+import { TableDataEdgeCreateReq } from './typescript/api/resources/pontus/client/requests/TableDataEdgeCreateReq';
+import { TableDataEdgeCreateRes } from './typescript/api/resources/pontus/types/TableDataEdgeCreateRes';
 
 export const getModelData = async (
   modelId: string,
@@ -164,6 +166,12 @@ export const tableDataCreate = async (
   body: TableDataCreateReq,
 ): Promise<AxiosResponse<TableDataCreateRes> | undefined> => {
   return post('/table/data/create', body);
+};
+
+export const tableDataEdgeCreate = async (
+  body: TableDataEdgeCreateReq,
+): Promise<AxiosResponse<TableDataEdgeCreateRes> | undefined> => {
+  return post('/table/data/edge/create', body);
 };
 
 export const tableDataRead = async (
