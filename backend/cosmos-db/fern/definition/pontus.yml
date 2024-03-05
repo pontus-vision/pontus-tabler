@@ -68,7 +68,7 @@ service:
       #         properties:
       #           message: string
     tableDataEdgeCreatePOST:
-      path: /table/edge/connection/create
+      path: /table/data/edge/create
       method: POST
       auth: true
       docs: Create a new table with properties and associated columns
