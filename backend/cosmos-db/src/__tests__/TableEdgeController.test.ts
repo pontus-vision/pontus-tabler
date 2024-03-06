@@ -417,7 +417,7 @@ describe('tableControllerTest', () => {
     };
 
     const createTableConnectionData = await post(
-      'table/edge/connection/create',
+      'table/data/edge/create',
       bodyCreateConnection,
     );
 
