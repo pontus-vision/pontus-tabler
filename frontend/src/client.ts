@@ -146,7 +146,7 @@ export const tableRead = async (
 
 export const createTable = async (
   data: TableCreateReq,
-): Promise<AxiosResponse<TableCreateRes, any> | OpenApiValidationFail> => {
+): Promise<AxiosResponse<TableCreateRes, any>> => {
   return post('/table/create', data);
 };
 
