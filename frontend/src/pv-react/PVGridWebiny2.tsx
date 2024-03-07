@@ -370,7 +370,6 @@ const PVGridWebiny2 = ({
     if (gridApi) {
       onFiltersChange && onFiltersChange(gridApi.getFilterModel());
       setFilterState(gridApi.getFilterModel());
-      console.log({ filterModel: gridApi.getFilterModel() });
     }
   }
 
