@@ -31,8 +31,10 @@ import {
   upsertDashboard,
 } from './service/DashboardService';
 import {
+  createTableDataEdge,
   createTableEdge,
   deleteTableEdge,
+  readTableDataEdge,
   readTableEdgesByTableId,
   // updateTableEdge,
 } from './service/EdgeService';
@@ -248,4 +250,20 @@ export default new PontusService({
     // const response = await updateTableEdge(req.body);
     // res.send(response);
   },
+  tableDataEdgeCreatePost: async (req, res) => {
+    try {
+      console.log({ req });
+      const response = await createTableDataEdge(req.body);
+
+      res.send(response);
+    } catch (error) {
+      console.log({ error });
+    }
+  },
+  tableDataEdgeReadPost: async (req, res) => {
+    const response = await readTableDataEdge(req.body);
+    console.log({ response: JSON.stringify(response) });
+    res.send(response);
+  },
+  tableDataEdgeDeletePost(req, res) {},
 });

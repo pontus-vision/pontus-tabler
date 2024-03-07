@@ -15,7 +15,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@backend/*": [
+        "/home/pvpmartins/work/pontus-tabler/backend/cosmos-db/src/typescript"
+      ]
+    }
   },
   "exclude": ["node_modules"],
   "references": [{ "path": "./tsconfig.node.json" }]
