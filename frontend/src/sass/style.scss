@@ -21,6 +21,7 @@
 @use '../views/styles/DeleteTableView.scss';
 @use '../views/styles/UpdateTable.scss';
 @use '../views/styles/Unauthorized.scss';
+@use '../views/styles/EdgesView.scss';
 // @use '../components/styles/Sidebar.scss';
 
 #root {
@@ -40,14 +41,14 @@
   }
 }
 
-.table-input-tooltip{
-    position: absolute;
-    left: 0;
-    background-color: #ff5555; /* Tooltip background color */
-    color: #fff; /* Tooltip text color */
-    padding: 8px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
-    font-size: 14px;
-    white-space: nowrap; 
+.table-input-tooltip {
+  position: absolute;
+  left: 0;
+  background-color: #ff5555; /* Tooltip background color */
+  color: #fff; /* Tooltip text color */
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+  font-size: 14px;
+  white-space: nowrap;
 }

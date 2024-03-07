@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "target": "ES5",
+    "target": "ES6",
     "lib": ["es6", "dom"],
     "module": "commonjs",
     "moduleResolution": "Node",

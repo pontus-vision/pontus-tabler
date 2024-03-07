@@ -30,6 +30,14 @@ import {
   readDashboards,
   upsertDashboard,
 } from './service/DashboardService';
+import {
+  createTableDataEdge,
+  createTableEdge,
+  deleteTableEdge,
+  readTableDataEdge,
+  readTableEdgesByTableId,
+  // updateTableEdge,
+} from './service/EdgeService';
 
 export default new PontusService({
   authGroupCreatePost(req, res) {},
@@ -223,4 +231,39 @@ export default new PontusService({
       }
     }
   },
+  tableEdgeCreatePost: async (req, res) => {
+    const response = await createTableEdge(req.body);
+
+    res.send(response);
+  },
+  tableEdgeDeletePost: async (req, res) => {
+    const response = await deleteTableEdge(req.body);
+
+    res.send(response);
+  },
+  tableEdgeReadPost: async (req, res) => {
+    const response = await readTableEdgesByTableId(req.body);
+
+    res.send(response);
+  },
+  tableEdgeUpdatePost: async (req, res) => {
+    // const response = await updateTableEdge(req.body);
+    // res.send(response);
+  },
+  tableDataEdgeCreatePost: async (req, res) => {
+    try {
+      console.log({ req });
+      const response = await createTableDataEdge(req.body);
+
+      res.send(response);
+    } catch (error) {
+      console.log({ error });
+    }
+  },
+  tableDataEdgeReadPost: async (req, res) => {
+    const response = await readTableDataEdge(req.body);
+    console.log({ response: JSON.stringify(response) });
+    res.send(response);
+  },
+  tableDataEdgeDeletePost(req, res) {},
 });

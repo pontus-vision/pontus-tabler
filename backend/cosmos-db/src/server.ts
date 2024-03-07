@@ -1,5 +1,6 @@
 import express from 'express';
 import pontus from './index';
+import cors from 'cors';
 import { register } from './generated/register';
 import {
   app as azureApp,
@@ -18,6 +19,11 @@ export const app = express();
 
 const port = 8080;
 
+<<<<<<< HEAD
+=======
+app.use(cors());
+
+>>>>>>> main
 app.use(express.json());
 
 register(app, { pontus });

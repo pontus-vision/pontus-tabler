@@ -22,6 +22,9 @@ import CreateDashboard from './views/dashboard/CreateDashboard';
 import UpdateDashboard from './views/dashboard/UpdateDashboard';
 import CreateTableView from './views/tables/CreateTable';
 import TableDataReadView from './views/tables/table-data/TableDataRead';
+import EdgesView from './views/EdgesView';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -30,9 +33,19 @@ function App() {
 
   const [dashboardId, setDashboardId] = useState<string>();
 
+  const [openedSidebar, setOpenedSidebar] = useState(false);
+
   return (
     <AuthProvider>
       <>
+        <Header
+          setOpenedSidebar={setOpenedSidebar}
+          openedSidebar={openedSidebar}
+        />
+        <Sidebar
+          setOpenedSidebar={setOpenedSidebar}
+          openedSidebar={openedSidebar}
+        />
         <Routes>
           <Route
             path="/"
@@ -46,6 +59,7 @@ function App() {
               />
             }
           />
+          <Route path="/table/edges" element={<EdgesView />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
             <Route path="/dashboard" element={<DashboardView />} />
