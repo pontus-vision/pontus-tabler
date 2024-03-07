@@ -1,5 +1,6 @@
 *.iml
 **/node_modules/
+.vscode/**
 **/npm-debug.log
 bower_components/
 coverage/

@@ -122,339 +122,345 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
 
   let colSortStr = '';
 
-  for (const colId in cols) {
-    if (cols.hasOwnProperty(colId)) {
-      const condition1Filter = cols[colId]?.condition1?.filter;
-      const condition2Filter = cols[colId]?.condition2?.filter;
+  for (let col in cols) {
+    if (cols.hasOwnProperty(col)) {
+      const colName = `["${col}"]`;
 
-      const filterType = cols[colId]?.filterType;
+      const condition1Filter = cols[col]?.condition1?.filter;
+      const condition2Filter = cols[col]?.condition2?.filter;
 
-      const type = cols[colId]?.type?.toLowerCase(); // When we received a object from just one col, the property is on a higher level
+      const filterType = cols[col]?.filterType;
 
-      const type1 = cols[colId]?.condition1?.type.toLowerCase();
-      const type2 = cols[colId]?.condition2?.type.toLowerCase();
+      const type = cols[col]?.type?.toLowerCase(); // When we received a object from just one colName, the property is on a higher level
 
-      const operator = cols[colId]?.operator;
+      const type1 = cols[col]?.condition1?.type.toLowerCase();
+      const type2 = cols[col]?.condition2?.type.toLowerCase();
+
+      const operator = cols[col]?.operator;
 
       const colQuery = [];
 
       if (filterType === 'text') {
-        const filter = cols[colId]?.filter; // When we received a object from just one col, the property is on a higher level
+        const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
 
         if (!condition1Filter) {
           if (type === 'contains') {
-            colQuery.push(` CONTAINS(c.${colId}, "${filter}")`);
+            colQuery.push(` CONTAINS(c${colName}, "${filter}")`);
           }
 
           if (type === 'not contains') {
-            colQuery.push(` NOT CONTAINS(c.${colId}, "${filter}")`);
+            colQuery.push(` NOT CONTAINS(c${colName}, "${filter}")`);
           }
 
           if (type === 'starts with') {
-            colQuery.push(` STARTSWITH(c.${colId}, "${filter}")`);
+            colQuery.push(` STARTSWITH(c${colName}, "${filter}")`);
           }
 
           if (type === 'ends with') {
-            colQuery.push(` ENDSWITH(c.${colId}, "${filter}")`);
+            colQuery.push(` ENDSWITH(c${colName}, "${filter}")`);
           }
 
           if (type === 'equals') {
-            colQuery.push(` c.${colId} = "${filter}"`);
+            colQuery.push(` c${colName} = "${filter}"`);
           }
 
           if (type === 'not equals') {
-            colQuery.push(` NOT c.${colId} = "${filter}"`);
+            colQuery.push(` NOT c${colName} = "${filter}"`);
           }
         }
 
         if (condition1Filter && type1 === 'contains') {
-          colQuery.push(` CONTAINS(c.${colId}, "${condition1Filter}")`);
+          colQuery.push(` CONTAINS(c${colName}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'contains') {
           colQuery.push(
-            `${operator} CONTAINS(c.${colId}, "${condition2Filter}")`,
+            `${operator} CONTAINS(c${colName}, "${condition2Filter}")`,
           );
         }
 
         if (condition1Filter && type1 === 'not contains') {
-          colQuery.push(` NOT CONTAINS(c.${colId}, "${condition1Filter}")`);
+          colQuery.push(` NOT CONTAINS(c${colName}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'not contains') {
           colQuery.push(
-            ` ${operator} NOT CONTAINS(c.${colId}, "${condition2Filter}")`,
+            ` ${operator} NOT CONTAINS(c${colName}, "${condition2Filter}")`,
           );
         }
 
         if (condition1Filter && type1 === 'starts with') {
-          colQuery.push(` STARTSWITH(c.${colId}, "${condition1Filter}")`);
+          colQuery.push(` STARTSWITH(c${colName}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'starts with') {
           colQuery.push(
-            ` ${operator} STARTSWITH(c.${colId}, "${condition2Filter}")`,
+            ` ${operator} STARTSWITH(c${colName}, "${condition2Filter}")`,
           );
         }
 
         if (condition1Filter && type1 === 'ends with') {
-          colQuery.push(` ENDSWITH(c.${colId}, "${condition1Filter}")`);
+          colQuery.push(` ENDSWITH(c${colName}, "${condition1Filter}")`);
         }
 
         if (condition2Filter && type2 === 'ends with') {
           colQuery.push(
-            ` ${operator} ENDSWITH(c.${colId}, "${condition2Filter}")`,
+            ` ${operator} ENDSWITH(c${colName}, "${condition2Filter}")`,
           );
         }
 
         if (condition1Filter && type1 === 'equals') {
-          colQuery.push(` c.${colId} = "${condition1Filter}"`);
+          colQuery.push(` c${colName} = "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'equals') {
-          colQuery.push(` ${operator} c.${colId} = "${condition2Filter}"`);
+          colQuery.push(` ${operator} c${colName} = "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'not equals') {
-          colQuery.push(` NOT c.${colId} = "${condition1Filter}"`);
+          colQuery.push(` NOT c${colName} = "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'not equals') {
-          colQuery.push(` ${operator} NOT c.${colId} = "${condition2Filter}"`);
+          colQuery.push(` ${operator} NOT c${colName} = "${condition2Filter}"`);
         }
       }
       if (filterType === 'number') {
-        const filter = cols[colId]?.filter; // When we received a object from just one col, the property is on a higher level
+        const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
 
         if (!condition1Filter) {
           if (type === 'greaterThan') {
-            colQuery.push(` CONTAINS(c.${colId}, "${filter}")`);
+            colQuery.push(` CONTAINS(c${colName}, "${filter}")`);
           }
 
           if (type === 'greaterThanOrEquals') {
-            colQuery.push(` ENDSWITH(c.${colId}, "${filter}")`);
+            colQuery.push(` ENDSWITH(c${colName}, "${filter}")`);
           }
           if (type === 'lessThan') {
-            colQuery.push(` NOT CONTAINS(c.${colId}, "${filter}")`);
+            colQuery.push(` NOT CONTAINS(c${colName}, "${filter}")`);
           }
 
           if (type === 'lessThanOrEquals') {
-            colQuery.push(` STARTSWITH(c.${colId}, "${filter}")`);
+            colQuery.push(` STARTSWITH(c${colName}, "${filter}")`);
           }
 
           if (type === 'equals') {
-            colQuery.push(` c.${colId} = "${filter}"`);
+            colQuery.push(` c${colName} = "${filter}"`);
           }
 
           if (type === 'notEqual') {
-            colQuery.push(` NOT c.${colId} = "${filter}"`);
+            colQuery.push(` NOT c${colName} = "${filter}"`);
           }
 
           if (type === 'inRange') {
-            const filterFrom = cols[colId].filter;
-            const filterTo = cols[colId].filterTo;
+            const filterFrom = cols[col].filter;
+            const filterTo = cols[col].filterTo;
             colQuery.push(
-              ` c.${colId} >= "${filterFrom}" AND c.${colId} <= "${filterTo}"`,
+              ` c${colName} >= "${filterFrom}" AND c${colName} <= "${filterTo}"`,
             );
           }
 
           if (type === 'blank') {
-            colQuery.push(` NOT c.${colId} = "${filter}"`);
+            colQuery.push(` NOT c${colName} = "${filter}"`);
           }
 
           if (type === 'notBlank') {
-            colQuery.push(` NOT c.${colId} = "${filter}"`);
+            colQuery.push(` NOT c${colName} = "${filter}"`);
           }
         }
 
         if (condition1Filter && type1 === 'greaterThan') {
-          colQuery.push(` c.${colId} > "${condition1Filter}"`);
+          colQuery.push(` c${colName} > "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'greaterThan') {
-          colQuery.push(` ${operator} c.${colId} > "${condition2Filter}"`);
+          colQuery.push(` ${operator} c${colName} > "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'greaterThanOrEquals') {
-          colQuery.push(` c.${colId} >= "${condition1Filter}"`);
+          colQuery.push(` c${colName} >= "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'greaterThanOrEquals') {
-          colQuery.push(` ${operator} c.${colId} >= "${condition2Filter}"`);
+          colQuery.push(` ${operator} c${colName} >= "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'lessThan') {
-          colQuery.push(` c.${colId} < "${condition1Filter}"`);
+          colQuery.push(` c${colName} < "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'lessThan') {
-          colQuery.push(` ${operator} c.${colId} < "${condition2Filter}"`);
+          colQuery.push(` ${operator} c${colName} < "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'lessThanOrEquals') {
-          colQuery.push(` c.${colId} <= "${condition1Filter}"`);
+          colQuery.push(` c${colName} <= "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'lessThanOrEquals') {
-          colQuery.push(` ${operator} c.${colId} <= "${condition2Filter}"`);
+          colQuery.push(` ${operator} c${colName} <= "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'equals') {
-          colQuery.push(` c.${colId} = "${condition1Filter}"`);
+          colQuery.push(` c${colName} = "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'equals') {
-          colQuery.push(` ${operator} c.${colId} = "${condition2Filter}"`);
+          colQuery.push(` ${operator} c${colName} = "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'notEquals') {
-          colQuery.push(` NOT c.${colId} = "${condition1Filter}"`);
+          colQuery.push(` NOT c${colName} = "${condition1Filter}"`);
         }
 
         if (condition2Filter && type2 === 'notEquals') {
-          colQuery.push(` ${operator} NOT c.${colId} = "${condition2Filter}"`);
+          colQuery.push(` ${operator} NOT c${colName} = "${condition2Filter}"`);
         }
 
         if (condition1Filter && type1 === 'inRange') {
-          const filterFrom = cols[colId].condition1.filter;
-          const filterTo = cols[colId].condition1.filterTo;
+          const filterFrom = cols[col].condition1.filter;
+          const filterTo = cols[col].condition1.filterTo;
           colQuery.push(
-            ` c.${colId} >= "${filterFrom}" AND c.${colId} <= "${filterTo}"`,
+            ` c${colName} >= "${filterFrom}" AND c${colName} <= "${filterTo}"`,
           );
         }
 
         if (condition2Filter && type2 === 'inRange') {
-          const filterFrom = cols[colId].condition2.filter;
-          const filterTo = cols[colId].condition2.filterTo;
+          const filterFrom = cols[col].condition2.filter;
+          const filterTo = cols[col].condition2.filterTo;
           colQuery.push(
-            ` c.${colId} >= "${filterFrom}" AND c.${colId} <= "${filterTo}"`,
+            ` c${colName} >= "${filterFrom}" AND c${colName} <= "${filterTo}"`,
           );
         }
 
         if (condition1Filter && type1 === 'blank') {
-          colQuery.push(` c.${colId} = "" AND c.${colId} = null`);
+          colQuery.push(` c${colName} = "" AND c${colName} = null`);
         }
 
         if (condition2Filter && type2 === 'blank') {
-          colQuery.push(` ${operator} c.${colId} = "" AND c.${colId} = null`);
+          colQuery.push(` ${operator} c${colName} = "" AND c${colName} = null`);
         }
 
         if (condition1Filter && type1 === 'notBlank') {
-          colQuery.push(` c.${colId} != "" AND c.${colId} != null`);
+          colQuery.push(` c${colName} != "" AND c${colName} != null`);
         }
 
         if (condition2Filter && type2 === 'notBlank') {
-          colQuery.push(` ${operator} c.${colId} != "" AND c.${colId} != null`);
+          colQuery.push(
+            ` ${operator} c${colName} != "" AND c${colName} != null`,
+          );
         }
       }
 
       if (filterType === 'date') {
         const date1 =
-          cols[colId]?.condition1?.dateFrom &&
-          convertToISOString(cols[colId]?.condition1?.dateFrom);
+          cols[col]?.condition1?.dateFrom &&
+          convertToISOString(cols[col]?.condition1?.dateFrom);
         const date2 =
-          cols[colId]?.condition2?.dateFrom &&
-          convertToISOString(cols[colId]?.condition2?.dateFrom);
+          cols[col]?.condition2?.dateFrom &&
+          convertToISOString(cols[col]?.condition2?.dateFrom);
 
         const condition1DateFrom =
-          cols[colId]?.condition1?.dateFrom &&
-          convertToISOString(cols[colId]?.condition1?.dateFrom);
+          cols[col]?.condition1?.dateFrom &&
+          convertToISOString(cols[col]?.condition1?.dateFrom);
         const condition2DateFrom =
-          cols[colId]?.condition2?.dateFrom &&
-          convertToISOString(cols[colId]?.condition2?.dateFrom);
+          cols[col]?.condition2?.dateFrom &&
+          convertToISOString(cols[col]?.condition2?.dateFrom);
 
         const condition1DateTo =
-          cols[colId]?.condition1?.dateTo &&
-          convertToISOString(cols[colId]?.condition1?.dateTo);
+          cols[col]?.condition1?.dateTo &&
+          convertToISOString(cols[col]?.condition1?.dateTo);
         const condition2DateTo =
-          cols[colId]?.condition2?.dateTo &&
-          convertToISOString(cols[colId]?.condition2?.dateTo);
+          cols[col]?.condition2?.dateTo &&
+          convertToISOString(cols[col]?.condition2?.dateTo);
 
-        if (!cols[colId]?.condition1) {
+        if (!cols[col]?.condition1) {
           const date =
-            cols[colId].dateFrom && convertToISOString(cols[colId].dateFrom);
+            cols[col].dateFrom && convertToISOString(cols[col].dateFrom);
 
           if (type === 'greaterthan') {
-            colQuery.push(`c.${colId} > "${date}"`);
+            colQuery.push(`c${colName} > "${date}"`);
           }
 
           if (type === 'lessthan') {
-            colQuery.push(` c.${colId} < "${date}"`);
+            colQuery.push(` c${colName} < "${date}"`);
           }
 
           if (type === 'inrange') {
             const dateFrom =
-              cols[colId].dateFrom && convertToISOString(cols[colId].dateFrom);
+              cols[col].dateFrom && convertToISOString(cols[col].dateFrom);
             const dateTo =
-              cols[colId].dateTo && convertToISOString(cols[colId].dateTo);
+              cols[col].dateTo && convertToISOString(cols[col].dateTo);
             colQuery.push(
-              ` c.${colId} >= "${dateFrom}" AND c.${colId} <= "${dateTo}"`,
+              ` c${colName} >= "${dateFrom}" AND c${colName} <= "${dateTo}"`,
             );
           }
 
           if (type === 'equals') {
-            colQuery.push(` c.${colId} = "${date}"`);
+            colQuery.push(` c${colName} = "${date}"`);
           }
 
           if (type === 'notequal') {
-            colQuery.push(` c.${colId} != "${date}"`);
+            colQuery.push(` c${colName} != "${date}"`);
           }
 
           if (type === 'blank') {
-            colQuery.push(` c.${colId} = "" AND c.${colId} = null`);
+            colQuery.push(` c${colName} = "" AND c${colName} = null`);
           }
 
           if (type === 'notblank') {
-            colQuery.push(` c.${colId} != "" AND c.${colId} != null`);
+            colQuery.push(` c${colName} != "" AND c${colName} != null`);
           }
         }
 
         if (condition1DateFrom && type1 === 'greaterthan') {
-          colQuery.push(` c.${colId} > "${date1}"`);
+          colQuery.push(` c${colName} > "${date1}"`);
         }
 
         if (condition2DateFrom && type2 === 'greaterthan') {
-          colQuery.push(` ${operator} c.${colId} > "${date2}"`);
+          colQuery.push(` ${operator} c${colName} > "${date2}"`);
         }
 
         if (condition1DateFrom && type1 === 'lessthan') {
-          colQuery.push(` c.${colId} < "${date1}"`);
+          colQuery.push(` c${colName} < "${date1}"`);
         }
 
         if (condition2DateFrom && type2 === 'lessthan') {
-          colQuery.push(` ${operator} c.${colId} < "${date2}"`);
+          colQuery.push(` ${operator} c${colName} < "${date2}"`);
         }
 
         if (condition1DateFrom && type1 === 'blank') {
-          colQuery.push(` c.${colId} = "" AND c.${colId} = null`);
+          colQuery.push(` c${colName} = "" AND c${colName} = null`);
         }
 
         if (condition2DateFrom && type2 === 'blank') {
-          colQuery.push(` ${operator} c.${colId} = "" AND c.${colId} = null`);
+          colQuery.push(` ${operator} c${colName} = "" AND c${colName} = null`);
         }
 
         if (condition1DateFrom && type1 === 'notblank') {
-          colQuery.push(` c.${colId} != "" AND c.${colId} != null`);
+          colQuery.push(` c${colName} != "" AND c${colName} != null`);
         }
 
         if (condition2DateFrom && type2 === 'notblank') {
-          colQuery.push(` ${operator} c.${colId} != "" AND c.${colId} != null`);
+          colQuery.push(
+            ` ${operator} c${colName} != "" AND c${colName} != null`,
+          );
         }
 
         if (condition1DateFrom && type1 === 'equals') {
-          colQuery.push(` c.${colId} = ${condition1DateFrom}`);
+          colQuery.push(` c${colName} = ${condition1DateFrom}`);
         }
 
         if (condition2DateFrom && type2 === 'equals') {
-          colQuery.push(` ${operator} c.${colId} = ${condition2DateFrom}`);
+          colQuery.push(` ${operator} c${colName} = ${condition2DateFrom}`);
         }
 
         if (condition1DateFrom && type1 === 'notequal') {
-          colQuery.push(` c.${colId} != ${condition1DateFrom}`);
+          colQuery.push(` c${colName} != ${condition1DateFrom}`);
         }
 
         if (condition2DateFrom && type2 === 'notequal') {
-          colQuery.push(` ${operator} c.${colId} != ${condition2DateFrom}`);
+          colQuery.push(` ${operator} c${colName} != ${condition2DateFrom}`);
         }
 
         if (condition1DateFrom && type1 === 'inrange') {
@@ -462,7 +468,7 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
           colQuery.push(
             ` ${
               multiCol ? '(' : ''
-            }c.${colId} >= "${condition1DateFrom}" AND c.${colId} <= "${condition1DateTo}"` +
+            }c${colName} >= "${condition1DateFrom}" AND c${colName} <= "${condition1DateTo}"` +
               (condition2DateFrom ? ')' : ''),
           );
         }
@@ -470,17 +476,17 @@ export const filterToQuery = (body: ReadPaginationFilter) => {
         if (condition2DateFrom && type2 === 'inrange') {
           const multiCol = Object.keys(cols).length > 1;
           colQuery.push(
-            ` ${operator} (c.${colId} >= "${condition2DateFrom}" AND c.${colId} <= "${condition2DateTo}"${
+            ` ${operator} (c${colName} >= "${condition2DateFrom}" AND c${colName} <= "${condition2DateTo}"${
               multiCol ? ')' : ''
             }`,
           );
         }
       }
 
-      const colSort = cols[colId].sort;
+      const colSort = cols[col].sort;
 
       if (!!colSort) {
-        colSortStr = `c.${colId} ${colSort}`;
+        colSortStr = `c${colName} ${colSort}`;
       }
       const colQueryStr = colQuery.join('').trim();
 

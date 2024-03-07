@@ -24,7 +24,7 @@ import NotificationManager, {
 } from '../../../components/NotificationManager';
 
 const TableDataReadView = () => {
-  const [cols, setCols] = useState<TableColumnRef[]>();
+  const [cols, setCols] = useState<TableColumnRef[]>([]);
   const tableId = useParams().id;
   const [tableName, setTableName] = useState<string>('');
   const [filters, setFilters] = useState<{
@@ -49,7 +49,7 @@ const TableDataReadView = () => {
         });
 
         setTable(res?.data);
-        setCols(colsRes);
+        colsRes && setCols(colsRes);
         setTableName(res?.data.name || '');
 
         console.log({ res: res?.data });
@@ -129,7 +129,7 @@ const TableDataReadView = () => {
       };
       const res = await tableDataCreate(obj);
 
-      if (res?.status === 201) {
+      if (res?.status === 200) {
         fetchTableData();
         notificationManagerRef?.current?.addMessage(
           'success',

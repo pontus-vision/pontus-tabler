@@ -88,8 +88,7 @@ const TablesReadView = ({ rowsTested }: Props) => {
   const handleDelete = async (arr: { id: string; name: string }[]) => {
     arr.forEach(async (el, index) => {
       try {
-        console.log({ el });
-        const res = await deleteTable(el);
+        const res = await deleteTable({ id: el.id, name: el.name });
         if (index === arr.length - 1 && res?.status === 200) {
           const message = `Table${
             arr.length > 1 ? 's' : ''
