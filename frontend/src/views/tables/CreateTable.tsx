@@ -30,96 +30,96 @@ const CreateTableView = ({ testId }: Props) => {
 
   const { t, i18n } = useTranslation();
 
-  const handleCreate = async (data: TableColumnRef[]) => {
-    const isAnyFieldInvalid = Object.values(validationError).some(
-      (field) => field,
-    );
-    if (isAnyFieldInvalid) return;
+  // const handleCreate = async (data: TableColumnRef[]) => {
+  //   const isAnyFieldInvalid = Object.values(validationError).some(
+  //     (field) => field,
+  //   );
+  //   if (isAnyFieldInvalid) return;
 
-    let colsEmpty = false;
+  //   let colsEmpty = false;
 
-    for (const [key, value] of Object.entries(data)) {
-      console.log({ key, value });
-      if (!value.headerName) {
-        colsEmpty = true;
-      }
-    }
+  //   for (const [key, value] of Object.entries(data)) {
+  //     console.log({ key, value });
+  //     if (!value.headerName) {
+  //       colsEmpty = true;
+  //     }
+  //   }
 
-    try {
-      if (!name || colsEmpty) {
-        throw `Please, there are some empty fields.`;
-      }
+  //   try {
+  //     if (!name || colsEmpty) {
+  //       throw `Please, there are some empty fields.`;
+  //     }
 
-      const obj = {
-        label: name || '',
-        name: formatToCosmosDBPattern(name || ''),
-        cols: data.map((col) => {
-          return {
-            ...col,
-            name: formatToCosmosDBPattern(col.name || ''),
-            field: formatToCosmosDBPattern(col.name || ''),
-          };
-        }),
-      };
-      const createRes = await createTable(obj);
+  //     const obj = {
+  //       label: name || '',
+  //       name: formatToCosmosDBPattern(name || ''),
+  //       cols: data.map((col) => {
+  //         return {
+  //           ...col,
+  //           name: formatToCosmosDBPattern(col.name || ''),
+  //           field: formatToCosmosDBPattern(col.name || ''),
+  //         };
+  //       }),
+  //     };
+  //     const createRes = await createTable(obj);
 
-      if (createRes?.status === 400) {
-        throw new Error();
-      } else if (createRes?.status === 409) {
-        throw 'There is already a table with that Name';
-      }
+  //     if (createRes?.status === 400) {
+  //       throw new Error();
+  //     } else if (createRes?.status === 409) {
+  //       throw 'There is already a table with that Name';
+  //     }
 
-      notificationManagerRef?.current?.addMessage(
-        'success',
-        'Success',
-        'Table created!',
-      );
-    } catch (error: any) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        typeof error === 'string' ? error : 'Could not create table',
-      );
-    }
-  };
+  //     notificationManagerRef?.current?.addMessage(
+  //       'success',
+  //       'Success',
+  //       'Table created!',
+  //     );
+  //   } catch (error: any) {
+  //     notificationManagerRef?.current?.addMessage(
+  //       'error',
+  //       'Error',
+  //       typeof error === 'string' ? error : 'Could not create table',
+  //     );
+  //   }
+  // };
 
-  const handleCreate = async (data: TableColumnRef[]) => {
-    const isAnyFieldInvalid = Object.values(validationError).some(
-      (field) => field,
-    );
-    if (isAnyFieldInvalid) return;
+  // const handleCreate = async (data: TableColumnRef[]) => {
+  //   const isAnyFieldInvalid = Object.values(validationError).some(
+  //     (field) => field,
+  //   );
+  //   if (isAnyFieldInvalid) return;
 
-    try {
-      const obj = {
-        label: name || '',
-        name: formatToCosmosDBPattern(name || ''),
-        cols: data.map((col) => {
-          return {
-            ...col,
-            name: formatToCosmosDBPattern(col.name || ''),
-            field: formatToCosmosDBPattern(col.name || ''),
-          };
-        }),
-      };
-      const createRes = await createTable(obj);
+  //   try {
+  //     const obj = {
+  //       label: name || '',
+  //       name: formatToCosmosDBPattern(name || ''),
+  //       cols: data.map((col) => {
+  //         return {
+  //           ...col,
+  //           name: formatToCosmosDBPattern(col.name || ''),
+  //           field: formatToCosmosDBPattern(col.name || ''),
+  //         };
+  //       }),
+  //     };
+  //     const createRes = await createTable(obj);
 
-      if (createRes?.status === 400) {
-        throw new Error();
-      } else if (createRes?.status === 409) {
-        throw 'There is already a table with that Name';
-      }
+  //     if (createRes?.status === 400) {
+  //       throw new Error();
+  //     } else if (createRes?.status === 409) {
+  //       throw 'There is already a table with that Name';
+  //     }
 
-      setMessage({ message: 'Table created successfully!', type: 'success' });
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        message: typeof error === 'string' ? error : '',
-      });
-      setTimeout(() => {
-        setMessage({ message: '', type: undefined });
-      }, 5000);
-    }
-  };
+  //     setMessage({ message: 'Table created successfully!', type: 'success' });
+  //   } catch (error) {
+  //     setMessage({
+  //       type: 'error',
+  //       message: typeof error === 'string' ? error : '',
+  //     });
+  //     setTimeout(() => {
+  //       setMessage({ message: '', type: undefined });
+  //     }, 5000);
+  //   }
+  // };
 
   const checkValidationError = (message: string) => {
     if (message.startsWith('required')) {
