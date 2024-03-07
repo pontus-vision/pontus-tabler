@@ -17,10 +17,6 @@ const TableRelationshipsPreview = ({ array1, array2, onSelect }: Props) => {
       : [...array2, ...Array(array1.length - array2.length).fill(null)];
 
   useEffect(() => {
-    console.log({ array1 });
-  }, [array1]);
-
-  useEffect(() => {
     onSelect && onSelect(activeTab);
   }, [activeTab]);
 

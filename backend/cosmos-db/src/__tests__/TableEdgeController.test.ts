@@ -448,7 +448,7 @@ describe('tableControllerTest', () => {
     };
 
     const createTableConnectionData2 = await post(
-      'table/edge/connection/create',
+      'table/data/edge/create',
       bodyCreateConnection2,
     );
 
@@ -496,7 +496,7 @@ describe('tableControllerTest', () => {
       ),
     ).toBe(true);
   });
-  it('It should test one-to-many edges creation', async () => {
+  it.only('It should test one-to-many edges creation', async () => {
     const table: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',

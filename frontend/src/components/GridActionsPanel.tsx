@@ -72,7 +72,6 @@ const GridActionsPanel = ({
     const cmpWidth = (document.querySelector('body') as HTMLElement)
       ?.offsetWidth;
     setCmpWidth(cmpWidth);
-    console.log({ windowWidth });
   }, [windowWidth]);
 
   if (!!cmpWidth && cmpWidth < 514) {
