@@ -4,6 +4,7 @@ import {
   DashboardUpdateReq,
   ReadPaginationFilter,
   DashboardsReadRes,
+  DashboardGroupAuthCreateReq,
 } from '../typescript/api';
 import { FetchData, fetchContainer, fetchData } from '../cosmos-utils';
 import { NotFoundError } from '../generated/api';
@@ -45,7 +46,7 @@ export const readDashboardById = async (dashboardId: string) => {
     return resources[0];
   } else if (resources.length === 0) {
     throw new NotFoundError('No dashboard found.');
-  } 
+  }
 };
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
@@ -67,5 +68,24 @@ export const readDashboards = async (
   return { dashboards: res.values, totalDashboards: res.count };
 };
 
-//   return resources[0];
-// };
+export const createDashboardAuthGroup = async (
+  data: DashboardGroupAuthCreateReq,
+) => {
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
+  const dashboardId = data.dashboardId;
+
+  const res = await dashboardContainer.item(dashboardId, dashboardId).read();
+
+  if (data.authGroups.create) {
+    const querySpec = {
+      query: 'select c.authGroups.create from c where c.id=@dashboardId',
+      parameters: [
+        {
+          name: '@dashboardId',
+          value: dashboardId,
+        },
+      ],
+    };
+    const res = await dashboardContainer.items.query(querySpec).fetchAll();
+  }
+};

@@ -751,14 +751,14 @@ service:
       docs: Create a new dashboard state with name and state information
       display-name: Create a new dashboard state
       request:
-        name: AuthCreateBody
+        name: DashboardGroupAuthCreateReq
         body:
           properties:
             dashboardId: optional<string>
-            authGroups: optional<DashboardgroupauthcreateAuthGroups>
+            authGroups: optional<AuthGroups>
       response:
         docs: Dashboard state created successfully
-        type: DashboardAuthGroup
+        type: DashboardGroupAuthRes
       errors:
         - BadRequestError
         - InternalServerError
@@ -795,7 +795,7 @@ service:
             dashboardId: optional<string>
       response:
         docs: Dashboard state created successfully
-        type: DashboardAuthGroup
+        type: DashboardGroupAuth
       errors:
         - BadRequestError
         - InternalServerError
@@ -832,7 +832,7 @@ service:
             authGroups: optional<AuthGroups>
       response:
         docs: Dashboard state created successfully
-        type: DashboardAuthGroup
+        type: DashboardGroupAuth
       errors:
         - BadRequestError
         - InternalServerError
@@ -1444,19 +1444,17 @@ types:
       authGroups:
         docs: IDs of the groups the user belongs to
         type: optional<list<string>>
-  DashboardAuthGroup:
+  DashboardGroupAuth:
     properties:
       dashboardId:
         docs: Unique identifier of the dashboard
-        type: optional<string>
-      dashboardName: optional<string>
-      authGroups: optional<AuthGroups>
-  DashboardgroupauthcreateAuthGroups:
-    properties:
-      create: optional<list<string>>
-      read: optional<list<string>>
-      update: optional<list<string>>
-      delete: optional<list<string>>
+        type: string
+      dashboardName: string
+      authGroups: AuthGroups
+  DashboardGroupAuthRes:
+    properties: {}
+    extends:
+      - DashboardGroupAuth
   AuthDeleteBody:
     properties:
       dashboardId: optional<string>

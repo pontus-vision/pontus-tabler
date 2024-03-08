@@ -25,6 +25,7 @@ import {
   upsertTableData,
 } from './service/TableDataService';
 import {
+  createDashboardAuthGroup,
   deleteDashboard,
   readDashboardById,
   readDashboards,
@@ -50,7 +51,9 @@ export default new PontusService({
   authUserReadPost(req, res) {},
   authUsersReadPost(req, res) {},
   authUserUpdatePost(req, res) {},
-  dashboardGroupAuthCreatePost(req, res) {},
+  dashboardGroupAuthCreatePost: async (req, res) => {
+    await createDashboardAuthGroup(req.body);
+  },
   dashboardGroupAuthDeletePost(req, res) {},
   dashboardGroupAuthReadPost(req, res) {},
   dashboardGroupAuthUpdatePost(req, res) {},
