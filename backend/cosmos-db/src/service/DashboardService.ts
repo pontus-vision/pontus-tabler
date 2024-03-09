@@ -74,18 +74,80 @@ export const createDashboardAuthGroup = async (
   const dashboardContainer = await fetchContainer(DASHBOARDS);
   const dashboardId = data.dashboardId;
 
-  const res = await dashboardContainer.item(dashboardId, dashboardId).read();
+  const authPermsArr = [];
 
-  if (data.authGroups.create) {
-    const querySpec = {
-      query: 'select c.authGroups.create from c where c.id=@dashboardId',
-      parameters: [
-        {
-          name: '@dashboardId',
-          value: dashboardId,
-        },
-      ],
-    };
-    const res = await dashboardContainer.items.query(querySpec).fetchAll();
+  for (const prop in data.authGroups) {
+    authPermsArr.push(prop);
+  }
+
+  const query = `select ${authPermsArr
+    .map((el) => `c.authGroups.${el}`)
+    .join(', ')}  from c where c.id=@dashboardId`;
+
+  const res4 = await dashboardContainer.item(dashboardId, dashboardId).read();
+
+  const querySpec = {
+    query,
+    parameters: [
+      {
+        name: '@dashboardId',
+        value: dashboardId,
+      },
+    ],
+  };
+
+  const res2 = await dashboardContainer.items.query(querySpec).fetchNext();
+
+  const authGroups = res2.resources[0];
+
+  let isAuthGroupEmpty = true;
+
+  for (const prop in data.authGroups) {
+    if (authGroups[prop]) {
+      isAuthGroupEmpty = false;
+    }
+  }
+  console.log({ isAuthGroupEmpty });
+  if (isAuthGroupEmpty) {
+    const res = await dashboardContainer.item(dashboardId, dashboardId).patch([
+      {
+        op: 'add',
+        path: '/authGroups',
+        value: data.authGroups,
+      },
+    ]);
+    return res.resource;
+  } else {
+    for (const prop in data.authGroups) {
+      if (!authGroups[prop] || !Array.isArray(authGroups[prop])) {
+        const res = await dashboardContainer
+          .item(dashboardId, dashboardId)
+          .patch([
+            {
+              op: 'add',
+              path: `/authGroups/${prop}`,
+              value: [data.authGroups[prop]],
+            },
+          ]);
+      } else {
+        const ret = [];
+
+        for (const [index, el] of data.authGroups[prop].entries()) {
+          const res = await dashboardContainer
+            .item(dashboardId, dashboardId)
+            .patch([
+              {
+                op: 'add',
+                path: `/authGroups/${prop}/-`,
+                value: el,
+              },
+            ]);
+
+          if (data.authGroups[prop].length - 1 === index) {
+            return res.resource;
+          }
+        }
+      }
+    }
   }
 };
