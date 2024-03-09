@@ -5,6 +5,9 @@ import {
   DashboardRef,
   DashboardUpdateRes,
   DashboardUpdateReq,
+  DashboardReadReq,
+  DashboardGroupAuthReadRes,
+  DashboardGroupAuthReadReq,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -258,7 +261,23 @@ describe('dashboardCreatePOST', () => {
       ...groupAuthBody,
       authGroups: { create: ['foo', 'bar'] },
     });
+    // const createGroupAuth3 = await post('dashboard/group/auth/create', {
+    //   ...groupAuthBody,
+    //   authGroups: { create: null },
+    // });
 
+    const readDashboardBody: DashboardGroupAuthReadReq = {
+      dashboardId: createDashboard.data.id,
+    };
+
+    const readDashboardGroupAuth = (await post(
+      'dashboard/group/auth/read',
+      readDashboardBody,
+    )) as AxiosResponse<DashboardGroupAuthReadRes>;
+
+    expect(readDashboardGroupAuth.data.authGroups.create).toContain(
+      createDashboard2.data.id,
+    );
     expect(createDashboard2.status).toBe(200);
   });
 });
