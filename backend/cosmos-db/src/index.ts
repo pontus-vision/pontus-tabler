@@ -28,6 +28,7 @@ import {
   createDashboardAuthGroup,
   deleteDashboard,
   readDashboardById,
+  readDashboardGroupAuth,
   readDashboards,
   upsertDashboard,
 } from './service/DashboardService';
@@ -60,7 +61,12 @@ export default new PontusService({
     }
   },
   dashboardGroupAuthDeletePost(req, res) {},
-  dashboardGroupAuthReadPost(req, res) {},
+  dashboardGroupAuthReadPost: async (req, res) => {
+    console.log({ req });
+    const response = await readDashboardGroupAuth(req.body);
+
+    res.send(response);
+  },
   dashboardGroupAuthUpdatePost(req, res) {},
   dashboardCreatePost: async (req, res) => {
     if (Object.keys(req.body).length === 0) {
@@ -87,7 +93,7 @@ export default new PontusService({
   dashboardsReadPost: async (req, res) => {
     try {
       const response = await readDashboards(req.body);
-
+      console.log({ response });
       res.send(response);
     } catch (error) {}
   },

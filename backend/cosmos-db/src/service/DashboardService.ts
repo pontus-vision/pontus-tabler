@@ -7,6 +7,8 @@ import {
   DashboardGroupAuthCreateReq,
   DashboardGroupAuthCreateRes,
   DashboardGroupAuth,
+  DashboardGroupAuthReadReq,
+  DashboardGroupAuthReadRes,
 } from '../typescript/api';
 import { FetchData, fetchContainer, fetchData } from '../cosmos-utils';
 import { NotFoundError } from '../generated/api';
@@ -163,4 +165,33 @@ export const createDashboardAuthGroup = async (
       }
     }
   }
+};
+
+export const readDashboardGroupAuth = async (
+  data: DashboardGroupAuthReadReq,
+): Promise<DashboardGroupAuthReadRes> => {
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
+
+  const query = `select c.authGroups, c.name from c where c.id=@dashboardId`;
+
+  const querySpec = {
+    query,
+    parameters: [
+      {
+        name: '@dashboardId',
+        value: data.dashboardId,
+      },
+    ],
+  };
+
+  const res2 = await dashboardContainer.items.query(querySpec).fetchNext();
+
+  const res3 = await dashboardContainer
+    .item(data.dashboardId, data.dashboardId)
+    .read();
+  return {
+    authGroups: res2.resources[0]?.authGroups,
+    dashboardId: data.dashboardId,
+    dashboardName: res2.resources[0]?.name,
+  };
 };

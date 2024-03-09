@@ -789,18 +789,19 @@ service:
       docs: Create a new dashboard state with name and state information
       display-name: Create a new dashboard state
       request:
-        name: AuthReadBody
+        name: DashboardGroupAuthReadReq
         body:
           properties:
-            dashboardId: optional<string>
+            dashboardId: string
       response:
         docs: Dashboard state created successfully
-        type: unknown
+        type: DashboardGroupAuthReadRes
       errors:
         - BadRequestError
         - InternalServerError
       examples:
-        - request: {}
+        - request:
+            dashboardId: 'a271f651-e4aa-4c9b-a6a0-0ef10711fb48'
           response:
             body:
               dashboardId: dashboardId
@@ -1389,6 +1390,10 @@ types:
     extends:
       - DashboardRef
       - BaseModelRef
+  DashboardGroupAuthReadRes:
+    properties: {}
+    extends:
+      - DashboardGroupAuth
   DashboardCreateReq: DashboardRef
   DashboardCreateRes:
     properties: {}
