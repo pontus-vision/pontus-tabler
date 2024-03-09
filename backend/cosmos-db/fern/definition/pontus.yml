@@ -754,34 +754,34 @@ service:
         name: DashboardGroupAuthCreateReq
         body:
           properties:
-            dashboardId: optional<string>
-            authGroups: optional<AuthGroups>
+            dashboardId: string
+            authGroups: AuthGroups
       response:
         docs: Dashboard state created successfully
-        type: DashboardGroupAuthRes
+        type: unknown
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request:
-            authGroups: {}
-          response:
-            body:
-              dashboardId: dashboardId
-              dashboardName: dashboardName
-              authGroups:
-                create:
-                  - create
-                  - create
-                read:
-                  - read
-                  - read
-                update:
-                  - update
-                  - update
-                delete:
-                  - delete
-                  - delete
+      # examples:
+      #   - request:
+      #       authGroups: {}
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         dashboardName: dashboardName
+      #         authGroups:
+      #           create:
+      #             - create
+      #             - create
+      #           read:
+      #             - read
+      #             - read
+      #           update:
+      #             - update
+      #             - update
+      #           delete:
+      #             - delete
+      #             - delete
     dashboardGroupAuthReadPOST:
       path: /dashboard/group/auth/read
       method: POST
@@ -1451,7 +1451,7 @@ types:
         type: string
       dashboardName: string
       authGroups: AuthGroups
-  DashboardGroupAuthRes:
+  DashboardGroupAuthCreateRes:
     properties: {}
     extends:
       - DashboardGroupAuth
