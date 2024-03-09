@@ -12,6 +12,8 @@ import {
 import { srv } from '../server';
 
 import { post } from './test-utils';
+import { DashboardGroupAuthCreateReq } from '../generated/api';
+import { AxiosResponse } from 'axios';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -226,5 +228,37 @@ describe('dashboardCreatePOST', () => {
     });
 
     expect(deleteVal2.status).toBe(200);
+  });
+  it.only('should create auth correctly in dashboard', async () => {
+    const dashboardBody: DashboardCreateReq = {
+      folder: 'folder',
+      name: 'dashboard1',
+      owner: 'foo',
+      state: {},
+    };
+    const createDashboard = (await post(
+      'dashboard/create',
+      dashboardBody,
+    )) as AxiosResponse<DashboardCreateRes>;
+
+    const createDashboard2 = (await post('dashboard/create', {
+      ...dashboardBody,
+      name: 'dashboard2',
+    })) as AxiosResponse<DashboardCreateRes>;
+
+    const groupAuthBody: DashboardGroupAuthCreateReq = {
+      dashboardId: createDashboard.data.id,
+      authGroups: { create: [createDashboard2.data.id] },
+    };
+    const createGroupAuth = await post(
+      'dashboard/group/auth/create',
+      groupAuthBody,
+    );
+    const createGroupAuth2 = await post('dashboard/group/auth/create', {
+      ...groupAuthBody,
+      authGroups: { create: ['foo', 'bar'] },
+    });
+
+    expect(createDashboard2.status).toBe(200);
   });
 });
