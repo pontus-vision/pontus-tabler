@@ -758,7 +758,7 @@ service:
             authGroups: AuthGroups
       response:
         docs: Dashboard state created successfully
-        type: unknown
+        type: DashboardGroupAuth
       errors:
         - BadRequestError
         - InternalServerError
@@ -795,7 +795,7 @@ service:
             dashboardId: optional<string>
       response:
         docs: Dashboard state created successfully
-        type: DashboardGroupAuth
+        type: unknown
       errors:
         - BadRequestError
         - InternalServerError

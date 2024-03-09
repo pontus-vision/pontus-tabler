@@ -5,9 +5,12 @@ import {
   ReadPaginationFilter,
   DashboardsReadRes,
   DashboardGroupAuthCreateReq,
+  DashboardGroupAuthCreateRes,
+  DashboardGroupAuth,
 } from '../typescript/api';
 import { FetchData, fetchContainer, fetchData } from '../cosmos-utils';
 import { NotFoundError } from '../generated/api';
+import { ItemResponse } from '@azure/cosmos';
 
 const DASHBOARDS = 'dashboards';
 
@@ -70,7 +73,7 @@ export const readDashboards = async (
 
 export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
-) => {
+): Promise<DashboardGroupAuthCreateRes> => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
   const dashboardId = data.dashboardId;
 
@@ -83,8 +86,6 @@ export const createDashboardAuthGroup = async (
   const query = `select ${authPermsArr
     .map((el) => `c.authGroups.${el}`)
     .join(', ')}  from c where c.id=@dashboardId`;
-
-  const res4 = await dashboardContainer.item(dashboardId, dashboardId).read();
 
   const querySpec = {
     query,
@@ -107,7 +108,7 @@ export const createDashboardAuthGroup = async (
       isAuthGroupEmpty = false;
     }
   }
-  console.log({ isAuthGroupEmpty });
+
   if (isAuthGroupEmpty) {
     const res = await dashboardContainer.item(dashboardId, dashboardId).patch([
       {
@@ -116,7 +117,12 @@ export const createDashboardAuthGroup = async (
         value: data.authGroups,
       },
     ]);
-    return res.resource;
+
+    return {
+      authGroups: res.resource.authGroups,
+      dashboardId,
+      dashboardName: res.resource.name,
+    };
   } else {
     for (const prop in data.authGroups) {
       if (!authGroups[prop] || !Array.isArray(authGroups[prop])) {
@@ -126,12 +132,15 @@ export const createDashboardAuthGroup = async (
             {
               op: 'add',
               path: `/authGroups/${prop}`,
-              value: [data.authGroups[prop]],
+              value: data.authGroups[prop],
             },
           ]);
+        return {
+          authGroups: res.resource.authGroups,
+          dashboardId,
+          dashboardName: res.resource.name,
+        };
       } else {
-        const ret = [];
-
         for (const [index, el] of data.authGroups[prop].entries()) {
           const res = await dashboardContainer
             .item(dashboardId, dashboardId)
@@ -144,7 +153,11 @@ export const createDashboardAuthGroup = async (
             ]);
 
           if (data.authGroups[prop].length - 1 === index) {
-            return res.resource;
+            return {
+              authGroups: res.resource.authGroups,
+              dashboardId,
+              dashboardName: res.resource.name,
+            };
           }
         }
       }
