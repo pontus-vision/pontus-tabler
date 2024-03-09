@@ -52,7 +52,12 @@ export default new PontusService({
   authUsersReadPost(req, res) {},
   authUserUpdatePost(req, res) {},
   dashboardGroupAuthCreatePost: async (req, res) => {
-    await createDashboardAuthGroup(req.body);
+    try {
+      const response = await createDashboardAuthGroup(req.body);
+      res.send(response);
+    } catch (error) {
+      console.log({ error });
+    }
   },
   dashboardGroupAuthDeletePost(req, res) {},
   dashboardGroupAuthReadPost(req, res) {},
