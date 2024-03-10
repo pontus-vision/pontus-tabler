@@ -1,0 +1,72 @@
+.edges-view {
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  &__panel {
+    display: flex;
+
+    flex-direction: column;
+    margin-inline: auto;
+    width: fit-content;
+    .select-tables-container {
+      display: flex;
+      gap: 3rem;
+
+      &__col {
+        width: 24rem;
+      }
+      .stylish-select {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        cursor: pointer;
+      }
+
+      .stylish-select:focus {
+        outline: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      &__select {
+        width: fit-content;
+        height: fit-content;
+      }
+      &__preview {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  }
+}
+
+.list-with-dropdown {
+  &__grid {
+    z-index: 1;
+    position: absolute;
+    background-color: white;
+    &.closed {
+      visibility: hidden;
+    }
+    &__close-btn {
+      border-radius: 3rem;
+      width: fit-content;
+      height: fit-content;
+      position: absolute;
+      right: -0.7rem;
+      top: -0.7rem;
+      box-shadow: 0 0 4px black;
+      background-color: white;
+      svg {
+        font-size: 2rem;
+      }
+    }
+  }
+}

@@ -8,6 +8,10 @@ import {
   TableEdgeCreateRes,
   TableEdgeReadRes,
   TableEdgeDeleteReq,
+  TableDataCreateReq,
+  TableDataEdgeCreateReq,
+  TableDataReadReq,
+  TableDataReadRes,
 } from '../typescript/api';
 import { isSubset, post } from './test-utils';
 import { deleteDatabase } from '../cosmos-utils';
@@ -239,7 +243,7 @@ describe('tableControllerTest', () => {
       label: 'Person Natural',
       cols: [
         {
-          field: 'Person_Natural_Full_Name',
+          field: 'full-name',
           filter: true,
           headerName: 'Full Name',
           id: 'Person_Natural_Full_Name',
@@ -247,7 +251,7 @@ describe('tableControllerTest', () => {
           sortable: true,
         },
         {
-          field: 'Person_Natural_Customer_ID',
+          field: 'customer-id',
           filter: true,
           headerName: 'Customer ID',
           id: 'Person_Natural_Customer_ID',
@@ -336,5 +340,317 @@ describe('tableControllerTest', () => {
     );
 
     expect(createEdgeNonExistingTable.status).toBe(404);
+  });
+  it('test edges between rows', async () => {
+    const table: TableCreateReq = {
+      name: 'person-natural',
+      label: 'Person Natural',
+      cols: [
+        {
+          field: 'Person_Natural_Full_Name',
+          filter: true,
+          headerName: 'Full Name',
+          id: 'Person_Natural_Full_Name',
+          name: 'full-name',
+          sortable: true,
+        },
+        {
+          field: 'Person_Natural_Customer_ID',
+          filter: true,
+          headerName: 'Customer ID',
+          id: 'Person_Natural_Customer_ID',
+          name: 'customer-id',
+          sortable: true,
+        },
+      ],
+    };
+
+    const createTable1 = (await post(
+      'table/create',
+      table,
+    )) as AxiosResponse<TableCreateRes>;
+    expect(createTable1.status === 200);
+
+    const createTable2 = (await post('table/create', {
+      ...table,
+      name: 'person-natural-2',
+      label: 'Person Natural 2',
+    })) as AxiosResponse<TableCreateRes>;
+
+    expect(createTable2.status === 200);
+
+    const body: TableDataCreateReq = {
+      tableName: 'person-natural',
+      cols: {
+        'customer-id': 'foo',
+        'full-name': 'bar',
+      },
+    };
+
+    const createTableData = await post('table/data/create', body);
+
+    expect(createTableData.status).toBe(200);
+
+    const body2: TableDataCreateReq = {
+      tableName: 'person-natural-2',
+      cols: {
+        'customer-id': 'foo2',
+        'full-name': 'bar2',
+      },
+    };
+
+    const createTableData2 = await post('table/data/create', body2);
+
+    expect(createTableData2.status).toBe(200);
+
+    const bodyCreateConnection: TableDataEdgeCreateReq = {
+      tableFrom: {
+        tableName: body.tableName,
+        rowIds: [createTableData.data.id],
+      },
+      edge: 'has_email',
+      edgeType: 'oneToOne',
+      tableTo: {
+        tableName: body2.tableName,
+        rowIds: [createTableData2.data.id],
+      },
+    };
+
+    const createTableConnectionData = await post(
+      'table/data/edge/create',
+      bodyCreateConnection,
+    );
+
+    expect(createTableConnectionData.status).toBe(200);
+
+    const table2DataReadBody: TableDataReadReq = {
+      from: 1,
+      to: 10,
+      filters: {},
+      tableName: bodyCreateConnection.tableTo.tableName,
+    };
+
+    const createTableData3 = await post('table/data/create', body2);
+
+    expect(createTableData3.status).toBe(200);
+
+    const bodyCreateConnection2: TableDataEdgeCreateReq = {
+      tableFrom: {
+        tableName: body.tableName,
+        rowIds: [createTableData.data.id],
+      },
+      edge: 'has_email',
+      edgeType: 'oneToOne',
+      tableTo: {
+        tableName: body2.tableName,
+        rowIds: [createTableData3.data.id],
+      },
+    };
+
+    const createTableConnectionData2 = await post(
+      'table/data/edge/create',
+      bodyCreateConnection2,
+    );
+
+    const table1DataReadBody: TableDataReadReq = {
+      from: 1,
+      to: 10,
+      filters: {},
+      tableName: 'person-natural',
+    };
+
+    const table1DataRead = (await post(
+      'table/data/read',
+      table1DataReadBody,
+    )) as AxiosResponse<TableDataReadRes>;
+
+    const table4DataRead = (await post(
+      'table/data/read',
+      table2DataReadBody,
+    )) as AxiosResponse<TableDataReadRes>;
+
+    expect(
+      table4DataRead.data.rows[0]?.edges?.[
+        bodyCreateConnection2.tableFrom.tableName
+      ]?.['has_email']?.from.some((rowId) =>
+        bodyCreateConnection2.tableFrom.rowIds.some(
+          (rowId2) => rowId === rowId2,
+        ),
+      ),
+    ).toBe(true);
+
+    expect(
+      table1DataRead.data.rows[0]?.edges?.[
+        bodyCreateConnection.tableTo.tableName
+      ]?.['has_email']?.to.some((rowId) =>
+        bodyCreateConnection.tableTo.rowIds.some((rowId2) => rowId === rowId2),
+      ),
+    ).toBe(true);
+    expect(
+      table4DataRead.data.rows[0]?.edges?.[
+        bodyCreateConnection.tableFrom.tableName
+      ]?.['has_email']?.from.some((rowId) =>
+        bodyCreateConnection.tableFrom.rowIds.some(
+          (rowId2) => rowId === rowId2,
+        ),
+      ),
+    ).toBe(true);
+  });
+  it.only('It should test one-to-many edges creation', async () => {
+    const table: TableCreateReq = {
+      name: 'person-natural',
+      label: 'Person Natural',
+      cols: [
+        {
+          field: 'full-name',
+          filter: true,
+          headerName: 'Full Name',
+          id: 'Person_Natural_Full_Name',
+          name: 'full-name',
+          sortable: true,
+        },
+        {
+          field: 'customer-id',
+          filter: true,
+          headerName: 'Customer ID',
+          id: 'Person_Natural_Customer_ID',
+          name: 'customer-id',
+          sortable: true,
+        },
+      ],
+    };
+
+    const createTable1 = (await post(
+      'table/create',
+      table,
+    )) as AxiosResponse<TableCreateRes>;
+    expect(createTable1.status === 200);
+
+    const createTable2 = (await post('table/create', {
+      ...table,
+      name: 'person-natural-2',
+      label: 'Person Natural 2',
+    })) as AxiosResponse<TableCreateRes>;
+
+    expect(createTable2.status === 200);
+
+    const body: TableDataCreateReq = {
+      tableName: 'person-natural',
+      cols: {
+        'customer-id': 'foo',
+        'full-name': 'bar',
+      },
+    };
+
+    const createTableData = await post('table/data/create', body);
+
+    expect(createTableData.status).toBe(200);
+
+    const body2: TableDataCreateReq = {
+      tableName: 'person-natural-2',
+      cols: {
+        'customer-id': 'foo2',
+        'full-name': 'bar2',
+      },
+    };
+
+    const createTableData2 = await post('table/data/create', body2);
+
+    expect(createTableData2.status).toBe(200);
+
+    const createTableData3 = await post('table/data/create', body2);
+
+    expect(createTableData3.status).toBe(200);
+
+    const bodyCreateConnection: TableDataEdgeCreateReq = {
+      tableFrom: {
+        tableName: body.tableName,
+        rowIds: [createTableData.data.id],
+      },
+      edge: 'has_email',
+      edgeType: 'oneToMany',
+      tableTo: {
+        tableName: body2.tableName,
+        rowIds: [createTableData2.data.id, createTableData3.data.id],
+      },
+    };
+
+    const createTableConnectionData = await post(
+      'table/data/edge/create',
+      bodyCreateConnection,
+    );
+
+    const createTableConnectionData2 = await post('table/data/edge/create', {
+      tableFrom: {
+        tableName: body.tableName,
+        rowIds: [createTableData.data.id],
+      },
+      edge: 'has_address',
+      edgeType: 'oneToMany',
+      tableTo: {
+        tableName: body2.tableName,
+        rowIds: [createTableData2.data.id, createTableData3.data.id],
+      },
+    });
+
+    expect(createTableConnectionData.status).toBe(200);
+
+    // expect(
+    //   createTableConnectionData.data.some(
+    //     (el) =>
+    //       el.from === createTableData.data.id &&
+    //       el.to === createTableData2.data.id,
+    //   ),
+    // ).toBe(true);
+    // expect(
+    //   createTableConnectionData.data.some(
+    //     (el) =>
+    //       el.from === createTableData.data.id &&
+    //       el.to === createTableData3.data.id,
+    //   ),
+    // ).toBe(true);
+    const table2DataReadBody: TableDataReadReq = {
+      from: 1,
+      to: 10,
+      filters: {},
+      tableName: bodyCreateConnection.tableTo.tableName,
+    };
+
+    const table1DataReadBody: TableDataReadReq = {
+      from: 1,
+      to: 10,
+      filters: {},
+      tableName: 'person-natural',
+    };
+
+    const table1DataRead = (await post(
+      'table/data/read',
+      table1DataReadBody,
+    )) as AxiosResponse<TableDataReadRes>;
+
+    const table2DataRead = (await post(
+      'table/data/read',
+      table2DataReadBody,
+    )) as AxiosResponse<TableDataReadRes>;
+
+    const tableFromName = bodyCreateConnection.tableFrom.tableName;
+
+    const tableToName = bodyCreateConnection.tableTo.tableName;
+
+    expect(
+      table2DataRead.data.rows.every((row) =>
+        row.edges[tableFromName][bodyCreateConnection.edge].from.every((el) =>
+          table1DataRead.data.rows.some((row2) => row2.id === el),
+        ),
+      ),
+    ).toBe(true);
+
+    expect(
+      table1DataRead.data.rows.every((row) =>
+        row.edges[tableToName][bodyCreateConnection.edge].to.every((el) =>
+          table2DataRead.data.rows.some((row2) => row2.id === el),
+        ),
+      ),
+    ).toBe(true);
   });
 });
