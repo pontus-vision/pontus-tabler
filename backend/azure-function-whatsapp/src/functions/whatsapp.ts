@@ -51,8 +51,8 @@ const azureSearchDeploymentId =
 const azureOpenAISystemRole =
   process.env['AZURE_OPENAI_SYSTEM_ROLE'] ||
   `You are an AI estate agent that helps people find information about new property builds (primary market) in Brazil. 
-You must only provide information about properties built by Exto Incorporação e Construção by calling the tools defined 
-without letting the user know that you are using a file`;
+You must only provide information about properties built by Exto Incorporação e Construção by calling the tools defined.
+You must summarise the details of each property in a format suitable for a whatsapp chat.`;
 
 // You must only use content from the following sites:
 // GERAL
@@ -156,6 +156,10 @@ const resetHistory = async (
   putOpenAIMessageHistory(to, []);
   return `resetting chat history for ${to}`;
 };
+
+const normalizePropId = (propId:string): string => {
+  return propId?.toLocaleLowerCase()?.replace(/ /g,"_")?.replace(/-/g,"_");
+}
 const getPropertiesNearLocation = async (
   location: Location,
   context: InvocationContext,
@@ -163,59 +167,60 @@ const getPropertiesNearLocation = async (
   context.log(
     `in getPropertiesNearLocation() => location = ${JSON.stringify(location)}`,
   );
-  const propertiesByDistance = sampleProperties.sort((a, b) => {
-    a.distance = getDistance(
-      location.latitude,
-      location.longitude,
-      a.latitude,
-      a.longitude,
-    );
 
-    b.distance = getDistance(
-      location.latitude,
-      location.longitude,
-      b.latitude,
-      b.longitude,
-    );
-    return a.distance - b.distance;
-  });
+  const retVal: Record<string,Property> = {}
+  
 
-  const properties10K = propertiesByDistance.filter(
-    (val) =>
-      val.distance
-        ? val.distance < (location.radiusInMeters || 10000)
-        : getDistance(
-            location.latitude,
-            location.longitude,
-            val.latitude,
-            val.longitude,
-          ) < 15000,
-    // (location.radiusInMeters || 10000),
-  );
 
-  const summaryVals = properties10K.map((val) => ({
-    id: val.id,
-    address: val.address,
-    url: val.url,
-    short_description: val.short_description,
-  }));
+  // const propertiesByDistance = sampleProperties.sort((a, b) => {
+  //   a.distance = getDistance(
+  //     location.latitude,
+  //     location.longitude,
+  //     a.latitude,
+  //     a.longitude,
+  //   );
 
-  context.log(`properties within 10K: ${JSON.stringify(summaryVals)}`);
+  //   b.distance = getDistance(
+  //     location.latitude,
+  //     location.longitude,
+  //     b.latitude,
+  //     b.longitude,
+  //   );
+  //   return a.distance - b.distance;
+  // });
 
-  return JSON.stringify(summaryVals);
+  for (const prop in sampleProperties) {
+
+    const property: Property = sampleProperties[prop];
+    property.distance = getDistance(location.latitude, location.longitude,property.latitude, property.longitude);
+    if (property.distance < 15000){
+      retVal[normalizePropId(prop)] = {
+        ...property,
+        descripton: undefined,
+        distance: undefined
+      }
+    }
+
+  } 
+
+
+  context.log(`properties within 10K: ${JSON.stringify(retVal)}`);
+
+  return JSON.stringify(retVal);
 };
 
 export interface IdObj {
-  id: string;
+  key: string;
 }
 
 const getDetailedInformation = async (
   data: IdObj,
   context: InvocationContext,
 ): Promise<string> => {
-  context.log(`in getDetailedInformation() => id = ${data.id}`);
+  const propId = normalizePropId(data.key)
+  context.log(`in getDetailedInformation() => id = ${data.key}, normalised to ${propId}`);
 
-  const res = sampleProperties.filter((prop: Property) => prop.id === data.id);
+  const res = sampleProperties[propId] || "No details found; please contact the construction company directly.";
   return JSON.stringify(res);
 };
 
@@ -239,17 +244,17 @@ const toolsMap: Record<string, ToolType> = {
       function: {
         name: 'getDetailedInformation',
         description:
-          'Gets details about a property given an id returned from calling getPropertiesNearLocation()',
+          'Get detailed information for a property by key in a JSON map [properties]',
         parameters: {
           type: 'object',
           descrition:
-            'The id of a property returned from calling getPropertiesNearLocation() e.g. { "id": "1234556" }',
+            'The key of the [properties] JSON map to get details for',
           properties: {
-            id: {
+            key: {
               type: 'string',
             },
           },
-          required: ['id'],
+          required: ['key'],
         },
       },
     },
@@ -261,7 +266,7 @@ const toolsMap: Record<string, ToolType> = {
       function: {
         name: 'getPropertiesNearLocation',
         description:
-          'Lists properties in an area in a json format  { "id": string, "short_description": string, "url": string, "address": string }  use the id returned here to get more information by calling getDetailedInformation()',
+          '[properties]: Lists properties in an area in a JSON map { "id1": {  "short_description": string, "url": string, "address": string }, "id2": {...}}  use the key returned here to get more information by calling getDetailedInformation()',
         parameters: {
           type: 'object',
           descrition:
@@ -935,7 +940,7 @@ export const sendReply = async (
       `in SendReply() message history is ${JSON.stringify(messageHistory)}`,
     );
 
-    const replyMessage = await getOpenAIReplyDirect(
+    const replyMessage = await getOpenAIReply(
       to,
       customerMessage,
       messageHistory,

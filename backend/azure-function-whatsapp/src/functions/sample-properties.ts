@@ -1,18 +1,16 @@
 import { Property } from './types';
 
-export const sampleProperties: Property[] = [
-  {
-    id: 'ab1344',
+export const sampleProperties: Record<string,Property> = {
+   "only_cidade_jardim": {
     kind: ['building'],
     address:
       'Av. Duquesa de Goiás, 825 - Cidade Jardim, São Paulo - SP, 05686-002, Brazil',
     url: 'https://www.exto.com.br/empreendimentos/only-cidade-jardim/',
     floors: 30,
-    name: 'Only Cidade Jardim',
     latitude: -23.615101,
     longitude: -46.702169,
     short_description:
-      'O Altíssimo Padrão Exto, em frente ao maior cartão postal de São Paulo, a Ponte Estaiada. Apartamentos de 4 suítes prontos para morar. PLANTAS NO CONCEITO INTERNACIONAL DE SALA ABERTA E PÉ DIREITO COM DIMENSÕES ESPECIAIS DE 2,80M LIVRES',
+      'O Altíssimo Padrão Exto, em frente ao maior cartão postal de São Paulo, a Ponte Estaiada. Apartamentos de 2 a 4 suítes  com áreasu de 186M² e 252M² prontos para morar. ',
     descripton: `Localização única: em frente à Ponte Estaiada, maior cartão postal de São Paulo, a Ponte Estaiada e a 2 min. do Shopping Cidade Jardim. Também a poucos passos do novo Parque Bruno Covas, complexo de lazer que contará com 650.000m² de lazer, conveniência e do futuro complexo multiuso Usina SP.
 Mobilidade e acesso: entre as pontes Cidade Jardim e do Morumbi
 Apenas duas torres em terreno de aproximadamente 11.000m²
@@ -47,15 +45,14 @@ Opções de plantas de apartamento:
   - Torre SUNSET - 252M² - 4 SUÍTES - COZINHA GOURMET
   - Torre SUNSET - 252M² - 4 SUÍTES - OFFICE - LAVABO INTEGRADO AO JANTAR`,
   },
-  {
+ "excellence_guedala": {
     kind: ['building'],
-    name: 'Excellence Guedala',
-    id: 'ab1544',
     address:
       'Rua dos Três Irmãos, 186 - Caxingui, São Paulo - SP, 05615-190, Brazil',
     url: 'https://www.exto.com.br/empreendimentos/excellence-guedala',
     latitude: -23.5863678,
     longitude: -46.7175488,
+    short_description: "Torre única e puramente residencial, 2 ou 3 SUÍTES com áreas de 96M² a 126M², a 600m da Estação São Paulo-Morumbi",
     descripton: `Um projeto excepcional, na rua mais desejada do Jardim Guedala. Em seus mais de 30 anos de história, a Exto desenvolveu projetos que se consagraram verdadeiros marcos, como o Only Cidade Jardim, com mais de 11 mil metros quadrados de terreno em frente à Ponte Estaiada, e o Green Guedala, empreendimento recém-entregue que virou referência na região.
   É esta busca pela excelência que nos inspirou a criar o Excellence Guedala. Um empreendimento que homenageia o bairro, porque reúne diferenciais que são marcas registradas da Exto, somados à melhor rua do Jardim Guedala e a uma visão de futuro que torna o projeto atemporal.
   São características excepcionais na arquitetura, no design, nos acabamentos, nos ambientes de lazer, na localização e nos diferenciais dos apartamentos. O resultado é um lançamento em perfeito equilíbrio para quem deseja uma experiência exclusiva de morar, com a tranquilidade de investir em uma empresa sólida e de qualidade.
@@ -125,17 +122,15 @@ Opções de plantas de apartamento:
   Projetos de logística reversa
   A Exto tem certificação do PBQPH - Nível A, classificação máxima de excelência na construção civil.`,
   },
-  {
+  "lamp_perdizes": {
     kind: ['building'],
     address: 'R. Campevas, 300 - Perdizes, São Paulo - SP, 05016-010, Brazil',
     url: 'https://www.exto.com.br/empreendimentos/lamp-perdizes',
-    id: 'ab1584',
     floors: 26,
-    name: 'Lamp Perdizes',
     latitude: -23.537203,
     longitude: -46.676152,
     short_description:
-      'Um projeto luminoso, em um dos pontos mais altos e nobres de Perdizes, a 900 metros da futura estação Perdizes.  Apartamentos de 1 a 4 quartos com áreas de 53M² a 142M²',
+      'Um projeto luminoso, em um dos pontos mais altos e nobres de Perdizes, a 900 metros da futura estação Perdizes.  Apartamentos de 1 a 4 SUÍTES com áreas de 53M² a 142M²',
     descripton: `Torre única residencial. EM UM DOS PONTOS MAIS ALTOS E NOBRES DE PERDIZES 
   Luz é vida, felicidade, energia.
   Luz é o brilho que ilumina e renova as esperanças.
@@ -350,4 +345,4 @@ Opções de plantas de apartamento:
   //     },
   //   ],
   // },
-];
+};
