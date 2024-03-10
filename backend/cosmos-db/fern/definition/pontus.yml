@@ -758,7 +758,7 @@ service:
             authGroups: AuthGroups
       response:
         docs: Dashboard state created successfully
-        type: DashboardGroupAuth
+        type: DashboardGroupAuthCreateRes
       errors:
         - BadRequestError
         - InternalServerError
@@ -826,19 +826,20 @@ service:
       docs: Create a new dashboard state with name and state information
       display-name: Create a new dashboard state
       request:
-        name: AuthUpdateBody
+        name: DashboardGroupAuthUpdateReq
         body:
           properties:
-            dashboardId: optional<string>
-            authGroups: optional<AuthGroups>
+            dashboardId: string
+            authGroups: AuthGroups
       response:
         docs: Dashboard state created successfully
-        type: DashboardGroupAuth
+        type: DashboardGroupAuthUpdateRes
       errors:
         - BadRequestError
         - InternalServerError
       examples:
         - request:
+            dashboardId: dashboardId
             authGroups:
               create:
                 - create
@@ -1457,6 +1458,10 @@ types:
       dashboardName: string
       authGroups: AuthGroups
   DashboardGroupAuthCreateRes:
+    properties: {}
+    extends:
+      - DashboardGroupAuth
+  DashboardGroupAuthUpdateRes:
     properties: {}
     extends:
       - DashboardGroupAuth
