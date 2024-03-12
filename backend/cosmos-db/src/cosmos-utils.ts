@@ -90,7 +90,7 @@ export const fetchData = async (
 
     const countStr = `select VALUE COUNT(1) from c ${query}`;
 
-    const valuesStr = `select * from c ${query}`;
+    const valuesStr = `select  * from c ${query}`;
 
     const values = await container.items
       .query({
