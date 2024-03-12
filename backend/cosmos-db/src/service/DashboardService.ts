@@ -6,11 +6,15 @@ import {
   DashboardsReadRes,
   DashboardGroupAuthCreateReq,
   DashboardGroupAuthCreateRes,
-  DashboardGroupAuth,
   DashboardGroupAuthReadReq,
   DashboardGroupAuthReadRes,
   DashboardGroupAuthUpdateReq,
   DashboardGroupAuthUpdateRes,
+  DashboardGroupAuthDeleteReq,
+  DashboardGroupAuthDeleteRes,
+  DashboardAuthGroups,
+  DashboardGroupAuthDeleteReqBody,
+  AuthGroupIds,
 } from '../typescript/api';
 import { FetchData, fetchContainer, fetchData } from '../cosmos-utils';
 import {
@@ -18,27 +22,23 @@ import {
   ConflictEntityError,
   BadRequestError,
 } from '../generated/api';
-import { ItemResponse } from '@azure/cosmos';
+import { ItemResponse, PatchOperation } from '@azure/cosmos';
 
 const DASHBOARDS = 'dashboards';
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
 ) => {
-  try {
-    const dashboardContainer = await fetchContainer(DASHBOARDS);
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
 
-    const res = await dashboardContainer.items.upsert({
-      ...data,
-      authGroups: {},
-    });
-    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-      res.resource as any;
+  const res = await dashboardContainer.items.upsert({
+    ...data,
+    authGroups: { create: [], read: [], update: [], delete: [] },
+  });
+  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
+    res.resource as any;
 
-    return rest;
-  } catch (error) {
-    throw error;
-  }
+  return rest;
 };
 
 export const readDashboardById = async (dashboardId: string) => {
@@ -64,19 +64,25 @@ export const readDashboardById = async (dashboardId: string) => {
 };
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
-  try {
-    const dashboardContainer = await fetchContainer(DASHBOARDS);
-    const res = await dashboardContainer.item(data.id, data.id).delete();
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
+  const res = await dashboardContainer.item(data.id, data.id).delete();
 
-    return 'Dashboard deleted!';
-  } catch (error) {
-    throw error;
-  }
+  return 'Dashboard deleted!';
 };
 
 export const readDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<DashboardsReadRes> => {
+  // if (Object.keys(body.filters).length === 0 && body.from === 1) {
+  //   const dashboardContainer = await fetchContainer(DASHBOARDS);
+  //   const res = await dashboardContainer.items
+  //     .readAll({
+  //       maxItemCount: body.to,
+  //     })
+  //     .fetchAll();
+
+  //   return { dashboards: res.resources, totalDashboards: 1000 };
+  // }
   const res = await fetchData(body, DASHBOARDS);
 
   return { dashboards: res.values, totalDashboards: res.count };
@@ -85,61 +91,35 @@ export const readDashboards = async (
 export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
+  checkFields(data.authGroups);
+
   const dashboardContainer = await fetchContainer(DASHBOARDS);
   const dashboardId = data.dashboardId;
 
-  const res2 = await dashboardContainer.item(dashboardId, dashboardId).read();
+  const res = await dashboardContainer.item(dashboardId, dashboardId).read();
+  const authGroups = res.resource.authGroups;
 
-  const authGroups = res2.resource.authGroups;
-
-  const wrongFieldsArr = [];
-
-  for (const prop in data.authGroups) {
-    if (!authGroups[prop]) {
-      const res = await dashboardContainer
-        .item(dashboardId, dashboardId)
-        .patch([
-          {
-            op: 'add',
-            path: `/authGroups/${prop}`,
-            value: [],
-          },
-        ]);
-    }
-
-    if (!data.authGroups[prop]) {
-      wrongFieldsArr.push(prop);
-    }
-  }
-
-  if (wrongFieldsArr.length > 0) {
-    throw new BadRequestError(
-      `${wrongFieldsArr.length > 1 ? 'fields' : 'field'} ${wrongFieldsArr
-        .map((el) => `'${el?.toUpperCase()}'`)
-        .join(', ')} cannot be null or undefined.`,
-    );
-  }
+  const patchArr: PatchOperation[] = [];
 
   for (const prop in data.authGroups) {
     for (const [index, el] of data.authGroups[prop]?.entries()) {
-      const res = await dashboardContainer
-        .item(dashboardId, dashboardId)
-        .patch([
-          {
-            op: 'add',
-            path: `/authGroups/${prop}/-`,
-            value: el,
-          },
-        ]);
-      if (data.authGroups[prop].length - 1 === index) {
-        return {
-          authGroups: res.resource.authGroups,
-          dashboardId,
-          dashboardName: res.resource.name,
-        };
-      }
+      patchArr.push({
+        op: 'add',
+        path: `/authGroups/${prop}/-`,
+        value: el,
+      });
     }
   }
+
+  const res2 = await dashboardContainer
+    .item(dashboardId, dashboardId)
+    .patch(patchArr);
+
+  return {
+    authGroups: res2.resource.authGroups,
+    dashboardId,
+    dashboardName: res2.resource.name,
+  };
 };
 
 export const readDashboardGroupAuth = async (
@@ -151,6 +131,8 @@ export const readDashboardGroupAuth = async (
     .item(data.dashboardId, data.dashboardId)
     .read();
 
+  var requestCharge = res3.headers['x-ms-request-charge'];
+
   return {
     authGroups: res3.resource?.authGroups,
     dashboardId: res3.resource?.id,
@@ -159,74 +141,162 @@ export const readDashboardGroupAuth = async (
 };
 
 export const deleteDashboardGroupAuth = async (
-  data: DashboardGroupAuthUpdateReq,
-): Promise<DashboardGroupAuthUpdateRes> => {
+  data: DashboardGroupAuthDeleteReq,
+): Promise<DashboardGroupAuthDeleteRes> => {
+  checkFields(data.authGroups);
+
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
   const dashboardId = data.dashboardId;
 
   const res3 = await dashboardContainer.item(dashboardId, dashboardId).read();
 
-  const resAuthGroups = res3.resource.authGroups;
+  const resource = res3.resource as DashboardGroupAuthReadRes;
 
-  for (const prop in data.authGroups) {
-    for (const [index, el] of data.authGroups[prop]) {
-      const indexUpdate = resAuthGroups[prop].findIndex((el2) => el2 === el);
+  const resAuthGroups = resource.authGroups;
 
-      const res = await dashboardContainer
-        .item(dashboardId, dashboardId)
-        .patch([
-          {
-            op: 'remove',
-            path: `authGroups/${prop}/${indexUpdate}`,
-          },
-        ]);
-
-      if (data.authGroups[prop].length - 1 === index) {
-        return {
-          authGroups: res.resource.authGroups,
-          dashboardId: res.resource.id,
-          dashboardName: res.resource.name,
-        };
-      }
-    }
-  }
-};
-
-export const updateDashboardGroupAuth = async (
-  data: DashboardGroupAuthUpdateReq,
-): Promise<DashboardGroupAuthUpdateRes> => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-  const dashboardId = data.dashboardId;
-
-  const res3 = await dashboardContainer.item(dashboardId, dashboardId).read();
-  const resAuthGroups = res3.resource.authGroups;
-
-  // Prepare patch operations
-  const patchOperations = [];
+  const patchArr: PatchOperation[] = [];
 
   for (const prop in data.authGroups) {
     for (const [index, el] of data.authGroups[prop].entries()) {
-      const indexUpdate = resAuthGroups[prop].findIndex((el2) => el2 !== el);
-      if (indexUpdate !== -1) {
-        // Add patch operation for each element that needs to be updated
-        patchOperations.push({
-          op: 'set',
-          path: `/authGroups/${prop}/${indexUpdate}`,
-          value: el,
-        });
-      }
+      const indexUpdate = resAuthGroups[prop].findIndex(
+        (el2) => el2.dashboardId === el,
+      );
+
+      patchArr.push({
+        op: 'remove',
+        path: `/authGroups/${prop}/${indexUpdate}`,
+      });
     }
   }
 
-  // Perform a single patch operation with all updates
   const res = await dashboardContainer
     .item(dashboardId, dashboardId)
-    .patch(patchOperations);
+    .patch(patchArr);
 
   return {
     authGroups: res.resource.authGroups,
     dashboardId: res.resource.id,
     dashboardName: res.resource.name,
   };
+};
+
+export const upsertDashboardGroupAuth = async (
+  data: DashboardGroupAuthUpdateReq,
+): Promise<DashboardGroupAuthUpdateRes> => {
+  checkFields(data.authGroups);
+
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
+  const dashboardId = data.dashboardId;
+
+  const res = await dashboardContainer.item(dashboardId, dashboardId).read();
+
+  const resAuthGroups = res.resource.authGroups;
+
+  const patchOperations: PatchOperation[] = [];
+
+  for (const prop in data.authGroups) {
+    const obsoleteEl = [];
+    const newEl = [];
+
+    for (const [indexJ, elJ] of data.authGroups[prop].entries()) {
+      if (
+        !resAuthGroups[prop].some((el) => el.dashboardId === elJ.dashboardId) &&
+        (newEl.length === 0 ||
+          newEl.some(
+            (el) =>
+              el?.el.dashboardId !== elJ.dashboardId && el?.index !== indexJ,
+          ))
+      ) {
+        newEl.push({ el: elJ, index: indexJ });
+      }
+    }
+    for (const [index, el] of resAuthGroups[prop]?.entries()) {
+      if (
+        !data.authGroups[prop].some(
+          (el2) => el2.dashboardId === el.dashboardId,
+        ) &&
+        (obsoleteEl.length === 0 ||
+          obsoleteEl.some(
+            (el2) =>
+              el2?.el.dashboardId !== el.dashboardId && el2?.index !== index,
+          ))
+      ) {
+        obsoleteEl.push({ el: el, index: index });
+      }
+    }
+
+    for (const [index, el] of obsoleteEl.entries()) {
+      if (newEl[index]) {
+        patchOperations.push({
+          op: 'set',
+          path: `/authGroups/${prop}/${el.index}`,
+          value: newEl[index].el,
+        });
+      } else {
+        patchOperations.push({
+          op: 'remove',
+          path: `/authGroups/${prop}/${el.index}`,
+        });
+      }
+    }
+    for (const [index, el] of newEl.entries()) {
+      if (!obsoleteEl[index]) {
+        patchOperations.push({
+          op: 'add',
+          path: `/authGroups/${prop}/-`,
+          value: el.el,
+        });
+      }
+    }
+
+    // if (resAuthGroups[prop].length > 0) {
+    //   for (const [index, el] of resAuthGroups[prop]?.entries()) {
+    //     if (data.authGroups[prop].indexOf(el) === -1) {
+    //       patchOperations.push({
+    //         op: 'remove',
+    //         path: `/authGroups/${prop}/${index}`,
+    //       });
+    //     }
+    //   }
+    // }
+
+    // for (const [index, el] of data.authGroups[prop].entries()) {
+    //   if (resAuthGroups[prop].indexOf(el) === -1) {
+    //     patchOperations.push({
+    //       op: 'add',
+    //       path: `/authGroups/${prop}/-`,
+    //       value: el,
+    //     });
+    //   }
+    // }
+  }
+
+  const res2 = await dashboardContainer
+    .item(dashboardId, dashboardId)
+    .patch(patchOperations);
+
+  return {
+    authGroups: res2.resource.authGroups,
+    dashboardId,
+    dashboardName: res2.resource.name,
+  };
+};
+
+const checkFields = (authGroups: DashboardAuthGroups | AuthGroupIds) => {
+  const wrongFieldsArr = [];
+
+  for (const prop in authGroups) {
+    if (!authGroups[prop]) {
+      wrongFieldsArr.push(prop);
+    }
+  }
+
+  if (wrongFieldsArr.length > 0) {
+    throw new BadRequestError(
+      `${wrongFieldsArr.length > 1 ? 'fields' : 'field'} ${wrongFieldsArr
+        .map((el) => `'${el?.toUpperCase()}'`)
+        .join(', ')} cannot be null or undefined.`,
+    );
+  }
 };
