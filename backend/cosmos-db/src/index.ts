@@ -30,8 +30,9 @@ import {
   readDashboardById,
   readDashboardGroupAuth,
   readDashboards,
-  updateDashboardGroupAuth,
   upsertDashboard,
+  upsertDashboardGroupAuth,
+  deleteDashboardGroupAuth,
 } from './service/DashboardService';
 import {
   createTableDataEdge,
@@ -55,17 +56,21 @@ export default new PontusService({
   authUserUpdatePost(req, res) {},
   dashboardGroupAuthCreatePost: async (req, res) => {
     const response = await createDashboardAuthGroup(req.body);
+
     res.send(response);
   },
-  dashboardGroupAuthDeletePost(req, res) {},
+  dashboardGroupAuthDeletePost: async (req, res) => {
+    const response = await deleteDashboardGroupAuth(req.body);
+
+    res.send(response);
+  },
   dashboardGroupAuthReadPost: async (req, res) => {
-    console.log({ req });
     const response = await readDashboardGroupAuth(req.body);
 
     res.send(response);
   },
   dashboardGroupAuthUpdatePost: async (req, res) => {
-    const response = await updateDashboardGroupAuth(req.body);
+    const response = await upsertDashboardGroupAuth(req.body);
 
     res.send(response);
   },
@@ -80,11 +85,9 @@ export default new PontusService({
     res.send(response);
   },
   dashboardDeletePost: async (req, res) => {
-    try {
-      const response = await deleteDashboard(req.body);
+    const response = await deleteDashboard(req.body);
 
-      res.send(response);
-    } catch (error) {}
+    res.send(response);
   },
   dashboardReadPost: async (req, res) => {
     const response = await readDashboardById(req.body.id);
@@ -92,18 +95,14 @@ export default new PontusService({
     res.send(response);
   },
   dashboardsReadPost: async (req, res) => {
-    try {
-      const response = await readDashboards(req.body);
-      console.log({ response });
-      res.send(response);
-    } catch (error) {}
+    const response = await readDashboards(req.body);
+    console.log({ response });
+    res.send(response);
   },
   dashboardUpdatePost: async (req, res) => {
-    try {
-      const response = await upsertDashboard(req.body);
+    const response = await upsertDashboard(req.body);
 
-      res.send(response);
-    } catch (error) {}
+    res.send(response);
   },
   menuCreatePost: async (req, res) => {
     if (Object.keys(req.body).length === 0) {
