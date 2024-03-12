@@ -11,16 +11,18 @@ import {
   DashboardGroupAuthCreateRes,
   DashboardGroupAuthUpdateReq,
   DashboardGroupAuthUpdateRes,
+  DashboardGroupAuthDeleteReq,
+  DashboardGroupAuthDeleteRes,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
 import { srv } from '../server';
 
-import { post } from './test-utils';
+import { post, stateObj } from './test-utils';
 import { DashboardGroupAuthCreateReq } from '../generated/api';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { deleteDatabase } from '../cosmos-utils';
+import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -40,7 +42,7 @@ describe('dashboardCreatePOST', () => {
   beforeEach(async () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    await deleteDatabase('pv_db');
+    await deleteContainer('dashboards');
   });
 
   afterAll(() => {
@@ -237,12 +239,12 @@ describe('dashboardCreatePOST', () => {
 
     expect(deleteVal2.status).toBe(200);
   });
-  it.only('should create auth correctly in dashboard', async () => {
+  it('should create auth correctly in dashboard', async () => {
     const dashboardBody: DashboardCreateReq = {
       folder: 'folder',
       name: 'dashboard1',
       owner: 'foo',
-      state: {},
+      state: stateObj,
     };
     const createDashboard = (await post(
       'dashboard/create',
@@ -254,20 +256,32 @@ describe('dashboardCreatePOST', () => {
       name: 'dashboard2',
     })) as AxiosResponse<DashboardCreateRes>;
 
-    const groupAuthBody: DashboardGroupAuthCreateReq = {
+    const createGroupAuthBody: DashboardGroupAuthCreateReq = {
       dashboardId: createDashboard.data.id,
-      authGroups: { create: [createDashboard2.data.id] },
+      authGroups: {
+        create: [
+          {
+            dashboardId: createDashboard2.data.id,
+            dashboardName: createDashboard2.data.name,
+          },
+        ],
+      },
     };
     const createGroupAuth = await post(
       'dashboard/group/auth/create',
-      groupAuthBody,
+      createGroupAuthBody,
     );
 
     expect(createGroupAuth.status).toBe(200);
 
-    const createGroupAuth2Body = {
-      ...groupAuthBody,
-      authGroups: { create: ['foo', 'bar'] },
+    const createGroupAuth2Body: DashboardGroupAuthCreateReq = {
+      ...createGroupAuthBody,
+      authGroups: {
+        create: [
+          { dashboardName: 'foo', dashboardId: 'fnmaofmadom' },
+          { dashboardName: 'bar', dashboardId: 'ufgnsisifjodnsjkom' },
+        ],
+      },
     };
 
     const createGroupAuth2 = await post(
@@ -276,49 +290,125 @@ describe('dashboardCreatePOST', () => {
     );
     expect(createGroupAuth2.status).toBe(200);
 
-    const readDashboardBody: DashboardGroupAuthReadReq = {
+    const createGroupAuthBody3: DashboardGroupAuthCreateReq = {
       dashboardId: createDashboard.data.id,
-    };
-
-    const groupAuthBody2: DashboardGroupAuthCreateReq = {
-      dashboardId: createDashboard.data.id,
-      authGroups: { read: [createDashboard2.data.id] },
+      authGroups: {
+        read: [
+          {
+            dashboardId: createDashboard2.data.id,
+            dashboardName: createDashboard2.data.name,
+          },
+        ],
+      },
     };
     const createGroupAuth3 = await post(
       'dashboard/group/auth/create',
-      groupAuthBody2,
+      createGroupAuthBody3,
     );
 
-    const readDashboardGroupAuth = (await post(
+    expect(createGroupAuth3.status).toBe(200);
+
+    const readGroupAuthBody: DashboardGroupAuthReadReq = {
+      dashboardId: createDashboard.data.id,
+    };
+
+    const readGroupAuthResponse = (await post(
       'dashboard/group/auth/read',
-      readDashboardBody,
+      readGroupAuthBody,
     )) as AxiosResponse<DashboardGroupAuthReadRes>;
-    expect(readDashboardGroupAuth.data.authGroups.create).toContain(
-      createDashboard2.data.id && 'foo' && 'bar',
+
+    expect(readGroupAuthResponse.data.authGroups.create).toContainEqual(
+      createGroupAuth2Body.authGroups.create[0] &&
+        createGroupAuth2Body.authGroups.create[1],
     );
-    expect(readDashboardGroupAuth.data.authGroups.read).toContain(
-      createDashboard2.data.id,
+    expect(readGroupAuthResponse.data.authGroups.read).toContainEqual(
+      createGroupAuthBody3.authGroups.read[0],
     );
 
-    const updateDashboardAuthGroupBody: DashboardGroupAuthUpdateReq = {
-      dashboardId: readDashboardGroupAuth.data.dashboardId,
+    const updateAuthGroupBody: DashboardGroupAuthUpdateReq = {
+      dashboardId: readGroupAuthResponse.data.dashboardId,
       authGroups: {
         create: [
-          ...readDashboardGroupAuth.data.authGroups.create.slice(
+          ...readGroupAuthResponse.data.authGroups.create.slice(
             0,
-            readDashboardGroupAuth.data.authGroups.create.length - 1,
+            readGroupAuthResponse.data.authGroups.create.length - 1,
           ),
-          'John Doe',
+          { dashboardId: 'kladmaslkmdas', dashboardName: 'John Doe' },
+          { dashboardName: 'Pontus Vision', dashboardId: 'dasfagadfad' },
         ],
       },
     };
 
-    const updateDashboardGroupAuth = (await post(
+    const updateGroupAuthResponse = (await post(
       'dashboard/group/auth/update',
-      updateDashboardAuthGroupBody,
+      updateAuthGroupBody,
     )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
 
-    expect(updateDashboardGroupAuth.status).toBe(200);
+    expect(updateGroupAuthResponse.data.authGroups.create.length).toBe(
+      updateAuthGroupBody.authGroups.create.length,
+    );
+
+    expect(updateGroupAuthResponse.status).toBe(200);
+
+    expect(updateGroupAuthResponse.data.authGroups.create).toContainEqual(
+      updateAuthGroupBody.authGroups.create[0],
+    );
+    expect(updateGroupAuthResponse.data.authGroups.create).toContainEqual(
+      updateAuthGroupBody.authGroups.create[1],
+    );
+    expect(updateGroupAuthResponse.data.authGroups.create).toContainEqual(
+      updateAuthGroupBody.authGroups.create[2],
+    );
+
+    expect(updateGroupAuthResponse.data.authGroups.read).toContainEqual(
+      createGroupAuthBody3.authGroups.read[0],
+    );
+
+    expect(updateGroupAuthResponse.data.authGroups.create).toContainEqual(
+      updateAuthGroupBody.authGroups.create[3],
+    );
+
+    expect(updateGroupAuthResponse.data.dashboardId).toBe(
+      updateAuthGroupBody.dashboardId,
+    );
+
+    expect(updateGroupAuthResponse.data.dashboardName).toBe(
+      createDashboard.data.name,
+    );
+
+    const deleteGroupAuthBody: DashboardGroupAuthDeleteReq = {
+      dashboardId: updateAuthGroupBody.dashboardId,
+      authGroups: {
+        create: [updateAuthGroupBody.authGroups.create[0].dashboardId],
+      },
+    };
+
+    const deleteGroupAuthResponse = (await post(
+      'dashboard/group/auth/delete',
+      deleteGroupAuthBody,
+    )) as AxiosResponse<DashboardGroupAuthDeleteRes>;
+
+    expect(deleteGroupAuthResponse.data.authGroups.create.length).toBe(3);
+
+    const updateAuthGroup2Body: DashboardGroupAuthUpdateReq = {
+      dashboardId: readGroupAuthResponse.data.dashboardId,
+      authGroups: {
+        create: [
+          { dashboardName: 'Pontus Vision', dashboardId: 'dasfagadfad' },
+        ],
+      },
+    };
+
+    const updateGroupAuth2Response = (await post(
+      'dashboard/group/auth/update',
+      updateAuthGroup2Body,
+    )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
+
+    expect(updateGroupAuth2Response.data.authGroups.create.length).toBe(1);
+
+    expect(updateGroupAuth2Response.data.authGroups.create).toContainEqual(
+      updateAuthGroup2Body.authGroups.create[0],
+    );
   });
 
   it('should create auth incorrectly in dashboard', async () => {
@@ -344,5 +434,17 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<DashboardGroupAuthCreateRes>;
 
     expect(createGroupAuth3.status).toBe(400);
+
+    const updateDashboardGroupAuthResponse2 = (await post(
+      'dashboard/group/auth/update',
+      {
+        dashboardId: createDashboard.data.id,
+        authGroups: {
+          create: null,
+        },
+      },
+    )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
+
+    expect(updateDashboardGroupAuthResponse2.status).toBe(400);
   });
 });
