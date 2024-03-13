@@ -261,8 +261,8 @@ describe('dashboardCreatePOST', () => {
       authGroups: {
         create: [
           {
-            dashboardId: createDashboard2.data.id,
-            dashboardName: createDashboard2.data.name,
+            groupId: createDashboard2.data.id,
+            groupName: createDashboard2.data.name,
           },
         ],
       },
@@ -278,8 +278,8 @@ describe('dashboardCreatePOST', () => {
       ...createGroupAuthBody,
       authGroups: {
         create: [
-          { dashboardName: 'foo', dashboardId: 'fnmaofmadom' },
-          { dashboardName: 'bar', dashboardId: 'ufgnsisifjodnsjkom' },
+          { groupName: 'foo', groupId: 'fnmaofmadom' },
+          { groupName: 'bar', groupId: 'ufgnsisifjodnsjkom' },
         ],
       },
     };
@@ -295,8 +295,8 @@ describe('dashboardCreatePOST', () => {
       authGroups: {
         read: [
           {
-            dashboardId: createDashboard2.data.id,
-            dashboardName: createDashboard2.data.name,
+            groupId: createDashboard2.data.id,
+            groupName: createDashboard2.data.name,
           },
         ],
       },
@@ -333,8 +333,8 @@ describe('dashboardCreatePOST', () => {
             0,
             readGroupAuthResponse.data.authGroups.create.length - 1,
           ),
-          { dashboardId: 'kladmaslkmdas', dashboardName: 'John Doe' },
-          { dashboardName: 'Pontus Vision', dashboardId: 'dasfagadfad' },
+          { groupId: 'kladmaslkmdas', groupName: 'John Doe' },
+          { groupId: 'dasfagadfad', groupName: 'Pontus Vision' },
         ],
       },
     };
@@ -379,7 +379,7 @@ describe('dashboardCreatePOST', () => {
     const deleteGroupAuthBody: DashboardGroupAuthDeleteReq = {
       dashboardId: updateAuthGroupBody.dashboardId,
       authGroups: {
-        create: [updateAuthGroupBody.authGroups.create[0].dashboardId],
+        create: [updateAuthGroupBody.authGroups.create[0].groupId],
       },
     };
 
@@ -393,9 +393,7 @@ describe('dashboardCreatePOST', () => {
     const updateAuthGroup2Body: DashboardGroupAuthUpdateReq = {
       dashboardId: readGroupAuthResponse.data.dashboardId,
       authGroups: {
-        create: [
-          { dashboardName: 'Pontus Vision', dashboardId: 'dasfagadfad' },
-        ],
+        create: [{ groupName: 'Pontus Vision', groupId: 'dasfagadfad' }],
       },
     };
 

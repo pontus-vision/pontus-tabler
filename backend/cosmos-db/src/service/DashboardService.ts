@@ -160,7 +160,7 @@ export const deleteDashboardGroupAuth = async (
   for (const prop in data.authGroups) {
     for (const [index, el] of data.authGroups[prop].entries()) {
       const indexUpdate = resAuthGroups[prop].findIndex(
-        (el2) => el2.dashboardId === el,
+        (el2) => el2.groupId === el,
       );
 
       patchArr.push({
@@ -201,11 +201,10 @@ export const upsertDashboardGroupAuth = async (
 
     for (const [indexJ, elJ] of data.authGroups[prop].entries()) {
       if (
-        !resAuthGroups[prop].some((el) => el.dashboardId === elJ.dashboardId) &&
+        !resAuthGroups[prop].some((el) => el.groupId === elJ.groupId) &&
         (newEl.length === 0 ||
           newEl.some(
-            (el) =>
-              el?.el.dashboardId !== elJ.dashboardId && el?.index !== indexJ,
+            (el) => el?.el.groupId !== elJ.groupId && el?.index !== indexJ,
           ))
       ) {
         newEl.push({ el: elJ, index: indexJ });
@@ -213,13 +212,10 @@ export const upsertDashboardGroupAuth = async (
     }
     for (const [index, el] of resAuthGroups[prop]?.entries()) {
       if (
-        !data.authGroups[prop].some(
-          (el2) => el2.dashboardId === el.dashboardId,
-        ) &&
+        !data.authGroups[prop].some((el2) => el2.groupId === el.groupId) &&
         (obsoleteEl.length === 0 ||
           obsoleteEl.some(
-            (el2) =>
-              el2?.el.dashboardId !== el.dashboardId && el2?.index !== index,
+            (el2) => el2?.el.groupId !== el.groupId && el2?.index !== index,
           ))
       ) {
         obsoleteEl.push({ el: el, index: index });
