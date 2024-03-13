@@ -808,17 +808,17 @@ service:
               dashboardName: dashboardName
               authGroups:
                 create:
-                  - dashboardId: dashboardId
-                    dashboardName: dashboardName
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
                 read:
-                  - dashboardId: dashboardId
-                    dashboardName: dashboardName
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
                 update:
-                  - dashboardId: dashboardId
-                    dashboardName: dashboardName
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
                 delete:
-                  - dashboardId: dashboardId
-                    dashboardName: dashboardName
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthUpdatePOST:
       path: /dashboard/group/auth/update
       method: POST
@@ -842,34 +842,34 @@ service:
             dashboardId: dashboardId
             authGroups:
               create:
-                - dashboardName: Mapeamento de Processos
-                  dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                - groupName: Mapeamento de Processos
+                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
               read:
-                - dashboardName: Mapeamento de Processos
-                  dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                - groupName: Mapeamento de Processos
+                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
               update:
-                - dashboardName: Mapeamento de Processos
-                  dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                - groupName: Mapeamento de Processos
+                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
               delete:
-                - dashboardName: Mapeamento de Processos
-                  dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                - groupName: Mapeamento de Processos
+                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
           response:
             body:
               dashboardId: dashboardId
               dashboardName: dashboardName
               authGroups:
                 create:
-                  - dashboardName: Mapeamento de Processos
-                    dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
                 read:
-                  - dashboardName: Mapeamento de Processos
-                    dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
                 update:
-                  - dashboardName: Mapeamento de Processos
-                    dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
                 delete:
-                  - dashboardName: Mapeamento de Processos
-                    dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+                  - groupName: Mapeamento de Processos
+                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthDeletePOST:
       path: /dashboard/group/auth/delete
       method: POST
@@ -894,34 +894,34 @@ service:
       #       dashboardName: string
       #       authGroups:
       #         create:
-      #           - dashboardName: Mapeamento de Processos
-      #             dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         read:
-      #           - dashboardName: Mapeamento de Processos
-      #             dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         update:
-      #           - dashboardName: Mapeamento de Processos
-      #             dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         delete:
-      #           - dashboardName: Mapeamento de Processos
-      #             dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #     response:
       #       body:
       #         dashboardId: dashboardId
-      #         dashboardName: Mapeamento de Processos
-      #         authGroups:
+      #         groupName: Mapeamento de Processos
+      #         groups:
       #           create:
-      #             - dashboardName: Mapeamento de Processos
-      #               dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           read:
-      #             - dashboardName: Mapeamento de Processos
-      #               dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           update:
-      #             - dashboardName: Mapeamento de Processos
-      #               dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           delete:
-      #             - dashboardName: Mapeamento de Processos
-      #               dashboardId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardsReadPOST:
       path: /dashboards/read
       method: POST
@@ -1438,8 +1438,8 @@ types:
       delete: optional<list<DashboardAuthGroupsRef>>
   DashboardAuthGroupsRef:
     properties:
-      dashboardId: string
-      dashboardName: string
+      groupId: string
+      groupName: string
 
   TableReadReq:
     extends:
