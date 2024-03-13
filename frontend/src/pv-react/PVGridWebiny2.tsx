@@ -294,7 +294,7 @@ const PVGridWebiny2 = ({
   useEffect(() => {
     if (!rows) return;
     cachedRowParams?.successCallback(rows, totalCount);
-  }, [rows, filterState]);
+  }, [rows, filterState, cachedRowParams]);
 
   useEffect(() => {
     const objects = columnDefs?.filter(
