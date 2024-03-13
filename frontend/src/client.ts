@@ -54,6 +54,16 @@ import { D } from 'msw/lib/glossary-de6278a9';
 import { sendHttpRequest } from './http';
 import { TableDataEdgeCreateReq } from './typescript/api/resources/pontus/client/requests/TableDataEdgeCreateReq';
 import { TableDataEdgeCreateRes } from './typescript/api/resources/pontus/types/TableDataEdgeCreateRes';
+import {
+  DashboardGroupAuthCreateReq,
+  DashboardGroupAuthCreateRes,
+  DashboardGroupAuthDeleteReq,
+  DashboardGroupAuthDeleteRes,
+  DashboardGroupAuthReadReq,
+  DashboardGroupAuthReadRes,
+  DashboardGroupAuthUpdateReq,
+  DashboardGroupAuthUpdateRes,
+} from './typescript/api';
 
 export const getModelData = async (
   modelId: string,
@@ -280,10 +290,28 @@ export const deleteUser = async (
   return post('/auth/user/delete', { userId });
 };
 
+export const createDashboardGroupAuth = async (
+  data: DashboardGroupAuthCreateReq,
+): Promise<AxiosResponse<DashboardGroupAuthCreateRes> | undefined> => {
+  return post('/dashboard/group/auth/create', data);
+};
+
 export const readDashboardGroupAuth = async (
-  dashboardId: string,
-): Promise<AxiosResponse<DashboardAuthGroup> | undefined> => {
-  return post('/dashboard/group/auth/read', { dashboardId });
+  data: DashboardGroupAuthReadReq,
+): Promise<AxiosResponse<DashboardGroupAuthReadRes> | undefined> => {
+  return post('/dashboard/group/auth/read', data);
+};
+
+export const updateDashboardGroupAuth = async (
+  data: DashboardGroupAuthUpdateReq,
+): Promise<AxiosResponse<DashboardGroupAuthUpdateRes> | undefined> => {
+  return post('/dashboard/group/auth/update', data);
+};
+
+export const deleteDashboardGroupAuth = async (
+  data: DashboardGroupAuthDeleteReq,
+): Promise<AxiosResponse<DashboardGroupAuthDeleteRes> | undefined> => {
+  return post('/dashboard/group/auth/delete', data);
 };
 
 // export const getApiKeys = async () => {
