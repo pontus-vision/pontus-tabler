@@ -12,21 +12,9 @@ import {
   DashboardGroupAuthUpdateRes,
   DashboardGroupAuthDeleteReq,
   DashboardGroupAuthDeleteRes,
-  DashboardAuthGroups,
-  DashboardGroupAuthDeleteReqBody,
-  AuthGroupIds,
 } from '../typescript/api';
-import {
-  FetchData,
-  fetchContainer,
-  fetchData,
-  filterToQuery,
-} from '../cosmos-utils';
-import {
-  NotFoundError,
-  ConflictEntityError,
-  BadRequestError,
-} from '../generated/api';
+import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
+import { NotFoundError } from '../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
 
 const DASHBOARDS = 'dashboards';
@@ -135,7 +123,7 @@ export const readDashboardGroupAuth = async (
   const str = filterToQuery({ filters: data.filters }, 'p');
 
   let query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str}`;
-
+  console.log({ query });
   const res = await dashboardContainer.items
     .query({
       query,
@@ -143,10 +131,14 @@ export const readDashboardGroupAuth = async (
     })
     .fetchAll();
 
+  if (res.resources.length === 0) {
+    throw new NotFoundError('No group auth found.');
+  }
+  console.log({ res: res.resources });
   return {
-    authGroups: res3.resource?.authGroups,
-    dashboardId: data.dashboardId,
-    dashboardName: res3.resource?.name,
+    authGroups: res?.resources,
+    dashboardId: data?.dashboardId,
+    dashboardName: res?.resources[0]?.name,
   };
 };
 
