@@ -31,7 +31,7 @@ import {
   readDashboardGroupAuth,
   readDashboards,
   upsertDashboard,
-  upsertDashboardGroupAuth,
+  updateDashboardGroupAuth,
   deleteDashboardGroupAuth,
 } from './service/DashboardService';
 import {
@@ -70,7 +70,7 @@ export default new PontusService({
     res.send(response);
   },
   dashboardGroupAuthUpdatePost: async (req, res) => {
-    const response = await upsertDashboardGroupAuth(req.body);
+    const response = await updateDashboardGroupAuth(req.body);
 
     res.send(response);
   },
