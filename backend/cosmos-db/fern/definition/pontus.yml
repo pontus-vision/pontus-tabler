@@ -755,7 +755,7 @@ service:
         body:
           properties:
             dashboardId: string
-            authGroups: DashboardAuthGroups
+            authGroups: list<DashboardAuthGroups>
       response:
         docs: Dashboard state created successfully
         type: DashboardGroupAuthCreateRes
@@ -763,25 +763,25 @@ service:
         - BadRequestError
         - InternalServerError
       # examples:
-    #   #   - request:
-    #   #       authGroups: {}
-    #   #     response:
-    #   #       body:
-    #   #         dashboardId: dashboardId
-    #   #         dashboardName: dashboardName
-    #   #         authGroups:
-    #   #           create:
-    #   #             - create
-    #   #             - create
-    #   #           read:
-    #   #             - read
-    #   #             - read
-    #   #           update:
-    #   #             - update
-    #   #             - update
-    #   #           delete:
-    #   #             - delete
-    #   #             - delete
+      #   - request:
+      #       authGroups: {}
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         dashboardName: dashboardName
+      #         authGroups:
+      #           create:
+      #             - create
+      #             - create
+      #           read:
+      #             - read
+      #             - read
+      #           update:
+      #             - update
+      #             - update
+      #           delete:
+      #             - delete
+      #             - delete
     dashboardGroupAuthReadPOST:
       path: /dashboard/group/auth/read
       method: POST
@@ -793,32 +793,34 @@ service:
         body:
           properties:
             dashboardId: string
+          extends:
+            - ReadPaginationFilter
       response:
         docs: Dashboard state created successfully
         type: DashboardGroupAuthReadRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request:
-            dashboardId: 'a271f651-e4aa-4c9b-a6a0-0ef10711fb48'
-          response:
-            body:
-              dashboardId: dashboardId
-              dashboardName: dashboardName
-              authGroups:
-                create:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-                read:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-                update:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-                delete:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      # examples:
+      #   - request:
+      #       dashboardId: 'a271f651-e4aa-4c9b-a6a0-0ef10711fb48'
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         dashboardName: dashboardName
+      #         authGroups:
+      #           create:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           read:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           update:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           delete:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthUpdatePOST:
       path: /dashboard/group/auth/update
       method: POST
@@ -830,46 +832,46 @@ service:
         body:
           properties:
             dashboardId: string
-            authGroups: DashboardAuthGroups
+            authGroups: list<DashboardAuthGroups>
       response:
         docs: Dashboard state created successfully
         type: DashboardGroupAuthUpdateRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request:
-            dashboardId: dashboardId
-            authGroups:
-              create:
-                - groupName: Mapeamento de Processos
-                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-              read:
-                - groupName: Mapeamento de Processos
-                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-              update:
-                - groupName: Mapeamento de Processos
-                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-              delete:
-                - groupName: Mapeamento de Processos
-                  groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-          response:
-            body:
-              dashboardId: dashboardId
-              dashboardName: dashboardName
-              authGroups:
-                create:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-                read:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-                update:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
-                delete:
-                  - groupName: Mapeamento de Processos
-                    groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      # examples:
+      #   - request:
+      #       dashboardId: dashboardId
+      #       authGroups:
+      #         create:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         read:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         update:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         delete:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         dashboardName: dashboardName
+      #         authGroups:
+      #           create:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           read:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           update:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           delete:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthDeletePOST:
       path: /dashboard/group/auth/delete
       method: POST
@@ -1401,12 +1403,12 @@ types:
     properties:
       dashboardName: string
       dashboardId: string
-      authGroups: DashboardAuthGroups
+      authGroups: list<DashboardAuthGroups>
   DashboardGroupAuthDeleteRes:
     properties:
       dashboardName: string
       dashboardId: string
-      authGroups: DashboardAuthGroups
+      authGroups: list<DashboardAuthGroups>
   DashboardCreateReq: DashboardRef
   DashboardCreateRes:
     properties: {}
@@ -1423,7 +1425,7 @@ types:
   DashboardGroupAuthDeleteReqBody:
     properties:
       dashboardId: string
-      authGroups: AuthGroupIds
+      authGroups: list<string>
   AuthGroupIds:
     properties:
       create: optional<list<string>>
@@ -1432,10 +1434,12 @@ types:
       delete: optional<list<string>>
   DashboardAuthGroups:
     properties:
-      create: optional<list<DashboardAuthGroupsRef>>
-      read: optional<list<DashboardAuthGroupsRef>>
-      update: optional<list<DashboardAuthGroupsRef>>
-      delete: optional<list<DashboardAuthGroupsRef>>
+      groupId: string
+      groupName: string
+      create: boolean
+      read: boolean
+      update: boolean
+      delete: boolean
   DashboardAuthGroupsRef:
     properties:
       groupId: string
@@ -1482,12 +1486,12 @@ types:
     properties:
       dashboardId: string
       dashboardName: string
-      authGroups: DashboardAuthGroups
+      authGroups: list<DashboardAuthGroups>
   DashboardGroupAuthUpdateRes:
     properties:
       dashboardName: string
       dashboardId: string
-      authGroups: DashboardAuthGroups
+      authGroups: list<DashboardAuthGroups>
   DashboardsReadRes:
     properties:
       totalDashboards: optional<integer>
