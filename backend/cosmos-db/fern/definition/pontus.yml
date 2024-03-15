@@ -1589,6 +1589,7 @@ types:
       filterTo: optional<ReadPaginationFilterFiltersFilterTo>
       condition1: optional<ReadPaginationFilterFiltersColIdCondition>
       condition2: optional<ReadPaginationFilterFiltersColIdCondition>
+      conditions: optional<list<ReadPaginationFilterFiltersColIdCondition>>
       filterType: optional<string>
       operator: optional<string>
   Dashboard:
