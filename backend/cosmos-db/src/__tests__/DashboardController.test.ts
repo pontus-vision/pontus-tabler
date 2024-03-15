@@ -352,6 +352,7 @@ describe('dashboardCreatePOST', () => {
       dashboardId: createDashboard.data.id,
       filters: {
         groupName: {
+          filterType: 'text',
           condition1: {
             filter: 'foo',
             filterType: 'text',

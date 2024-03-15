@@ -16,7 +16,12 @@ import {
   DashboardGroupAuthDeleteReqBody,
   AuthGroupIds,
 } from '../typescript/api';
-import { FetchData, fetchContainer, fetchData } from '../cosmos-utils';
+import {
+  FetchData,
+  fetchContainer,
+  fetchData,
+  filterToQuery,
+} from '../cosmos-utils';
 import {
   NotFoundError,
   ConflictEntityError,
@@ -127,32 +132,9 @@ export const readDashboardGroupAuth = async (
     .item(data.dashboardId, data.dashboardId)
     .read();
 
-  const queryArr = [];
+  const str = filterToQuery({ filters: data.filters }, 'p');
 
-  const groupName = data?.filters?.groupName;
-  const filter = groupName?.filter;
-  const filterCondition1 = groupName?.condition1?.filter;
-  const filterCondition2 = groupName?.condition2?.filter;
-  const operator = groupName?.operator;
-
-  let query = `SELECT p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups WHERE `;
-
-  if (filter) {
-    queryArr.push(`p.groupName = "${filter}"`);
-  } else {
-    if (filterCondition1) {
-      queryArr.push(`p.groupName = "${filterCondition1}"`);
-    }
-    if (filterCondition2) {
-      queryArr.push(`p.groupName = "${filterCondition2}"`);
-    }
-  }
-
-  if (queryArr.length > 1) {
-    query += queryArr.join(` ${operator} `);
-  } else if (queryArr.length === 1) {
-    query += queryArr[0];
-  }
+  let query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str}`;
 
   const res = await dashboardContainer.items
     .query({
@@ -163,7 +145,7 @@ export const readDashboardGroupAuth = async (
 
   return {
     authGroups: res3.resource?.authGroups,
-    dashboardId: res3.resource?.id,
+    dashboardId: data.dashboardId,
     dashboardName: res3.resource?.name,
   };
 };
