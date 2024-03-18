@@ -103,40 +103,6 @@ export const createDashboardAuthGroup = async (
   };
 };
 
-// export const readDashboardGroupAuth = async (
-//   data: DashboardGroupAuthReadReq,
-// ): Promise<DashboardGroupAuthReadRes> => {
-//   const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-//   const res3 = await dashboardContainer
-//     .item(data.dashboardId, data.dashboardId)
-//     .read();
-
-//   const str = filterToQuery({ filters: data.filters }, 'p');
-
-//   const countStr = `select VALUE COUNT(1) from c.authGroups ${str}`;
-
-//   let query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str}`;
-
-//   const res = await dashboardContainer.items
-//     .query({
-//       query,
-//       parameters: [],
-//     })
-//     .fetchAll();
-
-//   if (res.resources.length === 0) {
-//     throw new NotFoundError('No group auth found.');
-//   }
-
-//   return {
-//     totalCount: 100,
-//     authGroups: res?.resources,
-//     dashboardId: data?.dashboardId,
-//     dashboardName: res?.resources[0]?.name,
-//   };
-// };
-
 export const readDashboardGroupAuth = async (
   data: DashboardGroupAuthReadReq,
 ): Promise<DashboardGroupAuthReadRes> => {
