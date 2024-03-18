@@ -16,6 +16,8 @@ import {
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
 import { NotFoundError } from '../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
+import { CosmosClient } from '@azure/cosmos';
+declare function getContext(): any;
 
 const DASHBOARDS = 'dashboards';
 
@@ -66,16 +68,6 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 export const readDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<DashboardsReadRes> => {
-  // if (Object.keys(body.filters).length === 0 && body.from === 1) {
-  //   const dashboardContainer = await fetchContainer(DASHBOARDS);
-  //   const res = await dashboardContainer.items
-  //     .readAll({
-  //       maxItemCount: body.to,
-  //     })
-  //     .fetchAll();
-
-  //   return { dashboards: res.resources, totalDashboards: 1000 };
-  // }
   const res = await fetchData(body, DASHBOARDS);
 
   return { dashboards: res.values, totalDashboards: res.count };
@@ -111,19 +103,50 @@ export const createDashboardAuthGroup = async (
   };
 };
 
+// export const readDashboardGroupAuth = async (
+//   data: DashboardGroupAuthReadReq,
+// ): Promise<DashboardGroupAuthReadRes> => {
+//   const dashboardContainer = await fetchContainer(DASHBOARDS);
+
+//   const res3 = await dashboardContainer
+//     .item(data.dashboardId, data.dashboardId)
+//     .read();
+
+//   const str = filterToQuery({ filters: data.filters }, 'p');
+
+//   const countStr = `select VALUE COUNT(1) from c.authGroups ${str}`;
+
+//   let query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str}`;
+
+//   const res = await dashboardContainer.items
+//     .query({
+//       query,
+//       parameters: [],
+//     })
+//     .fetchAll();
+
+//   if (res.resources.length === 0) {
+//     throw new NotFoundError('No group auth found.');
+//   }
+
+//   return {
+//     totalCount: 100,
+//     authGroups: res?.resources,
+//     dashboardId: data?.dashboardId,
+//     dashboardName: res?.resources[0]?.name,
+//   };
+// };
+
 export const readDashboardGroupAuth = async (
   data: DashboardGroupAuthReadReq,
 ): Promise<DashboardGroupAuthReadRes> => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
-  const res3 = await dashboardContainer
-    .item(data.dashboardId, data.dashboardId)
-    .read();
-
   const str = filterToQuery({ filters: data.filters }, 'p');
+  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.authGroups ${str}`;
 
   let query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str}`;
-  console.log({ query });
+
   const res = await dashboardContainer.items
     .query({
       query,
@@ -131,11 +154,19 @@ export const readDashboardGroupAuth = async (
     })
     .fetchAll();
 
+  const res2 = await dashboardContainer.items
+    .query({
+      query: countStr,
+      parameters: [],
+    })
+    .fetchAll();
+
   if (res.resources.length === 0) {
     throw new NotFoundError('No group auth found.');
   }
-  console.log({ res: res.resources });
+
   return {
+    totalCount: res2.resources[0], // Use the count obtained from the stored procedure
     authGroups: res?.resources,
     dashboardId: data?.dashboardId,
     dashboardName: res?.resources[0]?.name,
@@ -190,133 +221,44 @@ export const updateDashboardGroupAuth = async (
     .item(dashboardId, dashboardId)
     .read()) as ItemResponse<DashboardGroupAuthReadRes>;
 
-  const patchArr: PatchOperation[] = [];
+  const batchPatchArr: PatchOperation[][] = [];
 
-  for (const group of data.authGroups) {
-    const index = res.resource.authGroups.findIndex(
-      (i) => i.groupId === group.groupId,
+  while (data.authGroups.length > 0) {
+    batchPatchArr.push(
+      data.authGroups.splice(0, 10).map((authGroup) => {
+        const index = res.resource.authGroups.findIndex(
+          (i) => i.groupId === authGroup.groupId,
+        );
+        if (index === -1) {
+          throw new NotFoundError(
+            `No group auth found at: (name: ${authGroup.groupName}, id: ${authGroup.groupId})`,
+          );
+        }
+
+        return {
+          op: 'set',
+          path: `/authGroups/${index}`,
+          value: authGroup,
+        };
+      }),
     );
-
-    if (index === -1) {
-      throw new NotFoundError(
-        `No group (${group.groupName}) at id "${group.groupId}" found`,
-      );
-    }
-
-    patchArr.push({
-      op: 'set',
-      path: `/authGroups/${index}`,
-      value: group,
-    });
   }
 
-  const res2 = await dashboardContainer
-    .item(dashboardId, dashboardId)
-    .patch(patchArr);
+  for (const [index, batch] of batchPatchArr.entries()) {
+    const res2 = await dashboardContainer
+      .item(dashboardId, dashboardId)
+      .patch(batch);
 
-  const resource = res2.resource;
+    if (index === batchPatchArr.length - 1) {
+      const resource = res2.resource;
 
-  return {
-    authGroups: resource.authGroups,
-    dashboardId: resource.id,
-    dashboardName: resource.name,
-  };
+      return {
+        authGroups: resource.authGroups,
+        dashboardId: resource.id,
+        dashboardName: resource.name,
+      };
+    }
+  }
 };
 
-// export const upsertDashboardGroupAuth = async (
-//   data: DashboardGroupAuthUpdateReq,
-// ): Promise<DashboardGroupAuthUpdateRes> => {
-//   checkFields(data.authGroups);
-
-//   const dashboardContainer = await fetchContainer(DASHBOARDS);
-//   const dashboardId = data.dashboardId;
-
-//   const res = await dashboardContainer.item(dashboardId, dashboardId).read();
-
-//   const resAuthGroups = res.resource.authGroups;
-
-//   const patchOperations: PatchOperation[] = [];
-
-//   for (const prop in data.authGroups) {
-//     const obsoleteEl = [];
-//     const newEl = [];
-
-//     for (const [indexJ, elJ] of data.authGroups[prop].entries()) {
-//       if (
-//         !resAuthGroups[prop].some((el) => el.groupId === elJ.groupId) &&
-//         (newEl.length === 0 ||
-//           newEl.some(
-//             (el) => el?.el.groupId !== elJ.groupId && el?.index !== indexJ,
-//           ))
-//       ) {
-//         newEl.push({ el: elJ, index: indexJ });
-//       }
-//     }
-//     for (const [index, el] of resAuthGroups[prop]?.entries()) {
-//       if (
-//         !data.authGroups[prop].some((el2) => el2.groupId === el.groupId) &&
-//         (obsoleteEl.length === 0 ||
-//           obsoleteEl.some(
-//             (el2) => el2?.el.groupId !== el.groupId && el2?.index !== index,
-//           ))
-//       ) {
-//         obsoleteEl.push({ el: el, index: index });
-//       }
-//     }
-
-//     for (const [index, el] of obsoleteEl.entries()) {
-//       if (newEl[index]) {
-//         patchOperations.push({
-//           op: 'set',
-//           path: `/authGroups/${prop}/${el.index}`,
-//           value: newEl[index].el,
-//         });
-//       } else {
-//         patchOperations.push({
-//           op: 'remove',
-//           path: `/authGroups/${prop}/${el.index}`,
-//         });
-//       }
-//     }
-//     for (const [index, el] of newEl.entries()) {
-//       if (!obsoleteEl[index]) {
-//         patchOperations.push({
-//           op: 'add',
-//           path: `/authGroups/${prop}/-`,
-//           value: el.el,
-//         });
-//       }
-//     }
-
-//     // if (resAuthGroups[prop].length > 0) {
-//     //   for (const [index, el] of resAuthGroups[prop]?.entries()) {
-//     //     if (data.authGroups[prop].indexOf(el) === -1) {
-//     //       patchOperations.push({
-//     //         op: 'remove',
-//     //         path: `/authGroups/${prop}/${index}`,
-//     //       });
-//     //     }
-//     //   }
-//     // }
-
-//     // for (const [index, el] of data.authGroups[prop].entries()) {
-//     //   if (resAuthGroups[prop].indexOf(el) === -1) {
-//     //     patchOperations.push({
-//     //       op: 'add',
-//     //       path: `/authGroups/${prop}/-`,
-//     //       value: el,
-//     //     });
-//     //   }
-//     // }
-//   }
-
-//   const res2 = await dashboardContainer
-//     .item(dashboardId, dashboardId)
-//     .patch(patchOperations);
-
-//   return {
-//     authGroups: res2.resource.authGroups,
-//     dashboardId,
-//     dashboardName: res2.resource.name,
-//   };
-// };
+/
