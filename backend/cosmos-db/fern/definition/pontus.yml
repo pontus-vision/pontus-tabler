@@ -795,6 +795,7 @@ service:
             dashboardId: string
           extends:
             - ReadPaginationFilter
+
       response:
         docs: Dashboard state created successfully
         type: DashboardGroupAuthReadRes
@@ -1404,6 +1405,7 @@ types:
       dashboardName: string
       dashboardId: string
       authGroups: list<DashboardAuthGroups>
+      totalCount: integer
   DashboardGroupAuthDeleteRes:
     properties:
       dashboardName: string
