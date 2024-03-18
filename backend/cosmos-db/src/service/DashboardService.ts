@@ -260,5 +260,3 @@ export const updateDashboardGroupAuth = async (
     }
   }
 };
-
-/
