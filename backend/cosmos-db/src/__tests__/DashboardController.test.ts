@@ -342,9 +342,6 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<DashboardGroupAuthReadRes>;
 
     expect(readGroupAuthResponse.data.authGroups).toContainEqual(
-      createGroupAuth2Body.authGroups[0] && createGroupAuth2Body.authGroups[1],
-    );
-    expect(readGroupAuthResponse.data.authGroups).toContainEqual(
       createGroupAuth2Body.authGroups[0],
     );
 
@@ -360,7 +357,7 @@ describe('dashboardCreatePOST', () => {
           },
           operator: 'OR',
           condition2: {
-            filter: 'f',
+            filter: 'bar',
             filterType: 'text',
             type: 'contains',
           },
@@ -373,6 +370,9 @@ describe('dashboardCreatePOST', () => {
       readGroupAuthBody2,
     )) as AxiosResponse<DashboardGroupAuthReadRes>;
 
+    expect(readGroupAuthResponse2.data.authGroups).toMatchObject(
+      createGroupAuth2Body.authGroups,
+    );
     expect(readGroupAuthResponse2.data.authGroups).toContainEqual({
       create: true,
       delete: true,
@@ -385,10 +385,22 @@ describe('dashboardCreatePOST', () => {
     const updateAuthGroupBody: DashboardGroupAuthUpdateReq = {
       dashboardId: readGroupAuthResponse.data.dashboardId,
       authGroups: [
-        ...readGroupAuthResponse.data.authGroups.slice(
-          0,
-          readGroupAuthResponse.data.authGroups.length - 1,
-        ),
+        {
+          create: true,
+          delete: true,
+          groupId: 'Pontus Vision 2',
+          groupName: 'foo',
+          read: false,
+          update: false,
+        },
+        {
+          create: true,
+          delete: false,
+          groupId: 'Pontus Vision',
+          groupName: 'bar',
+          read: false,
+          update: true,
+        },
       ],
     };
 
@@ -438,7 +450,7 @@ describe('dashboardCreatePOST', () => {
           delete: true,
           read: false,
           update: true,
-          groupId: 'Pontus Vision 2',
+          groupId: 'Pontus Vision',
           groupName: 'foo',
         },
       ],
@@ -484,5 +496,32 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
 
     expect(updateDashboardGroupAuthResponse2.status).toBe(404);
+
+    const readGroupAuthBody2: DashboardGroupAuthReadReq = {
+      dashboardId: createDashboard.data.id,
+      filters: {
+        groupName: {
+          filterType: 'text',
+          condition1: {
+            filter: 'foo',
+            filterType: 'text',
+            type: 'contains',
+          },
+          operator: 'AND',
+          condition2: {
+            filter: 'bar',
+            filterType: 'text',
+            type: 'contains',
+          },
+        },
+      },
+    };
+
+    const readDashboardGroupAuthResponse2 = (await post(
+      'dashboard/group/auth/read',
+      readGroupAuthBody2,
+    )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
+
+    expect(readDashboardGroupAuthResponse2.status).toBe(404);
   });
 });
