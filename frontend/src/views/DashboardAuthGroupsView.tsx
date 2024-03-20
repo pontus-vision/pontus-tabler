@@ -45,21 +45,22 @@ const DashboardAuthGroupsView = () => {
     },
   ]);
 
-  const [dashboardId, setDashboardId] = useState();
+  const [selectedDashboard, setSelectedDashboard] = useState<Dashboard>();
 
   const [groups, setGroups] = useState<any[]>([]);
+  const [totalGroups, setTotalGroups] = useState<number>();
+  const [addGroup, setAddGroup] = useState(false);
 
   const fetchDashboards = async () => {
     const res = await getAllDashboards({ from: 1, to: 5, filters: {} });
-    console.log({ res });
     setDashboards(res?.data.dashboards);
   };
 
   const fetchDashboardAuthGroups = async () => {
-    if (!dashboardId) return;
+    if (!selectedDashboard?.id) return;
 
     const res = await readDashboardGroupAuth({
-      dashboardId,
+      dashboardId: selectedDashboard?.id,
       filters,
     });
     console.log({ res });
@@ -69,8 +70,10 @@ const DashboardAuthGroupsView = () => {
     }
 
     const authGroups = res?.data.authGroups;
+    const totalCount = res?.data.totalCount;
 
     authGroups && setGroups(authGroups);
+    totalCount && setTotalGroups(totalCount);
 
     // for (const prop in authGroups) {
     //   authGroups[prop].forEach((el) => {
@@ -114,14 +117,8 @@ const DashboardAuthGroupsView = () => {
 
   useEffect(() => {
     fetchDashboardAuthGroups();
-    console.log({ dashboardId, filters, to, from });
-  }, [dashboardId, filters, to, from]);
-
-  useEffect(() => {
-    console.log({
-      perms: groups,
-    });
-  }, [groups]);
+    console.log({ dashboardId: selectedDashboard, filters, to, from });
+  }, [selectedDashboard, filters, to, from]);
 
   useEffect(() => {
     fetchDashboards();
@@ -135,57 +132,64 @@ const DashboardAuthGroupsView = () => {
 
   return (
     <div className={styles.dashboardAuthGroupsView}>
-      <PVGridWebiny2
-        cols={cols}
-        rows={dashboards}
-        onRowClicked={(e) => setDashboardId(e.data.id)}
-      />
-      <PVGridWebiny2
-        onParamsChange={handleParamsChange}
-        cols={[
-          {
-            headerName: 'Group',
-            field: 'groupName',
-            editable: true,
-          },
-          {
-            headerName: 'Group Id',
-            field: 'groupId',
-            hide: true,
-            editable: true,
-          },
-          {
-            headerName: 'Create',
-            field: 'create',
-            editable: true,
-            cellEditor: 'agCheckboxCellEditor',
-            cellRenderer: 'agCheckboxCellRenderer',
-          },
-          {
-            headerName: 'Read',
-            field: 'read',
-            editable: true,
-            cellEditor: 'agCheckboxCellEditor',
-            cellRenderer: 'agCheckboxCellRenderer',
-          },
-          {
-            headerName: 'Update',
-            field: 'update',
-            editable: true,
-            cellEditor: 'agCheckboxCellEditor',
-            cellRenderer: 'agCheckboxCellRenderer',
-          },
-          {
-            headerName: 'Delete',
-            field: 'delete',
-            editable: true,
-            cellEditor: 'agCheckboxCellEditor',
-            cellRenderer: 'agCheckboxCellRenderer',
-          },
-        ]}
-        rows={groups}
-        totalCount={2}
-      />
+      <label htmlFor="">{selectedDashboard?.name}</label>
+      <div className={styles.dashboardAuthGroupsViewContainer}>
+        <PVGridWebiny2
+          cols={cols}
+          rows={dashboards}
+          onRowClicked={(e) => setSelectedDashboard(e.data)}
+        />
+        {selectedDashboard && (
+          <PVGridWebiny2
+            add={() => setAddGroup(true)}
+            permissions={{ createAction: true }}
+            onParamsChange={handleParamsChange}
+            cols={[
+              {
+                headerName: 'Group',
+                field: 'groupName',
+                editable: true,
+              },
+              {
+                headerName: 'Group Id',
+                field: 'groupId',
+                hide: true,
+                editable: true,
+              },
+              {
+                headerName: 'Create',
+                field: 'create',
+                editable: true,
+                cellEditor: 'agCheckboxCellEditor',
+                cellRenderer: 'agCheckboxCellRenderer',
+              },
+              {
+                headerName: 'Read',
+                field: 'read',
+                editable: true,
+                cellEditor: 'agCheckboxCellEditor',
+                cellRenderer: 'agCheckboxCellRenderer',
+              },
+              {
+                headerName: 'Update',
+                field: 'update',
+                editable: true,
+                cellEditor: 'agCheckboxCellEditor',
+                cellRenderer: 'agCheckboxCellRenderer',
+              },
+              {
+                headerName: 'Delete',
+                field: 'delete',
+                editable: true,
+                cellEditor: 'agCheckboxCellEditor',
+                cellRenderer: 'agCheckboxCellRenderer',
+              },
+            ]}
+            rows={groups}
+            totalCount={totalGroups}
+          />
+        )}
+      </div>
     </div>
   );
 };
