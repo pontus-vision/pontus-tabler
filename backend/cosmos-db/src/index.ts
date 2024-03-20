@@ -96,7 +96,7 @@ export default new PontusService({
   },
   dashboardsReadPost: async (req, res) => {
     const response = await readDashboards(req.body);
-    console.log({ response });
+
     res.send(response);
   },
   dashboardUpdatePost: async (req, res) => {
