@@ -28,6 +28,12 @@ const DashboardAuthGroupsView = () => {
   });
   const [cols, setCols] = useState<ColDef[]>([
     {
+      headerName: 'Name',
+      field: 'name',
+      filter: true,
+      sortable: true,
+    },
+    {
       headerName: 'Owner',
       field: 'owner',
       filter: true,
@@ -36,12 +42,6 @@ const DashboardAuthGroupsView = () => {
     {
       headerName: 'Folder',
       field: 'folder',
-      filter: true,
-      sortable: true,
-    },
-    {
-      headerName: 'Name',
-      field: 'name',
       filter: true,
       sortable: true,
     },
@@ -71,6 +71,12 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 404) {
       setDashboards([]);
       setTotalDashboards(0);
+    } else if (res?.status === 500) {
+      notificationManagerRef?.current?.addMessage(
+        'error',
+        'Error',
+        'Something went wrong. Could not fetch Dashboard(s)!',
+      );
     }
 
     setDashboards(res?.data.dashboards);
@@ -92,6 +98,12 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 404) {
       setGroups([]);
       setTotalGroups(0);
+    } else if (res?.status === 500) {
+      notificationManagerRef?.current?.addMessage(
+        'error',
+        'Error',
+        'Something went wrong. Could not fetch Auth Group(s)!',
+      );
     }
 
     const authGroups = res?.data.authGroups;
@@ -138,6 +150,8 @@ const DashboardAuthGroupsView = () => {
         'Success',
         'Auth group created!',
       );
+
+      await fetchDashboardAuthGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
@@ -237,7 +251,7 @@ const DashboardAuthGroupsView = () => {
         {addGroup && (
           <>
             <div
-              className={styles.shadow}
+              className={styles.dashboardAuthGroupsViewShadow}
               onClick={() => setAddGroup(false)}
             ></div>
             <div className={styles.selectGroup}>

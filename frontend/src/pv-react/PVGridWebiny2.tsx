@@ -34,12 +34,14 @@ import {
   User,
 } from '../pontus-api/typescript-fetch-client-generated';
 import GridActionsPanel from '../components/GridActionsPanel';
+import { CustomLoadingOverlay } from './customLoadingOverlay';
 
 type FilterState = {
   [key: string]: any;
 };
 
 type Props = {
+  isLoading?: boolean;
   id?: string;
   onValueChange?: (id: string, value: ColumnState[]) => void;
   modelId?: string;
@@ -80,6 +82,7 @@ type Props = {
 
 const PVGridWebiny2 = ({
   id,
+  isLoading,
   onValueChange,
   lastState,
   onRefresh,
@@ -131,6 +134,8 @@ const PVGridWebiny2 = ({
 
   const [selectedRowIds, setSelectedRowIds] = useState([]);
 
+  const gridContainerRef = useRef<AgGridReact>(null);
+
   useEffect(() => {
     if (!columnState || !onValueChange || !id) return;
     // onValueChange(id, columnState);
@@ -161,6 +166,15 @@ const PVGridWebiny2 = ({
   useEffect(() => {
     selectRows();
   }, [rows]);
+
+  useEffect(() => {
+    console.log({ isLoading });
+    if (isLoading) {
+      gridContainerRef.current!?.api?.showLoadingOverlay();
+    } else {
+      gridContainerRef.current!?.api?.hideOverlay();
+    }
+  }, [isLoading]);
 
   const getDataSource = () => {
     const datasource: IDatasource = {
@@ -344,11 +358,14 @@ const PVGridWebiny2 = ({
     }
   };
 
+  function onBtShowLoading() {
+    gridApi!.showLoadingOverlay();
+  }
+
   const gridOptions: GridOptions = {
     rowModelType: 'infinite',
     cacheBlockSize: 100,
     suppressRowClickSelection: true,
-
     onRowClicked: (e) => {
       onRowClicked && onRowClicked(e);
     },
@@ -449,8 +466,6 @@ const PVGridWebiny2 = ({
       setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);
 
-  const gridContainerRef = useRef(null);
-
   const updateGridHeight = () => {
     const gridElement = document.querySelector(
       `.${gridId}.ag-theme-alpine`,
@@ -515,6 +530,7 @@ const PVGridWebiny2 = ({
           gridOptions={gridOptions}
           // enableRangeSelection={true}
           // paginationAutoPageSize={true}
+
           paginationPageSize={6}
           defaultColDef={defaultColDef}
           rowSelection={'multiple'}
