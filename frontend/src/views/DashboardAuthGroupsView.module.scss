@@ -9,4 +9,23 @@
     display: flex;
     gap: 10rem;
   }
+
+  &Shadow {
+    top: 3rem;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 3rem);
+    background-color: rgba(0, 0, 0, 0.363);
+    position: absolute;
+    z-index: 2;
+  }
+}
+
+.selectGroup {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
 }
