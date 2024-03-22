@@ -11,6 +11,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
   CellClickedEvent,
+  CellValueChangedEvent,
   ColDef,
   ColumnApi,
   ColumnState,
@@ -21,7 +22,6 @@ import {
   IDatasource,
   IGetRowsParams,
   IRowNode,
-  IServerSideGetRowsParams,
   RowEvent,
   SelectionChangedEvent,
 } from 'ag-grid-community';
@@ -35,12 +35,14 @@ import {
 } from '../pontus-api/typescript-fetch-client-generated';
 import GridActionsPanel from '../components/GridActionsPanel';
 import { CustomLoadingOverlay } from './customLoadingOverlay';
+import { deepEqual } from '../../utils';
 
 type FilterState = {
   [key: string]: any;
 };
 
 type Props = {
+  onRowsStateChange?: (data: CellValueChangedEvent[]) => void;
   isLoading?: boolean;
   id?: string;
   onValueChange?: (id: string, value: ColumnState[]) => void;
@@ -83,6 +85,7 @@ type Props = {
 const PVGridWebiny2 = ({
   id,
   isLoading,
+  onRowsStateChange,
   onValueChange,
   lastState,
   onRefresh,
@@ -127,12 +130,12 @@ const PVGridWebiny2 = ({
   );
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
-
   const [selectedColumns, setSelectedColumns] = useState<
     Array<string | undefined>
   >([]);
-
   const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [initialRows, setInitialRows] = useState<string>();
+  const [rowsChanged, setRowsChanged] = useState<CellValueChangedEvent[]>([]);
 
   const gridContainerRef = useRef<AgGridReact>(null);
 
@@ -140,6 +143,17 @@ const PVGridWebiny2 = ({
     if (!columnState || !onValueChange || !id) return;
     // onValueChange(id, columnState);
   }, [columnState, id]);
+
+  useEffect(() => {
+    onRowsStateChange &&
+      rowsChanged &&
+      onRowsStateChange(
+        rowsChanged.filter((row) => {
+          if (!initialRows) return;
+          return !JSON.parse(initialRows).some((row2) => deepEqual(row, row2));
+        }),
+      );
+  }, [rowsChanged]);
 
   const paramsChange = () => {
     cachedRowParams && onParamsChange && onParamsChange(cachedRowParams);
@@ -346,6 +360,7 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     gridApi?.refreshInfiniteCache();
+    setInitialRows(JSON.stringify(rows));
   }, [rows]);
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
@@ -476,6 +491,10 @@ const PVGridWebiny2 = ({
     }
   };
 
+  const onCellValueChanged = (cell: CellValueChangedEvent) => {
+    setRowsChanged((prevState) => [...new Set([...prevState, cell.data])]);
+  };
+
   const [gridId, setGridId] = useState<string>();
 
   useEffect(() => {
@@ -538,6 +557,7 @@ const PVGridWebiny2 = ({
           onGridReady={onGridReady}
           onFilterChanged={handleGridStateChanged}
           onSelectionChanged={onSelectionChanged}
+          onCellValueChanged={onCellValueChanged}
           onColumnMoved={handleGridStateChanged}
           onColumnResized={handleGridStateChanged}
           onColumnPinned={handleGridStateChanged}
