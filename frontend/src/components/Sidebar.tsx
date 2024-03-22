@@ -8,7 +8,7 @@ import {
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';

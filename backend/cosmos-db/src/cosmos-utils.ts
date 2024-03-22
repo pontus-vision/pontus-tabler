@@ -113,7 +113,11 @@ export const fetchData = async (
   }
 };
 
-export const filterToQuery = (body: ReadPaginationFilter, alias = 'c') => {
+export const filterToQuery = (
+  body: ReadPaginationFilter,
+  alias = 'c',
+  additionalClause?: string,
+) => {
   const query = [];
 
   let cols = body?.filters;
@@ -541,10 +545,15 @@ export const filterToQuery = (body: ReadPaginationFilter, alias = 'c') => {
     }
   }
 
+  const hasFilters = Object.keys(body.filters).length > 0;
+
   const finalQuery = (
-    (Object.keys(body.filters).length > 0 ? ' WHERE ' : '') +
+    (hasFilters ? ' WHERE ' : '') +
     query.join(' and ') +
     (colSortStr ? ` ORDER BY ${colSortStr}` : '') +
+    (additionalClause
+      ? ` ${hasFilters ? 'AND' : 'WHERE'} ${additionalClause}`
+      : '') +
     `${from ? ' OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
   ).trim();
 
