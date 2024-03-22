@@ -34,7 +34,6 @@ import {
   User,
 } from '../pontus-api/typescript-fetch-client-generated';
 import GridActionsPanel from '../components/GridActionsPanel';
-import { CustomLoadingOverlay } from './customLoadingOverlay';
 import { deepEqual } from '../../utils';
 
 type FilterState = {
