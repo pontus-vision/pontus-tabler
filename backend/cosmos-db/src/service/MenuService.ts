@@ -14,6 +14,7 @@ import {
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { BadRequestError, NotFoundError } from '../generated/api';
+import { upsertDashboard } from './DashboardService';
 
 const MENU = 'menu';
 const DASHBOARDS = 'dashboards';
@@ -68,31 +69,35 @@ export const createMenuItem = async (
           path,
         });
 
+        const res2 = await upsertDashboard({
+          id: res.resource.id,
+          name: child.name,
+        });
+
         if (res.statusCode === 201) {
           patchArr.push({
             op: 'add',
             path: '/children/-',
             value: res.resource,
           });
-        } else if (res.statusCode === 404) {
-          throw new NotFoundError(
-            `Menu item at path '${data.path}' and id '${data.id}' not found.`,
-          );
         }
         break;
       default:
         break;
     }
   }
-
-  const res = await menuContainer.item(data.id, data.path).patch(patchArr);
-
-  if (res.statusCode === 400) {
-    throw new BadRequestError('');
+  try {
+    const res = await menuContainer.item(data.id, data.path).patch(patchArr);
+    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
+      res.resource as any;
+    return rest;
+  } catch (error) {
+    if (error.code === 404) {
+      throw new NotFoundError(
+        `Menu item at path '${data.path}' and id '${data.id}' not found.`,
+      );
+    }
   }
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
-  return rest;
 };
 
 export const updateMenuItem = async (
@@ -120,6 +125,7 @@ export const updateMenuItem = async (
         patchArr.push({ op: 'replace', path: '/kind', value: data[prop] });
         break;
       case 'children':
+        if (data.kind === 'file') break;
         const child = data[prop][0];
         const res = await menuContainer.items.upsert({
           ...child,
@@ -147,7 +153,6 @@ export const updateMenuItem = async (
 
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
-  console.log({ rest });
 
   return res;
 };
