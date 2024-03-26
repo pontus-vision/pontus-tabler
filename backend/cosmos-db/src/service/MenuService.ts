@@ -16,6 +16,7 @@ import {
 import { BadRequestError, NotFoundError } from '../generated/api';
 
 const MENU = 'menu';
+const DASHBOARDS = 'dashboards';
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/path'],
@@ -48,7 +49,47 @@ export const createMenuItem = async (
 ): Promise<MenuCreateReq | any> => {
   const menuContainer = await initiateMenuContainer();
 
-  const res = await menuContainer.items.create(data);
+  const patchArr = [];
+  for (const prop in data) {
+    switch (prop) {
+      case 'children':
+        const child = data[prop][0];
+
+        if (child.kind === 'file') {
+          delete child?.children;
+        }
+
+        const path = `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
+          child.name
+        }`;
+
+        const res = await menuContainer.items.create({
+          ...child,
+          path,
+        });
+
+        if (res.statusCode === 201) {
+          patchArr.push({
+            op: 'add',
+            path: '/children/-',
+            value: res.resource,
+          });
+        } else if (res.statusCode === 404) {
+          throw new NotFoundError(
+            `Menu item at path '${data.path}' and id '${data.id}' not found.`,
+          );
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  const res = await menuContainer.item(data.id, data.path).patch(patchArr);
+
+  if (res.statusCode === 400) {
+    throw new BadRequestError('');
+  }
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
   return rest;
@@ -57,7 +98,6 @@ export const createMenuItem = async (
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
 ): Promise<ItemResponse<MenuCreateRes>> => {
-  console.log({ body: data });
   const menuContainer = await initiateMenuContainer();
 
   const patchArr = [];
@@ -68,6 +108,13 @@ export const updateMenuItem = async (
     switch (prop) {
       case 'name':
         patchArr.push({ op: 'replace', path: '/name', value: data[prop] });
+        if (data?.kind === 'file') {
+          const dashboardContainer = await fetchContainer(DASHBOARDS);
+
+          const res = await dashboardContainer
+            .item(data.id, data.id)
+            .patch([{ op: 'set', path: '/name', value: data.name }]);
+        }
         break;
       case 'kind':
         patchArr.push({ op: 'replace', path: '/kind', value: data[prop] });
