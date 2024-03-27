@@ -41,15 +41,13 @@ type FilterState = {
 };
 
 type Props = {
-  onRowsStateChange?: (data: CellValueChangedEvent[]) => void;
+  onRowsStateChange?: (data: Record<string, any>[]) => void;
   isLoading?: boolean;
   id?: string;
   onValueChange?: (id: string, value: ColumnState[]) => void;
   modelId?: string;
   lastState?: ColumnState[];
   onColumnState?: (cols: ColumnState[]) => void;
-  showColumnSelector?: boolean;
-  setShowColumnSelector?: Dispatch<React.SetStateAction<boolean>>;
   containerHeight?: string;
   updateMode?: boolean;
   setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
@@ -89,8 +87,6 @@ const PVGridWebiny2 = ({
   lastState,
   onRefresh,
   modelId,
-  showColumnSelector,
-  setShowColumnSelector,
   setRowClicked,
   cols,
   rows,
@@ -129,13 +125,11 @@ const PVGridWebiny2 = ({
   );
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState<
-    Array<string | undefined>
-  >([]);
+
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [initialRows, setInitialRows] = useState<string>();
   const [rowsChanged, setRowsChanged] = useState<CellValueChangedEvent[]>([]);
-
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
   const gridContainerRef = useRef<AgGridReact>(null);
 
   useEffect(() => {
@@ -149,7 +143,9 @@ const PVGridWebiny2 = ({
       onRowsStateChange(
         rowsChanged.filter((row) => {
           if (!initialRows) return;
-          return !JSON.parse(initialRows).some((row2) => deepEqual(row, row2));
+          return !JSON.parse(initialRows).some((row2: Record<string, any>) =>
+            deepEqual(row, row2),
+          );
         }),
       );
   }, [rowsChanged]);
@@ -164,7 +160,6 @@ const PVGridWebiny2 = ({
   }, [cachedRowParams]);
 
   useEffect(() => {
-    console.log({ columnState });
     onColumnState && columnState && onColumnState(columnState);
   }, [columnState]);
 
@@ -381,7 +376,13 @@ const PVGridWebiny2 = ({
     cacheBlockSize: 100,
     suppressRowClickSelection: true,
     onRowClicked: (e) => {
-      onRowClicked && onRowClicked(e);
+      console.log({ e });
+      if (
+        !e.api.getColumn('update-mode')?.isVisible() &&
+        !e.api.getColumn('delete-mode')?.isVisible()
+      ) {
+        onRowClicked && onRowClicked(e);
+      }
     },
   };
 
@@ -415,9 +416,17 @@ const PVGridWebiny2 = ({
     onFilterChanged();
   };
 
-  const handleColumnSelect = (selectedColumns: Array<string | undefined>) => {
-    setSelectedColumns(selectedColumns);
-    setShowColumnSelector && setShowColumnSelector(false);
+  const handleColumnSelect = (cols: Array<string | undefined>) => {
+    const hidden = columnState
+      ?.filter((colState) => !cols.some((col) => colState.colId === col))
+      ?.map((col) => col.colId);
+
+    if (hidden) {
+      gridApi?.setColumnsVisible(hidden, false);
+    }
+
+    !cols.some((col) => col === undefined) &&
+      gridApi?.setColumnsVisible(cols as string[], true);
   };
 
   useEffect(() => {
@@ -521,14 +530,18 @@ const PVGridWebiny2 = ({
 
   return (
     <>
-      <div data-testid={testId} className={'ag-theme-alpine' + ' ' + gridId}>
-        {columnDefs && (
+      <div
+        style={{ width: '100%', height: '100%', position: 'relative' }}
+        data-testid={testId}
+        className={'ag-theme-alpine' + ' ' + gridId}
+      >
+        {cols && (
           <PVAggridColumnSelector
             columnState={columnState}
             setShowColumnSelector={setShowColumnSelector}
             showColumnSelector={showColumnSelector}
             onColumnSelect={handleColumnSelect}
-            columns={columnDefs}
+            columns={cols}
           />
         )}
         <GridActionsPanel
@@ -536,6 +549,7 @@ const PVGridWebiny2 = ({
           add={add}
           permissions={permissions}
           onDelete={onDelete}
+          setShowColumnSelector={setShowColumnSelector}
           deleteMode={deleteMode}
           onRefresh={onRefresh}
           updateMode={updateMode}
