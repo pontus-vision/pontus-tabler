@@ -109,36 +109,46 @@ export const updateMenuItem = async (
 
   // Partial Update Docs https://learn.microsoft.com/en-us/azure/cosmos-db/partial-document-update
 
+  const child = data?.children?.[0];
+
   for (const prop in data) {
     switch (prop) {
       case 'name':
         patchArr.push({ op: 'replace', path: '/name', value: data[prop] });
-        if (data?.kind === 'file') {
-          const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-          const res = await dashboardContainer
-            .item(data.id, data.id)
-            .patch([{ op: 'set', path: '/name', value: data.name }]);
-        }
         break;
       case 'kind':
         patchArr.push({ op: 'replace', path: '/kind', value: data[prop] });
         break;
       case 'children':
         if (data.kind === 'file') break;
-        const child = data[prop][0];
+
         const res = await menuContainer.items.upsert({
           ...child,
           path: `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
             child.name
           }`,
         });
+
+        const res2 = (await menuContainer
+          .item(data.id, data.path)
+          .read()) as ItemResponse<MenuItemTreeRef>;
+
+        const index = res2.resource.children.findIndex(
+          (el) => el.id === child.id,
+        );
+
         res.statusCode === 201 &&
           patchArr.push({
-            op: 'add',
-            path: '/children/-',
+            op: 'set',
+            path: `/children/${index}`,
             value: res.resource,
           });
+
+        const dashboardContainer = await fetchContainer(DASHBOARDS);
+
+        const res3 = await dashboardContainer
+          .item(child.id, child.id)
+          .patch([{ op: 'set', path: '/name', value: child.name }]);
 
         break;
       default:
@@ -150,6 +160,8 @@ export const updateMenuItem = async (
     throw { code: 400, message: 'No menu item property defined' };
   }
   const res = await menuContainer.item(data.id, data.path).patch(patchArr);
+
+  await menuContainer.item(child.id, child.path).delete();
 
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
