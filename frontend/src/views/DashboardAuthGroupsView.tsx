@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   createDashboardGroupAuth,
+  deleteDashboard,
   deleteDashboardGroupAuth,
   getAllDashboards,
   readDashboardGroupAuth,
@@ -16,12 +17,14 @@ import {
   CellValueChangedEvent,
   ColDef,
   IGetRowsParams,
+  RowEvent,
 } from 'ag-grid-community';
 import styles from './DashboardAuthGroupsView.module.scss';
 import NotificationManager, {
   MessageRefs,
 } from '../components/NotificationManager';
 import { deepEqual } from '../../utils';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardAuthGroupsView = () => {
   const [dashboards, setDashboards] = useState<Dashboard[]>();
@@ -40,14 +43,36 @@ const DashboardAuthGroupsView = () => {
       sortable: true,
     },
     {
-      headerName: 'Owner',
-      field: 'owner',
-      filter: true,
-      sortable: true,
+      headerName: 'Create',
+      field: 'create',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
+      cellRenderer: 'agCheckboxCellRenderer',
     },
     {
-      headerName: 'Folder',
-      field: 'folder',
+      headerName: 'Read',
+      field: 'read',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
+      cellRenderer: 'agCheckboxCellRenderer',
+    },
+    {
+      headerName: 'Update',
+      field: 'update',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
+      cellRenderer: 'agCheckboxCellRenderer',
+    },
+    {
+      headerName: 'Delete',
+      field: 'delete',
+      editable: true,
+      cellEditor: 'agCheckboxCellEditor',
+      cellRenderer: 'agCheckboxCellRenderer',
+    },
+    {
+      headerName: 'Owner',
+      field: 'owner',
       filter: true,
       sortable: true,
     },
@@ -57,19 +82,25 @@ const DashboardAuthGroupsView = () => {
       filter: true,
       sortable: true,
     },
+    {
+      headerName: 'Folder',
+      field: 'folder',
+      filter: true,
+      sortable: true,
+    },
   ]);
 
   const [selectedDashboard, setSelectedDashboard] =
     useState<Dashboard | null>();
-  const [groupsChanged, setGroupsChanged] = useState<CellValueChangedEvent[]>(
-    [],
-  );
+  const [groupsChanged, setGroupsChanged] = useState<DashboardAuthGroups[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
-
+  const navigate = useNavigate();
   const [totalGroups, setTotalGroups] = useState<number>();
   const [totalDashboards, setTotalDashboards] = useState<number>();
   const [addGroup, setAddGroup] = useState(false);
-  const [newGroups, setNewGroups] = useState<Dashboard[]>([]);
+  const [newGroups, setNewGroups] = useState<
+    { groupName: string; groupId: string }[]
+  >([]);
   const notificationManagerRef = useRef<MessageRefs>();
   const [isLoading1, setIsLoading1] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
@@ -222,75 +253,64 @@ const DashboardAuthGroupsView = () => {
     }
   };
 
-  useEffect(() => {}, []);
+  const handleAddition = () => {
+    navigate('/dashboard/create');
+  };
+
+  const handleDelete = (arr: Dashboard[]) => {
+    arr.forEach(async (item) => {
+      if (!item?.id) return;
+      const res = await deleteDashboard(item.id);
+      console.log(res);
+    });
+    fetchDashboards();
+  };
+
+  const handleDashboardUpdate = (row: Dashboard) => {
+    navigate(`/dashboard/update/${row?.id}`);
+  };
 
   return (
     <div className={styles.dashboardAuthGroupsView}>
+      {addGroup && (
+        <div
+          className={styles.dashboardAuthGroupsViewShadow}
+          onClick={() => setAddGroup(false)}
+        ></div>
+      )}
       <label htmlFor="">{selectedDashboard?.name}</label>
       <div className={styles.dashboardAuthGroupsViewContainer}>
-        <PVGridWebiny2
-          cols={cols}
-          rows={dashboards}
-          isLoading={isLoading2}
-          totalCount={totalDashboards}
-          onRowClicked={(e) => {
-            setSelectedDashboard(null);
-            setTimeout(() => {
-              setSelectedDashboard(e.data);
-            }, 1);
-          }}
-        />
-        {selectedDashboard?.id && (
-          <>
+        {
+          <div className={styles.authGroupsGrid}>
+            <label htmlFor="">Auth Group</label>
             <PVGridWebiny2
               add={() => setAddGroup(true)}
-              onRowsStateChange={(e) => setGroupsChanged(e)}
+              onRowsStateChange={(e) => {
+                setGroupsChanged(e as DashboardAuthGroups[]);
+              }}
+              onRefresh={() => fetchDashboardAuthGroups()}
               onDelete={(e) => deleteDashboardsAuthGroup(e)}
               permissions={{ createAction: true, deleteAction: true }}
               onParamsChange={handleParamsChange}
               isLoading={isLoading2}
               cols={[
                 {
-                  headerName: 'Group',
+                  headerName: 'Name',
                   field: 'groupName',
-                  editable: true,
+                  sortable: true,
+                  filter: true,
                 },
                 {
                   headerName: 'Group Id',
                   field: 'groupId',
-                  hide: true,
-                  editable: true,
-                },
-                {
-                  headerName: 'Create',
-                  field: 'create',
-                  editable: true,
-                  cellEditor: 'agCheckboxCellEditor',
-                  cellRenderer: 'agCheckboxCellRenderer',
-                },
-                {
-                  headerName: 'Read',
-                  field: 'read',
-                  editable: true,
-                  cellEditor: 'agCheckboxCellEditor',
-                  cellRenderer: 'agCheckboxCellRenderer',
-                },
-                {
-                  headerName: 'Update',
-                  field: 'update',
-                  editable: true,
-                  cellEditor: 'agCheckboxCellEditor',
-                  cellRenderer: 'agCheckboxCellRenderer',
-                },
-                {
-                  headerName: 'Delete',
-                  field: 'delete',
-                  editable: true,
-                  cellEditor: 'agCheckboxCellEditor',
-                  cellRenderer: 'agCheckboxCellRenderer',
+                  sortable: true,
+                  filter: true,
                 },
               ]}
-              rows={groups}
+              rows={[
+                { groupName: 'foo', groupId: 'bar' },
+                { groupName: 'foo2', groupId: 'bar2' },
+              ]}
               onRowsSelected={(e) => console.log(e)}
               totalCount={totalGroups}
             />
@@ -302,36 +322,53 @@ const DashboardAuthGroupsView = () => {
                 Update AuthGroup(s)
               </button>
             )}
-          </>
-        )}
-
+          </div>
+        }
+        <label htmlFor="">Dashboards:</label>
+        <PVGridWebiny2
+          cols={cols}
+          rows={dashboards}
+          isLoading={isLoading2}
+          add={() => handleAddition()}
+          permissions={{
+            createAction: true,
+            updateAction: true,
+            deleteAction: true,
+          }}
+          totalCount={totalDashboards}
+          onUpdate={handleDashboardUpdate}
+          onRefresh={() => fetchDashboards()}
+          onDelete={handleDelete}
+          onRowClicked={(e) => {
+            setSelectedDashboard(null);
+            setTimeout(() => {
+              setSelectedDashboard(e.data);
+            }, 1);
+          }}
+        />
         {addGroup && (
           <>
-            <div
-              className={styles.dashboardAuthGroupsViewShadow}
-              onClick={() => setAddGroup(false)}
-            ></div>
             <div className={styles.selectGroup}>
               <PVGridWebiny2
                 onParamsChange={handleParamsChange}
                 cols={[
                   {
-                    headerClass: 'Name',
+                    headerName: 'Group',
                     field: 'groupName',
-                    sortable: true,
-                    filter: true,
+                    editable: true,
                   },
                   {
-                    headerClass: 'Group Id',
+                    headerName: 'Group Id',
                     field: 'groupId',
-                    sortable: true,
-                    filter: true,
+                    // hide: true,
+                    editable: true,
                   },
                 ]}
+                rows={groups}
+                // onRefresh={()=>}
                 onRowsSelected={(e) => setNewGroups(e.map((el) => el.data))}
                 selection={true}
-                rows={[{ groupName: 'foo2', groupId: 'bar2' }]}
-                totalCount={1}
+                totalCount={2}
               />
               <button onClick={() => addDashboardAuthGroups()}>
                 Add Group(s)
