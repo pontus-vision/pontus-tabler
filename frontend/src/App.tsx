@@ -88,7 +88,7 @@ function App() {
             <Route path="/table/read/:id" element={<UpdateTable />} />
             <Route path="/table/create" element={<CreateTableView />} />
             <Route path="/table/delete" element={<DeleteTableView />} />
-            <Route path="/dashboards/read" element={<Dashboards />} />
+            <Route path="/dashboards" element={<Dashboards />} />
             <Route path="/dashboard/create" element={<CreateDashboard />} />
             <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
             <Route
