@@ -5,11 +5,19 @@ import {
   DashboardUpdateReq,
 } from '../../pontus-api/typescript-fetch-client-generated';
 import DashboardView from '../DashboardView';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const UpdateDashboard = () => {
   const { id } = useParams();
   const [newDashboardName, setNewDashboardName] = useState<string>();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1);
+  }, [id]);
 
   const saveDashboard = async (obj: DashboardRef) => {
     if (!id) return;
@@ -17,22 +25,12 @@ const UpdateDashboard = () => {
       const res = await updateDashboard({
         ...obj,
         id,
-        name: newDashboardName || obj.name,
       });
 
       console.log({ res });
     } catch (error) {}
   };
-  return (
-    <>
-      <label htmlFor="">Dashboard Name: </label>
-      <input
-        type="text"
-        onChange={(e) => setNewDashboardName(e.target.value)}
-      />
-      <DashboardView onDashboardSave={saveDashboard} />
-    </>
-  );
+  return <>{!loading && <DashboardView onDashboardSave={saveDashboard} />}</>;
 };
 
 export default UpdateDashboard;
