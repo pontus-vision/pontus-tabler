@@ -239,7 +239,7 @@ describe('dashboardCreatePOST', () => {
 
     expect(deleteVal2.status).toBe(200);
   });
-  it.only('should create auth correctly in dashboard', async () => {
+  it('should create auth correctly in dashboard', async () => {
     const dashboardBody: DashboardCreateReq = {
       folder: 'folder',
       name: 'dashboard1',
