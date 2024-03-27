@@ -176,7 +176,6 @@ const PVGridWebiny2 = ({
   }, [rows]);
 
   useEffect(() => {
-    console.log({ isLoading });
     if (isLoading) {
       gridContainerRef.current!?.api?.showLoadingOverlay();
     } else {
@@ -376,7 +375,6 @@ const PVGridWebiny2 = ({
     cacheBlockSize: 100,
     suppressRowClickSelection: true,
     onRowClicked: (e) => {
-      console.log({ e });
       if (
         !e.api.getColumn('update-mode')?.isVisible() &&
         !e.api.getColumn('delete-mode')?.isVisible()
