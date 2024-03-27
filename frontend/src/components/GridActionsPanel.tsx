@@ -245,6 +245,7 @@ const GridActionsPanel = ({
         <button
           className="grid-actions-panel__select-btn"
           onClick={() => {
+            console.log({ setShowColumnSelector });
             setShowColumnSelector && setShowColumnSelector(true);
           }}
         >
