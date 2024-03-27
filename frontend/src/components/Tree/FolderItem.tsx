@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import FileItem from './FileItem';
 import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
+import { useNavigate } from 'react-router-dom';
 
 export type Folder = {
   id: string;
@@ -17,6 +18,7 @@ export type File = {
 };
 
 type FolderItemProps = {
+  parentFolder?: MenuItemTreeRef;
   folder: MenuItemTreeRef;
   onSelect?: (folderId: MenuItemTreeRef) => void;
   selected?: string;
@@ -29,10 +31,12 @@ type FolderItemProps = {
   path?: string;
   actionsMode: boolean;
   onUpdate?: (data: MenuItemTreeRef) => void;
+  onCreate?: (data: MenuItemTreeRef) => void;
 };
 
 const FolderItem = ({
   folder,
+  parentFolder,
   onSelect,
   selected,
   onDragStart,
@@ -40,6 +44,7 @@ const FolderItem = ({
   path,
   actionsMode,
   onUpdate,
+  onCreate,
 }: FolderItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -51,6 +56,8 @@ const FolderItem = ({
   const [selectedItem, setSelectedItem] = useState();
   const [currentPath, setCurrentPath] = useState(folder.path);
   const [updatedFolder, setUpdatedFolder] = useState<MenuItemTreeRef>();
+  const [creation, setCreation] = useState(false);
+  const navigate = useNavigate();
 
   const toggleFolder = () => {
     setIsOpen(!isOpen);
@@ -85,7 +92,8 @@ const FolderItem = ({
         // Implement the delete functionality here
         break;
       case 'create':
-        // Implement the create functionality here
+        setCreation(true);
+
         break;
       default:
         break;
@@ -102,13 +110,18 @@ const FolderItem = ({
     window.addEventListener('click', handleWindowClick);
   }, []);
 
-  function changeLastPart(str?: string, newPart?: string) {
-    if (!str || !newPart) return;
+  useEffect(() => {
+    if (isOpen) {
+    } else {
+      setCreation(false);
+    }
+  }, [isOpen]);
 
-    var n = str.lastIndexOf('/');
-    var result = str.substring(0, n + 1) + newPart;
-    return result;
-  }
+  useEffect(() => {
+    if (creation) {
+      setIsOpen(true);
+    }
+  }, [creation]);
 
   return (
     <div
@@ -135,8 +148,13 @@ const FolderItem = ({
                 path: folder.path,
               });
           }}
-          onBlur={() => {
-            updatedFolder && onUpdate && onUpdate(updatedFolder);
+          onKeyDown={(e) => {
+            if (e.key.toLowerCase() === 'enter') {
+              const newName = event.target.value;
+
+              onUpdate && updatedFolder && onUpdate(updatedFolder);
+              setIsEditing(false);
+            }
           }}
         />
       ) : (
@@ -150,6 +168,21 @@ const FolderItem = ({
           {isOpen ? '📂' : '📁'} {folder.name}
         </span>
       )}
+      {creation && selected === folder.path && isOpen && (
+        <input
+          type="text"
+          onKeyDown={(e) => {
+            if (e.key.toLowerCase() === 'enter') {
+              onCreate({
+                path: folder.path,
+                id: folder.id,
+                children: [{ name: event.target.value, kind: 'file' }],
+              });
+              setCreation(false);
+            }
+          }}
+        />
+      )}
       {isOpen && folder?.children && (
         <ul className="pl-4 ">
           {folder?.children.map((child, index) => (
@@ -159,16 +192,20 @@ const FolderItem = ({
                   onDragStart={onDragStart}
                   index={index}
                   folder={child}
+                  parentFolder={folder}
                   onSelect={onSelect}
                   selected={selected}
                   onUpdate={onUpdate}
+                  onCreate={onCreate}
                   path={`${!!path ? path : ''}/${child.name}`}
                   actionsMode={actionsMode}
                 />
               ) : (
                 <FileItem
+                  parentFolder={folder}
                   file={child}
                   onSelect={onSelect}
+                  onUpdate={onUpdate}
                   selected={selected || ''}
                   path={`${!!path ? path : ''}/${child.name}`}
                   actionsMode={actionsMode}
@@ -199,7 +236,7 @@ const FolderItem = ({
             className="cursor-pointer hover:bg-gray-100 p-1"
             onClick={() => handleContextMenuClick('create')}
           >
-            Read File
+            Create
           </div>
         </div>
       )}
