@@ -950,7 +950,7 @@ service:
       docs: Create a new group with a name, parents, and symlinks
       display-name: Create a new group
       request:
-        name: GroupCreateReq
+        name: AuthGroupCreateReq
         body:
           properties:
             name:
@@ -964,7 +964,7 @@ service:
               type: optional<list<string>>
       response:
         docs: Group created successfully
-        type: AuthGroupRef
+        type: AuthGroupCreateRes
       errors:
         - BadRequestError
         - InternalServerError
@@ -1245,6 +1245,11 @@ types:
       kind: optional<string>
       path: optional<string>
       children: optional<list<MenuItemTreeRef>>
+
+  AuthGroupCreateRes:
+    properties: {}
+    extends:
+      - AuthGroupRef
   AuthGroupRef:
     properties:
       groupId:
