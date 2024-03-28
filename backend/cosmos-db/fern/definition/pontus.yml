@@ -751,37 +751,37 @@ service:
       docs: Create a new dashboard state with name and state information
       display-name: Create a new dashboard state
       request:
-        name: AuthCreateBody
+        name: DashboardGroupAuthCreateReq
         body:
           properties:
-            dashboardId: optional<string>
-            authGroups: optional<DashboardgroupauthcreateAuthGroups>
+            dashboardId: string
+            authGroups: list<DashboardAuthGroups>
       response:
         docs: Dashboard state created successfully
-        type: DashboardAuthGroup
+        type: DashboardGroupAuthCreateRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request:
-            authGroups: {}
-          response:
-            body:
-              dashboardId: dashboardId
-              dashboardName: dashboardName
-              authGroups:
-                create:
-                  - create
-                  - create
-                read:
-                  - read
-                  - read
-                update:
-                  - update
-                  - update
-                delete:
-                  - delete
-                  - delete
+      # examples:
+      #   - request:
+      #       authGroups: {}
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         dashboardName: dashboardName
+      #         authGroups:
+      #           create:
+      #             - create
+      #             - create
+      #           read:
+      #             - read
+      #             - read
+      #           update:
+      #             - update
+      #             - update
+      #           delete:
+      #             - delete
+      #             - delete
     dashboardGroupAuthReadPOST:
       path: /dashboard/group/auth/read
       method: POST
@@ -789,35 +789,39 @@ service:
       docs: Create a new dashboard state with name and state information
       display-name: Create a new dashboard state
       request:
-        name: AuthReadBody
+        name: DashboardGroupAuthReadReq
         body:
           properties:
-            dashboardId: optional<string>
+            dashboardId: string
+          extends:
+            - ReadPaginationFilter
+
       response:
         docs: Dashboard state created successfully
-        type: DashboardAuthGroup
+        type: DashboardGroupAuthReadRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              dashboardId: dashboardId
-              dashboardName: dashboardName
-              authGroups:
-                create:
-                  - create
-                  - create
-                read:
-                  - read
-                  - read
-                update:
-                  - update
-                  - update
-                delete:
-                  - delete
-                  - delete
+      # examples:
+      #   - request:
+      #       dashboardId: 'a271f651-e4aa-4c9b-a6a0-0ef10711fb48'
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         dashboardName: dashboardName
+      #         authGroups:
+      #           create:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           read:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           update:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           delete:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthUpdatePOST:
       path: /dashboard/group/auth/update
       method: POST
@@ -825,49 +829,50 @@ service:
       docs: Create a new dashboard state with name and state information
       display-name: Create a new dashboard state
       request:
-        name: AuthUpdateBody
+        name: DashboardGroupAuthUpdateReq
         body:
           properties:
-            dashboardId: optional<string>
-            authGroups: optional<AuthGroups>
+            dashboardId: string
+            authGroups: list<DashboardAuthGroups>
       response:
         docs: Dashboard state created successfully
-        type: DashboardAuthGroup
+        type: DashboardGroupAuthUpdateRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request:
-            authGroups:
-              create:
-                - create
-                - create
-              read:
-                - read
-                - read
-              update:
-                - update
-                - update
-              delete:
-                - delete
-                - delete
-          response:
-            body:
-              dashboardId: dashboardId
-              dashboardName: dashboardName
-              authGroups:
-                create:
-                  - create
-                  - create
-                read:
-                  - read
-                  - read
-                update:
-                  - update
-                  - update
-                delete:
-                  - delete
-                  - delete
+      # examples:
+      #   - request:
+      #       dashboardId: dashboardId
+      #       authGroups:
+      #         create:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         read:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         update:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         delete:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         dashboardName: dashboardName
+      #         authGroups:
+      #           create:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           read:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           update:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           delete:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthDeletePOST:
       path: /dashboard/group/auth/delete
       method: POST
@@ -875,45 +880,51 @@ service:
       docs: Create a new dashboard state with name and state information
       display-name: Delete group from dashboard
       request:
-        body: AuthDeleteBody
+        name: DashboardGroupAuthDeleteReq
+        body:
+          properties: {}
+          extends:
+            - DashboardGroupAuthDeleteReqBody
       response:
         docs: Dashboard Auth Group(s) deleted successfully
-        type: AuthDeleteBody
+        type: DashboardGroupAuthDeleteRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request:
-            dashboardId: dashboardId
-            authGroups:
-              create:
-                - create
-                - create
-              read:
-                - read
-                - read
-              update:
-                - update
-                - update
-              delete:
-                - delete
-                - delete
-          response:
-            body:
-              dashboardId: dashboardId
-              authGroups:
-                create:
-                  - create
-                  - create
-                read:
-                  - read
-                  - read
-                update:
-                  - update
-                  - update
-                delete:
-                  - delete
-                  - delete
+      # examples:
+      #   - request:
+      #       dashboardId: dashboardId
+      #       dashboardName: string
+      #       authGroups:
+      #         create:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         read:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         update:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #         delete:
+      #           - groupName: Mapeamento de Processos
+      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #     response:
+      #       body:
+      #         dashboardId: dashboardId
+      #         groupName: Mapeamento de Processos
+      #         groups:
+      #           create:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           read:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           update:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           delete:
+      #             - groupName: Mapeamento de Processos
+      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardsReadPOST:
       path: /dashboards/read
       method: POST
@@ -1389,6 +1400,17 @@ types:
     extends:
       - DashboardRef
       - BaseModelRef
+  DashboardGroupAuthReadRes:
+    properties:
+      dashboardName: string
+      dashboardId: string
+      authGroups: list<DashboardAuthGroups>
+      totalCount: integer
+  DashboardGroupAuthDeleteRes:
+    properties:
+      dashboardName: string
+      dashboardId: string
+      authGroups: list<DashboardAuthGroups>
   DashboardCreateReq: DashboardRef
   DashboardCreateRes:
     properties: {}
@@ -1401,12 +1423,30 @@ types:
       - BaseModelRef
       - DashboardRef
   DashboardDeleteReq: BaseModelRef
-  AuthGroups:
+
+  DashboardGroupAuthDeleteReqBody:
+    properties:
+      dashboardId: string
+      authGroups: list<string>
+  AuthGroupIds:
     properties:
       create: optional<list<string>>
       read: optional<list<string>>
       update: optional<list<string>>
       delete: optional<list<string>>
+  DashboardAuthGroups:
+    properties:
+      groupId: string
+      groupName: string
+      create: boolean
+      read: boolean
+      update: boolean
+      delete: boolean
+  DashboardAuthGroupsRef:
+    properties:
+      groupId: string
+      groupName: string
+
   TableReadReq:
     extends:
       - BaseModelRef
@@ -1444,23 +1484,16 @@ types:
       authGroups:
         docs: IDs of the groups the user belongs to
         type: optional<list<string>>
-  DashboardAuthGroup:
+  DashboardGroupAuthCreateRes:
     properties:
-      dashboardId:
-        docs: Unique identifier of the dashboard
-        type: optional<string>
-      dashboardName: optional<string>
-      authGroups: optional<AuthGroups>
-  DashboardgroupauthcreateAuthGroups:
+      dashboardId: string
+      dashboardName: string
+      authGroups: list<DashboardAuthGroups>
+  DashboardGroupAuthUpdateRes:
     properties:
-      create: optional<list<string>>
-      read: optional<list<string>>
-      update: optional<list<string>>
-      delete: optional<list<string>>
-  AuthDeleteBody:
-    properties:
-      dashboardId: optional<string>
-      authGroups: optional<AuthGroups>
+      dashboardName: string
+      dashboardId: string
+      authGroups: list<DashboardAuthGroups>
   DashboardsReadRes:
     properties:
       totalDashboards: optional<integer>
@@ -1558,6 +1591,7 @@ types:
       filterTo: optional<ReadPaginationFilterFiltersFilterTo>
       condition1: optional<ReadPaginationFilterFiltersColIdCondition>
       condition2: optional<ReadPaginationFilterFiltersColIdCondition>
+      conditions: optional<list<ReadPaginationFilterFiltersColIdCondition>>
       filterType: optional<string>
       operator: optional<string>
   Dashboard:

@@ -25,10 +25,14 @@ import {
   upsertTableData,
 } from './service/TableDataService';
 import {
+  createDashboardAuthGroup,
   deleteDashboard,
   readDashboardById,
+  readDashboardGroupAuth,
   readDashboards,
   upsertDashboard,
+  updateDashboardGroupAuth,
+  deleteDashboardGroupAuth,
 } from './service/DashboardService';
 import {
   createTableDataEdge,
@@ -50,10 +54,26 @@ export default new PontusService({
   authUserReadPost(req, res) {},
   authUsersReadPost(req, res) {},
   authUserUpdatePost(req, res) {},
-  dashboardGroupAuthCreatePost(req, res) {},
-  dashboardGroupAuthDeletePost(req, res) {},
-  dashboardGroupAuthReadPost(req, res) {},
-  dashboardGroupAuthUpdatePost(req, res) {},
+  dashboardGroupAuthCreatePost: async (req, res) => {
+    const response = await createDashboardAuthGroup(req.body);
+
+    res.send(response);
+  },
+  dashboardGroupAuthDeletePost: async (req, res) => {
+    const response = await deleteDashboardGroupAuth(req.body);
+
+    res.send(response);
+  },
+  dashboardGroupAuthReadPost: async (req, res) => {
+    const response = await readDashboardGroupAuth(req.body);
+
+    res.send(response);
+  },
+  dashboardGroupAuthUpdatePost: async (req, res) => {
+    const response = await updateDashboardGroupAuth(req.body);
+
+    res.send(response);
+  },
   dashboardCreatePost: async (req, res) => {
     if (Object.keys(req.body).length === 0) {
       throw new BadRequestError(
@@ -65,11 +85,9 @@ export default new PontusService({
     res.send(response);
   },
   dashboardDeletePost: async (req, res) => {
-    try {
-      const response = await deleteDashboard(req.body);
+    const response = await deleteDashboard(req.body);
 
-      res.send(response);
-    } catch (error) {}
+    res.send(response);
   },
   dashboardReadPost: async (req, res) => {
     const response = await readDashboardById(req.body.id);
@@ -77,18 +95,14 @@ export default new PontusService({
     res.send(response);
   },
   dashboardsReadPost: async (req, res) => {
-    try {
-      const response = await readDashboards(req.body);
+    const response = await readDashboards(req.body);
 
-      res.send(response);
-    } catch (error) {}
+    res.send(response);
   },
   dashboardUpdatePost: async (req, res) => {
-    try {
-      const response = await upsertDashboard(req.body);
+    const response = await upsertDashboard(req.body);
 
-      res.send(response);
-    } catch (error) {}
+    res.send(response);
   },
   menuCreatePost: async (req, res) => {
     if (Object.keys(req.body).length === 0) {
