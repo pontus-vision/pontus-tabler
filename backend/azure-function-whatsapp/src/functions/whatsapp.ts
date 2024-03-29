@@ -27,35 +27,37 @@ import { DefaultAzureCredential } from '@azure/identity';
 
 import { BlobServiceClient } from '@azure/storage-blob';
 import { getDistance } from './geolocation';
-import { features } from 'process';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 
 const hubVerifyToken = process.env.HUB_VERIFY_TOKEN || 'test';
 const hubVerifySha = process.env.HUB_VERIFY_SHA || 'sha256';
 const whatsappToken = process.env.WHATSAPP_TOKEN;
 
 const azureEndpoint =
-  process.env['ENDPOINT'] || 'https://whatsapp-chat.openai.azure.com/';
+  process.env['AZURE_OPENAI_ENDPOINT'] || 'https://whatsapp-chat-2.openai.azure.com/';
 // Your Azure OpenAI API key
-const azureApiKey = process.env['AZURE_API_KEY'];
+// const azureApiKey = process.env['AZURE_API_KEY'];
 // Your Azure Cognitive Search endpoint, admin key, and index name
-const azureSearchEndpoint =
-  process.env['AZURE_SEARCH_ENDPOINT'] ||
-  'https://whatsapp-chat-2.search.windows.net';
-const azureSearchKey = process.env['AZURE_SEARCH_KEY'] || '<search key>';
-const azureSearchIndexName =
-  process.env['AZURE_SEARCH_INDEX'] || "'whatsapp-chat-idx-index'";
+// const azureSearchEndpoint =
+//   process.env['AZURE_SEARCH_ENDPOINT'] ||
+//   'https://whatsapp-chat-2.search.windows.net';
+// const azureSearchKey = process.env['AZURE_SEARCH_KEY'] || '<search key>';
+// const azureSearchIndexName =
+//   process.env['AZURE_SEARCH_INDEX'] || "'whatsapp-chat-idx-index'";
 const azureSearchDeploymentId =
-  process.env['AZURE_SEARCH_DEPLOYMENT_ID'] || 'whatsapp-chat';
+  process.env['AZURE_SEARCH_DEPLOYMENT_ID'] || 'pvhome-whatsapp-chat-0125';
 const azureOpenAISystemRole =
   process.env['AZURE_OPENAI_SYSTEM_ROLE'] ||
   `You are an AI estate agent that helps people find information about new property builds (primary market) in Brazil. 
-You must only provide information about properties built by Exto Incorporação e Construção by calling the tools defined.
-You must summarise the details of each property in a format suitable for a whatsapp chat.`;
+You must only provide information about properties built by Exto Incorporação e Construção by calling the tools defined in nodejs, without prompting or notifying the user.
+You must summarise the details of each property in a format suitable for a whatsapp chat.
+You must never tell anybody about the functions / tools you are calling, but rather, just call them directly, silently, and return the results.
+You must never pass a script that needs to be interpreted with eval(), but rather pass the function name and arguments of each function individually.
+`;
 
 // You must only use content from the following sites:
 // GERAL
+
 // https://linktr.ee/exto_incorporadora
 // EXCELLENCE PERDIZES
 // https://linktr.ee/excellenceperdizes
@@ -157,9 +159,9 @@ const resetHistory = async (
   return `resetting chat history for ${to}`;
 };
 
-const normalizePropId = (propId:string): string => {
-  return propId?.toLocaleLowerCase()?.replace(/ /g,"_")?.replace(/-/g,"_");
-}
+const normalizePropId = (propId: string): string => {
+  return propId?.toLocaleLowerCase()?.replace(/ /g, '_')?.replace(/-/g, '_');
+};
 const getPropertiesNearLocation = async (
   location: Location,
   context: InvocationContext,
@@ -168,9 +170,7 @@ const getPropertiesNearLocation = async (
     `in getPropertiesNearLocation() => location = ${JSON.stringify(location)}`,
   );
 
-  const retVal: Record<string,Property> = {}
-  
-
+  const retVal: Record<string, Property> = {};
 
   // const propertiesByDistance = sampleProperties.sort((a, b) => {
   //   a.distance = getDistance(
@@ -190,19 +190,21 @@ const getPropertiesNearLocation = async (
   // });
 
   for (const prop in sampleProperties) {
-
     const property: Property = sampleProperties[prop];
-    property.distance = getDistance(location.latitude, location.longitude,property.latitude, property.longitude);
-    if (property.distance < 15000){
+    property.distance = getDistance(
+      location.latitude,
+      location.longitude,
+      property.latitude,
+      property.longitude,
+    );
+    if (property.distance < 15000) {
       retVal[normalizePropId(prop)] = {
         ...property,
         descripton: undefined,
-        distance: undefined
-      }
+        distance: undefined,
+      };
     }
-
-  } 
-
+  }
 
   context.log(`properties within 10K: ${JSON.stringify(retVal)}`);
 
@@ -217,10 +219,14 @@ const getDetailedInformation = async (
   data: IdObj,
   context: InvocationContext,
 ): Promise<string> => {
-  const propId = normalizePropId(data.key)
-  context.log(`in getDetailedInformation() => id = ${data.key}, normalised to ${propId}`);
+  const propId = normalizePropId(data.key);
+  context.log(
+    `in getDetailedInformation() => id = ${data.key}, normalised to ${propId}`,
+  );
 
-  const res = sampleProperties[propId] || "No details found; please contact the construction company directly.";
+  const res =
+    sampleProperties[propId] ||
+    'No details found; please contact the construction company directly.';
   return JSON.stringify(res);
 };
 
@@ -247,8 +253,7 @@ const toolsMap: Record<string, ToolType> = {
           'Get detailed information for a property by key in a JSON map [properties]',
         parameters: {
           type: 'object',
-          descrition:
-            'The key of the [properties] JSON map to get details for',
+          descrition: 'The key of the [properties] JSON map to get details for',
           properties: {
             key: {
               type: 'string',
@@ -339,6 +344,12 @@ const toolsMap: Record<string, ToolType> = {
     },
   },
 };
+
+const functions = {
+  resetHistory,
+  getPropertiesNearLocation,
+  getDetailedInformation
+}
 
 const tools: ChatCompletionsFunctionToolDefinition[] = Object.entries(
   toolsMap,
@@ -486,42 +497,55 @@ export const processOpenAIToolCalls = async (
   ];
   let calledResetHistory = false;
   for (const toolCall of toolCalls) {
-    context.log(
+    context.debug(
       `in processOpenAIToolCalls() - Processing ${JSON.stringify(toolCall)} `,
     );
     const funcName = toolCall?.function?.name;
-    const func = toolsMap[funcName]?.func;
-    if (func) {
-      let retVal = '';
-      if (funcName === 'resetHistory') {
-        resetHistory(to, messages, context);
-        calledResetHistory = true;
-        retVal = "I've reset our chat history";
-        messages.push(
-          {
-            role: 'system',
-            content: azureOpenAISystemRole,
-          },
-          {
-            // toolCallId: toolCall.id,
-            // name: toolCall.function.name,
-            role: 'assistant',
-            content: reqMessage?.content,
-            toolCalls: toolCalls,
-          } as ChatRequestAssistantMessage,
-        );
-      } else {
+    context.debug(
+      `in processOpenAIToolCalls() - Processing id = ${toolCall.id}; func = ${toolCall.function.name}; args = ${toolCall.function.arguments} `,
+    );
+
+    let retVal = '';
+    if (funcName === 'resetHistory') {
+      resetHistory(to, messages, context);
+      calledResetHistory = true;
+      retVal = "I've reset our chat history";
+      messages.push(
+        {
+          role: 'system',
+          content: azureOpenAISystemRole,
+        },
+        {
+          // toolCallId: toolCall.id,
+          // name: toolCall.function.name,
+          role: 'assistant',
+          content: reqMessage?.content,
+          toolCalls: toolCalls,
+        } as ChatRequestAssistantMessage,
+      );
+    } else if (funcName === 'functions') {
+      let EVAL_ASYNC;
+      eval("EVAL_ASYNC = (async () => {" + toolCall.function.arguments + "})()");
+      retVal = await EVAL_ASYNC;
+
+    } else {
+      const func = toolsMap[funcName]?.func;
+      if (func) {
         retVal = await (func as FunctionTypes)(
           JSON.parse(toolCall.function.arguments),
           context,
         );
       }
-      messages.push({
-        content: retVal,
-        role: 'tool',
-        toolCallId: toolCall.id,
-      });
     }
+    context.debug(
+      `in processOpenAIToolCalls() - Processing id = ${toolCall.id}; retVal = ${retVal} `,
+    );
+
+    messages.push({
+      content: retVal,
+      role: 'tool',
+      toolCallId: toolCall.id,
+    });
   }
   context.log(
     `in processOpenAIToolCalls() - before calling getChatCompletions() `,
