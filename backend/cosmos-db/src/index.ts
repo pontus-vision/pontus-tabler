@@ -42,9 +42,14 @@ import {
   readTableEdgesByTableId,
   // updateTableEdge,
 } from './service/EdgeService';
+import { createAuthGroup } from './service/AuthGroupService';
 
 export default new PontusService({
-  authGroupCreatePost(req, res) {},
+  authGroupCreatePost: async (req, res) => {
+    const response = await createAuthGroup(req.body);
+
+    res.send(response);
+  },
   authGroupDeletePost(req, res) {},
   authGroupReadPost(req, res) {},
   authGroupsReadPost(req, res) {},
