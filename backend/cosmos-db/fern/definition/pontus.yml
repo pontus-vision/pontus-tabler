@@ -968,12 +968,12 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              groupId: groupId
-              name: name
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         groupId: groupId
+      #         name: name
     authGroupReadPOST:
       path: /auth/group/read
       method: POST
@@ -990,12 +990,12 @@ service:
         type: AuthGroupRef
       errors:
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              groupId: groupId
-              name: name
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         groupId: groupId
+      #         name: name
     authGroupUpdatePOST:
       path: /auth/group/update
       method: POST
@@ -1022,8 +1022,8 @@ service:
         - BadRequestError
         - NotFoundError
         - InternalServerError
-      examples:
-        - request: {}
+      # examples:
+      #   - request: {}
     authGroupDeletePOST:
       path: /auth/group/delete
       method: POST
@@ -1055,16 +1055,16 @@ service:
         type: InlineResponse2001
       errors:
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              totalGroups: 0
-              authGroups:
-                - groupId: groupId
-                  name: name
-                - groupId: groupId
-                  name: name
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         totalGroups: 0
+      #         authGroups:
+      #           - groupId: groupId
+      #             name: name
+      #           - groupId: groupId
+      #             name: name
     authUsersReadPOST:
       path: /auth/users/read
       method: POST
@@ -1252,12 +1252,18 @@ types:
       - AuthGroupRef
   AuthGroupRef:
     properties:
-      groupId:
+      id:
         docs: Unique identifier of the group
         type: optional<string>
       name:
         docs: Name of the group
         type: optional<string>
+      parents:
+        docs: Parent groups of the group (optional)
+        type: optional<list<string>>
+      symlinks:
+        docs: Symlinks associated with the group (optional)
+        type: optional<list<string>>
   AgGridReadReq:
     properties:
       search: optional<AgGridInputSearch>
