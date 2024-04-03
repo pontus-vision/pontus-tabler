@@ -1,10 +1,20 @@
-import { AuthGroupCreateReq, AuthGroupCreateRes } from '../typescript/api';
+import { fetchContainer } from '../cosmos-utils';
+import {
+  AuthGroupCreateReq,
+  AuthGroupCreateRes,
+  AuthGroupRef,
+} from '../typescript/api';
+import { ItemResponse, PatchOperation } from '@azure/cosmos';
+const AUTH_GROUPS = 'auth_groups';
 
-const createAuthGroup = async (
+export const createAuthGroup = async (
   data: AuthGroupCreateReq,
 ): Promise<AuthGroupCreateRes> => {
-  return {
-    groupId: '',
-    name: '',
-  };
+  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+
+  const res = (await authGroupContainer.items.create(
+    data,
+  )) as ItemResponse<AuthGroupRef>;
+
+  return res.resource;
 };
