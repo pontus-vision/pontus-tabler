@@ -101,7 +101,6 @@ const GridActionsPanel = ({
               <BsFillTrash2Fill
                 onClick={() => {
                   setModelId && setModelId(configTableId);
-                  console.log('whatever');
                   // entriesToBeDeleted &&
                   //   entriesToBeDeleted.length > 0 &&
                   setDeletion && setDeletion(true);
@@ -138,7 +137,6 @@ const GridActionsPanel = ({
               data-testid={`${testId}-add-btn`}
               onClick={() => {
                 setFlexModelId && setFlexModelId(id);
-                console.log('add entry');
                 setOpenNewEntryView && setOpenNewEntryView(true);
                 setModelId &&
                   setModelId((prevState) =>
@@ -157,7 +155,6 @@ const GridActionsPanel = ({
               className="grid-actions-panel__restore-btn btn"
               onClick={() => {
                 setGridKey && setGridKey((prevState) => prevState + 1);
-                console.log('restore');
               }}
             >
               restore

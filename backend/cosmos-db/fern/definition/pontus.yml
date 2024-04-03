@@ -1218,12 +1218,16 @@ types:
       name: string
     extends:
       - TableEdgesMetadata
+  MenuItemTreeRefKind:
+    enum:
+      - file
+      - folder
   MenuCreateReq: MenuItemTreeRef
   MenuCreateRes:
     properties:
       id: optional<string>
       name: optional<string>
-      kind: optional<string>
+      kind: optional<MenuItemTreeRefKind>
       path: optional<string>
       children: optional<list<MenuItemTreeRef>>
   MenuReadRes: MenuItemTreeRef
@@ -1290,6 +1294,7 @@ types:
     enum:
       - from
       - to
+
   TableDataEdgeReadRes:
     properties:
       rowId: string

@@ -61,7 +61,9 @@ const TreeView = ({
             <button
               onClick={() => {
                 setCreateFolder(false);
-                newFolder && onCreate(newFolder);
+
+                newFolder &&
+                  onCreate({ ...selectedFolder, children: [newFolder] });
                 if (input.current) {
                   input.current.value = '';
                 }
@@ -78,6 +80,7 @@ const TreeView = ({
         // onToggle={handleFolderToggle}
         selected={selectedFolder?.path}
         onUpdate={onUpdate}
+        onCreate={onCreate}
         actionsMode={true}
       />
     </div>
