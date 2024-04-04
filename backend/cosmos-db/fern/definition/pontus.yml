@@ -953,6 +953,9 @@ service:
         name: AuthGroupCreateReq
         body:
           properties:
+            id:
+              docs: id of the group
+              type: optional<string>
             name:
               docs: Name of the group
               type: optional<string>
@@ -981,13 +984,13 @@ service:
       docs: Retrieve group by id
       display-name: Get group by ID
       request:
-        name: GroupReadBody
+        name: AuthGroupReadReq
         body:
           properties:
-            groupId: optional<string>
+            id: string
       response:
         docs: Successful response
-        type: AuthGroupRef
+        type: AuthGroupReadRes
       errors:
         - InternalServerError
       # examples:
@@ -1003,10 +1006,10 @@ service:
       docs: Update group details by ID
       display-name: Update group by ID
       request:
-        name: GroupUpdateReq
+        name: AuthGroupUpdateReq
         body:
           properties:
-            groupId:
+            id:
               docs: ID of the group to update
               type: optional<string>
             name:
@@ -1018,6 +1021,9 @@ service:
             symlinks:
               docs: Updated symlinks associated with the group (optional)
               type: optional<list<string>>
+      response:
+        docs: Successful response
+        type: AuthGroupUpdateRes
       errors:
         - BadRequestError
         - NotFoundError
@@ -1031,15 +1037,20 @@ service:
       docs: Delete a group by ID
       display-name: Delete a group
       request:
-        name: GroupDeleteReq
+        name: AuthGroupDeleteReq
         body:
           properties:
-            groupId: optional<string>
+            id: string
+      response:
+        type: AuthGroupDeleteRes
       errors:
         - NotFoundError
         - InternalServerError
       examples:
-        - request: {}
+        - request:
+            id: foo
+          response:
+            body: 'AuthGroup deleted.'
     authGroupsReadPOST:
       path: /auth/groups/read
       method: POST
@@ -1049,10 +1060,14 @@ service:
         model
       display-name: Get all groups
       request:
-        body: ReadPaginationFilter
+        name: AuthGroupsReadReq
+        body:
+          properties: {}
+          extends:
+            - ReadPaginationFilter
       response:
         docs: Successful response
-        type: InlineResponse2001
+        type: AuthGroupsReadRes
       errors:
         - InternalServerError
       # examples:
@@ -1254,11 +1269,15 @@ types:
     properties: {}
     extends:
       - AuthGroupRef
+  AuthGroupUpdateRes:
+    properties: {}
+    extends:
+      - AuthGroupRef
   AuthGroupRef:
     properties:
       id:
         docs: Unique identifier of the group
-        type: optional<string>
+        type: string
       name:
         docs: Name of the group
         type: optional<string>
@@ -1514,10 +1533,15 @@ types:
     properties:
       totalDashboards: optional<integer>
       dashboards: optional<list<Dashboard>>
-  InlineResponse2001:
+  AuthGroupsReadRes:
     properties:
       totalGroups: optional<integer>
       authGroups: optional<list<AuthGroupRef>>
+  AuthGroupReadRes:
+    properties: {}
+    extends:
+      - AuthGroupRef
+  AuthGroupDeleteRes: string
   InlineResponse2002:
     properties:
       totalUsers: optional<integer>
