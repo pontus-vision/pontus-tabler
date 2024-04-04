@@ -42,7 +42,13 @@ import {
   readTableEdgesByTableId,
   // updateTableEdge,
 } from './service/EdgeService';
-import { createAuthGroup } from './service/AuthGroupService';
+import {
+  createAuthGroup,
+  deleteAuthGroup,
+  readAuthGroup,
+  readAuthGroups,
+  updateAuthGroup,
+} from './service/AuthGroupService';
 
 export default new PontusService({
   authGroupCreatePost: async (req, res) => {
@@ -50,10 +56,26 @@ export default new PontusService({
 
     res.send(response);
   },
-  authGroupDeletePost(req, res) {},
-  authGroupReadPost(req, res) {},
-  authGroupsReadPost(req, res) {},
-  authGroupUpdatePost(req, res) {},
+  authGroupDeletePost: async (req, res) => {
+    const response = await deleteAuthGroup(req.body);
+
+    res.send(response);
+  },
+  authGroupReadPost: async (req, res) => {
+    const response = await readAuthGroup(req.body);
+
+    res.send(response);
+  },
+  authGroupsReadPost: async (req, res) => {
+    const response = await readAuthGroups(req.body);
+
+    res.send(response);
+  },
+  authGroupUpdatePost: async (req, res) => {
+    const response = await updateAuthGroup(req.body);
+
+    res.send(response);
+  },
   authUserCreatePost(req, res) {},
   authUserDeletePost(req, res) {},
   authUserReadPost(req, res) {},
