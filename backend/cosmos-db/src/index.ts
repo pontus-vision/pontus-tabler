@@ -44,10 +44,14 @@ import {
 } from './service/EdgeService';
 import {
   createAuthGroup,
+  createAuthGroupDashboards,
   deleteAuthGroup,
+  deleteAuthGroupDashboards,
   readAuthGroup,
+  readAuthGroupDashboards,
   readAuthGroups,
   updateAuthGroup,
+  updateAuthGroupDashboards,
 } from './service/AuthGroupService';
 
 export default new PontusService({
@@ -98,6 +102,26 @@ export default new PontusService({
   },
   dashboardGroupAuthUpdatePost: async (req, res) => {
     const response = await updateDashboardGroupAuth(req.body);
+
+    res.send(response);
+  },
+  authGroupDashboardCreatePost: async (req, res) => {
+    const response = await createAuthGroupDashboards(req.body);
+
+    res.send(response);
+  },
+  authGroupDashboardDeletePost: async (req, res) => {
+    const response = await deleteAuthGroupDashboards(req.body);
+
+    res.send(response);
+  },
+  authGroupDashboardsReadPost: async (req, res) => {
+    const response = await readAuthGroupDashboards(req.body);
+
+    res.send(response);
+  },
+  authGroupDashboardUpdatePost: async (req, res) => {
+    const response = await updateAuthGroupDashboards(req.body);
 
     res.send(response);
   },
