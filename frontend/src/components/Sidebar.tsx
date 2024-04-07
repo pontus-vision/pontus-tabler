@@ -8,7 +8,7 @@ import {
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';
@@ -34,7 +34,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-
+  const [openAdminOptions, setOpenAdminOptions] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -143,10 +143,18 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           <button
             className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
             type="button"
-            onClick={() => onClickNavigate('/admin')}
+            onClick={() => setOpenAdminOptions(!openAdminOptions)}
           >
             {t('admin-panel')}
           </button>
+          {openAdminOptions && (
+            <ul>
+              <li onClick={() => navigate('/dashboards')}>Dashboards</li>
+              <li onClick={() => navigate('/dashboard/group/auth/')}>
+                Auth Groups
+              </li>
+            </ul>
+          )}
         </li>
         <li>
           <Link to="/table/create">

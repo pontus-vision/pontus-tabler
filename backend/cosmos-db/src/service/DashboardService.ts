@@ -108,10 +108,22 @@ export const readDashboardGroupAuth = async (
 ): Promise<DashboardGroupAuthReadRes> => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
-  const str = filterToQuery({ filters: data.filters }, 'p');
+  const str = filterToQuery(
+    { filters: data.filters },
+    'p',
+    `c.id = '${data.dashboardId}'`,
+  );
   const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.authGroups ${str}`;
 
-  let query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str}`;
+  const str2 = filterToQuery(
+    { filters: data.filters, from: data.from, to: data.to },
+    'p',
+    `c.id = '${data.dashboardId}'`,
+  );
+
+  const query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str2}`;
+
+  console.log({ countStr, query, str2 });
 
   const res = await dashboardContainer.items
     .query({

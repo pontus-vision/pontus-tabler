@@ -3,7 +3,7 @@ import { set } from 'immer/dist/internal';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 interface ColumnSelectorProps {
-  columns: Array<ColDef | undefined>;
+  columns: Array<ColDef>;
   showColumnSelector?: boolean;
   columnState?: ColumnState[];
   onColumnSelect: (selectedColumns: Array<string | undefined>) => void;
@@ -25,10 +25,10 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   >([]);
 
   const handleColumnToggle = (column: string | undefined) => {
-    if (selectedColumns.includes(column)) {
+    if (selectedColumns.includes(column || '')) {
       setSelectedColumns(selectedColumns.filter((c) => c !== column));
     } else {
-      setSelectedColumns([...selectedColumns, column]);
+      setSelectedColumns((prevState) => [...prevState, column]);
     }
   };
 
@@ -46,7 +46,9 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
         columnState.filter((col) => !col.hide).map((el) => el.colId),
       );
     } else {
-      setSelectedColumns(columns.map((col) => col?.field));
+      const colFields = columns.map((col) => col?.field || '');
+
+      setSelectedColumns(colFields);
     }
   }, [columnsVisible]);
 
@@ -57,7 +59,9 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
         columnState.filter((col) => !col.hide).map((el) => el.colId),
       );
     } else {
-      setSelectedColumns(columns.map((col) => col?.field));
+      const colFields = columns.map((col) => col?.field || '');
+
+      setSelectedColumns(colFields);
     }
   }, []);
 
@@ -72,7 +76,7 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   }, [columns]);
 
   useEffect(() => {
-    // console.log({ selectedColumns, columnState });
+    console.log({ selectedColumns, columnState });
   }, [selectedColumns, columnState]);
 
   return (
@@ -82,7 +86,7 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
         boxShadow: '0px 0px 5px black',
         padding: '1rem',
         backgroundColor: 'white',
-        zIndex: 1,
+        zIndex: 3,
         position: 'absolute',
         top: 0,
         left: '5rem',
@@ -94,7 +98,7 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
           if (!column) return;
           return (
             <div key={index}>
-              <label>
+              <label style={{ fontSize: '1rem' }}>
                 <input
                   type="checkbox"
                   checked={selectedColumns.some((el) => column.field === el)}
