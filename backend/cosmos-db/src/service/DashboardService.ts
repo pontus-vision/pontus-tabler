@@ -19,7 +19,7 @@ import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { CosmosClient } from '@azure/cosmos';
 declare function getContext(): any;
 
-const DASHBOARDS = 'dashboards';
+export const DASHBOARDS = 'dashboards';
 
 export const upsertDashboard = async (
   data: DashboardCreateReq | DashboardUpdateReq,
@@ -111,17 +111,17 @@ export const readDashboardGroupAuth = async (
   const str = filterToQuery(
     { filters: data.filters },
     'p',
-    `c.id = '${data.dashboardId}'`,
+    `c.id = "${data.dashboardId}"`,
   );
   const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.authGroups ${str}`;
 
   const str2 = filterToQuery(
     { filters: data.filters, from: data.from, to: data.to },
     'p',
-    `c.id = '${data.dashboardId}'`,
+    `c.id = "${data.dashboardId}"`,
   );
 
-  const query = `SELECT c.name, p.groupName, p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str2}`;
+  const query = `SELECT c.name, p["groupName"], p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str2}`;
 
   console.log({ countStr, query, str2 });
 
