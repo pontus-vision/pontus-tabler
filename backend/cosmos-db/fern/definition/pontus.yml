@@ -958,12 +958,6 @@ service:
             name:
               docs: Name of the group
               type: optional<string>
-            parents:
-              docs: Parent groups of the group (optional)
-              type: optional<list<string>>
-            symlinks:
-              docs: Symlinks associated with the group (optional)
-              type: optional<list<string>>
       response:
         docs: Group created successfully
         type: AuthGroupCreateRes
@@ -1014,12 +1008,6 @@ service:
             name:
               docs: Updated name of the group
               type: optional<string>
-            parents:
-              docs: Updated parent groups of the group (optional)
-              type: optional<list<string>>
-            symlinks:
-              docs: Updated symlinks associated with the group (optional)
-              type: optional<list<string>>
       response:
         docs: Successful response
         type: AuthGroupUpdateRes

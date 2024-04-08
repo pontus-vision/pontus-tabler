@@ -69,8 +69,6 @@ describe('dashboardCreatePOST', () => {
   it('should create a group', async () => {
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
-      parents: ['foo'],
-      symlinks: ['foo'],
     };
 
     const authGroupCreateRes = (await post(
@@ -97,8 +95,6 @@ describe('dashboardCreatePOST', () => {
     const updateBody: AuthGroupUpdateReq = {
       id: authGroupCreateRes.data.id,
       name: 'foo',
-      parents: ['foo1'],
-      symlinks: ['foo2'],
     };
 
     const authGroupUpdateRes = (await post(
@@ -122,8 +118,7 @@ describe('dashboardCreatePOST', () => {
   it('should read many groups', async () => {
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
-      parents: ['foo'],
-      symlinks: ['foo'],
+   
     };
 
     const authGroupCreateRes = (await post(
@@ -133,8 +128,6 @@ describe('dashboardCreatePOST', () => {
 
     const createBody2: AuthGroupCreateReq = {
       name: 'group2',
-      parents: ['foo'],
-      symlinks: ['foo'],
     };
 
     const authGroupCreateRes2 = (await post(
@@ -200,8 +193,7 @@ describe('dashboardCreatePOST', () => {
 
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
-      parents: ['foo'],
-      symlinks: ['foo'],
+      
     };
 
     const authGroupCreateRes = (await post(
@@ -323,8 +315,6 @@ describe('dashboardCreatePOST', () => {
 
     const authGroupCreateRes = (await post('auth/group/create', {
       name: 'group1',
-      parents: ['foo'],
-      symlinks: ['foo'],
     })) as AxiosResponse<AuthGroupCreateRes>;
 
     const authGroupId = authGroupCreateRes.data.id;
@@ -451,8 +441,6 @@ describe('dashboardCreatePOST', () => {
 
     const authGroupCreateRes = (await post('auth/group/create', {
       name: 'group1',
-      parents: ['foo'],
-      symlinks: ['foo'],
     })) as AxiosResponse<AuthGroupCreateRes>;
 
     const authGroupId = authGroupCreateRes.data.id;
@@ -624,8 +612,6 @@ describe('dashboardCreatePOST', () => {
 
     const authGroupCreateRes = (await post('auth/group/create', {
       name: 'group1',
-      parents: ['foo'],
-      symlinks: ['foo'],
     })) as AxiosResponse<AuthGroupCreateRes>;
 
     const authGroupId = authGroupCreateRes.data.id;
