@@ -318,7 +318,6 @@ service:
                     tableName: person-natural
           response:
             body: string
-
     tableCreatePOST:
       path: /table/create
       method: POST
@@ -950,30 +949,27 @@ service:
       docs: Create a new group with a name, parents, and symlinks
       display-name: Create a new group
       request:
-        name: GroupCreateReq
+        name: AuthGroupCreateReq
         body:
           properties:
+            id:
+              docs: id of the group
+              type: optional<string>
             name:
               docs: Name of the group
               type: optional<string>
-            parents:
-              docs: Parent groups of the group (optional)
-              type: optional<list<string>>
-            symlinks:
-              docs: Symlinks associated with the group (optional)
-              type: optional<list<string>>
       response:
         docs: Group created successfully
-        type: AuthGroupRef
+        type: AuthGroupCreateRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              groupId: groupId
-              name: name
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         groupId: groupId
+      #         name: name
     authGroupReadPOST:
       path: /auth/group/read
       method: POST
@@ -981,21 +977,21 @@ service:
       docs: Retrieve group by id
       display-name: Get group by ID
       request:
-        name: GroupReadBody
+        name: AuthGroupReadReq
         body:
           properties:
-            groupId: optional<string>
+            id: string
       response:
         docs: Successful response
-        type: AuthGroupRef
+        type: AuthGroupReadRes
       errors:
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              groupId: groupId
-              name: name
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         groupId: groupId
+      #         name: name
     authGroupUpdatePOST:
       path: /auth/group/update
       method: POST
@@ -1003,27 +999,24 @@ service:
       docs: Update group details by ID
       display-name: Update group by ID
       request:
-        name: GroupUpdateReq
+        name: AuthGroupUpdateReq
         body:
           properties:
-            groupId:
+            id:
               docs: ID of the group to update
               type: optional<string>
             name:
               docs: Updated name of the group
               type: optional<string>
-            parents:
-              docs: Updated parent groups of the group (optional)
-              type: optional<list<string>>
-            symlinks:
-              docs: Updated symlinks associated with the group (optional)
-              type: optional<list<string>>
+      response:
+        docs: Successful response
+        type: AuthGroupUpdateRes
       errors:
         - BadRequestError
         - NotFoundError
         - InternalServerError
-      examples:
-        - request: {}
+      # examples:
+      #   - request: {}
     authGroupDeletePOST:
       path: /auth/group/delete
       method: POST
@@ -1031,15 +1024,112 @@ service:
       docs: Delete a group by ID
       display-name: Delete a group
       request:
-        name: GroupDeleteReq
+        name: AuthGroupDeleteReq
         body:
           properties:
-            groupId: optional<string>
+            id: string
+      response:
+        type: AuthGroupDeleteRes
       errors:
         - NotFoundError
         - InternalServerError
       examples:
-        - request: {}
+        - request:
+            id: foo
+          response:
+            body: 'AuthGroup deleted.'
+    authGroupDashboardCreatePOST:
+      path: /auth/group/dashboard/create
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupDashboardCreateReq
+        body:
+          properties:
+            id: string
+            name: string
+            dashboards: list<AuthGroupDashboardRef>
+      response:
+        type: AuthGroupDashboardCreateRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
+    authGroupDashboardsReadPOST:
+      path: /auth/group/dashboards/read
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupDashboardsReadReq
+        body:
+          properties:
+            id: string
+          extends:
+            - ReadPaginationFilter
+      response:
+        type: AuthGroupDashboardsReadRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
+
+    authGroupDashboardUpdatePOST:
+      path: /auth/group/dashboard/update
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupDashboardUpdateReq
+        body:
+          properties:
+            id: string
+            dashboards: list<AuthGroupDashboardRef>
+      response:
+        type: AuthGroupDashboardUpdateRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
+    authGroupDashboardDeletePOST:
+      path: /auth/group/dashboard/delete
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupDashboardDeleteReq
+        body:
+          properties:
+            id: string
+            dashboardIds: list<string>
+      response:
+        type: AuthGroupDashboardDeleteRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
+
     authGroupsReadPOST:
       path: /auth/groups/read
       method: POST
@@ -1049,22 +1139,26 @@ service:
         model
       display-name: Get all groups
       request:
-        body: ReadPaginationFilter
+        name: AuthGroupsReadReq
+        body:
+          properties: {}
+          extends:
+            - ReadPaginationFilter
       response:
         docs: Successful response
-        type: InlineResponse2001
+        type: AuthGroupsReadRes
       errors:
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              totalGroups: 0
-              authGroups:
-                - groupId: groupId
-                  name: name
-                - groupId: groupId
-                  name: name
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         totalGroups: 0
+      #         authGroups:
+      #           - groupId: groupId
+      #             name: name
+      #           - groupId: groupId
+      #             name: name
     authUsersReadPOST:
       path: /auth/users/read
       method: POST
@@ -1218,12 +1312,16 @@ types:
       name: string
     extends:
       - TableEdgesMetadata
+  MenuItemTreeRefKind:
+    enum:
+      - file
+      - folder
   MenuCreateReq: MenuItemTreeRef
   MenuCreateRes:
     properties:
       id: optional<string>
       name: optional<string>
-      kind: optional<string>
+      kind: optional<MenuItemTreeRefKind>
       path: optional<string>
       children: optional<list<MenuItemTreeRef>>
   MenuReadRes: MenuItemTreeRef
@@ -1237,7 +1335,6 @@ types:
       id: string
       path: string
   MenuDeleteRes: string
-
   MenuItemTreeRef:
     properties:
       id: optional<string>
@@ -1245,14 +1342,43 @@ types:
       kind: optional<string>
       path: optional<string>
       children: optional<list<MenuItemTreeRef>>
+  AuthGroupCreateRes:
+    properties: {}
+    extends:
+      - AuthGroupRef
+  AuthGroupUpdateRes:
+    properties: {}
+    extends:
+      - AuthGroupRef
+  AuthGroupDashboardCreateRes:
+    properties:
+      id: string
+      name: string
+      dashboards: list<AuthGroupDashboardRef>
+  AuthGroupDashboardUpdateRes:
+    properties:
+      id: string
+      name: string
+      dashboards: list<AuthGroupDashboardRef>
+  AuthGroupDashboardsReadRes:
+    properties:
+      dashboards: list<AuthGroupDashboardRef>
+      count: integer
+  AuthGroupDashboardDeleteRes: string
   AuthGroupRef:
     properties:
-      groupId:
+      id:
         docs: Unique identifier of the group
-        type: optional<string>
+        type: string
       name:
         docs: Name of the group
         type: optional<string>
+      parents:
+        docs: Parent groups of the group (optional)
+        type: optional<list<string>>
+      symlinks:
+        docs: Symlinks associated with the group (optional)
+        type: optional<list<string>>
   AgGridReadReq:
     properties:
       search: optional<AgGridInputSearch>
@@ -1279,6 +1405,14 @@ types:
     enum:
       - from
       - to
+  AuthGroupDashboardRef:
+    properties:
+      id: string
+      name: string
+      create: boolean
+      read: boolean
+      update: boolean
+      delete: boolean
   TableDataEdgeReadRes:
     properties:
       rowId: string
@@ -1498,10 +1632,15 @@ types:
     properties:
       totalDashboards: optional<integer>
       dashboards: optional<list<Dashboard>>
-  InlineResponse2001:
+  AuthGroupsReadRes:
     properties:
       totalGroups: optional<integer>
       authGroups: optional<list<AuthGroupRef>>
+  AuthGroupReadRes:
+    properties: {}
+    extends:
+      - AuthGroupRef
+  AuthGroupDeleteRes: string
   InlineResponse2002:
     properties:
       totalUsers: optional<integer>

@@ -25,6 +25,7 @@ import TableDataReadView from './views/tables/table-data/TableDataRead';
 import EdgesView from './views/EdgesView';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import DashboardAuthGroupsView from './views/DashboardAuthGroupsView';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -72,6 +73,10 @@ function App() {
               element={<TableDataReadView />}
             />
             <Route path="/dashboard/:id" element={<DashboardView />} />
+            <Route
+              path="/dashboard/group/auth/"
+              element={<DashboardAuthGroupsView />}
+            />
             <Route path="/users/read" element={<ReadUsers />} />
             <Route path="/user/create" element={<CreateUser />} />
 
@@ -83,7 +88,7 @@ function App() {
             <Route path="/table/read/:id" element={<UpdateTable />} />
             <Route path="/table/create" element={<CreateTableView />} />
             <Route path="/table/delete" element={<DeleteTableView />} />
-            <Route path="/dashboards/read" element={<Dashboards />} />
+            <Route path="/dashboards" element={<Dashboards />} />
             <Route path="/dashboard/create" element={<CreateDashboard />} />
             <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
             <Route

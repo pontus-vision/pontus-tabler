@@ -6,11 +6,12 @@ import {
 } from '../pontus-api/typescript-fetch-client-generated';
 import TreeView from './Tree/TreeView';
 import { IoMdClose } from 'react-icons/io';
+import { useNavigate } from 'react-router-dom';
 
 const MenuTree = () => {
   const [data, setData] = useState<MenuItemTreeRef>();
   const [selectedItem, setSelectedItem] = useState<MenuItemTreeRef>();
-  const [message, setMessage] = useState<string>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMenu = async (path: string) => {
@@ -59,21 +60,7 @@ const MenuTree = () => {
 
   const handleCreate = async (folder: MenuItemTreeRef) => {
     try {
-      const obj: MenuUpdateReq = {
-        ...selectedItem,
-        id: selectedItem?.id || '',
-        children: [
-          {
-            ...folder,
-            path: `${selectedItem?.path}${
-              selectedItem?.path?.endsWith('/') ? '' : '/'
-            }${folder.name}`,
-          },
-        ],
-      };
-
-      const res = await updateMenu(obj);
-      console.log({ res });
+      const res = await createMenu(folder);
 
       if (res?.status === 200) {
         setData(
@@ -82,6 +69,7 @@ const MenuTree = () => {
             updateNodeByPath(prevState, res.data?.path, res.data),
           // }
         );
+        navigate('/dashboard/update/' + res?.data.id, { state: folder });
         createMessage(`${folder?.kind} created.`);
       }
       if (res?.status === 409) {
@@ -93,9 +81,8 @@ const MenuTree = () => {
       console.error({ error });
     }
   };
-  useEffect(() => {
-    console.log({ message });
-  }, [message]);
+
+  useEffect(() => {}, [data]);
 
   const handleUpdate = async (data: MenuUpdateReq) => {
     const res = await updateMenu(data);
@@ -108,20 +95,24 @@ const MenuTree = () => {
           updateNodeByPath(prevState, res.data?.path, res.data),
         // }
       );
-      setMessage('Folder updated!');
     } else if (res?.status === 409) {
-      setMessage('That name already exists under the parent folder');
     }
   };
 
   const handleSelect = async (selection: MenuItemTreeRef) => {
+    if (!selection.path) return;
     setSelectedItem(selection);
     const res = await readMenu({ path: selection?.path });
     console.log({ selection, res });
 
     res?.status === 200 &&
       setData((prevState) =>
-        updateNodeByPath(prevState, selection?.path, res.data),
+        updateNodeByPath(prevState, selection?.path, {
+          ...res.data,
+          children: res.data.children?.toSorted((a, b) =>
+            a?.name?.localeCompare(b?.name),
+          ),
+        }),
       );
   };
 
@@ -140,14 +131,6 @@ const MenuTree = () => {
           onUpdate={handleUpdate}
         />
       )}
-
-      <div id="messageBox" className={`menu-tree ${message ? 'opened' : ''}`}>
-        {message}
-        <IoMdClose
-          style={{ position: 'absolute', top: '2px', right: '5px' }}
-          onClick={() => setMessage('')}
-        />
-      </div>
     </>
   );
 };

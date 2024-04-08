@@ -2,13 +2,9 @@ import { Dispatch, useEffect, useState } from 'react';
 import { FlexLayoutCmp, WebinyModel } from '../types';
 import BootstrapForm from 'react-bootstrap/Form';
 import { getModelsWebiny } from '../webinyApi';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { getTables } from '../client';
-import {
-  GetTablesResponse,
-  TableRef,
-} from '../pontus-api/typescript-fetch-client-generated';
+import { TableRef } from '../pontus-api/typescript-fetch-client-generated';
 
 type Props = {
   setSelectedCmp: Dispatch<React.SetStateAction<FlexLayoutCmp | undefined>>;
@@ -74,24 +70,5 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
     </div>
   );
 };
-
-const CmpPanelStyles = styled.div`
-  .dropdown-panels {
-    display: flex;
-    gap: 1rem;
-
-    &__tables {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    &__charts {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-  }
-`;
 
 export default CmpPanel;

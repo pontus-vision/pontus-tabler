@@ -11,6 +11,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
   CellClickedEvent,
+  CellValueChangedEvent,
   ColDef,
   ColumnApi,
   ColumnState,
@@ -21,7 +22,6 @@ import {
   IDatasource,
   IGetRowsParams,
   IRowNode,
-  IServerSideGetRowsParams,
   RowEvent,
   SelectionChangedEvent,
 } from 'ag-grid-community';
@@ -34,19 +34,20 @@ import {
   User,
 } from '../pontus-api/typescript-fetch-client-generated';
 import GridActionsPanel from '../components/GridActionsPanel';
+import { deepEqual } from '../../utils';
 
 type FilterState = {
   [key: string]: any;
 };
 
 type Props = {
+  onRowsStateChange?: (data: Record<string, any>[]) => void;
+  isLoading?: boolean;
   id?: string;
   onValueChange?: (id: string, value: ColumnState[]) => void;
   modelId?: string;
   lastState?: ColumnState[];
   onColumnState?: (cols: ColumnState[]) => void;
-  showColumnSelector?: boolean;
-  setShowColumnSelector?: Dispatch<React.SetStateAction<boolean>>;
   containerHeight?: string;
   updateMode?: boolean;
   setRowClicked?: Dispatch<SetStateAction<RowEvent<any, any> | undefined>>;
@@ -80,12 +81,12 @@ type Props = {
 
 const PVGridWebiny2 = ({
   id,
+  isLoading,
+  onRowsStateChange,
   onValueChange,
   lastState,
   onRefresh,
   modelId,
-  showColumnSelector,
-  setShowColumnSelector,
   setRowClicked,
   cols,
   rows,
@@ -125,16 +126,29 @@ const PVGridWebiny2 = ({
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
 
-  const [selectedColumns, setSelectedColumns] = useState<
-    Array<string | undefined>
-  >([]);
-
   const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [initialRows, setInitialRows] = useState<string>();
+  const [rowsChanged, setRowsChanged] = useState<CellValueChangedEvent[]>([]);
+  const [showColumnSelector, setShowColumnSelector] = useState(false);
+  const gridContainerRef = useRef<AgGridReact>(null);
 
   useEffect(() => {
     if (!columnState || !onValueChange || !id) return;
     // onValueChange(id, columnState);
   }, [columnState, id]);
+
+  useEffect(() => {
+    onRowsStateChange &&
+      rowsChanged &&
+      onRowsStateChange(
+        rowsChanged.filter((row) => {
+          if (!initialRows) return;
+          return !JSON.parse(initialRows).some((row2: Record<string, any>) =>
+            deepEqual(row, row2),
+          );
+        }),
+      );
+  }, [rowsChanged]);
 
   const paramsChange = () => {
     cachedRowParams && onParamsChange && onParamsChange(cachedRowParams);
@@ -146,7 +160,6 @@ const PVGridWebiny2 = ({
   }, [cachedRowParams]);
 
   useEffect(() => {
-    console.log({ columnState });
     onColumnState && columnState && onColumnState(columnState);
   }, [columnState]);
 
@@ -161,6 +174,14 @@ const PVGridWebiny2 = ({
   useEffect(() => {
     selectRows();
   }, [rows]);
+
+  useEffect(() => {
+    if (isLoading) {
+      gridContainerRef.current!?.api?.showLoadingOverlay();
+    } else {
+      gridContainerRef.current!?.api?.hideOverlay();
+    }
+  }, [isLoading]);
 
   const getDataSource = () => {
     const datasource: IDatasource = {
@@ -294,7 +315,7 @@ const PVGridWebiny2 = ({
   useEffect(() => {
     if (!rows) return;
     cachedRowParams?.successCallback(rows, totalCount);
-  }, [rows, filterState]);
+  }, [rows, filterState, cachedRowParams]);
 
   useEffect(() => {
     const objects = columnDefs?.filter(
@@ -332,6 +353,7 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     gridApi?.refreshInfiniteCache();
+    setInitialRows(JSON.stringify(rows));
   }, [rows]);
 
   const onGridReady = (params: GridReadyEvent<any>): void => {
@@ -344,13 +366,21 @@ const PVGridWebiny2 = ({
     }
   };
 
+  function onBtShowLoading() {
+    gridApi!.showLoadingOverlay();
+  }
+
   const gridOptions: GridOptions = {
     rowModelType: 'infinite',
     cacheBlockSize: 100,
     suppressRowClickSelection: true,
-
     onRowClicked: (e) => {
-      onRowClicked && onRowClicked(e);
+      if (
+        !e.api.getColumn('update-mode')?.isVisible() &&
+        !e.api.getColumn('delete-mode')?.isVisible()
+      ) {
+        onRowClicked && onRowClicked(e);
+      }
     },
   };
 
@@ -384,9 +414,17 @@ const PVGridWebiny2 = ({
     onFilterChanged();
   };
 
-  const handleColumnSelect = (selectedColumns: Array<string | undefined>) => {
-    setSelectedColumns(selectedColumns);
-    setShowColumnSelector && setShowColumnSelector(false);
+  const handleColumnSelect = (cols: Array<string | undefined>) => {
+    const hidden = columnState
+      ?.filter((colState) => !cols.some((col) => colState.colId === col))
+      ?.map((col) => col.colId);
+
+    if (hidden) {
+      gridApi?.setColumnsVisible(hidden, false);
+    }
+
+    !cols.some((col) => col === undefined) &&
+      gridApi?.setColumnsVisible(cols as string[], true);
   };
 
   useEffect(() => {
@@ -449,8 +487,6 @@ const PVGridWebiny2 = ({
       setEntriesToBeDeleted(selectedRows.map((row) => row.data));
   }, [selectedRows]);
 
-  const gridContainerRef = useRef(null);
-
   const updateGridHeight = () => {
     const gridElement = document.querySelector(
       `.${gridId}.ag-theme-alpine`,
@@ -459,6 +495,10 @@ const PVGridWebiny2 = ({
       const gridHeight = gridElement.offsetHeight;
       setGridHeight && setGridHeight(gridHeight);
     }
+  };
+
+  const onCellValueChanged = (cell: CellValueChangedEvent) => {
+    setRowsChanged((prevState) => [...new Set([...prevState, cell.data])]);
   };
 
   const [gridId, setGridId] = useState<string>();
@@ -488,14 +528,18 @@ const PVGridWebiny2 = ({
 
   return (
     <>
-      <div data-testid={testId} className={'ag-theme-alpine' + ' ' + gridId}>
-        {columnDefs && (
+      <div
+        style={{ width: '100%', height: '100%', position: 'relative' }}
+        data-testid={testId}
+        className={'ag-theme-alpine' + ' ' + gridId}
+      >
+        {cols && (
           <PVAggridColumnSelector
             columnState={columnState}
             setShowColumnSelector={setShowColumnSelector}
             showColumnSelector={showColumnSelector}
             onColumnSelect={handleColumnSelect}
-            columns={columnDefs}
+            columns={cols}
           />
         )}
         <GridActionsPanel
@@ -503,6 +547,7 @@ const PVGridWebiny2 = ({
           add={add}
           permissions={permissions}
           onDelete={onDelete}
+          setShowColumnSelector={setShowColumnSelector}
           deleteMode={deleteMode}
           onRefresh={onRefresh}
           updateMode={updateMode}
@@ -515,6 +560,7 @@ const PVGridWebiny2 = ({
           gridOptions={gridOptions}
           // enableRangeSelection={true}
           // paginationAutoPageSize={true}
+
           paginationPageSize={6}
           defaultColDef={defaultColDef}
           rowSelection={'multiple'}
@@ -522,6 +568,7 @@ const PVGridWebiny2 = ({
           onGridReady={onGridReady}
           onFilterChanged={handleGridStateChanged}
           onSelectionChanged={onSelectionChanged}
+          onCellValueChanged={onCellValueChanged}
           onColumnMoved={handleGridStateChanged}
           onColumnResized={handleGridStateChanged}
           onColumnPinned={handleGridStateChanged}

@@ -42,13 +42,44 @@ import {
   readTableEdgesByTableId,
   // updateTableEdge,
 } from './service/EdgeService';
+import {
+  createAuthGroup,
+  createAuthGroupDashboards,
+  deleteAuthGroup,
+  deleteAuthGroupDashboards,
+  readAuthGroup,
+  readAuthGroupDashboards,
+  readAuthGroups,
+  updateAuthGroup,
+  updateAuthGroupDashboards,
+} from './service/AuthGroupService';
 
 export default new PontusService({
-  authGroupCreatePost(req, res) {},
-  authGroupDeletePost(req, res) {},
-  authGroupReadPost(req, res) {},
-  authGroupsReadPost(req, res) {},
-  authGroupUpdatePost(req, res) {},
+  authGroupCreatePost: async (req, res) => {
+    const response = await createAuthGroup(req.body);
+
+    res.send(response);
+  },
+  authGroupDeletePost: async (req, res) => {
+    const response = await deleteAuthGroup(req.body);
+
+    res.send(response);
+  },
+  authGroupReadPost: async (req, res) => {
+    const response = await readAuthGroup(req.body);
+
+    res.send(response);
+  },
+  authGroupsReadPost: async (req, res) => {
+    const response = await readAuthGroups(req.body);
+
+    res.send(response);
+  },
+  authGroupUpdatePost: async (req, res) => {
+    const response = await updateAuthGroup(req.body);
+
+    res.send(response);
+  },
   authUserCreatePost(req, res) {},
   authUserDeletePost(req, res) {},
   authUserReadPost(req, res) {},
@@ -74,6 +105,26 @@ export default new PontusService({
 
     res.send(response);
   },
+  authGroupDashboardCreatePost: async (req, res) => {
+    const response = await createAuthGroupDashboards(req.body);
+
+    res.send(response);
+  },
+  authGroupDashboardDeletePost: async (req, res) => {
+    const response = await deleteAuthGroupDashboards(req.body);
+
+    res.send(response);
+  },
+  authGroupDashboardsReadPost: async (req, res) => {
+    const response = await readAuthGroupDashboards(req.body);
+
+    res.send(response);
+  },
+  authGroupDashboardUpdatePost: async (req, res) => {
+    const response = await updateAuthGroupDashboards(req.body);
+
+    res.send(response);
+  },
   dashboardCreatePost: async (req, res) => {
     if (Object.keys(req.body).length === 0) {
       throw new BadRequestError(
@@ -96,7 +147,6 @@ export default new PontusService({
   },
   dashboardsReadPost: async (req, res) => {
     const response = await readDashboards(req.body);
-
     res.send(response);
   },
   dashboardUpdatePost: async (req, res) => {
