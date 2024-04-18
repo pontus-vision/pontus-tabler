@@ -75,20 +75,6 @@ export const updateAuthGroup = async (
           value: data[prop],
         });
         break;
-      case 'parents':
-        patchArr.push({
-          op: 'replace',
-          path: '/parents',
-          value: data[prop],
-        });
-        break;
-      case 'symlinks':
-        patchArr.push({
-          op: 'replace',
-          path: '/symlinks',
-          value: data[prop],
-        });
-        break;
       default:
         break;
     }
@@ -107,14 +93,6 @@ export const updateAuthGroup = async (
         const index = res2?.resource?.authGroups.findIndex(
           (el) => el?.groupId === data?.id,
         );
-
-        if (index === -1) {
-          throw new NotFoundError(
-            `Auth Group not found in dashboard ${dashboard.name} (id: ${dashboard.id})`,
-          );
-        }
-
-        const dashboarAuthGroup = res2?.resource?.authGroups[index];
 
         const res3 = await dashboardContainer
           .item(dashboard.id, dashboard.id)
@@ -166,38 +144,20 @@ export const deleteAuthGroup = async (
   }
 
   for (const dashboard of res.resource?.dashboards) {
-  
     const res = await dashboardContainer
       .item(dashboard.id, dashboard.id)
       .read();
 
-    if (res?.statusCode === 404) {
-      throw new NotFoundError(`Dashboard not found at id: ${dashboard.id}`);
-    }
-
     const authGroups = res.resource?.authGroups;
-
- 
 
     const index = authGroups?.findIndex((el) => el.groupId === data.id);
 
-    if (index === -1) {
-      throw new NotFoundError(
-        `AuthGroup at id: ${data.id} not associated with dashboard at id: ${dashboard.id}`,
-      );
-    }
-    try {
-      const resPatch = await dashboardContainer
-        .item(dashboard.id, dashboard.id)
-        .patch([{ op: 'remove', path: `/authGroups/${index}` }]);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError(`Auth Group not found at id: ${data.id}`);
-      }
-    }
+    const resPatch = await dashboardContainer
+      .item(dashboard.id, dashboard.id)
+      .patch([{ op: 'remove', path: `/authGroups/${index}` }]);
   }
 
-   const res3 = (await authGroupContainer
+  const res3 = (await authGroupContainer
     .item(data.id, data.id)
     .delete()) as ItemResponse<AuthGroupRef>;
 
@@ -229,8 +189,6 @@ export const createAuthGroupDashboards = async (
   const batchPatchArr: PatchOperation[][] = [];
 
   for (const [index, dashboard] of data.dashboards.entries()) {
-
-
     try {
       const res = await dashboardContainer
         .item(dashboard.id, dashboard.id)
