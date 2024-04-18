@@ -60,6 +60,20 @@ import {
   DashboardGroupAuthReadRes,
   DashboardGroupAuthUpdateReq,
   DashboardGroupAuthUpdateRes,
+  AuthGroupsReadReq,
+  AuthGroupsReadRes,
+  AuthGroupDashboardCreateReq,
+  AuthGroupDashboardCreateRes,
+  AuthGroupDashboardsReadReq,
+  AuthGroupDashboardsReadRes,
+  AuthGroupDashboardUpdateReq,
+  AuthGroupDashboardUpdateRes,
+  AuthGroupDashboardDeleteReq,
+  AuthGroupDashboardDeleteRes,
+  AuthGroupUpdateReq,
+  AuthGroupUpdateRes,
+  AuthGroupDeleteReq,
+  AuthGroupDeleteRes,
 } from './typescript/api';
 
 export const getModelData = async (
@@ -234,15 +248,45 @@ export const createAuthGroup = async (
 };
 
 export const readAuthGroups = async (
-  data: ReadPaginationFilter,
-): Promise<AxiosResponse<AuthGroupRef[]> | undefined> => {
+  data: AuthGroupsReadReq,
+): Promise<AxiosResponse<AuthGroupsReadRes> | undefined> => {
   return post('/auth/groups/read', data);
+};
+
+export const updateAuthGroups = async (
+  data: AuthGroupUpdateReq,
+): Promise<AxiosResponse<AuthGroupUpdateRes>> => {
+  return post('/auth/group/update', data);
 };
 
 export const readAuthGroup = async (
   body: GroupReadBody,
 ): Promise<AxiosResponse<AuthGroupRef> | undefined> => {
   return post('/auth/group/read', body);
+};
+
+export const createAuthGroupDashboards = async (
+  body: AuthGroupDashboardCreateReq,
+): Promise<AxiosResponse<AuthGroupDashboardCreateRes>> => {
+  return post('/auth/group/dashboard/create', body);
+};
+
+export const readAuthGroupsDashboards = async (
+  body: AuthGroupDashboardsReadReq,
+): Promise<AxiosResponse<AuthGroupDashboardsReadRes>> => {
+  return post('/auth/group/dashboards/read', body);
+};
+
+export const updateAuthGroupDashboards = async (
+  body: AuthGroupDashboardUpdateReq,
+): Promise<AxiosResponse<AuthGroupDashboardUpdateRes>> => {
+  return post('/auth/group/dashboard/update', body);
+};
+
+export const deleteAuthGroupDashboards = async (
+  body: AuthGroupDashboardDeleteReq,
+): Promise<AxiosResponse<AuthGroupDashboardDeleteRes>> => {
+  return post('/auth/group/dashboard/delete', body);
 };
 
 export const updateAuthGroup = async (
@@ -252,8 +296,8 @@ export const updateAuthGroup = async (
 };
 
 export const deleteAuthGroup = async (
-  body: GroupDeleteReq,
-): Promise<AxiosResponse<Response> | undefined> => {
+  body: AuthGroupDeleteReq,
+): Promise<AxiosResponse<AuthGroupDeleteRes>> => {
   return post('/auth/group/delete', body);
 };
 
