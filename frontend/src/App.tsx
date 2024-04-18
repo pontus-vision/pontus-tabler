@@ -38,76 +38,57 @@ function App() {
 
   return (
     <AuthProvider>
-      <>
-        <Header
-          setOpenedSidebar={setOpenedSidebar}
-          openedSidebar={openedSidebar}
-        />
-        <Sidebar
-          setOpenedSidebar={setOpenedSidebar}
-          openedSidebar={openedSidebar}
-        />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Navigate
-                to={
-                  localStorage.getItem('userRole')
-                    ? '/dashboards/read'
-                    : '/login'
-                }
-              />
-            }
-          />
-          <Route path="/table/edges" element={<EdgesView />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
-            <Route path="/dashboard" element={<DashboardView />} />
-          </Route>
-          <Route element={<ProtectedLayout allowedRoles={['Admin']} />}>
-            <Route path="/admin" element={<AdminView />} />
-            <Route path="/tables/read" element={<TablesReadView />} />
-            <Route
-              path="/table/data/read/:id"
-              element={<TableDataReadView />}
+      <Header
+        setOpenedSidebar={setOpenedSidebar}
+        openedSidebar={openedSidebar}
+      />
+      <Sidebar
+        setOpenedSidebar={setOpenedSidebar}
+        openedSidebar={openedSidebar}
+      />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to={
+                localStorage.getItem('userRole') ? '/dashboards/read' : '/login'
+              }
             />
-            <Route path="/dashboard/:id" element={<DashboardView />} />
-            <Route
-              path="/dashboard/group/auth/"
-              element={<DashboardAuthGroupsView />}
-            />
-            <Route path="/users/read" element={<ReadUsers />} />
-            <Route path="/user/create" element={<CreateUser />} />
+          }
+        />
+        <Route path="/table/edges" element={<EdgesView />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
+          <Route path="/dashboard" element={<DashboardView />} />
+        </Route>
+        <Route element={<ProtectedLayout allowedRoles={['Admin']} />}>
+          <Route path="/admin" element={<AdminView />} />
+          <Route path="/tables/read" element={<TablesReadView />} />
+          <Route path="/table/data/read/:id" element={<TableDataReadView />} />
+          <Route path="/dashboard/:id" element={<DashboardView />} />
+          <Route path="/auth/groups" element={<DashboardAuthGroupsView />} />
+          <Route path="/users/read" element={<ReadUsers />} />
+          <Route path="/user/create" element={<CreateUser />} />
 
-            <Route path="/user/update/:id" element={<UpdateUser />} />
-          </Route>
-          <Route path="/login" element={<Login />} />
-          <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
-            <Route path="/table/update/:id" element={<UpdateTable />} />
-            <Route path="/table/read/:id" element={<UpdateTable />} />
-            <Route path="/table/create" element={<CreateTableView />} />
-            <Route path="/table/delete" element={<DeleteTableView />} />
-            <Route path="/dashboards" element={<Dashboards />} />
-            <Route path="/dashboard/create" element={<CreateDashboard />} />
-            <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
-            <Route
-              path="/table/data/read/:id"
-              element={<TableDataReadView />}
-            />
-            <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
-            <Route path="/auth/group/create" element={<CreateAuthGroup />} />
-            <Route
-              path="/auth/group/update/:id"
-              element={<UpdateAuthGroup />}
-            />
-            <Route
-              path="dashboard/auth/group"
-              element={<DashboardAuthGroup />}
-            />
-          </Route>
-        </Routes>
-      </>
+          <Route path="/user/update/:id" element={<UpdateUser />} />
+        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
+          <Route path="/table/update/:id" element={<UpdateTable />} />
+          <Route path="/table/read/:id" element={<UpdateTable />} />
+          <Route path="/table/create" element={<CreateTableView />} />
+          <Route path="/table/delete" element={<DeleteTableView />} />
+          <Route path="/dashboards" element={<Dashboards />} />
+          <Route path="/dashboard/create" element={<CreateDashboard />} />
+          <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
+          <Route path="/table/data/read/:id" element={<TableDataReadView />} />
+          <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
+          <Route path="/auth/group/create" element={<CreateAuthGroup />} />
+          <Route path="/auth/group/update/:id" element={<UpdateAuthGroup />} />
+          <Route path="dashboard/auth/group" element={<DashboardAuthGroup />} />
+        </Route>
+      </Routes>
     </AuthProvider>
   );
 }
