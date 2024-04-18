@@ -26,7 +26,7 @@ export const upsertDashboard = async (
 ) => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
-  const res = await dashboardContainer.items.upsert({
+  const res = await dashboardContainer.items.create({
     ...data,
     authGroups: [],
   });
@@ -68,9 +68,15 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 export const readDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<DashboardsReadRes> => {
-  const res = await fetchData(body, DASHBOARDS);
-
-  return { dashboards: res.values, totalDashboards: res.count };
+  try {
+    const res = await fetchData(body, DASHBOARDS);
+    console.log({ res });
+    return { dashboards: res.values, totalDashboards: res.count };
+  } catch (error) {
+    if (error?.code === 404) {
+      throw new NotFoundError('No dashboards found');
+    }
+  }
 };
 
 export const createDashboardAuthGroup = async (
@@ -80,7 +86,6 @@ export const createDashboardAuthGroup = async (
   const dashboardId = data.dashboardId;
 
   const res = await dashboardContainer.item(dashboardId, dashboardId).read();
-  const authGroups = res.resource.authGroups;
 
   const patchArr: PatchOperation[] = [];
 
@@ -97,9 +102,9 @@ export const createDashboardAuthGroup = async (
     .patch(patchArr);
 
   return {
-    authGroups: res2.resource.authGroups,
-    dashboardId: res2.resource.id,
-    dashboardName: res2.resource.name,
+    authGroups: res2.resource?.authGroups,
+    dashboardId: res2.resource?.id,
+    dashboardName: res2.resource?.name,
   };
 };
 
@@ -139,13 +144,18 @@ export const readDashboardGroupAuth = async (
     })
     .fetchAll();
 
-  if (res.resources.length === 0) {
+  if (res.resources?.length === 0) {
     throw new NotFoundError('No group auth found.');
   }
 
+  console.log({ res: res.requestCharge, res2: res2.requestCharge });
+
   return {
-    totalCount: res2.resources[0], // Use the count obtained from the stored procedure
-    authGroups: res?.resources,
+    totalCount: res2?.resources[0], // Use the count obtained from the stored procedure
+    authGroups: res.resources.map((el) => {
+      const { name, ...rest } = el;
+      return rest;
+    }),
     dashboardId: data?.dashboardId,
     dashboardName: res?.resources[0]?.name,
   };
@@ -164,7 +174,7 @@ export const deleteDashboardGroupAuth = async (
 
   const resource = res3.resource as DashboardGroupAuthReadRes;
 
-  const resAuthGroups = resource.authGroups;
+  const resAuthGroups = resource?.authGroups;
 
   const patchArr: PatchOperation[] = [];
 
@@ -182,9 +192,9 @@ export const deleteDashboardGroupAuth = async (
     .patch(patchArr);
 
   return {
-    authGroups: res.resource.authGroups,
-    dashboardId: res.resource.id,
-    dashboardName: res.resource.name,
+    authGroups: res.resource?.authGroups,
+    dashboardId: res.resource?.id,
+    dashboardName: res.resource?.name,
   };
 };
 
@@ -204,7 +214,7 @@ export const updateDashboardGroupAuth = async (
   while (data.authGroups.length > 0) {
     batchPatchArr.push(
       data.authGroups.splice(0, 10).map((authGroup) => {
-        const index = res.resource.authGroups.findIndex(
+        const index = res.resource?.authGroups.findIndex(
           (i) => i.groupId === authGroup.groupId,
         );
         if (index === -1) {
@@ -231,9 +241,9 @@ export const updateDashboardGroupAuth = async (
       const resource = res2.resource;
 
       return {
-        authGroups: resource.authGroups,
-        dashboardId: resource.id,
-        dashboardName: resource.name,
+        authGroups: resource?.authGroups,
+        dashboardId: resource?.id,
+        dashboardName: resource?.name,
       };
     }
   }
