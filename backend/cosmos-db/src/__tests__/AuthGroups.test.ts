@@ -39,6 +39,7 @@ import { DashboardGroupAuthCreateReq } from '../generated/api';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { AUTH_GROUPS, createAuthGroup } from '../service/AuthGroupService';
+import { DASHBOARDS } from '../service/DashboardService';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -59,6 +60,8 @@ describe('dashboardCreatePOST', () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
     await deleteContainer(AUTH_GROUPS);
+    await deleteContainer(DASHBOARDS);
+    await deleteDatabase('pv_db');
   });
 
   afterAll(async () => {
@@ -118,7 +121,6 @@ describe('dashboardCreatePOST', () => {
   it('should read many groups', async () => {
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
-   
     };
 
     const authGroupCreateRes = (await post(
@@ -193,7 +195,6 @@ describe('dashboardCreatePOST', () => {
 
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
-      
     };
 
     const authGroupCreateRes = (await post(
@@ -236,76 +237,50 @@ describe('dashboardCreatePOST', () => {
 
     expect(readGroups.status).toBe(404);
 
-    const deleteBody: AuthGroupDashboardDeleteReq = {
-      dashboardIds: ['foo'],
-      id: authGroupCreateRes.data.id,
+    const updateBody: AuthGroupDashboardUpdateReq = {
+      dashboards: [
+        {
+          create: true,
+          delete: true,
+          read: true,
+          update: true,
+          id: 'foo',
+          name: 'f',
+        },
+      ],
+      id: 'foo',
     };
 
+    const updateRetVal = (await post(
+      'auth/group/dashboard/update',
+      updateBody,
+    )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
+
+    expect(updateRetVal.status).toBe(404);
+
+    const deleteBody: AuthGroupDashboardDeleteReq = {
+      dashboardIds: [],
+      id: 'foo',
+    };
     const deleteRetVal = (await post(
       'auth/group/dashboard/delete',
       deleteBody,
     )) as AxiosResponse<DashboardGroupAuthDeleteRes>;
 
-    expect(deleteRetVal.status).toBe(404);
+    expect(deleteRetVal.status).toBe(400);
+
+    const delete2RetVal = (await post('auth/group/dashboard/delete', {
+      dashboardIds: ['foo', 'bar'],
+      id: authGroupCreateRes.data.id,
+    })) as AxiosResponse<DashboardGroupAuthDeleteRes>;
+    expect(delete2RetVal.status).toBe(404);
   });
   it('should create dashboards subdocuments', async () => {
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
       folder: 'folder 1',
-      state: {
-        global: {},
-        borders: [],
-        layout: {
-          type: 'row',
-          id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
-          children: [
-            {
-              type: 'row',
-              id: '#63ec4f08-7081-4557-b2c0-6fe74bf2893e',
-              children: [
-                {
-                  type: 'tabset',
-                  id: '#3155bc6f-ea47-4e9b-822e-bc023ced5e60',
-                  children: [
-                    {
-                      type: 'tab',
-                      id: '#ba731bfa-a493-445b-a74f-dcf042b53593',
-                      name: 'name',
-                      component: 'PVGridWebiny2',
-                      config: {
-                        title: 'name',
-                        tableId: 'tableId',
-                        lastState: [],
-                        height: 249,
-                      },
-                    },
-                  ],
-                },
-                {
-                  type: 'tabset',
-                  id: '#f6d34c55-6a57-4266-bc09-ad5099853b89',
-                  children: [
-                    {
-                      type: 'tab',
-                      id: '#ca5bdcac-9cd2-4b7a-861a-034b6117af34',
-                      name: 'name',
-                      component: 'PVGridWebiny2',
-                      config: {
-                        title: 'name',
-                        tableId: 'tableId',
-                        lastState: [],
-                        height: 249,
-                      },
-                    },
-                  ],
-                  active: true,
-                },
-              ],
-            },
-          ],
-        },
-      },
+      state: {},
     };
 
     const createRetVal = (await post(
@@ -379,59 +354,7 @@ describe('dashboardCreatePOST', () => {
       owner: 'Joe',
       name: 'PontusVision',
       folder: 'folder 1',
-      state: {
-        global: {},
-        borders: [],
-        layout: {
-          type: 'row',
-          id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
-          children: [
-            {
-              type: 'row',
-              id: '#63ec4f08-7081-4557-b2c0-6fe74bf2893e',
-              children: [
-                {
-                  type: 'tabset',
-                  id: '#3155bc6f-ea47-4e9b-822e-bc023ced5e60',
-                  children: [
-                    {
-                      type: 'tab',
-                      id: '#ba731bfa-a493-445b-a74f-dcf042b53593',
-                      name: 'name',
-                      component: 'PVGridWebiny2',
-                      config: {
-                        title: 'name',
-                        tableId: 'tableId',
-                        lastState: [],
-                        height: 249,
-                      },
-                    },
-                  ],
-                },
-                {
-                  type: 'tabset',
-                  id: '#f6d34c55-6a57-4266-bc09-ad5099853b89',
-                  children: [
-                    {
-                      type: 'tab',
-                      id: '#ca5bdcac-9cd2-4b7a-861a-034b6117af34',
-                      name: 'name',
-                      component: 'PVGridWebiny2',
-                      config: {
-                        title: 'name',
-                        tableId: 'tableId',
-                        lastState: [],
-                        height: 249,
-                      },
-                    },
-                  ],
-                  active: true,
-                },
-              ],
-            },
-          ],
-        },
-      },
+      state: {},
     };
 
     const createRetVal = (await post(
@@ -496,14 +419,14 @@ describe('dashboardCreatePOST', () => {
       from: 1,
       to: 20,
       filters: {
-        groupName: {
-          // condition1: {
-          filter: 'Pontus',
-          filterType: 'text',
-          type: 'contains',
-          // },
-          // filterType: 'text',
-        },
+        // groupName: {
+        //   // condition1: {
+        //   filter: 'Pontus',
+        //   filterType: 'text',
+        //   type: 'contains',
+        //   // },
+        //   // filterType: 'text',
+        // },
       },
     };
 
@@ -511,10 +434,9 @@ describe('dashboardCreatePOST', () => {
       'dashboard/group/auth/read',
       readBody,
     )) as AxiosResponse<DashboardGroupAuthReadRes>;
-
-    expect(readRetVal2.data.authGroups[0]).toMatchObject({
-      groupName: updateBody.dashboards[0].name,
-      groupId: updateBody.dashboards[0].id,
+    expect(readRetVal2.data?.authGroups[0]).toMatchObject({
+      groupName: authGroupCreateRes.data.name,
+      groupId: authGroupCreateRes.data.id,
       create: true,
       delete: true,
       read: true,
@@ -545,64 +467,73 @@ describe('dashboardCreatePOST', () => {
       groupDashUpdateRes.data.dashboards,
     );
   });
+  it('should update a authGroup and its reference in a dashboard', async () => {
+    const body: DashboardCreateReq = {
+      owner: 'Joe',
+      name: 'PontusVision',
+      folder: 'folder 1',
+      state: {},
+    };
+
+    const createRetVal = (await post(
+      'dashboard/create',
+      body,
+    )) as AxiosResponse<DashboardCreateRes>;
+
+    const authGroupCreateRes = (await post('auth/group/create', {
+      name: 'group1',
+    })) as AxiosResponse<AuthGroupCreateRes>;
+
+    const createBody: AuthGroupDashboardCreateReq = {
+      dashboards: [
+        {
+          name: createRetVal.data.name,
+          id: createRetVal.data.id,
+          create: false,
+          delete: true,
+          read: false,
+          update: true,
+        },
+      ],
+      id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
+    };
+    const groupDashCreateRes = (await post(
+      'auth/group/dashboard/create',
+      createBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(groupDashCreateRes.status).toBe(200);
+
+    const updateBody: AuthGroupUpdateReq = {
+      id: authGroupCreateRes.data.id,
+      name: 'foo',
+    };
+
+    const authGroupUpdateRes = (await post(
+      '/auth/group/update',
+      updateBody,
+    )) as AxiosResponse<AuthGroupCreateRes>;
+
+    expect(authGroupUpdateRes.status).toBe(200);
+
+    const readBody: AuthGroupReadReq = {
+      id: authGroupCreateRes.data.id,
+    };
+
+    const authGroupReadRes = (await post(
+      '/auth/group/read',
+      readBody,
+    )) as AxiosResponse<AuthGroupReadRes>;
+
+    expect(authGroupReadRes.data.name).toBe(updateBody.name);
+  });
   it('should delete dashboards subdocuments', async () => {
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
       folder: 'folder 1',
-      state: {
-        global: {},
-        borders: [],
-        layout: {
-          type: 'row',
-          id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
-          children: [
-            {
-              type: 'row',
-              id: '#63ec4f08-7081-4557-b2c0-6fe74bf2893e',
-              children: [
-                {
-                  type: 'tabset',
-                  id: '#3155bc6f-ea47-4e9b-822e-bc023ced5e60',
-                  children: [
-                    {
-                      type: 'tab',
-                      id: '#ba731bfa-a493-445b-a74f-dcf042b53593',
-                      name: 'name',
-                      component: 'PVGridWebiny2',
-                      config: {
-                        title: 'name',
-                        tableId: 'tableId',
-                        lastState: [],
-                        height: 249,
-                      },
-                    },
-                  ],
-                },
-                {
-                  type: 'tabset',
-                  id: '#f6d34c55-6a57-4266-bc09-ad5099853b89',
-                  children: [
-                    {
-                      type: 'tab',
-                      id: '#ca5bdcac-9cd2-4b7a-861a-034b6117af34',
-                      name: 'name',
-                      component: 'PVGridWebiny2',
-                      config: {
-                        title: 'name',
-                        tableId: 'tableId',
-                        lastState: [],
-                        height: 249,
-                      },
-                    },
-                  ],
-                  active: true,
-                },
-              ],
-            },
-          ],
-        },
-      },
+      state: {},
     };
 
     const createRetVal = (await post(
@@ -748,5 +679,148 @@ describe('dashboardCreatePOST', () => {
 
     expect(readRetVal2.status).toBe(404);
     expect(readRetVal3.status).toBe(404);
+  });
+  it('should create a an authgroup, associate a dashboard and delete it, and its reference in the dashboard', async () => {
+    const body: DashboardCreateReq = {
+      owner: 'Joe',
+      name: 'PontusVision',
+      folder: 'folder 1',
+      state: {},
+    };
+
+    const createRetVal = (await post(
+      'dashboard/create',
+      body,
+    )) as AxiosResponse<DashboardCreateRes>;
+
+    const authGroupCreateRes = (await post('auth/group/create', {
+      name: 'group1',
+    })) as AxiosResponse<AuthGroupCreateRes>;
+
+    const authGroupId = authGroupCreateRes.data.id;
+
+    const createBody: AuthGroupDashboardCreateReq = {
+      dashboards: [
+        {
+          name: createRetVal.data.name,
+          id: createRetVal.data.id,
+          create: false,
+          delete: true,
+          read: false,
+          update: true,
+        },
+      ],
+      name: authGroupCreateRes.data.name,
+      id: authGroupId,
+    };
+
+    const groupDashCreateRes = (await post(
+      'auth/group/dashboard/create',
+      createBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    const readBody: DashboardGroupAuthReadReq = {
+      dashboardId: createRetVal.data.id,
+      filters: {
+        groupName: {
+          condition1: {
+            filter: 'group1',
+            filterType: 'text',
+            type: 'contains',
+          },
+          filterType: 'text',
+        },
+      },
+    };
+
+    const readRetVal = (await post(
+      'dashboard/group/auth/read',
+      readBody,
+    )) as AxiosResponse<DashboardGroupAuthReadRes>;
+
+    expect(readRetVal.data.authGroups[0].groupName).toBe(
+      authGroupCreateRes.data.name,
+    );
+
+    const deleteBody: AuthGroupDeleteReq = {
+      id: authGroupCreateRes.data.id,
+    };
+
+    const authGroupDeleteRes = (await post(
+      '/auth/group/delete',
+      deleteBody,
+    )) as AxiosResponse<AuthGroupDeleteRes>;
+
+    expect(authGroupDeleteRes.status).toBe(200);
+
+    const readRetVal2 = (await post(
+      'dashboard/group/auth/read',
+      readBody,
+    )) as AxiosResponse<DashboardGroupAuthReadRes>;
+
+    expect(readRetVal2.status).toBe(404);
+  });
+  it('should UPDATE dashboards subdocuments incorreclty', async () => {
+    const body: DashboardCreateReq = {
+      owner: 'Joe',
+      name: 'PontusVision',
+      folder: 'folder 1',
+      state: {},
+    };
+
+    const createRetVal = (await post(
+      'dashboard/create',
+      body,
+    )) as AxiosResponse<DashboardCreateRes>;
+
+    const authGroupCreateRes = (await post('auth/group/create', {
+      name: 'group1',
+    })) as AxiosResponse<AuthGroupCreateRes>;
+
+    const authGroupId = authGroupCreateRes.data.id;
+
+    const deleteBody: AuthGroupDashboardUpdateReq = {
+      dashboards: [
+        {
+          id: 'foo',
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          name: 'bar',
+        },
+      ],
+      id: authGroupId,
+    };
+
+    const readRetVal = (await post(
+      'auth/group/dashboard/update',
+      deleteBody,
+    )) as AxiosResponse<DashboardGroupAuthDeleteRes>;
+
+    expect(readRetVal.status).toBe(404);
+  });
+  it('should associate a dashboard to an incorrect authGroup', async () => {
+    const createBody: AuthGroupDashboardCreateReq = {
+      dashboards: [
+        {
+          name: 'foo',
+          id: 'bar',
+          create: false,
+          delete: true,
+          read: false,
+          update: true,
+        },
+      ],
+      name: 'foo',
+      id: 'bar',
+    };
+
+    const groupDashCreateRes = (await post(
+      'auth/group/dashboard/create',
+      createBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(groupDashCreateRes.status).toBe(404);
   });
 });
