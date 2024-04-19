@@ -308,6 +308,7 @@ describe('dashboardCreatePOST', () => {
       id: authGroupId,
       name: authGroupCreateRes.data.name,
     };
+    
     const groupDashCreateRes = (await post(
       'auth/group/dashboard/create',
       createBody,
