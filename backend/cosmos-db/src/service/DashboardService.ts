@@ -34,7 +34,6 @@ export const createDashboard = async (
     ...data,
     authGroups: [],
   });
-  console.log({ res: JSON.stringify(res.resource) });
 
   const dashboardId = res.resource.id;
 
@@ -45,7 +44,6 @@ export const createDashboard = async (
     const path = `${menuItem?.path}${menuItem?.path?.endsWith('/') ? '' : '/'}${
       child.name
     }`;
-    console.log({ path, child, menuItem });
 
     const res = await menuContainer.items.create({
       ...child,
@@ -154,7 +152,7 @@ export const readDashboards = async (
 ): Promise<DashboardsReadRes> => {
   try {
     const res = await fetchData(body, DASHBOARDS);
-    console.log({ res });
+
     return { dashboards: res.values, totalDashboards: res.count };
   } catch (error) {
     if (error?.code === 404) {
@@ -212,8 +210,6 @@ export const readDashboardGroupAuth = async (
 
   const query = `SELECT c.name, p["groupName"], p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str2}`;
 
-  console.log({ countStr, query, str2 });
-
   const res = await dashboardContainer.items
     .query({
       query,
@@ -231,8 +227,6 @@ export const readDashboardGroupAuth = async (
   if (res.resources?.length === 0) {
     throw new NotFoundError('No group auth found.');
   }
-
-  console.log({ res: res.requestCharge, res2: res2.requestCharge });
 
   return {
     totalCount: res2?.resources[0], // Use the count obtained from the stored procedure

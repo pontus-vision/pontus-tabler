@@ -71,10 +71,6 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
       });
     }
 
-    patchArr.forEach((arr) =>
-      console.log({ arr, rowId: data.rowId, container: data.tableName }),
-    );
-
     const res = await tableDataContainer
       .item(data.rowId, data.rowId)
       .patch(patchArr);
@@ -125,11 +121,9 @@ export const readTableData = async (
   body: TableDataReadReq,
 ): Promise<TableDataReadRes> => {
   try {
-    console.log({ tableName: body.tableName, filters: body.filters });
     const res1 = await checkTableCols(body.tableName, body.filters);
-    // console.log({ res1 });
+
     const res2 = await fetchData(body, body.tableName);
-    console.log({ res2 });
 
     return { rowsCount: res2.count, rows: res2.values };
   } catch (error) {

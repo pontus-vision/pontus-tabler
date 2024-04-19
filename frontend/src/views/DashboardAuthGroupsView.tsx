@@ -341,30 +341,6 @@ const DashboardAuthGroupsView = () => {
     }, 1);
   };
 
-  const addGroup = async (data: CellValueChangedEvent[]) => {
-    if (!addMode) return;
-    const newGroups = data.filter((group) => !group.data.id);
-    for (const group of newGroups) {
-      const res = await createAuthGroup({ name: group.data.name });
-
-      if (res?.status === 200) {
-        notificationManagerRef?.current?.addMessage(
-          'success',
-          'Success',
-          `AuthGroup(s) created!`,
-        );
-
-        await fetchAuthGroupDashboards();
-      } else {
-        notificationManagerRef?.current?.addMessage(
-          'error',
-          'Error',
-          'Something went wrong. Could not create Auth Group(s)!',
-        );
-      }
-    }
-  };
-
   return (
     <div className={styles.dashboardAuthGroupsView}>
       {addDashboard && (

@@ -126,7 +126,6 @@ export const readAuthGroup = async (
     throw new NotFoundError(`No Auth Group found at id: ${data.id}`);
   }
 
-  console.log({ res });
 
   return res.resource;
 };
