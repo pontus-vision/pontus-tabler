@@ -29,6 +29,7 @@ type Props = {
     readAction?: boolean;
   };
   onDelete?: (arr: any[]) => void;
+  onUpdate?: () => void;
   entriesToBeDeleted: IRowNode<any>[];
   testId?: string;
   changesMade?: boolean;
@@ -57,6 +58,7 @@ const GridActionsPanel = ({
   testId,
   changesMade,
   updateModeOnRows,
+  onUpdate,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
@@ -271,8 +273,12 @@ const GridActionsPanel = ({
         deleteMode ||
         (permissions?.updateAction &&
           (changesMade ? (
-            <div>
-              <IoIosSave />
+            <div
+              onClick={() => {
+                onUpdate && onUpdate();
+              }}
+            >
+              <IoIosSave style={{ fontSize: '1.3rem' }} />
             </div>
           ) : (
             updateModeOnRows || (
