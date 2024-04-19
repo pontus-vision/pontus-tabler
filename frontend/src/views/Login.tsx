@@ -20,8 +20,6 @@ const LoginPage = () => {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // navigate('/dashboard');
-
     login(role);
   };
 
