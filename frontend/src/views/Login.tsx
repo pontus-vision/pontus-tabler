@@ -19,7 +19,9 @@ const LoginPage = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log('click');
+
+    // navigate('/dashboard');
+
     login(role);
   };
 
