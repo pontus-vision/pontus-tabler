@@ -1,6 +1,6 @@
 @use '../sass/variables';
 
-.header{
+.header {
   --bar-width: 35px;
   --bar-height: 4px;
   --hamburguer-gap: 6px;
@@ -8,18 +8,19 @@
   --background: white;
   --animation-timing: 100ms ease-in-out;
   --hamburguer-height: calc(var(--bar-height) * 3 + var(--hamburguer-gap) * 2);
-  
-  &__logo{
+  position: fixed;
+  z-index: 3;
+  &__logo {
     position: relative;
     left: 5rem;
     cursor: pointer;
     transition: left 100ms ease-in-out;
-    &.active{
+    &.active {
       left: 15rem;
     }
   }
 
-  &__language-selector.form-select{
+  &__language-selector.form-select {
     width: fit-content;
   }
 
@@ -37,15 +38,15 @@
     position: absolute;
     z-index: 1;
     transition: left 100ms ease-in-out;
-    &.active{
-      left: 11.5rem
+    &.active {
+      left: 11.5rem;
     }
   }
 
   &__hamburguer-menu::before,
   &__hamburguer-menu input,
   &__hamburguer-menu::after {
-    content: "";
+    content: '';
     width: var(--bar-width);
     height: var(--bar-height);
     background-color: var(--foreground);
@@ -77,7 +78,7 @@
     opacity: 0;
     width: 0;
   }
-  &__language-selector{
+  &__language-selector {
     right: 2rem;
     position: absolute;
   }
@@ -91,46 +92,34 @@
 }
 
 /* Target iPhone */
-@media only screen 
-  and (min-device-width: 375px) 
-  and (max-device-width: 667px) 
-  and (orientation: portrait) {
-    .header{
-      &__hamburguer-menu.active{
-        left: 21rem
-      }
-      
-      &__logo{
-        left: 5rem;
-        &.active{
-          left: 2.5rem;
-        }
-      }
-      
-      &__language-selector.form-select{
-        display: none;
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: portrait) {
+  .header {
+    &__hamburguer-menu.active {
+      left: 21rem;
+    }
+
+    &__logo {
+      left: 5rem;
+      &.active {
+        left: 2.5rem;
       }
     }
+
+    &__language-selector.form-select {
+      display: none;
+    }
+  }
 }
 
-@media only screen 
-  and (min-device-width: 375px) 
-  and (max-device-width: 667px) 
-  and (orientation: landscape) {
-    /* CSS styles for iPhone landscape mode */
+@media only screen and (min-device-width: 375px) and (max-device-width: 667px) and (orientation: landscape) {
+  /* CSS styles for iPhone landscape mode */
 }
 
 /* Target iPad */
-@media only screen 
-  and (min-device-width: 768px) 
-  and (max-device-width: 1024px) 
-  and (orientation: portrait) {
-    /* CSS styles for iPad portrait mode */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+  /* CSS styles for iPad portrait mode */
 }
 
-@media only screen 
-  and (min-device-width: 768px) 
-  and (max-device-width: 1024px) 
-  and (orientation: landscape) {
-    /* CSS styles for iPad landscape mode */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+  /* CSS styles for iPad landscape mode */
 }
