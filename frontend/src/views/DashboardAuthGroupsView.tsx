@@ -159,7 +159,6 @@ const DashboardAuthGroupsView = () => {
     const fails = [];
 
     for (const [index, group] of groupsChanged.entries()) {
-      console.log({ group });
       const res = await updateAuthGroups({ id: group.id, name: group.name });
 
       if (res.status !== 200) {
@@ -213,19 +212,10 @@ const DashboardAuthGroupsView = () => {
   const updateAuthGroupDash = async () => {
     if (!selectedGroup?.id || !dashboardsChanged) return;
 
-    console.log({ dashboardsChanged });
-
     const res = await updateAuthGroupDashboards({
       id: selectedGroup.id,
       dashboards: dashboardsChanged,
     });
-    console.log(
-      { res },
-      {
-        id: selectedGroup.id,
-        dashboards: dashboardsChanged,
-      },
-    );
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
@@ -342,10 +332,6 @@ const DashboardAuthGroupsView = () => {
     fetchAuthGroups();
   };
 
-  const handleAuthGroupDashboardUpdate = (row: Dashboard) => {
-    navigate(`/dashboard/update/${row?.id}`);
-  };
-
   const handleCellClicked = (e: CellClickedEvent<any, any>) => {
     console.log({ e });
     if (e.colDef.field !== 'click') return;
@@ -391,52 +377,9 @@ const DashboardAuthGroupsView = () => {
       <div className={styles.dashboardAuthGroupsViewContainer}>
         {
           <div className={styles.authGroupsGrid}>
-            {/* <PVGridWebiny2
-              onCellClicked={handleCellClicked}
-              onRefresh={() => fetchAuthGroups()}
-              add={() => {
-                setAddMode(true);
-                setTotalGroups((totalGroups || 0) + 1);
-                setAuthGroups([...groups, { name: '', id: '' }]);
-              }}
-              onDelete={(e) => deleteDashboardsAuthGroup(e)}
-              permissions={{ createAction: true, deleteAction: true }}
-              onParamsChange={handleParamsChange}
-              isLoading={isLoading1}
-              onCellsChange={(e) => addGroup(e)}
-              selectRowByCell={true}
-              onRowsStateChange={(e) => {
-                setAddMode(false);
-                setGroupsChanged(e as AuthGroupRef[]);
-              }}
-              cols={[
-                {
-                  headerName: 'Name',
-                  field: 'name',
-                  sortable: true,
-
-                  filter: true,
-                  editable: true,
-                  // cellEditor: SimpleTextEditor,
-                },
-                {
-                  headerName: 'Id',
-                  field: 'id',
-                  sortable: true,
-                  filter: true,
-                },
-              ]}
-              rows={groups}
-              totalCount={totalGroups}
-            /> */}
             <AuthGroups
               onCellClicked={handleCellClicked}
               onRefresh={() => fetchAuthGroups()}
-              // onAdd={() => {
-              //   setAddMode(true);
-              //   setTotalGroups((totalGroups || 0) + 1);
-              //   setAuthGroups([...groups, { name: '', id: '' }]);
-              // }}
               onDelete={(e) => deleteDashboardsAuthGroup(e)}
               permissions={{
                 createAction: true,
@@ -445,8 +388,6 @@ const DashboardAuthGroupsView = () => {
               }}
               onParamsChange={handleParamsChange}
               isLoading={isLoading1}
-              // onCellsChange={(e) => addGroup(e)}
-
               selectRowByCell={true}
               onRowsStateChange={(e) => {
                 setAddMode(false);
@@ -454,16 +395,13 @@ const DashboardAuthGroupsView = () => {
               }}
             />
             {groupsChanged.length > 0 && !addMode && (
-              <button
-                onClick={() => updateGroups()}
-                // className={styles.updateBtn}
-              >
+              <button onClick={() => updateGroups()}>
                 Update AuthGroup(s)
               </button>
             )}
           </div>
         }
-        {dashboards.length > 0 && (
+        {selectedGroup && (
           <>
             <label htmlFor="">{selectedGroup?.name} Dashboards:</label>
             <PVGridWebiny2
@@ -482,20 +420,13 @@ const DashboardAuthGroupsView = () => {
               }}
               updateModeOnRows={true}
               totalCount={totalDashboards}
-              onUpdate={handleAuthGroupDashboardUpdate}
+              onUpdate={updateAuthGroupDash}
               onRowsSelected={(e) => {
                 setDashboardstoBeDeleted(e.map((el) => el.data.id));
               }}
               onRefresh={() => fetchAuthGroupDashboards()}
               onDelete={handleDelete}
             />
-
-            <button
-              onClick={() => updateAuthGroupDash()}
-              // className={styles.updateBtn}
-            >
-              Update AuthGroup(s)
-            </button>
           </>
         )}
         {addDashboard && (
