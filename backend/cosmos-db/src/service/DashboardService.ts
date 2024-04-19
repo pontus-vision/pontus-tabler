@@ -12,28 +12,112 @@ import {
   DashboardGroupAuthUpdateRes,
   DashboardGroupAuthDeleteReq,
   DashboardGroupAuthDeleteRes,
+  DashboardUpdateRes,
+  DashboardCreateRes,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
 import { NotFoundError } from '../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { CosmosClient } from '@azure/cosmos';
+import { initiateMenuContainer } from './MenuService';
 declare function getContext(): any;
 
 export const DASHBOARDS = 'dashboards';
 
-export const upsertDashboard = async (
-  data: DashboardCreateReq | DashboardUpdateReq,
-) => {
+export const createDashboard = async (
+  data: DashboardCreateReq,
+): Promise<DashboardCreateRes> => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
+  const menuContainer = await initiateMenuContainer();
 
   const res = await dashboardContainer.items.create({
     ...data,
     authGroups: [],
   });
+  console.log({ res: JSON.stringify(res.resource) });
+
+  const dashboardId = res.resource.id;
+
+  if (data?.menuItem) {
+    const menuItem = data.menuItem;
+    const child = menuItem.children[0];
+
+    const path = `${menuItem?.path}${menuItem?.path?.endsWith('/') ? '' : '/'}${
+      child.name
+    }`;
+    console.log({ path, child, menuItem });
+
+    const res = await menuContainer.items.create({
+      ...child,
+      path: path,
+      id: dashboardId,
+    });
+
+    try {
+      const res2 = await menuContainer
+        .item(menuItem.id, menuItem.path)
+        .patch([{ op: 'add', path: `/children/-`, value: res.resource }]);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(
+          `Parent folder at path '${menuItem.path}, at id '${menuItem.id} not found.'`,
+        );
+      }
+    }
+  }
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
   return rest;
+};
+
+export const updateDashboard = async (
+  data: DashboardUpdateReq,
+): Promise<DashboardUpdateRes> => {
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
+
+  try {
+    const patchArr: PatchOperation[] = [];
+    for (const prop in data) {
+      switch (prop) {
+        case 'name':
+          patchArr.push({
+            op: 'replace',
+            path: '/name',
+            value: data[prop],
+          });
+          break;
+        case 'state':
+          patchArr.push({
+            op: 'replace',
+            path: '/state',
+            value: data[prop],
+          });
+          break;
+        case 'folder':
+          patchArr.push({
+            op: 'replace',
+            path: '/folder',
+            value: data[prop],
+          });
+        case 'owner':
+          patchArr.push({
+            op: 'replace',
+            path: '/owner',
+            value: data[prop],
+          });
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    const res3 = await dashboardContainer
+      .item(data.id, data.id)
+      .patch(patchArr);
+    return res3.resource;
+  } catch (error) {}
 };
 
 export const readDashboardById = async (dashboardId: string) => {
