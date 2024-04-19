@@ -580,6 +580,11 @@ const PVGridWebiny2 = ({
     setGridId(generateRandomString(16));
   }, []);
 
+  const handleOnUpdate = () => {
+    onUpdate && onUpdate(rowsAlterations);
+    setRowsAlterations([]);
+  };
+
   const defaultColDef = useMemo(() => {
     return {
       width: 170,
@@ -614,6 +619,7 @@ const PVGridWebiny2 = ({
           onRefresh={onRefresh}
           updateModeOnRows={updateModeOnRows}
           changesMade={rowStateHasChanged}
+          onUpdate={handleOnUpdate}
           updateMode={updateMode}
           setDeleteMode={setDeleteMode}
           setUpdateMode={setUpdateMode}
