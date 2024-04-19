@@ -11,6 +11,7 @@ import { isSubset, post } from './test-utils';
 import { deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
+import { DashboardReadReq, DashboardReadRes } from '../typescript/api';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -112,11 +113,22 @@ describe('testing Menu', () => {
 
     // Read the created Menu Item
 
-    const readRetVal2 = await post('menu/read', {
+    const readRetVal2 = (await post('menu/read', {
       path: readRetVal?.path,
-    });
+    })) as AxiosResponse<MenuReadRes>;
 
     expect(isSubset(body, readRetVal2.data)).toBe(true);
+
+    const readDashBody: DashboardReadReq = {
+      id: readRetVal2.data.children[0].id,
+    };
+
+    const readDashVal = (await post(
+      'dashboard/read',
+      readDashBody,
+    )) as AxiosResponse<DashboardReadRes>;
+
+    expect(readDashVal.data.name).toBe(readRetVal2.data.children[0].name);
 
     const body2: MenuUpdateReq = {
       id: readRetVal.id,
