@@ -219,7 +219,6 @@ export const readTableDataEdge = async (
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
   const resource = resources[0];
-  console.log({ res: JSON.stringify(resource) });
 
   return {
     edges: resource,
@@ -293,11 +292,6 @@ export const createTableEdge = async (
     );
 
     if (duplicates.length > 0) {
-      console.log({
-        duplicates: JSON.stringify(duplicates),
-        document: JSON.stringify(document.edges[prop]),
-        data: JSON.stringify(data.edges[prop]),
-      });
       throw new ConflictEntityError(
         `Duplicate edge(s) detected for property '${prop}': ${JSON.stringify(
           duplicates,

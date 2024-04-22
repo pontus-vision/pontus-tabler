@@ -8,7 +8,13 @@ import TreeView from './Tree/TreeView';
 import { IoMdClose } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 
-const MenuTree = () => {
+type Props = {
+  onUpdate?: (data: MenuItemTreeRef) => void;
+  onCreate?: (data: MenuItemTreeRef) => void;
+  onSelect?: (data: MenuItemTreeRef) => void;
+};
+
+const MenuTree = ({ onCreate, onSelect, onUpdate }: Props) => {
   const [data, setData] = useState<MenuItemTreeRef>();
   const [selectedItem, setSelectedItem] = useState<MenuItemTreeRef>();
   const navigate = useNavigate();
@@ -82,9 +88,7 @@ const MenuTree = () => {
     }
   };
 
-  useEffect(() => {}, [data]);
-
-  const handleUpdate = async (data: MenuUpdateReq) => {
+  const handleUpdate = async (data: MenuItemTreeRef) => {
     const res = await updateMenu(data);
 
     console.log({ res, data });
@@ -116,19 +120,15 @@ const MenuTree = () => {
       );
   };
 
-  useEffect(() => {
-    console.log({ data });
-  }, [data]);
-
   return (
     <>
       {data && (
         <TreeView
           data={data}
           actionsMode={true}
-          onSelect={handleSelect}
-          onCreate={handleCreate}
-          onUpdate={handleUpdate}
+          onSelect={onSelect || handleSelect}
+          onCreate={onCreate || handleCreate}
+          onUpdate={onUpdate || handleUpdate}
         />
       )}
     </>

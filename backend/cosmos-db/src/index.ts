@@ -30,9 +30,10 @@ import {
   readDashboardById,
   readDashboardGroupAuth,
   readDashboards,
-  upsertDashboard,
+  createDashboard,
   updateDashboardGroupAuth,
   deleteDashboardGroupAuth,
+  updateDashboard,
 } from './service/DashboardService';
 import {
   createTableDataEdge,
@@ -131,7 +132,7 @@ export default new PontusService({
         'Please, send dashboard properties in the body.',
       );
     }
-    const response = await upsertDashboard(req.body);
+    const response = await createDashboard(req.body);
 
     res.send(response);
   },
@@ -150,7 +151,7 @@ export default new PontusService({
     res.send(response);
   },
   dashboardUpdatePost: async (req, res) => {
-    const response = await upsertDashboard(req.body);
+    const response = await updateDashboard(req.body);
 
     res.send(response);
   },

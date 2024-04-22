@@ -35,6 +35,7 @@ import {
 } from '../pontus-api/typescript-fetch-client-generated';
 import GridActionsPanel from '../components/GridActionsPanel';
 import { deepEqual } from '../../utils';
+import { AiOutlineSelect } from 'react-icons/ai';
 
 type FilterState = {
   [key: string]: any;
@@ -44,6 +45,7 @@ type Props = {
   onRowsStateChange?: (data: Record<string, any>[]) => void;
   isLoading?: boolean;
   id?: string;
+  cypressAtt?: string;
   onValueChange?: (id: string, value: ColumnState[]) => void;
   modelId?: string;
   lastState?: ColumnState[];
@@ -61,15 +63,19 @@ type Props = {
   onUpdate?: (data: any) => void;
   onRowClicked?: (row: RowEvent<any, any>) => void;
   selection?: boolean;
+  selectRowByCell?: boolean;
   permissions?: {
     updateAction?: boolean;
     createAction?: boolean;
     deleteAction?: boolean;
     readAction?: boolean;
   };
+  onCellsChange?: (data: CellValueChangedEvent[]) => void;
   onFiltersChange?: (filters: {
     [key: string]: ReadPaginationFilterFilters;
   }) => void;
+  onCellValueChange?: (cell: CellValueChangedEvent) => void;
+  onCellClicked?: (e: CellClickedEvent<any, any>) => void;
   rowsSelected?: IRowNode<any>[];
   onRowsSelected?: (e: IRowNode<any>[]) => void;
   onFromChange?: (num: number) => void;
@@ -77,13 +83,17 @@ type Props = {
   setGridHeight?: Dispatch<React.SetStateAction<undefined | number>>;
   setEntriesToBeDeleted?: Dispatch<React.SetStateAction<any | undefined>>;
   testId?: string;
+  resetRowsChangedState?: boolean;
+  updateModeOnRows?: boolean;
 };
 
 const PVGridWebiny2 = ({
   id,
   isLoading,
   onRowsStateChange,
+  resetRowsChangedState,
   onValueChange,
+  onCellsChange,
   lastState,
   onRefresh,
   modelId,
@@ -104,8 +114,13 @@ const PVGridWebiny2 = ({
   onParamsChange,
   onRowsSelected,
   onColumnState,
+  onCellClicked,
+  onCellValueChange,
   selection,
+  selectRowByCell,
   testId,
+  cypressAtt,
+  updateModeOnRows,
 }: Props) => {
   const [deleteMode, setDeleteMode] = useState(false);
   const [columnState, setColumnState] = useState<ColumnState[]>();
@@ -118,6 +133,7 @@ const PVGridWebiny2 = ({
   const [cachedRowParams, setCachedRowParams] = useState<IGetRowsParams>();
   const [to, setTo] = useState();
   const [from, setFrom] = useState();
+  const [rowStateHasChanged, setRowsStateHasChanged] = useState(false);
   // const [deleteMode, setDeleteMode] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
   const [entriesToBeDeleted, setEntriesToBeDeleted] = useState<IRowNode<any>[]>(
@@ -128,7 +144,9 @@ const PVGridWebiny2 = ({
 
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [initialRows, setInitialRows] = useState<string>();
-  const [rowsChanged, setRowsChanged] = useState<CellValueChangedEvent[]>([]);
+  const [rowsAlterations, setRowsAlterations] = useState<
+    CellValueChangedEvent[]
+  >([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const gridContainerRef = useRef<AgGridReact>(null);
 
@@ -138,17 +156,22 @@ const PVGridWebiny2 = ({
   }, [columnState, id]);
 
   useEffect(() => {
-    onRowsStateChange &&
-      rowsChanged &&
-      onRowsStateChange(
-        rowsChanged.filter((row) => {
-          if (!initialRows) return;
-          return !JSON.parse(initialRows).some((row2: Record<string, any>) =>
-            deepEqual(row, row2),
-          );
-        }),
+    const alterations = rowsAlterations.filter((row) => {
+      if (!initialRows) return;
+      return !JSON.parse(initialRows).some((row2: Record<string, any>) =>
+        deepEqual(row, row2),
       );
-  }, [rowsChanged]);
+    });
+
+    rowsAlterations && setRowsStateHasChanged(alterations.length > 0);
+
+    onRowsStateChange && rowsAlterations && onRowsStateChange(alterations);
+  }, [rowsAlterations]);
+
+  useEffect(() => {
+    if (!resetRowsChangedState) return;
+    setRowsAlterations([]);
+  }, [resetRowsChangedState]);
 
   const paramsChange = () => {
     cachedRowParams && onParamsChange && onParamsChange(cachedRowParams);
@@ -234,7 +257,32 @@ const PVGridWebiny2 = ({
               filter: false,
               hide: true,
               suppressMovable: true,
+              cellAriaRole: `${cypressAtt}-select`,
               // cellRendererParams: {onChange: handleCheckboxChange,}
+            },
+            {
+              field: 'click',
+              cellStyle: {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.3rem',
+              },
+              width: 30,
+              colId: 'click',
+              sortable: false,
+              filter: false,
+              hide: true,
+              suppressMovable: true,
+
+              cellRenderer: (e: ICellRendererParams) => {
+                return (
+                  <div>
+                    <AiOutlineSelect />
+                  </div>
+                );
+              },
+              onCellClicked: handleUpdateIconClick,
             },
             {
               headerName: '',
@@ -432,9 +480,10 @@ const PVGridWebiny2 = ({
       columnApi?.setColumnVisible('delete-mode', true);
     } else {
       columnApi?.setColumnVisible('delete-mode', false);
-      // selectedRows.forEach((row) => {
-      //   row.setSelected(false);
-      // });
+
+      selectedRows.forEach((row) => {
+        row.setSelected(false);
+      });
     }
   }, [deleteMode]);
 
@@ -460,6 +509,11 @@ const PVGridWebiny2 = ({
   useEffect(() => {
     restoreGridColumnStates();
     updateGridHeight();
+
+    if (selectRowByCell) {
+      columnApi?.setColumnVisible('click', true);
+      gridApi?.setColumnVisible('click', true);
+    }
 
     if (selection) {
       columnApi?.setColumnVisible('selection-mode', true);
@@ -496,10 +550,17 @@ const PVGridWebiny2 = ({
       setGridHeight && setGridHeight(gridHeight);
     }
   };
-
+  const [cellsChanged, setCellsChanged] = useState<CellValueChangedEvent[]>([]);
   const onCellValueChanged = (cell: CellValueChangedEvent) => {
-    setRowsChanged((prevState) => [...new Set([...prevState, cell.data])]);
+    onCellValueChange && onCellValueChange(cell);
+
+    setCellsChanged([...cellsChanged, cell]);
+    setRowsAlterations((prevState) => [...new Set([...prevState, cell.data])]);
   };
+
+  useEffect(() => {
+    onCellsChange && onCellsChange(cellsChanged);
+  }, [cellsChanged]);
 
   const [gridId, setGridId] = useState<string>();
 
@@ -519,6 +580,11 @@ const PVGridWebiny2 = ({
     setGridId(generateRandomString(16));
   }, []);
 
+  const handleOnUpdate = () => {
+    onUpdate && onUpdate(rowsAlterations);
+    setRowsAlterations([]);
+  };
+
   const defaultColDef = useMemo(() => {
     return {
       width: 170,
@@ -529,6 +595,7 @@ const PVGridWebiny2 = ({
   return (
     <>
       <div
+        data-cy={cypressAtt}
         style={{ width: '100%', height: '100%', position: 'relative' }}
         data-testid={testId}
         className={'ag-theme-alpine' + ' ' + gridId}
@@ -550,6 +617,9 @@ const PVGridWebiny2 = ({
           setShowColumnSelector={setShowColumnSelector}
           deleteMode={deleteMode}
           onRefresh={onRefresh}
+          updateModeOnRows={updateModeOnRows}
+          changesMade={rowStateHasChanged}
+          onUpdate={handleOnUpdate}
           updateMode={updateMode}
           setDeleteMode={setDeleteMode}
           setUpdateMode={setUpdateMode}
@@ -560,7 +630,7 @@ const PVGridWebiny2 = ({
           gridOptions={gridOptions}
           // enableRangeSelection={true}
           // paginationAutoPageSize={true}
-
+          onCellClicked={(e) => onCellClicked && onCellClicked(e)}
           paginationPageSize={6}
           defaultColDef={defaultColDef}
           rowSelection={'multiple'}

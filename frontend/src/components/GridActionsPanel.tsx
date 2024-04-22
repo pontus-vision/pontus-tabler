@@ -4,6 +4,7 @@ import { BsFillTrash2Fill } from 'react-icons/bs';
 import { GrUpdate } from 'react-icons/gr';
 import { FaPlusCircle } from 'react-icons/fa';
 import { IRowNode } from 'ag-grid-community';
+import { IoIosSave } from 'react-icons/io';
 
 type Props = {
   deleteMode?: boolean;
@@ -28,8 +29,11 @@ type Props = {
     readAction?: boolean;
   };
   onDelete?: (arr: any[]) => void;
+  onUpdate?: () => void;
   entriesToBeDeleted: IRowNode<any>[];
   testId?: string;
+  changesMade?: boolean;
+  updateModeOnRows?: boolean;
 };
 
 const GridActionsPanel = ({
@@ -52,6 +56,9 @@ const GridActionsPanel = ({
   permissions,
   onDelete,
   testId,
+  changesMade,
+  updateModeOnRows,
+  onUpdate,
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
@@ -264,17 +271,28 @@ const GridActionsPanel = ({
         ))}
       {updateMode ||
         deleteMode ||
-        (permissions?.updateAction && (
-          <button
-            data-testid={`${testId}-update-mode`}
-            className="grid-actions-panel__update-btn"
-            onClick={() => {
-              setUpdateMode && setUpdateMode(!updateMode);
-            }}
-          >
-            Update Mode
-          </button>
-        ))}
+        (permissions?.updateAction &&
+          (changesMade ? (
+            <div
+              onClick={() => {
+                onUpdate && onUpdate();
+              }}
+            >
+              <IoIosSave style={{ fontSize: '1.3rem' }} />
+            </div>
+          ) : (
+            updateModeOnRows || (
+              <button
+                data-testid={`${testId}-update-mode`}
+                className="grid-actions-panel__update-btn"
+                onClick={() => {
+                  setUpdateMode && setUpdateMode(!updateMode);
+                }}
+              >
+                Update Mode
+              </button>
+            )
+          )))}
 
       {deleteMode && (
         <div
@@ -295,6 +313,7 @@ const GridActionsPanel = ({
             onClick={() => {
               if (entriesToBeDeleted && onDelete) {
                 onDelete(entriesToBeDeleted);
+                setDeleteMode && setDeleteMode(false);
               }
             }}
             style={{ fontSize: '1.8rem', color: '#b53737', cursor: 'pointer' }}
