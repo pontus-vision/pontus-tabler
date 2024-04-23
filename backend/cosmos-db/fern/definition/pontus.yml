@@ -1251,6 +1251,8 @@ service:
           properties: {}
           extends:
             - AuthUserRef
+      response:
+        type: AuthUserUpdateRes
       errors:
         - BadRequestError
         - NotFoundError
