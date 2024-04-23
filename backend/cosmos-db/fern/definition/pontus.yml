@@ -678,13 +678,13 @@ service:
             name: name
             folder: folder
             owner: owner
-            menuItem: 
-                id: 42332h4b23ijnkj2n34
-                path: /
-                children: 
-                  - id: 978hh3hujh3438hr29
-                    name: dashboard1
-                    kind: file
+            menuItem:
+              id: 42332h4b23ijnkj2n34
+              path: /
+              children:
+                - id: 978hh3hujh3438hr29
+                  name: dashboard1
+                  kind: file
           response:
             body:
               id: string
@@ -1184,28 +1184,33 @@ service:
       docs: Retrieve all users
       display-name: Get all users
       request:
-        body: ReadPaginationFilter
+        name: AuthUsersReadReq
+        body:
+          properties: {}
+          extends:
+            - ReadPaginationFilter
       response:
         docs: Successful response
-        type: InlineResponse2002
+        type: AuthUsersReadRes
       errors:
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              totalUsers: 0
-              users:
-                - userId: userId
-                  name: name
-                  authGroups:
-                    - authGroups
-                    - authGroups
-                - userId: userId
-                  name: name
-                  authGroups:
-                    - authGroups
-                    - authGroups
+        - NotFoundError
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         totalUsers: 0
+      #         users:
+      #           - userId: userId
+      #             name: name
+      #             authGroups:
+      #               - authGroups
+      #               - authGroups
+      #           - userId: userId
+      #             name: name
+      #             authGroups:
+      #               - authGroups
+      #               - authGroups
     authUserCreatePOST:
       path: /auth/user/create
       method: POST
@@ -1213,30 +1218,27 @@ service:
       docs: Create a new user with a name and associated groups
       display-name: Create a new user
       request:
-        name: NewUser
+        name: AuthUserCreateReq
         body:
           properties:
             name:
               docs: Name of the user
-              type: optional<string>
-            authGroups:
-              docs: IDs of the groups the user belongs to
-              type: optional<list<string>>
+              type: string
       response:
         docs: User created successfully
-        type: User
+        type: AuthUserCreateRes
       errors:
         - BadRequestError
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              userId: userId
-              name: name
-              authGroups:
-                - authGroups
-                - authGroups
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         userId: userId
+      #         name: name
+      #         authGroups:
+      #           - authGroups
+      #           - authGroups
     authUserUpdatePOST:
       path: /auth/user/update
       method: POST
@@ -1244,24 +1246,17 @@ service:
       docs: Update user details by ID
       display-name: Update user by ID
       request:
-        name: UpdateUser
+        name: AuthUserUpdateReq
         body:
-          properties:
-            userId:
-              docs: ID of the user to update
-              type: optional<string>
-            name:
-              docs: Updated name of the user
-              type: optional<string>
-            authGroups:
-              docs: Updated IDs of the groups the user belongs to
-              type: optional<list<string>>
+          properties: {}
+          extends:
+            - AuthUserRef
       errors:
         - BadRequestError
         - NotFoundError
         - InternalServerError
-      examples:
-        - request: {}
+      # examples:
+      #   - request: {}
     authUserDeletePOST:
       path: /auth/user/delete
       method: POST
@@ -1269,15 +1264,17 @@ service:
       docs: Delete a user by ID
       display-name: Delete a user
       request:
-        name: DeleteUser
+        name: AuthUserDeleteReq
         body:
           properties:
-            userId: optional<string>
+            id: string
+      response:
+        type: AuthUserDeleteRes
       errors:
         - NotFoundError
         - InternalServerError
-      examples:
-        - request: {}
+      # examples:
+      #   - request: {}
     authUserReadPOST:
       path: /auth/user/read
       method: POST
@@ -1285,24 +1282,24 @@ service:
       docs: Retrieve user by ID
       display-name: Get user by ID
       request:
-        name: UserReadBody
+        name: AuthUserReadReq
         body:
           properties:
-            userId: optional<string>
+            id: string
       response:
         docs: Successful response
-        type: User
+        type: AuthUserReadRes
       errors:
         - InternalServerError
-      examples:
-        - request: {}
-          response:
-            body:
-              userId: userId
-              name: name
-              authGroups:
-                - authGroups
-                - authGroups
+      # examples:
+      #   - request: {}
+      #     response:
+      #       body:
+      #         userId: userId
+      #         name: name
+      #         authGroups:
+      #           - authGroups
+      #           - authGroups
 types:
   TableEdgeReadRes:
     properties:
@@ -1629,18 +1626,36 @@ types:
         docs: Table columns associated with the table
         type: optional<list<TablesReadResTablesItem>>
   TableDeleteRes: string
-
-  User:
+  AuthUserCreateRes:
+    properties: {}
+    extends:
+      - AuthUserRef
+  AuthUserReadRes:
+    properties: {}
+    extends:
+      - AuthUserRef
+  AuthUserUpdateRes:
+    properties: {}
+    extends:
+      - AuthUserRef
+  AuthUsersReadRes:
     properties:
-      userId:
+      count: integer
+      authUsers: list<AuthUserRef>
+  AuthUserAndGroupsRef:
+    properties:
+      authGroups: list<AuthGroupRef>
+    extends:
+      - AuthUserRef
+  AuthUserRef:
+    properties:
+      id:
         docs: Unique identifier of the user
-        type: optional<string>
+        type: string
       name:
         docs: Name of the user
-        type: optional<string>
-      authGroups:
-        docs: IDs of the groups the user belongs to
-        type: optional<list<string>>
+        type: string
+  AuthUserDeleteRes: string
   DashboardGroupAuthCreateRes:
     properties:
       dashboardId: string
@@ -1664,10 +1679,6 @@ types:
     extends:
       - AuthGroupRef
   AuthGroupDeleteRes: string
-  InlineResponse2002:
-    properties:
-      totalUsers: optional<integer>
-      users: optional<list<User>>
   AgGridInputSearchCols:
     properties:
       id: optional<string>
