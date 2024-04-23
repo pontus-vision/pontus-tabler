@@ -50,9 +50,11 @@ export const createAuthGroup = async (
     const res = (await authGroupContainer.items.create({
       ...data,
       dashboards: [],
+      authGroups: [],
     })) as ItemResponse<AuthGroupRef>;
 
-    return res.resource;
+    const { name, id } = res.resource;
+    return { name, id };
   } catch (error) {
     if (error?.code === 409) {
       throw new ConflictEntityError(`id: ${data.id} already taken.`);
@@ -126,8 +128,13 @@ export const readAuthGroup = async (
     throw new NotFoundError(`No Auth Group found at id: ${data.id}`);
   }
 
+  const name = res.resource.name;
+  const id = res.resource.name;
 
-  return res.resource;
+  return {
+    name,
+    id,
+  };
 };
 
 export const deleteAuthGroup = async (
