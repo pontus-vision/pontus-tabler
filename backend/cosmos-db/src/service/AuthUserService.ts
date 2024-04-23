@@ -14,7 +14,7 @@ import {
 } from '../typescript/api';
 import { fetchContainer, fetchData } from '../cosmos-utils';
 import { ItemResponse } from '@azure/cosmos';
-import { NotFoundError } from '../generated/api';
+import { InternalServerError, NotFoundError } from '../generated/api';
 
 const AUTH_USERS = 'auth_users';
 const AUTH_GROUPS = 'auth_groups';
@@ -66,6 +66,10 @@ export const authUserRead = async (
     .item(userId, userId)
     .read()) as ItemResponse<AuthUserRef>;
 
+  if (res.statusCode === 404) {
+    throw new NotFoundError(`User not found at id: ${data.id}`);
+  }
+
   const { id, name } = res.resource;
 
   return {
@@ -107,9 +111,13 @@ export const authUserDelete = async (
 
   const authUserDoc = await authUserContainer.item(data.id, data.id);
 
-  const res2 = (await authUserDoc.read()) as ItemResponse<AuthUserAndGroupsRef>;
+  const res = (await authUserDoc.read()) as ItemResponse<AuthUserAndGroupsRef>;
 
-  for (const [index, authGroup] of res2.resource.authGroups.entries()) {
+  if (res.statusCode === 404) {
+    throw new NotFoundError(`No user found at id: ${data.id}`);
+  }
+
+  for (const [index, authGroup] of res.resource.authGroups.entries()) {
     try {
       const authGroupDoc = await authGroupContainer.item(
         authGroup.id,
@@ -125,10 +133,10 @@ export const authUserDelete = async (
     } catch (error) {}
   }
 
-  const res = await authUserDoc.delete();
+  const res2 = await authUserDoc.delete();
 
-  if (res.statusCode === 404) {
-    throw new NotFoundError(`No user found at id: ${data.id}`);
+  if (res2.statusCode !== 200) {
+    throw new InternalServerError(`Could not delete User at id '${data.id}'`);
   }
 
   return `User at id "${data.id}" deleted!`;
