@@ -1293,6 +1293,7 @@ service:
         type: AuthUserReadRes
       errors:
         - InternalServerError
+        - NotFoundError
       # examples:
       #   - request: {}
       #     response:
@@ -1302,6 +1303,79 @@ service:
       #         authGroups:
       #           - authGroups
       #           - authGroups
+    authUserGroupsCreatePost:
+      path: /auth/user/groups/create
+      method: POST
+      auth: true
+      docs: Associate user (using id) to group(s) (using a list of group ids)
+      display-name: Associate user to group(s)
+      request:
+        name: AuthUserGroupsCreateReq
+        body:
+          properties:
+            id: string
+            authGroupsIds: list<string>
+      response:
+        docs: Successful response
+        type: AuthUserGroupsCreateRes
+      errors:
+        - InternalServerError
+        - NotFoundError
+    authUserGroupsReadPost:
+      path: /auth/user/groups/read
+      method: POST
+      auth: true
+      docs: Read user group(s) by using its id
+      display-name: Read user group(s)
+      request:
+        name: AuthUserGroupsReadReq
+        body:
+          properties:
+            id: string
+          extends:
+            - ReadPaginationFilter
+      response:
+        docs: Successful response
+        type: AuthUserGroupsReadRes
+      errors:
+        - InternalServerError
+        - NotFoundError
+    authUserGroupsUpdatePost:
+      path: /auth/user/groups/update
+      method: POST
+      auth: true
+      docs: Update user group(s) by using its id
+      display-name: Update user group(s)
+      request:
+        name: AuthUserGroupsUpdateReq
+        body:
+          properties:
+            id: string
+            authGroups: list<AuthGroupRef>
+      response:
+        docs: Successful response
+        type: AuthUserGroupsUpdateRes
+      errors:
+        - InternalServerError
+        - NotFoundError
+    authUserGroupsDeletePost:
+      path: /auth/user/groups/delete
+      method: POST
+      auth: true
+      docs: Delete user group(s) by using its id
+      display-name: Delete user group(s)
+      request:
+        name: AuthUserGroupsDeleteReq
+        body:
+          properties:
+            id: string
+            authGroupsIds: list<string>
+      response:
+        docs: Successful response
+        type: AuthUserGroupsDeleteRes
+      errors:
+        - InternalServerError
+        - NotFoundError
 types:
   TableEdgeReadRes:
     properties:
@@ -1359,6 +1433,7 @@ types:
       kind: optional<string>
       path: optional<string>
       children: optional<list<MenuItemTreeRef>>
+
   AuthGroupCreateRes:
     properties: {}
     extends:
@@ -1389,13 +1464,16 @@ types:
         type: string
       name:
         docs: Name of the group
-        type: optional<string>
+        type: string
+      dashboards: optional<list<Dashboard>>
+      authUsers: optional<list<AuthUserRef>>
       parents:
         docs: Parent groups of the group (optional)
         type: optional<list<string>>
       symlinks:
         docs: Symlinks associated with the group (optional)
         type: optional<list<string>>
+  
   AgGridReadReq:
     properties:
       search: optional<AgGridInputSearch>
@@ -1649,6 +1727,23 @@ types:
       authGroups: list<AuthGroupRef>
     extends:
       - AuthUserRef
+  AuthUserGroupsCreateRes:
+    properties: {}
+    extends:
+      - AuthUserAndGroupsRef
+  AuthUserGroupRef:
+    properties:
+      name: string
+      id: string
+  AuthUserGroupsUpdateRes:
+    properties: {}
+    extends:
+      - AuthUserAndGroupsRef
+  AuthUserGroupsReadRes:
+    properties:
+      count: integer
+      authGroups: list<AuthGroupRef>
+  AuthUserGroupsDeleteRes: string
   AuthUserRef:
     properties:
       id:
