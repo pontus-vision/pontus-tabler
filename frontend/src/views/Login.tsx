@@ -19,7 +19,7 @@ const LoginPage = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log('click');
+
     login(role);
   };
 

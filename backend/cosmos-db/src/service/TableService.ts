@@ -119,8 +119,6 @@ export const deleteTable = async (data: TableDeleteReq) => {
 
     const res2 = (await fetchContainer(data.name)).read();
 
-    console.log({ res2StatusCode: (await res2).statusCode });
-
     if ((await res2).statusCode === 200) {
       const res3 = await deleteContainer(data.name);
     }

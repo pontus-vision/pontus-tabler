@@ -12,28 +12,110 @@ import {
   DashboardGroupAuthUpdateRes,
   DashboardGroupAuthDeleteReq,
   DashboardGroupAuthDeleteRes,
+  DashboardUpdateRes,
+  DashboardCreateRes,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
 import { NotFoundError } from '../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { CosmosClient } from '@azure/cosmos';
+import { initiateMenuContainer } from './MenuService';
 declare function getContext(): any;
 
 export const DASHBOARDS = 'dashboards';
 
-export const upsertDashboard = async (
-  data: DashboardCreateReq | DashboardUpdateReq,
-) => {
+export const createDashboard = async (
+  data: DashboardCreateReq,
+): Promise<DashboardCreateRes> => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
+  const menuContainer = await initiateMenuContainer();
 
-  const res = await dashboardContainer.items.upsert({
+  const res = await dashboardContainer.items.create({
     ...data,
     authGroups: [],
   });
+
+  const dashboardId = res.resource.id;
+
+  if (data?.menuItem) {
+    const menuItem = data.menuItem;
+    const child = menuItem.children[0];
+
+    const path = `${menuItem?.path}${menuItem?.path?.endsWith('/') ? '' : '/'}${
+      child.name
+    }`;
+
+    const res = await menuContainer.items.create({
+      ...child,
+      path: path,
+      id: dashboardId,
+    });
+
+    try {
+      const res2 = await menuContainer
+        .item(menuItem.id, menuItem.path)
+        .patch([{ op: 'add', path: `/children/-`, value: res.resource }]);
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(
+          `Parent folder at path '${menuItem.path}, at id '${menuItem.id} not found.'`,
+        );
+      }
+    }
+  }
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
   return rest;
+};
+
+export const updateDashboard = async (
+  data: DashboardUpdateReq,
+): Promise<DashboardUpdateRes> => {
+  const dashboardContainer = await fetchContainer(DASHBOARDS);
+
+  try {
+    const patchArr: PatchOperation[] = [];
+    for (const prop in data) {
+      switch (prop) {
+        case 'name':
+          patchArr.push({
+            op: 'replace',
+            path: '/name',
+            value: data[prop],
+          });
+          break;
+        case 'state':
+          patchArr.push({
+            op: 'replace',
+            path: '/state',
+            value: data[prop],
+          });
+          break;
+        case 'folder':
+          patchArr.push({
+            op: 'replace',
+            path: '/folder',
+            value: data[prop],
+          });
+        case 'owner':
+          patchArr.push({
+            op: 'replace',
+            path: '/owner',
+            value: data[prop],
+          });
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    const res3 = await dashboardContainer
+      .item(data.id, data.id)
+      .patch(patchArr);
+    return res3.resource;
+  } catch (error) {}
 };
 
 export const readDashboardById = async (dashboardId: string) => {
@@ -68,9 +150,15 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 export const readDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<DashboardsReadRes> => {
-  const res = await fetchData(body, DASHBOARDS);
+  try {
+    const res = await fetchData(body, DASHBOARDS);
 
-  return { dashboards: res.values, totalDashboards: res.count };
+    return { dashboards: res.values, totalDashboards: res.count };
+  } catch (error) {
+    if (error?.code === 404) {
+      throw new NotFoundError('No dashboards found');
+    }
+  }
 };
 
 export const createDashboardAuthGroup = async (
@@ -80,7 +168,6 @@ export const createDashboardAuthGroup = async (
   const dashboardId = data.dashboardId;
 
   const res = await dashboardContainer.item(dashboardId, dashboardId).read();
-  const authGroups = res.resource.authGroups;
 
   const patchArr: PatchOperation[] = [];
 
@@ -97,9 +184,9 @@ export const createDashboardAuthGroup = async (
     .patch(patchArr);
 
   return {
-    authGroups: res2.resource.authGroups,
-    dashboardId: res2.resource.id,
-    dashboardName: res2.resource.name,
+    authGroups: res2.resource?.authGroups,
+    dashboardId: res2.resource?.id,
+    dashboardName: res2.resource?.name,
   };
 };
 
@@ -123,8 +210,6 @@ export const readDashboardGroupAuth = async (
 
   const query = `SELECT c.name, p["groupName"], p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str2}`;
 
-  console.log({ countStr, query, str2 });
-
   const res = await dashboardContainer.items
     .query({
       query,
@@ -139,13 +224,16 @@ export const readDashboardGroupAuth = async (
     })
     .fetchAll();
 
-  if (res.resources.length === 0) {
+  if (res.resources?.length === 0) {
     throw new NotFoundError('No group auth found.');
   }
 
   return {
-    totalCount: res2.resources[0], // Use the count obtained from the stored procedure
-    authGroups: res?.resources,
+    totalCount: res2?.resources[0], // Use the count obtained from the stored procedure
+    authGroups: res.resources.map((el) => {
+      const { name, ...rest } = el;
+      return rest;
+    }),
     dashboardId: data?.dashboardId,
     dashboardName: res?.resources[0]?.name,
   };
@@ -164,7 +252,7 @@ export const deleteDashboardGroupAuth = async (
 
   const resource = res3.resource as DashboardGroupAuthReadRes;
 
-  const resAuthGroups = resource.authGroups;
+  const resAuthGroups = resource?.authGroups;
 
   const patchArr: PatchOperation[] = [];
 
@@ -182,9 +270,9 @@ export const deleteDashboardGroupAuth = async (
     .patch(patchArr);
 
   return {
-    authGroups: res.resource.authGroups,
-    dashboardId: res.resource.id,
-    dashboardName: res.resource.name,
+    authGroups: res.resource?.authGroups,
+    dashboardId: res.resource?.id,
+    dashboardName: res.resource?.name,
   };
 };
 
@@ -204,7 +292,7 @@ export const updateDashboardGroupAuth = async (
   while (data.authGroups.length > 0) {
     batchPatchArr.push(
       data.authGroups.splice(0, 10).map((authGroup) => {
-        const index = res.resource.authGroups.findIndex(
+        const index = res.resource?.authGroups.findIndex(
           (i) => i.groupId === authGroup.groupId,
         );
         if (index === -1) {
@@ -231,9 +319,9 @@ export const updateDashboardGroupAuth = async (
       const resource = res2.resource;
 
       return {
-        authGroups: resource.authGroups,
-        dashboardId: resource.id,
-        dashboardName: resource.name,
+        authGroups: resource?.authGroups,
+        dashboardId: resource?.id,
+        dashboardName: resource?.name,
       };
     }
   }

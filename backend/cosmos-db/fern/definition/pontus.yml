@@ -26,6 +26,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - NotFoundError
       examples:
         - request:
             path: /folder1/file1
@@ -648,6 +649,7 @@ service:
       response:
         type: TableDataDeleteRes
       errors:
+        - NotFoundError
         - BadRequestError
         - InternalServerError
       examples:
@@ -676,6 +678,13 @@ service:
             name: name
             folder: folder
             owner: owner
+            menuItem: 
+                id: 42332h4b23ijnkj2n34
+                path: /
+                children: 
+                  - id: 978hh3hujh3438hr29
+                    name: dashboard1
+                    kind: file
           response:
             body:
               id: string
@@ -693,6 +702,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - NotFoundError
       examples:
         - request:
             id: string
@@ -761,6 +771,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - NotFoundError
       # examples:
       #   - request:
       #       authGroups: {}
@@ -801,6 +812,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - NotFoundError
       # examples:
       #   - request:
       #       dashboardId: 'a271f651-e4aa-4c9b-a6a0-0ef10711fb48'
@@ -837,6 +849,7 @@ service:
         docs: Dashboard state created successfully
         type: DashboardGroupAuthUpdateRes
       errors:
+        - NotFoundError
         - BadRequestError
         - InternalServerError
       # examples:
@@ -890,6 +903,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - NotFoundError
       # examples:
       #   - request:
       #       dashboardId: dashboardId
@@ -938,6 +952,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+        - NotFoundError
       examples:
         - request: {}
           response:
@@ -964,6 +979,7 @@ service:
       errors:
         - BadRequestError
         - InternalServerError
+
       # examples:
       #   - request: {}
       #     response:
@@ -986,6 +1002,7 @@ service:
         type: AuthGroupReadRes
       errors:
         - InternalServerError
+        - NotFoundError
       # examples:
       #   - request: {}
       #     response:
@@ -1149,6 +1166,7 @@ service:
         type: AuthGroupsReadRes
       errors:
         - InternalServerError
+        - NotFoundError
       # examples:
       #   - request: {}
       #     response:
@@ -1545,7 +1563,12 @@ types:
       dashboardName: string
       dashboardId: string
       authGroups: list<DashboardAuthGroups>
-  DashboardCreateReq: DashboardRef
+  DashboardCreateReq:
+    properties:
+      id: optional<string>
+      menuItem: optional<MenuItemTreeRef>
+    extends:
+      - DashboardRef
   DashboardCreateRes:
     properties: {}
     extends:

@@ -150,9 +150,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           {openAdminOptions && (
             <ul>
               <li onClick={() => navigate('/dashboards')}>Dashboards</li>
-              <li onClick={() => navigate('/dashboard/group/auth/')}>
-                Auth Groups
-              </li>
+              <li onClick={() => navigate('/auth/groups')}>Auth Groups</li>
             </ul>
           )}
         </li>

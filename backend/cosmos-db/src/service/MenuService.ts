@@ -14,7 +14,7 @@ import {
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { BadRequestError, NotFoundError } from '../generated/api';
-import { upsertDashboard } from './DashboardService';
+import { updateDashboard, createDashboard } from './DashboardService';
 
 const MENU = 'menu';
 const DASHBOARDS = 'dashboards';
@@ -34,7 +34,7 @@ const initialDoc: MenuItemTreeRef = {
   children: [],
 };
 
-const initiateMenuContainer = async (): Promise<Container> => {
+export const initiateMenuContainer = async (): Promise<Container> => {
   const menuContainer = await fetchContainer(
     MENU,
     partitionKey,
@@ -42,12 +42,13 @@ const initiateMenuContainer = async (): Promise<Container> => {
     initialDoc,
   );
 
+
   return menuContainer;
 };
 
 export const createMenuItem = async (
   data: MenuCreateReq,
-): Promise<MenuCreateReq | any> => {
+): Promise<MenuCreateRes | any> => {
   const menuContainer = await initiateMenuContainer();
 
   const patchArr = [];
@@ -69,7 +70,7 @@ export const createMenuItem = async (
           path,
         });
 
-        const res2 = await upsertDashboard({
+        const res2 = await createDashboard({
           id: res.resource.id,
           name: child.name,
         });
@@ -183,7 +184,10 @@ export const readMenuItemByPath = async (
   };
   const menuContainer = await initiateMenuContainer();
 
-  const { resources } = await menuContainer.items.query(querySpec).fetchAll();
+  const { resources, requestCharge } = await menuContainer.items
+    .query(querySpec)
+    .fetchAll();
+
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {

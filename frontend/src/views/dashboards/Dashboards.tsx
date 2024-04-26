@@ -8,8 +8,10 @@ import {
   updateDashboardGroupAuth,
 } from '../../client';
 import {
+  AuthGroupRef,
   Dashboard,
   DashboardAuthGroups,
+  MenuItemTreeRef,
   ReadPaginationFilterFilters,
 } from '../../typescript/api';
 import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
@@ -25,9 +27,13 @@ import NotificationManager, {
 } from '../../components/NotificationManager';
 import { deepEqual } from '../../../utils';
 import { useNavigate } from 'react-router-dom';
+import FetchDashboards from '../dashboard/FetchDashboards';
+import AuthGroups from '../authGroups/AuthGroups';
+import MenuTree from '../../components/MenuTree';
 
 const Dashboards = () => {
-  const [dashboards, setDashboards] = useState<Dashboard[]>();
+  const [groupsChanged, setGroupsChanged] = useState<DashboardAuthGroups[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const [from, setFrom] = useState<number>();
   const [to, setTo] = useState<number>();
   const [filters, setFilters] = useState<{
@@ -35,67 +41,13 @@ const Dashboards = () => {
   }>({
     groupName: { filter: '', filterType: 'text', type: 'contains' },
   });
-  const [cols, setCols] = useState<ColDef[]>([
-    {
-      headerName: 'Name',
-      field: 'name',
-      filter: true,
-      sortable: true,
-    },
-    {
-      headerName: 'Owner',
-      field: 'owner',
-      filter: true,
-      sortable: true,
-    },
-    {
-      headerName: 'Id',
-      field: 'id',
-      filter: true,
-      sortable: true,
-    },
-    {
-      headerName: 'Folder',
-      field: 'folder',
-      filter: true,
-      sortable: true,
-    },
-  ]);
-
+    const [addGroup, setAddGroup] = useState(false);
+  const [newGroups, setNewGroups] = useState<AuthGroupRef[]>([]);
+  const notificationManagerRef = useRef<MessageRefs>();
   const [selectedDashboard, setSelectedDashboard] =
     useState<Dashboard | null>();
-  const [groupsChanged, setGroupsChanged] = useState<DashboardAuthGroups[]>([]);
-  const [groups, setGroups] = useState<any[]>([]);
-  const navigate = useNavigate();
-  const [totalGroups, setTotalGroups] = useState<number>();
-  const [totalDashboards, setTotalDashboards] = useState<number>();
-  const [addGroup, setAddGroup] = useState(false);
-  const [newGroups, setNewGroups] = useState<
-    { groupName: string; groupId: string }[]
-  >([]);
-  const notificationManagerRef = useRef<MessageRefs>();
-  const [isLoading1, setIsLoading1] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
-
-  const fetchDashboards = async () => {
-    setIsLoading1(true);
-    const res = await getAllDashboards({ from: 1, to: 100, filters: {} });
-
-    if (res?.status === 404) {
-      setDashboards([]);
-      setTotalDashboards(0);
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not fetch Dashboard(s)!',
-      );
-    }
-
-    setDashboards(res?.data.dashboards);
-    setTotalDashboards(res?.data.totalDashboards);
-    setIsLoading1(false);
-  };
+  const [totalGroups, setTotalGroups] = useState<number>();
 
   const fetchDashboardAuthGroups = async () => {
     if (!selectedDashboard?.id) return;
@@ -157,24 +109,15 @@ const Dashboards = () => {
     fetchDashboardAuthGroups();
   }, [selectedDashboard, filters, to, from]);
 
-  useEffect(() => {
-    fetchDashboards();
-  }, []);
-
-  const handleParamsChange = (params: IGetRowsParams) => {
-    setFilters(params.filterModel);
-    setFrom(params.startRow + 1);
-    setTo(params.endRow);
-  };
-
   const addDashboardAuthGroups = async () => {
     if (!selectedDashboard?.id) return;
+    console.log({ newGroups });
     const res = await createDashboardGroupAuth({
       dashboardId: selectedDashboard?.id,
       authGroups: newGroups.map((group) => {
         return {
-          groupName: group.groupName,
-          groupId: group.groupId,
+          groupName: group.name,
+          groupId: group.id,
           create: false,
           delete: false,
           read: false,
@@ -182,6 +125,8 @@ const Dashboards = () => {
         };
       }),
     });
+
+    console.log({ res });
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
@@ -225,22 +170,13 @@ const Dashboards = () => {
     }
   };
 
-  const handleAddition = () => {
-    navigate('/dashboard/create');
+  const handleParamsChange = (params: IGetRowsParams) => {
+    setFilters(params.filterModel);
+    setFrom(params.startRow + 1);
+    setTo(params.endRow);
   };
 
-  const handleDelete = (arr: Dashboard[]) => {
-    arr.forEach(async (item) => {
-      if (!item?.id) return;
-      const res = await deleteDashboard(item.id);
-      console.log(res);
-    });
-    fetchDashboards();
-  };
-
-  const handleDashboardUpdate = (row: Dashboard) => {
-    navigate(`/dashboard/update/${row?.id}`);
-  };
+  
 
   return (
     <div className={styles.dashboardAuthGroupsView}>
@@ -250,28 +186,22 @@ const Dashboards = () => {
           onClick={() => setAddGroup(false)}
         ></div>
       )}
+      
 
       <div className={styles.dashboardAuthGroupsViewContainer}>
         {/* <div></div> */}
-        <PVGridWebiny2
-          cols={cols}
-          rows={dashboards}
-          isLoading={isLoading2}
-          add={() => handleAddition()}
-          permissions={{
-            createAction: true,
-            updateAction: true,
-            deleteAction: true,
-          }}
-          totalCount={totalDashboards}
-          onUpdate={handleDashboardUpdate}
-          onRefresh={() => fetchDashboards()}
-          onDelete={handleDelete}
+        <FetchDashboards
           onRowClicked={(e) => {
             setSelectedDashboard(null);
             setTimeout(() => {
               setSelectedDashboard(e.data);
             }, 1);
+          }}
+          actions={{
+            createAction: true,
+            deleteAction: true,
+            readAction: true,
+            updateAction: true,
           }}
         />
         {selectedDashboard?.id && (
@@ -282,9 +212,15 @@ const Dashboards = () => {
               onRowsStateChange={(e) => {
                 setGroupsChanged(e as DashboardAuthGroups[]);
               }}
+              updateModeOnRows={true}
+              onUpdate={updateDashboardAuthGroup}
               onRefresh={() => fetchDashboardAuthGroups()}
               onDelete={(e) => deleteDashboardsAuthGroup(e)}
-              permissions={{ createAction: true, deleteAction: true }}
+              permissions={{
+                updateAction: true,
+                createAction: true,
+                deleteAction: true,
+              }}
               onParamsChange={handleParamsChange}
               isLoading={isLoading2}
               cols={[
@@ -329,49 +265,23 @@ const Dashboards = () => {
                 },
               ]}
               rows={groups}
-              onRowsSelected={(e) => console.log(e)}
               totalCount={totalGroups}
             />
-            {groupsChanged.length > 0 && (
-              <button
-                onClick={() => updateDashboardAuthGroup()}
-                className={styles.updateBtn}
-              >
-                Update AuthGroup(s)
-              </button>
-            )}
           </div>
         )}
 
         {addGroup && (
           <>
             <div className={styles.selectGroup}>
-              <PVGridWebiny2
-                onParamsChange={handleParamsChange}
-                cols={[
-                  {
-                    headerName: 'Name',
-                    field: 'groupName',
-                    sortable: true,
-                    filter: true,
-                  },
-                  {
-                    headerName: 'Group Id',
-                    field: 'groupId',
-                    sortable: true,
-                    filter: true,
-                  },
-                ]}
-                // onRefresh={()=>}
+              <AuthGroups
                 onRowsSelected={(e) => setNewGroups(e.map((el) => el.data))}
                 selection={true}
-                rows={[
-                  { groupName: 'foo', groupId: 'bar' },
-                  { groupName: 'foo2', groupId: 'bar2' },
-                ].filter(
-                  (row) => !groups.some((row2) => row.groupId === row2.groupId),
-                )}
-                totalCount={2}
+                permissions={{
+                  updateAction: false,
+                  createAction: false,
+                  deleteAction: false,
+                  readAction: true,
+                }}
               />
               <button onClick={() => addDashboardAuthGroups()}>
                 Add Group(s)
