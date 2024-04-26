@@ -1,9 +1,18 @@
 import {
+  AuthGroupRef,
   AuthUserAndGroupsRef,
   AuthUserCreateReq,
   AuthUserCreateRes,
   AuthUserDeleteReq,
   AuthUserDeleteRes,
+  AuthUserGroupsCreateReq,
+  AuthUserGroupsCreateRes,
+  AuthUserGroupsDeleteReq,
+  AuthUserGroupsDeleteRes,
+  AuthUserGroupsReadReq,
+  AuthUserGroupsReadRes,
+  AuthUserGroupsUpdateReq,
+  AuthUserGroupsUpdateRes,
   AuthUserReadReq,
   AuthUserReadRes,
   AuthUserRef,
@@ -12,33 +21,13 @@ import {
   AuthUsersReadReq,
   AuthUsersReadRes,
 } from '../typescript/api';
-import { fetchContainer, fetchData } from '../cosmos-utils';
-import { ItemResponse } from '@azure/cosmos';
+import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
+import { Item, ItemResponse, PatchOperation } from '@azure/cosmos';
 import { InternalServerError, NotFoundError } from '../generated/api';
+import { patch } from '@azure/functions/types/app';
 
-const AUTH_USERS = 'auth_users';
-const AUTH_GROUPS = 'auth_groups';
-
-// export const authenticateToken = (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction,
-// ) => {
-//   const authHeader = req.headers['authorization'];
-//   const token = authHeader && authHeader.split(' ')[1];
-
-//   if (!token) {
-//     return res.sendStatus(401); // Unauthorized
-//   }
-
-//   try {
-//     const decoded = verifyToken(token);
-//     req.user = decoded; // Attach the decoded token to the request object
-//     next();
-//   } catch (error) {
-//     return res.sendStatus(403); // Forbidden
-//   }
-// };
+export const AUTH_USERS = 'auth_users';
+export const AUTH_GROUPS = 'auth_groups';
 
 export const authUserCreate = async (
   data: AuthUserCreateReq,
@@ -135,7 +124,7 @@ export const authUserDelete = async (
 
   const res2 = await authUserDoc.delete();
 
-  if (res2.statusCode !== 200) {
+  if (res2.statusCode !== 204) {
     throw new InternalServerError(`Could not delete User at id '${data.id}'`);
   }
 
@@ -155,6 +144,166 @@ export const authUsersRead = async (
   } catch (error) {
     if (error?.code === 404) {
       throw new NotFoundError(`Auth Group not found.`);
+    }
+  }
+};
+
+export const authUserGroupsCreate = async (
+  data: AuthUserGroupsCreateReq,
+): Promise<AuthUserGroupsCreateRes> => {
+  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+
+  const authUserDoc = await authUserContainer.item(data.id, data.id);
+
+  const authUser = (await authUserDoc.read()) as ItemResponse<AuthUserRef>;
+
+  if (authUser.statusCode === 404) {
+    throw new NotFoundError(`No Auth User found at id: ${data.id}`);
+  }
+
+  const patchArr: PatchOperation[] = [];
+
+  for (const [index, groupId] of data.authGroupsIds.entries()) {
+    try {
+      const authGroupRes = (await authGroupContainer
+        .item(groupId, groupId)
+        .patch([
+          {
+            op: 'add',
+            path: '/authUsers/-',
+            value: {
+              id: authUser.resource.id,
+              name: authUser.resource.name,
+            },
+          },
+        ])) as ItemResponse<AuthGroupRef>;
+
+      patchArr.push({
+        op: 'add',
+        path: '/authGroups/-',
+        value: {
+          name: authGroupRes.resource.name,
+          id: authGroupRes.resource.id,
+        },
+      });
+
+      if (index === data.authGroupsIds.length - 1) {
+        const res = (await authUserDoc.patch(
+          patchArr,
+        )) as ItemResponse<AuthUserAndGroupsRef>;
+
+        return {
+          authGroups: res.resource?.authGroups,
+          id: authUser.resource?.id,
+          name: authUser.resource?.name,
+        };
+      }
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(`No Auth Group found at id: ${groupId}`);
+      }
+    }
+  }
+};
+
+export const authUserGroupsRead = async (
+  data: AuthUserGroupsReadReq,
+): Promise<AuthUserGroupsReadRes> => {
+  const authUserContainer = await fetchContainer(AUTH_USERS);
+
+  const userId = data.id;
+
+  const str = filterToQuery(
+    { filters: data.filters },
+    'p',
+    `c.id = "${userId}"`,
+  );
+  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.authGroups ${str}`;
+
+  const str2 = filterToQuery(
+    { filters: data.filters, from: data.from, to: data.to },
+    'p',
+    `c["id"] = "${userId}"`,
+  );
+
+  const query = `SELECT p["name"], p["id"] FROM c JOIN p IN c["authGroups"] ${str2}`;
+
+  const res = await authUserContainer.items
+    .query({
+      query,
+      parameters: [],
+    })
+    .fetchAll();
+
+  const res2 = await authUserContainer.items
+    .query({
+      query: countStr,
+      parameters: [],
+    })
+    .fetchAll();
+
+  if (res.resources.length === 0) {
+    throw new NotFoundError('No group auth found.');
+  }
+
+  return {
+    count: res2.resources[0],
+    authGroups: res.resources,
+  };
+};
+
+export const authUserGroupsDelete = async (
+  data: AuthUserGroupsDeleteReq,
+): Promise<AuthUserGroupsDeleteRes> => {
+  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+
+  const authUserDoc = await authUserContainer.item(data.id, data.id);
+
+  const authUser =
+    (await authUserDoc.read()) as ItemResponse<AuthUserAndGroupsRef>;
+  if (authUser.statusCode === 404) {
+    throw new NotFoundError(`No user found at id "${data.id}"`);
+  }
+
+  const patchArr: PatchOperation[] = [];
+
+  for (const [index, groupId] of data.authGroupsIds.entries()) {
+    const authGroup = await authGroupContainer.item(groupId, groupId).read();
+
+    if (authGroup.statusCode === 404) {
+      throw new NotFoundError(`No Auth Group found at id: ${groupId}`);
+    }
+
+    const index = authGroup.resource.authUsers.findIndex(
+      (el) => el.id === data.id,
+    );
+
+    const authGroupRes = (await authGroupContainer
+      .item(groupId, groupId)
+      .patch([
+        {
+          op: 'remove',
+          path: `/authUsers/${index}`,
+        },
+      ])) as ItemResponse<AuthGroupRef>;
+
+    const indexAuthUserDoc = authUser.resource.authGroups.findIndex(
+      (el) => el.id === groupId,
+    );
+
+    patchArr.push({
+      op: 'remove',
+      path: `/authGroups/${indexAuthUserDoc}`,
+    });
+
+    if (index === data.authGroupsIds.length - 1) {
+      const res = (await authUserDoc.patch(
+        patchArr,
+      )) as ItemResponse<AuthUserAndGroupsRef>;
+
+      return `Auth Groups deleted from user (id: '${data.id}')`;
     }
   }
 };
