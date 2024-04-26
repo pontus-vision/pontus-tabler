@@ -128,6 +128,7 @@ export const readAuthGroup = async (
     throw new NotFoundError(`No Auth Group found at id: ${data.id}`);
   }
 
+
   return res.resource;
 };
 
@@ -241,6 +242,57 @@ export const createAuthGroupDashboards = async (
     }
   }
 };
+
+export const readAuthGroupDashboards = async (
+  data: AuthGroupDashboardsReadReq,
+): Promise<AuthGroupDashboardsReadRes> => {
+  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+
+  const authGroupId = data.id;
+
+  const str = filterToQuery(
+    { filters: data.filters },
+    'p',
+    `c.id = "${authGroupId}"`,
+  );
+  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.dashboards ${str}`;
+
+  const str2 = filterToQuery(
+    { filters: data.filters, from: data.from, to: data.to },
+    'p',
+    `c["id"] = "${authGroupId}"`,
+  );
+
+  const response = await authGroupContainer
+    .item(authGroupId, authGroupId)
+    .read();
+
+  const query = `SELECT  p["name"], p["id"], p["create"], p["read"], p["update"], p["delete"] FROM c JOIN p IN c["dashboards"] ${str2}`;
+
+  const res = await authGroupContainer.items
+    .query({
+      query,
+      parameters: [],
+    })
+    .fetchAll();
+
+  const res2 = await authGroupContainer.items
+    .query({
+      query: countStr,
+      parameters: [],
+    })
+    .fetchAll();
+
+  if (res.resources.length === 0) {
+    throw new NotFoundError('No group auth found.');
+  }
+
+  return {
+    count: res2.resources[0],
+    dashboards: res.resources,
+  };
+};
+
 export const updateAuthGroupDashboards = async (
   data: AuthGroupDashboardUpdateReq,
 ): Promise<AuthGroupDashboardUpdateRes> => {
@@ -315,56 +367,6 @@ export const updateAuthGroupDashboards = async (
       };
     }
   }
-};
-
-export const readAuthGroupDashboards = async (
-  data: AuthGroupDashboardsReadReq,
-): Promise<AuthGroupDashboardsReadRes> => {
-  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
-
-  const authGroupId = data.id;
-
-  const str = filterToQuery(
-    { filters: data.filters },
-    'p',
-    `c.id = "${authGroupId}"`,
-  );
-  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.dashboards ${str}`;
-
-  const str2 = filterToQuery(
-    { filters: data.filters, from: data.from, to: data.to },
-    'p',
-    `c["id"] = "${authGroupId}"`,
-  );
-
-  const response = await authGroupContainer
-    .item(authGroupId, authGroupId)
-    .read();
-
-  const query = `SELECT  p["name"], p["id"], p["create"], p["read"], p["update"], p["delete"] FROM c JOIN p IN c["dashboards"] ${str2}`;
-
-  const res = await authGroupContainer.items
-    .query({
-      query,
-      parameters: [],
-    })
-    .fetchAll();
-
-  const res2 = await authGroupContainer.items
-    .query({
-      query: countStr,
-      parameters: [],
-    })
-    .fetchAll();
-
-  if (res.resources.length === 0) {
-    throw new NotFoundError('No group auth found.');
-  }
-
-  return {
-    count: res2.resources[0],
-    dashboards: res.resources,
-  };
 };
 
 export const deleteAuthGroupDashboards = async (

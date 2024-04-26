@@ -678,13 +678,13 @@ service:
             name: name
             folder: folder
             owner: owner
-            menuItem:
-              id: 42332h4b23ijnkj2n34
-              path: /
-              children:
-                - id: 978hh3hujh3438hr29
-                  name: dashboard1
-                  kind: file
+            menuItem: 
+                id: 42332h4b23ijnkj2n34
+                path: /
+                children: 
+                  - id: 978hh3hujh3438hr29
+                    name: dashboard1
+                    kind: file
           response:
             body:
               id: string
