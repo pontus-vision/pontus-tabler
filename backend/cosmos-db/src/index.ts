@@ -50,13 +50,16 @@ import {
   deleteAuthGroupDashboards,
   readAuthGroup,
   readAuthGroupDashboards,
+  updateAuthGroupDashboards,
   readAuthGroups,
   updateAuthGroup,
-  updateAuthGroupDashboards,
 } from './service/AuthGroupService';
 import {
   authUserCreate,
   authUserDelete,
+  authUserGroupsCreate,
+  authUserGroupsDelete,
+  authUserGroupsRead,
   authUserRead,
   authUserUpdate,
   authUsersRead,
@@ -113,6 +116,22 @@ export default new PontusService({
 
     res.send(response);
   },
+  authUserGroupsCreatePost: async (req, res) => {
+    const response = await authUserGroupsCreate(req.body);
+
+    res.send(response);
+  },
+  authUserGroupsDeletePost: async (req, res) => {
+    const response = await authUserGroupsDelete(req.body);
+
+    res.send(response);
+  },
+  authUserGroupsReadPost: async (req, res) => {
+    const response = await authUserGroupsRead(req.body);
+
+    res.send(response);
+  },
+  authUserGroupsUpdatePost: async (req, res) => {},
   dashboardGroupAuthCreatePost: async (req, res) => {
     const response = await createDashboardAuthGroup(req.body);
 
