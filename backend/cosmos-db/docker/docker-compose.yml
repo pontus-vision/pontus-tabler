@@ -1,15 +1,9 @@
-version: "3"
+version: '3'
 services:
   cosmosdb:
-    #image: "tensorflow/tensorflow:latest-gpu"
-    image: "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest"
-    #command: bash
+    image: 'mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest'
     environment:
-      SA_PASSWORD: "Your_password123"
-      #ACCEPT_EULA: "Y"
-      #MSSQL_PID: "Developer"
-    #volumes:
-      #- dbbackup:/dbbackup
+      SA_PASSWORD: 'Your_password123'
     cap_add:
       - SYS_PTRACE
     ports:
@@ -18,12 +12,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 2000M
+          memory: 8000M # Increase memory limit to 4GB (4000 megabytes)
         reservations:
           cpus: '1'
-          memory: 1000M
-
-
-#volumes:
-  #dbbackup:
-    #driver: local
+          memory: 4000M # Increase memory reservation to 2GB (2000 megabytes)

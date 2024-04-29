@@ -50,10 +50,20 @@ import {
   deleteAuthGroupDashboards,
   readAuthGroup,
   readAuthGroupDashboards,
+  updateAuthGroupDashboards,
   readAuthGroups,
   updateAuthGroup,
-  updateAuthGroupDashboards,
 } from './service/AuthGroupService';
+import {
+  authUserCreate,
+  authUserDelete,
+  authUserGroupsCreate,
+  authUserGroupsDelete,
+  authUserGroupsRead,
+  authUserRead,
+  authUserUpdate,
+  authUsersRead,
+} from './service/AuthUserService';
 
 export default new PontusService({
   authGroupCreatePost: async (req, res) => {
@@ -81,11 +91,47 @@ export default new PontusService({
 
     res.send(response);
   },
-  authUserCreatePost(req, res) {},
-  authUserDeletePost(req, res) {},
-  authUserReadPost(req, res) {},
-  authUsersReadPost(req, res) {},
-  authUserUpdatePost(req, res) {},
+  authUserCreatePost: async (req, res) => {
+    const response = await authUserCreate(req.body);
+
+    res.send(response);
+  },
+  authUserDeletePost: async (req, res) => {
+    const response = await authUserDelete(req.body);
+
+    res.send(response);
+  },
+  authUserReadPost: async (req, res) => {
+    const response = await authUserRead(req.body);
+
+    res.send(response);
+  },
+  authUsersReadPost: async (req, res) => {
+    const response = await authUsersRead(req.body);
+
+    res.send(response);
+  },
+  authUserUpdatePost: async (req, res) => {
+    const response = await authUserUpdate(req.body);
+
+    res.send(response);
+  },
+  authUserGroupsCreatePost: async (req, res) => {
+    const response = await authUserGroupsCreate(req.body);
+
+    res.send(response);
+  },
+  authUserGroupsDeletePost: async (req, res) => {
+    const response = await authUserGroupsDelete(req.body);
+
+    res.send(response);
+  },
+  authUserGroupsReadPost: async (req, res) => {
+    const response = await authUserGroupsRead(req.body);
+
+    res.send(response);
+  },
+  authUserGroupsUpdatePost: async (req, res) => {},
   dashboardGroupAuthCreatePost: async (req, res) => {
     const response = await createDashboardAuthGroup(req.body);
 
