@@ -678,13 +678,13 @@ service:
             name: name
             folder: folder
             owner: owner
-            menuItem: 
-                id: 42332h4b23ijnkj2n34
-                path: /
-                children: 
-                  - id: 978hh3hujh3438hr29
-                    name: dashboard1
-                    kind: file
+            menuItem:
+              id: 42332h4b23ijnkj2n34
+              path: /
+              children:
+                - id: 978hh3hujh3438hr29
+                  name: dashboard1
+                  kind: file
           response:
             body:
               id: string
@@ -763,7 +763,7 @@ service:
         name: DashboardGroupAuthCreateReq
         body:
           properties:
-            dashboardId: string
+            id: string
             authGroups: list<DashboardAuthGroups>
       response:
         docs: Dashboard state created successfully
@@ -777,8 +777,8 @@ service:
       #       authGroups: {}
       #     response:
       #       body:
-      #         dashboardId: dashboardId
-      #         dashboardName: dashboardName
+      #         id: id
+      #         name: name
       #         authGroups:
       #           create:
       #             - create
@@ -802,7 +802,7 @@ service:
         name: DashboardGroupAuthReadReq
         body:
           properties:
-            dashboardId: string
+            id: string
           extends:
             - ReadPaginationFilter
 
@@ -815,24 +815,24 @@ service:
         - NotFoundError
       # examples:
       #   - request:
-      #       dashboardId: 'a271f651-e4aa-4c9b-a6a0-0ef10711fb48'
+      #       id: 'a271f651-e4aa-4c9b-a6a0-0ef10711fb48'
       #     response:
       #       body:
-      #         dashboardId: dashboardId
-      #         dashboardName: dashboardName
+      #         id: id
+      #         name: name
       #         authGroups:
       #           create:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           read:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           update:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           delete:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthUpdatePOST:
       path: /dashboard/group/auth/update
       method: POST
@@ -843,7 +843,7 @@ service:
         name: DashboardGroupAuthUpdateReq
         body:
           properties:
-            dashboardId: string
+            id: string
             authGroups: list<DashboardAuthGroups>
       response:
         docs: Dashboard state created successfully
@@ -854,37 +854,37 @@ service:
         - InternalServerError
       # examples:
       #   - request:
-      #       dashboardId: dashboardId
+      #       id: id
       #       authGroups:
       #         create:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         read:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         update:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         delete:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #     response:
       #       body:
-      #         dashboardId: dashboardId
-      #         dashboardName: dashboardName
+      #         id: id
+      #         name: name
       #         authGroups:
       #           create:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           read:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           update:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           delete:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardGroupAuthDeletePOST:
       path: /dashboard/group/auth/delete
       method: POST
@@ -906,38 +906,38 @@ service:
         - NotFoundError
       # examples:
       #   - request:
-      #       dashboardId: dashboardId
-      #       dashboardName: string
+      #       id: id
+      #       name: string
       #       authGroups:
       #         create:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         read:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         update:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #         delete:
-      #           - groupName: Mapeamento de Processos
-      #             groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #           - name: Mapeamento de Processos
+      #             id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #     response:
       #       body:
-      #         dashboardId: dashboardId
-      #         groupName: Mapeamento de Processos
+      #         id: id
+      #         name: Mapeamento de Processos
       #         groups:
       #           create:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           read:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           update:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
       #           delete:
-      #             - groupName: Mapeamento de Processos
-      #               groupId: ccad492e-b22c-44c9-9dff-0a9e45d7a896
+      #             - name: Mapeamento de Processos
+      #               id: ccad492e-b22c-44c9-9dff-0a9e45d7a896
     dashboardsReadPOST:
       path: /dashboards/read
       method: POST
@@ -984,7 +984,7 @@ service:
       #   - request: {}
       #     response:
       #       body:
-      #         groupId: groupId
+      #         id: id
       #         name: name
     authGroupReadPOST:
       path: /auth/group/read
@@ -1007,7 +1007,7 @@ service:
       #   - request: {}
       #     response:
       #       body:
-      #         groupId: groupId
+      #         id: id
       #         name: name
     authGroupUpdatePOST:
       path: /auth/group/update
@@ -1101,7 +1101,6 @@ service:
       #       id: foo
       #     response:
       #       body: 'AuthGroup deleted.'
-
     authGroupDashboardUpdatePOST:
       path: /auth/group/dashboard/update
       method: POST
@@ -1146,7 +1145,96 @@ service:
       #       id: foo
       #     response:
       #       body: 'AuthGroup deleted.'
-
+    authGroupUsersCreatePOST:
+      path: /auth/group/users/create
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupUsersCreateReq
+        body:
+          properties:
+            id: string
+            name: string
+            authUsers: list<AuthUserRef>
+      response:
+        type: AuthGroupUsersCreateRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
+    authGroupUsersReadPOST:
+      path: /auth/group/users/read
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupUsersReadReq
+        body:
+          properties:
+            id: string
+          extends:
+            - ReadPaginationFilter
+      response:
+        type: AuthGroupUsersReadRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
+    authGroupUsersUpdatePOST:
+      path: /auth/group/users/update
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupUsersUpdateReq
+        body:
+          properties:
+            id: string
+            authUsers: list<AuthUserRef>
+      response:
+        type: AuthGroupUsersUpdateRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
+    authGroupUsersDeletePOST:
+      path: /auth/group/users/delete
+      method: POST
+      auth: true
+      docs: Delete a group by ID
+      display-name: Delete a group
+      request:
+        name: AuthGroupUsersDeleteReq
+        body:
+          properties:
+            id: string
+            authUsersIds: list<string>
+      response:
+        type: AuthGroupUsersDeleteRes
+      errors:
+        - NotFoundError
+        - InternalServerError
+      # examples:
+      #   - request:
+      #       id: foo
+      #     response:
+      #       body: 'AuthGroup deleted.'
     authGroupsReadPOST:
       path: /auth/groups/read
       method: POST
@@ -1173,9 +1261,9 @@ service:
       #       body:
       #         totalGroups: 0
       #         authGroups:
-      #           - groupId: groupId
+      #           - id: id
       #             name: name
-      #           - groupId: groupId
+      #           - id: id
       #             name: name
     authUsersReadPOST:
       path: /auth/users/read
@@ -1433,7 +1521,25 @@ types:
       kind: optional<string>
       path: optional<string>
       children: optional<list<MenuItemTreeRef>>
-
+  AuthGroupUsersCreateRes:
+    properties:
+      id: string
+    extends:
+      - AuthGroupUsersRef
+  AuthGroupUsersReadRes:
+    properties:
+      authUsers: list<AuthUserRef>
+      count: integer
+  AuthGroupUsersUpdateRes:
+    properties:
+      id: string
+    extends:
+      - AuthGroupUsersRef
+  AuthGroupUsersDeleteRes: string
+  AuthGroupUsersRef:
+    properties:
+      name: string
+      authUsers: list<AuthUserRef>
   AuthGroupCreateRes:
     properties: {}
     extends:
@@ -1473,7 +1579,7 @@ types:
       symlinks:
         docs: Symlinks associated with the group (optional)
         type: optional<list<string>>
-  
+
   AgGridReadReq:
     properties:
       search: optional<AgGridInputSearch>
@@ -1631,14 +1737,14 @@ types:
       - BaseModelRef
   DashboardGroupAuthReadRes:
     properties:
-      dashboardName: string
-      dashboardId: string
+      name: string
+      id: string
       authGroups: list<DashboardAuthGroups>
       totalCount: integer
   DashboardGroupAuthDeleteRes:
     properties:
-      dashboardName: string
-      dashboardId: string
+      name: string
+      id: string
       authGroups: list<DashboardAuthGroups>
   DashboardCreateReq:
     properties:
@@ -1657,10 +1763,9 @@ types:
       - BaseModelRef
       - DashboardRef
   DashboardDeleteReq: BaseModelRef
-
   DashboardGroupAuthDeleteReqBody:
     properties:
-      dashboardId: string
+      id: string
       authGroups: list<string>
   AuthGroupIds:
     properties:
@@ -1670,16 +1775,16 @@ types:
       delete: optional<list<string>>
   DashboardAuthGroups:
     properties:
-      groupId: string
-      groupName: string
+      id: string
+      name: string
       create: boolean
       read: boolean
       update: boolean
       delete: boolean
   DashboardAuthGroupsRef:
     properties:
-      groupId: string
-      groupName: string
+      id: string
+      name: string
 
   TableReadReq:
     extends:
@@ -1755,13 +1860,13 @@ types:
   AuthUserDeleteRes: string
   DashboardGroupAuthCreateRes:
     properties:
-      dashboardId: string
-      dashboardName: string
+      id: string
+      name: string
       authGroups: list<DashboardAuthGroups>
   DashboardGroupAuthUpdateRes:
     properties:
-      dashboardName: string
-      dashboardId: string
+      name: string
+      id: string
       authGroups: list<DashboardAuthGroups>
   DashboardsReadRes:
     properties:
