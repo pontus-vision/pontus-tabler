@@ -50,9 +50,11 @@ export const createAuthGroup = async (
     const res = (await authGroupContainer.items.create({
       ...data,
       dashboards: [],
+      authUsers: [],
     })) as ItemResponse<AuthGroupRef>;
 
-    return res.resource;
+    const { name, id } = res.resource;
+    return { name, id };
   } catch (error) {
     if (error?.code === 409) {
       throw new ConflictEntityError(`id: ${data.id} already taken.`);
@@ -265,21 +267,11 @@ export const readAuthGroupDashboards = async (
     .item(authGroupId, authGroupId)
     .read();
 
-  const json = JSON.stringify(response.resource);
-
   const query = `SELECT  p["name"], p["id"], p["create"], p["read"], p["update"], p["delete"] FROM c JOIN p IN c["dashboards"] ${str2}`;
 
   const res = await authGroupContainer.items
     .query({
       query,
-      parameters: [],
-    })
-    .fetchAll();
-
-  const res3 = await authGroupContainer.items
-    .query({
-      query:
-        'SELECT p["name"],p["id"], p["create"], p["read"], p["update"], p["delete"] FROM c JOIN p IN c["dashboards"]',
       parameters: [],
     })
     .fetchAll();

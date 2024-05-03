@@ -166,8 +166,12 @@ describe('dashboardCreatePOST', () => {
       readGroupsBody,
     )) as AxiosResponse<AuthGroupsReadRes>;
 
-    expect(readGroups.data.authGroups).toContainEqual(authGroupCreateRes.data);
-    expect(readGroups.data.authGroups).toContainEqual(authGroupCreateRes2.data);
+    expect(readGroups.data.authGroups[0]).toMatchObject(
+      authGroupCreateRes.data,
+    );
+    expect(readGroups.data.authGroups[1]).toMatchObject(
+      authGroupCreateRes2.data,
+    );
   });
   it('should do the sad path', async () => {
     const readBody: AuthGroupReadReq = {
@@ -308,7 +312,7 @@ describe('dashboardCreatePOST', () => {
       id: authGroupId,
       name: authGroupCreateRes.data.name,
     };
-    
+
     const groupDashCreateRes = (await post(
       'auth/group/dashboard/create',
       createBody,
@@ -468,6 +472,7 @@ describe('dashboardCreatePOST', () => {
       groupDashUpdateRes.data.dashboards,
     );
   });
+
   it('should update a authGroup and its reference in a dashboard', async () => {
     const body: DashboardCreateReq = {
       owner: 'Joe',
