@@ -13,6 +13,18 @@
   z-index: 3;
   top: 3rem;
 
+  &__admin-options {
+    li {
+      cursor: pointer;
+    }
+    button {
+      &:hover {
+        background-color: #66bccf63;
+      }
+      border: none;
+    }
+  }
+
   .tree-view {
     overflow-y: auto;
     width: 80%;
