@@ -220,7 +220,7 @@ describe('dashboardCreatePOST', () => {
 
     expect(readGroups.status).toBe(404);
   });
-  it.only('should create authgroup subdocuments', async () => {
+  it('should create authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
       name: 'user1',
     };

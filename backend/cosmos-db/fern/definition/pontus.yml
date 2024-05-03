@@ -1579,7 +1579,6 @@ types:
       symlinks:
         docs: Symlinks associated with the group (optional)
         type: optional<list<string>>
-
   AgGridReadReq:
     properties:
       search: optional<AgGridInputSearch>
