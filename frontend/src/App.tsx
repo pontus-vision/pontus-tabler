@@ -25,7 +25,7 @@ import TableDataReadView from './views/tables/table-data/TableDataRead';
 import EdgesView from './views/EdgesView';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import DashboardAuthGroupsView from './views/DashboardAuthGroupsView';
+import DashboardAuthGroupsView from './views/AuthGroupsView';
 import AuthUsersView from './views/AuthUsersView';
 
 function App() {
