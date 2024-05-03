@@ -29,6 +29,7 @@ type Props = {
     deleteAction?: boolean;
     readAction?: boolean;
   };
+  groupsToFilterOutById?: AuthGroupRef[];
   onRowsSelected?: (e: IRowNode<any>[]) => void;
   selection?: boolean;
   selectRowByCell?: boolean;
@@ -52,6 +53,7 @@ const AuthGroups = ({
   permissions,
   selectRowByCell,
   onRowsSelected,
+  groupsToFilterOutById,
 }: Props) => {
   const [totalGroups, setTotalGroups] = useState<number>();
   const [isLoading1, setIsLoading1] = useState(false);
@@ -71,7 +73,9 @@ const AuthGroups = ({
   const fetchAuthGroups = async () => {
     setIsLoading1(true);
     const res = await readAuthGroups({ from: 1, to: 100, filters: {} });
-    console.log({ res: res?.data });
+
+    const authGroups = res?.data.authGroups;
+
     if (res?.status === 404) {
       setAuthGroups([]);
       setTotalGroups(0);
@@ -89,8 +93,18 @@ const AuthGroups = ({
       return;
     }
 
-    setAuthGroups(res?.data.authGroups);
-    setTotalGroups(res?.data.totalGroups);
+    if (groupsToFilterOutById) {
+      const filtered = res?.data.authGroups?.filter(
+        (dash1) =>
+          !groupsToFilterOutById.some((dash2) => dash1.id === dash2.id),
+      );
+
+      filtered && setAuthGroups(filtered);
+      setTotalGroups(filtered?.length);
+    } else {
+      authGroups && setAuthGroups(authGroups);
+      setTotalGroups(res?.data.totalGroups);
+    }
     setIsLoading1(false);
   };
 
