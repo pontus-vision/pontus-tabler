@@ -26,6 +26,7 @@ import EdgesView from './views/EdgesView';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import DashboardAuthGroupsView from './views/DashboardAuthGroupsView';
+import AuthUsersView from './views/AuthUsersView';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -60,6 +61,7 @@ function App() {
               />
             }
           />
+          <Route path="/auth/users" element={<AuthUsersView />} />
           <Route path="/table/edges" element={<EdgesView />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
