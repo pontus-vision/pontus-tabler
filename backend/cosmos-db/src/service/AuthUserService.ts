@@ -20,26 +20,68 @@ import {
   AuthUserUpdateRes,
   AuthUsersReadReq,
   AuthUsersReadRes,
+  LoginReq,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
-import { Item, ItemResponse, PatchOperation } from '@azure/cosmos';
+import { Item, ItemResponse, PartitionKeyDefinition, PatchOperation, UniqueKeyPolicy } from '@azure/cosmos';
 import { InternalServerError, NotFoundError } from '../generated/api';
-import { patch } from '@azure/functions/types/app';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 export const AUTH_USERS = 'auth_users';
 export const AUTH_GROUPS = 'auth_groups';
 
+const partitionKey: string | PartitionKeyDefinition = {
+  paths: ['/username'],
+};
+
+const uniqueKeyPolicy: UniqueKeyPolicy = {
+  uniqueKeys: [{ paths: ['/username'] }],
+};
+
+const findUsername = async(username:string): Promise<AuthUserRef> => {
+  const query = `SELECT * FROM c WHERE name=${username}`;
+  const authUserContainer = await fetchContainer(AUTH_USERS);
+
+  const res = await authUserContainer.items
+    .query({
+      query,
+      parameters: [],
+    })
+    .fetchAll();
+
+  if(res.resources.length === 0) {
+    throw new NotFoundError(`No user found with username: ${username}`)
+  }
+
+  return res.resources[0]
+}
+
 export const authUserCreate = async (
   data: AuthUserCreateReq,
 ): Promise<AuthUserCreateRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
 
+  // const usern
+
+  // try {
+    
+   
+    
+
+  //   res.status(201).json({ message: 'User created successfully' });
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(500).json({ message: 'Internal server error' });
+  // }
+
+  const authUserContainer = await fetchContainer(AUTH_USERS);
+ 
   const res = await authUserContainer.items.create({ ...data, authGroups: [] });
 
-  const { id, name } = res.resource;
+  const { id, username } = res.resource;
 
   return {
-    name,
+    username,
     id,
   };
 };
@@ -59,11 +101,11 @@ export const authUserRead = async (
     throw new NotFoundError(`User not found at id: ${data.id}`);
   }
 
-  const { id, name } = res.resource;
+  const { id, username } = res.resource;
 
   return {
     id,
-    name,
+    username,
   };
 };
 
@@ -76,14 +118,14 @@ export const authUserUpdate = async (
     const res = (await authUserContainer
       .item(data.id, data.id)
       .patch([
-        { op: 'replace', path: '/name', value: data.name },
+        { op: 'replace', path: '/name', value: data.username },
       ])) as ItemResponse<AuthUserRef>;
 
-    const { id, name } = res.resource;
+    const { id, username } = res.resource;
 
     return {
       id,
-      name,
+      username,
     };
   } catch (error) {
     if (error?.code === 404) {
@@ -173,7 +215,7 @@ export const authUserGroupsCreate = async (
             path: '/authUsers/-',
             value: {
               id: authUser.resource.id,
-              name: authUser.resource.name,
+              name: authUser.resource.username,
             },
           },
         ])) as ItemResponse<AuthGroupRef>;
@@ -195,7 +237,7 @@ export const authUserGroupsCreate = async (
         return {
           authGroups: res.resource?.authGroups,
           id: authUser.resource?.id,
-          name: authUser.resource?.name,
+          username: authUser.resource?.username,
         };
       }
     } catch (error) {
@@ -306,3 +348,37 @@ export const authUserGroupsDelete = async (
     }
   }
 };
+
+
+
+// const loginUser = async (data: LoginReq) => {
+//   try {
+//     const query = `SELECT ${data.user} p IN c["authGroups"] ${str2}`;
+
+//   const res = await authUserContainer.items
+//     .query({
+//       query,
+//       parameters: [],
+//     })
+//     .fetchAll();
+
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+
+//     if (!isPasswordValid) {
+//       return res.status(401).json({ message: 'Invalid credentials' });
+//     }
+
+//     const token = jwt.sign({ userId: user._id }, 'secret_key', {
+//       expiresIn: '1h',
+//     });
+
+//     res.json({ token });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// };

@@ -2,6 +2,23 @@ service:
   auth: false
   base-path: '/PontusTest/1.0.0'
   endpoints:
+    loginPOST:
+      path: /login
+      method: POST
+      auth: true
+      request:
+        name: LoginReq
+        body: 
+          properties:
+            user: string
+            password: string
+      response:
+        docs: User logged in successfully
+        type: LoginRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - NotFoundError
     menuCreatePOST:
       path: /menu/create
       method: POST
@@ -1309,7 +1326,7 @@ service:
         name: AuthUserCreateReq
         body:
           properties:
-            name:
+            username:
               docs: Name of the user
               type: string
       response:
@@ -1465,6 +1482,7 @@ service:
         - InternalServerError
         - NotFoundError
 types:
+  LoginRes: string
   TableEdgeReadRes:
     properties:
       name: string
@@ -1853,7 +1871,7 @@ types:
       id:
         docs: Unique identifier of the user
         type: string
-      name:
+      username:
         docs: Name of the user
         type: string
   AuthUserDeleteRes: string

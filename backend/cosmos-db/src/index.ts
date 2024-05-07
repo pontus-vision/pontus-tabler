@@ -70,6 +70,9 @@ import {
 } from './service/AuthUserService';
 
 export default new PontusService({
+  loginPost:async(req, res) =>{
+    // const response = await 
+  },
   authGroupCreatePost: async (req, res) => {
     const response = await createAuthGroup(req.body);
 
