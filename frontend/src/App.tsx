@@ -25,7 +25,8 @@ import TableDataReadView from './views/tables/table-data/TableDataRead';
 import EdgesView from './views/EdgesView';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import DashboardAuthGroupsView from './views/DashboardAuthGroupsView';
+import AuthGroupsView from './views/AuthGroupsView';
+import AuthUsersView from './views/AuthUsersView';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -60,6 +61,7 @@ function App() {
               />
             }
           />
+          <Route path="/auth/users" element={<AuthUsersView />} />
           <Route path="/table/edges" element={<EdgesView />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
@@ -73,7 +75,7 @@ function App() {
               element={<TableDataReadView />}
             />
             <Route path="/dashboard/:id" element={<DashboardView />} />
-            <Route path="/auth/groups" element={<DashboardAuthGroupsView />} />
+            <Route path="/auth/groups" element={<AuthGroupsView />} />
             <Route path="/users/read" element={<ReadUsers />} />
             <Route path="/user/create" element={<CreateUser />} />
 

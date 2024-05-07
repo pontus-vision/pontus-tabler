@@ -53,6 +53,10 @@ import {
   updateAuthGroupDashboards,
   readAuthGroups,
   updateAuthGroup,
+  createAuthUserGroup,
+  readAuthGroupUsers,
+  updateAuthGroupUsers,
+  deleteAuthGroupUsers,
 } from './service/AuthGroupService';
 import {
   authUserCreate,
@@ -108,6 +112,7 @@ export default new PontusService({
   },
   authUsersReadPost: async (req, res) => {
     const response = await authUsersRead(req.body);
+    
 
     res.send(response);
   },
@@ -172,6 +177,27 @@ export default new PontusService({
 
     res.send(response);
   },
+  authGroupUsersCreatePost: async (req, res) => {
+    const response = await createAuthUserGroup(req.body);
+
+    res.send(response);
+  },
+  authGroupUsersDeletePost: async (req, res) => {
+    const response = await deleteAuthGroupUsers(req.body);
+   
+    res.send(response);
+  },
+  authGroupUsersReadPost: async (req, res) => {
+    const response = await readAuthGroupUsers(req.body);
+
+    
+    res.send(response);
+  },
+  authGroupUsersUpdatePost: async (req, res) => {
+    const response = await updateAuthGroupUsers(req.body);
+
+    res.send(response);
+  },
   dashboardCreatePost: async (req, res) => {
     if (Object.keys(req.body).length === 0) {
       throw new BadRequestError(
@@ -194,6 +220,7 @@ export default new PontusService({
   },
   dashboardsReadPost: async (req, res) => {
     const response = await readDashboards(req.body);
+
     res.send(response);
   },
   dashboardUpdatePost: async (req, res) => {
@@ -237,11 +264,11 @@ export default new PontusService({
   menuUpdatePost: async (req, res) => {
     try {
       const response = await updateMenuItem(req.body);
-      console.log({ response });
+      
       if (response.statusCode === 404) {
         throw new NotFoundError('Not found');
       }
-      console.log({ statusCode: response.statusCode });
+    
       res.send({ ...response.resource, path: response.resource?.path || '' });
     } catch (error) {
       if (error?.code === 400) {
@@ -363,12 +390,12 @@ export default new PontusService({
   },
   tableDataEdgeCreatePost: async (req, res) => {
     try {
-      console.log({ req });
+      
       const response = await createTableDataEdge(req.body);
 
       res.send(response);
     } catch (error) {
-      console.log({ error });
+ 
     }
   },
   tableDataEdgeReadPost: async (req, res) => {

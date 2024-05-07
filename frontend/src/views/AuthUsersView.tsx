@@ -4,20 +4,26 @@ import {
   createAuthGroupDashboards,
   createDashboard,
   createDashboardGroupAuth,
+  createUserGroups,
   deleteAuthGroupDashboards,
   deleteDashboard,
   deleteDashboardGroupAuth,
+  deleteUser,
+  deleteUserGroups,
   getAllDashboards,
-  readAuthGroups,
-  readAuthGroupsDashboards,
+  readAuthGroupsDashboards as readAuthUserGroups,
   readDashboardGroupAuth,
+  readUserGroups,
+  readUsers,
   updateAuthGroupDashboards,
   updateAuthGroups,
   updateDashboardGroupAuth,
+  updateUser,
 } from '../client';
 import {
   AuthGroupDashboardRef,
   AuthGroupRef,
+  AuthUserAndGroupsRef,
   Dashboard,
   DashboardAuthGroups,
   ReadPaginationFilterFilters,
@@ -40,9 +46,12 @@ import SimpleTextEditor from '../pv-react/simpleTextEditor';
 import FetchDashboards from './dashboard/FetchDashboards';
 import { slice } from 'cypress/types/lodash';
 import AuthGroups from './authGroups/AuthGroups';
+import { AuthUserGroupRef } from '../typescript/api/resources/pontus/types/AuthUserGroupRef';
+import AuthUsersGrid from '../components/AuthUsersGrid';
+import { AuthUserRef } from '../typescript/api/resources/pontus/types/AuthUserRef';
 
-const DashboardAuthGroupsView = () => {
-  const [groups, setAuthGroups] = useState<AuthGroupRef[]>([]);
+const AuthUsersView = () => {
+  const [users, setAuthUsers] = useState<AuthGroupRef[]>([]);
   const [from, setFrom] = useState<number>();
   const [to, setTo] = useState<number>();
   const [filters, setFilters] = useState<{
@@ -58,48 +67,8 @@ const DashboardAuthGroupsView = () => {
       sortable: true,
     },
     {
-      headerName: 'Create',
-      field: 'create',
-      editable: true,
-      cellEditor: 'agCheckboxCellEditor',
-      cellRenderer: 'agCheckboxCellRenderer',
-    },
-    {
-      headerName: 'Read',
-      field: 'read',
-      editable: true,
-      cellEditor: 'agCheckboxCellEditor',
-      cellRenderer: 'agCheckboxCellRenderer',
-    },
-    {
-      headerName: 'Update',
-      field: 'update',
-      editable: true,
-      cellEditor: 'agCheckboxCellEditor',
-      cellRenderer: 'agCheckboxCellRenderer',
-    },
-    {
-      headerName: 'Delete',
-      field: 'delete',
-      editable: true,
-      cellEditor: 'agCheckboxCellEditor',
-      cellRenderer: 'agCheckboxCellRenderer',
-    },
-    {
-      headerName: 'Owner',
-      field: 'owner',
-      filter: true,
-      sortable: true,
-    },
-    {
       headerName: 'Id',
       field: 'id',
-      filter: true,
-      sortable: true,
-    },
-    {
-      headerName: 'Folder',
-      field: 'folder',
       filter: true,
       sortable: true,
     },
@@ -107,22 +76,18 @@ const DashboardAuthGroupsView = () => {
 
   const [addMode, setAddMode] = useState(false);
 
-  const [selectedGroup, setSelectedGroup] = useState<AuthGroupRef | null>();
-  const [dashboardsChanged, setDashboardsChanged] = useState<
-    AuthGroupDashboardRef[]
-  >([]);
+  const [selectedUser, setSelectedUser] = useState<AuthGroupRef | null>();
+  const [groupsChanged, setGroupsChanged] = useState<AuthUserGroupRef[]>([]);
   const [selectedDashboard, setSelectedDashboard] =
     useState<Dashboard | null>();
-  const [groupsChanged, setGroupsChanged] = useState<AuthGroupRef[]>([]);
-  const [dashboards, setDashboards] = useState<any[]>([]);
+  const [usersChanged, setUsersChanged] = useState<AuthGroupRef[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const navigate = useNavigate();
   const [totalGroups, setTotalGroups] = useState<number>();
-  const [totalDashboards, setTotalDashboards] = useState<number>();
+
   const [addDashboard, setAddDashboard] = useState(false);
-  const [newDashboards, setNewDashboards] = useState<AuthGroupDashboardRef[]>(
-    [],
-  );
-  const [dashboardsToBeDeleted, setDashboardstoBeDeleted] =
+  const [newGroups, setNewGroups] = useState<AuthUserAndGroupsRef[]>([]);
+  const [userGroupsToBeDeleted, setUserGroupsToBeDeleted] =
     useState<string[]>();
   const notificationManagerRef = useRef<MessageRefs>();
   const [isLoading1, setIsLoading1] = useState(false);
@@ -130,10 +95,11 @@ const DashboardAuthGroupsView = () => {
 
   const fetchAuthGroups = async () => {
     setIsLoading1(true);
-    const res = await readAuthGroups({ from: 1, to: 100, filters: {} });
+    const res = await readUsers({ from: 1, to: 100, filters: {} });
+    const authUsers = res?.data.authUsers;
 
     if (res?.status === 404) {
-      setAuthGroups([]);
+      setAuthUsers([]);
       setTotalGroups(0);
       setIsLoading1(false);
       return;
@@ -143,14 +109,14 @@ const DashboardAuthGroupsView = () => {
         'Error',
         'Something went wrong. Could not fetch Auth Group(s)!',
       );
-      setAuthGroups([]);
+      setAuthUsers([]);
       setTotalGroups(0);
       setIsLoading1(false);
       return;
     }
 
-    setAuthGroups(res?.data.authGroups);
-    setTotalGroups(res?.data.totalGroups);
+    authUsers && setAuthUsers(authUsers);
+    setTotalGroups(res?.data.count);
     setIsLoading1(false);
   };
 
@@ -159,7 +125,7 @@ const DashboardAuthGroupsView = () => {
     const fails = [];
 
     for (const [index, group] of groupsChanged.entries()) {
-      const res = await updateAuthGroups({ id: group.id, name: group.name });
+      const res = await updateUser({ id: group.id, name: group.name });
 
       if (res.status !== 200) {
         notificationManagerRef?.current?.addMessage(
@@ -180,19 +146,19 @@ const DashboardAuthGroupsView = () => {
     }
   };
 
-  const fetchAuthGroupDashboards = async () => {
-    if (!selectedGroup?.id) return;
+  const fetchAuthUserGroups = async () => {
+    if (!selectedUser?.id) return;
     setIsLoading2(true);
-    const res = await readAuthGroupsDashboards({
-      id: selectedGroup.id,
+    const res = await readUserGroups({
+      id: selectedUser.id,
       filters,
       from,
       to,
     });
 
     if (res?.status === 404) {
-      setDashboards([]);
-      setTotalDashboards(0);
+      setGroups([]);
+      setTotalGroups(0);
     } else if (res?.status === 500) {
       notificationManagerRef?.current?.addMessage(
         'error',
@@ -201,42 +167,17 @@ const DashboardAuthGroupsView = () => {
       );
     }
 
-    const dashboards = res?.data.dashboards;
+    const authGroups = res?.data.authGroups;
     const totalCount = res?.data.count;
 
-    dashboards && setDashboards(dashboards);
-    totalCount && setTotalDashboards(totalCount);
+    authGroups && setGroups(authGroups);
+    totalCount && setTotalGroups(totalCount);
     setIsLoading2(false);
   };
 
-  const updateAuthGroupDash = async () => {
-    if (!selectedGroup?.id || !dashboardsChanged) return;
-
-    const res = await updateAuthGroupDashboards({
-      id: selectedGroup.id,
-      dashboards: dashboardsChanged,
-    });
-
-    if (res?.status === 200) {
-      notificationManagerRef?.current?.addMessage(
-        'success',
-        'Success',
-        'Dashboard(s) updated!',
-      );
-
-      await fetchAuthGroupDashboards();
-    } else {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not update Dashboard(s)!',
-      );
-    }
-  };
-
   useEffect(() => {
-    fetchAuthGroupDashboards();
-  }, [selectedGroup, filters, to, from]);
+    fetchAuthUserGroups();
+  }, [selectedUser, filters, to, from]);
 
   useEffect(() => {
     fetchAuthGroups();
@@ -248,31 +189,21 @@ const DashboardAuthGroupsView = () => {
     setTo(params.endRow);
   };
 
-  const addAuthGroupDashboard = async () => {
-    if (!selectedGroup?.id || !selectedGroup.name) return;
-    const res = await createAuthGroupDashboards({
-      name: selectedGroup.name,
-      id: selectedGroup?.id,
-      dashboards: newDashboards.map((dashboard) => {
-        return {
-          name: dashboard.name,
-          id: dashboard.id,
-          create: false,
-          delete: false,
-          read: false,
-          update: false,
-        };
-      }),
+  const addAuthUserGroup = async () => {
+    if (!selectedUser?.id || !selectedUser.name) return;
+    const res = await createUserGroups({
+      id: selectedUser?.id,
+      authGroupsIds: newGroups.map((group) => group.id),
     });
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
         'Success',
-        `Dashboard(s) added to ${selectedGroup.name}`,
+        `Dashboard(s) added to ${selectedUser.name}`,
       );
 
-      await fetchAuthGroupDashboards();
+      await fetchAuthUserGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
@@ -282,50 +213,52 @@ const DashboardAuthGroupsView = () => {
     }
   };
 
-  const deleteDashboardsAuthGroup = async (data: DashboardAuthGroups[]) => {
-    if (!selectedGroup?.id) return;
-    const ids = data.map((el) => el.groupId);
+  const deleteAuthUsers = async (data: AuthUserRef[]) => {
+    if (!selectedUser?.id) return;
 
-    const res = await deleteDashboardGroupAuth({
-      authGroups: ids,
-      dashboardId: selectedGroup?.id,
-    });
+    for (const [index, user] of data.entries()) {
+      const res = await deleteUser({
+        id: user?.id,
+      });
 
-    if (res?.status === 200) {
-      notificationManagerRef?.current?.addMessage(
-        'success',
-        'Success',
-        'Auth Group(s) deleted!',
-      );
-      await fetchAuthGroupDashboards();
-    } else {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something wrong happened! Could not delete.',
-      );
+      if (index === data.length - 1) {
+        if (res?.status === 200) {
+          notificationManagerRef?.current?.addMessage(
+            'success',
+            'Success',
+            'Auth Group(s) deleted!',
+          );
+          await fetchAuthUserGroups();
+        } else {
+          notificationManagerRef?.current?.addMessage(
+            'error',
+            'Error',
+            'Something wrong happened! Could not delete.',
+          );
+        }
+      }
     }
   };
 
-  const handleDelete = async (arr: AuthGroupDashboardRef[]) => {
-    if (!selectedGroup?.id) return;
-    const res = await deleteAuthGroupDashboards({
-      id: selectedGroup?.id,
-      dashboardIds: arr.map((el) => el.id),
+  const deleteAuthUserGroups = async (arr: AuthUserAndGroupsRef[]) => {
+    if (!selectedUser?.id) return;
+    const res = await deleteUserGroups({
+      id: selectedUser?.id,
+      authGroupsIds: arr?.map((el) => el.id),
     });
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
         'Success',
-        `Dashboards disassociated to ${selectedGroup?.name}!`,
+        `Dashboards disassociated to ${selectedUser?.name}!`,
       );
-      await fetchAuthGroupDashboards();
+      await fetchAuthUserGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
         'Error',
-        `Could not disassociate dashboard(s) from ${selectedGroup?.name}!`,
+        `Could not disassociate dashboard(s) from ${selectedUser?.name}!`,
       );
     }
 
@@ -333,11 +266,10 @@ const DashboardAuthGroupsView = () => {
   };
 
   const handleCellClicked = (e: CellClickedEvent<any, any>) => {
-    console.log({ e });
     if (e.colDef.field !== 'click') return;
-    setSelectedGroup(null);
+    setSelectedUser(null);
     setTimeout(() => {
-      setSelectedGroup(e.data);
+      setSelectedUser(e.data);
     }, 1);
   };
 
@@ -353,10 +285,10 @@ const DashboardAuthGroupsView = () => {
       <div className={styles.dashboardAuthGroupsViewContainer}>
         {
           <div className={styles.authGroupsGrid}>
-            <AuthGroups
+            <AuthUsersGrid
               onCellClicked={handleCellClicked}
               onRefresh={() => fetchAuthGroups()}
-              onDelete={(e) => deleteDashboardsAuthGroup(e)}
+              onDelete={(e) => deleteAuthUsers(e)}
               permissions={{
                 createAction: true,
                 deleteAction: true,
@@ -367,7 +299,7 @@ const DashboardAuthGroupsView = () => {
               selectRowByCell={true}
               onRowsStateChange={(e) => {
                 setAddMode(false);
-                setGroupsChanged(e as AuthGroupRef[]);
+                setGroupsChanged(e as AuthUserRef[]);
               }}
             />
             {groupsChanged.length > 0 && !addMode && (
@@ -377,14 +309,14 @@ const DashboardAuthGroupsView = () => {
             )}
           </div>
         }
-        {selectedGroup && (
+        {selectedUser && (
           <>
-            <label htmlFor="">{selectedGroup?.name} Dashboards:</label>
+            <label htmlFor="">{selectedUser?.name} Auth Groups:</label>
             <PVGridWebiny2
               add={() => setAddDashboard(true)}
               cols={cols}
-              cypressAtt="group-dashboards-grid"
-              rows={dashboards}
+              cypressAtt="user-groups-grid"
+              rows={groups}
               isLoading={isLoading2}
               permissions={{
                 createAction: true,
@@ -392,30 +324,29 @@ const DashboardAuthGroupsView = () => {
                 updateAction: true,
               }}
               onRowsStateChange={(e) => {
-                setDashboardsChanged(e as AuthGroupDashboardRef[]);
+                setGroupsChanged(e as AuthGroupDashboardRef[]);
               }}
               updateModeOnRows={true}
-              totalCount={totalDashboards}
-              onUpdate={updateAuthGroupDash}
+              totalCount={totalGroups}
+              // onUpdate={updateAuthGroupDash}
               onRowsSelected={(e) => {
-                setDashboardstoBeDeleted(e.map((el) => el.data.id));
+                setUserGroupsToBeDeleted(e.map((el) => el.data.id));
               }}
-              onRefresh={() => fetchAuthGroupDashboards()}
-              onDelete={handleDelete}
+              onRefresh={() => fetchAuthUserGroups()}
+              onDelete={deleteAuthUserGroups}
             />
+            {/* <AuthGroups /> */}
           </>
         )}
         {addDashboard && (
           <div className={styles.selectGroup}>
-            <FetchDashboards
+            <AuthGroups
               selection={true}
-              dashboardsToFilterOutById={dashboards}
-              onRowsSelected={(e) => setNewDashboards(e.map((el) => el.data))}
+              groupsToFilterOutById={groups}
+              onRowsSelected={(e) => setNewGroups(e.map((el) => el.data))}
             />
-            {newDashboards.length > 0 && (
-              <button onClick={() => addAuthGroupDashboard()}>
-                Add Group(s)
-              </button>
+            {newGroups.length > 0 && (
+              <button onClick={() => addAuthUserGroup()}>Add Group(s)</button>
             )}
           </div>
         )}
@@ -425,4 +356,4 @@ const DashboardAuthGroupsView = () => {
   );
 };
 
-export default DashboardAuthGroupsView;
+export default AuthUsersView;

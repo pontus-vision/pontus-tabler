@@ -165,7 +165,7 @@ export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
-  const dashboardId = data.dashboardId;
+  const dashboardId = data.id;
 
   const res = await dashboardContainer.item(dashboardId, dashboardId).read();
 
@@ -185,8 +185,8 @@ export const createDashboardAuthGroup = async (
 
   return {
     authGroups: res2.resource?.authGroups,
-    dashboardId: res2.resource?.id,
-    dashboardName: res2.resource?.name,
+    id: res2.resource?.id,
+    name: res2.resource?.name,
   };
 };
 
@@ -198,17 +198,17 @@ export const readDashboardGroupAuth = async (
   const str = filterToQuery(
     { filters: data.filters },
     'p',
-    `c.id = "${data.dashboardId}"`,
+    `c.id = "${data.id}"`,
   );
   const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.authGroups ${str}`;
 
   const str2 = filterToQuery(
     { filters: data.filters, from: data.from, to: data.to },
     'p',
-    `c.id = "${data.dashboardId}"`,
+    `c.id = "${data.id}"`,
   );
 
-  const query = `SELECT c.name, p["groupName"], p.create, p.read, p["update"], p.delete, p.groupId FROM c JOIN p IN c.authGroups ${str2}`;
+  const query = `SELECT p["name"], p.create, p.read, p["update"], p.delete, p.id FROM c JOIN p IN c.authGroups ${str2}`;
 
   const res = await dashboardContainer.items
     .query({
@@ -230,12 +230,9 @@ export const readDashboardGroupAuth = async (
 
   return {
     totalCount: res2?.resources[0], // Use the count obtained from the stored procedure
-    authGroups: res.resources.map((el) => {
-      const { name, ...rest } = el;
-      return rest;
-    }),
-    dashboardId: data?.dashboardId,
-    dashboardName: res?.resources[0]?.name,
+    authGroups: res.resources,
+    id: data?.id,
+    name: res?.resources[0]?.name,
   };
 };
 
@@ -246,7 +243,7 @@ export const deleteDashboardGroupAuth = async (
 
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
-  const dashboardId = data.dashboardId;
+  const dashboardId = data.id;
 
   const res3 = await dashboardContainer.item(dashboardId, dashboardId).read();
 
@@ -257,7 +254,7 @@ export const deleteDashboardGroupAuth = async (
   const patchArr: PatchOperation[] = [];
 
   for (const [index, el] of data.authGroups.entries()) {
-    const indexUpdate = resAuthGroups.findIndex((el2) => el2.groupId === el);
+    const indexUpdate = resAuthGroups.findIndex((el2) => el2.id === el);
 
     patchArr.push({
       op: 'remove',
@@ -271,8 +268,8 @@ export const deleteDashboardGroupAuth = async (
 
   return {
     authGroups: res.resource?.authGroups,
-    dashboardId: res.resource?.id,
-    dashboardName: res.resource?.name,
+    id: res.resource?.id,
+    name: res.resource?.name,
   };
 };
 
@@ -281,10 +278,10 @@ export const updateDashboardGroupAuth = async (
 ): Promise<DashboardGroupAuthUpdateRes> => {
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
-  const dashboardId = data.dashboardId;
+  const id = data.id;
 
   const res = (await dashboardContainer
-    .item(dashboardId, dashboardId)
+    .item(id, id)
     .read()) as ItemResponse<DashboardGroupAuthReadRes>;
 
   const batchPatchArr: PatchOperation[][] = [];
@@ -293,11 +290,11 @@ export const updateDashboardGroupAuth = async (
     batchPatchArr.push(
       data.authGroups.splice(0, 10).map((authGroup) => {
         const index = res.resource?.authGroups.findIndex(
-          (i) => i.groupId === authGroup.groupId,
+          (i) => i.id === authGroup.id,
         );
         if (index === -1) {
           throw new NotFoundError(
-            `No group auth found at: (name: ${authGroup.groupName}, id: ${authGroup.groupId})`,
+            `No group auth found at: (name: ${authGroup.name}, id: ${authGroup.id})`,
           );
         }
 
@@ -312,7 +309,7 @@ export const updateDashboardGroupAuth = async (
 
   for (const [index, batch] of batchPatchArr.entries()) {
     const res2 = await dashboardContainer
-      .item(dashboardId, dashboardId)
+      .item(id, id)
       .patch(batch);
 
     if (index === batchPatchArr.length - 1) {
@@ -320,8 +317,8 @@ export const updateDashboardGroupAuth = async (
 
       return {
         authGroups: resource?.authGroups,
-        dashboardId: resource?.id,
-        dashboardName: resource?.name,
+        id: resource?.id,
+        name: resource?.name,
       };
     }
   }

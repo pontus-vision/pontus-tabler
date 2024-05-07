@@ -136,14 +136,13 @@ export const authUsersRead = async (
 ): Promise<AuthUsersReadRes> => {
   try {
     const res = await fetchData(data, AUTH_USERS);
-
     return {
       authUsers: res.values,
       count: res.count,
     };
   } catch (error) {
     if (error?.code === 404) {
-      throw new NotFoundError(`Auth Group not found.`);
+      throw new NotFoundError(`Auth User(s) not found.`);
     }
   }
 };
