@@ -236,63 +236,6 @@ export const createAuthGroupDashboards = async (
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
-  // const authGroupId = data.id;
-
-  // const batchPatchArr: PatchOperation[][] = [];
-
-  // for (const [index, dashboard] of data.dashboards.entries()) {
-  //   try {
-  //     const res = await dashboardContainer
-  //       .item(dashboard.id, dashboard.id)
-  //       .patch([
-  //         {
-  //           op: 'add',
-  //           path: '/authGroups/-',
-  //           value: {
-  //             groupId: authGroupId,
-  //             create: dashboard.create,
-  //             read: dashboard.read,
-  //             delete: dashboard.delete,
-  //             update: dashboard.update,
-  //             groupName: data.name,
-  //           },
-  //         },
-  //       ]);
-  //   } catch (error) {
-  //     if (error?.code === 404) {
-  //       throw new NotFoundError(`Dashboard not found at id: ${dashboard.id}`);
-  //     }
-  //   }
-  // }
-
-  // while (data.dashboards.length > 0) {
-  //   batchPatchArr.push(
-  //     data.dashboards.splice(0, 10).map((dashboard) => {
-  //       return {
-  //         op: 'add',
-  //         path: `/dashboards/-`,
-  //         value: dashboard,
-  //       };
-  //     }),
-  //   );
-  // }
-
-  // for (const [index, batch] of batchPatchArr.entries()) {
-  //   const res2 = await authGroupContainer
-  //     .item(authGroupId, authGroupId)
-  //     .patch(batch);
-
-  //   if (index === batchPatchArr.length - 1) {
-  //     const resource = res2.resource;
-
-  //     return {
-  //       dashboards: resource.dashboards,
-  //       id: resource.id,
-  //       name: resource.name,
-  //     };
-  //   }
-  // }
-
   const res = await createSubdoc({
     id: data.id,
     values: data.dashboards,
@@ -436,68 +379,8 @@ export const updateAuthGroupDashboards = async (
 export const deleteAuthGroupDashboards = async (
   data: AuthGroupDashboardDeleteReq,
 ): Promise<AuthGroupDashboardDeleteRes> => {
-  // if (data?.dashboardIds?.length === 0) {
-  //   throw new BadRequestError('Dashboard Ids array empty');
-  // }
-
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
   const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-  // const authGroupId = data.id;
-
-  // const res = await authGroupContainer.item(authGroupId, authGroupId).read();
-  // if (res.resource) {
-  // }
-
-  // for (const [index, dashboardId] of data.dashboardIds.entries()) {
-  //   const res3 = await dashboardContainer.item(dashboardId, dashboardId).read();
-
-  //   if (res3.statusCode === 404) {
-  //     throw new NotFoundError(`Dashboard not found at id: ${dashboardId}`);
-  //   }
-
-  //   const indexUpdate = res3.resource.authGroups.findIndex(
-  //     (el2) => el2.groupId === authGroupId,
-  //   );
-
-  //   const res2 = await dashboardContainer.item(dashboardId, dashboardId).patch([
-  //     {
-  //       op: 'remove',
-  //       path: `/authGroups/${indexUpdate}`,
-  //     },
-  //   ]);
-
-  // }
-
-  // const batchPatchArr: PatchOperation[][] = [];
-
-  // while (data.dashboardIds.length > 0) {
-  //   batchPatchArr.push(
-  //     data.dashboardIds.splice(0, 10).map((dashboardId) => {
-  //       const index = res.resource.dashboards.findIndex(
-  //         (i) => i.id === dashboardId,
-  //       );
-
-  //       return {
-  //         op: 'remove',
-  //         path: `/dashboards/${index}`,
-  //         value: dashboardId,
-  //       };
-  //     }),
-  //   );
-  // }
-
-  // for (const [index, batch] of batchPatchArr.entries()) {
-  //   const res2 = await authGroupContainer
-  //     .item(authGroupId, authGroupId)
-  //     .patch(batch);
-
-  //   if (index === batchPatchArr.length - 1) {
-  //     const resource = res2.resource;
-
-  //     return 'Dashboard references deleted.';
-  //   }
-  // }
 
   const res = await deleteSubdoc({
     id: data.id,
@@ -514,56 +397,6 @@ export const createAuthUserGroup = async (
 ): Promise<AuthGroupUsersCreateRes> => {
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
   const authUsersContainer = await fetchContainer(AUTH_USERS);
-
-  // const authGroupId = data.id;
-
-  // const batchPatchArr: PatchOperation[][] = [];
-
-  // for (const [index, authUser] of data.authUsers.entries()) {
-  //   try {
-  //     const res = await authUsersContainer
-  //       .item(authUser.id, authUser.id)
-  //       .patch([
-  //         {
-  //           op: 'add',
-  //           path: '/authGroups/-',
-  //           value: { id: data.id, name: data.name },
-  //         },
-  //       ]);
-  //   } catch (error) {
-  //     if (error?.code === 404) {
-  //       throw new NotFoundError(`Dashboard not found at id: ${authUser.id}`);
-  //     }
-  //   }
-  // }
-
-  // while (data.authUsers.length > 0) {
-  //   batchPatchArr.push(
-  //     data.authUsers.splice(0, 10).map((authUser) => {
-  //       return {
-  //         op: 'add',
-  //         path: `/authUsers/-`,
-  //         value: authUser,
-  //       };
-  //     }),
-  //   );
-  // }
-
-  // for (const [index, batch] of batchPatchArr.entries()) {
-  //   const res2 = await authGroupContainer
-  //     .item(authGroupId, authGroupId)
-  //     .patch(batch);
-
-  //   if (index === batchPatchArr.length - 1) {
-  //     const resource = res2.resource;
-
-  //     return {
-  //       authUsers: resource.authUsers,
-  //       id: resource.id,
-  //       name: resource.name,
-  //     };
-  //   }
-  // }
 
   const res = await createSubdoc({
     id: data.id,
@@ -708,64 +541,9 @@ export const updateAuthGroupUsers = async (
 export const deleteAuthGroupUsers = async (
   data: AuthGroupUsersDeleteReq,
 ): Promise<AuthGroupUsersDeleteRes> => {
-  // if (data?.authUsersIds?.length === 0) {
-  //   throw new BadRequestError('User Ids array empty');
-  // }
 
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
   const authUsersContainer = await fetchContainer(AUTH_USERS);
-
-  // const authGroupId = data.id;
-
-  // const res = await authGroupContainer.item(authGroupId, authGroupId).read();
-
-  // for (const [index, userId] of data.authUsersIds.entries()) {
-  //   const res3 = await authUsersContainer.item(userId, userId).read();
-
-  //   if (res3.statusCode === 404) {
-  //     throw new NotFoundError(`User not found at id: ${userId}`);
-  //   }
-
-  //   const indexUpdate = res3.resource.authGroups.findIndex(
-  //     (el2) => el2.id === authGroupId,
-  //   );
-
-  //   const res2 = await authUsersContainer.item(userId, userId).patch([
-  //     {
-  //       op: 'remove',
-  //       path: `/authGroups/${indexUpdate}`,
-  //     },
-  //   ]);
-  // }
-
-  // const batchPatchArr: PatchOperation[][] = [];
-
-  // while (data.authUsersIds.length > 0) {
-  //   batchPatchArr.push(
-  //     data.authUsersIds.splice(0, 10).map((authUserId) => {
-  //       const index = res.resource.authGroups.findIndex(
-  //         (i) => i.id === authUserId,
-  //       );
-
-  //       return {
-  //         op: 'remove',
-  //         path: `/authUsers/${index}`
-  //       };
-  //     }),
-  //   );
-  // }
-
-  // for (const [index, batch] of batchPatchArr.entries()) {
-  //   const res2 = await authGroupContainer
-  //     .item(authGroupId, authGroupId)
-  //     .patch(batch);
-
-  //   if (index === batchPatchArr.length - 1) {
-  //     const resource = res2.resource;
-
-  //     return 'Dashboard references deleted.';
-  //   }
-  // }
 
   const res = await deleteSubdoc({
     id: data.id,
