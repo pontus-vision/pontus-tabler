@@ -4,18 +4,20 @@ import {
   deleteAuthGroup,
   readAuthGroups,
   updateAuthGroups,
-} from '../../client';
-import { AuthGroupRef } from '../../typescript/api';
+} from '../client';
+import { AuthGroupRef } from '../typescript/api';
 import NotificationManager, {
   MessageRefs,
-} from '../../components/NotificationManager';
-import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
+} from '../components/NotificationManager';
+import PVGridWebiny2 from '../pv-react/PVGridWebiny2';
 import {
   CellClickedEvent,
   CellValueChangedEvent,
   IGetRowsParams,
   IRowNode,
 } from 'ag-grid-community';
+import { AuthUserRef } from '../typescript/api/resources/pontus/types/AuthUserRef';
+import { readUsers } from '../client';
 
 type Props = {
   onCellClicked?: (e: CellClickedEvent<any, any>) => void;
@@ -29,7 +31,7 @@ type Props = {
     deleteAction?: boolean;
     readAction?: boolean;
   };
-  groupsToFilterOutById?: AuthGroupRef[];
+  usersToFilterOutById?: AuthUserRef[];
   onRowsSelected?: (e: IRowNode<any>[]) => void;
   selection?: boolean;
   selectRowByCell?: boolean;
@@ -39,7 +41,7 @@ type Props = {
   onCellsChange?: (data: CellValueChangedEvent[]) => void;
 };
 
-const AuthGroups = ({
+const AuthUsersGrid = ({
   isLoading,
   onAdd,
   onCellClicked,
@@ -53,32 +55,30 @@ const AuthGroups = ({
   permissions,
   selectRowByCell,
   onRowsSelected,
-  groupsToFilterOutById,
+  usersToFilterOutById,
 }: Props) => {
-  const [totalGroups, setTotalGroups] = useState<number>();
+  const [totalUsers, setTotalUsers] = useState<number>();
   const [isLoading1, setIsLoading1] = useState(false);
-  const [authGroups, setAuthGroups] = useState<AuthGroupRef[]>([]);
+  const [users, setUsers] = useState<AuthUserRef[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<AuthGroupRef | null>();
   const notificationManagerRef = useRef<MessageRefs>();
   const [addMode, setAddMode] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
-  const [groupsChanged, setGroupsChanged] = useState<AuthGroupRef[]>([]);
-  const [groupsToBeUpdated, setGroupsToBeUpdated] = useState<AuthGroupRef[]>(
-    [],
-  );
-  const [groupsToBeAdded, setGroupsToBeAdded] = useState<AuthGroupRef | null>();
+  const [usersChanged, setUsersChanged] = useState<AuthGroupRef[]>([]);
+  const [usersToBeUpdated, setUsersToBeUpdated] = useState<AuthGroupRef[]>([]);
+  const [usersToBeAdded, setUsersToBeAdded] = useState<AuthGroupRef | null>();
 
   const [reset, setReset] = useState(false);
 
-  const fetchAuthGroups = async () => {
+  const fetchAuthUsers = async () => {
     setIsLoading1(true);
-    const res = await readAuthGroups({ from: 1, to: 100, filters: {} });
+    const res = await readUsers({ from: 1, to: 100, filters: {} });
 
-    const authGroups = res?.data.authGroups;
+    const authUsers = res?.data.authUsers;
 
     if (res?.status === 404) {
-      setAuthGroups([]);
-      setTotalGroups(0);
+      setUsers([]);
+      setTotalUsers(0);
       setIsLoading1(false);
       return;
     } else if (res?.status === 500) {
@@ -87,30 +87,29 @@ const AuthGroups = ({
         'Error',
         'Something went wrong. Could not fetch Auth Group(s)!',
       );
-      setAuthGroups([]);
-      setTotalGroups(0);
+      setUsers([]);
+      setTotalUsers(0);
       setIsLoading1(false);
       return;
     }
 
-    if (groupsToFilterOutById) {
-      const filtered = res?.data.authGroups?.filter(
-        (dash1) =>
-          !groupsToFilterOutById.some((dash2) => dash1.id === dash2.id),
+    if (usersToFilterOutById) {
+      const filtered = res?.data.authUsers?.filter(
+        (dash1) => !usersToFilterOutById.some((dash2) => dash1.id === dash2.id),
       );
 
-      filtered && setAuthGroups(filtered);
-      setTotalGroups(filtered?.length);
+      filtered && setUsers(filtered);
+      setTotalUsers(filtered?.length);
     } else {
-      authGroups && setAuthGroups(authGroups);
-      setTotalGroups(res?.data.totalGroups);
+      authUsers && setUsers(authUsers);
+      setTotalUsers(res?.data.count);
     }
     setIsLoading1(false);
   };
 
-  const delAuthGroup = async (arr: AuthGroupRef[]) => {
-    for (const [index, group] of arr.entries()) {
-      const res = await deleteAuthGroup({ id: group.id });
+  const delAuthUsers = async (arr: AuthUserRef[]) => {
+    for (const [index, user] of arr.entries()) {
+      const res = await deleteAuthGroup({ id: user.id });
 
       if (index === arr.length - 1) {
         if (res?.status === 200) {
@@ -119,7 +118,7 @@ const AuthGroups = ({
             'Success',
             'Auth Group(s) deleted!',
           );
-          await fetchAuthGroups();
+          await fetchAuthUsers();
         } else {
           notificationManagerRef?.current?.addMessage(
             'error',
@@ -131,7 +130,7 @@ const AuthGroups = ({
     }
   };
 
-  const addGroup = async (data: AuthGroupRef) => {
+  const addUser = async (data: AuthUserRef) => {
     if (!addMode || data.id) return;
 
     const res = await createAuthGroup({ name: data.name });
@@ -143,7 +142,7 @@ const AuthGroups = ({
         `AuthGroup(s) created!`,
       );
 
-      await fetchAuthGroups();
+      await fetchAuthUsers();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
@@ -152,11 +151,11 @@ const AuthGroups = ({
       );
     }
 
-    setGroupsToBeAdded(null);
+    setUsersToBeAdded(null);
     // setGroupsChanged(groupsChanged.filter((group) => !!group.id));
     // console.log({ groupsChanged });
     resetRowsState();
-    setGroupsChanged([]);
+    setUsersChanged([]);
     setAddMode(false);
   };
 
@@ -168,11 +167,11 @@ const AuthGroups = ({
   };
 
   const updateGroups = async () => {
-    console.log({ groupsChanged });
-    if (groupsChanged.length === 0) return;
+    console.log({ groupsChanged: usersChanged });
+    if (usersChanged.length === 0) return;
     const fails = [];
 
-    for (const [index, group] of groupsChanged.entries()) {
+    for (const [index, group] of usersChanged.entries()) {
       if (!group.id) break;
       const res = await updateAuthGroups({ id: group.id, name: group.name });
 
@@ -185,7 +184,7 @@ const AuthGroups = ({
         fails.push(res.status);
       }
 
-      if (index === groupsToBeUpdated.length - 1 && fails.length === 0) {
+      if (index === usersToBeUpdated.length - 1 && fails.length === 0) {
         notificationManagerRef?.current?.addMessage(
           'success',
           'Success',
@@ -194,9 +193,9 @@ const AuthGroups = ({
       }
     }
     resetRowsState();
-    setGroupsChanged([]);
-    setGroupsChanged([]);
-    setGroupsToBeUpdated([]);
+    setUsersChanged([]);
+    setUsersChanged([]);
+    setUsersToBeUpdated([]);
 
     setUpdateMode(false);
   };
@@ -213,13 +212,13 @@ const AuthGroups = ({
     }
 
     setAddMode(true);
-    setTotalGroups((totalGroups || 0) + 1);
-    setAuthGroups([...authGroups, { name: '', id: '' }]);
+    setTotalUsers((totalUsers || 0) + 1);
+    setUsers([...users, { name: '', id: '' }]);
   };
 
   const handleRowsStateChange = (e: Record<string, any>[]) => {
     // if(authGroups.some(group=> ))
-    setGroupsChanged(e as AuthGroupRef[]);
+    setUsersChanged(e as AuthGroupRef[]);
 
     // if (e.some((el) => !el.id)) {
     //   setAddMode(true);
@@ -233,7 +232,7 @@ const AuthGroups = ({
   };
 
   useEffect(() => {
-    if (!groupsChanged[groupsChanged.length - 1]?.id) {
+    if (!usersChanged[usersChanged.length - 1]?.id) {
       setAddMode(true);
       setUpdateMode(false);
     } else {
@@ -241,29 +240,27 @@ const AuthGroups = ({
       setUpdateMode(true);
     }
     if (addMode) {
-      setGroupsToBeAdded(
-        groupsChanged[groupsChanged.length - 1] as AuthGroupRef,
-      );
+      setUsersToBeAdded(usersChanged[usersChanged.length - 1] as AuthGroupRef);
     }
-    setGroupsToBeUpdated(groupsChanged.filter((group) => group.id));
-  }, [groupsChanged]);
+    setUsersToBeUpdated(usersChanged.filter((group) => group.id));
+  }, [usersChanged]);
 
   useEffect(() => {
-    fetchAuthGroups();
+    fetchAuthUsers();
   }, []);
 
   useEffect(() => {
     // groupsToBeAdded && addGroup(groupsToBeAdded);
-  }, [groupsToBeAdded]);
+  }, [usersToBeAdded]);
 
   return (
     <>
       <PVGridWebiny2
         onCellClicked={onCellClicked}
         cypressAtt="auth-groups-grid"
-        onRefresh={() => fetchAuthGroups()}
+        onRefresh={() => fetchAuthUsers()}
         add={() => handleOnAdd()}
-        onDelete={(e) => delAuthGroup(e)}
+        onDelete={(e) => delAuthUsers(e)}
         permissions={permissions}
         selection={selection}
         onParamsChange={onParamsChange}
@@ -272,7 +269,7 @@ const AuthGroups = ({
         updateModeOnRows={true}
         onUpdate={updateGroups}
         resetRowsChangedState={reset}
-        onCellValueChange={(e) => addGroup(e.data)}
+        onCellValueChange={(e) => addUser(e.data)}
         onCellsChange={(e) => handleOnCellsChange(e)}
         selectRowByCell={selectRowByCell}
         onRowsStateChange={(e) => handleRowsStateChange(e)}
@@ -293,8 +290,8 @@ const AuthGroups = ({
             filter: true,
           },
         ]}
-        rows={authGroups}
-        totalCount={totalGroups}
+        rows={users}
+        totalCount={totalUsers}
       />
 
       <NotificationManager ref={notificationManagerRef} />
@@ -302,4 +299,4 @@ const AuthGroups = ({
   );
 };
 
-export default AuthGroups;
+export default AuthUsersGrid;

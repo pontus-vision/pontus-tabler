@@ -139,9 +139,8 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
             Logout
           </button>
         </li>
-        <li>
+        <li className="sidebar__admin-options">
           <button
-            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
             type="button"
             onClick={() => setOpenAdminOptions(!openAdminOptions)}
           >
@@ -151,6 +150,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
             <ul>
               <li onClick={() => navigate('/dashboards')}>Dashboards</li>
               <li onClick={() => navigate('/auth/groups')}>Auth Groups</li>
+              <li onClick={() => navigate('/auth/users')}>Auth Users</li>
             </ul>
           )}
         </li>
