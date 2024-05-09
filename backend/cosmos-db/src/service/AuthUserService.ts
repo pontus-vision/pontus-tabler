@@ -1,4 +1,6 @@
 import {
+  AuthGroupCreateReq,
+  AuthGroupDashboardRef,
   AuthGroupRef,
   AuthUserAndGroupsRef,
   AuthUserCreateReq,
@@ -20,11 +22,23 @@ import {
   AuthUserUpdateRes,
   AuthUsersReadReq,
   AuthUsersReadRes,
+  ConflictEntityError,
   LoginReq,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
-import { Item, ItemResponse, PartitionKeyDefinition, PatchOperation, UniqueKeyPolicy } from '@azure/cosmos';
-import { InternalServerError, NotFoundError } from '../generated/api';
+import {
+  Container,
+  Item,
+  ItemResponse,
+  PartitionKeyDefinition,
+  PatchOperation,
+  UniqueKeyPolicy,
+} from '@azure/cosmos';
+import {
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+} from '../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
@@ -39,9 +53,36 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
   uniqueKeys: [{ paths: ['/username'] }],
 };
 
-const findUsername = async(username:string): Promise<AuthUserRef> => {
-  const query = `SELECT * FROM c WHERE name=${username}`;
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+const initialDocs: AuthUserCreateReq[] = [
+  {
+    username: 'ADMIN',
+    password: 'admin',
+  },
+  {
+    username: 'USER',
+    password: 'user'
+  },
+];
+
+export const initiateAuthUserContainer = async (): Promise<Container> => {
+  for (const doc of initialDocs) {
+    const hashedPassword = await bcrypt.hash(doc.password, 10);
+    doc.password = hashedPassword;
+  }
+
+  const authUserContainer = await fetchContainer(
+    AUTH_USERS,
+    partitionKey,
+    uniqueKeyPolicy,
+    initialDocs,
+  );
+
+  return authUserContainer;
+};
+
+const findUsername = async (username: string): Promise<AuthUserRef> => {
+  const query = `SELECT * FROM c WHERE c.username="${username}"`;
+  const authUserContainer = await initiateAuthUserContainer();
 
   const res = await authUserContainer.items
     .query({
@@ -50,33 +91,31 @@ const findUsername = async(username:string): Promise<AuthUserRef> => {
     })
     .fetchAll();
 
-  if(res.resources.length === 0) {
-    throw new NotFoundError(`No user found with username: ${username}`)
-  }
-
-  return res.resources[0]
-}
+  return res.resources[0];
+};
 
 export const authUserCreate = async (
   data: AuthUserCreateReq,
 ): Promise<AuthUserCreateRes> => {
+  if (data.password.length < 6) {
+    throw new BadRequestError('Please, insert at least 6 characters.');
+  }
 
-  // const usern
+  const user = await findUsername(data.username);
 
-  // try {
-    
-   
-    
+  if (user) {
+    throw new ConflictEntityError(`${data.username} already registered`);
+  }
 
-  //   res.status(201).json({ message: 'User created successfully' });
-  // } catch (error) {
-  //   console.error(error);
-  //   res.status(500).json({ message: 'Internal server error' });
-  // }
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  const authUserContainer = await fetchContainer(AUTH_USERS);
- 
-  const res = await authUserContainer.items.create({ ...data, authGroups: [] });
+  const authUserContainer = await initiateAuthUserContainer();
+
+  const res = await authUserContainer.items.create({
+    ...data,
+    password: hashedPassword,
+    authGroups: [],
+  });
 
   const { id, username } = res.resource;
 
@@ -89,12 +128,13 @@ export const authUserCreate = async (
 export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
 
   const userId = data.id;
+  const usernameInput = data.username
 
   const res = (await authUserContainer
-    .item(userId, userId)
+    .item(userId, usernameInput)
     .read()) as ItemResponse<AuthUserRef>;
 
   if (res.statusCode === 404) {
@@ -112,11 +152,11 @@ export const authUserRead = async (
 export const authUserUpdate = async (
   data: AuthUserUpdateReq,
 ): Promise<AuthUserUpdateRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
 
   try {
     const res = (await authUserContainer
-      .item(data.id, data.id)
+      .item(data.id, data.username)
       .patch([
         { op: 'replace', path: '/name', value: data.username },
       ])) as ItemResponse<AuthUserRef>;
@@ -137,10 +177,10 @@ export const authUserUpdate = async (
 export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
 
-  const authUserDoc = await authUserContainer.item(data.id, data.id);
+  const authUserDoc = await authUserContainer.item(data.id, data.username);
 
   const res = (await authUserDoc.read()) as ItemResponse<AuthUserAndGroupsRef>;
 
@@ -192,7 +232,7 @@ export const authUsersRead = async (
 export const authUserGroupsCreate = async (
   data: AuthUserGroupsCreateReq,
 ): Promise<AuthUserGroupsCreateRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
 
   const authUserDoc = await authUserContainer.item(data.id, data.id);
@@ -251,7 +291,7 @@ export const authUserGroupsCreate = async (
 export const authUserGroupsRead = async (
   data: AuthUserGroupsReadReq,
 ): Promise<AuthUserGroupsReadRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
 
   const userId = data.id;
 
@@ -297,7 +337,7 @@ export const authUserGroupsRead = async (
 export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,
 ): Promise<AuthUserGroupsDeleteRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
 
   const authUserDoc = await authUserContainer.item(data.id, data.id);
@@ -349,36 +389,91 @@ export const authUserGroupsDelete = async (
   }
 };
 
+interface IAuthUser extends AuthUserAndGroupsRef {
+  password: string;
+}
 
+export const loginUser = async (data: LoginReq) => {
+  const query = `SELECT username, password, authGroups from authUsers c WHERE c.username = ${data.user}`;
 
-// const loginUser = async (data: LoginReq) => {
-//   try {
-//     const query = `SELECT ${data.user} p IN c["authGroups"] ${str2}`;
+  const authUserContainer = await initiateAuthUserContainer();
+  const res = await authUserContainer.items
+    .query({
+      query,
+      parameters: [],
+    })
+    .fetchAll();
 
-//   const res = await authUserContainer.items
-//     .query({
-//       query,
-//       parameters: [],
-//     })
-//     .fetchAll();
+  if (res.resources.length === 0) {
+    throw new NotFoundError(`${data.user} not found.`);
+  }
+  const user = res.resources[0] as IAuthUser;
+  const password = user.password;
+  const authGroups = user.authGroups;
 
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
+  const isPasswordValid = await bcrypt.compare(password, data.password);
 
-//     const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new BadRequestError('Wrong password');
+  }
 
-//     if (!isPasswordValid) {
-//       return res.status(401).json({ message: 'Invalid credentials' });
-//     }
+  const dashboardsAuth = [];
 
-//     const token = jwt.sign({ userId: user._id }, 'secret_key', {
-//       expiresIn: '1h',
-//     });
+  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
 
-//     res.json({ token });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// };
+  for (const group of authGroups) {
+    const res = (await authGroupContainer.item(group.id, group.id).read())
+      .resource.dashboards as AuthGroupDashboardRef;
+
+    dashboardsAuth.push(res);
+  }
+  const token = jwt.sign(
+    { userId: user.id, dashboardsAuth },
+    process.env.JWT_SECRET_KEY,
+    {
+      expiresIn: '1h',
+    },
+  );
+  const refreshToken = jwt.sign(user, process.env.REFRESH_JWT_SECRET_KEY);
+  //   res.json({ token })
+  return { accessToken: token, refreshToken };
+};
+
+export const authenticateToken = async (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+
+  const claims = getJwtClaims(token);
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    console.log(err);
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    return true;
+  });
+};
+
+function base64UrlDecode(str) {
+  // Replace '-' with '+' and '_' with '/'
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  // Pad the string with '=' to make its length a multiple of 4
+  while (str.length % 4) {
+    str += '=';
+  }
+  // Decode the Base64 string
+  return atob(str);
+}
+
+function getJwtClaims(token) {
+  // Split the token into parts
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    throw new Error('Invalid JWT token');
+  }
+  // Decode the payload
+  const payload = base64UrlDecode(parts[1]);
+  // Parse the JSON string to get the claims
+  const claims = JSON.parse(payload);
+  return claims;
+}
