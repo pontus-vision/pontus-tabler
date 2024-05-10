@@ -24,6 +24,7 @@ import {
   AuthUsersReadRes,
   ConflictEntityError,
   LoginReq,
+  LoginRes,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
 import {
@@ -41,7 +42,8 @@ import {
 } from '../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-
+import dotenv from 'dotenv';
+dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const AUTH_GROUPS = 'auth_groups';
 
@@ -392,9 +394,9 @@ export const authUserGroupsDelete = async (
 interface IAuthUser extends AuthUserAndGroupsRef {
   password: string;
 }
-
-export const loginUser = async (data: LoginReq) => {
-  const query = `SELECT username, password, authGroups from authUsers c WHERE c.username = ${data.user}`;
+let refreshTokens = []
+export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
+  const query = `SELECT c.username, c.password, c.authGroups, c.id from authUsers c WHERE c.username = "${data.username}"`;
 
   const authUserContainer = await initiateAuthUserContainer();
   const res = await authUserContainer.items
@@ -405,13 +407,13 @@ export const loginUser = async (data: LoginReq) => {
     .fetchAll();
 
   if (res.resources.length === 0) {
-    throw new NotFoundError(`${data.user} not found.`);
+    throw new NotFoundError(`${data.username} not found.`);
   }
   const user = res.resources[0] as IAuthUser;
   const password = user.password;
   const authGroups = user.authGroups;
 
-  const isPasswordValid = await bcrypt.compare(password, data.password);
+  const isPasswordValid = await bcrypt.compare(data.password, password);
 
   if (!isPasswordValid) {
     throw new BadRequestError('Wrong password');
@@ -435,23 +437,27 @@ export const loginUser = async (data: LoginReq) => {
     },
   );
   const refreshToken = jwt.sign(user, process.env.REFRESH_JWT_SECRET_KEY);
+  refreshTokens.push(refreshToken)
   //   res.json({ token })
   return { accessToken: token, refreshToken };
 };
 
-export const authenticateToken = async (req, res) => {
+export const authenticateToken = (req, res) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (token == null) return res.sendStatus(401);
 
   const claims = getJwtClaims(token);
 
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
     console.log(err);
-    if (err) return res.sendStatus(403);
+    if (err) throw new BadRequestError(`token needed.`) 
     req.user = user;
-    return true;
+    return true
   });
+  return claims;
+
+  
 };
 
 function base64UrlDecode(str) {
