@@ -10,7 +10,7 @@ service:
         name: LoginReq
         body: 
           properties:
-            user: string
+            username: string
             password: string
       response:
         docs: User logged in successfully
@@ -1174,7 +1174,7 @@ service:
           properties:
             id: string
             name: string
-            authUsers: list<AuthUserRef>
+            authUsers: list<AuthUserIdAndUsername>
       response:
         type: AuthGroupUsersCreateRes
       errors:
@@ -1219,7 +1219,7 @@ service:
         body:
           properties:
             id: string
-            authUsers: list<AuthUserRef>
+            authUsers: list<AuthUserIdAndUsername>
       response:
         type: AuthGroupUsersUpdateRes
       errors:
@@ -1329,6 +1329,7 @@ service:
             username:
               docs: Name of the user
               type: string
+            password: string
       response:
         docs: User created successfully
         type: AuthUserCreateRes
@@ -1355,7 +1356,7 @@ service:
         body:
           properties: {}
           extends:
-            - AuthUserRef
+            - AuthUserIdAndUsername
       response:
         type: AuthUserUpdateRes
       errors:
@@ -1375,6 +1376,7 @@ service:
         body:
           properties:
             id: string
+            username: string
       response:
         type: AuthUserDeleteRes
       errors:
@@ -1393,6 +1395,7 @@ service:
         body:
           properties:
             id: string
+            username: string
       response:
         docs: Successful response
         type: AuthUserReadRes
@@ -1482,7 +1485,10 @@ service:
         - InternalServerError
         - NotFoundError
 types:
-  LoginRes: string
+  LoginRes: 
+    properties:
+      accessToken: string
+      refreshToken: string
   TableEdgeReadRes:
     properties:
       name: string
@@ -1546,7 +1552,7 @@ types:
       - AuthGroupUsersRef
   AuthGroupUsersReadRes:
     properties:
-      authUsers: list<AuthUserRef>
+      authUsers: list<AuthUserIdAndUsername>
       count: integer
   AuthGroupUsersUpdateRes:
     properties:
@@ -1557,7 +1563,7 @@ types:
   AuthGroupUsersRef:
     properties:
       name: string
-      authUsers: list<AuthUserRef>
+      authUsers: list<AuthUserIdAndUsername>
   AuthGroupCreateRes:
     properties: {}
     extends:
@@ -1590,7 +1596,7 @@ types:
         docs: Name of the group
         type: string
       dashboards: optional<list<Dashboard>>
-      authUsers: optional<list<AuthUserRef>>
+      authUsers: optional<list<AuthUserIdAndUsername>>
       parents:
         docs: Parent groups of the group (optional)
         type: optional<list<string>>
@@ -1828,27 +1834,31 @@ types:
         docs: Table columns associated with the table
         type: optional<list<TablesReadResTablesItem>>
   TableDeleteRes: string
+  AuthUserIdAndUsername:
+    properties:
+      username: string
+      id: string
   AuthUserCreateRes:
     properties: {}
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUserReadRes:
     properties: {}
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUserUpdateRes:
     properties: {}
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUsersReadRes:
     properties:
       count: integer
-      authUsers: list<AuthUserRef>
+      authUsers: list<AuthUserIdAndUsername>
   AuthUserAndGroupsRef:
     properties:
       authGroups: list<AuthGroupRef>
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUserGroupsCreateRes:
     properties: {}
     extends:
@@ -1864,7 +1874,7 @@ types:
   AuthUserGroupsReadRes:
     properties:
       count: integer
-      authGroups: list<AuthGroupRef>
+      authGroups: list<AuthUserIdAndUsername>
   AuthUserGroupsDeleteRes: string
   AuthUserRef:
     properties:
@@ -1874,6 +1884,7 @@ types:
       username:
         docs: Name of the user
         type: string
+      password: string
   AuthUserDeleteRes: string
   DashboardGroupAuthCreateRes:
     properties:
