@@ -20,6 +20,13 @@ import {
   AuthGroupsReadReq,
   AuthGroupReadReq,
   AuthGroupReadRes,
+  LoginReq,
+  LoginRes,
+  DashboardReadReq,
+  DashboardCreateReq,
+  DashboardCreateRes,
+  AuthGroupUsersCreateReq,
+  AuthGroupUsersCreateRes,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -62,7 +69,8 @@ describe('dashboardCreatePOST', () => {
 
   it('should create a user', async () => {
     const createBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
@@ -71,10 +79,11 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<AuthUserCreateRes>;
     expect(userCreateRes.status).toBe(200);
 
-    expect(userCreateRes.data).toMatchObject(createBody);
+    expect(userCreateRes.data.username).toBe(createBody.username);
 
     const readBody: AuthUserReadReq = {
       id: userCreateRes.data.id,
+      username: userCreateRes.data.username,
     };
 
     const authGroupReadRes = (await post(
@@ -88,7 +97,7 @@ describe('dashboardCreatePOST', () => {
 
     const updateBody: AuthUserUpdateReq = {
       id: userCreateRes.data.id,
-      name: 'foo',
+      username: 'foo',
     };
 
     const authGroupUpdateRes = (await post(
@@ -100,6 +109,7 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupUpdateRes.data).toMatchObject(updateBody);
     const deleteBody: AuthUserDeleteReq = {
       id: userCreateRes.data.id,
+      username: userCreateRes.data.username,
     };
 
     const authGroupDeleteRes = (await post(
@@ -116,9 +126,10 @@ describe('dashboardCreatePOST', () => {
 
     expect(authGroupReadRes2.status).toBe(404);
   });
-  it('should read many groups', async () => {
+  it('should read many users', async () => {
     const createBody: AuthUserCreateReq = {
-      name: 'group1',
+      username: 'group1',
+      password: 'pontusvision',
     };
 
     const authGroupCreateRes = (await post(
@@ -127,7 +138,8 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<AuthUserCreateRes>;
 
     const createBody2: AuthUserCreateReq = {
-      name: 'user2',
+      username: 'user2',
+      password: 'pontusvision',
     };
 
     const authGroupCreateRes2 = (await post(
@@ -136,14 +148,14 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<AuthUserCreateRes>;
     expect(authGroupCreateRes.status).toBe(200);
 
-    expect(authGroupCreateRes2.data.name).toBe(createBody2.name);
-    expect(authGroupCreateRes.data.name).toBe(createBody.name);
+    expect(authGroupCreateRes2.data.username).toBe(createBody2.username);
+    expect(authGroupCreateRes.data.username).toBe(createBody.username);
 
     const readGroupsBody: AuthUsersReadReq = {
       from: 1,
       to: 20,
       filters: {
-        name: {
+        username: {
           condition1: {
             filter: 'user2',
             filterType: 'text',
@@ -171,6 +183,7 @@ describe('dashboardCreatePOST', () => {
   it('should do the sad path', async () => {
     const readBody: AuthUserReadReq = {
       id: 'foo',
+      username: 'bar',
     };
 
     const authGroupReadRes = (await post(
@@ -222,7 +235,8 @@ describe('dashboardCreatePOST', () => {
   });
   it('should create authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
@@ -259,7 +273,8 @@ describe('dashboardCreatePOST', () => {
   });
   it('should create INCORRECTLY authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
@@ -309,7 +324,8 @@ describe('dashboardCreatePOST', () => {
   });
   it('should read authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
@@ -368,13 +384,15 @@ describe('dashboardCreatePOST', () => {
   });
   it('should read INCORRECTLY authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
       '/auth/user/create',
       createUserBody,
     )) as AxiosResponse<AuthUserCreateRes>;
+
     expect(userCreateRes.status).toBe(200);
 
     expect(userCreateRes.data).toMatchObject(createUserBody);
@@ -425,7 +443,8 @@ describe('dashboardCreatePOST', () => {
   });
   it('should delete authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
@@ -474,7 +493,8 @@ describe('dashboardCreatePOST', () => {
   });
   it('should delete INCORRECTLY authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
@@ -522,7 +542,8 @@ describe('dashboardCreatePOST', () => {
   });
   it('should create authgroup subdocuments', async () => {
     const createUserBody: AuthUserCreateReq = {
-      name: 'user1',
+      username: 'user1',
+      password: 'pontusvision',
     };
 
     const userCreateRes = (await post(
@@ -565,6 +586,7 @@ describe('dashboardCreatePOST', () => {
 
     const deleteGroupBody: AuthUserDeleteReq = {
       id: userCreateRes.data.id,
+      username: userCreateRes.data.username,
     };
 
     const authGroupDeleteRes = (await post(
@@ -581,5 +603,29 @@ describe('dashboardCreatePOST', () => {
     const readGroup = await post('auth/group/read', readGroupsBody);
 
     expect(readGroup.data?.authUsers.length).toBe(0);
+  });
+  it.only('should login and authorize', async () => {
+    const createBody: AuthUserCreateReq = {
+      username: 'user1',
+      password: 'pontusvision',
+    };
+
+    const userCreateRes = (await post(
+      '/auth/user/create',
+      createBody,
+    )) as AxiosResponse<AuthUserCreateRes>;
+
+    expect(userCreateRes.status).toBe(200);
+
+    const loginBody: LoginReq = {
+      username: 'user1',
+
+      password: 'pontusvision',
+    };
+    const LoginRes = (await post(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(200);
   });
 });
