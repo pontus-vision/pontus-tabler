@@ -53,7 +53,7 @@ export const fetchContainer = async (
     paths: ['/id'],
   },
   uniqueKeyPolicy: UniqueKeyPolicy | undefined = undefined,
-  initialDoc?: Record<any, any>,
+  initialDocs?: Record<any, any>[],
 ): Promise<Container | undefined> => {
   const database = await fetchDatabase(cosmosDbName);
 
@@ -66,8 +66,10 @@ export const fetchContainer = async (
   );
 
   // Creating initial document when container is created
-  if (statusCode === 201 && initialDoc) {
-    const res = await container.items.create(initialDoc);
+  if (statusCode === 201 && initialDocs) {
+    for (const doc of initialDocs) {
+      const res = await container.items.create(doc);
+    }
   }
 
   return container;
