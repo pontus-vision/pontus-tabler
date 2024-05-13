@@ -25,6 +25,8 @@ import {
   ConflictEntityError,
   LoginReq,
   LoginRes,
+  LogoutReq,
+  LogoutRes,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
 import {
@@ -395,6 +397,7 @@ interface IAuthUser extends AuthUserAndGroupsRef {
   password: string;
 }
 let refreshTokens = []
+
 export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
   const query = `SELECT c.username, c.password, c.authGroups, c.id from authUsers c WHERE c.username = "${data.username}"`;
 
@@ -441,7 +444,18 @@ export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
   //   res.json({ token })
   return { accessToken: token, refreshToken };
 };
-
+export const logout = (data: LogoutReq): string => {
+  const refreshToken = data.token
+  if (refreshToken == null) throw new BadRequestError('Please insert a token.')
+  if (!refreshTokens.includes(refreshToken)) throw new NotFoundError('refresh token not found.')
+  let res;
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+    if (err) throw new BadRequestError('Wrong token inserted.')
+    const accessToken = generateAccessToken({ name: user.name })
+    res = accessToken
+  })
+  return res
+}
 export const authenticateToken = (req, res) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -459,7 +473,9 @@ export const authenticateToken = (req, res) => {
 
   
 };
-
+function generateAccessToken(user) {
+  return jwt.sign(user, process.env.REFRESH_JWT_SECRET_KEY, { expiresIn: '15s' })
+}
 function base64UrlDecode(str) {
   // Replace '-' with '+' and '_' with '/'
   str = str.replace(/-/g, '+').replace(/_/g, '/');

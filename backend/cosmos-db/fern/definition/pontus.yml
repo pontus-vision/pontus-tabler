@@ -19,6 +19,22 @@ service:
         - BadRequestError
         - InternalServerError
         - NotFoundError
+    logoutPOST:
+      path: /logout
+      method: POST
+      auth: true
+      request:
+        name: LogoutReq
+        body: 
+          properties:
+            token: string
+      response:
+        docs: User logged in successfully
+        type: LogoutRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - NotFoundError
     menuCreatePOST:
       path: /menu/create
       method: POST
@@ -1489,6 +1505,8 @@ types:
     properties:
       accessToken: string
       refreshToken: string
+  
+  LogoutRes: string 
   TableEdgeReadRes:
     properties:
       name: string

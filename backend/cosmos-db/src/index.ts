@@ -68,6 +68,7 @@ import {
   authUserUpdate,
   authUsersRead,
   loginUser,
+  logout,
 } from './service/AuthUserService';
 
 export default new PontusService({
@@ -75,6 +76,11 @@ export default new PontusService({
     const response = await loginUser(req.body);
 
     res.send(response);
+  },
+  logoutPost:async(req, res) =>{
+    const response = await logout(req.body)
+
+    res.send(response)
   },
   authGroupCreatePost: async (req, res) => {
     const response = await createAuthGroup(req.body);
