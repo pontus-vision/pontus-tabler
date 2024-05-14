@@ -1,4 +1,5 @@
 import {
+  AuthUserRef,
   AuthUserCreateReq,
   AuthUserUpdateReq,
   AuthUserCreateRes,
@@ -27,6 +28,8 @@ import {
   DashboardCreateRes,
   AuthGroupUsersCreateReq,
   AuthGroupUsersCreateRes,
+  LogoutReq,
+  AuthGroupDashboardCreateReq,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -36,7 +39,7 @@ import { srv } from '../server';
 import { post } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { deleteContainer } from '../cosmos-utils';
-import { AUTH_USERS } from '../service/AuthUserService';
+import { AUTH_USERS, loginUser } from '../service/AuthUserService';
 import { AUTH_GROUPS } from '../service/AuthGroupService';
 
 // // Mock the utils.writeJson function
@@ -53,12 +56,48 @@ jest.setTimeout(1000000);
 
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
+  let token;
+  const postReq = async (
+    endpoint: string,
+    body: Record<string, any>,
+  ): Promise<AxiosResponse> => {
+    const res = (await post(endpoint, body, {
+      Authorization: 'Bearer ' + token,
+    })) as AxiosResponse<any, any>;
 
+    return res;
+  };
+
+  let user = {} as AuthUserCreateRes;
   beforeEach(async () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
     await deleteContainer(AUTH_USERS);
     await deleteContainer(AUTH_GROUPS);
+
+    const createBody: AuthUserCreateReq = {
+      username: 'user1',
+      password: 'pontusvision',
+    };
+    const userCreateRes = (await postReq(
+      '/auth/user/create',
+      createBody,
+    )) as AxiosResponse<AuthUserCreateRes>;
+    expect(userCreateRes.status).toBe(200);
+
+    user = userCreateRes.data;
+    const loginBody: LoginReq = {
+      username: 'user1',
+
+      password: 'pontusvision',
+    };
+    const LoginRes = (await postReq(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(200);
+
+    token = LoginRes.data.accessToken;
     // await deleteDatabase('pv_db');
   });
 
@@ -69,11 +108,11 @@ describe('dashboardCreatePOST', () => {
 
   it('should create a user', async () => {
     const createBody: AuthUserCreateReq = {
-      username: 'user1',
+      username: 'user2',
       password: 'pontusvision',
     };
 
-    const userCreateRes = (await post(
+    const userCreateRes = (await postReq(
       '/auth/user/create',
       createBody,
     )) as AxiosResponse<AuthUserCreateRes>;
@@ -86,7 +125,7 @@ describe('dashboardCreatePOST', () => {
       username: userCreateRes.data.username,
     };
 
-    const authGroupReadRes = (await post(
+    const authGroupReadRes = (await postReq(
       '/auth/user/read',
       readBody,
     )) as AxiosResponse<AuthUserReadRes>;
@@ -97,10 +136,10 @@ describe('dashboardCreatePOST', () => {
 
     const updateBody: AuthUserUpdateReq = {
       id: userCreateRes.data.id,
-      username: 'foo',
+      username: userCreateRes.data.username,
     };
 
-    const authGroupUpdateRes = (await post(
+    const authGroupUpdateRes = (await postReq(
       '/auth/user/update',
       updateBody,
     )) as AxiosResponse<AuthUserCreateRes>;
@@ -112,14 +151,14 @@ describe('dashboardCreatePOST', () => {
       username: userCreateRes.data.username,
     };
 
-    const authGroupDeleteRes = (await post(
+    const authGroupDeleteRes = (await postReq(
       '/auth/user/delete',
       deleteBody,
     )) as AxiosResponse<AuthUserDeleteRes>;
 
     expect(authGroupDeleteRes.status).toBe(200);
 
-    const authGroupReadRes2 = (await post(
+    const authGroupReadRes2 = (await postReq(
       '/auth/user/read',
       readBody,
     )) as AxiosResponse<AuthUserReadRes>;
@@ -132,7 +171,7 @@ describe('dashboardCreatePOST', () => {
       password: 'pontusvision',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       'auth/user/create',
       createBody,
     )) as AxiosResponse<AuthUserCreateRes>;
@@ -142,7 +181,7 @@ describe('dashboardCreatePOST', () => {
       password: 'pontusvision',
     };
 
-    const authGroupCreateRes2 = (await post(
+    const authGroupCreateRes2 = (await postReq(
       'auth/user/create',
       createBody2,
     )) as AxiosResponse<AuthUserCreateRes>;
@@ -172,7 +211,7 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const readUsers = (await post(
+    const readUsers = (await postReq(
       'auth/users/read',
       readGroupsBody,
     )) as AxiosResponse<AuthUsersReadRes>;
@@ -186,19 +225,19 @@ describe('dashboardCreatePOST', () => {
       username: 'bar',
     };
 
-    const authGroupReadRes = (await post(
+    const authGroupReadRes = (await postReq(
       'auth/user/read',
       readBody,
     )) as AxiosResponse<AuthUserReadRes>;
     expect(authGroupReadRes.status).toBe(404);
-    const authGroupUpdateRes = (await post('/auth/user/update', {
-      name: 'bar',
+    const authGroupUpdateRes = (await postReq('/auth/user/update', {
+      username: 'bar',
       id: 'foo',
     })) as AxiosResponse<AuthUserCreateRes>;
 
     expect(authGroupUpdateRes.status).toBe(404);
 
-    const authGroupDeleteRes = (await post(
+    const authGroupDeleteRes = (await postReq(
       '/auth/user/delete',
       readBody,
     )) as AxiosResponse<AuthUserCreateRes>;
@@ -226,7 +265,7 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const readGroups = (await post(
+    const readGroups = (await postReq(
       'auth/users/read',
       readGroupsBody,
     )) as AxiosResponse<AuthUsersReadRes>;
@@ -234,24 +273,11 @@ describe('dashboardCreatePOST', () => {
     expect(readGroups.status).toBe(404);
   });
   it('should create authgroup subdocuments', async () => {
-    const createUserBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createUserBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(userCreateRes.status).toBe(200);
-
-    expect(userCreateRes.data).toMatchObject(createUserBody);
-
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
@@ -260,11 +286,13 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
     const createUserGroupBody: AuthUserGroupsCreateReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+      username: user.username,
+
       authGroupsIds: [authGroupCreateRes.data.id],
     };
 
-    const authUserGroupCreateRes = (await post(
+    const authUserGroupCreateRes = (await postReq(
       '/auth/user/groups/create',
       createUserGroupBody,
     )) as AxiosResponse<AuthUserGroupsCreateRes>;
@@ -272,24 +300,11 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupCreateRes.status).toBe(200);
   });
   it('should create INCORRECTLY authgroup subdocuments', async () => {
-    const createUserBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createUserBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(userCreateRes.status).toBe(200);
-
-    expect(userCreateRes.data).toMatchObject(createUserBody);
-
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
@@ -298,49 +313,43 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
     const createUserGroupBody: AuthUserGroupsCreateReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+      username: user.username,
       authGroupsIds: [
         'foo',
         // authGroupCreateRes.data.id
       ],
     };
 
-    const authUserGroupCreateRes = (await post(
+    const authUserGroupCreateRes = (await postReq(
       '/auth/user/groups/create',
       createUserGroupBody,
     )) as AxiosResponse<AuthUserGroupsCreateRes>;
 
     expect(authUserGroupCreateRes.status).toBe(404);
 
-    const authUserGroupCreateRes2 = (await post('/auth/user/groups/create', {
+    const createUserGroups: AuthUserGroupsCreateReq = {
       id: 'foo',
+      username: 'bar',
       authGroupsIds: [
         'foo',
         // authGroupCreateRes.data.id
       ],
-    })) as AxiosResponse<AuthUserGroupsCreateRes>;
+    };
+
+    const authUserGroupCreateRes2 = (await postReq(
+      '/auth/user/groups/create',
+      createUserGroups,
+    )) as AxiosResponse<AuthUserGroupsCreateRes>;
 
     expect(authUserGroupCreateRes2.status).toBe(404);
   });
   it('should read authgroup subdocuments', async () => {
-    const createUserBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createUserBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(userCreateRes.status).toBe(200);
-
-    expect(userCreateRes.data).toMatchObject(createUserBody);
-
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
@@ -349,11 +358,12 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
     const createUserGroupBody: AuthUserGroupsCreateReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+      username: user.username,
       authGroupsIds: [authGroupCreateRes.data.id],
     };
 
-    const authUserGroupCreateRes = (await post(
+    const authUserGroupCreateRes = (await postReq(
       '/auth/user/groups/create',
       createUserGroupBody,
     )) as AxiosResponse<AuthUserGroupsCreateRes>;
@@ -361,7 +371,7 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupCreateRes.status).toBe(200);
 
     const readUserGroupsBody: AuthUserGroupsReadReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
       filters: {
         name: {
           filter: 'group',
@@ -373,7 +383,7 @@ describe('dashboardCreatePOST', () => {
       to: 20,
     };
 
-    const authUserGroupReadRes = (await post(
+    const authUserGroupReadRes = (await postReq(
       '/auth/user/groups/read',
       readUserGroupsBody,
     )) as AxiosResponse<AuthUserGroupsReadRes>;
@@ -383,25 +393,11 @@ describe('dashboardCreatePOST', () => {
     );
   });
   it('should read INCORRECTLY authgroup subdocuments', async () => {
-    const createUserBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createUserBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-
-    expect(userCreateRes.status).toBe(200);
-
-    expect(userCreateRes.data).toMatchObject(createUserBody);
-
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
@@ -410,11 +406,13 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
     const createUserGroupBody: AuthUserGroupsCreateReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+
+      username: user.username,
       authGroupsIds: [authGroupCreateRes.data.id],
     };
 
-    const authUserGroupCreateRes = (await post(
+    const authUserGroupCreateRes = (await postReq(
       '/auth/user/groups/create',
       createUserGroupBody,
     )) as AxiosResponse<AuthUserGroupsCreateRes>;
@@ -422,7 +420,7 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupCreateRes.status).toBe(200);
 
     const readUserGroupsBody: AuthUserGroupsReadReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
       filters: {
         name: {
           filter: 'foo',
@@ -434,7 +432,7 @@ describe('dashboardCreatePOST', () => {
       to: 20,
     };
 
-    const authUserGroupReadRes = (await post(
+    const authUserGroupReadRes = (await postReq(
       '/auth/user/groups/read',
       readUserGroupsBody,
     )) as AxiosResponse<AuthUserGroupsReadRes>;
@@ -442,24 +440,11 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupReadRes.status).toBe(404);
   });
   it('should delete authgroup subdocuments', async () => {
-    const createUserBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createUserBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(userCreateRes.status).toBe(200);
-
-    expect(userCreateRes.data).toMatchObject(createUserBody);
-
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
@@ -468,11 +453,12 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
     const createUserGroupBody: AuthUserGroupsCreateReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+      username: user.username,
       authGroupsIds: [authGroupCreateRes.data.id],
     };
 
-    const authUserGroupCreateRes = (await post(
+    const authUserGroupCreateRes = (await postReq(
       '/auth/user/groups/create',
       createUserGroupBody,
     )) as AxiosResponse<AuthUserGroupsCreateRes>;
@@ -480,11 +466,12 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupCreateRes.status).toBe(200);
 
     const authUserGroupDeleteBody: AuthUserGroupsDeleteReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+      username: user.username,
       authGroupsIds: [authGroupCreateRes.data.id],
     };
 
-    const authUserGroupDeleteRes = (await post(
+    const authUserGroupDeleteRes = (await postReq(
       '/auth/user/groups/delete',
       authUserGroupDeleteBody,
     )) as AxiosResponse<AuthUserGroupsDeleteRes>;
@@ -492,24 +479,11 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupDeleteRes.status).toBe(200);
   });
   it('should delete INCORRECTLY authgroup subdocuments', async () => {
-    const createUserBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createUserBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(userCreateRes.status).toBe(200);
-
-    expect(userCreateRes.data).toMatchObject(createUserBody);
-
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
@@ -519,21 +493,23 @@ describe('dashboardCreatePOST', () => {
 
     const authUserGroupDeleteBody: AuthUserGroupsDeleteReq = {
       id: 'foo',
+      username: 'bar',
       authGroupsIds: [authGroupCreateRes.data.id],
     };
 
-    const authUserGroupDeleteRes = (await post(
+    const authUserGroupDeleteRes = (await postReq(
       '/auth/user/groups/delete',
       authUserGroupDeleteBody,
     )) as AxiosResponse<AuthUserGroupsDeleteRes>;
 
     expect(authUserGroupDeleteRes.status).toBe(404);
     const authUserGroupDeleteBody2: AuthUserGroupsDeleteReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+      username: user.username,
       authGroupsIds: ['foo'],
     };
 
-    const authUserGroupDeleteRes2 = (await post(
+    const authUserGroupDeleteRes2 = (await postReq(
       '/auth/user/groups/delete',
       authUserGroupDeleteBody2,
     )) as AxiosResponse<AuthUserGroupsDeleteRes>;
@@ -541,24 +517,11 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupDeleteRes2.status).toBe(404);
   });
   it('should create authgroup subdocuments', async () => {
-    const createUserBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createUserBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(userCreateRes.status).toBe(200);
-
-    expect(userCreateRes.data).toMatchObject(createUserBody);
-
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
 
-    const authGroupCreateRes = (await post(
+    const authGroupCreateRes = (await postReq(
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
@@ -567,11 +530,12 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
     const createUserGroupBody: AuthUserGroupsCreateReq = {
-      id: userCreateRes.data.id,
+      id: user.id,
+      username: user.username,
       authGroupsIds: [authGroupCreateRes.data.id],
     };
 
-    const authUserGroupCreateRes = (await post(
+    const authUserGroupCreateRes = (await postReq(
       '/auth/user/groups/create',
       createUserGroupBody,
     )) as AxiosResponse<AuthUserGroupsCreateRes>;
@@ -582,14 +546,14 @@ describe('dashboardCreatePOST', () => {
       id: authGroupCreateRes.data.id,
     };
 
-    const readGroup2 = await post('auth/group/read', readGroupsBody2);
+    const readGroup2 = await postReq('auth/group/read', readGroupsBody2);
 
     const deleteGroupBody: AuthUserDeleteReq = {
-      id: userCreateRes.data.id,
-      username: userCreateRes.data.username,
+      id: user.id,
+      username: user.username,
     };
 
-    const authGroupDeleteRes = (await post(
+    const authGroupDeleteRes = (await postReq(
       '/auth/user/delete',
       deleteGroupBody,
     )) as AxiosResponse<AuthUserDeleteRes>;
@@ -600,32 +564,63 @@ describe('dashboardCreatePOST', () => {
       id: authGroupCreateRes.data.id,
     };
 
-    const readGroup = await post('auth/group/read', readGroupsBody);
+    const readGroup = await postReq('auth/group/read', readGroupsBody);
 
     expect(readGroup.data?.authUsers.length).toBe(0);
   });
-  it.only('should login and authorize', async () => {
-    const createBody: AuthUserCreateReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/auth/user/create',
-      createBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-
-    expect(userCreateRes.status).toBe(200);
-
+  it('should login and authorize', async () => {
     const loginBody: LoginReq = {
       username: 'user1',
 
       password: 'pontusvision',
     };
-    const LoginRes = (await post(
+    const LoginRes = (await postReq(
       '/login',
       loginBody,
     )) as AxiosResponse<LoginRes>;
     expect(LoginRes.status).toBe(200);
+
+    const logoutBody: LogoutReq = {
+      token: LoginRes.data.refreshToken,
+    };
+    const createGroupBody: AuthGroupCreateReq = {
+      id: 'foo',
+      name: 'bar',
+    };
+
+    const createGroup = await postReq('auth/group/create', createGroupBody);
+
+    expect(createGroup.status).toBe(200);
+    const LogoutRes = (await postReq(
+      'logout',
+      logoutBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LogoutRes.status).toBe(200);
+  });
+  it('should login incorrectly', async () => {
+    const loginBody: LoginReq = {
+      username: 'user1',
+
+      password: 'foo',
+    };
+    const LoginRes = (await postReq(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(400);
+
+    const logoutBody: LogoutReq = {
+      token: 'foo',
+    };
+    const createGroupBody: AuthGroupCreateReq = {
+      id: 'foo',
+      name: 'bar',
+    };
+
+    const createGroup = await post('auth/group/create', createGroupBody, {
+      Authorization: 'foo',
+    });
+
+    expect(createGroup.status).toBe(400);
   });
 });

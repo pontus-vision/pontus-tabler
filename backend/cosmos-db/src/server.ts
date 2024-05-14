@@ -74,7 +74,7 @@ const httpTrigger = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer 123456',
+        Authorization: headers['authorization'] || 'Bearer 123456',
       },
       body: data,
     },

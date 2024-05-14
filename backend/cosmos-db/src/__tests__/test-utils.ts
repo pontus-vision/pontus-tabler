@@ -28,35 +28,35 @@ export const post = async (
   //   );
   //   return res;
 
-  const res = await fetch(
-    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization:  headers['Authorization'] || 'Bearer 123456',
-      },
-      body: JSON.stringify(body),
-    },
-  )
-  const json = await res.json()
-
-//  const res = await httpTrigger(
-//    new HttpRequest({
-//      body: { string: JSON.stringify(body) },
+//  const res = await fetch(
+//    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+//    {
 //      method: 'POST',
 //      headers: {
 //        'Content-Type': 'application/json',
-//        ...headers
+//        Authorization:  headers['Authorization'] || 'Bearer 123456',
 //      },
-//      url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-//    }),
-//    new InvocationContext(),
-//  );
+//      body: JSON.stringify(body),
+//    },
+//  )
+//  const json = await res.json()
+
+  const res = await httpTrigger(
+    new HttpRequest({
+      body: { string: JSON.stringify(body) },
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      },
+      url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    }),
+    new InvocationContext(),
+  );
 
   const retVal = {
     status: res.status,
-    data: typeof json === 'string' ? JSON.parse(json) : json,
+    data: typeof res.body === 'string' ? JSON.parse(res.body) : res.body,
   };
   return retVal;
 };

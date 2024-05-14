@@ -35,6 +35,22 @@ service:
         - BadRequestError
         - InternalServerError
         - NotFoundError
+    tokenPOST:
+      path: /token
+      method: POST
+      auth: true
+      request:
+        name: TokenReq
+        body: 
+          properties:
+            token: string
+      response:
+        docs: User logged in successfully
+        type: TokenRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - NotFoundError 
     menuCreatePOST:
       path: /menu/create
       method: POST
@@ -1438,6 +1454,7 @@ service:
         body:
           properties:
             id: string
+            username: string
             authGroupsIds: list<string>
       response:
         docs: Successful response
@@ -1493,6 +1510,7 @@ service:
         body:
           properties:
             id: string
+            username: string
             authGroupsIds: list<string>
       response:
         docs: Successful response
@@ -1505,7 +1523,7 @@ types:
     properties:
       accessToken: string
       refreshToken: string
-  
+  TokenRes: string 
   LogoutRes: string 
   TableEdgeReadRes:
     properties:
@@ -1892,7 +1910,7 @@ types:
   AuthUserGroupsReadRes:
     properties:
       count: integer
-      authGroups: list<AuthUserIdAndUsername>
+      authGroups: list<AuthGroupRef>
   AuthUserGroupsDeleteRes: string
   AuthUserRef:
     properties:
