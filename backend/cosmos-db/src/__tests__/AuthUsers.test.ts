@@ -609,9 +609,6 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<LoginRes>;
     expect(LoginRes.status).toBe(400);
 
-    const logoutBody: LogoutReq = {
-      token: 'foo',
-    };
     const createGroupBody: AuthGroupCreateReq = {
       id: 'foo',
       name: 'bar',
