@@ -4,6 +4,7 @@ import httpTrigger from '../server';
 export const post = async (
   endpoint: string,
   body: any,
+  headers: any = {},
 ): Promise<{ data: any; status: number }> => {
   // return sendHttpRequest(
   //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
@@ -27,17 +28,18 @@ export const post = async (
   //   );
   //   return res;
 
-  // const res = await fetch(
-  //   'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-  //   {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: 'Bearer 123456',
-  //     },
-  //     body: JSON.stringify(body),
-  //   },
-  // );
+//  const res = await fetch(
+//    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+//    {
+//      method: 'POST',
+//      headers: {
+//        'Content-Type': 'application/json',
+//        Authorization:  headers['Authorization'] || 'Bearer 123456',
+//      },
+//      body: JSON.stringify(body),
+//    },
+//  )
+//  const json = await res.json()
 
   const res = await httpTrigger(
     new HttpRequest({
@@ -45,7 +47,7 @@ export const post = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer 123456',
+        ...headers
       },
       url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
     }),

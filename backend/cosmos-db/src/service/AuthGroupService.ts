@@ -401,7 +401,7 @@ export const createAuthUserGroup = async (
   const res = await createSubdoc({
     id: data.id,
     values: data.authUsers.map((user) => {
-      return { name: user.name, id: user.id };
+      return { username: user.username, id: user.id };
     }),
     container1: { container: authGroupContainer, name: 'authGroups' },
     container2: { container: authUsersContainer, name: 'authUsers' },
@@ -411,7 +411,7 @@ export const createAuthUserGroup = async (
     authUsers: res.values.map((value) => {
       return {
         id: value.id as string,
-        name: value.name as string,
+        username: value.username as string,
       };
     }),
     id: res.id,
@@ -443,7 +443,7 @@ export const readAuthGroupUsers = async (
     .item(authGroupId, authGroupId)
     .read();
 
-  const query = `SELECT p["name"], p["id"] FROM c JOIN p IN c["authUsers"] ${str2}`;
+  const query = `SELECT p["username"], p["id"] FROM c JOIN p IN c["authUsers"] ${str2}`;
 
   const res = await authGroupContainer.items
     .query({
@@ -499,7 +499,11 @@ export const updateAuthGroupUsers = async (
     const res3 = await authUsersContainer
       .item(authUser.id, authUser.id)
       .patch([
-        { op: 'set', path: `/authGroups/${index}/name`, value: authUser.name },
+        {
+          op: 'set',
+          path: `/authGroups/${index}/username`,
+          value: authUser.username,
+        },
       ]);
   }
 
@@ -541,7 +545,6 @@ export const updateAuthGroupUsers = async (
 export const deleteAuthGroupUsers = async (
   data: AuthGroupUsersDeleteReq,
 ): Promise<AuthGroupUsersDeleteRes> => {
-
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
   const authUsersContainer = await fetchContainer(AUTH_USERS);
 

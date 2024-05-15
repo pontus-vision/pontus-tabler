@@ -1,4 +1,6 @@
 import {
+  AuthGroupCreateReq,
+  AuthGroupDashboardRef,
   AuthGroupRef,
   AuthUserAndGroupsRef,
   AuthUserCreateReq,
@@ -13,6 +15,7 @@ import {
   AuthUserGroupsReadRes,
   AuthUserGroupsUpdateReq,
   AuthUserGroupsUpdateRes,
+  AuthUserIdAndUsername,
   AuthUserReadReq,
   AuthUserReadRes,
   AuthUserRef,
@@ -20,26 +23,92 @@ import {
   AuthUserUpdateRes,
   AuthUsersReadReq,
   AuthUsersReadRes,
+  ConflictEntityError,
+  LoginReq,
+  LoginRes,
+  LogoutReq,
+  LogoutRes,
+  TokenReq,
+  TokenRes,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
-import { Item, ItemResponse, PatchOperation } from '@azure/cosmos';
-import { InternalServerError, NotFoundError } from '../generated/api';
-import { patch } from '@azure/functions/types/app';
-
+import {
+  Container,
+  Item,
+  ItemResponse,
+  PartitionKeyDefinition,
+  PatchOperation,
+  UniqueKeyPolicy,
+} from '@azure/cosmos';
+import {
+  BadRequestError,
+  InternalServerError,
+  NotFoundError,
+} from '../generated/api';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const AUTH_GROUPS = 'auth_groups';
+
+const partitionKey: string | PartitionKeyDefinition = {
+  paths: ['/username'],
+};
+
+const uniqueKeyPolicy: UniqueKeyPolicy = {
+  uniqueKeys: [{ paths: ['/username'] }],
+};
+
+const initialDocs: AuthUserCreateReq[] = [
+  {
+    username: 'ADMIN',
+    password: 'admin',
+  },
+  {
+    username: 'USER',
+    password: 'user',
+  },
+];
+
+export const initiateAuthUserContainer = async (): Promise<Container> => {
+  for (const doc of initialDocs) {
+    const hashedPassword = await bcrypt.hash(doc.password, 10);
+    doc.password = hashedPassword;
+  }
+
+  const authUserContainer = await fetchContainer(
+    AUTH_USERS,
+    partitionKey,
+    uniqueKeyPolicy,
+    initialDocs,
+  );
+
+  return authUserContainer;
+};
 
 export const authUserCreate = async (
   data: AuthUserCreateReq,
 ): Promise<AuthUserCreateRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  if (data.password.length < 6) {
+    throw new BadRequestError('Please, insert at least 6 characters.');
+  }
 
-  const res = await authUserContainer.items.create({ ...data, authGroups: [] });
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  const { id, name } = res.resource;
+  const authUserContainer = await initiateAuthUserContainer();
+
+  const res = await authUserContainer.items.create({
+    ...data,
+    password: hashedPassword,
+    authGroups: [],
+    refreshTokens: [],
+  });
+
+  const { id, username } = res.resource;
 
   return {
-    name,
+    username,
     id,
   };
 };
@@ -47,43 +116,44 @@ export const authUserCreate = async (
 export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
 
   const userId = data.id;
+  const usernameInput = data.username;
 
   const res = (await authUserContainer
-    .item(userId, userId)
+    .item(userId, usernameInput)
     .read()) as ItemResponse<AuthUserRef>;
 
   if (res.statusCode === 404) {
     throw new NotFoundError(`User not found at id: ${data.id}`);
   }
 
-  const { id, name } = res.resource;
+  const { id, username } = res.resource;
 
   return {
     id,
-    name,
+    username,
   };
 };
 
 export const authUserUpdate = async (
   data: AuthUserUpdateReq,
 ): Promise<AuthUserUpdateRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
 
   try {
     const res = (await authUserContainer
-      .item(data.id, data.id)
+      .item(data.id, data.username)
       .patch([
-        { op: 'replace', path: '/name', value: data.name },
+        { op: 'replace', path: '/username', value: data.username },
       ])) as ItemResponse<AuthUserRef>;
 
-    const { id, name } = res.resource;
+    const { id, username } = res.resource;
 
     return {
       id,
-      name,
+      username,
     };
   } catch (error) {
     if (error?.code === 404) {
@@ -95,10 +165,10 @@ export const authUserUpdate = async (
 export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
 
-  const authUserDoc = await authUserContainer.item(data.id, data.id);
+  const authUserDoc = await authUserContainer.item(data.id, data.username);
 
   const res = (await authUserDoc.read()) as ItemResponse<AuthUserAndGroupsRef>;
 
@@ -150,10 +220,10 @@ export const authUsersRead = async (
 export const authUserGroupsCreate = async (
   data: AuthUserGroupsCreateReq,
 ): Promise<AuthUserGroupsCreateRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
 
-  const authUserDoc = await authUserContainer.item(data.id, data.id);
+  const authUserDoc = await authUserContainer.item(data.id, data.username);
 
   const authUser = (await authUserDoc.read()) as ItemResponse<AuthUserRef>;
 
@@ -165,16 +235,17 @@ export const authUserGroupsCreate = async (
 
   for (const [index, groupId] of data.authGroupsIds.entries()) {
     try {
+      const obj: AuthUserIdAndUsername = {
+        id: authUser.resource.id,
+        username: authUser.resource.username,
+      };
       const authGroupRes = (await authGroupContainer
         .item(groupId, groupId)
         .patch([
           {
             op: 'add',
             path: '/authUsers/-',
-            value: {
-              id: authUser.resource.id,
-              name: authUser.resource.name,
-            },
+            value: obj,
           },
         ])) as ItemResponse<AuthGroupRef>;
 
@@ -195,7 +266,7 @@ export const authUserGroupsCreate = async (
         return {
           authGroups: res.resource?.authGroups,
           id: authUser.resource?.id,
-          name: authUser.resource?.name,
+          username: authUser.resource?.username,
         };
       }
     } catch (error) {
@@ -209,7 +280,7 @@ export const authUserGroupsCreate = async (
 export const authUserGroupsRead = async (
   data: AuthUserGroupsReadReq,
 ): Promise<AuthUserGroupsReadRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
 
   const userId = data.id;
 
@@ -255,10 +326,10 @@ export const authUserGroupsRead = async (
 export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,
 ): Promise<AuthUserGroupsDeleteRes> => {
-  const authUserContainer = await fetchContainer(AUTH_USERS);
+  const authUserContainer = await initiateAuthUserContainer();
   const authGroupContainer = await fetchContainer(AUTH_GROUPS);
 
-  const authUserDoc = await authUserContainer.item(data.id, data.id);
+  const authUserDoc = await authUserContainer.item(data.id, data.username);
 
   const authUser =
     (await authUserDoc.read()) as ItemResponse<AuthUserAndGroupsRef>;
@@ -306,3 +377,149 @@ export const authUserGroupsDelete = async (
     }
   }
 };
+
+interface IAuthUser extends AuthUserAndGroupsRef {
+  password: string;
+}
+
+export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
+  const query = `SELECT c.username, c.password, c.authGroups, c.id from authUsers c WHERE c.username = "${data.username}"`;
+
+  const authUserContainer = await initiateAuthUserContainer();
+  const res = await authUserContainer.items
+    .query({
+      query,
+      parameters: [],
+    })
+    .fetchAll();
+
+  if (res.resources.length === 0) {
+    throw new NotFoundError(`${data.username} not found.`);
+  }
+  const user = res.resources[0] as IAuthUser;
+  const password = user.password;
+  const username = user.username;
+  const authGroups = user.authGroups;
+
+  const isPasswordValid = await bcrypt.compare(data.password, password);
+
+  if (!isPasswordValid) {
+    throw new BadRequestError('Wrong password');
+  }
+
+  const dashboardsAuth = [];
+
+  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+
+  for (const group of authGroups) {
+    const res = (await authGroupContainer.item(group.id, group.id).read())
+      .resource.dashboards as AuthGroupDashboardRef;
+
+    dashboardsAuth.push(res);
+  }
+  const accessToken = generateAccessToken({ userId: user.id, username });
+
+  const refreshToken = jwt.sign(
+    { userId: user.id, username },
+    process.env.REFRESH_JWT_SECRET_KEY,
+  );
+  const authUserRes = await authUserContainer
+    .item(user.id, user.username)
+    .patch([{ op: 'add', path: '/refreshTokens/-', value: refreshToken }]);
+
+  return { accessToken, refreshToken };
+};
+
+export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
+  const claims = getJwtClaims(data.token);
+  const username = claims.username;
+  const userId = claims.userId;
+
+  const authUserContainer = await initiateAuthUserContainer();
+
+  const res = await authUserContainer.item(userId, username).read();
+
+  const index = res.resource.refreshTokens.findIndex((el) => el === data.token);
+
+  if (index === -1) {
+    throw new NotFoundError(
+      'There is no such refresh token stored in the database',
+    );
+  }
+
+  const res2 = await authUserContainer
+    .item(userId, username)
+    .patch([{ op: 'remove', path: `/refreshTokens/${index}` }]);
+
+
+  return 'Token removed';
+};
+
+export const refreshToken = async (data: TokenReq): Promise<TokenRes> => {
+  const authUserContainer = await initiateAuthUserContainer();
+
+  const claims = getJwtClaims(data.token.split(' ')[1]);
+  const username = claims.username;
+  const userId = claims.userId;
+
+  const refreshToken = data.token;
+
+  const refreshTokens = (await authUserContainer.item(userId, username).read())
+    .resource.refreshTokens;
+
+  if (refreshToken == null) throw new BadRequestError('Please insert a token.');
+  if (!refreshTokens.includes(refreshToken))
+    throw new NotFoundError('refresh token not found.');
+  let res;
+  jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET_KEY, (err, user) => {
+    if (err) throw new BadRequestError('Wrong token inserted.');
+    const accessToken = generateAccessToken({ name: user.name });
+    res = accessToken;
+  });
+  return res;
+};
+
+export const authenticateToken = (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) throw new BadRequestError('No token was detected in the input.');
+
+  const claims = getJwtClaims(token);
+
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+    console.log(err);
+    if (err) throw new BadRequestError(`token needed.`);
+    req.user = user;
+    return true;
+  });
+  return claims;
+};
+
+function generateAccessToken(user) {
+  return jwt.sign(user, process.env.JWT_SECRET_KEY, {
+    expiresIn: '1h',
+  });
+}
+function base64UrlDecode(str) {
+  // Replace '-' with '+' and '_' with '/'
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  // Pad the string with '=' to make its length a multiple of 4
+  while (str.length % 4) {
+    str += '=';
+  }
+  // Decode the Base64 string
+  return atob(str);
+}
+
+function getJwtClaims(token) {
+  // Split the token into parts
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    throw new Error('Invalid JWT token');
+  }
+  // Decode the payload
+  const payload = base64UrlDecode(parts[1]);
+  // Parse the JSON string to get the claims
+  const claims = JSON.parse(payload);
+  return claims;
+}
