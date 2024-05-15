@@ -39,7 +39,7 @@ export const initiateMenuContainer = async (): Promise<Container> => {
     MENU,
     partitionKey,
     uniqueKeyPolicy,
-    initialDoc,
+    [initialDoc],
   );
 
 

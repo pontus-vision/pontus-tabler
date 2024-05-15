@@ -2,6 +2,55 @@ service:
   auth: false
   base-path: '/PontusTest/1.0.0'
   endpoints:
+    loginPOST:
+      path: /login
+      method: POST
+      auth: true
+      request:
+        name: LoginReq
+        body: 
+          properties:
+            username: string
+            password: string
+      response:
+        docs: User logged in successfully
+        type: LoginRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - NotFoundError
+    logoutPOST:
+      path: /logout
+      method: POST
+      auth: true
+      request:
+        name: LogoutReq
+        body: 
+          properties:
+            token: string
+      response:
+        docs: User logged in successfully
+        type: LogoutRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - NotFoundError
+    tokenPOST:
+      path: /token
+      method: POST
+      auth: true
+      request:
+        name: TokenReq
+        body: 
+          properties:
+            token: string
+      response:
+        docs: User logged in successfully
+        type: TokenRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - NotFoundError 
     menuCreatePOST:
       path: /menu/create
       method: POST
@@ -1157,7 +1206,7 @@ service:
           properties:
             id: string
             name: string
-            authUsers: list<AuthUserRef>
+            authUsers: list<AuthUserIdAndUsername>
       response:
         type: AuthGroupUsersCreateRes
       errors:
@@ -1202,7 +1251,7 @@ service:
         body:
           properties:
             id: string
-            authUsers: list<AuthUserRef>
+            authUsers: list<AuthUserIdAndUsername>
       response:
         type: AuthGroupUsersUpdateRes
       errors:
@@ -1309,9 +1358,10 @@ service:
         name: AuthUserCreateReq
         body:
           properties:
-            name:
+            username:
               docs: Name of the user
               type: string
+            password: string
       response:
         docs: User created successfully
         type: AuthUserCreateRes
@@ -1338,7 +1388,7 @@ service:
         body:
           properties: {}
           extends:
-            - AuthUserRef
+            - AuthUserIdAndUsername
       response:
         type: AuthUserUpdateRes
       errors:
@@ -1358,6 +1408,7 @@ service:
         body:
           properties:
             id: string
+            username: string
       response:
         type: AuthUserDeleteRes
       errors:
@@ -1376,6 +1427,7 @@ service:
         body:
           properties:
             id: string
+            username: string
       response:
         docs: Successful response
         type: AuthUserReadRes
@@ -1402,6 +1454,7 @@ service:
         body:
           properties:
             id: string
+            username: string
             authGroupsIds: list<string>
       response:
         docs: Successful response
@@ -1457,6 +1510,7 @@ service:
         body:
           properties:
             id: string
+            username: string
             authGroupsIds: list<string>
       response:
         docs: Successful response
@@ -1465,6 +1519,12 @@ service:
         - InternalServerError
         - NotFoundError
 types:
+  LoginRes: 
+    properties:
+      accessToken: string
+      refreshToken: string
+  TokenRes: string 
+  LogoutRes: string 
   TableEdgeReadRes:
     properties:
       name: string
@@ -1528,7 +1588,7 @@ types:
       - AuthGroupUsersRef
   AuthGroupUsersReadRes:
     properties:
-      authUsers: list<AuthUserRef>
+      authUsers: list<AuthUserIdAndUsername>
       count: integer
   AuthGroupUsersUpdateRes:
     properties:
@@ -1539,7 +1599,7 @@ types:
   AuthGroupUsersRef:
     properties:
       name: string
-      authUsers: list<AuthUserRef>
+      authUsers: list<AuthUserIdAndUsername>
   AuthGroupCreateRes:
     properties: {}
     extends:
@@ -1572,7 +1632,7 @@ types:
         docs: Name of the group
         type: string
       dashboards: optional<list<Dashboard>>
-      authUsers: optional<list<AuthUserRef>>
+      authUsers: optional<list<AuthUserIdAndUsername>>
       parents:
         docs: Parent groups of the group (optional)
         type: optional<list<string>>
@@ -1810,27 +1870,31 @@ types:
         docs: Table columns associated with the table
         type: optional<list<TablesReadResTablesItem>>
   TableDeleteRes: string
+  AuthUserIdAndUsername:
+    properties:
+      username: string
+      id: string
   AuthUserCreateRes:
     properties: {}
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUserReadRes:
     properties: {}
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUserUpdateRes:
     properties: {}
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUsersReadRes:
     properties:
       count: integer
-      authUsers: list<AuthUserRef>
+      authUsers: list<AuthUserIdAndUsername>
   AuthUserAndGroupsRef:
     properties:
       authGroups: list<AuthGroupRef>
     extends:
-      - AuthUserRef
+      - AuthUserIdAndUsername
   AuthUserGroupsCreateRes:
     properties: {}
     extends:
@@ -1853,9 +1917,10 @@ types:
       id:
         docs: Unique identifier of the user
         type: string
-      name:
+      username:
         docs: Name of the user
         type: string
+      password: string
   AuthUserDeleteRes: string
   DashboardGroupAuthCreateRes:
     properties:
