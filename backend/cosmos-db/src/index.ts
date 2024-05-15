@@ -67,16 +67,30 @@ import {
   authUserRead,
   authUserUpdate,
   authUsersRead,
+  authenticateToken,
   loginUser,
+  logout,
+  refreshToken,
 } from './service/AuthUserService';
 
 export default new PontusService({
-    loginPost: async (req, res) => {
+  loginPost: async (req, res) => {
     const response = await loginUser(req.body);
 
     res.send(response);
   },
+  logoutPost: async (req, res) => {
+    const response = await logout(req.body);
+
+    res.send(response);
+  },
+  tokenPost: async(req, res) => {
+    const response = await refreshToken(req.body)
+
+    res.send(response)
+  },
   authGroupCreatePost: async (req, res) => {
+    authenticateToken(req, res);
     const response = await createAuthGroup(req.body);
 
     res.send(response);
@@ -118,7 +132,6 @@ export default new PontusService({
   },
   authUsersReadPost: async (req, res) => {
     const response = await authUsersRead(req.body);
-    
 
     res.send(response);
   },
@@ -190,13 +203,12 @@ export default new PontusService({
   },
   authGroupUsersDeletePost: async (req, res) => {
     const response = await deleteAuthGroupUsers(req.body);
-   
+
     res.send(response);
   },
   authGroupUsersReadPost: async (req, res) => {
     const response = await readAuthGroupUsers(req.body);
 
-    
     res.send(response);
   },
   authGroupUsersUpdatePost: async (req, res) => {
@@ -270,11 +282,11 @@ export default new PontusService({
   menuUpdatePost: async (req, res) => {
     try {
       const response = await updateMenuItem(req.body);
-      
+
       if (response.statusCode === 404) {
         throw new NotFoundError('Not found');
       }
-    
+
       res.send({ ...response.resource, path: response.resource?.path || '' });
     } catch (error) {
       if (error?.code === 400) {
@@ -396,13 +408,10 @@ export default new PontusService({
   },
   tableDataEdgeCreatePost: async (req, res) => {
     try {
-      
       const response = await createTableDataEdge(req.body);
 
       res.send(response);
-    } catch (error) {
- 
-    }
+    } catch (error) {}
   },
   tableDataEdgeReadPost: async (req, res) => {
     const response = await readTableDataEdge(req.body);
