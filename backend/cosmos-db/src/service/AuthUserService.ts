@@ -381,7 +381,6 @@ export const authUserGroupsDelete = async (
 interface IAuthUser extends AuthUserAndGroupsRef {
   password: string;
 }
-let refreshTokens = [];
 
 export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
   const query = `SELECT c.username, c.password, c.authGroups, c.id from authUsers c WHERE c.username = "${data.username}"`;
@@ -428,7 +427,6 @@ export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
     .item(user.id, user.username)
     .patch([{ op: 'add', path: '/refreshTokens/-', value: refreshToken }]);
 
-  //   res.json({ token })
   return { accessToken, refreshToken };
 };
 
@@ -453,7 +451,6 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
     .item(userId, username)
     .patch([{ op: 'remove', path: `/refreshTokens/${index}` }]);
 
-  refreshTokens = refreshTokens.filter((token) => token !== data.token);
 
   return 'Token removed';
 };
