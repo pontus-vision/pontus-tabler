@@ -102,6 +102,7 @@ export const authUserCreate = async (
     ...data,
     password: hashedPassword,
     authGroups: [],
+    refreshTokens: [],
   });
 
   const { id, username } = res.resource;
@@ -423,19 +424,52 @@ export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
     { userId: user.id, username },
     process.env.REFRESH_JWT_SECRET_KEY,
   );
-  refreshTokens.push(refreshToken);
+  const authUserRes = await authUserContainer
+    .item(user.id, user.username)
+    .patch([{ op: 'add', path: '/refreshTokens/-', value: refreshToken }]);
+
   //   res.json({ token })
   return { accessToken, refreshToken };
 };
 
-export const logout = (data: LogoutReq): LogoutRes => {
+export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
+  const claims = getJwtClaims(data.token);
+  const username = claims.username;
+  const userId = claims.userId;
+
+  const authUserContainer = await initiateAuthUserContainer();
+
+  const res = await authUserContainer.item(userId, username).read();
+
+  const index = res.resource.refreshTokens.findIndex((el) => el === data.token);
+
+  if (index === -1) {
+    throw new NotFoundError(
+      'There is no such refresh token stored in the database',
+    );
+  }
+
+  const res2 = await authUserContainer
+    .item(userId, username)
+    .patch([{ op: 'remove', path: `/refreshTokens/${index}` }]);
+
   refreshTokens = refreshTokens.filter((token) => token !== data.token);
 
   return 'Token removed';
 };
 
-export const refreshToken = (data: TokenReq): TokenRes => {
+export const refreshToken = async (data: TokenReq): Promise<TokenRes> => {
+  const authUserContainer = await initiateAuthUserContainer();
+
+  const claims = getJwtClaims(data.token.split(' ')[1]);
+  const username = claims.username;
+  const userId = claims.userId;
+
   const refreshToken = data.token;
+
+  const refreshTokens = (await authUserContainer.item(userId, username).read())
+    .resource.refreshTokens;
+
   if (refreshToken == null) throw new BadRequestError('Please insert a token.');
   if (!refreshTokens.includes(refreshToken))
     throw new NotFoundError('refresh token not found.');
@@ -466,7 +500,7 @@ export const authenticateToken = (req, res) => {
 
 function generateAccessToken(user) {
   return jwt.sign(user, process.env.JWT_SECRET_KEY, {
-    expiresIn: '20s',
+    expiresIn: '1h',
   });
 }
 function base64UrlDecode(str) {
