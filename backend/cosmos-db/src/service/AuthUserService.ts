@@ -87,31 +87,11 @@ export const initiateAuthUserContainer = async (): Promise<Container> => {
   return authUserContainer;
 };
 
-const findUsername = async (username: string): Promise<AuthUserRef> => {
-  const query = `SELECT * FROM c WHERE c.username="${username}"`;
-  const authUserContainer = await initiateAuthUserContainer();
-
-  const res = await authUserContainer.items
-    .query({
-      query,
-      parameters: [],
-    })
-    .fetchAll();
-
-  return res.resources[0];
-};
-
 export const authUserCreate = async (
   data: AuthUserCreateReq,
 ): Promise<AuthUserCreateRes> => {
   if (data.password.length < 6) {
     throw new BadRequestError('Please, insert at least 6 characters.');
-  }
-
-  const user = await findUsername(data.username);
-
-  if (user) {
-    throw new ConflictEntityError(`${data.username} already registered`);
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
