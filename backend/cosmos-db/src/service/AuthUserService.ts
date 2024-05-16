@@ -450,7 +450,6 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
     .item(userId, username)
     .patch([{ op: 'remove', path: `/refreshTokens/${index}` }]);
 
-
   return 'Token removed';
 };
 
@@ -522,3 +521,67 @@ function getJwtClaims(token) {
   const claims = JSON.parse(payload);
   return claims;
 }
+
+export const checkUserDashPermissions = async (data: {
+  userId: string;
+  username: string;
+  dashboardId: string;
+}): Promise<{
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+}> => {
+  const authUserContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+
+  const user = await authUserContainer.item(data.userId, data.username).read();
+
+  const userGroups = user.resource.authGroups as AuthUserAndGroupsRef[];
+
+  const userGroupsFiltered = [];
+
+  for (const group of userGroups) {
+    const res = (await authGroupContainer
+      .item(group.id, group.id)
+      .read()) as ItemResponse<AuthGroupRef>;
+    const dashboards = res.resource.dashboards;
+
+    const index = dashboards.findIndex((el) => el.id === data.dashboardId);
+
+    if (index !== -1) {
+      userGroupsFiltered.push(dashboards[index]);
+    }
+  }
+
+  if (userGroupsFiltered.length === 0) {
+    throw new NotFoundError('Dashboard id not found');
+  }
+
+  let create = false;
+  let read = false;
+  let update = false;
+  let del = false;
+
+  userGroupsFiltered.forEach((el) => {
+    if (el.create) {
+      create = el.create;
+    }
+    if (el.read) {
+      read = el.read;
+    }
+    if (el.update) {
+      update = el.update;
+    }
+    if (el.delete) {
+      del = el.delete;
+    }
+  });
+
+  return {
+    create,
+    read,
+    update,
+    delete: del,
+  };
+};

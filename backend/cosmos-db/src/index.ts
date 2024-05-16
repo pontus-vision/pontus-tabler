@@ -3,6 +3,7 @@ import {
   BadRequestError,
   ConflictEntityError,
   NotFoundError,
+  UnauthorizedError,
 } from './generated/api';
 import { PontusService } from './generated/api/resources/pontus/service/PontusService';
 import {
@@ -68,10 +69,12 @@ import {
   authUserUpdate,
   authUsersRead,
   authenticateToken,
+  checkUserDashPermissions,
   loginUser,
   logout,
   refreshToken,
 } from './service/AuthUserService';
+
 
 export default new PontusService({
   loginPost: async (req, res) => {
@@ -90,7 +93,8 @@ export default new PontusService({
     res.send(response)
   },
   authGroupCreatePost: async (req, res) => {
-    authenticateToken(req, res);
+    
+    
     const response = await createAuthGroup(req.body);
 
     res.send(response);
@@ -227,6 +231,15 @@ export default new PontusService({
     res.send(response);
   },
   dashboardDeletePost: async (req, res) => {
+    const auth = authenticateToken(req, res)
+    const userId = auth.userId
+    const username = auth.username
+    const permissions = await checkUserDashPermissions({userId, username, dashboardId: req.body.id })  
+
+    if(!permissions.delete) {
+      throw new UnauthorizedError('Auth user does not belong to a group with this permission')
+    } 
+
     const response = await deleteDashboard(req.body);
 
     res.send(response);

@@ -238,8 +238,11 @@ export const createAuthGroupDashboards = async (
 
   const res = await createSubdoc({
     id: data.id,
-    values: data.dashboards,
-    container1: { container: authGroupContainer, name: 'authGroups' },
+    docs: { docs1: data.dashboards },
+    container1: {
+      container: authGroupContainer,
+      name: 'authGroups',
+    },
     container2: { container: dashboardContainer, name: 'dashboards' },
   });
 
@@ -400,11 +403,21 @@ export const createAuthUserGroup = async (
 
   const res = await createSubdoc({
     id: data.id,
-    values: data.authUsers.map((user) => {
-      return { username: user.username, id: user.id };
-    }),
-    container1: { container: authGroupContainer, name: 'authGroups' },
-    container2: { container: authUsersContainer, name: 'authUsers' },
+    docs: {
+      docs1: data.authUsers.map((user) => {
+        return { username: user.username, id: user.id };
+      }),
+      ommitPropsInContainer2: ['username'],
+    },
+    container1: {
+      container: authGroupContainer,
+      name: 'authGroups',
+    },
+    container2: {
+      container: authUsersContainer,
+      name: 'authUsers',
+      partitionKey: 'username',
+    },
   });
 
   return {
@@ -496,15 +509,13 @@ export const updateAuthGroupUsers = async (
       (i) => i.id === authGroupId,
     );
 
-    const res3 = await authUsersContainer
-      .item(authUser.id, authUser.id)
-      .patch([
-        {
-          op: 'set',
-          path: `/authGroups/${index}/username`,
-          value: authUser.username,
-        },
-      ]);
+    const res3 = await authUsersContainer.item(authUser.id, authUser.id).patch([
+      {
+        op: 'set',
+        path: `/authGroups/${index}/username`,
+        value: authUser.username,
+      },
+    ]);
   }
 
   const batchPatchArr: PatchOperation[][] = [];
@@ -624,9 +635,15 @@ export const deleteSubdoc = async (data: {
 
 export const createSubdoc = async (data: {
   id: string;
-  values: { [key: string]: any }[];
+
+  docs: {
+    docs1: Record<string, any>[];
+    ommitPropsInContainer2?: string[];
+  };
+
   container1: { container: Container; name: string };
-  container2: { container: Container; name: string };
+  container2: { container: Container; name: string; partitionKey?: string };
+  partitionKey?: string;
 }): Promise<{
   id: string;
   name: string;
@@ -639,11 +656,11 @@ export const createSubdoc = async (data: {
 
   const batchPatchArr: PatchOperation[][] = [];
 
-  const valuesCopy = JSON.parse(JSON.stringify(data.values));
+  const docsCopy = JSON.parse(JSON.stringify(data.docs.docs1));
 
-  while (valuesCopy.length > 0) {
+  while (docsCopy.length > 0) {
     batchPatchArr.push(
-      valuesCopy.splice(0, 10).map((value) => {
+      docsCopy.splice(0, 10).map((value) => {
         return {
           op: 'add',
           path: `/${container2.name}/-`,
@@ -659,9 +676,15 @@ export const createSubdoc = async (data: {
     values: Record<string, any>[];
   };
 
+  const fooRes = await container1.container.items
+    .query({ query: 'Select * from c' })
+    .fetchAll();
+
   for (const [index, batch] of batchPatchArr.entries()) {
     try {
-      const res2 = await container1.container.item(id, id).patch(batch);
+      const res2 = await container1.container
+        .item(id, data?.partitionKey || id)
+        .patch(batch);
       doc1Name = res2.resource.name;
       if (index === batchPatchArr.length - 1) {
         const resource = res2.resource;
@@ -679,23 +702,26 @@ export const createSubdoc = async (data: {
     }
   }
 
-  for (const [index, value] of data.values.entries()) {
+  for (const [index, doc] of data.docs.docs1.entries()) {
     try {
-      const res = await container2.container.item(value.id, value.id).patch([
-        {
-          op: 'add',
-          path: `/${container1.name}/-`,
-          value: {
-            ...value,
-            name: doc1Name,
-            id: data.id,
+      const obj = JSON.parse(JSON.stringify(doc));
+      const excludeKey = data.docs?.ommitPropsInContainer2;
+
+      excludeKey?.forEach((key) => delete obj[key]);
+
+      const res = await container2.container
+        .item(doc.id, doc?.[container2?.partitionKey] || doc.id)
+        .patch([
+          {
+            op: 'add',
+            path: `/${container1.name}/-`,
+            value: { ...obj, name: doc1Name, id: data.id },
           },
-        },
-      ]);
+        ]);
     } catch (error) {
       if (error?.code === 404) {
         throw new NotFoundError(
-          `${container2.name} not found at id: ${value.id}`,
+          `${container2.name} not found at id: ${doc.id}`,
         );
       }
     }

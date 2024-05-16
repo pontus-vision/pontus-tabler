@@ -30,6 +30,8 @@ import {
   AuthGroupUsersCreateRes,
   LogoutReq,
   AuthGroupDashboardCreateReq,
+  AuthGroupDashboardCreateRes,
+  DashboardDeleteReq,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -619,5 +621,83 @@ describe('dashboardCreatePOST', () => {
     });
 
     expect(createGroup.status).toBe(400);
+  });
+  it('should check dashboard permissions incorrectly', async () => {
+    const loginBody: LoginReq = {
+      username: 'user1',
+
+      password: 'foo',
+    };
+
+    const LoginRes = (await postReq(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(400);
+
+    const createGroupBody: AuthGroupCreateReq = {
+      name: 'bar',
+    };
+
+    const createGroup = (await postReq(
+      'auth/group/create',
+      createGroupBody,
+    )) as AxiosResponse<AuthGroupCreateReq>;
+
+    const dashBody: DashboardCreateReq = {
+      name: 'dashboard1',
+    };
+
+    const createDash = (await postReq(
+      'dashboard/create',
+      dashBody,
+    )) as AxiosResponse<DashboardCreateRes>;
+
+    expect(createDash.status).toBe(200);
+    const createGroupDashBody: AuthGroupDashboardCreateReq = {
+      id: createGroup.data.id,
+      name: createGroup.data.name,
+      dashboards: [
+        {
+          delete: true,
+          create: false,
+          read: false,
+          update: false,
+          name: createDash.data.name,
+          id: createDash.data.id,
+        },
+      ],
+    };
+
+    const createGroupDash = (await postReq(
+      'auth/group/dashboard/create',
+      createGroupDashBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(createGroupDash.status).toBe(200);
+
+    const createGroupUserBody: AuthGroupUsersCreateReq = {
+      id: createGroup.data.id,
+      authUsers: [{ id: user.id, username: user.username }],
+      name: createGroup.data.name,
+    };
+
+    const createGroupUser = (await postReq(
+      'auth/group/users/create',
+      createGroupUserBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(createGroupUser.status).toBe(200);
+
+    const dashDelBody: DashboardDeleteReq = {
+      id: createDash.data.id,
+    };
+
+    const delDash = (await postReq(
+      'dashboard/delete',
+      dashDelBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(delDash.status).toBe(200);
   });
 });
