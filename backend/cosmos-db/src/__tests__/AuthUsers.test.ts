@@ -546,6 +546,7 @@ describe('dashboardCreatePOST', () => {
 
     const readGroupsBody2: AuthGroupReadReq = {
       id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
     };
 
     const readGroup2 = await postReq('auth/group/read', readGroupsBody2);
@@ -564,6 +565,7 @@ describe('dashboardCreatePOST', () => {
 
     const readGroupsBody: AuthGroupReadReq = {
       id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
     };
 
     const readGroup = await postReq('auth/group/read', readGroupsBody);

@@ -96,6 +96,7 @@ describe('dashboardCreatePOST', () => {
 
     const readBody: AuthGroupReadReq = {
       id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
     };
 
     const authGroupReadRes = (await post(
@@ -121,6 +122,8 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupUpdateRes.data).toMatchObject(updateBody);
     const deleteBody: AuthGroupDeleteReq = {
       id: authGroupCreateRes.data.id,
+
+      name: authGroupCreateRes.data.name,
     };
 
     const authGroupDeleteRes = (await post(
@@ -188,6 +191,8 @@ describe('dashboardCreatePOST', () => {
   it('should do the sad path', async () => {
     const readBody: AuthGroupReadReq = {
       id: 'foo',
+
+      name: 'bar',
     };
 
     const authGroupReadRes = (await post(
@@ -265,6 +270,7 @@ describe('dashboardCreatePOST', () => {
         },
       ],
       id: 'foo',
+      name: authGroupCreateRes.data.name,
     };
 
     const updateRetVal = (await post(
@@ -277,6 +283,7 @@ describe('dashboardCreatePOST', () => {
     const deleteBody: AuthGroupDashboardDeleteReq = {
       dashboardIds: [],
       id: 'foo',
+      name: 'bar',
     };
     const deleteRetVal = (await post(
       'auth/group/dashboard/delete',
@@ -410,6 +417,7 @@ describe('dashboardCreatePOST', () => {
 
     const updateBody: AuthGroupDashboardUpdateReq = {
       id: authGroupId,
+      name: authGroupCreateRes.data.name,
       dashboards: [
         {
           name: createRetVal.data.name,
@@ -464,6 +472,7 @@ describe('dashboardCreatePOST', () => {
 
     const readBody2: AuthGroupDashboardsReadReq = {
       id: authGroupId,
+      name: authGroupCreateRes.data.name,
 
       filters: {
         name: {
@@ -539,6 +548,7 @@ describe('dashboardCreatePOST', () => {
 
     const readBody: AuthGroupReadReq = {
       id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
     };
 
     const authGroupReadRes = (await post(
@@ -597,6 +607,7 @@ describe('dashboardCreatePOST', () => {
 
     const readBody4: AuthGroupDashboardsReadReq = {
       id: groupDashCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
       filters: {
         name: {
           condition1: {
@@ -650,6 +661,7 @@ describe('dashboardCreatePOST', () => {
     const deleteBody: AuthGroupDashboardDeleteReq = {
       dashboardIds: [createRetVal.data.id],
       id: authGroupId,
+      name: authGroupCreateRes.data.name,
     };
 
     const readRetVal = (await post(
@@ -680,6 +692,7 @@ describe('dashboardCreatePOST', () => {
 
     const readBody2: AuthGroupDashboardsReadReq = {
       id: authGroupId,
+      name: authGroupCreateRes.data.name,
       filters: {
         name: {
           condition1: {
@@ -764,6 +777,7 @@ describe('dashboardCreatePOST', () => {
 
     const deleteBody: AuthGroupDeleteReq = {
       id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
     };
 
     const authGroupDeleteRes = (await post(
@@ -810,6 +824,7 @@ describe('dashboardCreatePOST', () => {
           name: 'bar',
         },
       ],
+      name: authGroupCreateRes.data.name,
       id: authGroupId,
     };
 
@@ -900,6 +915,7 @@ describe('dashboardCreatePOST', () => {
 
     const deleteBody: AuthGroupDeleteReq = {
       id: createRetVal.data.id,
+      name: createRetVal.data.name,
     };
 
     const authGroupDeleteRes = (await post(
@@ -928,6 +944,7 @@ describe('dashboardCreatePOST', () => {
 
     const createUserBody: AuthUserCreateReq = {
       username: 'user1',
+      password: 'pontusvision',
     };
 
     const authUserCreateRes = (await post(
@@ -997,6 +1014,7 @@ describe('dashboardCreatePOST', () => {
 
     const deleteBody: AuthGroupDeleteReq = {
       id: createRetVal.data.id,
+      name: createRetVal.data.name,
     };
 
     const authGroupDeleteRes = (await post(
@@ -1025,6 +1043,7 @@ describe('dashboardCreatePOST', () => {
 
     const createUserBody: AuthUserCreateReq = {
       username: 'user1',
+      password: 'pontusvision',
     };
 
     const authUserCreateRes = (await post(

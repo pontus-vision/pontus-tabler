@@ -1044,8 +1044,9 @@ service:
       request:
         name: AuthGroupReadReq
         body:
-          properties:
-            id: string
+          properties: {}
+          extends:
+            - AuthGroupBaseRef
       response:
         docs: Successful response
         type: AuthGroupReadRes
@@ -1066,14 +1067,10 @@ service:
       display-name: Update group by ID
       request:
         name: AuthGroupUpdateReq
-        body:
-          properties:
-            id:
-              docs: ID of the group to update
-              type: optional<string>
-            name:
-              docs: Updated name of the group
-              type: optional<string>
+        body: 
+          properties: {}
+          extends:
+            - AuthGroupBaseRef
       response:
         docs: Successful response
         type: AuthGroupUpdateRes
@@ -1092,8 +1089,9 @@ service:
       request:
         name: AuthGroupDeleteReq
         body:
-          properties:
-            id: string
+          properties: {}
+          extends:
+            - AuthGroupBaseRef
       response:
         type: AuthGroupDeleteRes
       errors:
@@ -1102,6 +1100,7 @@ service:
       examples:
         - request:
             id: foo
+            name: bar
           response:
             body: 'AuthGroup deleted.'
     authGroupDashboardCreatePOST:
@@ -1136,10 +1135,10 @@ service:
       request:
         name: AuthGroupDashboardsReadReq
         body:
-          properties:
-            id: string
+          properties: {}
           extends:
             - ReadPaginationFilter
+            - AuthGroupBaseRef
       response:
         type: AuthGroupDashboardsReadRes
       errors:
@@ -1160,8 +1159,9 @@ service:
         name: AuthGroupDashboardUpdateReq
         body:
           properties:
-            id: string
             dashboards: list<AuthGroupDashboardRef>
+          extends:
+            - AuthGroupBaseRef
       response:
         type: AuthGroupDashboardUpdateRes
       errors:
@@ -1182,8 +1182,9 @@ service:
         name: AuthGroupDashboardDeleteReq
         body:
           properties:
-            id: string
             dashboardIds: list<string>
+          extends:
+            - AuthGroupBaseRef
       response:
         type: AuthGroupDashboardDeleteRes
       errors:
@@ -1944,6 +1945,10 @@ types:
     properties: {}
     extends:
       - AuthGroupRef
+  AuthGroupBaseRef:
+    properties:
+      name: string
+      id: string
   AuthGroupDeleteRes: string
   AgGridInputSearchCols:
     properties:
