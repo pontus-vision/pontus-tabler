@@ -19,10 +19,14 @@ import { ConflictEntityError, NotFoundError } from '../generated/api';
 
 const TABLES = 'tables';
 
+
+
+
 export const createTableDataEdge = async (
-  data: TableDataEdgeCreateReq,
+  data: TableDataEdgeCreateReq, 
 ): Promise<TableDataEdgeCreateRes> => {
   const arrRes = [];
+  
 
   function getOrCreatePath(obj, path, defaultValue = {}) {
     const parts = path.split('.');

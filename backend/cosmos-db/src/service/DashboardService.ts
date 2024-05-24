@@ -33,9 +33,7 @@ export const createDashboard = async (
   const res = await dashboardContainer.items.create({
     ...data,
     authGroups: [],
-  });
-
-  const dashboardId = res.resource.id;
+  });[]
 
   if (data?.menuItem) {
     const menuItem = data.menuItem;

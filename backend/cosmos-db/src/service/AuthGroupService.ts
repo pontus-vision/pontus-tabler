@@ -29,6 +29,22 @@ import {
   AuthGroupUsersDeleteRes,
   AuthGroupUsersCreateReq,
   AuthGroupUsersCreateRes,
+  AuthGroupTablesCreateReq,
+  AuthGroupTablesCreateRes,
+  AuthGroupTablesDeleteReq,
+  AuthGroupTablesDeleteRes,
+  NameAndIdRef,
+  ReadPaginationFilterFilters,
+  ReadPaginationFilter,
+  AuthGroupTablesReadReq,
+  AuthGroupTablesReadRes,
+  AuthGroupTableCreateReq,
+  AuthGroupTableCreateRes,
+  CrudDocumentRef,
+  AuthGroupTableReadReq,
+  AuthGroupTableReadRes,
+  AuthGroupTableUpdateReq,
+  AuthGroupTableUpdateRes,
 } from '../typescript/api';
 import {
   ConflictEntityError,
@@ -45,7 +61,9 @@ import {
 } from '@azure/cosmos';
 import { DASHBOARDS } from './DashboardService';
 import { AUTH_USERS } from './AuthUserService';
+import { TABLES } from './TableService';
 export const AUTH_GROUPS = 'auth_groups';
+export const ADMIN = 'Admin';
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],
@@ -57,38 +75,59 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
 
 const initialDocs: AuthGroupCreateReq[] = [
   {
-    name: 'ADMIN',
+    name: ADMIN,
   },
   {
     name: 'USER',
   },
 ];
 
-export const initiateAuthUserContainer = async (): Promise<Container> => {
-  const authUserContainer = await fetchContainer(
+export const initiateAuthGroupContainer = async (): Promise<Container> => {
+  const authGroupContainer = await fetchContainer(
     AUTH_GROUPS,
     partitionKey,
     uniqueKeyPolicy,
     initialDocs,
   );
 
-  return authUserContainer;
+  return authGroupContainer;
 };
 
 export const createAuthGroup = async (
   data: AuthGroupCreateReq,
 ): Promise<AuthGroupCreateRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
-
+  const authGroupContainer = await initiateAuthGroupContainer();
+  
   try {
     const res = (await authGroupContainer.items.create({
       ...data,
       dashboards: [],
       authUsers: [],
+      tables: [],
+      auth: {
+        table: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+        },
+        tableData: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+        },
+        dashboard: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+        },
+      },
     })) as ItemResponse<AuthGroupRef>;
 
-    const { name, id } = res.resource;
-    return { name, id };
+    const { name, id, auth } = res.resource;
+    return { name, id, auth };
   } catch (error) {
     if (error?.code === 409) {
       throw new ConflictEntityError(`id: ${data.id} already taken.`);
@@ -99,7 +138,7 @@ export const createAuthGroup = async (
 export const updateAuthGroup = async (
   data: AuthGroupUpdateReq,
 ): Promise<AuthGroupUpdateRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const patchArr: PatchOperation[] = [];
   for (const prop in data) {
@@ -116,7 +155,9 @@ export const updateAuthGroup = async (
     }
   }
   try {
-    const res = await authGroupContainer.item(data.id, data.name).patch(patchArr);
+    const res = await authGroupContainer
+      .item(data.id, data.name)
+      .patch(patchArr);
 
     const dashboards = res?.resource?.dashboards as AuthGroupDashboardRef[];
     const authUsers = res?.resource?.authUsers;
@@ -176,7 +217,7 @@ export const updateAuthGroup = async (
 export const readAuthGroup = async (
   data: AuthGroupReadReq,
 ): Promise<AuthGroupReadRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const res = (await authGroupContainer
     .item(data.id, data.name)
@@ -192,7 +233,7 @@ export const readAuthGroup = async (
 export const deleteAuthGroup = async (
   data: AuthGroupDeleteReq,
 ): Promise<AuthGroupDeleteRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const res = await authGroupContainer.item(data.id, data.name).read();
 
@@ -222,20 +263,36 @@ export const deleteAuthGroup = async (
     const authUsersContainer = await fetchContainer(AUTH_USERS);
 
     for (const user of res.resource?.authUsers) {
-      const res2 = await authUsersContainer.item(user.id, user.id).read();
+      const res2 = await authUsersContainer.item(user.id, user.username).read();
 
       const authGroups = res2.resource?.authGroups;
 
       const index = authGroups?.findIndex((el) => el.id === data.id);
 
       const resPatch = await authUsersContainer
-        .item(user.id, user.id)
+        .item(user.id, user.username)
+        .patch([{ op: 'remove', path: `/authGroups/${index}` }]);
+    }
+  }
+
+  if (res.resource.tables.length > 0) {
+    const authTablesContainer = await fetchContainer(TABLES);
+
+    for (const user of res.resource?.authUsers) {
+      const res2 = await authTablesContainer.item(user.id, user.name).read();
+
+      const tables = res2.resource?.tables;
+
+      const index = tables?.findIndex((el) => el.id === data.id);
+
+      const resPatch = await authTablesContainer
+        .item(user.id, user.name)
         .patch([{ op: 'remove', path: `/authGroups/${index}` }]);
     }
   }
 
   const res3 = (await authGroupContainer
-    .item(data.id, data.id)
+    .item(data.id, data.name)
     .delete()) as ItemResponse<AuthGroupRef>;
 
   return `AuthGroup deleted.`;
@@ -258,7 +315,7 @@ export const readAuthGroups = async (
 export const createAuthGroupDashboards = async (
   data: AuthGroupDashboardCreateReq,
 ): Promise<AuthGroupDashboardCreateRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
   const res = await createSubdoc({
@@ -269,6 +326,7 @@ export const createAuthGroupDashboards = async (
       name: 'authGroups',
     },
     container2: { container: dashboardContainer, name: 'dashboards' },
+    partitionKey: data.name,
   });
 
   return {
@@ -281,10 +339,10 @@ export const createAuthGroupDashboards = async (
 export const readAuthGroupDashboards = async (
   data: AuthGroupDashboardsReadReq,
 ): Promise<AuthGroupDashboardsReadRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const authGroupId = data.id;
-  const authGroupName = data.name
+  const authGroupName = data.name;
 
   const str = filterToQuery(
     { filters: data.filters },
@@ -298,10 +356,6 @@ export const readAuthGroupDashboards = async (
     'p',
     `c["id"] = "${authGroupId}"`,
   );
-
-  const response = await authGroupContainer
-    .item(authGroupId, authGroupName)
-    .read();
 
   const query = `SELECT  p["name"], p["id"], p["create"], p["read"], p["update"], p["delete"] FROM c JOIN p IN c["dashboards"] ${str2}`;
 
@@ -332,13 +386,13 @@ export const readAuthGroupDashboards = async (
 export const updateAuthGroupDashboards = async (
   data: AuthGroupDashboardUpdateReq,
 ): Promise<AuthGroupDashboardUpdateRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
   const authGroupId = data.id;
-  const authGroupName = data.name
+  const authGroupName = data.name;
 
-  const res = await authGroupContainer.item(authGroupId, authGroupId).read();
+  const res = await authGroupContainer.item(authGroupId, authGroupName).read();
 
   if (res.statusCode === 404) {
     throw new NotFoundError(`No group auth found at id: ${data.id})`);
@@ -391,7 +445,7 @@ export const updateAuthGroupDashboards = async (
 
   for (const [index, batch] of batchPatchArr.entries()) {
     const res2 = await authGroupContainer
-      .item(authGroupId, authGroupId)
+      .item(authGroupId, authGroupName)
       .patch(batch);
 
     if (index === batchPatchArr.length - 1) {
@@ -409,14 +463,17 @@ export const updateAuthGroupDashboards = async (
 export const deleteAuthGroupDashboards = async (
   data: AuthGroupDashboardDeleteReq,
 ): Promise<AuthGroupDashboardDeleteRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
   const dashboardContainer = await fetchContainer(DASHBOARDS);
 
   const res = await deleteSubdoc({
     id: data.id,
-    subIds: data.dashboardIds,
+    subDocs: data.dashboardIds.map((el) => {
+      return { id: el };
+    }),
     container1: { container: authGroupContainer, name: 'authGroups' },
-    container2: { container: dashboardContainer, name: 'dashboards' }, 
+    container2: { container: dashboardContainer, name: 'dashboards' },
+    partitionKey: data.name,
   });
 
   return res;
@@ -425,7 +482,7 @@ export const deleteAuthGroupDashboards = async (
 export const createAuthUserGroup = async (
   data: AuthGroupUsersCreateReq,
 ): Promise<AuthGroupUsersCreateRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
   const authUsersContainer = await fetchContainer(AUTH_USERS);
 
   const res = await createSubdoc({
@@ -445,6 +502,7 @@ export const createAuthUserGroup = async (
       name: 'authUsers',
       partitionKey: 'username',
     },
+    partitionKey: data.name,
   });
 
   return {
@@ -459,10 +517,31 @@ export const createAuthUserGroup = async (
   };
 };
 
+export const readAuthGroupTables = async (
+  data: AuthGroupTablesReadReq,
+): Promise<AuthGroupTablesReadRes> => {
+  const authGroupContainer = await initiateAuthGroupContainer();
+
+  const res = await readSubdocs({
+    container: { instance: authGroupContainer, props: ['name', 'id'] },
+    id: data.id,
+    partitionKeyProp: data.name,
+    subContainerName: 'tables',
+    filters: { filters: data.filters, from: data.from, to: data.to },
+  });
+
+  return {
+    tables: res.values.map((value) => {
+      return { id: value.id, name: value.name };
+    }),
+    count: res.count,
+  };
+};
+
 export const readAuthGroupUsers = async (
   data: AuthGroupUsersReadReq,
 ): Promise<AuthGroupUsersReadRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const authGroupId = data.id;
 
@@ -512,13 +591,13 @@ export const readAuthGroupUsers = async (
 export const updateAuthGroupUsers = async (
   data: AuthGroupUsersUpdateReq,
 ): Promise<AuthGroupUsersUpdateRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
   const authUsersContainer = await fetchContainer(AUTH_USERS);
 
   const authGroupId = data.id;
 
   const res = (await authGroupContainer
-    .item(authGroupId, authGroupId)
+    .item(authGroupId, data.name)
     .read()) as ItemResponse<AuthGroupRef>;
 
   if (res.statusCode === 404) {
@@ -526,7 +605,9 @@ export const updateAuthGroupUsers = async (
   }
 
   for (const [index, authUser] of data.authUsers.entries()) {
-    const res2 = await authUsersContainer.item(authUser.id, authUser.id).read();
+    const res2 = await authUsersContainer
+      .item(authUser.id, authUser.username)
+      .read();
 
     if (res2.statusCode === 404) {
       throw new NotFoundError(`No dashboard found at id: ${authUser.id}`);
@@ -536,13 +617,15 @@ export const updateAuthGroupUsers = async (
       (i) => i.id === authGroupId,
     );
 
-    const res3 = await authUsersContainer.item(authUser.id, authUser.id).patch([
-      {
-        op: 'set',
-        path: `/authGroups/${index}/username`,
-        value: authUser.username,
-      },
-    ]);
+    const res3 = await authUsersContainer
+      .item(authUser.id, authUser.username)
+      .patch([
+        {
+          op: 'set',
+          path: `/authGroups/${index}/username`,
+          value: authUser.username,
+        },
+      ]);
   }
 
   const batchPatchArr: PatchOperation[][] = [];
@@ -565,7 +648,7 @@ export const updateAuthGroupUsers = async (
 
   for (const [index, batch] of batchPatchArr.entries()) {
     const res2 = await authGroupContainer
-      .item(authGroupId, authGroupId)
+      .item(authGroupId, data.name)
       .patch(batch);
 
     if (index === batchPatchArr.length - 1) {
@@ -583,14 +666,68 @@ export const updateAuthGroupUsers = async (
 export const deleteAuthGroupUsers = async (
   data: AuthGroupUsersDeleteReq,
 ): Promise<AuthGroupUsersDeleteRes> => {
-  const authGroupContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
   const authUsersContainer = await fetchContainer(AUTH_USERS);
 
   const res = await deleteSubdoc({
     id: data.id,
-    subIds: data.authUsersIds,
+    subDocs: data.authUsers.map((el) => {
+      return { id: el.id, username: el.username };
+    }),
     container1: { container: authGroupContainer, name: 'authGroups' },
-    container2: { container: authUsersContainer, name: 'authUsers' },
+    container2: {
+      container: authUsersContainer,
+      name: 'authUsers',
+      partitionKeyDocProp: 'username',
+    },
+    partitionKey: data.name,
+  });
+
+  return res;
+};
+
+export const createAuthGroupTables = async (
+  data: AuthGroupTablesCreateReq,
+): Promise<AuthGroupTablesCreateRes> => {
+  const authGroupContainer = await initiateAuthGroupContainer();
+  const tablesContainer = await fetchContainer(TABLES);
+
+  const res = await createSubdoc({
+    container1: { container: authGroupContainer, name: 'authGroups' },
+    container2: {
+      container: tablesContainer,
+      name: 'tables',
+      partitionKey: 'name',
+    },
+    id: data.id,
+    docs: { docs1: data.tables },
+    partitionKey: data.name,
+  });
+
+  return {
+    name: data.name,
+    id: data.id,
+    tables: res.values as { id: string; name: string }[],
+  };
+};
+
+export const deleteAuthGroupTables = async (
+  data: AuthGroupTablesDeleteReq,
+): Promise<AuthGroupTablesDeleteRes> => {
+  const authGroupContainer = await initiateAuthGroupContainer();
+  const tablesContainer = await fetchContainer(TABLES);
+
+  const res = await deleteSubdoc({
+    id: data.id,
+    subDocs: data.tables,
+    partitionKey: data.name,
+
+    container1: { container: authGroupContainer, name: 'authGroups' },
+    container2: {
+      container: tablesContainer,
+      name: 'tables',
+      partitionKeyDocProp: 'name',
+    },
   });
 
   return res;
@@ -598,12 +735,16 @@ export const deleteAuthGroupUsers = async (
 
 export const deleteSubdoc = async (data: {
   id: string;
-  subIds: string[];
+  subDocs: { id: string; name?: string }[];
   container1: { container: Container; name: string };
-  container2: { container: Container; name: string };
-  partitionKey?: string
+  container2: {
+    container: Container;
+    name: string;
+    partitionKeyDocProp?: string;
+  };
+  partitionKey?: string;
 }): Promise<string> => {
-  if (data?.subIds?.length === 0) {
+  if (data?.subDocs?.length === 0) {
     throw new BadRequestError(`${data.container1.name} Ids array empty`);
   }
 
@@ -612,34 +753,40 @@ export const deleteSubdoc = async (data: {
 
   const docId = data.id;
 
-  const res = await data.container1.container.item(docId, docId).read();
+  const res = await data.container1.container
+    .item(docId, data.partitionKey || docId)
+    .read();
 
-  for (const [index, subId] of data.subIds.entries()) {
-    const res3 = await container2.container.item(subId, data.partitionKey || subId).read();
+  for (const [index, subId] of data.subDocs.entries()) {
+    const res3 = await container2.container
+      .item(subId.id, subId?.[container2.partitionKeyDocProp] || subId.id)
+      .read();
 
     if (res3.statusCode === 404) {
-      throw new NotFoundError(`Dashboard not found at id: ${subId}`);
+      throw new NotFoundError(`${container2.name} not found at id: ${subId}`);
     }
 
     const indexUpdate = res3.resource[container1.name].findIndex(
       (el2) => el2.id === docId,
     );
 
-    const res2 = await container2.container.item(subId, subId).patch([
-      {
-        op: 'remove',
-        path: `/${container1.name}/${indexUpdate}`,
-      },
-    ]);
+    const res2 = await container2.container
+      .item(subId.id, subId?.[container2.partitionKeyDocProp] || subId.id)
+      .patch([
+        {
+          op: 'remove',
+          path: `/${container1.name}/${indexUpdate}`,
+        },
+      ]);
   }
 
   const batchPatchArr: PatchOperation[][] = [];
 
-  while (data.subIds.length > 0) {
+  while (data.subDocs.length > 0) {
     batchPatchArr.push(
-      data.subIds.splice(0, 10).map((subDoc2Id) => {
+      data.subDocs.splice(0, 10).map((subDoc) => {
         const index = res.resource[container2.name].findIndex(
-          (i) => i.id === subDoc2Id,
+          (i) => i.id === subDoc.id,
         );
 
         return {
@@ -651,12 +798,23 @@ export const deleteSubdoc = async (data: {
   }
 
   for (const [index, batch] of batchPatchArr.entries()) {
-    const res2 = await container1.container.item(docId, docId).patch(batch);
+    try {
+      const res2 = await container1.container
+        .item(docId, data?.partitionKey || docId)
+        .patch(batch);
 
-    if (index === batchPatchArr.length - 1) {
-      const resource = res2.resource;
+      if (index === batchPatchArr.length - 1) {
+        const resource = res2.resource;
 
-      return `${container1.name} references deleted.`;
+        return `${container1.name} references deleted.`;
+      }
+    } catch (error) {
+      if (error?.code === 400) {
+        throw new BadRequestError(error);
+      }
+      if (error?.code === 404) {
+        throw new NotFoundError(error);
+      }
     }
   }
 };
@@ -704,14 +862,10 @@ export const createSubdoc = async (data: {
     values: Record<string, any>[];
   };
 
-  const fooRes = await container1.container.items
-    .query({ query: 'Select * from c' })
-    .fetchAll();
-
   for (const [index, batch] of batchPatchArr.entries()) {
     try {
       const res2 = await container1.container
-        .item(id, data?.partitionKey || id)
+        .item(id, data.partitionKey || id)
         .patch(batch);
       doc1Name = res2.resource.name;
       if (index === batchPatchArr.length - 1) {
@@ -756,4 +910,135 @@ export const createSubdoc = async (data: {
   }
 
   return retValue;
+};
+
+export const readSubdocs = async (data: {
+  id: string;
+
+  filters: ReadPaginationFilter;
+
+  container: { instance: Container; props?: string[] };
+  subContainerName: string;
+  partitionKeyProp?: string;
+}): Promise<{ count: number; values: Record<string, any> }> => {
+  const authGroupId = data.id;
+
+  const str = filterToQuery(
+    { filters: data.filters.filters },
+    'p',
+    `c.id = "${authGroupId}"`,
+  );
+  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c["${data.subContainerName}"] ${str}`;
+
+  const str2 = filterToQuery(
+    {
+      filters: data.filters.filters,
+      from: data.filters.from,
+      to: data.filters.to,
+    },
+    'p',
+    `c["id"] = "${authGroupId}"`,
+  );
+
+  const props = data.container.props.map((prop) => `p["${prop}"]`).join(', ');
+
+  const query = `SELECT ${props} FROM c JOIN p IN c["${data.subContainerName}"] ${str2}`;
+
+  const res = await data.container.instance.items
+    .query({
+      query,
+      parameters: [],
+    })
+    .fetchAll();
+
+  const res2 = await data.container.instance.items
+    .query({
+      query: countStr,
+      parameters: [],
+    })
+    .fetchAll();
+
+  if (res.resources.length === 0) {
+    throw new NotFoundError('No group auth found.');
+  }
+
+  return {
+    count: res2.resources[0],
+    values: res.resources,
+  };
+};
+
+export const readAuthGroupTable = async (
+  data: AuthGroupTableReadReq,
+): Promise<AuthGroupTableReadRes> => {
+  const authGroupContainer = await initiateAuthGroupContainer();
+
+  const res = (await authGroupContainer
+    .item(data.id, data.name)
+    .read()) as ItemResponse<AuthGroupRef>;
+
+  if (res?.statusCode === 404) {
+    throw new NotFoundError(
+      `Group not found at id "${data.name}" and name: ${data.name}`,
+    );
+  }
+
+  const table = res.resource.auth.table;
+
+  const permissions: CrudDocumentRef = {
+    create: table.create,
+    read: table.read,
+    update: table.update,
+    delete: table.delete,
+  };
+
+  return {
+    id: data.id,
+    name: data.name,
+    table: permissions,
+  };
+};
+
+export const updateAuthGroupTable = async (
+  data: AuthGroupTableUpdateReq,
+): Promise<AuthGroupTableUpdateRes> => {
+  const authGroupContainer = await initiateAuthGroupContainer();
+
+  const patchArr: PatchOperation[] = [];
+
+  for (const perm in data.table) {
+    const value = data.table[perm];
+
+    switch (perm) {
+      case 'create':
+        patchArr.push({ op: 'set', path: `/auth/table/create`, value });
+        break;
+      case 'read':
+        patchArr.push({ op: 'set', path: `/auth/table/read`, value });
+        break;
+      case 'update':
+        patchArr.push({ op: 'set', path: `/auth/table/update`, value });
+        break;
+      case 'delete':
+        patchArr.push({ op: 'set', path: `/auth/table/delete`, value });
+        break;
+    }
+  }
+
+  try {
+    const res = (await authGroupContainer
+      .item(data.id, data.name)
+      .patch(patchArr)) as ItemResponse<AuthGroupRef>;
+    return {
+      id: res.resource.id,
+      name: res.resource.name,
+      table: res.resource.auth.table,
+    };
+  } catch (error) {
+    if (error?.code === 404) {
+      throw new NotFoundError(
+        `Group not found at id "${data.name}" and name: ${data.name}`,
+      );
+    }
+  }
 };

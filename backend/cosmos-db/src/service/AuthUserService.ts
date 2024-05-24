@@ -48,6 +48,7 @@ import {
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import { ADMIN, initiateAuthGroupContainer } from './AuthGroupService';
 dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const AUTH_GROUPS = 'auth_groups';
@@ -166,7 +167,7 @@ export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
   const authUserContainer = await initiateAuthUserContainer();
-  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const authUserDoc = await authUserContainer.item(data.id, data.username);
 
@@ -221,7 +222,7 @@ export const authUserGroupsCreate = async (
   data: AuthUserGroupsCreateReq,
 ): Promise<AuthUserGroupsCreateRes> => {
   const authUserContainer = await initiateAuthUserContainer();
-  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const authUserDoc = await authUserContainer.item(data.id, data.username);
 
@@ -327,7 +328,7 @@ export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,
 ): Promise<AuthUserGroupsDeleteRes> => {
   const authUserContainer = await initiateAuthUserContainer();
-  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const authUserDoc = await authUserContainer.item(data.id, data.username);
 
@@ -408,7 +409,7 @@ export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
 
   const dashboardsAuth = [];
 
-  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   for (const group of authGroups) {
     const res = (await authGroupContainer.item(group.id, group.id).read())
@@ -513,7 +514,7 @@ function getJwtClaims(token) {
   // Split the token into parts
   const parts = token.split('.');
   if (parts.length !== 3) {
-    throw new Error('Invalid JWT token');
+    throw new BadRequestError('Invalid JWT token');
   }
   // Decode the payload
   const payload = base64UrlDecode(parts[1]);
@@ -533,11 +534,20 @@ export const checkUserDashPermissions = async (data: {
   delete: boolean;
 }> => {
   const authUserContainer = await initiateAuthUserContainer();
-  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
+  const authGroupContainer = await initiateAuthGroupContainer();
 
   const user = await authUserContainer.item(data.userId, data.username).read();
 
-  const userGroups = user.resource.authGroups as AuthUserAndGroupsRef[];
+  const userGroups = user.resource.authGroups as AuthGroupRef[];
+
+  if (userGroups.some((el) => el.name === ADMIN)) {
+    return {
+      create: true,
+      read: true,
+      update: true,
+      delete: true,
+    };
+  }
 
   const userGroupsFiltered = [];
 
@@ -585,3 +595,138 @@ export const checkUserDashPermissions = async (data: {
     delete: del,
   };
 };
+
+export const checkUserPermissions = async (data: {
+  userId: string;
+  username?: string;
+  authTable: 'table' | 'dashboard' | 'tableData';
+}): Promise<{
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+}> => {
+  const authUserContainer = await initiateAuthUserContainer();
+  const authGroupContainer = await initiateAuthGroupContainer();
+
+  const user = await authUserContainer.item(data.userId, data.username).read();
+
+  const userGroups = user.resource.authGroups as AuthGroupRef[];
+
+  if (userGroups.some((el) => el.name === ADMIN)) {
+    return {
+      create: true,
+      read: true,
+      update: true,
+      delete: true,
+    };
+  }
+
+  let create = false;
+  let read = false;
+  let update = false;
+  let del = false;
+
+  for (const group of userGroups) {
+    const res = (await authGroupContainer
+      .item(group.id, group.name)
+      .read()) as ItemResponse<AuthGroupRef>;
+    const permissions = res.resource.auth?.[data.authTable];
+
+    if (permissions.create) {
+      create = true;
+    }
+    if (permissions.read) {
+      read = true;
+    }
+    if (permissions.update) {
+      update = true;
+    }
+    if (permissions.delete) {
+      del = true;
+    }
+  }
+
+  return {
+    create,
+    read,
+    update,
+    delete: del,
+  };
+};
+
+// const checkUserPermissions = async (data: {
+//   id: string;
+
+//   docs: {
+//     docs1: Record<string, any>[];
+//     ommitPropsInContainer2?: string[];
+//   };
+
+//   container1: { container: Container; name: string };
+//   container2: { container: Container; name: string; partitionKeyProp?: string };
+//   partitionKey?: string;
+// }) => {
+//   const authUserContainer = await initiateAuthUserContainer();
+//   const authGroupContainer = await initiateAuthUserContainer();
+
+//   const user = await data.container1.container.item(data.id, data.partitionKey).read();
+
+//   const userGroups = user.resource.authGroups as AuthGroupRef[];
+
+//   if (userGroups.some((el) => el.name === ADMIN)) {
+//     return {
+//       create: true,
+//       read: true,
+//       update: true,
+//       delete: true,
+//     };
+//   }
+
+//   const userGroupsFiltered = [];
+
+//   for (const group of userGroups) {
+//     const res = (await data.container2.container
+//       .item(group.id, group[data.container2.partitionKeyProp] || group.id)
+//       .read()) as ItemResponse<AuthGroupRef>;
+//     const dashboards = res.resource.dashboards;
+
+//     const index = dashboards.findIndex((el) => el.id === data.dashboardId);
+
+//     if (index !== -1) {
+//       userGroupsFiltered.push(dashboards[index]);
+//     }
+//   }
+
+//   if (userGroupsFiltered.length === 0) {
+//     throw new NotFoundError('Dashboard id not found');
+//   }
+
+//   let create = false;
+//   let read = false;
+//   let update = false;
+//   let del = false;
+
+//   userGroupsFiltered.forEach((el) => {
+//     if (el.create) {
+//       create = el.create;
+//     }
+//     if (el.read) {
+//       read = el.read;
+//     }
+//     if (el.update) {
+//       update = el.update;
+//     }
+//     if (el.delete) {
+//       del = el.delete;
+//     }
+//   });
+
+//   return {
+//     create,
+//     read,
+//     update,
+//     delete: del,
+//   };
+
+// };
