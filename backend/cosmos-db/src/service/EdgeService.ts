@@ -12,21 +12,128 @@ import {
   TableDataEdgeReadReq,
   TableDataEdgeReadRes,
   TableDataEdgeDeleteReq,
+  ReadPaginationFilter,
 } from '../typescript/api';
-import { fetchContainer } from '../cosmos-utils';
-import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
+import { fetchContainer, filterToQuery } from '../cosmos-utils';
+import {
+  Container,
+  ItemResponse,
+  PatchOperation,
+  ResourceResponse,
+} from '@azure/cosmos';
 import { ConflictEntityError, NotFoundError } from '../generated/api';
+import { initiateTableContainer } from './TableService';
 
 const TABLES = 'tables';
 
+export const createConnection = async (doc: {
+  container: Container;
+  id: string;
+  partitionKey?: string;
 
+  subCollectionName: string;
+  subCollectionPath: string;
+  values: { [key: string]: any }[];
 
+  ommitPropsInContainer2?: string[];
+}) => {
+  const values = doc.values;
+  const id = doc.id;
+  const partitionKey = doc.partitionKey;
+  const container = doc.container;
+  let retVal = {} as ItemResponse<any>;
+  for (const [index, value] of values.entries()) {
+    const res = await ensureSubDocumentIsCreated(
+      {
+        subCollectionPath: doc.subCollectionPath,
+        container: container,
+        subCollectionName: doc.subCollectionName,
+        id,
+        partitionKey,
+      },
+      value,
+    );
+    if (values.length - 1 === index) {
+      retVal = res;
+    }
+  }
+
+  return retVal.resource;
+};
+
+export const ensureSubDocumentIsCreated = async (
+  data: {
+    subCollectionPath: string;
+    subCollectionName: string;
+    container: Container;
+    id: string;
+    partitionKey?: string;
+  },
+  value: Record<string, any>,
+): Promise<ItemResponse<any>> => {
+  const container = data.container;
+  const id = data.id;
+  const partitionKey = data?.partitionKey;
+  try {
+    const res = await container.item(id, partitionKey || id).patch([
+      {
+        op: 'add',
+        path: `/${data.subCollectionPath}/-`,
+        value,
+      },
+    ]);
+    return res;
+  } catch (error) {
+    const { resource: existingDocument } = await container
+      .item(id, partitionKey || id)
+      .read();
+
+    ensureNestedPathExists(existingDocument, `/${data.subCollectionPath}`);
+
+    existingDocument[data.subCollectionName] = [value];
+    try {
+      const res = await container
+        .item(id, partitionKey || id)
+        .replace(existingDocument);
+
+      return res;
+    } catch (error) {
+      if (error?.code === 404) {
+        throw new NotFoundError(
+          `Document at id "${id}" ${
+            partitionKey ? `and partition key "${partitionKey}"` : ''
+          } not found.`,
+        );
+      }
+    }
+  }
+};
+
+const ensureNestedPathExists = (obj, path) => {
+  const parts = path.split('/');
+  let current = obj;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (i === parts.length - 1) {
+      if (!Array.isArray(current[part])) {
+        current[part] = [];
+      }
+    } else {
+      if (!current[part]) {
+        current[part] = {};
+      }
+      current = current[part];
+    }
+  }
+
+  return current;
+};
 
 export const createTableDataEdge = async (
-  data: TableDataEdgeCreateReq, 
+  data: TableDataEdgeCreateReq,
 ): Promise<TableDataEdgeCreateRes> => {
   const arrRes = [];
-  
 
   function getOrCreatePath(obj, path, defaultValue = {}) {
     const parts = path.split('.');
@@ -52,109 +159,150 @@ export const createTableDataEdge = async (
     return current;
   }
 
-  const ensureNestedPathExists = (obj, path) => {
-    const parts = path.split('/');
-    let current = obj;
+  // const createConnection = async (
+  //   direction: 'from' | 'to',
+  //   table1: { rowIds: string[]; tableName: string },
+  //   table2: { rowIds: string[]; tableName: string },
+  // ) => {
+  //   const container = await fetchContainer(table1.tableName);
 
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      if (i === parts.length - 1) {
-        if (!Array.isArray(current[part])) {
-          current[part] = [];
-        }
-      } else {
-        if (!current[part]) {
-          current[part] = {};
-        }
-        current = current[part];
-      }
+  //   if (data.edgeType === 'oneToOne') {
+  //     for (const [index, rowId] of table1.rowIds.entries()) {
+  //       const table2RowId = table2.rowIds.at(index);
+
+  //       if (!table2RowId) return;
+
+  //       const value = {
+  //         id: table2RowId,
+  //         edge: data.edge,
+  //         tableName: table2.tableName,
+  //       };
+
+  //       try {
+  //         await container.item(rowId, rowId).patch([
+  //           {
+  //             op: 'add',
+  //             path: `/edges/-`,
+  //             value,
+  //           },
+  //         ]);
+  //         arrRes.push({ from: rowId, to: table2RowId });
+  //       } catch (error) {
+  //         const { resource: existingDocument } = await container
+  //           .item(rowId, rowId)
+  //           .read();
+
+  //         ensureNestedPathExists(existingDocument, '/edges');
+
+  //         existingDocument['edges'] = [value];
+
+  //         await container.item(rowId, rowId).replace(existingDocument);
+  //         arrRes.push({ from: rowId, to: table2RowId });
+  //       }
+  //     }
+  //   } else if (data.edgeType === 'oneToMany') {
+  //     for (const [index, rowId] of table1.rowIds.entries()) {
+  //       for (const [index, rowId2] of table2.rowIds.entries()) {
+  //         if (!rowId2) return;
+  //         const path = `edges/${table2.tableName}/${data.edge}/${direction}`;
+
+  //         try {
+  //           await container.item(rowId, rowId).patch([
+  //             {
+  //               op: 'add',
+  //               path: `/${path}/-`,
+  //               value: rowId2,
+  //             },
+  //           ]);
+  //           arrRes.push({ from: rowId, to: rowId2 });
+  //         } catch (error) {
+  //           const { resource: existingDocument } = await container
+  //             .item(rowId, rowId)
+  //             .read();
+
+  //           ensureNestedPathExists(existingDocument, path);
+
+  //           existingDocument['edges'][table2.tableName][data.edge][
+  //             direction
+  //           ].push(rowId2);
+
+  //           await container.item(rowId, rowId).replace(existingDocument);
+  //           arrRes.push({ from: rowId, to: rowId2 });
+  //         }
+  //       }
+  //     }
+  //   }
+  // };
+
+  const tableContainer = await initiateTableContainer();
+
+  const table = await tableContainer
+    .item(data.tableFrom.id, data.tableFrom.tableName)
+    .read();
+
+  if (table.statusCode === 404) {
+    throw new NotFoundError(
+      `Could not found table at id: ${data.tableFrom.id}`,
+    );
+  }
+  for (const rowId of data.tableFrom.rowIds) {
+    const index = table.resource.data.findIndex((el) => el.id === rowId);
+    if (index === -1) {
+      throw new NotFoundError(
+        `Could not find row at id "${rowId}" of table ${data.tableFrom.tableName} (id: ${data.tableFrom.id})`,
+      );
     }
+  }
 
-    return current;
-  };
+  if (data.edgeType === 'oneToOne') {
+    for (const [index, rowId] of data.tableFrom.rowIds.entries()) {
+      const index = table.resource.data.findIndex((el) => el.id === rowId);
 
-  const createConnection = async (
-    direction: 'from' | 'to',
-    table1: { rowIds: string[]; tableName: string },
-    table2: { rowIds: string[]; tableName: string },
-  ) => {
-    const container = await fetchContainer(table1.tableName);
-
-    if (data.edgeType === 'oneToOne') {
-      for (const [index, rowId] of table1.rowIds.entries()) {
-        const table2RowId = table2.rowIds.at(index);
-
-        if (!table2RowId) return;
-        const path = `edges/${table2.tableName}/${data.edge}/${direction}`;
-
-        try {
-          await container.item(rowId, rowId).patch([
-            {
-              op: 'add',
-              path: `/${path}/-`,
-              value: table2RowId,
-            },
-          ]);
-          arrRes.push({ from: rowId, to: table2RowId });
-        } catch (error) {
-          const { resource: existingDocument } = await container
-            .item(rowId, rowId)
-            .read();
-
-          ensureNestedPathExists(existingDocument, path);
-
-          existingDocument['edges'][table2.tableName][data.edge][
-            direction
-          ].push(table2RowId);
-
-          await container.item(rowId, rowId).replace(existingDocument);
-          arrRes.push({ from: rowId, to: table2RowId });
-        }
-      }
-    } else if (data.edgeType === 'oneToMany') {
-      for (const [index, rowId] of table1.rowIds.entries()) {
-        for (const [index, rowId2] of table2.rowIds.entries()) {
-          if (!rowId2) return;
-          const path = `edges/${table2.tableName}/${data.edge}/${direction}`;
-
-          try {
-            await container.item(rowId, rowId).patch([
-              {
-                op: 'add',
-                path: `/${path}/-`,
-                value: rowId2,
-              },
-            ]);
-            arrRes.push({ from: rowId, to: rowId2 });
-          } catch (error) {
-            const { resource: existingDocument } = await container
-              .item(rowId, rowId)
-              .read();
-
-            ensureNestedPathExists(existingDocument, path);
-
-            existingDocument['edges'][table2.tableName][data.edge][
-              direction
-            ].push(rowId2);
-
-            await container.item(rowId, rowId).replace(existingDocument);
-            arrRes.push({ from: rowId, to: rowId2 });
-          }
-        }
-      }
+      const res = await createConnection({
+        container: tableContainer,
+        id: data.tableFrom.id,
+        partitionKey: data.tableFrom.tableName,
+        subCollectionPath: `data/${index}/edges`,
+        subCollectionName: 'data',
+        values: [
+          {
+            id: data.tableTo.rowIds[index],
+            tableName: data.tableTo.tableName,
+            edge: data.edge,
+          },
+        ],
+      });
+      arrRes.push(res);
     }
-  };
+  } else if (data.edgeType === 'oneToMany') {
+    for (const [index, rowId] of data.tableFrom.rowIds.entries()) {
+      const res = await createConnection({
+        container: tableContainer,
+        id: rowId,
+        subCollectionPath: 'edges',
+        subCollectionName: 'data',
+        values: data.tableTo.rowIds.map((rowId) => {
+          return {
+            id: rowId,
+            tableName: data.tableTo.tableName,
+            edge: data.edge,
+          };
+        }),
+      });
+      arrRes.push(res);
+    }
+  }
 
-  await createConnection(
-    'to',
-    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
-    { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
-  );
-  await createConnection(
-    'from',
-    { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
-    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
-  );
+  // await createConnection(
+  //   'to',
+  //   { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
+  //   { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
+  // );
+  // await createConnection(
+  //   'from',
+  //   { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
+  //   { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
+  // );
 
   return arrRes;
 };
@@ -186,47 +334,154 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
     });
   };
 
-  data.edge.rowIds.forEach(async (rowId) => {
-    await deleteConnection({
-      tableName: data.edge.tableName,
-      edge: {
-        direction: data.edge.direction === 'from' ? 'to' : 'from',
-        edgeLabel: data.edge.edgeLabel,
-        rowIds: [data.rowId],
-        tableName: data.tableName,
-      },
-      rowId,
-    });
-  });
+  // data.edge.rowIds.forEach(async (rowId) => {
+  //   await deleteConnection({
+  //     tableName: data.edge.tableName,
+  //     edge: {
+  //       direction: data.edge.direction === 'from' ? 'to' : 'from',
+  //       edgeLabel: data.edge.edgeLabel,
+  //       rowIds: [data.rowId],
+  //       tableName: data.tableName,
+  //     },
+  //     rowId,
+  //   });
+  // });
 
   await deleteConnection(data);
 };
 
-export const readTableDataEdge = async (
+export const readFromConnections = async (data: {
+  id: string;
+  container: Container;
+  docFields?: string[];
+  subDocFields?: string[];
+  subCollectionName: string;
+  
+  filters?: ReadPaginationFilter;
+}): Promise<unknown> => {
+  const container = data.container;
+
+  const whereClause = filterToQuery(data?.filters, 'p', `c.id = "${data.id}"`);
+
+  const subDocFieldsStr = data?.subDocFields
+    ?.map((field) => {
+      if (field === 'id') {
+        return `p["${field}"] as subId`;
+      }
+      return `p["${field}"]`;
+    })
+    .join(', ');
+
+  const docFieldsStr = data.docFields?.map((field) => `c["${field}"]`);
+  const querySpec2 = {
+    query: `SELECT ${docFieldsStr ? docFieldsStr : ''} ${
+      docFieldsStr && subDocFieldsStr ? ', ' : ''
+    } ${subDocFieldsStr ? subDocFieldsStr : ''} FROM c JOIN p IN c["${
+      data.subCollectionName
+    }"] ${whereClause}`,
+    parameters: [],
+  };
+  const { resources: res2 } = await container.items
+    .query(querySpec2)
+    .fetchAll();
+
+  return res2;
+};
+
+export const readToConnections = async (data: {
+  id: string;
+  container: Container;
+  subCollectionName: string;
+  subDocFields?: string[];
+  where?: string[];
+  docFields?: string[];
+  filters?: ReadPaginationFilter;
+}): Promise<unknown> => {
+  const container = data.container;
+
+  const subDocFieldsStr = data?.subDocFields
+    ?.map((field) => `p["${field}"]`)
+    .join(', ');
+
+  const whereClause = filterToQuery(data.filters, 'p', `p.id = "${data.id}"`);
+
+  const docFieldsStr = data.docFields?.map((field) => `c["${field}"]`);
+  const querySpec = {
+    query: `select ${docFieldsStr ? docFieldsStr : 'c'} ${
+      subDocFieldsStr ? subDocFieldsStr : ', p'
+    } from c JOIN p IN c["${data.subCollectionName}"] ${whereClause}`,
+    parameters: [],
+  };
+  const { resources: res2 } = await container.items.query(querySpec).fetchAll();
+
+  return res2;
+};
+
+export const readTableDataEdges = async (
   data: TableDataEdgeReadReq,
 ): Promise<TableDataEdgeReadRes> => {
-  const { direction, edgeLabel, tableName: edgeTableName } = data.edge;
+  const { direction, edgeLabel, tableName } = data.edge;
 
-  const querySpec = {
-    query: `select c.edges${edgeTableName ? `["${edgeTableName}"]` : ''}${
-      edgeLabel ? `["${edgeLabel}"]` : ''
-    }${direction ? `["${direction}"]` : ''}, c.id from c where c.id=@rowId`,
-    parameters: [
-      {
-        name: '@rowId',
-        value: data.rowId,
-      },
-    ],
-  };
+  // if (direction === 'from') {
 
   const tableContainer = await fetchContainer(data.tableName);
+  const res = (await readFromConnections({
+    filters: {
+      from: 1,
+      to: 20,
+      filters: {
+        tableName: {
+          filter: data.edge.tableName,
+          filterType: 'text',
+          type: 'equals',
+        },
+        edge: {
+          filter: data.edge.edgeLabel,
+          filterType: 'text',
+          type: 'equals',
+        },
+      },
+    },
+    container: tableContainer,
+    id: data.rowId,
+    subCollectionName: 'edges',
+    //docFields: ['id'],
+    subDocFields: ['id', 'tableName'],
+  })) as { subId: string; tableName: string }[];
 
-  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-  const resource = resources[0];
+  const container = await tableContainer.item(data.rowId, data.rowId).read();
+
+  for (const item of res) {
+    const container = await fetchContainer(item.tableName);
+    const res3 = await tableContainer.item(item.subId, item.subId).read();
+    console.log(res3.resource);
+    const res2 = (await readToConnections({
+      filters: {
+        from: 1,
+        to: 20,
+        filters: {
+          //tableName: {
+          //filter: data.edge.tableName,
+          //filterType: 'text',
+          //type: 'equals',
+          //},
+          //edge: {
+          //filter: data.edge.edgeLabel,
+          //filterType: 'text',
+          //type: 'equals',
+          //},
+        },
+      },
+      id: data.rowId,
+      container: container,
+      subCollectionName: 'edges',
+      //docFields: ['id'],
+    })) as { id: string; edge: string }[];
+  }
 
   return {
-    edges: resource,
-    rowId: resource.id,
+    edges: [],
+    rowId: '',
     tableName: data.tableName,
   };
 };

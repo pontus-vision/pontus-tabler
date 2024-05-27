@@ -46,7 +46,7 @@ export const createDashboard = async (
     const res = await menuContainer.items.create({
       ...child,
       path: path,
-      id: dashboardId,
+      id: menuItem.id,
     });
 
     try {

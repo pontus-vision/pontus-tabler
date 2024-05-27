@@ -8,7 +8,13 @@ import {
 } from '../typescript/api';
 import { fetchContainer, fetchData } from '../cosmos-utils';
 import { PatchOperation } from '@azure/cosmos';
-import { readTableByName } from './TableService';
+import {
+  TABLES,
+  initiateTableContainer,
+  readTableByName,
+} from './TableService';
+import { ensureSubDocumentIsCreated } from './EdgeService';
+import { v4 as uuidv4 } from 'uuid';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
   try {
@@ -39,17 +45,30 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
     throw error;
   }
 };
-export const upsertTableData = async (data: TableDataCreateReq) => {
+export const createTableData = async (data: TableDataCreateReq) => {
   try {
     await checkTableCols(data.tableName, data?.cols);
 
-    const tableDataContainer = await fetchContainer(data.tableName);
+    const uuid = uuidv4();
 
-    const res = await tableDataContainer.items.upsert(data.cols);
-    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
+    const tableContainer = await initiateTableContainer();
+
+    const dataRow = { ...data.cols, edges: [], id: uuid };
+
+    const res = await ensureSubDocumentIsCreated(
+      {
+        container: tableContainer,
+        id: data.id,
+        subCollectionName: 'data',
+        subCollectionPath: 'data',
+        partitionKey: data.tableName,
+      },
+      dataRow,
+    );
+    const { _rid, _self, _etag, _attachments, _ts,edges, ...rest } =
       res.resource as any;
 
-    return rest;
+    return dataRow;
   } catch (error) {
     throw error;
   }

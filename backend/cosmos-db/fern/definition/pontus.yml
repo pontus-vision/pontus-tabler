@@ -127,7 +127,7 @@ service:
         name: TableDataEdgeCreateReq
         body:
           properties:
-            tableFrom: TableDataEdgeRef
+            tableFrom: TableDataFromEdgeRef
             edge: string
             edgeType: EdgeConnectionType
             tableTo: TableDataEdgeRef
@@ -167,7 +167,7 @@ service:
           properties:
             rowId: string
             tableName: string
-            edge: TableDataEdgeReadEdgeRef
+            edge: optional<TableDataEdgeReadEdgeRef>
       response:
         type: TableDataEdgeReadRes
       errors:
@@ -596,7 +596,8 @@ service:
         body:
           properties:
             tableName: string
-            cols: optional<TableDataRowRef>
+            id: string
+            cols: TableDataRowRef
       response:
         docs: Table row created successfully
         type: TableDataCreateRes
@@ -606,6 +607,9 @@ service:
       examples:
         - request:
             tableName: string
+            id: ij3dmoi3dnmi32nmd
+            cols:
+              name: foo
           response:
             body:
               string: {}
@@ -619,6 +623,8 @@ service:
         body:
           properties:
             tableName: string
+            id: string
+            rowId: string
           extends:
             - ReadPaginationFilter
       response:
@@ -632,6 +638,9 @@ service:
       examples:
         - name: example-0001
           request:
+            tableName: person-natural
+            id: d3u9n34j4n43un44
+            rowId: i9ja34534jnn44
             from: 0
             to: 100
             filters:
@@ -646,7 +655,6 @@ service:
                   type: contains
                 filterType: text
                 operator: AND
-            tableName: Person_Natural
           response:
             body:
               rowsCount: 1
@@ -664,6 +672,7 @@ service:
         body:
           properties:
             tableName: string
+            id: string
             rowId: string
             cols: optional<TableDataRowRef>
       response:
@@ -676,7 +685,8 @@ service:
         - name: example-01
           request:
             tableName: string
-            rowId: string
+            id: string
+            rowId: d3u9n34j4n43un44
             cols:
               mapeamentoDeProcessoCol1: Value Overwritten
               mapeamentoDeProcessoCol2: Value Overwritten
@@ -693,6 +703,7 @@ service:
         name: TableDataDeleteReq
         body:
           properties:
+            id: string
             rowId: string
             tableName: string
       response:
@@ -704,7 +715,8 @@ service:
       examples:
         - name: example-01
           request:
-            rowId: string
+            id: string
+            rowId: d3u9n34j4n43un44
             tableName: string
           response:
             body: string
@@ -1208,9 +1220,9 @@ service:
       request:
         name: AuthGroupTableCreateReq
         body:
-          properties: 
-            table: CrudDocumentRef
+          properties: {}
           extends:
+            - CrudDocumentRef
             - NameAndIdRef
       response:
         type: AuthGroupTableCreateRes
@@ -1964,7 +1976,7 @@ types:
     properties:
       rowId: string
       tableName: string
-      edges: unknown
+      edges: list<Edge>
   # TableDataEdgeDeleteReq:
   #   properties:
   #     rowId: string
@@ -2040,6 +2052,11 @@ types:
     enum:
       - oneToOne
       - oneToMany
+  TableDataFromEdgeRef:
+    properties:
+      id: string
+    extends:
+      - TableDataEdgeRef 
   TableDataEdgeRef:
     properties:
       tableName: string

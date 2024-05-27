@@ -95,39 +95,21 @@ export const initiateAuthGroupContainer = async (): Promise<Container> => {
 
 export const createAuthGroup = async (
   data: AuthGroupCreateReq,
-): Promise<AuthGroupCreateRes> => {
+) => {
   const authGroupContainer = await initiateAuthGroupContainer();
   
   try {
-    const res = (await authGroupContainer.items.create({
+    const res = await authGroupContainer.items.create({
       ...data,
       dashboards: [],
       authUsers: [],
       tables: [],
-      auth: {
-        table: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-        },
-        tableData: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-        },
-        dashboard: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-        },
-      },
-    })) as ItemResponse<AuthGroupRef>;
 
-    const { name, id, auth } = res.resource;
-    return { name, id, auth };
+      tableMetadata: {},
+    });
+
+    const { name, id } = res.resource;
+    return { name, id, };
   } catch (error) {
     if (error?.code === 409) {
       throw new ConflictEntityError(`id: ${data.id} already taken.`);
@@ -821,12 +803,10 @@ export const deleteSubdoc = async (data: {
 
 export const createSubdoc = async (data: {
   id: string;
-
   docs: {
     docs1: Record<string, any>[];
     ommitPropsInContainer2?: string[];
   };
-
   container1: { container: Container; name: string };
   container2: { container: Container; name: string; partitionKey?: string };
   partitionKey?: string;
@@ -884,30 +864,30 @@ export const createSubdoc = async (data: {
     }
   }
 
-  for (const [index, doc] of data.docs.docs1.entries()) {
-    try {
-      const obj = JSON.parse(JSON.stringify(doc));
-      const excludeKey = data.docs?.ommitPropsInContainer2;
+  // for (const [index, doc] of data.docs.docs1.entries()) {
+  //   try {
+  //     const obj = JSON.parse(JSON.stringify(doc));
+  //     const excludeKey = data.docs?.ommitPropsInContainer2;
 
-      excludeKey?.forEach((key) => delete obj[key]);
+  //     excludeKey?.forEach((key) => delete obj[key]);
 
-      const res = await container2.container
-        .item(doc.id, doc?.[container2?.partitionKey] || doc.id)
-        .patch([
-          {
-            op: 'add',
-            path: `/${container1.name}/-`,
-            value: { ...obj, name: doc1Name, id: data.id },
-          },
-        ]);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError(
-          `${container2.name} not found at id: ${doc.id}`,
-        );
-      }
-    }
-  }
+  //     const res = await container2.container
+  //       .item(doc.id, doc?.[container2?.partitionKey] || doc.id)
+  //       .patch([
+  //         {
+  //           op: 'add',
+  //           path: `/${container1.name}/-`,
+  //           value: { ...obj, name: doc1Name, id: data.id },
+  //         },
+  //       ]);
+  //   } catch (error) {
+  //     if (error?.code === 404) {
+  //       throw new NotFoundError(
+  //         `${container2.name} not found at id: ${doc.id}`,
+  //       );
+  //     }
+  //   }
+  // }
 
   return retValue;
 };
