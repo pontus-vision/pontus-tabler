@@ -41,7 +41,7 @@ import { srv } from '../server';
 import { post } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { deleteContainer } from '../cosmos-utils';
-import { AUTH_USERS, loginUser } from '../service/AuthUserService';
+import { AUTH_USERS } from '../service/AuthUserService';
 import { AUTH_GROUPS } from '../service/AuthGroupService';
 
 // // Mock the utils.writeJson function
@@ -291,7 +291,9 @@ describe('dashboardCreatePOST', () => {
       id: user.id,
       username: user.username,
 
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -317,8 +319,8 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [
-        'foo',
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
         // authGroupCreateRes.data.id
       ],
     };
@@ -333,8 +335,8 @@ describe('dashboardCreatePOST', () => {
     const createUserGroups: AuthUserGroupsCreateReq = {
       id: 'foo',
       username: 'bar',
-      authGroupsIds: [
-        'foo',
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
         // authGroupCreateRes.data.id
       ],
     };
@@ -362,7 +364,9 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -411,7 +415,9 @@ describe('dashboardCreatePOST', () => {
       id: user.id,
 
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -457,7 +463,9 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -470,7 +478,9 @@ describe('dashboardCreatePOST', () => {
     const authUserGroupDeleteBody: AuthUserGroupsDeleteReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupDeleteRes = (await postReq(
@@ -496,7 +506,9 @@ describe('dashboardCreatePOST', () => {
     const authUserGroupDeleteBody: AuthUserGroupsDeleteReq = {
       id: 'foo',
       username: 'bar',
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupDeleteRes = (await postReq(
@@ -508,7 +520,9 @@ describe('dashboardCreatePOST', () => {
     const authUserGroupDeleteBody2: AuthUserGroupsDeleteReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: ['foo'],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupDeleteRes2 = (await postReq(
@@ -534,7 +548,9 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
