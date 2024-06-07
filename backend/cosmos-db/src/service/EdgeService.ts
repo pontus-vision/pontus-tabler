@@ -12,205 +12,403 @@ import {
   TableDataEdgeReadReq,
   TableDataEdgeReadRes,
   TableDataEdgeDeleteReq,
+  TableDataEdgeCreateRef,
+  EdgeDirectionEnum,
 } from '../typescript/api';
-import { fetchContainer } from '../cosmos-utils';
+import { fetchContainer, filterToQuery } from '../cosmos-utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
-import { ConflictEntityError, NotFoundError } from '../generated/api';
+import {
+  BadRequestError,
+  ConflictEntityError,
+  NotFoundError,
+} from '../generated/api';
+import { AUTH_GROUPS } from './AuthUserService';
+import { initiateAuthGroupContainer } from './AuthGroupService';
 
 const TABLES = 'tables';
+const ensureNestedPathExists = (obj, path) => {
+  const parts = path.split('/');
+  let current = obj;
 
-
-
-
-export const createTableDataEdge = async (
-  data: TableDataEdgeCreateReq, 
-): Promise<TableDataEdgeCreateRes> => {
-  const arrRes = [];
-  
-
-  function getOrCreatePath(obj, path, defaultValue = {}) {
-    const parts = path.split('.');
-    let current = obj;
-
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      if (i === parts.length - 1) {
-        // If this is the last part of the path, return or set the value
-        if (current[part] === undefined) {
-          current[part] = defaultValue;
-        }
-        return current[part];
-      } else {
-        // For other parts, ensure they are objects
-        if (!current[part]) {
-          current[part] = {};
-        }
-        current = current[part];
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (i === parts.length - 1) {
+      if (!Array.isArray(current[part])) {
+        current[part] = [];
       }
+    } else {
+      if (!current[part]) {
+        current[part] = {};
+      }
+      current = current[part];
     }
-
-    return current;
   }
 
-  const ensureNestedPathExists = (obj, path) => {
-    const parts = path.split('/');
-    let current = obj;
+  return current;
+};
+const snakeToCamel = (snake: string): string => {
+  return snake.replace(/(_\w)/g, (match) => match[1].toUpperCase());
+};
+export const createTableDataEdge = async (
+  data: TableDataEdgeCreateReq,
+): Promise<TableDataEdgeCreateRes> => {
+  const path = `edges/${snakeToCamel(data.tableTo.tableName)}/${data.edge}/`;
+  const path2 = `edges/${snakeToCamel(data.tableFrom.tableName)}/${data.edge}/`;
+  const res1 = await createConnection(
+    {
+      containerName: data.tableFrom.tableName,
+      values: data.tableFrom.rows,
+      partitionKeyProp: data.tableFrom.partitionKeyProp,
+    },
+    {
+      tableName: data.tableTo.tableName,
+      rowIds: data.tableTo.rows,
+    },
+    path + 'to',
+    data.edgeType,
+  );
+  const res2 = await createConnection(
+    {
+      containerName: data.tableTo.tableName,
+      values: data.tableTo.rows,
+      partitionKeyProp: data.tableTo.partitionKeyProp,
+    },
+    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rows },
+    path2 + 'from',
+    data.edgeType,
+  );
 
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      if (i === parts.length - 1) {
-        if (!Array.isArray(current[part])) {
-          current[part] = [];
-        }
-      } else {
-        if (!current[part]) {
-          current[part] = {};
-        }
-        current = current[part];
+  return res1;
+};
+
+export const createConnection = async (
+  table1: {
+    partitionKeyProp?: string;
+    values: Record<string, any>[];
+    containerName: string;
+  },
+  table2: { rowIds: Record<string, any>[] | string[]; tableName: string },
+  path: string,
+  edgeType: 'oneToOne' | 'oneToMany',
+): Promise<TableDataEdgeCreateRef[]> => {
+  const container = await fetchContainer(table1.containerName);
+
+  const arrRes = [];
+  if (edgeType === 'oneToOne') {
+    for (const [index, rowId] of table1.values.entries()) {
+      const table2Row = table2.rowIds.at(index);
+
+      if (!table2Row) return;
+
+      const partitionKey = table1?.partitionKeyProp
+        ? rowId[table1.partitionKeyProp]
+        : undefined;
+
+      try {
+        await container.item(rowId.id, partitionKey || rowId.id).patch([
+          {
+            op: 'add',
+            path: `/${path}/-`,
+            value: table2Row,
+          },
+        ]);
+        arrRes.push({ from: rowId, to: table2Row });
+      } catch (error) {
+        const { resource: existingDocument } = await container
+          .item(rowId.id, partitionKey || rowId.id)
+          .read();
+
+        ensureNestedPathExists(existingDocument, path);
+
+        const nested = createOrUpdateNestedObjectWithArray(
+          existingDocument,
+          path,
+          [table2Row],
+        );
+        const obj = { ...existingDocument, ...nested };
+        const res = await container
+          .item(rowId.id, partitionKey || rowId.id)
+          .replace(obj);
+
+        arrRes.push({ from: rowId, to: table2Row });
       }
     }
+  } else if (edgeType === 'oneToMany') {
+    for (const [index, row] of table1.values.entries()) {
+      for (const [index, rowId2] of table2.rowIds.entries()) {
+        if (!rowId2) return;
 
-    return current;
-  };
-
-  const createConnection = async (
-    direction: 'from' | 'to',
-    table1: { rowIds: string[]; tableName: string },
-    table2: { rowIds: string[]; tableName: string },
-  ) => {
-    const container = await fetchContainer(table1.tableName);
-
-    if (data.edgeType === 'oneToOne') {
-      for (const [index, rowId] of table1.rowIds.entries()) {
-        const table2RowId = table2.rowIds.at(index);
-
-        if (!table2RowId) return;
-        const path = `edges/${table2.tableName}/${data.edge}/${direction}`;
-
+        const partitionKey = table1?.partitionKeyProp
+          ? row[table1.partitionKeyProp]
+          : undefined;
         try {
-          await container.item(rowId, rowId).patch([
+          await container.item(row.id, partitionKey || row.id).patch([
             {
               op: 'add',
               path: `/${path}/-`,
-              value: table2RowId,
+              value: rowId2,
             },
           ]);
-          arrRes.push({ from: rowId, to: table2RowId });
+          arrRes.push({ from: row, to: rowId2 });
         } catch (error) {
           const { resource: existingDocument } = await container
-            .item(rowId, rowId)
+            .item(row.id, partitionKey || row.id)
             .read();
 
           ensureNestedPathExists(existingDocument, path);
 
-          existingDocument['edges'][table2.tableName][data.edge][
-            direction
-          ].push(table2RowId);
+          const nested = createOrUpdateNestedObjectWithArray(
+            existingDocument,
+            path,
+            rowId2,
+          );
 
-          await container.item(rowId, rowId).replace(existingDocument);
-          arrRes.push({ from: rowId, to: table2RowId });
-        }
-      }
-    } else if (data.edgeType === 'oneToMany') {
-      for (const [index, rowId] of table1.rowIds.entries()) {
-        for (const [index, rowId2] of table2.rowIds.entries()) {
-          if (!rowId2) return;
-          const path = `edges/${table2.tableName}/${data.edge}/${direction}`;
+          const obj = { ...existingDocument, ...nested };
 
-          try {
-            await container.item(rowId, rowId).patch([
-              {
-                op: 'add',
-                path: `/${path}/-`,
-                value: rowId2,
-              },
-            ]);
-            arrRes.push({ from: rowId, to: rowId2 });
-          } catch (error) {
-            const { resource: existingDocument } = await container
-              .item(rowId, rowId)
-              .read();
-
-            ensureNestedPathExists(existingDocument, path);
-
-            existingDocument['edges'][table2.tableName][data.edge][
-              direction
-            ].push(rowId2);
-
-            await container.item(rowId, rowId).replace(existingDocument);
-            arrRes.push({ from: rowId, to: rowId2 });
-          }
+          const res = await container
+            .item(row.id, partitionKey || row.id)
+            .replace(obj);
+          arrRes.push({ from: row, to: rowId2 });
         }
       }
     }
-  };
-
-  await createConnection(
-    'to',
-    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
-    { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
-  );
-  await createConnection(
-    'from',
-    { tableName: data.tableTo.tableName, rowIds: data.tableTo.rowIds },
-    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rowIds },
-  );
+  }
 
   return arrRes;
 };
+export const updateTableDataEdge = async (
+  data: TableDataEdgeCreateReq,
+): Promise<TableDataEdgeCreateRes> => {
+  const path = `edges/${snakeToCamel(data.tableTo.tableName)}/${data.edge}/`;
+  const path2 = `edges/${snakeToCamel(data.tableFrom.tableName)}/${data.edge}/`;
 
+  const res1 = await updateConnection(
+    {
+      containerName: data.tableFrom.tableName,
+      values: data.tableFrom.rows.map((row) => {
+        return { id: row.id, ...row };
+      }),
+      partitionKeyProp: data.tableFrom.partitionKeyProp,
+    },
+    {
+      tableName: data.tableTo.tableName,
+      rowIds: data.tableTo.rows,
+    },
+    data.edge,
+    'to',
+    'oneToMany',
+  );
+  const res2 = await updateConnection(
+    {
+      containerName: data.tableTo.tableName,
+      values: data.tableTo.rows.map((row) => {
+        return { id: row.id, ...row };
+      }),
+      partitionKeyProp: data.tableTo.partitionKeyProp,
+    },
+    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rows },
+    data.edge,
+    'from',
+    'oneToMany',
+  );
+
+  return res1;
+};
+export const updateConnection = async (
+  table1: {
+    partitionKeyProp?: string;
+    values: { [key: string]: any; id: string }[];
+    containerName: string;
+  },
+  table2: { rowIds: Record<string, any>[]; tableName: string },
+  edgeLabel: string,
+  direction: EdgeDirectionEnum,
+  edgeType: 'oneToOne' | 'oneToMany',
+): Promise<TableDataEdgeCreateRef[]> => {
+  const container = await fetchContainer(table1.containerName);
+
+  const path = `edges/${snakeToCamel(
+    table2.tableName,
+  )}/${edgeLabel}/${direction}`;
+  const arrRes = [];
+  if (edgeType === 'oneToOne') {
+    for (const [index, value] of table1.values.entries()) {
+      const table2Value = table2.rowIds.at(index);
+
+      if (!table2Value) return;
+
+      const partitionKey = table1?.partitionKeyProp
+        ? value[table1.partitionKeyProp]
+        : undefined;
+
+      const res = await container
+        .item(value.id, partitionKey || value.id)
+        .read();
+
+      const index2 = res.resource.edges[snakeToCamel(table2.tableName)][
+        edgeLabel
+      ][direction].findIndex((el) => el.id === table2Value.id);
+
+      try {
+        await container.item(value.id, partitionKey || value.id).patch([
+          {
+            op: 'set',
+            path: `/${path}/${index2}`,
+            value: table2Value,
+          },
+        ]);
+        arrRes.push({ from: value, to: table2Value });
+      } catch (error) {}
+    }
+  } else if (edgeType === 'oneToMany') {
+    for (const [index, value] of table1.values.entries()) {
+      for (const [index, value2] of table2.rowIds.entries()) {
+        if (!value2) return;
+
+        const partitionKey = table1?.partitionKeyProp
+          ? value[table1.partitionKeyProp]
+          : undefined;
+        const res = await container
+          .item(value.id, partitionKey || value.id)
+          .read();
+
+        const index2 = res.resource.edges[snakeToCamel(table2.tableName)][
+          edgeLabel
+        ][direction].findIndex((el) => el.id === value2.id);
+        try {
+          const res = await container
+            .item(value.id, partitionKey || value.id)
+            .patch([
+              {
+                op: 'set',
+                path: `/${path}/${index2}`,
+                value: value2,
+              },
+            ]);
+          arrRes.push({ from: value, to: value2 });
+        } catch (error) {}
+      }
+    }
+  }
+
+  return arrRes;
+};
+function createOrUpdateNestedObjectWithArray(
+  obj: Record<string, any>,
+  path: string,
+  item: any,
+): Record<string, any> {
+  const parts = path.split('/');
+  let current = obj;
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+
+    if (i === parts.length - 1) {
+      if (!Array.isArray(current[part])) {
+        current[part] = [];
+      }
+      current[part].push(item); // Push the item onto the array
+    } else {
+      if (!current[part]) {
+        current[part] = {}; // Create an empty object if it doesn't exist
+      }
+      current = current[part]; // Move to the next nested level
+    }
+  }
+
+  return obj;
+}
 export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
   const deleteConnection = async (data: TableDataEdgeDeleteReq) => {
     const container = await fetchContainer(data.tableName);
 
-    const res = (await container.item(data.rowId, data.rowId).read()).resource;
-
-    const {
-      direction,
-      edgeLabel,
-      rowIds,
-      tableName: edgeTableName,
-    } = data.edge;
-
-    rowIds.forEach((rowId) => {
-      const index = res.edges[edgeTableName][edgeLabel][direction].findIndex(
-        (el) => el === rowId,
+    const res = await container
+      .item(data.rowId, data?.rowPartitionKey || data.rowId)
+      .read();
+    const resource = res.resource;
+    if (res.statusCode === 404) {
+      throw new NotFoundError(
+        `did not found document at id ${data.rowId} ${
+          data?.rowPartitionKey
+            ? `and partition key: ${data.rowPartitionKey} `
+            : ''
+        }`,
       );
+    }
 
-      const resPatch = container.item(data.rowId, data.rowId).patch([
-        {
-          op: 'remove',
-          path: `/edges/${edgeTableName}/${edgeLabel}/${direction}/${index}`,
-        },
-      ]);
-    });
+    const { direction, edgeLabel, rows, tableName: edgeTableName } = data.edge;
+
+    for (const row of rows) {
+      const index = resource.edges[snakeToCamel(edgeTableName)][edgeLabel][
+        direction
+      ].findIndex((el) => el.id === row.id);
+
+      if (index === -1) {
+        throw new NotFoundError(`Did not find row at id: ${row.id}.`);
+      }
+
+      const resPatch = await container
+        .item(data.rowId, data?.rowPartitionKey || data.rowId)
+        .patch([
+          {
+            op: 'remove',
+            path: `/edges/${snakeToCamel(
+              edgeTableName,
+            )}/${edgeLabel}/${direction}/${index}`,
+          },
+        ]);
+    }
   };
 
-  data.edge.rowIds.forEach(async (rowId) => {
+  for (const row of data.edge.rows) {
     await deleteConnection({
       tableName: data.edge.tableName,
       edge: {
-        direction: data.edge.direction === 'from' ? 'to' : 'from',
+        direction: 'from',
         edgeLabel: data.edge.edgeLabel,
-        rowIds: [data.rowId],
+        rows: [{ id: data.rowId }],
         tableName: data.tableName,
       },
-      rowId,
+      rowId: row.id,
+      rowPartitionKey: row[data.edge.partitionKeyProp],
     });
-  });
+  }
 
-  await deleteConnection(data);
+  await deleteConnection({
+    tableName: data.tableName,
+    edge: {
+      direction: 'to',
+      edgeLabel: data.edge.edgeLabel,
+      rows: data.edge.rows,
+      tableName: data.edge.tableName,
+    },
+    rowId: data.rowId,
+    rowPartitionKey: data.rowPartitionKey,
+  });
 };
 
 export const readTableDataEdge = async (
   data: TableDataEdgeReadReq,
 ): Promise<TableDataEdgeReadRes> => {
   const { direction, edgeLabel, tableName: edgeTableName } = data.edge;
+  const str = filterToQuery(
+    { filters: data.filters, from: data.from, to: data.to },
+    'p',
+    `c.id = "${data.rowId}"`,
+  );
 
+  //`SELECT ${props} FROM c JOIN p IN c["edges"]["${data.subContainerName}"] ${str2}`
+  const query = `SELECT  p FROM c JOIN p IN c["edges"]["${snakeToCamel(
+    edgeTableName,
+  )}"]["${data.edge.edgeLabel}"]["${data.edge.direction}"] ${str}`;
   const querySpec = {
-    query: `select c.edges${edgeTableName ? `["${edgeTableName}"]` : ''}${
-      edgeLabel ? `["${edgeLabel}"]` : ''
-    }${direction ? `["${direction}"]` : ''}, c.id from c where c.id=@rowId`,
+    query,
+    // `select c.edges${edgeTableName ? `["${edgeTableName}"]` : ''}${
+    // edgeLabel ? `["${edgeLabel}"]` : ''
+    // }${
+    // direction ? `["${direction}"]` : ''
+    // },  from c where c.edges["${edgeTableName}"]["${edgeLabel}"]["${direction}"] c.id=@rowId`,
     parameters: [
       {
         name: '@rowId',
@@ -219,14 +417,32 @@ export const readTableDataEdge = async (
     ],
   };
 
-  const tableContainer = await fetchContainer(data.tableName);
+  let tableContainer;
+
+  if (data.tableName === AUTH_GROUPS) {
+    tableContainer = await initiateAuthGroupContainer();
+  } else {
+    tableContainer = await fetchContainer(data.tableName);
+  }
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
   const resource = resources[0];
 
+  const str2 = filterToQuery(
+    { filters: data.filters },
+    'p',
+    `c.id = "${data.rowId}"`,
+  );
+  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c["edges"]["${snakeToCamel(
+    edgeTableName,
+  )}"]["${data.edge.edgeLabel}"]["${data.edge.direction}"] ${str2}`;
+  const { resources: countRes } = await tableContainer.items
+    .query({ query: countStr, parameters: [] })
+    .fetchAll();
   return {
-    edges: resource,
-    rowId: resource.id,
+    edges: resources.map((resource) => resource.p),
+    count: countRes[0],
+    rowId: data.rowId,
     tableName: data.tableName,
   };
 };
