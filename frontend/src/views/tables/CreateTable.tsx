@@ -39,7 +39,6 @@ const CreateTableView = ({ testId }: Props) => {
     let colsEmpty = false;
 
     for (const [key, value] of Object.entries(data)) {
-      console.log({ key, value });
       if (!value.headerName) {
         colsEmpty = true;
       }
@@ -61,7 +60,6 @@ const CreateTableView = ({ testId }: Props) => {
           };
         }),
       };
-      console.log({tableReq: obj})
       const createRes = await createTable(obj);
 
       if (createRes?.status === 400) {
@@ -96,9 +94,6 @@ const CreateTableView = ({ testId }: Props) => {
   //   setCols(data);
   // };
 
-  useEffect(() => {
-    console.log({ validationError });
-  }, [validationError]);
 
   return (
     <>

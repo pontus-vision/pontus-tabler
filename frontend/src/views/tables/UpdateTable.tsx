@@ -80,7 +80,6 @@ const UpdateTableView = ({ tableId }: Props) => {
           };
         }),
       };
-      console.log({obj})
       const updateRes = await updateTable(obj);
       if (updateRes?.status === 400) {
         throw 'Some error in the form';
