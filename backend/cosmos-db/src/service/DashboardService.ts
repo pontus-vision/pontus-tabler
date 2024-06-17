@@ -38,7 +38,7 @@ export const createDashboard = async (
     ...data,
     authGroups: [],
   });
-  [];
+  
 
   if (data?.menuItem) {
     const menuItem = data.menuItem;
@@ -239,13 +239,13 @@ export const deleteDashboardGroupAuth = async (
     rowId: data.id,
     tableName: DASHBOARDS,
     edge: {
-      direction: 'to',
-      edgeLabel: 'groups-users',
+      direction: 'from',
+      edgeLabel: 'groups-dashboards',
       tableName: AUTH_GROUPS,
       rows: data.authGroups,
-      partitionKeyProp: 'username',
+      partitionKeyProp: 'name',
     },
-
+    
   });
   
   return 'Auth Groups disassociated from dashboard'

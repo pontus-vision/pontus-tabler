@@ -94,6 +94,13 @@ const initialDocs: AuthGroupCreateReq[] = [
   },
 ];
 
+export const authGroupContainerProps = {
+  AUTH_GROUPS,
+  partitionKey,
+  uniqueKeyPolicy,
+  initialDocs,
+};
+
 export const initiateAuthGroupContainer = async (): Promise<Container> => {
   const authGroupContainer = await fetchContainer(
     AUTH_GROUPS,
@@ -113,30 +120,16 @@ export const createAuthGroup = async (
   try {
     const res = (await authGroupContainer.items.create({
       ...data,
-      auth: {
-        table: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-        },
-        tableData: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-        },
-        dashboard: {
-          create: false,
-          read: true,
-          update: false,
-          delete: false,
-        },
+      tableMetadata: {
+        create: false,
+        read: true,
+        update: false,
+        delete: false,
       },
     })) as ItemResponse<AuthGroupRef>;
 
-    const { name, id, auth } = res.resource;
-    return { name, id, auth };
+    const { name, id, tableMetadata } = res.resource;
+    return { name, id, tableMetadata };
   } catch (error) {
     if (error?.code === 409) {
       throw new ConflictEntityError(`id: ${data.id} already taken.`);
@@ -512,11 +505,6 @@ export const readAuthGroupUsers = async (
     to: data.to,
   });
 
-  const res2 = await initiateAuthGroupContainer();
-  const res3 = await res2.items
-    .query({ query: 'select * from c', parameters: [] })
-    .fetchAll();
-
   if (res.count === 0) {
     throw new NotFoundError('No group auth found.');
   }
@@ -544,8 +532,6 @@ export const updateAuthGroupUsers = async (
       partitionKeyProp: 'username',
     },
   });
-
-
 
   return {
     id: data.id,
@@ -727,7 +713,7 @@ export const readAuthGroupTable = async (
     );
   }
 
-  const table = res.resource.auth.table;
+  const table = res.resource.tableMetadata;
 
   const permissions: CrudDocumentRef = {
     create: table.create,
@@ -755,16 +741,16 @@ export const updateAuthGroupTable = async (
 
     switch (perm) {
       case 'create':
-        patchArr.push({ op: 'set', path: `/auth/table/create`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadata/create`, value });
         break;
       case 'read':
-        patchArr.push({ op: 'set', path: `/auth/table/read`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadata/read`, value });
         break;
       case 'update':
-        patchArr.push({ op: 'set', path: `/auth/table/update`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadata/update`, value });
         break;
       case 'delete':
-        patchArr.push({ op: 'set', path: `/auth/table/delete`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadata/delete`, value });
         break;
     }
   }
@@ -776,7 +762,7 @@ export const updateAuthGroupTable = async (
     return {
       id: res.resource.id,
       name: res.resource.name,
-      table: res.resource.auth.table,
+      table: res.resource.tableMetadata,
     };
   } catch (error) {
     if (error?.code === 404) {

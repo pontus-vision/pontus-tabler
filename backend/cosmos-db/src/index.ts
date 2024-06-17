@@ -237,6 +237,28 @@ export default new PontusService({
   },
   dashboardDeletePost: async (req, res) => {
     const auth = authenticateToken(req, res);
+    const readGroups = await authUserGroupsRead({
+      id: auth.userId,
+      from: 1,
+      to: 100,
+      filters: {}
+    })
+
+    for (const group of readGroups.authGroups) {
+      const res = await readAuthGroupDashboards({id: group.id, name: group.name, from: 1, to: 3, filters: {
+        id: {
+          filter: req.body.id,
+          filterType: 'text',
+          type: 'equals'
+        }
+      }})      
+      console.log({res})
+      
+    }
+    
+    const readDashGroups = readDashboardGroupAuth({
+      id: req.body.id
+    })
 
     const userId = auth.userId;
     const username = auth.username;

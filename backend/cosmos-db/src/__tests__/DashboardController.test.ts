@@ -13,6 +13,10 @@ import {
   DashboardGroupAuthUpdateRes,
   DashboardGroupAuthDeleteReq,
   DashboardGroupAuthDeleteRes,
+  AuthUserCreateRes,
+  AuthUserCreateReq,
+  LoginReq,
+  LoginRes
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -39,10 +43,47 @@ jest.setTimeout(1000000);
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
+  let token;
+  const postReq = async (
+    endpoint: string,
+    body: Record<string, any>,
+  ): Promise<AxiosResponse> => {
+    const res = (await post(endpoint, body, {
+      Authorization: 'Bearer ' + token,
+    })) as AxiosResponse<any, any>;
+
+    return res;
+  };
+
+  let user = {} as AuthUserCreateRes;
   beforeEach(async () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
     await deleteContainer('dashboards');
+    await deleteContainer('auth_users');
+    const createBody: AuthUserCreateReq = {
+      username: 'user1',
+      password: 'pontusvision',
+    };
+    const userCreateRes = (await postReq(
+      '/auth/user/create',
+      createBody,
+    )) as AxiosResponse<AuthUserCreateRes>;
+    expect(userCreateRes.status).toBe(200);
+
+    user = userCreateRes.data;
+    const loginBody: LoginReq = {
+      username: 'user1',
+
+      password: 'pontusvision',
+    };
+    const LoginRes = (await postReq(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(200);
+
+    token = LoginRes.data.accessToken;
   });
 
   afterAll(() => {
@@ -58,14 +99,14 @@ describe('dashboardCreatePOST', () => {
       state: {},
     };
 
-    const createRetVal = await post('dashboard/create', body);
+    const createRetVal = await postReq('dashboard/create', body);
 
     let resPayload: DashboardCreateRes = createRetVal.data;
     let id = resPayload.id;
 
     expect(createRetVal.data.name).toBe(body.name);
 
-    const readRetVal = await post('dashboard/read', {
+    const readRetVal = await postReq('dashboard/read', {
       id,
     });
     let resPayload2: DashboardReadRes = readRetVal.data;
@@ -82,7 +123,7 @@ describe('dashboardCreatePOST', () => {
       state: resPayload2.state,
     };
 
-    const updateRetVal = await post('dashboard/update', body2);
+    const updateRetVal = await postReq('dashboard/update', body2);
 
     let resPayload3: DashboardUpdateRes = updateRetVal.data;
 
@@ -92,32 +133,32 @@ describe('dashboardCreatePOST', () => {
       id: resPayload3.id,
     };
 
-    const deleteRetVal = await post('dashboard/delete', body3);
+    const deleteRetVal = await postReq('dashboard/delete', body3);
 
     let resPayload4 = deleteRetVal.data;
 
     expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal2 = await post('dashboard/read', body3);
+    const readRetVal2 = await postReq('dashboard/read', body3);
 
     expect(readRetVal2.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
-    const createRetVal = await post('dashboard/create', {});
+    const createRetVal = await postReq('dashboard/create', {});
 
     expect(createRetVal.status).toBe(400);
 
-    const readRetVal = await post('dashboard/read', {
+    const readRetVal = await postReq('dashboard/read', {
       id: 'foo',
     });
 
     expect(readRetVal.status).toBe(404);
 
-    const updateRetVal = await post('dashboard/update', { foo: 'bar' });
+    const updateRetVal = await postReq('dashboard/update', { foo: 'bar' });
 
     expect(updateRetVal.status).toBe(422);
 
-    const deleteRetVal = await post('dashboard/delete', { foo: 'bar' });
+    const deleteRetVal = await postReq('dashboard/delete', { foo: 'bar' });
 
     let resPayload4 = deleteRetVal.data;
 
@@ -183,9 +224,9 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const createRetVal = await post('dashboard/create', body);
+    const createRetVal = await postReq('dashboard/create', body);
 
-    const createRetVal2 = await post('dashboard/create', {
+    const createRetVal2 = await postReq('dashboard/create', {
       ...body,
       name: 'PontusVision2',
     });
@@ -203,7 +244,7 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const readRetVal = await post('dashboards/read', readBody);
+    const readRetVal = await postReq('dashboards/read', readBody);
 
     expect(readRetVal.data.totalDashboards).toBe(2);
 
@@ -228,12 +269,12 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const deleteVal = await post('dashboard/delete', {
+    const deleteVal = await postReq('dashboard/delete', {
       id: createRetVal.data.id,
     });
 
     expect(deleteVal.status).toBe(200);
-    const deleteVal2 = await post('dashboard/delete', {
+    const deleteVal2 = await postReq('dashboard/delete', {
       id: createRetVal2.data.id,
     });
 
@@ -246,12 +287,12 @@ describe('dashboardCreatePOST', () => {
       owner: 'foo',
       state: stateObj,
     };
-    const createDashboard = (await post(
+    const createDashboard = (await postReq(
       'dashboard/create',
       dashboardBody,
     )) as AxiosResponse<DashboardCreateRes>;
 
-    const createDashboard2 = (await post('dashboard/create', {
+    const createDashboard2 = (await postReq('dashboard/create', {
       ...dashboardBody,
       name: 'dashboard2',
     })) as AxiosResponse<DashboardCreateRes>;
@@ -270,7 +311,7 @@ describe('dashboardCreatePOST', () => {
       ],
     };
 
-    const createGroupAuth = await post(
+    const createGroupAuth = await postReq(
       'dashboard/group/auth/create',
       createGroupAuthBody,
     );
@@ -299,7 +340,7 @@ describe('dashboardCreatePOST', () => {
       ],
     };
 
-    const createGroupAuth2 = await post(
+    const createGroupAuth2 = await postReq(
       'dashboard/group/auth/create',
       createGroupAuth2Body,
     );
@@ -318,7 +359,7 @@ describe('dashboardCreatePOST', () => {
     //     },
     //   ],
     // };
-    // const createGroupAuth3 = await post(
+    // const createGroupAuth3 = await postReq(
     //   'dashboard/group/auth/create',
     //   createGroupAuthBody3,
     // );
@@ -336,7 +377,7 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const readGroupAuthResponse = (await post(
+    const readGroupAuthResponse = (await postReq(
       'dashboard/group/auth/read',
       readGroupAuthBody,
     )) as AxiosResponse<DashboardGroupAuthReadRes>;
@@ -365,7 +406,7 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const readGroupAuthResponse2 = (await post(
+    const readGroupAuthResponse2 = (await postReq(
       'dashboard/group/auth/read',
       readGroupAuthBody2,
     )) as AxiosResponse<DashboardGroupAuthReadRes>;
@@ -404,7 +445,7 @@ describe('dashboardCreatePOST', () => {
       ],
     };
 
-    const updateGroupAuthResponse = (await post(
+    const updateGroupAuthResponse = (await postReq(
       'dashboard/group/auth/update',
       updateAuthGroupBody,
     )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
@@ -432,15 +473,15 @@ describe('dashboardCreatePOST', () => {
 
     const deleteGroupAuthBody: DashboardGroupAuthDeleteReq = {
       id: updateAuthGroupBody.id,
-      authGroups: [updateAuthGroupBody.authGroups[0].id],
+      authGroups: [{id: updateAuthGroupBody.authGroups[0].id, name: updateAuthGroupBody.authGroups[0].name}],
     };
 
-    const deleteGroupAuthResponse = (await post(
+    const deleteGroupAuthResponse = (await postReq(
       'dashboard/group/auth/delete',
       deleteGroupAuthBody,
     )) as AxiosResponse<DashboardGroupAuthDeleteRes>;
 
-    expect(deleteGroupAuthResponse.data.authGroups.length).toBe(2);
+    expect(deleteGroupAuthResponse.status).toBe(200);
 
     const updateAuthGroup2Body: DashboardGroupAuthUpdateReq = {
       id: readGroupAuthResponse.data.id,
@@ -456,7 +497,7 @@ describe('dashboardCreatePOST', () => {
       ],
     };
 
-    const updateGroupAuth2Response = (await post(
+    const updateGroupAuth2Response = (await postReq(
       'dashboard/group/auth/update',
       updateAuthGroup2Body,
     )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
@@ -473,12 +514,12 @@ describe('dashboardCreatePOST', () => {
       owner: 'foo',
       state: {},
     };
-    const createDashboard = (await post(
+    const createDashboard = (await postReq(
       'dashboard/create',
       dashboardBody,
     )) as AxiosResponse<DashboardCreateRes>;
 
-    const updateDashboardGroupAuthResponse2 = (await post(
+    const updateDashboardGroupAuthResponse2 = (await postReq(
       'dashboard/group/auth/update',
       {
         id: createDashboard.data.id,
@@ -517,7 +558,7 @@ describe('dashboardCreatePOST', () => {
       },
     };
 
-    const readDashboardGroupAuthResponse2 = (await post(
+    const readDashboardGroupAuthResponse2 = (await postReq(
       'dashboard/group/auth/read',
       readGroupAuthBody2,
     )) as AxiosResponse<DashboardGroupAuthUpdateRes>;

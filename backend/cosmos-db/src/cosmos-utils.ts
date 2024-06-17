@@ -8,6 +8,11 @@ import {
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
+import {
+  AUTH_GROUPS,
+  authGroupContainerProps,
+  initiateAuthGroupContainer,
+} from './service/AuthGroupService';
 
 export interface FetchData {
   count: number;
@@ -55,6 +60,12 @@ export const fetchContainer = async (
   uniqueKeyPolicy: UniqueKeyPolicy | undefined = undefined,
   initialDocs?: Record<any, any>[],
 ): Promise<Container | undefined> => {
+  if (containerId === AUTH_GROUPS) {
+    (containerId = authGroupContainerProps.AUTH_GROUPS),
+      (uniqueKeyPolicy = authGroupContainerProps.uniqueKeyPolicy),
+      (partitionKey = authGroupContainerProps.partitionKey);
+    initialDocs = authGroupContainerProps.initialDocs;
+  }
   const database = await fetchDatabase(cosmosDbName);
 
   const { container, statusCode } = await database.containers.createIfNotExists(

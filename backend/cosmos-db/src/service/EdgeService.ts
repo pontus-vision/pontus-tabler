@@ -155,6 +155,11 @@ export const createConnection = async (
             .item(row.id, partitionKey || row.id)
             .read();
 
+          const res2 = await container.items.query({
+            query: 'Select * from c',
+            parameters: [],
+          }).fetchAll()
+
           ensureNestedPathExists(existingDocument, path);
 
           const nested = createOrUpdateNestedObjectWithArray(

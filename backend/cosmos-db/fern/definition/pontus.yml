@@ -207,7 +207,7 @@ service:
             rowId: string
             tableName: string
             edge: TableDataEdgeDeleteRef
-            rowPartitionKey: string
+            rowPartitionKey: optional<string>
 
       response:
         type: string
@@ -1897,10 +1897,7 @@ types:
       name:
         docs: Name of the group
         type: string
-      dashboards: optional<list<Dashboard>>
-      authUsers: optional<list<AuthUserIdAndUsername>>
-      tables: optional<list<NameAndIdRef>>
-      auth: AuthGroupAuthRef
+      tableMetadata: optional<CrudDocumentRef>
       parents:
         docs: Parent groups of the group (optional)
         type: optional<list<string>>
@@ -2090,15 +2087,10 @@ types:
       - BaseModelRef
   DashboardGroupAuthReadRes:
     properties:
-      name: string
       id: string
       authGroups: list<DashboardAuthGroups>
       totalCount: integer
-  DashboardGroupAuthDeleteRes:
-    properties:
-      name: string
-      id: string
-      authGroups: list<DashboardAuthGroups>
+  DashboardGroupAuthDeleteRes: string
   DashboardCreateReq:
     properties:
       id: optional<string>
@@ -2119,7 +2111,7 @@ types:
   DashboardGroupAuthDeleteReqBody:
     properties:
       id: string
-      authGroups: list<string>
+      authGroups: list<NameAndIdRef>
   AuthGroupIds:
     properties:
       create: optional<list<string>>
@@ -2207,7 +2199,7 @@ types:
   AuthUserGroupsReadRes:
     properties:
       count: integer
-      authGroups: list<AuthUserIdAndUsername>
+      authGroups: list<NameAndIdRef>
   AuthUserGroupsDeleteRes: string
   AuthUserRef:
     properties:
