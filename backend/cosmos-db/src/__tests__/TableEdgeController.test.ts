@@ -341,7 +341,7 @@ describe('tableControllerTest', () => {
 
     expect(createEdgeNonExistingTable.status).toBe(404);
   });
-  it.only('test edges between rows', async () => {
+  it('test edges between rows', async () => {
     const table: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
@@ -458,7 +458,7 @@ describe('tableControllerTest', () => {
       filters: {},
       tableName: 'person-natural',
     };
-
+    armin van buuren sensation white 2005
     const table1DataRead = (await post(
       'table/data/read',
       table1DataReadBody,

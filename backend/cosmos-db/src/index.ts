@@ -295,8 +295,8 @@ export default new PontusService({
   menuDeletePost: async (req, res) => {
     const auth = authenticateToken(req, res);
 
-    const userId = auth.userId;
-    const username = auth.username;
+    const userId = auth?.userId;
+    const username = auth?.username;
     // const permissions = await checkUserPermissions({
     //   userId,
     //   username,
@@ -422,8 +422,8 @@ export default new PontusService({
   },
   tableUpdatePost: async (req, res) => {
     const auth = authenticateToken(req, res);
-    const userId = auth.userId;
-    const username = auth.username;
+    const userId = auth?.userId;
+    const username = auth?.username;
     // const permissions = await checkUserDashPermissions({
     //   userId,
     //   username,

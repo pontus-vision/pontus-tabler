@@ -149,7 +149,7 @@ export const createConnection = async (
               value: rowId2,
             },
           ]);
-          arrRes.push({ from: row, to: {...rowId2, name: res.resource.name}});
+          arrRes.push({ from: row, to: {...rowId2, docName: res.resource.name}});
         } catch (error) {
           const { resource: existingDocument } = await container
             .item(row.id, partitionKey || row.id)
@@ -168,7 +168,7 @@ export const createConnection = async (
           const res = await container
             .item(row.id, partitionKey || row.id)
             .replace(obj);
-          arrRes.push({ from: row, to: {...rowId2, name: res.resource.name}});
+          arrRes.push({ from: row, to: {...rowId2, docName: res.resource.name}});
         }
       }
     }

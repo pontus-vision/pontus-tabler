@@ -180,7 +180,7 @@ export const createDashboardAuthGroup = async (
   return {
     authGroups: res2.map(el=> el.to) as DashboardAuthGroups[],
     id: data.id,
-    name: res2[0].to.name,
+    name: res2[0].to.docName,
   };
 };
 
