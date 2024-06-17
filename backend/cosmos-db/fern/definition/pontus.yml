@@ -1944,7 +1944,7 @@ types:
   TableDataEdgeCreateRes: list<TableDataEdgeCreateRef>
   TableDataEdgeCreateRef:
     properties:
-      from: map<string, unknown> 
+      from: map<string, unknown>
       to: map<string, unknown>
   EdgeDirectionEnum:
     enum:

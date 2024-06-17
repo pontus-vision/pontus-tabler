@@ -87,7 +87,7 @@ export const createConnection = async (
     values: Record<string, any>[];
     containerName: string;
   },
-  table2: { rowIds: Record<string, any>[] | string[]; tableName: string },
+  table2: { rowIds: Record<string, any>[]; tableName: string },
   path: string,
   edgeType: 'oneToOne' | 'oneToMany',
 ): Promise<TableDataEdgeCreateRef[]> => {
@@ -142,14 +142,14 @@ export const createConnection = async (
           ? row[table1.partitionKeyProp]
           : undefined;
         try {
-          await container.item(row.id, partitionKey || row.id).patch([
+          const res = await container.item(row.id, partitionKey || row.id).patch([
             {
               op: 'add',
               path: `/${path}/-`,
               value: rowId2,
             },
           ]);
-          arrRes.push({ from: row, to: rowId2 });
+          arrRes.push({ from: row, to: {...rowId2, docName: res.resource.name}});
         } catch (error) {
           const { resource: existingDocument } = await container
             .item(row.id, partitionKey || row.id)
@@ -173,7 +173,7 @@ export const createConnection = async (
           const res = await container
             .item(row.id, partitionKey || row.id)
             .replace(obj);
-          arrRes.push({ from: row, to: rowId2 });
+          arrRes.push({ from: row, to: {...rowId2, docName: res.resource.name}});
         }
       }
     }

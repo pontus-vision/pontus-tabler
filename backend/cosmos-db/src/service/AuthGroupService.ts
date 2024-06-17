@@ -94,6 +94,7 @@ const initialDocs: AuthGroupCreateReq[] = [
   },
 ];
 
+<<<<<<< HEAD
 export const authGroupContainerProps = {
   AUTH_GROUPS,
   partitionKey,
@@ -101,6 +102,8 @@ export const authGroupContainerProps = {
   initialDocs,
 };
 
+=======
+>>>>>>> main
 export const initiateAuthGroupContainer = async (): Promise<Container> => {
   const authGroupContainer = await fetchContainer(
     AUTH_GROUPS,
@@ -120,6 +123,7 @@ export const createAuthGroup = async (
   try {
     const res = (await authGroupContainer.items.create({
       ...data,
+<<<<<<< HEAD
       tableMetadata: {
         create: false,
         read: true,
@@ -130,6 +134,32 @@ export const createAuthGroup = async (
 
     const { name, id, tableMetadata } = res.resource;
     return { name, id, tableMetadata };
+=======
+      auth: {
+        table: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+        },
+        tableData: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+        },
+        dashboard: {
+          create: false,
+          read: true,
+          update: false,
+          delete: false,
+        },
+      },
+    })) as ItemResponse<AuthGroupRef>;
+
+    const { name, id, auth } = res.resource;
+    return { name, id, auth };
+>>>>>>> main
   } catch (error) {
     if (error?.code === 409) {
       throw new ConflictEntityError(`id: ${data.id} already taken.`);
@@ -505,6 +535,14 @@ export const readAuthGroupUsers = async (
     to: data.to,
   });
 
+<<<<<<< HEAD
+=======
+  const res2 = await initiateAuthGroupContainer();
+  const res3 = await res2.items
+    .query({ query: 'select * from c', parameters: [] })
+    .fetchAll();
+
+>>>>>>> main
   if (res.count === 0) {
     throw new NotFoundError('No group auth found.');
   }
@@ -533,6 +571,11 @@ export const updateAuthGroupUsers = async (
     },
   });
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> main
   return {
     id: data.id,
     name: data.name,
@@ -713,7 +756,11 @@ export const readAuthGroupTable = async (
     );
   }
 
+<<<<<<< HEAD
   const table = res.resource.tableMetadata;
+=======
+  const table = res.resource.auth.table;
+>>>>>>> main
 
   const permissions: CrudDocumentRef = {
     create: table.create,
@@ -741,6 +788,7 @@ export const updateAuthGroupTable = async (
 
     switch (perm) {
       case 'create':
+<<<<<<< HEAD
         patchArr.push({ op: 'set', path: `/tableMetadata/create`, value });
         break;
       case 'read':
@@ -751,6 +799,18 @@ export const updateAuthGroupTable = async (
         break;
       case 'delete':
         patchArr.push({ op: 'set', path: `/tableMetadata/delete`, value });
+=======
+        patchArr.push({ op: 'set', path: `/auth/table/create`, value });
+        break;
+      case 'read':
+        patchArr.push({ op: 'set', path: `/auth/table/read`, value });
+        break;
+      case 'update':
+        patchArr.push({ op: 'set', path: `/auth/table/update`, value });
+        break;
+      case 'delete':
+        patchArr.push({ op: 'set', path: `/auth/table/delete`, value });
+>>>>>>> main
         break;
     }
   }
@@ -762,7 +822,11 @@ export const updateAuthGroupTable = async (
     return {
       id: res.resource.id,
       name: res.resource.name,
+<<<<<<< HEAD
       table: res.resource.tableMetadata,
+=======
+      table: res.resource.auth.table,
+>>>>>>> main
     };
   } catch (error) {
     if (error?.code === 404) {

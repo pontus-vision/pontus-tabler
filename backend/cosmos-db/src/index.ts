@@ -241,24 +241,29 @@ export default new PontusService({
       id: auth.userId,
       from: 1,
       to: 100,
-      filters: {}
-    })
+      filters: {},
+    });
 
     for (const group of readGroups.authGroups) {
-      const res = await readAuthGroupDashboards({id: group.id, name: group.name, from: 1, to: 3, filters: {
-        id: {
-          filter: req.body.id,
-          filterType: 'text',
-          type: 'equals'
-        }
-      }})      
-      console.log({res})
-      
+      const res = await readAuthGroupDashboards({
+        id: group.id,
+        name: group.name,
+        from: 1,
+        to: 3,
+        filters: {
+          id: {
+            filter: req.body.id,
+            filterType: 'text',
+            type: 'equals',
+          },
+        },
+      });
+      console.log({ res });
     }
-    
+
     const readDashGroups = readDashboardGroupAuth({
-      id: req.body.id
-    })
+      id: req.body.id,
+    });
 
     const userId = auth.userId;
     const username = auth.username;
@@ -317,8 +322,8 @@ export default new PontusService({
   menuDeletePost: async (req, res) => {
     const auth = authenticateToken(req, res);
 
-    const userId = auth.userId;
-    const username = auth.username;
+    const userId = auth?.userId;
+    const username = auth?.username;
     // const permissions = await checkUserPermissions({
     //   userId,
     //   username,
@@ -417,8 +422,6 @@ export default new PontusService({
     res.send(response);
   },
   tableCreatePost: async (req, res) => {
-  
-
     const response = await createTable(req.body);
     res.send(response);
   },
@@ -444,8 +447,8 @@ export default new PontusService({
   },
   tableUpdatePost: async (req, res) => {
     const auth = authenticateToken(req, res);
-    const userId = auth.userId;
-    const username = auth.username;
+    const userId = auth?.userId;
+    const username = auth?.username;
     // const permissions = await checkUserDashPermissions({
     //   userId,
     //   username,

@@ -39,7 +39,6 @@ const CreateTableView = ({ testId }: Props) => {
     let colsEmpty = false;
 
     for (const [key, value] of Object.entries(data)) {
-      console.log({ key, value });
       if (!value.headerName) {
         colsEmpty = true;
       }
@@ -96,9 +95,6 @@ const CreateTableView = ({ testId }: Props) => {
   //   setCols(data);
   // };
 
-  useEffect(() => {
-    console.log({ validationError });
-  }, [validationError]);
 
   return (
     <>
