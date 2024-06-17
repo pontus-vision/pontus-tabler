@@ -30,6 +30,8 @@ import {
   AuthGroupUsersCreateRes,
   LogoutReq,
   AuthGroupDashboardCreateReq,
+  AuthGroupDashboardCreateRes,
+  DashboardDeleteReq,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -39,7 +41,7 @@ import { srv } from '../server';
 import { post } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { deleteContainer } from '../cosmos-utils';
-import { AUTH_USERS, loginUser } from '../service/AuthUserService';
+import { AUTH_USERS } from '../service/AuthUserService';
 import { AUTH_GROUPS } from '../service/AuthGroupService';
 
 // // Mock the utils.writeJson function
@@ -289,7 +291,9 @@ describe('dashboardCreatePOST', () => {
       id: user.id,
       username: user.username,
 
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -315,8 +319,8 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [
-        'foo',
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
         // authGroupCreateRes.data.id
       ],
     };
@@ -331,8 +335,8 @@ describe('dashboardCreatePOST', () => {
     const createUserGroups: AuthUserGroupsCreateReq = {
       id: 'foo',
       username: 'bar',
-      authGroupsIds: [
-        'foo',
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
         // authGroupCreateRes.data.id
       ],
     };
@@ -360,7 +364,9 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -409,7 +415,9 @@ describe('dashboardCreatePOST', () => {
       id: user.id,
 
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -455,7 +463,9 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -468,7 +478,9 @@ describe('dashboardCreatePOST', () => {
     const authUserGroupDeleteBody: AuthUserGroupsDeleteReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupDeleteRes = (await postReq(
@@ -494,7 +506,9 @@ describe('dashboardCreatePOST', () => {
     const authUserGroupDeleteBody: AuthUserGroupsDeleteReq = {
       id: 'foo',
       username: 'bar',
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupDeleteRes = (await postReq(
@@ -506,7 +520,9 @@ describe('dashboardCreatePOST', () => {
     const authUserGroupDeleteBody2: AuthUserGroupsDeleteReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: ['foo'],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupDeleteRes2 = (await postReq(
@@ -532,7 +548,9 @@ describe('dashboardCreatePOST', () => {
     const createUserGroupBody: AuthUserGroupsCreateReq = {
       id: user.id,
       username: user.username,
-      authGroupsIds: [authGroupCreateRes.data.id],
+      authGroups: [
+        { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
+      ],
     };
 
     const authUserGroupCreateRes = (await postReq(
@@ -544,6 +562,7 @@ describe('dashboardCreatePOST', () => {
 
     const readGroupsBody2: AuthGroupReadReq = {
       id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
     };
 
     const readGroup2 = await postReq('auth/group/read', readGroupsBody2);
@@ -562,6 +581,7 @@ describe('dashboardCreatePOST', () => {
 
     const readGroupsBody: AuthGroupReadReq = {
       id: authGroupCreateRes.data.id,
+      name: authGroupCreateRes.data.name,
     };
 
     const readGroup = await postReq('auth/group/read', readGroupsBody);
@@ -619,5 +639,83 @@ describe('dashboardCreatePOST', () => {
     });
 
     expect(createGroup.status).toBe(400);
+  });
+  it('should check dashboard permissions incorrectly', async () => {
+    const loginBody: LoginReq = {
+      username: 'user1',
+
+      password: 'foo',
+    };
+
+    const LoginRes = (await postReq(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(400);
+
+    const createGroupBody: AuthGroupCreateReq = {
+      name: 'bar',
+    };
+
+    const createGroup = (await postReq(
+      'auth/group/create',
+      createGroupBody,
+    )) as AxiosResponse<AuthGroupCreateReq>;
+
+    const dashBody: DashboardCreateReq = {
+      name: 'dashboard1',
+    };
+
+    const createDash = (await postReq(
+      'dashboard/create',
+      dashBody,
+    )) as AxiosResponse<DashboardCreateRes>;
+
+    expect(createDash.status).toBe(200);
+    const createGroupDashBody: AuthGroupDashboardCreateReq = {
+      id: createGroup.data.id,
+      name: createGroup.data.name,
+      dashboards: [
+        {
+          delete: true,
+          create: false,
+          read: false,
+          update: false,
+          name: createDash.data.name,
+          id: createDash.data.id,
+        },
+      ],
+    };
+
+    const createGroupDash = (await postReq(
+      'auth/group/dashboard/create',
+      createGroupDashBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(createGroupDash.status).toBe(200);
+
+    const createGroupUserBody: AuthGroupUsersCreateReq = {
+      id: createGroup.data.id,
+      authUsers: [{ id: user.id, username: user.username }],
+      name: createGroup.data.name,
+    };
+
+    const createGroupUser = (await postReq(
+      'auth/group/users/create',
+      createGroupUserBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(createGroupUser.status).toBe(200);
+
+    const dashDelBody: DashboardDeleteReq = {
+      id: createDash.data.id,
+    };
+
+    const delDash = (await postReq(
+      'dashboard/delete',
+      dashDelBody,
+    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+    expect(delDash.status).toBe(200);
   });
 });

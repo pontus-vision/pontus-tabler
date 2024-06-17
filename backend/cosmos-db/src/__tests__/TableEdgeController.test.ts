@@ -458,7 +458,7 @@ describe('tableControllerTest', () => {
       filters: {},
       tableName: 'person-natural',
     };
-
+    armin van buuren sensation white 2005
     const table1DataRead = (await post(
       'table/data/read',
       table1DataReadBody,
@@ -469,32 +469,26 @@ describe('tableControllerTest', () => {
       table2DataReadBody,
     )) as AxiosResponse<TableDataReadRes>;
 
-    expect(
-      table4DataRead.data.rows[0]?.edges?.[
-        bodyCreateConnection2.tableFrom.tableName
-      ]?.['has_email']?.from.some((rowId) =>
-        bodyCreateConnection2.tableFrom.rowIds.some(
-          (rowId2) => rowId === rowId2,
-        ),
-      ),
-    ).toBe(true);
+    const row = table4DataRead.data.rows[0];
+    const rowEdges = row['edges'];
+    const personNatural2 = rowEdges['person-natural-2'];
+    const hasEmail = personNatural2['has_email'];
+    const rowId = hasEmail.from[0].id;
 
-    expect(
-      table1DataRead.data.rows[0]?.edges?.[
-        bodyCreateConnection.tableTo.tableName
-      ]?.['has_email']?.to.some((rowId) =>
-        bodyCreateConnection.tableTo.rowIds.some((rowId2) => rowId === rowId2),
-      ),
-    ).toBe(true);
-    expect(
-      table4DataRead.data.rows[0]?.edges?.[
-        bodyCreateConnection.tableFrom.tableName
-      ]?.['has_email']?.from.some((rowId) =>
-        bodyCreateConnection.tableFrom.rowIds.some(
-          (rowId2) => rowId === rowId2,
-        ),
-      ),
-    ).toBe(true);
+    expect(rowId).toBe(bodyCreateConnection2.tableFrom.rowIds[0]);
+    const row2 = table1DataRead.data.rows[0];
+    const rowEdges2 = row2['edges'];
+    const personNatural = rowEdges2['person-natural-2'];
+    const hasEmail2 = personNatural['has_email'];
+    const rowId2 = hasEmail2.to[0].id;
+    expect(rowId2).toBe(bodyCreateConnection.tableTo.rowIds[0]);
+
+    const row3 = table4DataRead.data.rows[1];
+    const rowEdges3 = row3['edges'];
+    const personNatural3 = rowEdges3['person-natural-2'];
+    const hasEmail3 = personNatural3['has_email'];
+    const rowId3 = hasEmail3.from[0].id;
+    expect(rowId3).toBe(bodyCreateConnection.tableFrom.rowIds[0]);
   });
   it('It should test one-to-many edges creation', async () => {
     const table: TableCreateReq = {

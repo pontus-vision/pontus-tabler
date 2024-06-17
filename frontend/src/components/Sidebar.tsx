@@ -151,6 +151,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
               <li onClick={() => navigate('/dashboards')}>Dashboards</li>
               <li onClick={() => navigate('/auth/groups')}>Auth Groups</li>
               <li onClick={() => navigate('/auth/users')}>Auth Users</li>
+              <li onClick={() => navigate('/tables/read')}>Tables</li>
             </ul>
           )}
         </li>

@@ -257,15 +257,15 @@ describe('dashboardCreatePOST', () => {
     })) as AxiosResponse<DashboardCreateRes>;
 
     const createGroupAuthBody: DashboardGroupAuthCreateReq = {
-      dashboardId: createDashboard.data.id,
+      id: createDashboard.data.id,
       authGroups: [
         {
           create: true,
           delete: true,
           read: false,
           update: true,
-          groupId: 'SomeGroupId',
-          groupName: 'some title',
+          id: 'SomeGroupId',
+          name: 'some title',
         },
       ],
     };
@@ -285,16 +285,16 @@ describe('dashboardCreatePOST', () => {
           delete: true,
           read: false,
           update: true,
-          groupName: 'foo',
-          groupId: 'Pontus Vision 2',
+          name: 'foo',
+          id: 'Pontus Vision 2',
         },
         {
           create: true,
           delete: true,
           read: false,
           update: true,
-          groupName: 'bar',
-          groupId: 'Pontus Vision',
+          name: 'bar',
+          id: 'Pontus Vision',
         },
       ],
     };
@@ -306,15 +306,15 @@ describe('dashboardCreatePOST', () => {
     expect(createGroupAuth2.status).toBe(200);
 
     // const createGroupAuthBody3: DashboardGroupAuthCreateReq = {
-    //   dashboardId: createDashboard.data.id,
+    //   id: createDashboard.data.id,
     //   authGroups: [
     //     {
     //       create: true,
     //       delete: true,
     //       read: false,
     //       update: true,
-    //       groupId: createDashboard2.data.id,
-    //       groupName: createDashboard2.data.name,
+    //       id: createDashboard2.data.id,
+    //       name: createDashboard2.data.name,
     //     },
     //   ],
     // };
@@ -326,9 +326,9 @@ describe('dashboardCreatePOST', () => {
     // expect(createGroupAuth3.status).toBe(200);
 
     const readGroupAuthBody: DashboardGroupAuthReadReq = {
-      dashboardId: createDashboard.data.id,
+      id: createDashboard.data.id,
       filters: {
-        groupName: {
+        name: {
           filter: 'foo',
           filterType: 'text',
           type: 'contains',
@@ -346,9 +346,9 @@ describe('dashboardCreatePOST', () => {
     );
 
     const readGroupAuthBody2: DashboardGroupAuthReadReq = {
-      dashboardId: createDashboard.data.id,
+      id: createDashboard.data.id,
       filters: {
-        groupName: {
+        name: {
           filterType: 'text',
           condition1: {
             filter: 'foo',
@@ -378,26 +378,26 @@ describe('dashboardCreatePOST', () => {
       delete: true,
       read: false,
       update: true,
-      groupName: 'foo',
-      groupId: 'Pontus Vision 2',
+      name: 'foo',
+      id: 'Pontus Vision 2',
     });
 
     const updateAuthGroupBody: DashboardGroupAuthUpdateReq = {
-      dashboardId: readGroupAuthResponse.data.dashboardId,
+      id: readGroupAuthResponse.data.id,
       authGroups: [
         {
           create: true,
           delete: true,
-          groupId: 'Pontus Vision 2',
-          groupName: 'foo',
+          id: 'Pontus Vision 2',
+          name: 'foo',
           read: false,
           update: false,
         },
         {
           create: true,
           delete: false,
-          groupId: 'Pontus Vision',
-          groupName: 'bar',
+          id: 'Pontus Vision',
+          name: 'bar',
           read: false,
           update: true,
         },
@@ -422,17 +422,17 @@ describe('dashboardCreatePOST', () => {
     //   createGroupAuthBody3.authGroups[0],
     // );
 
-    expect(updateGroupAuthResponse.data.dashboardId).toBe(
-      updateAuthGroupBody.dashboardId,
+    expect(updateGroupAuthResponse.data.id).toBe(
+      updateAuthGroupBody.id,
     );
 
-    expect(updateGroupAuthResponse.data.dashboardName).toBe(
+    expect(updateGroupAuthResponse.data.name).toBe(
       createDashboard.data.name,
     );
 
     const deleteGroupAuthBody: DashboardGroupAuthDeleteReq = {
-      dashboardId: updateAuthGroupBody.dashboardId,
-      authGroups: [updateAuthGroupBody.authGroups[0].groupId],
+      id: updateAuthGroupBody.id,
+      authGroups: [updateAuthGroupBody.authGroups[0].id],
     };
 
     const deleteGroupAuthResponse = (await post(
@@ -443,15 +443,15 @@ describe('dashboardCreatePOST', () => {
     expect(deleteGroupAuthResponse.data.authGroups.length).toBe(2);
 
     const updateAuthGroup2Body: DashboardGroupAuthUpdateReq = {
-      dashboardId: readGroupAuthResponse.data.dashboardId,
+      id: readGroupAuthResponse.data.id,
       authGroups: [
         {
           create: false,
           delete: true,
           read: false,
           update: true,
-          groupId: 'Pontus Vision',
-          groupName: 'foo',
+          id: 'Pontus Vision',
+          name: 'foo',
         },
       ],
     };
@@ -481,15 +481,15 @@ describe('dashboardCreatePOST', () => {
     const updateDashboardGroupAuthResponse2 = (await post(
       'dashboard/group/auth/update',
       {
-        dashboardId: createDashboard.data.id,
+        id: createDashboard.data.id,
         authGroups: [
           {
             create: true,
             delete: true,
             read: false,
             update: true,
-            groupId: 'foo',
-            groupName: 'bar',
+            id: 'foo',
+            name: 'bar',
           },
         ],
       },
@@ -498,9 +498,9 @@ describe('dashboardCreatePOST', () => {
     expect(updateDashboardGroupAuthResponse2.status).toBe(404);
 
     const readGroupAuthBody2: DashboardGroupAuthReadReq = {
-      dashboardId: createDashboard.data.id,
+      id: createDashboard.data.id,
       filters: {
-        groupName: {
+        name: {
           filterType: 'text',
           condition1: {
             filter: 'foo',

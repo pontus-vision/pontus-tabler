@@ -14,12 +14,16 @@ import {
   DashboardGroupAuthDeleteRes,
   DashboardUpdateRes,
   DashboardCreateRes,
+  DashboardAuthGroupsRef,
+  DashboardAuthGroups,
 } from '../typescript/api';
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
 import { NotFoundError } from '../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { CosmosClient } from '@azure/cosmos';
 import { initiateMenuContainer } from './MenuService';
+import { createConnection, deleteTableDataEdge, readTableDataEdge } from './EdgeService';
+import { AUTH_GROUPS } from './AuthGroupService';
 declare function getContext(): any;
 
 export const DASHBOARDS = 'dashboards';
@@ -35,8 +39,6 @@ export const createDashboard = async (
     authGroups: [],
   });
 
-  const dashboardId = res.resource.id;
-
   if (data?.menuItem) {
     const menuItem = data.menuItem;
     const child = menuItem.children[0];
@@ -48,7 +50,7 @@ export const createDashboard = async (
     const res = await menuContainer.items.create({
       ...child,
       path: path,
-      id: dashboardId,
+      id: menuItem.id,
     });
 
     try {
@@ -164,75 +166,49 @@ export const readDashboards = async (
 export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-  const dashboardId = data.id;
 
-  const res = await dashboardContainer.item(dashboardId, dashboardId).read();
-
-  const patchArr: PatchOperation[] = [];
-
-  for (const [index, el] of data.authGroups?.entries()) {
-    patchArr.push({
-      op: 'add',
-      path: `/authGroups/-`,
-      value: el,
-    });
-  }
-
-  const res2 = await dashboardContainer
-    .item(dashboardId, dashboardId)
-    .patch(patchArr);
+  const res2 = await createConnection(
+    {
+      containerName: DASHBOARDS,
+      values: [{ id: data.id }],
+    },
+    { rowIds: data.authGroups, tableName: 'authGroups' },
+    'authGroups',
+    'oneToMany',
+  );
 
   return {
-    authGroups: res2.resource?.authGroups,
-    id: res2.resource?.id,
-    name: res2.resource?.name,
+    authGroups: res2.map(el=> el.to) as DashboardAuthGroups[],
+    id: data.id,
+    name: res2[0].to.docName,
   };
 };
 
 export const readDashboardGroupAuth = async (
   data: DashboardGroupAuthReadReq,
 ): Promise<DashboardGroupAuthReadRes> => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
+  const res = await readTableDataEdge({
+    edge: {
+      direction: 'from',
+      edgeLabel: 'groups-dashboards',
+      tableName: AUTH_GROUPS,
+      
+    },
+    rowId: data.id,
+    tableName: DASHBOARDS,
+    filters: data.filters,
+    from: data.from,
+    to: data.to,
+  });
 
-  const str = filterToQuery(
-    { filters: data.filters },
-    'p',
-    `c.id = "${data.id}"`,
-  );
-  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c.authGroups ${str}`;
-
-  const str2 = filterToQuery(
-    { filters: data.filters, from: data.from, to: data.to },
-    'p',
-    `c.id = "${data.id}"`,
-  );
-
-  const query = `SELECT p["name"], p.create, p.read, p["update"], p.delete, p.id FROM c JOIN p IN c.authGroups ${str2}`;
-
-  const res = await dashboardContainer.items
-    .query({
-      query,
-      parameters: [],
-    })
-    .fetchAll();
-
-  const res2 = await dashboardContainer.items
-    .query({
-      query: countStr,
-      parameters: [],
-    })
-    .fetchAll();
-
-  if (res.resources?.length === 0) {
+  if (res.count === 0) {
     throw new NotFoundError('No group auth found.');
   }
-
   return {
-    totalCount: res2?.resources[0], // Use the count obtained from the stored procedure
-    authGroups: res.resources,
-    id: data?.id,
-    name: res?.resources[0]?.name,
+    authGroups: res.edges as DashboardAuthGroups[],
+    id: data.id,
+    totalCount: res.count,
+
   };
 };
 
@@ -240,37 +216,20 @@ export const deleteDashboardGroupAuth = async (
   data: DashboardGroupAuthDeleteReq,
 ): Promise<DashboardGroupAuthDeleteRes> => {
   // checkFields(data.authGroups);
+  const res = await deleteTableDataEdge({
+    rowId: data.id,
+    tableName: DASHBOARDS,
+    edge: {
+      direction: 'to',
+      edgeLabel: 'groups-users',
+      tableName: AUTH_GROUPS,
+      rows: data.authGroups,
+      partitionKeyProp: 'username',
+    },
 
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-  const dashboardId = data.id;
-
-  const res3 = await dashboardContainer.item(dashboardId, dashboardId).read();
-
-  const resource = res3.resource as DashboardGroupAuthReadRes;
-
-  const resAuthGroups = resource?.authGroups;
-
-  const patchArr: PatchOperation[] = [];
-
-  for (const [index, el] of data.authGroups.entries()) {
-    const indexUpdate = resAuthGroups.findIndex((el2) => el2.id === el);
-
-    patchArr.push({
-      op: 'remove',
-      path: `/authGroups/${indexUpdate}`,
-    });
-  }
-
-  const res = await dashboardContainer
-    .item(dashboardId, dashboardId)
-    .patch(patchArr);
-
-  return {
-    authGroups: res.resource?.authGroups,
-    id: res.resource?.id,
-    name: res.resource?.name,
-  };
+  });
+  
+  return 'Auth Groups disassociated from dashboard'
 };
 
 export const updateDashboardGroupAuth = async (
@@ -308,9 +267,7 @@ export const updateDashboardGroupAuth = async (
   }
 
   for (const [index, batch] of batchPatchArr.entries()) {
-    const res2 = await dashboardContainer
-      .item(id, id)
-      .patch(batch);
+    const res2 = await dashboardContainer.item(id, id).patch(batch);
 
     if (index === batchPatchArr.length - 1) {
       const resource = res2.resource;
