@@ -38,7 +38,6 @@ export const createDashboard = async (
     ...data,
     authGroups: [],
   });
-  [];
 
   if (data?.menuItem) {
     const menuItem = data.menuItem;
@@ -167,24 +166,6 @@ export const readDashboards = async (
 export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-  // const dashboardId = data.id;
-
-  // const res = await dashboardContainer.item(dashboardId, dashboardId).read();
-
-  // const patchArr: PatchOperation[] = [];
-
-  // for (const [index, el] of data.authGroups?.entries()) {
-  //   patchArr.push({
-  //     op: 'add',
-  //     path: `/authGroups/-`,
-  //     value: el,
-  //   });
-  // }
-
-  // const res2 = await dashboardContainer
-  //   .item(dashboardId, dashboardId)
-  //   .patch(patchArr);
 
   const res2 = await createConnection(
     {
@@ -197,9 +178,9 @@ export const createDashboardAuthGroup = async (
   );
 
   return {
-    authGroups: [],
-    id: '',
-    name: '',
+    authGroups: res2.map(el=> el.to) as DashboardAuthGroups[],
+    id: data.id,
+    name: res2[0].to.name,
   };
 };
 
