@@ -1,10 +1,10 @@
-import ListGroup from "react-bootstrap/ListGroup";
-import { useEffect, useState } from "react";
-import styled from "styled-components";
-import { getContentModel, listModel } from "../client";
-import { useDispatch } from "react-redux";
-import { setModel } from "../store/slice";
-import { Link } from "react-router-dom";
+import ListGroup from 'react-bootstrap/ListGroup';
+import { useEffect, useState } from 'react';
+
+import { getContentModel, listModel } from '../client';
+import { useDispatch } from 'react-redux';
+import { setModel } from '../store/slice';
+import { Link } from 'react-router-dom';
 
 const ListItems = ({ header, arr }: ListItemsProp) => {
   const [showList, setShowList] = useState(false);
@@ -24,16 +24,16 @@ const ListItems = ({ header, arr }: ListItemsProp) => {
 
   return (
     <ListItemsStyles>
-      <label onClick={toggleList} className={`${showList ? "active" : ""}`}>
+      <label onClick={toggleList} className={`${showList ? 'active' : ''}`}>
         {header}
       </label>
-      <ListGroup className={`group ${showList ? "active" : ""}`}>
+      <ListGroup className={`group ${showList ? 'active' : ''}`}>
         {!!arr &&
           arr.map((item, index) => (
             <ListGroup.Item
               key={index}
               onClick={() => selectModelId(item)}
-              className={`group__item ${showList ? "active" : ""}`}
+              className={`group__item ${showList ? 'active' : ''}`}
             >
               <Link to={`/model/${item.modelId}`}>{item.name}</Link>
             </ListGroup.Item>

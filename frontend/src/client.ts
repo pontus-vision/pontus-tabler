@@ -7,7 +7,11 @@ import {
   Meta,
   OpenApiValidationFail,
 } from './types';
-
+import { useTranslation } from 'react-i18next';
+import { D } from 'msw/lib/glossary-de6278a9';
+import { sendHttpRequest } from './http';
+import { TableDataEdgeCreateReq } from './typescript/api/resources/pontus/client/requests/TableDataEdgeCreateReq';
+import { TableDataEdgeCreateRes } from './typescript/api/resources/pontus/types/TableDataEdgeCreateRes';
 import {
   DeleteTableRow,
   GroupReadBody,
@@ -48,12 +52,52 @@ import {
   TableDataCreateReq,
   TableDataCreateRes,
   TableDataDeleteReq,
-} from './pontus-api/typescript-fetch-client-generated';
-import { useTranslation } from 'react-i18next';
-import { D } from 'msw/lib/glossary-de6278a9';
-import { sendHttpRequest } from './http';
-import { TableDataEdgeCreateReq } from './typescript/api/resources/pontus/client/requests/TableDataEdgeCreateReq';
-import { TableDataEdgeCreateRes } from './typescript/api/resources/pontus/types/TableDataEdgeCreateRes';
+  DashboardGroupAuthCreateReq,
+  DashboardGroupAuthCreateRes,
+  DashboardGroupAuthDeleteReq,
+  DashboardGroupAuthDeleteRes,
+  DashboardGroupAuthReadReq,
+  DashboardGroupAuthReadRes,
+  DashboardGroupAuthUpdateReq,
+  DashboardGroupAuthUpdateRes,
+  AuthGroupsReadReq,
+  AuthGroupsReadRes,
+  AuthGroupDashboardCreateReq,
+  AuthGroupDashboardCreateRes,
+  AuthGroupDashboardsReadReq,
+  AuthGroupDashboardsReadRes,
+  AuthGroupDashboardUpdateReq,
+  AuthGroupDashboardUpdateRes,
+  AuthGroupDashboardDeleteReq,
+  AuthGroupDashboardDeleteRes,
+  AuthGroupUpdateReq,
+  AuthGroupUpdateRes,
+  AuthGroupDeleteReq,
+  AuthGroupDeleteRes,
+} from './typescript/api';
+import { AuthUserGroupsCreateReq } from './typescript/api/resources/pontus/client/requests/AuthUserGroupsCreateReq';
+import { AuthUserGroupsCreateRes } from './typescript/api/resources/pontus/types/AuthUserGroupsCreateRes';
+import { AuthUserCreateReq } from './typescript/api/resources/pontus/client/requests/AuthUserCreateReq';
+import { AuthUserCreateRes } from './typescript/api/resources/pontus/types/AuthUserCreateRes';
+import { AuthUsersReadReq } from './typescript/api/resources/pontus/client/requests/AuthUsersReadReq';
+import { AuthUsersReadRes } from './typescript/api/resources/pontus/types/AuthUsersReadRes';
+import { AuthUserReadReq } from './typescript/api/resources/pontus/client/requests/AuthUserReadReq';
+import { AuthUserReadRes } from './typescript/api/resources/pontus/types/AuthUserReadRes';
+import { AuthUserUpdateReq } from './typescript/api/resources/pontus/client/requests/AuthUserUpdateReq';
+import { AuthUserUpdateRes } from './typescript/api/resources/pontus/types/AuthUserUpdateRes';
+import { AuthUserDeleteReq } from './typescript/api/resources/pontus/client/requests/AuthUserDeleteReq';
+import { AuthUserDeleteRes } from './typescript/api/resources/pontus/types/AuthUserDeleteRes';
+import { AuthUserGroupsReadReq } from './typescript/api/resources/pontus/client/requests/AuthUserGroupsReadReq';
+import { AuthUserGroupsReadRes } from './typescript/api/resources/pontus/types/AuthUserGroupsReadRes';
+import { AuthUserGroupsDeleteReq } from './typescript/api/resources/pontus/client/requests/AuthUserGroupsDeleteReq';
+import { AuthUserGroupsDeleteRes } from './typescript/api/resources/pontus/types/AuthUserGroupsDeleteRes';
+import { AuthGroupUsersCreateReq } from './typescript/api/resources/pontus/client/requests/AuthGroupUsersCreateReq';
+import { AuthGroupUsersCreateRes } from './typescript/api/resources/pontus/types/AuthGroupUsersCreateRes';
+import { Table } from 'semantic-ui-react';
+import { AuthGroupUsersDeleteReq } from './typescript/api/resources/pontus/client/requests/AuthGroupUsersDeleteReq';
+import { AuthGroupUsersReadReq } from './typescript/api/resources/pontus/client/requests/AuthGroupUsersReadReq';
+import { AuthGroupUsersDeleteRes } from './typescript/api/resources/pontus/types/AuthGroupUsersDeleteRes';
+import { AuthGroupUsersReadRes } from './typescript/api/resources/pontus/types/AuthGroupUsersReadRes';
 
 export const getModelData = async (
   modelId: string,
@@ -227,15 +271,63 @@ export const createAuthGroup = async (
 };
 
 export const readAuthGroups = async (
-  data: ReadPaginationFilter,
-): Promise<AxiosResponse<AuthGroupRef[]> | undefined> => {
+  data: AuthGroupsReadReq,
+): Promise<AxiosResponse<AuthGroupsReadRes> | undefined> => {
   return post('/auth/groups/read', data);
+};
+
+export const updateAuthGroups = async (
+  data: AuthGroupUpdateReq,
+): Promise<AxiosResponse<AuthGroupUpdateRes>> => {
+  return post('/auth/group/update', data);
 };
 
 export const readAuthGroup = async (
   body: GroupReadBody,
 ): Promise<AxiosResponse<AuthGroupRef> | undefined> => {
   return post('/auth/group/read', body);
+};
+
+export const createAuthGroupDashboards = async (
+  body: AuthGroupDashboardCreateReq,
+): Promise<AxiosResponse<AuthGroupDashboardCreateRes>> => {
+  return post('/auth/group/dashboard/create', body);
+};
+
+export const readAuthGroupsDashboards = async (
+  body: AuthGroupDashboardsReadReq,
+): Promise<AxiosResponse<AuthGroupDashboardsReadRes>> => {
+  return post('/auth/group/dashboards/read', body);
+};
+
+export const updateAuthGroupDashboards = async (
+  body: AuthGroupDashboardUpdateReq,
+): Promise<AxiosResponse<AuthGroupDashboardUpdateRes>> => {
+  return post('/auth/group/dashboard/update', body);
+};
+
+export const deleteAuthGroupDashboards = async (
+  body: AuthGroupDashboardDeleteReq,
+): Promise<AxiosResponse<AuthGroupDashboardDeleteRes>> => {
+  return post('/auth/group/dashboard/delete', body);
+};
+
+export const createAuthGroupUsers = async (
+  body: AuthGroupUsersCreateReq,
+): Promise<AxiosResponse<AuthGroupUsersCreateRes>> => {
+  return post('/auth/group/users/create', body);
+};
+
+export const readAuthGroupsUsers = async (
+  body: AuthGroupUsersReadReq,
+): Promise<AxiosResponse<AuthGroupUsersReadRes>> => {
+  return post('/auth/group/users/read', body);
+};
+
+export const deleteAuthGroupUsers = async (
+  body: AuthGroupUsersDeleteReq,
+): Promise<AxiosResponse<AuthGroupUsersDeleteRes>> => {
+  return post('/auth/group/users/delete', body);
 };
 
 export const updateAuthGroup = async (
@@ -245,45 +337,81 @@ export const updateAuthGroup = async (
 };
 
 export const deleteAuthGroup = async (
-  body: GroupDeleteReq,
-): Promise<AxiosResponse<Response> | undefined> => {
+  body: AuthGroupDeleteReq,
+): Promise<AxiosResponse<AuthGroupDeleteRes>> => {
   return post('/auth/group/delete', body);
 };
 
 export const createUser = async (
-  body: NewUser,
-): Promise<AxiosResponse<User> | undefined> => {
+  body: AuthUserCreateReq,
+): Promise<AxiosResponse<AuthUserCreateRes> | undefined> => {
   return post('/auth/user/create', body);
 };
 
 export const readUsers = async (
-  body: ReadPaginationFilter,
-): Promise<AxiosResponse<User[]> | undefined> => {
-  return post('/auth/users/read', {});
+  body: AuthUsersReadReq,
+): Promise<AxiosResponse<AuthUsersReadRes> | undefined> => {
+  return post('/auth/users/read', body);
 };
 
 export const readUser = async (
-  body: UserReadBody,
-): Promise<AxiosResponse<User> | undefined> => {
-  return post('/auth/user/read', {});
+  body: AuthUserReadReq,
+): Promise<AxiosResponse<AuthUserReadRes> | undefined> => {
+  return post('/auth/user/read', body);
 };
 
 export const updateUser = async (
-  body: UpdateUser,
-): Promise<AxiosResponse<Response>> => {
+  body: AuthUserUpdateReq,
+): Promise<AxiosResponse<AuthUserUpdateRes>> => {
   return post('/auth/user/update', body);
 };
 
 export const deleteUser = async (
-  userId: string,
-): Promise<AxiosResponse<Response> | undefined> => {
-  return post('/auth/user/delete', { userId });
+  data: AuthUserDeleteReq,
+): Promise<AxiosResponse<AuthUserDeleteRes> | undefined> => {
+  return post('/auth/user/delete', data);
+};
+
+export const createUserGroups = async (
+  body: AuthUserGroupsCreateReq,
+): Promise<AxiosResponse<AuthUserGroupsCreateRes> | undefined> => {
+  return post('/auth/user/groups/create', body);
+};
+
+export const readUserGroups = async (
+  body: AuthUserGroupsReadReq,
+): Promise<AxiosResponse<AuthUserGroupsReadRes> | undefined> => {
+  return post('/auth/user/groups/read', body);
+};
+
+export const deleteUserGroups = async (
+  body: AuthUserGroupsDeleteReq,
+): Promise<AxiosResponse<AuthUserGroupsDeleteRes>> => {
+  return post('/auth/user/groups/delete', body);
+};
+
+export const createDashboardGroupAuth = async (
+  data: DashboardGroupAuthCreateReq,
+): Promise<AxiosResponse<DashboardGroupAuthCreateRes> | undefined> => {
+  return post('/dashboard/group/auth/create', data);
 };
 
 export const readDashboardGroupAuth = async (
-  dashboardId: string,
-): Promise<AxiosResponse<DashboardAuthGroup> | undefined> => {
-  return post('/dashboard/group/auth/read', { dashboardId });
+  data: DashboardGroupAuthReadReq,
+): Promise<AxiosResponse<DashboardGroupAuthReadRes> | undefined> => {
+  return post('/dashboard/group/auth/read', data);
+};
+
+export const updateDashboardGroupAuth = async (
+  data: DashboardGroupAuthUpdateReq,
+): Promise<AxiosResponse<DashboardGroupAuthUpdateRes> | undefined> => {
+  return post('/dashboard/group/auth/update', data);
+};
+
+export const deleteDashboardGroupAuth = async (
+  data: DashboardGroupAuthDeleteReq,
+): Promise<AxiosResponse<DashboardGroupAuthDeleteRes> | undefined> => {
+  return post('/dashboard/group/auth/delete', data);
 };
 
 // export const getApiKeys = async () => {

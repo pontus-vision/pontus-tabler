@@ -12,7 +12,7 @@ import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
 import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
 import { NotFoundError } from '../generated/api';
 
-const TABLES = 'tables';
+export const TABLES = 'tables';
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],
@@ -31,7 +31,7 @@ export const createTable = async (
     uniqueKeyPolicy,
   );
 
-  const res = await tableContainer.items.create(data);
+  const res = await tableContainer.items.create({...data, authGroups: []});
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
@@ -48,6 +48,7 @@ export const updateTable = async (data: TableUpdateReq) => {
       uniqueKeyPolicy,
     );
 
+    
     const res = await tableContainer.items.upsert(data);
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
       res.resource as any;
@@ -58,7 +59,10 @@ export const updateTable = async (data: TableUpdateReq) => {
   }
 };
 
-export const readTableById = async (data: TableReadReq) => {
+export const readTableById = async (
+  data: TableReadReq,
+): Promise<TableReadRes> => {
+  
   const querySpec = {
     query: 'select * from tables p where p.id=@tableId',
     parameters: [
@@ -75,6 +79,7 @@ export const readTableById = async (data: TableReadReq) => {
   );
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
+  
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {
@@ -118,8 +123,6 @@ export const deleteTable = async (data: TableDeleteReq) => {
     const res = await tableContainer.item(data.id, data.name).delete();
 
     const res2 = (await fetchContainer(data.name)).read();
-
-    console.log({ res2StatusCode: (await res2).statusCode });
 
     if ((await res2).statusCode === 200) {
       const res3 = await deleteContainer(data.name);

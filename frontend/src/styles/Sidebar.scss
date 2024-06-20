@@ -1,6 +1,6 @@
 .sidebar {
   width: 14rem;
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,8 +10,20 @@
   height: calc(100% - 3rem);
   translate: -100%;
   transition: translate 100ms ease-in-out;
-  z-index: 2;
+  z-index: 3;
   top: 3rem;
+
+  &__admin-options {
+    li {
+      cursor: pointer;
+    }
+    button {
+      &:hover {
+        background-color: #66bccf63;
+      }
+      border: none;
+    }
+  }
 
   .tree-view {
     overflow-y: auto;

@@ -10,6 +10,8 @@ import {
 import { isSubset, post } from './test-utils';
 import { deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
+import { AxiosResponse } from 'axios';
+import { DashboardReadReq, DashboardReadRes } from '../typescript/api';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -33,9 +35,10 @@ describe('testing Menu', () => {
     await deleteDatabase('pv_db');
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     process.env = OLD_ENV; // Restore old environment
     srv.close();
+    await deleteDatabase('pv_db');
   });
 
   it('should read the root', async () => {
@@ -55,50 +58,54 @@ describe('testing Menu', () => {
     const data2: MenuUpdateReq = {
       id: readRes.data?.id,
       path: readRes.data?.path,
-      kind: 'folder',
-      name: 'folder',
-      children: [{ kind: 'file', children: [], name: 'file1' }],
+
+      children: [{ kind: 'file', name: 'file1' }],
     };
 
-    const updateRes = await post('menu/update', data2);
+    const createRes = await post('menu/create', data2);
 
-    console.log({ updateRes });
+    console.log({ updateRes: createRes });
 
     const readRes2 = await post('menu/read', {
-      path: updateRes.data?.children[0]?.path,
+      path: createRes.data?.children[0]?.path,
     });
 
     expect(readRes2.status).toBe(200);
 
     const readRes3 = await post('menu/read', {
-      path: updateRes.data?.path,
+      path: createRes.data?.path,
     });
 
     const obj1 = data2.children[0];
 
     const obj2 = readRes3.data.children[0];
-    console.log({ obj1, obj2 });
+
     expect(isSubset(obj1, obj2)).toBe(true);
   });
 
   it('should do the CRUD "happy path"', async () => {
     // Create Menu Item
 
+    const readMenuRoot = await post('menu/read', {
+      path: '/',
+    });
+
     const body: MenuItemTreeRef = {
-      name: 'string',
-      kind: 'folder',
-      path: '/string',
+      path: '/',
+      id: readMenuRoot.data.id,
       children: [
         {
           name: 'string',
           kind: 'folder',
-          path: '/',
           children: [],
         },
       ],
     };
 
-    const createRetVal = await post('menu/create', body);
+    const createRetVal = (await post(
+      'menu/create',
+      body,
+    )) as AxiosResponse<MenuCreateRes>;
 
     let readRetVal: MenuCreateRes = createRetVal.data;
 
@@ -106,24 +113,35 @@ describe('testing Menu', () => {
 
     // Read the created Menu Item
 
-    const readRetVal2 = await post('menu/read', {
+    const readRetVal2 = (await post('menu/read', {
       path: readRetVal?.path,
-    });
+    })) as AxiosResponse<MenuReadRes>;
 
     expect(isSubset(body, readRetVal2.data)).toBe(true);
 
+    const readDashBody: DashboardReadReq = {
+      id: readRetVal2.data.children[0].id,
+    };
+
+    const readDashVal = (await post(
+      'dashboard/read',
+      readDashBody,
+    )) as AxiosResponse<DashboardReadRes>;
+
+    expect(readDashVal.data.name).toBe(readRetVal2.data.children[0].name);
+
     const body2: MenuUpdateReq = {
-      name: 'string',
-      kind: 'folder',
+      id: readRetVal.id,
       path: readRetVal.path,
       children: [
         {
+          path: createRetVal.data.children[0].path,
+          id: createRetVal.data.children[0].id,
           name: 'string2',
           kind: 'folder',
           children: [],
         },
       ],
-      id: readRetVal.id,
     };
 
     // Checking if update is correct.
@@ -132,15 +150,9 @@ describe('testing Menu', () => {
 
     let resPayload3: MenuUpdateRes = updateRetVal.data;
 
-    const { children, ...rest } = body2;
-    const { children: children2, ...rest2 } = resPayload3;
-
-    expect(isSubset(rest, rest2)).toBeTruthy();
     expect(
-      children2.some((child2) =>
-        children.some((child) => isSubset(child, child2)),
-      ),
-    ).toBeTruthy();
+      updateRetVal.data.children.some((el) => el.path === '/string2'),
+    ).toBe(true);
 
     // Deleting and checking if the file was indeed deleted.
 
@@ -148,6 +160,45 @@ describe('testing Menu', () => {
       id: resPayload3.id,
       path: resPayload3.path,
     };
+
+    const createFileBody: MenuItemTreeRef = {
+      path: '/',
+      id: readMenuRoot.data.id,
+      children: [
+        {
+          name: 'foo',
+          kind: 'file',
+          children: [],
+        },
+      ],
+    };
+
+    const createFileRetVal = await post('menu/create', createFileBody);
+
+    expect(createFileRetVal.status).toBe(200);
+
+    const updateFileBody: MenuItemTreeRef = {
+      id: readMenuRoot.data.id,
+      path: readMenuRoot.data.path,
+      kind: 'folder',
+      children: [
+        {
+          path: '/foo',
+          name: 'bar',
+          kind: 'file',
+          id: createFileRetVal.data.children.find((el) => el.name === 'foo').id,
+        },
+      ],
+    };
+
+    const updateFileRetVal = (await post(
+      'menu/update',
+      updateFileBody,
+    )) as AxiosResponse<MenuUpdateReq>;
+
+    expect(
+      updateFileRetVal.data.children.some((el) => el.path === '/bar'),
+    ).toBe(true);
 
     const deleteRetVal = await post('menu/delete', body3);
 
@@ -158,9 +209,9 @@ describe('testing Menu', () => {
     expect(readRetVal3.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
-    const createRetVal = await post('menu/create', {});
+    const createRetVal = await post('menu/create', { path: '/foo', id: 'bar' });
 
-    expect(createRetVal.status).toBe(400);
+    expect(createRetVal.status).toBe(404);
 
     const readRetVal = await post('menu/read', {
       id: 'foo',
@@ -183,14 +234,14 @@ describe('testing Menu', () => {
 
     const updateRetVal3 = await post('menu/update', {
       path: 'bar',
-      id: 'foo'
-    })
+      id: 'foo',
+    });
 
-    expect(updateRetVal3.status).toBe(400)
+    expect(updateRetVal3.status).toBe(400);
 
-    const updateRetVal4 = await post('menu/update', {})
+    const updateRetVal4 = await post('menu/update', {});
 
-    expect(updateRetVal3.status).toBe(400)
+    expect(updateRetVal3.status).toBe(400);
 
     const deleteRetVal = await post('menu/delete', { foo: 'bar' });
 

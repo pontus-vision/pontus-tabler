@@ -189,6 +189,23 @@ const DashboardView = ({
     const fetchDashboard = async () => {
       const res = await readDashboard(id);
       console.log({ res });
+
+      if (res?.status !== 200) {
+        setName(res?.data.name || '');
+        setDashboard(res?.data);
+
+        setInitialState({
+          global: {},
+          borders: [],
+          layout: {
+            type: 'row',
+            id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
+            children: [],
+          },
+        });
+        return;
+      }
+
       setName(res?.data.name || '');
       setDashboard(res?.data);
 
