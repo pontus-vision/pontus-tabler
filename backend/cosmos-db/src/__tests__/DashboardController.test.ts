@@ -216,6 +216,7 @@ describe('dashboardCreatePOST', () => {
     const createUserBody: AuthUserCreateReq = {
       username: 'foo',
       password: 'foobar',
+      passwordConfirmation: 'foobar'
     };
 
     const authUserCreateRes = (await post(
@@ -282,9 +283,11 @@ describe('dashboardCreatePOST', () => {
     const createRetVal2 = await postAdmin(
       'dashboard/group/auth/create',
       dashboardGroupBody,
-    );
+    ) as AxiosResponse<DashboardGroupAuthCreateRes>
 
     expect(createRetVal2.status).toBe(200);
+
+    expect(createRetVal2.data.authGroups).toMatchObject(dashboardGroupBody.authGroups)
 
     const readRetVal = await post(
       'dashboard/read',
