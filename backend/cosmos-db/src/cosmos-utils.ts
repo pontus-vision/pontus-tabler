@@ -9,10 +9,19 @@ import {
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
 import {
+  ADMIN_GROUP_NAME,
   AUTH_GROUPS,
   authGroupContainerProps,
+  createAuthUserGroup,
   initiateAuthGroupContainer,
 } from './service/AuthGroupService';
+import { createTableDataEdge } from './service/EdgeService';
+import {
+  ADMIN_USER_USERNAME,
+  AUTH_USERS,
+  authUserContainerProps,
+  initiateAuthUserContainer,
+} from './service/AuthUserService';
 
 export interface FetchData {
   count: number;
@@ -26,7 +35,7 @@ const cosmosClient = new CosmosClient({
     'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==',
 });
 
-const cosmosDbName = process.env.COSMOSDB_NAME || 'pv_db';
+export const cosmosDbName = process.env.COSMOSDB_NAME || 'pv_db';
 
 export const fetchDatabase = async (
   db_name: string,
@@ -64,7 +73,6 @@ export const fetchContainer = async (
     (containerId = authGroupContainerProps.AUTH_GROUPS),
       (uniqueKeyPolicy = authGroupContainerProps.uniqueKeyPolicy),
       (partitionKey = authGroupContainerProps.partitionKey);
-    initialDocs = authGroupContainerProps.initialDocs;
   }
   const database = await fetchDatabase(cosmosDbName);
 
@@ -78,6 +86,8 @@ export const fetchContainer = async (
 
   // Creating initial document when container is created
   if (statusCode === 201 && initialDocs) {
+    let adminGroup;
+    let adminUser;
     for (const doc of initialDocs) {
       const res = await container.items.create(doc);
     }
@@ -558,7 +568,7 @@ export const filterToQuery = (
     }
   }
 
-  const hasFilters = Object.keys(body.filters).length > 0;
+  const hasFilters = Object.keys(body?.filters || {}).length > 0;
 
   const finalQuery = (
     (hasFilters ? ' WHERE ' : '') +
