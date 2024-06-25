@@ -458,7 +458,7 @@ describe('tableControllerTest', () => {
       filters: {},
       tableName: 'person-natural',
     };
-    armin van buuren sensation white 2005
+
     const table1DataRead = (await post(
       'table/data/read',
       table1DataReadBody,
