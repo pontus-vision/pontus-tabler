@@ -148,11 +148,11 @@ export const initiateAuthGroupContainer = async (): Promise<Container> => {
 
 export const createAuthGroup = async (
   data: AuthGroupCreateReq,
-): Promise<AuthGroupCreateRes> => {
+) => {
   const authGroupContainer = await initiateAuthGroupContainer();
 
   try {
-    const res = (await authGroupContainer.items.create({
+    const res = await authGroupContainer.items.create({
       ...data,
       tableMetadata: {
         create: false,
@@ -160,7 +160,7 @@ export const createAuthGroup = async (
         update: false,
         delete: false,
       },
-    })) as ItemResponse<AuthGroupRef>;
+    }) as ItemResponse<AuthGroupRef>;
 
     const { name, id, tableMetadata } = res.resource;
     return { name, id, tableMetadata };

@@ -559,16 +559,13 @@ describe('tableControllerTest', () => {
     const bodyCreateConnection: TableDataEdgeCreateReq = {
       tableFrom: {
         tableName: body.tableName,
-        rows: [{ id: createTableData.data.id }],
+        rows: [{id:createTableData.data.id}],
       },
       edge: 'has_email',
       edgeType: 'oneToMany',
       tableTo: {
         tableName: body2.tableName,
-        rows: [
-          { id: createTableData2.data.id },
-          { id: createTableData3.data.id },
-        ],
+        rows: [{id:createTableData2.data.id}, {id:createTableData3.data.id}],
       },
     };
 

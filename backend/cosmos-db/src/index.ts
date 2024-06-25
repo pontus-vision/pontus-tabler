@@ -23,7 +23,7 @@ import {
   deleteTableData,
   readTableData,
   updateTableData,
-  upsertTableData,
+  createTableData,
 } from './service/TableDataService';
 import {
   createDashboardAuthGroup,
@@ -41,7 +41,7 @@ import {
   createTableDataEdge,
   createTableEdge,
   deleteTableEdge,
-  readTableDataEdge,
+  readTableDataEdges,
   readTableEdgesByTableId,
   // updateTableEdge,
 } from './service/EdgeService';
@@ -117,7 +117,7 @@ export default new PontusService({
     await checkAdmin(auth.userId)
     const response = await createAuthGroup(req.body);
 
-    res.send(response);
+    // res.send(response);
   },
   authGroupDeletePost: async (req, res) => {
     const auth = await authenticateToken(req, res)
@@ -521,7 +521,7 @@ export default new PontusService({
   },
   tableDataCreatePost: async (req, res) => {
     try {
-      const response = await upsertTableData(req.body);
+      const response = await createTableData(req.body);
 
       res.send(response);
     } catch (error) {
@@ -592,7 +592,7 @@ export default new PontusService({
     } catch (error) {}
   },
   tableDataEdgeReadPost: async (req, res) => {
-    const response = await readTableDataEdge(req.body);
+    const response = await readTableDataEdges(req.body);
 
     res.send(response);
   },
