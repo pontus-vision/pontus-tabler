@@ -341,7 +341,7 @@ describe('tableControllerTest', () => {
 
     expect(createEdgeNonExistingTable.status).toBe(404);
   });
-  it.only('test edges between rows', async () => {
+  it('test edges between rows', async () => {
     const table: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
@@ -559,13 +559,16 @@ describe('tableControllerTest', () => {
     const bodyCreateConnection: TableDataEdgeCreateReq = {
       tableFrom: {
         tableName: body.tableName,
-        rows: [{id:createTableData.data.id}],
+        rows: [{ id: createTableData.data.id }],
       },
       edge: 'has_email',
       edgeType: 'oneToMany',
       tableTo: {
         tableName: body2.tableName,
-        rows: [{id:createTableData2.data.id}, {id:createTableData3.data.id}],
+        rows: [
+          { id: createTableData2.data.id },
+          { id: createTableData3.data.id },
+        ],
       },
     };
 
