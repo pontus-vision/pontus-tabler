@@ -90,7 +90,6 @@ import {
 import { Request } from 'express';
 
 export default new PontusService({
-  initiatePost(req, res) {},
   registerAdminPost: async (req, res) => {
     const response = await registerAdmin(req.body);
     res.send(response);
