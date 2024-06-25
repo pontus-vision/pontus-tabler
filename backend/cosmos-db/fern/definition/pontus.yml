@@ -2,6 +2,23 @@ service:
   auth: false
   base-path: '/PontusTest/1.0.0'
   endpoints:
+    registerAdminPOST:
+      path: /register/admin
+      method: POST
+      auth: true
+      request:
+        name: RegisterAdminReq
+        body:
+          properties:
+            username: string
+            password: string
+            passwordConfirmation: string
+      response:
+        docs: User logged in successfully
+        type: RegisterAdminRes
+      errors:
+        - BadRequestError
+        - InternalServerError
     loginPOST:
       path: /login
       method: POST
@@ -1602,6 +1619,7 @@ service:
               docs: Name of the user
               type: string
             password: string
+            passwordConfirmation: string
       response:
         docs: User created successfully
         type: AuthUserCreateRes
@@ -1759,6 +1777,11 @@ service:
         - InternalServerError
         - NotFoundError
 types:
+  InitiateRes: string
+  RegisterAdminRes:
+    properties: {}
+    extends:
+      - UsernameAndIdRef
   LoginRes:
     properties:
       accessToken: string
@@ -1965,7 +1988,7 @@ types:
     properties:
       rowId: string
       tableName: string
-      edges: unknown
+      edges: list<map<string, unknown>>
       count: integer
   # TableDataEdgeDeleteReq:
   #   properties:
@@ -2012,7 +2035,7 @@ types:
         type: optional<TableColumnRefKind>
   TableRef:
     properties:
-      edges: optional<map<string, list<Edge>>>
+      edges: optional<TableEdgeRef>
       name:
         docs: Name of the table
         type: optional<string>
@@ -2020,6 +2043,7 @@ types:
       cols:
         docs: Table columns associated with the table
         type: optional<list<TableColumnRef>>
+  TableEdgeRef: map<string, list<Edge>>
   TableReadRes:
     properties: {}
     extends:
@@ -2164,7 +2188,8 @@ types:
       username: string
       id: string
   AuthUserCreateRes:
-    properties: {}
+    properties:
+      redirect-to: optional<string>
     extends:
       - AuthUserIdAndUsername
   AuthUserReadRes:
@@ -2351,4 +2376,7 @@ errors:
     type: unknown
   ConflictEntityError:
     status-code: 409
+    type: string
+  TemporaryRedirect:
+    status-code: 307
     type: string
