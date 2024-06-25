@@ -60,7 +60,6 @@ const CreateTableView = ({ testId }: Props) => {
           };
         }),
       };
-      console.log({tableReq: obj})
       const createRes = await createTable(obj);
 
       if (createRes?.status === 400) {
