@@ -406,13 +406,13 @@ describe('tableControllerTest', () => {
     const bodyCreateConnection: TableDataEdgeCreateReq = {
       tableFrom: {
         tableName: body.tableName,
-        rowIds: [createTableData.data.id],
+        rows: [{ id: createTableData.data.id }],
       },
       edge: 'has_email',
       edgeType: 'oneToOne',
       tableTo: {
         tableName: body2.tableName,
-        rowIds: [createTableData2.data.id],
+        rows: [{ id: createTableData2.data.id }],
       },
     };
 
@@ -437,13 +437,13 @@ describe('tableControllerTest', () => {
     const bodyCreateConnection2: TableDataEdgeCreateReq = {
       tableFrom: {
         tableName: body.tableName,
-        rowIds: [createTableData.data.id],
+        rows: [{ id: createTableData.data.id }],
       },
       edge: 'has_email',
       edgeType: 'oneToOne',
       tableTo: {
         tableName: body2.tableName,
-        rowIds: [createTableData3.data.id],
+        rows: [{ id: createTableData3.data.id }],
       },
     };
 
@@ -475,20 +475,20 @@ describe('tableControllerTest', () => {
     const hasEmail = personNatural2['has_email'];
     const rowId = hasEmail.from[0].id;
 
-    expect(rowId).toBe(bodyCreateConnection2.tableFrom.rowIds[0]);
+    expect(rowId).toBe(bodyCreateConnection2.tableFrom.rows[0]);
     const row2 = table1DataRead.data.rows[0];
     const rowEdges2 = row2['edges'];
     const personNatural = rowEdges2['person-natural-2'];
     const hasEmail2 = personNatural['has_email'];
     const rowId2 = hasEmail2.to[0].id;
-    expect(rowId2).toBe(bodyCreateConnection.tableTo.rowIds[0]);
+    expect(rowId2).toBe(bodyCreateConnection.tableTo.rows[0]);
 
     const row3 = table4DataRead.data.rows[1];
     const rowEdges3 = row3['edges'];
     const personNatural3 = rowEdges3['person-natural-2'];
     const hasEmail3 = personNatural3['has_email'];
     const rowId3 = hasEmail3.from[0].id;
-    expect(rowId3).toBe(bodyCreateConnection.tableFrom.rowIds[0]);
+    expect(rowId3).toBe(bodyCreateConnection.tableFrom.rows[0]);
   });
   it('It should test one-to-many edges creation', async () => {
     const table: TableCreateReq = {
@@ -559,13 +559,16 @@ describe('tableControllerTest', () => {
     const bodyCreateConnection: TableDataEdgeCreateReq = {
       tableFrom: {
         tableName: body.tableName,
-        rowIds: [createTableData.data.id],
+        rows: [{ id: createTableData.data.id }],
       },
       edge: 'has_email',
       edgeType: 'oneToMany',
       tableTo: {
         tableName: body2.tableName,
-        rowIds: [createTableData2.data.id, createTableData3.data.id],
+        rows: [
+          { id: createTableData2.data.id },
+          { id: createTableData3.data.id },
+        ],
       },
     };
 
