@@ -35,7 +35,7 @@ export const createTable = async (
 ): Promise<TableCreateRes> => {
   const tableContainer = await initiateTableContainer();
 
-  const res = await tableContainer.items.create({ ...data, authGroups: [] });
+  const res = await tableContainer.items.create(data);
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
