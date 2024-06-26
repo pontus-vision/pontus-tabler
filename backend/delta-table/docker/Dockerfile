@@ -23,7 +23,7 @@
 # Note: PySpark v3.5.0 (https://spark.apache.org/docs/latest/api/python/getting_started/install.html#dependencies)
 ARG BASE_CONTAINER=spark:3.5.1-scala2.12-java17-python3-ubuntu
 FROM $BASE_CONTAINER as spark
-FROM spark as delta
+#FROM spark as delta
 
 # Authors (add your name when updating the Dockerfile)
 LABEL authors="Prashanth Babu, Denny Lee, Andrew Bauman, Scott Haines, Tristen Wentling, Leo Martins"
@@ -31,9 +31,12 @@ LABEL authors="Prashanth Babu, Denny Lee, Andrew Bauman, Scott Haines, Tristen W
 # Docker image was created and tested with the versions of following packages.
 USER root
 ARG DELTA_SPARK_VERSION="3.2.0"
+ENV DELTA_SPARK_VERSION=${DELTA_SPARK_VERSION}
 # Note: for 3.0.0 https://pypi.org/project/deltalake/
 ARG DELTALAKE_VERSION="0.17.4"
+ENV DELTALAKE_VERSION=${DELTALAKE_VERSION}
 ARG JUPYTERLAB_VERSION="4.2.1"
+ENV JUPYTERLAB_VERSION=${JUPYTERLAB_VERSION}
 # requires pandas >1.0.5, py4j>=0.10.9.7, pyarrow>=4.0.0
 ARG PANDAS_VERSION="2.2.2"
 ARG ROAPI_VERSION="0.11.1"
@@ -44,7 +47,7 @@ deltalake==${DELTALAKE_VERSION} jupyterlab==${JUPYTERLAB_VERSION} pandas==${PAND
 
 
 # Environment variables
-FROM delta as startup
+#FROM delta as startup
 ARG NBuser=NBuser
 ARG GROUP=NBuser
 ARG WORKDIR=/opt/spark/work-dir
