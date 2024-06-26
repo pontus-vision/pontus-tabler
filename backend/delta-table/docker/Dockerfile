@@ -95,7 +95,7 @@ RUN python3 -m pip install --upgrade pip && \
 RUN pip install sparksql-magic  'jupyterlab-lsp' 'python-lsp-server[all]' parquet-cli --quiet && \
     jupyter labextension install @krassowski/jupyterlab-lsp
 
-RUN pip install faker --quiet
+RUN pip install faker delta-spark --quiet
 
 COPY defaults.conf /opt/spark/config/defaults.conf
 COPY defaults.conf /opt/spark/config/spark-defaults.conf
