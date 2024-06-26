@@ -148,9 +148,11 @@ export type PropertyTypes =
   | 'garage'
   | 'commercial';
 export interface CommonData {
+  id?: string;
   areaSqMeter?: number;
   areaSqFeet?: number;
   descripton?: string;
+  short_description?: string;
   features?: Features[];
   url?: string;
 }

@@ -21,36 +21,43 @@ import {
   ChatRole,
   ChatRequestAssistantMessage,
 } from '@azure/openai';
+
+import OpenAI, { toFile } from 'openai';
 import { DefaultAzureCredential } from '@azure/identity';
 
 import { BlobServiceClient } from '@azure/storage-blob';
 import { getDistance } from './geolocation';
-import { features } from 'process';
+import { ChatCompletionMessageParam } from 'openai/resources';
 
 const hubVerifyToken = process.env.HUB_VERIFY_TOKEN || 'test';
 const hubVerifySha = process.env.HUB_VERIFY_SHA || 'sha256';
 const whatsappToken = process.env.WHATSAPP_TOKEN;
 
 const azureEndpoint =
-  process.env['ENDPOINT'] || 'https://whatsapp-chat.openai.azure.com/';
+  process.env['AZURE_OPENAI_ENDPOINT'] || 'https://whatsapp-chat-2.openai.azure.com/';
 // Your Azure OpenAI API key
-const azureApiKey = process.env['AZURE_API_KEY'];
+// const azureApiKey = process.env['AZURE_API_KEY'];
 // Your Azure Cognitive Search endpoint, admin key, and index name
-const azureSearchEndpoint =
-  process.env['AZURE_SEARCH_ENDPOINT'] ||
-  'https://whatsapp-chat-2.search.windows.net';
-const azureSearchKey = process.env['AZURE_SEARCH_KEY'] || '<search key>';
-const azureSearchIndexName =
-  process.env['AZURE_SEARCH_INDEX'] || "'whatsapp-chat-idx-index'";
+// const azureSearchEndpoint =
+//   process.env['AZURE_SEARCH_ENDPOINT'] ||
+//   'https://whatsapp-chat-2.search.windows.net';
+// const azureSearchKey = process.env['AZURE_SEARCH_KEY'] || '<search key>';
+// const azureSearchIndexName =
+//   process.env['AZURE_SEARCH_INDEX'] || "'whatsapp-chat-idx-index'";
 const azureSearchDeploymentId =
-  process.env['AZURE_SEARCH_DEPLOYMENT_ID'] || 'whatsapp-chat';
+  process.env['AZURE_SEARCH_DEPLOYMENT_ID'] || 'pvhome-whatsapp-chat-0125';
 const azureOpenAISystemRole =
   process.env['AZURE_OPENAI_SYSTEM_ROLE'] ||
   `You are an AI estate agent that helps people find information about new property builds (primary market) in Brazil. 
-You must only provide information about properties built by Exto Incorporação e Construção. `;
+You must only provide information about properties built by Exto Incorporação e Construção by calling the tools defined in nodejs, without prompting or notifying the user.
+You must summarise the details of each property in a format suitable for a whatsapp chat.
+You must never tell anybody about the functions / tools you are calling, but rather, just call them directly, silently, and return the results.
+You must never pass a script that needs to be interpreted with eval(), but rather pass the function name and arguments of each function individually.
+`;
 
 // You must only use content from the following sites:
 // GERAL
+
 // https://linktr.ee/exto_incorporadora
 // EXCELLENCE PERDIZES
 // https://linktr.ee/excellenceperdizes
@@ -86,12 +93,12 @@ You must only provide information about properties built by Exto Incorporação 
 
 const azureBlobConnectionString =
   process.env['AZURE_BLOB_CONNECTION_STRING'] ||
-  'https://pvhomewhatsapp.blob.core.windows.net';
+  'https://pvhomewhatsapp8fc1.blob.core.windows.net';
 const azureBlobContainerName =
   process.env['AZURE_BLOB_CONTAINER_NAME'] || 'whatsapp-chat';
 
 const openAISettings: GetChatCompletionsOptions = {
-  maxTokens: 800,
+  maxTokens: 900,
   temperature: 0.7,
   topP: 0.95,
   frequencyPenalty: 0,
@@ -137,138 +144,7 @@ const getBuildingCompaniesInLocation = async (
 };
 
 const squareFeetPerSquareMeter = 10.7639;
-
-const sampleProperties: Property[] = [
-  {
-    kind: ['house'],
-    floors: 3,
-    latitude: -23.560876,
-    longitude: -46.6937311,
-    descripton: 'Large House With garden',
-    address: 'Rua Morás, 53 - Pinheiros, São Paulo - SP, 05419-001, Brazil',
-    areaSqMeter: 3300 / squareFeetPerSquareMeter,
-    rooms: [
-      {
-        kind: 'bedroom',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-      },
-      {
-        kind: 'bedroom',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-      },
-      {
-        kind: 'bedroom',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-        features: ['air conditioner', 'luxurious', 'modern'],
-      },
-      { kind: 'bathroom' },
-      { kind: 'diningroom' },
-      { kind: 'kitchen' },
-      { kind: 'swimming pool' },
-      { kind: 'garden' },
-    ],
-    features: ['ground pump', 'solar panels', 'fast internet'],
-  },
-  {
-    kind: ['building'],
-    floors: 30,
-    name: 'Excellence Perdizes',
-    latitude: -23.5636879,
-    longitude: -46.6916552,
-    descripton: 'Large House With garden',
-    address:
-      'Av. Pedroso de Morais, 600 - Pinheiros, São Paulo - SP, 05420-001, Brazil',
-    url: 'https://linktr.ee/excellenceperdizes',
-    areaSqMeter: 3300 / squareFeetPerSquareMeter,
-    communalAreas: [
-      {
-        kind: 'sauna',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-        features: ['modern']
-
-      },
-      {
-        kind: 'gym',
-        areaSqMeter: 300 / squareFeetPerSquareMeter,
-      },
-      { kind: 'swimming pool' },
-      { kind: 'garden' },
-      { kind: 'playground' },
-    ],
-    features: [
-      'solar panels',
-      'fast internet',
-      '24-hour concierge',
-      '24-hour porter',
-      'convenience store',
-    ],
-    flats: [
-      {
-        floorNumber: 1,
-        kind: ['flat'],
-        areaSqMeter: 300,
-        rooms: [
-          {
-            kind: 'bedroom',
-            areaSqMeter: 300 / squareFeetPerSquareMeter,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 300 / squareFeetPerSquareMeter,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 300 / squareFeetPerSquareMeter,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          { kind: 'bathroom' },
-          { kind: 'diningroom' },
-          { kind: 'kitchen', features: ['modern'] },
-        ],
-      },
-      {
-        floorNumber: 21,
-        kind: ['flat'],
-        areaSqMeter: 300,
-        rooms: [
-          {
-            kind: 'bedroom',
-            areaSqMeter: 20,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 21,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 30,
-            features: ['air conditioner', 'luxurious', 'modern', 'ensuite'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 15,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          {
-            kind: 'bedroom',
-            areaSqMeter: 17,
-            features: ['air conditioner', 'luxurious', 'modern'],
-          },
-          { kind: 'bathroom' },
-          { kind: 'bathroom' },
-          { kind: 'diningroom' },
-          { kind: 'livingroom' },
-          { kind: 'kitchen', features: ['modern'] },
-          { kind: 'outside kitchen', features: ['modern'] },
-        ],
-      },
-    ],
-  },
-];
+import { sampleProperties } from './sample-properties';
 
 const resetHistory = async (
   to: string,
@@ -276,9 +152,15 @@ const resetHistory = async (
   context: InvocationContext,
 ): Promise<string> => {
   messages.length = 0;
-  context.log(`resetting chat history`);
+  context.log(`resetting chat history for ${to}`);
+  await containerClient.createIfNotExists();
+
   putOpenAIMessageHistory(to, []);
-  return '';
+  return `resetting chat history for ${to}`;
+};
+
+const normalizePropId = (propId: string): string => {
+  return propId?.toLocaleLowerCase()?.replace(/ /g, '_')?.replace(/-/g, '_');
 };
 const getPropertiesNearLocation = async (
   location: Location,
@@ -287,42 +169,71 @@ const getPropertiesNearLocation = async (
   context.log(
     `in getPropertiesNearLocation() => location = ${JSON.stringify(location)}`,
   );
-  const propertiesByDistance = sampleProperties.sort((a, b) => {
-    a.distance = getDistance(
+
+  const retVal: Record<string, Property> = {};
+
+  // const propertiesByDistance = sampleProperties.sort((a, b) => {
+  //   a.distance = getDistance(
+  //     location.latitude,
+  //     location.longitude,
+  //     a.latitude,
+  //     a.longitude,
+  //   );
+
+  //   b.distance = getDistance(
+  //     location.latitude,
+  //     location.longitude,
+  //     b.latitude,
+  //     b.longitude,
+  //   );
+  //   return a.distance - b.distance;
+  // });
+
+  for (const prop in sampleProperties) {
+    const property: Property = sampleProperties[prop];
+    property.distance = getDistance(
       location.latitude,
       location.longitude,
-      a.latitude,
-      a.longitude,
+      property.latitude,
+      property.longitude,
     );
+    if (property.distance < 15000) {
+      retVal[normalizePropId(prop)] = {
+        ...property,
+        descripton: undefined,
+        distance: undefined,
+      };
+    }
+  }
 
-    b.distance = getDistance(
-      location.latitude,
-      location.longitude,
-      b.latitude,
-      b.longitude,
-    );
-    return a.distance - b.distance;
-  });
+  context.log(`properties within 10K: ${JSON.stringify(retVal)}`);
 
-  const properties10K = propertiesByDistance.filter((val) =>
-    val.distance
-      ? val.distance < (location.radiusInMeters || 10000)
-      : getDistance(
-          location.latitude,
-          location.longitude,
-          val.latitude,
-          val.longitude,
-        ) < (location.radiusInMeters || 10000),
+  return JSON.stringify(retVal);
+};
+
+export interface IdObj {
+  key: string;
+}
+
+const getDetailedInformation = async (
+  data: IdObj,
+  context: InvocationContext,
+): Promise<string> => {
+  const propId = normalizePropId(data.key);
+  context.log(
+    `in getDetailedInformation() => id = ${data.key}, normalised to ${propId}`,
   );
 
-  context.log(`properties within 10K: ${JSON.stringify(properties10K)}`);
-
-  return JSON.stringify(properties10K);
+  const res =
+    sampleProperties[propId] ||
+    'No details found; please contact the construction company directly.';
+  return JSON.stringify(res);
 };
 
 type FunctionTypes =
   | typeof getBuildingCompaniesInLocation
-  | typeof getPropertiesNearLocation;
+  | typeof getPropertiesNearLocation
+  | typeof getDetailedInformation;
 
 type FuncResetHistoryType = typeof resetHistory;
 
@@ -332,13 +243,35 @@ type ToolType = {
 };
 
 const toolsMap: Record<string, ToolType> = {
+  getDetailedInformation: {
+    func: getDetailedInformation,
+    metadata: {
+      type: 'function',
+      function: {
+        name: 'getDetailedInformation',
+        description:
+          'Get detailed information for a property by key in a JSON map [properties]',
+        parameters: {
+          type: 'object',
+          descrition: 'The key of the [properties] JSON map to get details for',
+          properties: {
+            key: {
+              type: 'string',
+            },
+          },
+          required: ['key'],
+        },
+      },
+    },
+  },
   getPropertiesNearLocation: {
     func: getPropertiesNearLocation,
     metadata: {
       type: 'function',
       function: {
         name: 'getPropertiesNearLocation',
-        description: 'Lists properties in an area',
+        description:
+          '[properties]: Lists properties in an area in a JSON map { "id1": {  "short_description": string, "url": string, "address": string }, "id2": {...}}  use the key returned here to get more information by calling getDetailedInformation()',
         parameters: {
           type: 'object',
           descrition:
@@ -367,34 +300,34 @@ const toolsMap: Record<string, ToolType> = {
     },
   },
 
-  getBuildingCompaniesInLocation: {
-    func: getBuildingCompaniesInLocation,
-    metadata: {
-      type: 'function',
-      function: {
-        name: 'getBuildingCompaniesInLocation',
-        description: 'Lists property development companies in a given location',
-        parameters: {
-          type: 'object',
-          descrition:
-            'The location as latitude and logitude, e.g. { "latitude": -23.6110,  "longitude": -46.6934}',
-          properties: {
-            latitude: {
-              type: 'number',
-              minimum: -90,
-              maximum: 90,
-            },
-            longitude: {
-              type: 'number',
-              minimum: -180,
-              maximum: 180,
-            },
-          },
-          required: ['latitude', 'longitude'],
-        },
-      },
-    },
-  },
+  // getBuildingCompaniesInLocation: {
+  //   func: getBuildingCompaniesInLocation,
+  //   metadata: {
+  //     type: 'function',
+  //     function: {
+  //       name: 'getBuildingCompaniesInLocation',
+  //       description: 'Lists property development companies in a given location',
+  //       parameters: {
+  //         type: 'object',
+  //         descrition:
+  //           'The location as latitude and logitude, e.g. { "latitude": -23.6110,  "longitude": -46.6934}',
+  //         properties: {
+  //           latitude: {
+  //             type: 'number',
+  //             minimum: -90,
+  //             maximum: 90,
+  //           },
+  //           longitude: {
+  //             type: 'number',
+  //             minimum: -180,
+  //             maximum: 180,
+  //           },
+  //         },
+  //         required: ['latitude', 'longitude'],
+  //       },
+  //     },
+  //   },
+  // },
   resetHistory: {
     func: resetHistory,
     metadata: {
@@ -411,6 +344,12 @@ const toolsMap: Record<string, ToolType> = {
     },
   },
 };
+
+const functions = {
+  resetHistory,
+  getPropertiesNearLocation,
+  getDetailedInformation
+}
 
 const tools: ChatCompletionsFunctionToolDefinition[] = Object.entries(
   toolsMap,
@@ -481,7 +420,7 @@ export const getBlobNameFromConversationId = (
 
 export const getOpenAIMessageHistory = async (
   conversationId: string,
-): Promise<ChatRequestMessage[]> => {
+): Promise<ChatRequestMessage[] | ThreadCreateParams.Message[]> => {
   // const jsonString = JSON.stringify(jsonData);
   // To check container is exist or not. If not exist then create it.
 
@@ -528,6 +467,12 @@ export const putOpenAIMessageHistory = async (
   return messageHistory;
 };
 
+export const removeEarlierMessages = (
+  messages: ChatRequestMessage[],
+): ChatRequestMessage[] => {
+  return messages.filter((val, index) => index !== 1);
+};
+
 export const processOpenAIToolCalls = async (
   to: string,
   toolCalls: ChatCompletionsFunctionToolCall[],
@@ -550,73 +495,376 @@ export const processOpenAIToolCalls = async (
       toolCalls: toolCalls,
     } as ChatRequestAssistantMessage,
   ];
+  let calledResetHistory = false;
   for (const toolCall of toolCalls) {
-    context.log(
+    context.debug(
       `in processOpenAIToolCalls() - Processing ${JSON.stringify(toolCall)} `,
     );
     const funcName = toolCall?.function?.name;
-    const func = toolsMap[funcName]?.func;
-    if (func) {
-      let retVal = '';
-      if (funcName === 'resetHistory') {
-        resetHistory(to, messages, context);
-        messages.push(
-          {
-            role: 'system',
-            content: azureOpenAISystemRole,
-          },
-          {
-            // toolCallId: toolCall.id,
-            // name: toolCall.function.name,
-            role: 'assistant',
-            content: reqMessage?.content,
-            toolCalls: toolCalls,
-          } as ChatRequestAssistantMessage,
-        );
-      } else {
+    context.debug(
+      `in processOpenAIToolCalls() - Processing id = ${toolCall.id}; func = ${toolCall.function.name}; args = ${toolCall.function.arguments} `,
+    );
+
+    let retVal = '';
+    if (funcName === 'resetHistory') {
+      resetHistory(to, messages, context);
+      calledResetHistory = true;
+      retVal = "I've reset our chat history";
+      messages.push(
+        {
+          role: 'system',
+          content: azureOpenAISystemRole,
+        },
+        {
+          // toolCallId: toolCall.id,
+          // name: toolCall.function.name,
+          role: 'assistant',
+          content: reqMessage?.content,
+          toolCalls: toolCalls,
+        } as ChatRequestAssistantMessage,
+      );
+    } else if (funcName === 'functions') {
+      let EVAL_ASYNC;
+      eval("EVAL_ASYNC = (async () => {" + toolCall.function.arguments + "})()");
+      retVal = await EVAL_ASYNC;
+
+    } else {
+      const func = toolsMap[funcName]?.func;
+      if (func) {
         retVal = await (func as FunctionTypes)(
           JSON.parse(toolCall.function.arguments),
           context,
         );
       }
-      messages.push({
-        content: retVal,
-        role: 'tool',
-        toolCallId: toolCall.id,
-      });
     }
+    context.debug(
+      `in processOpenAIToolCalls() - Processing id = ${toolCall.id}; retVal = ${retVal} `,
+    );
+
+    messages.push({
+      content: retVal,
+      role: 'tool',
+      toolCallId: toolCall.id,
+    });
   }
   context.log(
     `in processOpenAIToolCalls() - before calling getChatCompletions() `,
   );
 
+  if (!calledResetHistory) {
+    for (let index = 0; index < 5; index++) {
+      try {
+        const events = await openAIclient.getChatCompletions(
+          azureSearchDeploymentId,
+          messages,
+          openAISettings,
+        );
+
+        context.log(
+          `in processOpenAIToolCalls() - got event ${JSON.stringify(events)}`,
+        );
+        for (const choice of events.choices) {
+          context.log(
+            `in processOpenAIToolCalls() - delta content = ${choice?.delta?.content}`,
+          );
+          context.log(
+            `in processOpenAIToolCalls() - message content = ${choice?.message?.content}`,
+          );
+          messagesHistory.push({
+            name: undefined,
+            content: choice?.message?.content,
+            role: choice?.message?.role as RoleType,
+          });
+        }
+        break;
+      } catch (e) {
+        context.error(e);
+        if (e.code === 'context_length_exceeded') {
+          messages = removeEarlierMessages(messages);
+          continue;
+        }
+        throw e;
+      }
+    }
+  }
+};
+
+// import * as fs from 'node:fs';
+import {
+  Assistant,
+  AssistantCreateParams,
+  AssistantListParams,
+} from 'openai/resources/beta/assistants/assistants';
+import {
+  Thread,
+  ThreadCreateParams,
+} from 'openai/resources/beta/threads/threads';
+import { Messages } from 'openai/resources/beta/threads/messages/messages';
+import { sleep } from 'openai/core';
+
+const openai = new OpenAI();
+
+let assistant: Assistant = undefined;
+export const stringToArrayBuffer = (str: string): ArrayBuffer => {
+  const encoder = new TextEncoder();
+  return encoder.encode(str).buffer;
+};
+
+export const getOrCreateAssistant = async (): Promise<Assistant> => {
+  if (!assistant) {
+    const openAIDirectSettings: AssistantCreateParams = {
+      model: 'gpt-3.5-turbo-0125',
+      instructions: azureOpenAISystemRole,
+      tools: [{ type: 'retrieval' }],
+      name: 'PVHOME',
+      description: 'Estate Agent Assistant',
+    };
+
+    const listParams: AssistantListParams = {
+      limit: 100,
+      order: 'desc',
+    };
+
+    do {
+      const res = await openai.beta.assistants.list(listParams);
+
+      const items = res.getPaginatedItems();
+      for (const item of items) {
+        if (
+          item.description === openAIDirectSettings.description &&
+          item.instructions === openAIDirectSettings.instructions &&
+          item.model === openAIDirectSettings.model &&
+          item.name === openAIDirectSettings.name
+        ) {
+          assistant = item;
+          break;
+        }
+        listParams.before = item.id;
+      }
+      if (!assistant && !res.hasNextPage()) {
+        const samplPropertiesStr = JSON.stringify(sampleProperties);
+
+        const filePromise = openai.files.create({
+          file: await toFile(
+            stringToArrayBuffer(samplPropertiesStr),
+            'properties.json',
+          ),
+          purpose: 'assistants',
+        });
+        assistant = await openai.beta.assistants.create({
+          ...openAIDirectSettings,
+          file_ids: [(await filePromise).id],
+        });
+      }
+    } while (!assistant);
+  }
+  return assistant;
+};
+
+let threadIdsMap: Record<string, string> = undefined;
+
+export const upsertThreadIdsMap = async (
+  context: InvocationContext,
+  threadIds?: Record<string, string>,
+  override: boolean = false,
+): Promise<Record<string, string>> => {
+  const blockBlobClient = containerClient.getBlockBlobClient('thread_ids.json');
   try {
-    const events = await openAIclient.getChatCompletions(
-      azureSearchDeploymentId,
-      messages,
-      openAISettings,
+    if (blockBlobClient.exists()) {
+      context.debug(`in upsertThreadIdsMap() - blob client exists`);
+      const download = await blockBlobClient.downloadToBuffer();
+      const currThreadIds: Record<string, string> = JSON.parse(
+        download.toString(),
+      );
+      context.debug(
+        `in upsertThreadIdsMap() - blob client exists - found ${JSON.stringify(
+          currThreadIds,
+        )}`,
+      );
+
+      if (!threadIds) {
+        threadIds = currThreadIds;
+        return threadIds;
+      } else {
+        const consolidatedThreadIds = override
+          ? threadIds
+          : { ...currThreadIds, ...threadIds };
+
+        context.debug(
+          `in upsertThreadIdsMap() - blob client exists - consolidatedThreadIds = ${JSON.stringify(
+            consolidatedThreadIds,
+          )}`,
+        );
+
+        const uploadPayload = JSON.stringify(consolidatedThreadIds);
+        await blockBlobClient.upload(
+          uploadPayload,
+          Buffer.byteLength(uploadPayload),
+        );
+        return consolidatedThreadIds;
+      }
+    } else {
+      context.debug(`in upsertThreadIdsMap() - blob client does not exist`);
+
+      const threadIdsRet = threadIds || {};
+      const uploadPayload = JSON.stringify(threadIdsRet);
+      context.debug(
+        `in upsertThreadIdsMap() - blob client does not exist - uploading ${uploadPayload}`,
+      );
+
+      await blockBlobClient.upload(
+        uploadPayload,
+        Buffer.byteLength(uploadPayload),
+      );
+      return threadIdsRet;
+    }
+  } catch (error) {
+    context.debug(
+      `in upsertThreadIdsMap() - got an error  ${JSON.stringify(error)}`,
     );
 
-    context.log(
-      `in processOpenAIToolCalls() - got event ${JSON.stringify(events)}`,
+    const threadIdsRet = threadIds || {};
+    const uploadPayload = JSON.stringify(threadIdsRet);
+    await blockBlobClient.upload(
+      uploadPayload,
+      Buffer.byteLength(uploadPayload),
     );
-    for (const choice of events.choices) {
-      context.log(
-        `in processOpenAIToolCalls() - delta content = ${choice?.delta?.content}`,
-      );
-      context.log(
-        `in processOpenAIToolCalls() - message content = ${choice?.message?.content}`,
-      );
-      messagesHistory.push({
-        name: undefined,
-        content: choice?.message?.content,
-        role: choice?.message?.role as RoleType,
-      });
-    }
-  } catch (e) {
-    context.error(e);
-    throw e;
+    return threadIdsRet;
   }
+};
+
+export const getOrCreateThread = async (
+  to: string,
+  messagesHistory: ChatRequestMessage[] | ChatCompletionMessageParam[],
+  context: InvocationContext,
+): Promise<Thread> => {
+  if (!threadIdsMap) {
+    threadIdsMap = await upsertThreadIdsMap(context);
+  }
+
+  context.debug(
+    `in getOrCreateThread() - threadIdsMap = ${JSON.stringify(threadIdsMap)}`,
+  );
+
+  let threadId = threadIdsMap && threadIdsMap[to];
+
+  context.debug(`in getOrCreateThread() - threadId = ${threadId}`);
+
+  if (threadId) {
+    const retVal = await openai.beta.threads.retrieve(threadId);
+    context.debug(
+      `in getOrCreateThread() - retrieved threadId = ${retVal.id}; created at ${retVal.created_at}`,
+    );
+
+    if (retVal) {
+      return retVal;
+    }
+  }
+
+  const messages = (messagesHistory as ChatCompletionMessageParam[])
+    .filter((msg) => msg.role === 'user')
+    .map(
+      (val) =>
+        ({
+          role: 'user',
+          content: val.content,
+        } as ThreadCreateParams.Message),
+    );
+  const thread = await openai.beta.threads.create({
+    messages,
+  });
+  context.debug(
+    `in getOrCreateThread() - created threadId ${
+      thread.id
+    }; messages = ${JSON.stringify(messages)}`,
+  );
+  threadIdsMap[to] = thread.id;
+  threadIdsMap = await upsertThreadIdsMap(context, threadIdsMap);
+
+  return thread;
+};
+
+export const getOpenAIReplyDirect = async (
+  to: string,
+  text: string,
+  messagesHistory: ChatRequestMessage[] | ChatCompletionMessageParam[],
+  context: InvocationContext,
+): Promise<ChatRequestMessage[] | ChatCompletionMessageParam[]> => {
+  const messages = messagesHistory;
+
+  await getOrCreateAssistant();
+
+  context.debug(`in getOpenAIReplyDirect() - assistantId is ${assistant.id} `);
+
+  const thrd = await getOrCreateThread(to, messagesHistory, context);
+  context.debug(
+    `in getOpenAIReplyDirect() - threadId is ${
+      thrd.id
+    }; threadIdMap = ${JSON.stringify(threadIdsMap)} `,
+  );
+
+  const message = await openai.beta.threads.messages.create(thrd.id, {
+    role: 'user',
+    content: text,
+  });
+
+  context.debug(
+    `in getOpenAIReplyDirect() - threadId is ${thrd.id}; message.created_at = ${message.created_at} `,
+  );
+
+  messagesHistory.push({
+    name: to,
+    content: text,
+    role: 'user',
+  });
+
+  let run = await openai.beta.threads.runs.create(thrd.id, {
+    assistant_id: assistant.id,
+  });
+
+  context.debug(
+    `in getOpenAIReplyDirect() - threadId is ${thrd.id}; run.id = ${run.id}; run.status = ${run.status} `,
+  );
+
+  let ready = false;
+
+  do {
+    run = await openai.beta.threads.runs.retrieve(thrd.id, run.id);
+    ready = run.status !== 'queued' && run.status !== 'in_progress';
+    context.debug(
+      `in getOpenAIReplyDirect() - in wait loop; threadId is ${thrd.id}; run.id = ${run.id}; run.status = ${run.status} `,
+    );
+    await sleep(1000);
+  } while (!ready);
+  context.debug(
+    `in getOpenAIReplyDirect() - after wait loop; threadId is ${thrd.id}; run.id = ${run.id}; run.status = ${run.status} `,
+  );
+  const retVal = [];
+  if (run.status === 'completed') {
+    const messages = await openai.beta.threads.messages.list(thrd.id, {
+      order: 'desc',
+      limit: 1,
+    });
+
+    for (const msgs of messages.data) {
+      for (const msg of msgs.content) {
+        if (msg.type === 'text') {
+          messagesHistory.push({
+            name: to,
+            content: msg.text.value,
+            role: 'assistant',
+          });
+          retVal.push({
+            name: to,
+            content: msg.text.value,
+            role: 'assistant',
+          });
+        }
+      }
+    }
+  }
+
+  return retVal;
 };
 
 export const getOpenAIReply = async (
@@ -742,31 +990,60 @@ export const sendReply = async (
     // const headers = new Headers();
     // headers.append('Content-Type', 'application/json');
     // headers.append('Authorization', `Bearer ${whatsapp_token}`);
-    let json = {
-      messaging_product: 'whatsapp',
-      type: 'text',
-      to: to,
-      text: {
-        body:
-          replyMessage.length > 0
-            ? replyMessage[replyMessage.length - 1].content
-            : `Sorry, no habla `,
-      },
-    };
-    const ret = fetch(
-      `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
-
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${whatsapp_token}`,
+    if (replyMessage.length == messageHistory.length) {
+      let json = {
+        messaging_product: 'whatsapp',
+        type: 'text',
+        to: to,
+        text: {
+          body:
+            replyMessage.length > 0
+              ? replyMessage[replyMessage.length - 1].content
+              : `Sorry, no data`,
         },
-        body: JSON.stringify(json),
-      },
-    );
+      };
+      const ret = fetch(
+        `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
 
-    return ret;
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${whatsapp_token}`,
+          },
+          body: JSON.stringify(json),
+        },
+      );
+      return ret;
+    } else {
+      let lastRet = undefined;
+      for (const msg of replyMessage) {
+        let json = {
+          messaging_product: 'whatsapp',
+          type: 'text',
+          to: to,
+          text: {
+            body: replyMessage.length > 0 ? msg.content : `Sorry, no data`,
+          },
+        };
+        const ret = fetch(
+          `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
+
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${whatsapp_token}`,
+            },
+            body: JSON.stringify(json),
+          },
+        );
+
+        lastRet = ret;
+      }
+
+      return lastRet;
+    }
   } catch (e) {
     context.error(e);
     throw e;
