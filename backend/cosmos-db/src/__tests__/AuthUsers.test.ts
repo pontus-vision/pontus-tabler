@@ -394,9 +394,10 @@ describe('dashboardCreatePOST', () => {
       readUserGroupsBody,
     )) as AxiosResponse<AuthUserGroupsReadRes>;
 
-    expect(authUserGroupReadRes.data.authGroups[0]).toMatchObject(
-      authGroupCreateRes.data,
-    );
+    expect(authUserGroupReadRes.data.authGroups[0]).toMatchObject({
+      name: authGroupCreateRes.data.name,
+      id: authGroupCreateRes.data.id,
+    });
   });
   it('should read INCORRECTLY authgroup subdocuments', async () => {
     const createGroupBody: AuthGroupCreateReq = {

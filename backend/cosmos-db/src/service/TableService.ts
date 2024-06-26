@@ -9,7 +9,11 @@ import {
   TablesReadRes,
 } from '../typescript/api';
 import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
-import { PartitionKeyDefinition, UniqueKeyPolicy } from '@azure/cosmos';
+import {
+  Container,
+  PartitionKeyDefinition,
+  UniqueKeyPolicy,
+} from '@azure/cosmos';
 import { NotFoundError } from '../generated/api';
 
 export const TABLES = 'tables';
@@ -22,16 +26,16 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
   uniqueKeys: [{ paths: ['/name'] }],
 };
 
+export const initiateTableContainer = async (): Promise<Container> => {
+  return await fetchContainer(TABLES, partitionKey, uniqueKeyPolicy);
+};
+
 export const createTable = async (
   data: TableCreateReq,
 ): Promise<TableCreateRes> => {
-  const tableContainer = await fetchContainer(
-    TABLES,
-    partitionKey,
-    uniqueKeyPolicy,
-  );
+  const tableContainer = await initiateTableContainer();
 
-  const res = await tableContainer.items.create({...data, authGroups: []});
+  const res = await tableContainer.items.create(data);
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
@@ -42,13 +46,8 @@ export const createTable = async (
 
 export const updateTable = async (data: TableUpdateReq) => {
   try {
-    const tableContainer = await fetchContainer(
-      TABLES,
-      partitionKey,
-      uniqueKeyPolicy,
-    );
+    const tableContainer = await initiateTableContainer();
 
-    
     const res = await tableContainer.items.upsert(data);
     const { _rid, _self, _etag, _attachments, _ts, ...rest } =
       res.resource as any;
@@ -62,7 +61,6 @@ export const updateTable = async (data: TableUpdateReq) => {
 export const readTableById = async (
   data: TableReadReq,
 ): Promise<TableReadRes> => {
-  
   const querySpec = {
     query: 'select * from tables p where p.id=@tableId',
     parameters: [
@@ -72,14 +70,10 @@ export const readTableById = async (
       },
     ],
   };
-  const tableContainer = await fetchContainer(
-    TABLES,
-    partitionKey,
-    uniqueKeyPolicy,
-  );
+  const tableContainer = await initiateTableContainer();
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-  
+
   if (resources.length === 1) {
     return resources[0];
   } else if (resources.length === 0) {
@@ -98,11 +92,7 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
     ],
   };
 
-  const tableContainer = await fetchContainer(
-    TABLES,
-    partitionKey,
-    uniqueKeyPolicy,
-  );
+  const tableContainer = await initiateTableContainer();
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
 
@@ -115,11 +105,7 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
 
 export const deleteTable = async (data: TableDeleteReq) => {
   try {
-    const tableContainer = await fetchContainer(
-      TABLES,
-      partitionKey,
-      uniqueKeyPolicy,
-    );
+    const tableContainer = await initiateTableContainer();
     const res = await tableContainer.item(data.id, data.name).delete();
 
     const res2 = (await fetchContainer(data.name)).read();

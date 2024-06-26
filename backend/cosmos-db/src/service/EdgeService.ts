@@ -14,6 +14,7 @@ import {
   TableDataEdgeDeleteReq,
   TableDataEdgeCreateRef,
   EdgeDirectionEnum,
+  ReadPaginationFilter,
 } from '../typescript/api';
 import { fetchContainer, filterToQuery } from '../cosmos-utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
@@ -24,6 +25,10 @@ import {
 } from '../generated/api';
 import { AUTH_GROUPS } from './AuthUserService';
 import { initiateAuthGroupContainer } from './AuthGroupService';
+
+export const GROUPS_DASHBOARDS = 'groups-dashboards';
+export const GROUPS_USERS = 'groups-users';
+export const GROUPS_TABLES = 'groups-tables';
 
 const TABLES = 'tables';
 const ensureNestedPathExists = (obj, path) => {
@@ -142,18 +147,36 @@ export const createConnection = async (
           ? row[table1.partitionKeyProp]
           : undefined;
         try {
-          const res = await container.item(row.id, partitionKey || row.id).patch([
-            {
-              op: 'add',
-              path: `/${path}/-`,
-              value: rowId2,
-            },
-          ]);
-          arrRes.push({ from: row, to: {...rowId2, docName: res.resource.name}});
+          const res = await container
+            .item(row.id, partitionKey || row.id)
+            .patch([
+              {
+                op: 'add',
+                path: `/${path}/-`,
+                value: rowId2,
+              },
+            ]);
+          arrRes.push({ from: row, to: rowId2, docName: res.resource.name });
         } catch (error) {
+          if (error?.code === 404) {
+            throw new NotFoundError(
+              `Could not find record at id: "${row.id}" ${
+                table1?.partitionKeyProp
+                  ? `and ${table1?.partitionKeyProp}: '${partitionKey}'`
+                  : ''
+              }`,
+            );
+          }
           const { resource: existingDocument } = await container
             .item(row.id, partitionKey || row.id)
             .read();
+
+          const res2 = await container.items
+            .query({
+              query: 'Select * from c',
+              parameters: [],
+            })
+            .fetchAll();
 
           ensureNestedPathExists(existingDocument, path);
 
@@ -168,7 +191,7 @@ export const createConnection = async (
           const res = await container
             .item(row.id, partitionKey || row.id)
             .replace(obj);
-          arrRes.push({ from: row, to: {...rowId2, docName: res.resource.name}});
+          arrRes.push({ from: row, to: rowId2, docName: res.resource.name });
         }
       }
     }
@@ -186,7 +209,7 @@ export const updateTableDataEdge = async (
     {
       containerName: data.tableFrom.tableName,
       values: data.tableFrom.rows.map((row) => {
-        return { id: row.id, ...row };
+        return { id: row.id as string, ...row };
       }),
       partitionKeyProp: data.tableFrom.partitionKeyProp,
     },
@@ -202,7 +225,7 @@ export const updateTableDataEdge = async (
     {
       containerName: data.tableTo.tableName,
       values: data.tableTo.rows.map((row) => {
-        return { id: row.id, ...row };
+        return { id: row.id as string, ...row };
       }),
       partitionKeyProp: data.tableTo.partitionKeyProp,
     },
@@ -272,9 +295,26 @@ export const updateConnection = async (
           .item(value.id, partitionKey || value.id)
           .read();
 
-        const index2 = res.resource.edges[snakeToCamel(table2.tableName)][
+        if (res.statusCode === 404) {
+          throw new NotFoundError(
+            `id "${value2.id} not found at ${table2.tableName} at id ${value.id}"`,
+          );
+        }
+
+        if (!res.resource?.edges) {
+          throw new BadRequestError(
+              `No edges found in record at id: "${value.id}" ${
+                table1?.partitionKeyProp
+                  ? `and ${table1?.partitionKeyProp}: '${partitionKey}'`
+                  : ''
+              }`,
+          );
+        }
+
+        const index2 = res.resource?.edges[snakeToCamel(table2.tableName)][
           edgeLabel
         ][direction].findIndex((el) => el.id === value2.id);
+
         try {
           const res = await container
             .item(value.id, partitionKey || value.id)
@@ -326,7 +366,6 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
     const res = await container
       .item(data.rowId, data?.rowPartitionKey || data.rowId)
       .read();
-    const resource = res.resource;
     if (res.statusCode === 404) {
       throw new NotFoundError(
         `did not found document at id ${data.rowId} ${
@@ -337,6 +376,7 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
       );
     }
 
+    const resource = res.resource;
     const { direction, edgeLabel, rows, tableName: edgeTableName } = data.edge;
 
     for (const row of rows) {
@@ -370,8 +410,8 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
         rows: [{ id: data.rowId }],
         tableName: data.tableName,
       },
-      rowId: row.id,
-      rowPartitionKey: row[data.edge.partitionKeyProp],
+      rowId: row.id as string,
+      rowPartitionKey: row[data.edge.partitionKeyProp]  as string,
     });
   }
 
@@ -386,6 +426,33 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
     rowId: data.rowId,
     rowPartitionKey: data.rowPartitionKey,
   });
+};
+
+export const readEdge = async (data: {
+  containerId: string;
+  edgeContainer: string;
+  direction: EdgeDirectionEnum;
+  edgeLabel: string;
+  filters: ReadPaginationFilter;
+  rowId: string;
+}) => {
+  const str = filterToQuery(data.filters, 'p', `c.id = "${data.rowId}"`);
+  const query = `SELECT  p FROM c JOIN p IN c["edges"]["${snakeToCamel(
+    data.edgeContainer,
+  )}"]["${data.edgeLabel}"]["${data.direction}"] ${str}`;
+  const querySpec = {
+    query,
+    parameters: [],
+  };
+  const container = await fetchContainer(data.containerId);
+
+  const { resources: res2 } = await container.items
+    .query({ query: 'select * from C', parameters: [] })
+    .fetchAll();
+
+  const { resources } = await container.items.query(querySpec).fetchAll();
+
+  return resources.map((el) => el.p);
 };
 
 export const readTableDataEdge = async (
@@ -424,6 +491,10 @@ export const readTableDataEdge = async (
   } else {
     tableContainer = await fetchContainer(data.tableName);
   }
+
+  const { resources: res5 } = await tableContainer.items
+    .query({ query: 'Select * from c', parameters: [] })
+    .fetchAll();
 
   const { resources } = await tableContainer.items.query(querySpec).fetchAll();
   const resource = resources[0];
