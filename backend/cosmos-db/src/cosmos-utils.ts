@@ -95,6 +95,7 @@ export const fetchContainer = async (
 
   return container;
 };
+
 export const deleteDatabase = async (
   databaseId: string,
 ): Promise<DatabaseResponse | undefined> => {
