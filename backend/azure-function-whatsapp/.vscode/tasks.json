@@ -19,7 +19,10 @@
     {
       "type": "shell",
       "label": "npm install (functions)",
-      "command": "npm install"
+      "command": "npm install",
+      "problemMatcher": [
+        "$node-sass"
+      ]
     },
     {
       "type": "shell",
