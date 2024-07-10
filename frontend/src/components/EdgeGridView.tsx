@@ -6,9 +6,13 @@ import {
   TableReadRes,
   Edge,
   ReadPaginationFilterFilters,
+  TableDataReadReq,
+  TableDataReadRes,
 } from '../typescript/api';
 import { IGetRowsParams, IRowNode, RowEvent } from 'ag-grid-community';
 import { tableDataRead } from '../client';
+import useApiAndNavigate from '../hooks/useApi';
+import { AxiosResponse } from 'axios';
 
 export interface ListWithDropdownItem extends TableRef {
   id: string;
@@ -42,30 +46,30 @@ const EdgeGridView = ({
   const [to, setTo] = useState<number>(8);
   const [selectedRows, setSelectedRows] = useState<IRowNode<any>[]>();
 
+  const { fetchDataAndNavigate } = useApiAndNavigate();
+
   const fetchTableRows = async () => {
     if (!dropdownValue?.name || !from || !to || !filters) return;
 
-    const res = await tableDataRead({
+    const req: TableDataReadReq = {
       tableName: dropdownValue?.name,
       from,
       to,
       filters,
-    });
+    };
 
-    console.log({
-      res,
-      tableName: dropdownValue?.name,
-      from,
-      to,
-      filters,
-    });
+    const res = (await fetchDataAndNavigate(
+      tableDataRead,
+      req,
+    )) as AxiosResponse<TableDataReadRes>;
+    console.log({ res });
 
     if (res?.status !== 200) {
       setList([]);
     } else {
-      const rows = res?.data.rows;
+      const rows = res?.data.rows as Record<string, any>[];
 
-      const edges = rows?.map((row) => {
+      const edges = rows?.map((row: any) => {
         const arr: string[] = [];
         for (const prop in row.edges) {
           for (const prop2 in row.edges[prop]) {
@@ -86,6 +90,7 @@ const EdgeGridView = ({
   };
   useEffect(() => {
     fetchTableRows();
+    console.log('FETCHING EDGES');
   }, [filters, from, to]);
 
   useEffect(() => {
