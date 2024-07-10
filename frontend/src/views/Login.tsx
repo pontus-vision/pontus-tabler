@@ -32,8 +32,11 @@ const LoginPage = () => {
   const loginUser = async (e) => {
     e.preventDefault();
 
-    handleLogin(username, password);
-    navigate('/auth/users');
+    const res = await handleLogin(username, password);
+
+    if (res.status === 200) {
+      navigate('/auth/users');
+    }
   };
 
   return (
