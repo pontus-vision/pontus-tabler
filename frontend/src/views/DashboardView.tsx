@@ -63,7 +63,7 @@ const DashboardView = ({
   const [initialState, setInitialState] = useState<IJsonModel>();
   const { id } = useParams();
 
-  const { userRole } = useAuth();
+  const { userGroups: userRole } = useAuth();
 
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
