@@ -34,6 +34,8 @@ import {
   NameAndIdRef,
   RegisterAdminReq,
   RegisterAdminRes,
+  RegisterUserRes,
+  RegisterUserReq,
   TokenReq,
   TokenRes,
 } from '../typescript/api';
@@ -88,7 +90,6 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
   uniqueKeys: [{ paths: ['/username'] }],
 };
 
-
 export const authUserContainerProps = {
   AUTH_USERS,
   partitionKey,
@@ -96,7 +97,6 @@ export const authUserContainerProps = {
 };
 
 export const initiateAuthUserContainer = async (): Promise<Container> => {
-
   const authUserContainer = await fetchContainer(
     AUTH_USERS,
     partitionKey,
@@ -130,14 +130,31 @@ export const setup = async (): Promise<InitiateRes> => {
   return '/login';
 };
 
+export const registerUser = async (
+  data: RegisterUserReq,
+): Promise<RegisterUserRes> => {
+  if (data.password !== data.passwordConfirmation) {
+    throw new BadRequestError('Password fields does not match.');
+  }
+
+  const res = await authUserCreate({
+    username: data.username,
+    password: data.password,
+    passwordConfirmation: data.passwordConfirmation,
+  });
+
+  return {
+    id: res.id,
+    username: res.username,
+  };
+};
+
 export const registerAdmin = async (
   data: RegisterAdminReq,
 ): Promise<RegisterAdminRes> => {
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }
-
-  const authUserContainer = await initiateAuthUserContainer();
 
   const res = await authUserCreate({
     username: data.username,
@@ -182,6 +199,7 @@ export const authUserCreate = async (
       authGroups: [],
       refreshTokens: [],
     });
+
     const { id, username } = res.resource;
 
     return {
@@ -612,6 +630,7 @@ function generateAccessToken(user) {
     expiresIn: '1h',
   });
 }
+
 function base64UrlDecode(str) {
   // Replace '-' with '+' and '_' with '/'
   str = str.replace(/-/g, '+').replace(/_/g, '/');
