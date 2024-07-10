@@ -82,7 +82,7 @@ button:focus-visible {
 }
 
 #root {
-  height: fit-content;
+  height: 100%;
   padding-bottom: 2rem;
 
   background-color: #f5f7fb;
