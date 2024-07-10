@@ -1,0 +1,2269 @@
+openapi: 3.0.1
+info:
+  title: Simple Inventory API
+  version: ''
+paths:
+  /PVPMARTINS_1/PontusBackend2/1.0.0/menu/create:
+    post:
+      operationId: pontus_menuCreatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Menu item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuCreateRes'
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      security: &ref_0
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuCreateReq'
+  /PVPMARTINS_1/PontusBackend2/1.0.0/menu/read:
+    post:
+      operationId: pontus_menuReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Menu item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuReadRes'
+              examples:
+                Example1:
+                  value: {}
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  example: /folder1/file1
+              required:
+                - path
+            examples:
+              Example1:
+                value:
+                  path: /folder1/file1
+  /PVPMARTINS_1/PontusBackend2/1.0.0/menu/update:
+    post:
+      operationId: pontus_menuUpdatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Menu item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuUpdateRes'
+              examples:
+                Example1:
+                  value: {}
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuUpdateReq'
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/menu/delete:
+    post:
+      operationId: pontus_menuDeletePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  example: string
+                id:
+                  type: string
+                  example: string
+              required:
+                - path
+                - id
+            examples:
+              Example1:
+                value:
+                  path: string
+                  id: string
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/create:
+    post:
+      description: Create a new table with properties and associated columns
+      operationId: pontus_tableCreatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Table created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableCreateRes'
+              examples:
+                Example1:
+                  value:
+                    id: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new table
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: |
+                    Name of the table
+                  example: Person Natural
+                label:
+                  type: string
+                  example: string
+                cols:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TableColumnRef'
+                  description: >-
+                    Table columns to be associated with the table during
+                    creation
+              required:
+                - name
+                - label
+                - cols
+            examples:
+              Example1:
+                value:
+                  name: Person Natural
+                  label: string
+                  cols:
+                    - id: Person_Natural_Full_Name
+                      name: Full Name
+                      field: Person_Natural_Full_Name
+                      sortable: true
+                      headerName: Full Name
+                      filter: true
+                      kind: checkboxes
+                    - id: Person_Natural_Customer_ID
+                      name: Customer ID
+                      field: Person_Natural_Customer_ID
+                      sortable: true
+                      headerName: Customer ID
+                      filter: true
+                      kind: checkboxes
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/read:
+    post:
+      description: Get table by id
+      operationId: pontus_tableReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableReadRes'
+              examples:
+                Example1:
+                  value:
+                    id: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get table by id
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableReadReq'
+            examples:
+              Example1:
+                value:
+                  id: mapeamentoDeProcessos
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/update:
+    post:
+      description: Update table properties and associated columns by ID
+      operationId: pontus_tableUpdatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Table updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableUpdateRes'
+              examples:
+                Example1:
+                  value:
+                    name: Person_Natural
+                    label: Person Natural
+                    cols:
+                      - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                        name: full-name
+                        field: full-name-2
+                        sortable: true
+                        headerName: Full Name
+                        filter: true
+                        kind: checkboxes
+                      - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                        name: full-name-2
+                        field: full-name-2
+                        sortable: true
+                        headerName: Full Name 2
+                        filter: true
+                        kind: text
+                    id: id
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Update table by ID
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              allOf:
+                - $ref: '#/components/schemas/BaseModelRef'
+                - $ref: '#/components/schemas/TableRef'
+            examples:
+              Example1:
+                value:
+                  name: person-natural
+                  label: Person Natural
+                  cols:
+                    - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                      name: full-name
+                      field: full-name
+                      sortable: true
+                      headerName: Full Name
+                      filter: true
+                      kind: checkboxes
+                    - id: ds67a8gasiyudhsay78dgasiuhdsa897h
+                      name: full-name
+                      field: full-name
+                      sortable: true
+                      headerName: Full Name
+                      filter: true
+                      kind: checkboxes
+                  id: id
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/delete:
+    post:
+      description: Delete a table by ID
+      operationId: pontus_tableDeletePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Delete a table
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: string
+                id:
+                  type: string
+                  example: string
+              required:
+                - name
+                - id
+            examples:
+              Example1:
+                value:
+                  name: string
+                  id: string
+  /PVPMARTINS_1/PontusBackend2/1.0.0/tables/read:
+    post:
+      description: Retrieve all tables with pagination and search
+      operationId: pontus_tablesReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TablesReadRes'
+              examples:
+                Example1:
+                  value:
+                    totalTables: 0
+                    tables:
+                      - name: name
+                        cols:
+                          - id: id
+                            name: name
+                            field: field
+                            sortable: true
+                            headerName: headerName
+                            filter: true
+                            kind: checkboxes
+                          - id: id
+                            name: name
+                            field: field
+                            sortable: true
+                            headerName: headerName
+                            filter: true
+                            kind: checkboxes
+                        id: tableId
+                      - name: name
+                        cols:
+                          - id: id
+                            name: name
+                            field: field
+                            sortable: true
+                            headerName: headerName
+                            filter: true
+                            kind: checkboxes
+                          - id: id
+                            name: name
+                            field: field
+                            sortable: true
+                            headerName: headerName
+                            filter: true
+                            kind: checkboxes
+                        id: tableId
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get all tables
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadPaginationFilter'
+            examples:
+              Example1:
+                value:
+                  from: 1
+                  to: 2
+                  filters:
+                    name:
+                      filter: person_Natural
+                      type: contains
+                      condition1: {}
+                      condition2: {}
+                      filterType: text
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/data/create:
+    post:
+      description: Create a new row data, by using key/value pair for each column.
+      operationId: pontus_tableDataCreatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Table row created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDataCreateRes'
+              examples:
+                Example1:
+                  value:
+                    string: {}
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new row
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tableName:
+                  type: string
+                  example: string
+                cols:
+                  $ref: '#/components/schemas/TableDataRowRef'
+                  nullable: true
+              required:
+                - tableName
+            examples:
+              Example1:
+                value:
+                  tableName: string
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/data/read:
+    post:
+      description: ''
+      operationId: pontus_tableDataReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: AG Record data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDataReadRes'
+              examples:
+                Example1:
+                  value:
+                    rowsCount: 1
+                    rows:
+                      - Person_Natural_Name: John Doe
+                        Person_Natural_Email: foo@bar.com
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tableName:
+                  type: string
+                  example: Person_Natural
+              required:
+                - tableName
+              allOf:
+                - $ref: '#/components/schemas/ReadPaginationFilter'
+            examples:
+              Example1:
+                value:
+                  from: 0
+                  to: 100
+                  filters:
+                    '0':
+                      condition1:
+                        filter: JO
+                        filterType: text
+                        type: contains
+                      condition2:
+                        filter: SE
+                        filterType: text
+                        type: contains
+                      filterType: text
+                      operator: AND
+                  tableName: Person_Natural
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/data/update:
+    post:
+      description: Update a row data, by using key/value pair for each column.
+      operationId: pontus_tableDataUpdatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Table row updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableDataUpdateRes'
+              examples:
+                Example1:
+                  value:
+                    string: {}
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Update a row
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tableName:
+                  type: string
+                  example: string
+                rowId:
+                  type: string
+                  example: string
+                cols:
+                  $ref: '#/components/schemas/TableDataRowRef'
+                  nullable: true
+              required:
+                - tableName
+                - rowId
+            examples:
+              Example1:
+                value:
+                  tableName: string
+                  rowId: string
+                  cols:
+                    mapeamentoDeProcessoCol1: Value Overwritten
+                    mapeamentoDeProcessoCol2: Value Overwritten
+  /PVPMARTINS_1/PontusBackend2/1.0.0/table/data/delete:
+    post:
+      description: Update a row data, by using key/value pair for each column.
+      operationId: pontus_tableDataDeletePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Update a row
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rowId:
+                  type: string
+                  example: string
+                tableName:
+                  type: string
+                  example: string
+              required:
+                - rowId
+                - tableName
+            examples:
+              Example1:
+                value:
+                  rowId: string
+                  tableName: string
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/create:
+    post:
+      description: Create a new dashboard with properties, auth group, folder, and owner
+      operationId: pontus_dashboardCreatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Dashboard created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardCreateRes'
+              examples:
+                Example1:
+                  value:
+                    id: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new dashboard
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardCreateReq'
+            examples:
+              Example1:
+                value:
+                  name: name
+                  folder: folder
+                  owner: owner
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/read:
+    post:
+      description: Retrieve dashboard by id
+      operationId: pontus_dashboardReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardReadRes'
+              examples:
+                Example1:
+                  value:
+                    id: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get dashboard by id
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardReadReq'
+            examples:
+              Example1:
+                value:
+                  id: string
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/update:
+    post:
+      description: Update dashboard properties, auth group, folder, and owner by ID
+      operationId: pontus_dashboardUpdatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Dashboard updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardUpdateRes'
+              examples:
+                Example1:
+                  value:
+                    id: string
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Update dashboard by ID
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+              allOf:
+                - $ref: '#/components/schemas/BaseModelRef'
+                - $ref: '#/components/schemas/DashboardRef'
+            examples:
+              Example1:
+                value:
+                  id: string
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/delete:
+    post:
+      description: Delete a dashboard by ID
+      operationId: pontus_dashboardDeletePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Delete a dashboard
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardDeleteReq'
+            examples:
+              Example1:
+                value:
+                  id: string
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/group/auth/create:
+    post:
+      description: Create a new dashboard state with name and state information
+      operationId: pontus_dashboardGroupAuthCreatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Dashboard state created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardAuthGroup'
+              examples:
+                Example1:
+                  value:
+                    dashboardId: dashboardId
+                    dashboardName: dashboardName
+                    authGroups:
+                      create:
+                        - create
+                        - create
+                      read:
+                        - read
+                        - read
+                      update:
+                        - update
+                        - update
+                      delete:
+                        - delete
+                        - delete
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new dashboard state
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dashboardId:
+                  type: string
+                  nullable: true
+                authGroups:
+                  $ref: '#/components/schemas/DashboardgroupauthcreateAuthGroups'
+                  nullable: true
+            examples:
+              Example1:
+                value:
+                  authGroups: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/group/auth/read:
+    post:
+      description: Create a new dashboard state with name and state information
+      operationId: pontus_dashboardGroupAuthReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Dashboard state created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardAuthGroup'
+              examples:
+                Example1:
+                  value:
+                    dashboardId: dashboardId
+                    dashboardName: dashboardName
+                    authGroups:
+                      create:
+                        - create
+                        - create
+                      read:
+                        - read
+                        - read
+                      update:
+                        - update
+                        - update
+                      delete:
+                        - delete
+                        - delete
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new dashboard state
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dashboardId:
+                  type: string
+                  nullable: true
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/group/auth/update:
+    post:
+      description: Create a new dashboard state with name and state information
+      operationId: pontus_dashboardGroupAuthUpdatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Dashboard state created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardAuthGroup'
+              examples:
+                Example1:
+                  value:
+                    dashboardId: dashboardId
+                    dashboardName: dashboardName
+                    authGroups:
+                      create:
+                        - create
+                        - create
+                      read:
+                        - read
+                        - read
+                      update:
+                        - update
+                        - update
+                      delete:
+                        - delete
+                        - delete
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new dashboard state
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dashboardId:
+                  type: string
+                  nullable: true
+                authGroups:
+                  $ref: '#/components/schemas/AuthGroups'
+                  nullable: true
+            examples:
+              Example1:
+                value:
+                  authGroups:
+                    create:
+                      - create
+                      - create
+                    read:
+                      - read
+                      - read
+                    update:
+                      - update
+                      - update
+                    delete:
+                      - delete
+                      - delete
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboard/group/auth/delete:
+    post:
+      description: Create a new dashboard state with name and state information
+      operationId: pontus_dashboardGroupAuthDeletePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Dashboard Auth Group(s) deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthDeleteBody'
+              examples:
+                Example1:
+                  value:
+                    dashboardId: dashboardId
+                    authGroups:
+                      create:
+                        - create
+                        - create
+                      read:
+                        - read
+                        - read
+                      update:
+                        - update
+                        - update
+                      delete:
+                        - delete
+                        - delete
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Delete group from dashboard
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthDeleteBody'
+            examples:
+              Example1:
+                value:
+                  dashboardId: dashboardId
+                  authGroups:
+                    create:
+                      - create
+                      - create
+                    read:
+                      - read
+                      - read
+                    update:
+                      - update
+                      - update
+                    delete:
+                      - delete
+                      - delete
+  /PVPMARTINS_1/PontusBackend2/1.0.0/dashboards/read:
+    post:
+      description: Retrieve all dashboards with pagination and search
+      operationId: pontus_dashboardsReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardsReadRes'
+              examples:
+                Example1:
+                  value: {}
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get all dashboards
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardsReadReq'
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/group/create:
+    post:
+      description: Create a new group with a name, parents, and symlinks
+      operationId: pontus_authGroupCreatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthGroupRef'
+              examples:
+                Example1:
+                  value:
+                    groupId: groupId
+                    name: name
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new group
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                  description: Name of the group
+                parents:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: Parent groups of the group (optional)
+                symlinks:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: Symlinks associated with the group (optional)
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/group/read:
+    post:
+      description: Retrieve group by id
+      operationId: pontus_authGroupReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthGroupRef'
+              examples:
+                Example1:
+                  value:
+                    groupId: groupId
+                    name: name
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get group by ID
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupId:
+                  type: string
+                  nullable: true
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/group/update:
+    post:
+      description: Update group details by ID
+      operationId: pontus_authGroupUpdatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Update group by ID
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupId:
+                  type: string
+                  nullable: true
+                  description: ID of the group to update
+                name:
+                  type: string
+                  nullable: true
+                  description: Updated name of the group
+                parents:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: Updated parent groups of the group (optional)
+                symlinks:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: Updated symlinks associated with the group (optional)
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/group/delete:
+    post:
+      description: Delete a group by ID
+      operationId: pontus_authGroupDeletePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Delete a group
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupId:
+                  type: string
+                  nullable: true
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/groups/read:
+    post:
+      description: >-
+        Retrieve all groups (nodes that Aggrid is using a new pagination filter
+        model
+      operationId: pontus_authGroupsReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InlineResponse2001'
+              examples:
+                Example1:
+                  value:
+                    totalGroups: 0
+                    authGroups:
+                      - groupId: groupId
+                        name: name
+                      - groupId: groupId
+                        name: name
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get all groups
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadPaginationFilter'
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/users/read:
+    post:
+      description: Retrieve all users
+      operationId: pontus_authUsersReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InlineResponse2002'
+              examples:
+                Example1:
+                  value:
+                    totalUsers: 0
+                    users:
+                      - userId: userId
+                        name: name
+                        authGroups:
+                          - authGroups
+                          - authGroups
+                      - userId: userId
+                        name: name
+                        authGroups:
+                          - authGroups
+                          - authGroups
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get all users
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadPaginationFilter'
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/user/create:
+    post:
+      description: Create a new user with a name and associated groups
+      operationId: pontus_authUserCreatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Example1:
+                  value:
+                    userId: userId
+                    name: name
+                    authGroups:
+                      - authGroups
+                      - authGroups
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Create a new user
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: true
+                  description: Name of the user
+                authGroups:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: IDs of the groups the user belongs to
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/user/update:
+    post:
+      description: Update user details by ID
+      operationId: pontus_authUserUpdatePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '400':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Update user by ID
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  nullable: true
+                  description: ID of the user to update
+                name:
+                  type: string
+                  nullable: true
+                  description: Updated name of the user
+                authGroups:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  description: Updated IDs of the groups the user belongs to
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/user/delete:
+    post:
+      description: Delete a user by ID
+      operationId: pontus_authUserDeletePOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Delete a user
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  nullable: true
+            examples:
+              Example1:
+                value: {}
+  /PVPMARTINS_1/PontusBackend2/1.0.0/auth/user/read:
+    post:
+      description: Retrieve user by ID
+      operationId: pontus_authUserReadPOST
+      tags:
+        - Pontus
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Example1:
+                  value:
+                    userId: userId
+                    name: name
+                    authGroups:
+                      - authGroups
+                      - authGroups
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema: {}
+      summary: Get user by ID
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  nullable: true
+            examples:
+              Example1:
+                value: {}
+components:
+  schemas:
+    MenuCreateReq:
+      title: MenuCreateReq
+      $ref: '#/components/schemas/MenuItemTreeRef'
+    MenuCreateRes:
+      title: MenuCreateRes
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        kind:
+          type: string
+          nullable: true
+        path:
+          type: string
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItemTreeRef'
+          nullable: true
+    MenuReadRes:
+      title: MenuReadRes
+      $ref: '#/components/schemas/MenuItemTreeRef'
+    MenuUpdateReq:
+      title: MenuUpdateReq
+      $ref: '#/components/schemas/MenuItemTreeRef'
+    MenuUpdateRes:
+      title: MenuUpdateRes
+      $ref: '#/components/schemas/MenuItemTreeRef'
+    MenuItemTreeRef:
+      title: MenuItemTreeRef
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        kind:
+          type: string
+          nullable: true
+        path:
+          type: string
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItemTreeRef'
+          nullable: true
+    AuthGroupRef:
+      title: AuthGroupRef
+      type: object
+      properties:
+        groupId:
+          type: string
+          nullable: true
+          description: Unique identifier of the group
+        name:
+          type: string
+          nullable: true
+          description: Name of the group
+    AgGridReadReq:
+      title: AgGridReadReq
+      type: object
+      properties:
+        search:
+          $ref: '#/components/schemas/AgGridInputSearch'
+          nullable: true
+        cols:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgGridInputSearchCols'
+          nullable: true
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgGridInputFilters'
+          nullable: true
+        dataType:
+          type: string
+          nullable: true
+        from:
+          type: number
+          format: double
+          nullable: true
+        to:
+          type: number
+          format: double
+          nullable: true
+        sortCol:
+          type: string
+          nullable: true
+        sortDir:
+          type: string
+          nullable: true
+    AgGridReadRes:
+      title: AgGridReadRes
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        from:
+          type: integer
+          nullable: true
+        records:
+          type: array
+          items:
+            type: string
+          nullable: true
+        to:
+          type: integer
+          nullable: true
+        totalAvailable:
+          type: integer
+          nullable: true
+    TableColumnRefKind:
+      title: TableColumnRefKind
+      type: string
+      enum:
+        - checkboxes
+        - selectbox
+        - text
+        - number
+        - phone
+        - zipcode
+        - email
+      description: Indicates the kind of column input
+    TableColumnRef:
+      title: TableColumnRef
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: Unique identifier of the table column
+        name:
+          type: string
+          nullable: true
+          description: Name of the table column
+        field:
+          type: string
+          nullable: true
+          description: Field name of the table column
+        sortable:
+          type: boolean
+          nullable: true
+          description: Indicates if the table column is sortable
+        headerName:
+          type: string
+          nullable: true
+          description: Header name of the table column
+        filter:
+          type: boolean
+          nullable: true
+          description: Indicates if the table column is filterable
+        kind:
+          $ref: '#/components/schemas/TableColumnRefKind'
+          nullable: true
+          description: Indicates the kind of column input
+    TableRef:
+      title: TableRef
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+          description: Name of the table
+        label:
+          type: string
+          nullable: true
+        cols:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableColumnRef'
+          nullable: true
+          description: Table columns associated with the table
+    TableReadRes:
+      title: TableReadRes
+      type: object
+      properties: {}
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
+    TableCreateRes:
+      title: TableCreateRes
+      type: object
+      properties: {}
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
+    TableUpdateRes:
+      title: TableUpdateRes
+      type: object
+      properties: {}
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
+    TableDataCreateRes:
+      title: TableDataCreateRes
+      $ref: '#/components/schemas/TableDataRowRef'
+    TableDataUpdateRes:
+      title: TableDataUpdateRes
+      $ref: '#/components/schemas/TableDataRowRef'
+    BaseModelRef:
+      title: BaseModelRef
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier
+      required:
+        - id
+    DashboardRef:
+      title: DashboardRef
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+          description: Name of the dashboard
+        folder:
+          type: string
+          nullable: true
+          description: Folder where the dashboard belongs
+        owner:
+          type: string
+          nullable: true
+          description: Owner of the dashboard
+        state:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: JSON containing all the dashboard state
+    DashboardsReadReq:
+      title: DashboardsReadReq
+      $ref: '#/components/schemas/ReadPaginationFilter'
+    DashboardReadReq:
+      title: DashboardReadReq
+      $ref: '#/components/schemas/BaseModelRef'
+    DashboardReadRes:
+      title: DashboardReadRes
+      type: object
+      properties: {}
+      allOf:
+        - $ref: '#/components/schemas/DashboardRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    DashboardCreateReq:
+      title: DashboardCreateReq
+      $ref: '#/components/schemas/DashboardRef'
+    DashboardCreateRes:
+      title: DashboardCreateRes
+      type: object
+      properties: {}
+      allOf:
+        - $ref: '#/components/schemas/DashboardRef'
+        - $ref: '#/components/schemas/BaseModelRef'
+    DashboardUpdateRes:
+      title: DashboardUpdateRes
+      type: object
+      properties: {}
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/DashboardRef'
+    DashboardDeleteReq:
+      title: DashboardDeleteReq
+      $ref: '#/components/schemas/BaseModelRef'
+    AuthGroups:
+      title: AuthGroups
+      type: object
+      properties:
+        create:
+          type: array
+          items:
+            type: string
+          nullable: true
+        read:
+          type: array
+          items:
+            type: string
+          nullable: true
+        update:
+          type: array
+          items:
+            type: string
+          nullable: true
+        delete:
+          type: array
+          items:
+            type: string
+          nullable: true
+    TableReadReq:
+      title: TableReadReq
+      $ref: '#/components/schemas/BaseModelRef'
+    ReadPaginationFilter:
+      title: ReadPaginationFilter
+      type: object
+      properties:
+        from:
+          type: integer
+          nullable: true
+        to:
+          type: integer
+          nullable: true
+        filters:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ReadPaginationFilterFilters'
+          nullable: true
+    TableDataReadRes:
+      title: TableDataReadRes
+      type: object
+      properties:
+        rowsCount:
+          type: integer
+          nullable: true
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableDataRowRef'
+          nullable: true
+    TablesReadResTablesItem:
+      title: TablesReadResTablesItem
+      type: object
+      properties: {}
+      allOf:
+        - $ref: '#/components/schemas/BaseModelRef'
+        - $ref: '#/components/schemas/TableRef'
+    TablesReadRes:
+      title: TablesReadRes
+      type: object
+      properties:
+        totalTables:
+          type: integer
+          nullable: true
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/TablesReadResTablesItem'
+          nullable: true
+          description: Table columns associated with the table
+    User:
+      title: User
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: true
+          description: Unique identifier of the user
+        name:
+          type: string
+          nullable: true
+          description: Name of the user
+        authGroups:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: IDs of the groups the user belongs to
+    DashboardAuthGroup:
+      title: DashboardAuthGroup
+      type: object
+      properties:
+        dashboardId:
+          type: string
+          nullable: true
+          description: Unique identifier of the dashboard
+        dashboardName:
+          type: string
+          nullable: true
+        authGroups:
+          $ref: '#/components/schemas/AuthGroups'
+          nullable: true
+    DashboardgroupauthcreateAuthGroups:
+      title: DashboardgroupauthcreateAuthGroups
+      type: object
+      properties:
+        create:
+          type: array
+          items:
+            type: string
+          nullable: true
+        read:
+          type: array
+          items:
+            type: string
+          nullable: true
+        update:
+          type: array
+          items:
+            type: string
+          nullable: true
+        delete:
+          type: array
+          items:
+            type: string
+          nullable: true
+    AuthDeleteBody:
+      title: AuthDeleteBody
+      type: object
+      properties:
+        dashboardId:
+          type: string
+          nullable: true
+        authGroups:
+          $ref: '#/components/schemas/AuthGroups'
+          nullable: true
+    DashboardsReadRes:
+      title: DashboardsReadRes
+      type: object
+      properties:
+        totalDashboards:
+          type: integer
+          nullable: true
+        dashboards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dashboard'
+          nullable: true
+    InlineResponse2001:
+      title: InlineResponse2001
+      type: object
+      properties:
+        totalGroups:
+          type: integer
+          nullable: true
+        authGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthGroupRef'
+          nullable: true
+    InlineResponse2002:
+      title: InlineResponse2002
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+          nullable: true
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          nullable: true
+    AgGridInputSearchCols:
+      title: AgGridInputSearchCols
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        field:
+          type: string
+          nullable: true
+        sortable:
+          type: boolean
+          nullable: true
+        headerName:
+          type: string
+          nullable: true
+        filter:
+          type: boolean
+          nullable: true
+    AgGridInputSearchExtraSearch:
+      title: AgGridInputSearchExtraSearch
+      type: object
+      properties:
+        label:
+          type: string
+          nullable: true
+        value:
+          type: string
+          nullable: true
+    AgGridInputSearch:
+      title: AgGridInputSearch
+      type: object
+      properties:
+        searchStr:
+          type: string
+          nullable: true
+        searchExact:
+          type: boolean
+          nullable: true
+        cols:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgGridInputSearchCols'
+          nullable: true
+        extraSearch:
+          $ref: '#/components/schemas/AgGridInputSearchExtraSearch'
+          nullable: true
+    AgGridInputFilters:
+      title: AgGridInputFilters
+      type: object
+      properties:
+        colId:
+          type: string
+          nullable: true
+        filterType:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        filter:
+          type: string
+          nullable: true
+    NewTableRowCols:
+      title: NewTableRowCols
+      type: object
+      properties:
+        colId:
+          type: string
+          nullable: true
+    ReadPaginationFilterFiltersColIdConditionDateFrom:
+      title: ReadPaginationFilterFiltersColIdConditionDateFrom
+      oneOf:
+        - type: string
+          format: date-time
+        - type: string
+    ReadPaginationFilterFiltersColIdConditionDateTo:
+      title: ReadPaginationFilterFiltersColIdConditionDateTo
+      oneOf:
+        - type: string
+          format: date-time
+        - type: string
+    ReadPaginationFilterFiltersColIdConditionFilter:
+      title: ReadPaginationFilterFiltersColIdConditionFilter
+      oneOf:
+        - type: string
+        - type: integer
+    ReadPaginationFilterFiltersColIdConditionFilterTo:
+      title: ReadPaginationFilterFiltersColIdConditionFilterTo
+      oneOf:
+        - type: string
+        - type: integer
+    ReadPaginationFilterFiltersColIdCondition:
+      title: ReadPaginationFilterFiltersColIdCondition
+      type: object
+      properties:
+        dateFrom:
+          $ref: >-
+            #/components/schemas/ReadPaginationFilterFiltersColIdConditionDateFrom
+          nullable: true
+        dateTo:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersColIdConditionDateTo'
+          nullable: true
+        filter:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersColIdConditionFilter'
+          nullable: true
+        filterTo:
+          $ref: >-
+            #/components/schemas/ReadPaginationFilterFiltersColIdConditionFilterTo
+          nullable: true
+        filterType:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+    ReadPaginationFilterFiltersFilter:
+      title: ReadPaginationFilterFiltersFilter
+      oneOf:
+        - type: string
+        - type: integer
+    ReadPaginationFilterFiltersDateFrom:
+      title: ReadPaginationFilterFiltersDateFrom
+      oneOf:
+        - type: string
+          format: date-time
+        - type: string
+    ReadPaginationFilterFiltersDateTo:
+      title: ReadPaginationFilterFiltersDateTo
+      oneOf:
+        - type: string
+          format: date-time
+        - type: string
+    ReadPaginationFilterFiltersFilterTo:
+      title: ReadPaginationFilterFiltersFilterTo
+      oneOf:
+        - type: string
+        - type: integer
+    ReadPaginationFilterFilters:
+      title: ReadPaginationFilterFilters
+      type: object
+      properties:
+        sort:
+          type: string
+          nullable: true
+        filter:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersFilter'
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        dateFrom:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersDateFrom'
+          nullable: true
+        dateTo:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersDateTo'
+          nullable: true
+        filterTo:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersFilterTo'
+          nullable: true
+        condition1:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersColIdCondition'
+          nullable: true
+        condition2:
+          $ref: '#/components/schemas/ReadPaginationFilterFiltersColIdCondition'
+          nullable: true
+        filterType:
+          type: string
+          nullable: true
+        operator:
+          type: string
+          nullable: true
+    Dashboard:
+      title: Dashboard
+      type: object
+      properties:
+        owner:
+          type: string
+          nullable: true
+        folder:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        id:
+          type: string
+          nullable: true
+    TableDataRowRef:
+      title: TableDataRowRef
+      type: object
+      additionalProperties: true
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+servers:
+  - url: https://virtserver.swaggerhub.com
+    description: Default
