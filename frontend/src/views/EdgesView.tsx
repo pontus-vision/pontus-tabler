@@ -1,7 +1,12 @@
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { getTables, tableDataEdgeCreate } from '../client';
 import EdgeGridView from '../components/EdgeGridView';
-import { TableReadRes } from '../typescript/api';
+import {
+  AuthGroupTablesReadReq,
+  ReadPaginationFilter,
+  TableReadRes,
+  TablesReadRes,
+} from '../typescript/api';
 
 import Select from 'react-select';
 import TableRelationshipsPreview from './TableRelationshipsPreview';
@@ -9,6 +14,8 @@ import { EdgeConnectionType } from '../typescript/api/resources/pontus/types/Edg
 import NotificationManager, {
   MessageRefs,
 } from '../components/NotificationManager';
+import useApiAndNavigate from '../hooks/useApi';
+import { AxiosResponse } from 'axios';
 
 const EdgesView = () => {
   const [tableOptions, setTableOptions] = useState<TableReadRes[]>([]);
@@ -25,15 +32,22 @@ const EdgesView = () => {
   const [tableToColId, setTableToColId] = useState<string>('');
   const notificationManagerRef = useRef<MessageRefs>();
 
+  const { fetchDataAndNavigate } = useApiAndNavigate();
+
   useEffect(() => {
     fetchTables();
   }, []);
   const fetchTables = async () => {
-    const res = await getTables({
+    const req: ReadPaginationFilter = {
       from: 1,
       to: 57,
       filters: {},
-    });
+    };
+
+    const res = (await fetchDataAndNavigate(
+      getTables,
+      req,
+    )) as AxiosResponse<TablesReadRes>;
 
     const tables = res?.data.tables as TableReadRes[] | undefined;
     tables && setTableOptions(tables);
