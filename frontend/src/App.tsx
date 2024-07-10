@@ -87,7 +87,7 @@ function App() {
 
             <Route path="/user/update/:id" element={<UpdateUser />} />
           </Route>
-          <Route path="/register" element={<RegisterView />} />
+          {/* <Route path="/register" element={<RegisterView />} /> */}
           <Route
             path="/register/admin"
             element={<RegisterView adminRoute={true} />}
