@@ -14,8 +14,12 @@ const useLogin = () => {
   const { fetchDataAndNavigate } = useApiAndNavigate();
   const { login } = useAuth();
 
-  const handleLogin = async (username: string, password: string) => {
+  const handleLogin = async (
+    username: string,
+    password: string,
+  ): Promise<AxiosResponse<LoginRes, any>> => {
     // e.preventDefault();
+    setLoading(true);
 
     const res = (await fetchDataAndNavigate(loginUser, {
       password,
@@ -25,11 +29,15 @@ const useLogin = () => {
     if (res.status === 200) {
       localStorage.setItem('accessToken', 'Bearer ' + res.data.accessToken);
       localStorage.setItem('refreshToken', 'Bearer ' + res.data.refreshToken);
+      console.log({ resData: res.data });
       const userId = getUserIdFromToken();
       await login(userId);
     }
+
+    setLoading(false);
+    return res;
   };
-  return { handleLogin };
+  return { handleLogin, loading };
 };
 
 export default useLogin;
