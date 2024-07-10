@@ -18,6 +18,7 @@ import { isEmpty } from '../../helpers/functions';
 import NotificationManager, {
   MessageRefs,
 } from '../../components/NotificationManager';
+import useApiAndNavigate from '../../hooks/useApi';
 
 type Props = {
   rowsTested?: any[];
@@ -36,6 +37,7 @@ const TablesReadView = ({ rowsTested }: Props) => {
   const [totalCount, setTotalCount] = useState<number>();
   const notificationManagerRef = useRef<MessageRefs>();
   const navigate = useNavigate();
+  const {fetchDataAndNavigate} = useApiAndNavigate()
 
   const fetchTables = async () => {
     console.log('fetching');
@@ -49,7 +51,8 @@ const TablesReadView = ({ rowsTested }: Props) => {
         filters,
       };
 
-      const data = await getTables(req);
+      const data = await fetchDataAndNavigate(getTables, req)
+
 
       const entries = data?.data?.tables; // setCols([...cols, ...data?.data.tables?.map()])
 
