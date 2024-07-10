@@ -5,7 +5,19 @@ import {
   readAuthGroups,
   updateAuthGroups,
 } from '../client';
-import { AuthGroupRef } from '../typescript/api';
+import {
+  AuthGroupDeleteReq,
+  AuthGroupDeleteRes,
+  AuthGroupRef,
+  AuthGroupUpdateReq,
+  AuthGroupUpdateRes,
+  AuthUserDeleteReq,
+  AuthUserIdAndUsername,
+  AuthUserUpdateReq,
+  AuthUserUpdateRes,
+  AuthUsersReadReq,
+  AuthUsersReadRes,
+} from '../typescript/api';
 import NotificationManager, {
   MessageRefs,
 } from '../components/NotificationManager';
@@ -18,6 +30,8 @@ import {
 } from 'ag-grid-community';
 import { AuthUserRef } from '../typescript/api/resources/pontus/types/AuthUserRef';
 import { readUsers } from '../client';
+import useApiAndNavigate from '../hooks/useApi';
+import { AxiosResponse } from 'axios';
 
 type Props = {
   onCellClicked?: (e: CellClickedEvent<any, any>) => void;
@@ -31,7 +45,7 @@ type Props = {
     deleteAction?: boolean;
     readAction?: boolean;
   };
-  usersToFilterOutById?: AuthUserRef[];
+  usersToFilterOutById?: AuthUserIdAndUsername[];
   onRowsSelected?: (e: IRowNode<any>[]) => void;
   selection?: boolean;
   selectRowByCell?: boolean;
@@ -59,7 +73,7 @@ const AuthUsersGrid = ({
 }: Props) => {
   const [totalUsers, setTotalUsers] = useState<number>();
   const [isLoading1, setIsLoading1] = useState(false);
-  const [users, setUsers] = useState<AuthUserRef[]>([]);
+  const [users, setUsers] = useState<AuthUserIdAndUsername[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<AuthGroupRef | null>();
   const notificationManagerRef = useRef<MessageRefs>();
   const [addMode, setAddMode] = useState(false);
@@ -68,11 +82,19 @@ const AuthUsersGrid = ({
   const [usersToBeUpdated, setUsersToBeUpdated] = useState<AuthGroupRef[]>([]);
   const [usersToBeAdded, setUsersToBeAdded] = useState<AuthGroupRef | null>();
 
+  const { fetchDataAndNavigate } = useApiAndNavigate();
+
   const [reset, setReset] = useState(false);
 
   const fetchAuthUsers = async () => {
     setIsLoading1(true);
-    const res = await readUsers({ from: 1, to: 100, filters: {} });
+
+    const req: AuthUsersReadReq = { from: 1, to: 100, filters: {} };
+
+    const res = (await fetchDataAndNavigate(
+      readUsers,
+      req,
+    )) as AxiosResponse<AuthUsersReadRes>;
 
     const authUsers = res?.data.authUsers;
 
@@ -85,7 +107,7 @@ const AuthUsersGrid = ({
       notificationManagerRef?.current?.addMessage(
         'error',
         'Error',
-        'Something went wrong. Could not fetch Auth Group(s)!',
+        'Something went wrong. Could not fetch Auth User(s)!',
       );
       setUsers([]);
       setTotalUsers(0);
@@ -109,14 +131,19 @@ const AuthUsersGrid = ({
 
   const delAuthUsers = async (arr: AuthUserRef[]) => {
     for (const [index, user] of arr.entries()) {
-      const res = await deleteAuthGroup({ id: user.id });
+      const req: AuthUserDeleteReq = { id: user.id, username: user.username };
+
+      const res = (await fetchDataAndNavigate(
+        deleteAuthGroup,
+        req,
+      )) as AxiosResponse<AuthGroupDeleteRes>;
 
       if (index === arr.length - 1) {
         if (res?.status === 200) {
           notificationManagerRef?.current?.addMessage(
             'success',
             'Success',
-            'Auth Group(s) deleted!',
+            'Auth User(s) deleted!',
           );
           await fetchAuthUsers();
         } else {
@@ -130,34 +157,34 @@ const AuthUsersGrid = ({
     }
   };
 
-  const addUser = async (data: AuthUserRef) => {
-    if (!addMode || data.id) return;
+  // const addUser = async (data: AuthUserRef) => {
+  //   if (!addMode || data.id) return;
 
-    const res = await createAuthGroup({ name: data.name });
+  //   const res = await createAuthGroup({ username: data.username });
 
-    if (res?.status === 200) {
-      notificationManagerRef?.current?.addMessage(
-        'success',
-        'Success',
-        `AuthGroup(s) created!`,
-      );
+  //   if (res?.status === 200) {
+  //     notificationManagerRef?.current?.addMessage(
+  //       'success',
+  //       'Success',
+  //       `AuthGroup(s) created!`,
+  //     );
 
-      await fetchAuthUsers();
-    } else {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not create Auth Group(s)!',
-      );
-    }
+  //     await fetchAuthUsers();
+  //   } else {
+  //     notificationManagerRef?.current?.addMessage(
+  //       'error',
+  //       'Error',
+  //       'Something went wrong. Could not create Auth Group(s)!',
+  //     );
+  //   }
 
-    setUsersToBeAdded(null);
-    // setGroupsChanged(groupsChanged.filter((group) => !!group.id));
-    // console.log({ groupsChanged });
-    resetRowsState();
-    setUsersChanged([]);
-    setAddMode(false);
-  };
+  //   setUsersToBeAdded(null);
+  //   // setGroupsChanged(groupsChanged.filter((group) => !!group.id));
+  //   // console.log({ groupsChanged });
+  //   resetRowsState();
+  //   setUsersChanged([]);
+  //   setAddMode(false);
+  // };
 
   const resetRowsState = () => {
     setReset(true);
@@ -166,20 +193,25 @@ const AuthUsersGrid = ({
     }, 1);
   };
 
-  const updateGroups = async () => {
-    console.log({ groupsChanged: usersChanged });
+  const updateUsers = async () => {
     if (usersChanged.length === 0) return;
     const fails = [];
 
-    for (const [index, group] of usersChanged.entries()) {
-      if (!group.id) break;
-      const res = await updateAuthGroups({ id: group.id, name: group.name });
+    for (const [index, user] of usersChanged.entries()) {
+      if (!user.id) break;
+
+      const req: AuthUserUpdateReq = { id: user.id, username: user.name };
+
+      const res = (await fetchDataAndNavigate(
+        updateAuthGroups,
+        req,
+      )) as AxiosResponse<AuthUserUpdateRes>;
 
       if (res.status !== 200) {
         notificationManagerRef?.current?.addMessage(
           'error',
           'Error',
-          `Something went wrong. Could not update Auth Group to ${group.name}.`,
+          `Something went wrong. Could not update Auth User to ${user.name}.`,
         );
         fails.push(res.status);
       }
@@ -188,7 +220,7 @@ const AuthUsersGrid = ({
         notificationManagerRef?.current?.addMessage(
           'success',
           'Success',
-          `Auth Group(s) updated.`,
+          `Auth User(s) updated.`,
         );
       }
     }
@@ -213,7 +245,7 @@ const AuthUsersGrid = ({
 
     setAddMode(true);
     setTotalUsers((totalUsers || 0) + 1);
-    setUsers([...users, { name: '', id: '' }]);
+    setUsers([...users, { username: '', id: '' }]);
   };
 
   const handleRowsStateChange = (e: Record<string, any>[]) => {
@@ -267,16 +299,16 @@ const AuthUsersGrid = ({
         isLoading={isLoading1}
         onRowsSelected={onRowsSelected}
         updateModeOnRows={true}
-        onUpdate={updateGroups}
+        onUpdate={updateUsers}
         resetRowsChangedState={reset}
-        onCellValueChange={(e) => addUser(e.data)}
+        // onCellValueChange={(e) => addUser(e.data)}
         onCellsChange={(e) => handleOnCellsChange(e)}
         selectRowByCell={selectRowByCell}
         onRowsStateChange={(e) => handleRowsStateChange(e)}
         cols={[
           {
-            headerName: 'Name',
-            field: 'name',
+            headerName: 'Username',
+            field: 'username',
             sortable: true,
 
             filter: true,
