@@ -6,42 +6,35 @@ import FormSelect from 'react-bootstrap/esm/FormSelect';
 // import { listApiKeys } from '../webinyApi';
 import { useDispatch } from 'react-redux';
 import { defineConfig } from 'vite';
+import { loginUser } from '../client';
+import useApiAndNavigate from '../hooks/useApi';
+import { AxiosResponse } from 'axios';
+import { LoginRes } from '../typescript/api';
+import { getUserIdFromToken } from '../../utils';
+import useLogin from '../hooks/useLogin';
+
 // import { getApiKeys } from '../client';
 
 const LoginPage = () => {
   const { login } = useAuth();
   const [role, setRole] = useState('Admin');
   const [apiKeys, setApiKeys] = useState();
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogin = (e) => {
+  const { fetchDataAndNavigate } = useApiAndNavigate();
+
+  const { handleLogin } = useLogin();
+  const loginUser = async (e) => {
     e.preventDefault();
 
-    login(role);
+    handleLogin(username, password);
+    navigate('/auth/users');
   };
-
-  // useEffect(() => {
-  //   const func = async () => {
-  //     const { data } = await getApiKeys();
-  //     console.log({ data });
-  //     setApiKeys(data);
-  //   };
-  //   func();
-  // }, []);
-
-  const setSelectedApiKey = (apiKey: string) => {
-    apiKey = JSON.parse(apiKey);
-    setRole(apiKey.name);
-    import.meta.env.VITE_WEBINY_API_TOKEN = apiKey.token;
-    console.log(import.meta.env.VITE_WEBINY_API_TOKEN);
-  };
-
-  useEffect(() => {
-    console.log(role);
-  }, [role]);
 
   return (
     <div className="login-page">
@@ -55,27 +48,21 @@ const LoginPage = () => {
           </p>
         </section>
         <section className="form">
-          <select onChange={(e) => setSelectedApiKey(e.target.value)}>
-            {apiKeys &&
-              apiKeys.map((api) => (
-                <option value={JSON.stringify(api)}>{api.name}</option>
-              ))}
-            <option value="Admin">Admin</option>
-            <option value="User">User</option>
-          </select>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={loginUser}>
             <h3>Sign In</h3>
             <div className="mb-3">
-              <label>Email address</label>
+              <label>username</label>
               <input
-                type="email"
+                onChange={(e) => setUsername(e.target.value)}
+                type="text"
                 className="form-control"
-                placeholder="Enter email"
+                placeholder="Enter username"
               />
             </div>
             <div className="mb-3">
               <label>Password</label>
               <input
+                onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 className="form-control"
                 placeholder="Enter password"
