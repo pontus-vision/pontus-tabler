@@ -2,6 +2,23 @@ service:
   auth: false
   base-path: '/PontusTest/1.0.0'
   endpoints:
+    registerUserPOST:
+      path: /register/user
+      method: POST
+      auth: true
+      request:
+        name: RegisterUserReq
+        body:
+          properties:
+            username: string
+            password: string
+            passwordConfirmation: string
+      response:
+        docs: User logged in successfully
+        type: RegisterUserRes
+      errors:
+        - BadRequestError
+        - InternalServerError
     registerAdminPOST:
       path: /register/admin
       method: POST
@@ -1778,6 +1795,10 @@ service:
         - NotFoundError
 types:
   InitiateRes: string
+  RegisterUserRes:
+    properties: {}
+    extends:
+      - UsernameAndIdRef
   RegisterAdminRes:
     properties: {}
     extends:
