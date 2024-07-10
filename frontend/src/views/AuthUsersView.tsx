@@ -266,6 +266,9 @@ const AuthUsersView = () => {
   };
 
   const handleCellClicked = (e: CellClickedEvent<any, any>) => {
+    if(e.colDef.field !== 'click') {
+      
+    }
     if (e.colDef.field !== 'click') return;
     setSelectedUser(null);
     setTimeout(() => {
@@ -297,10 +300,11 @@ const AuthUsersView = () => {
               onParamsChange={handleParamsChange}
               isLoading={isLoading1}
               selectRowByCell={true}
-              onRowsStateChange={(e) => {
-                setAddMode(false);
-                setGroupsChanged(e as AuthUserRef[]);
-              }}
+              addUserForm={true}
+              // onRowsStateChange={(e) => {
+              //   setAddMode(false);
+              //   setGroupsChanged(e as AuthUserRef[]);
+              // }}
             />
             {groupsChanged.length > 0 && !addMode && (
               <button onClick={() => updateGroups()}>

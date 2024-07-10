@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   createAuthGroup,
+  createUser,
   deleteAuthGroup,
   readAuthGroups,
   updateAuthGroups,
@@ -11,6 +12,8 @@ import {
   AuthGroupRef,
   AuthGroupUpdateReq,
   AuthGroupUpdateRes,
+  AuthUserCreateReq,
+  AuthUserCreateRes,
   AuthUserDeleteReq,
   AuthUserIdAndUsername,
   AuthUserUpdateReq,
@@ -32,11 +35,13 @@ import { AuthUserRef } from '../typescript/api/resources/pontus/types/AuthUserRe
 import { readUsers } from '../client';
 import useApiAndNavigate from '../hooks/useApi';
 import { AxiosResponse } from 'axios';
+import { transform } from 'cypress/types/lodash';
 
 type Props = {
   onCellClicked?: (e: CellClickedEvent<any, any>) => void;
   onRefresh?: () => void;
   onAdd?: () => void;
+  addUserForm?: boolean;
   onDelete?: (arr: any[]) => void;
   onUpdate?: (data: any) => void;
   permissions?: {
@@ -68,6 +73,7 @@ const AuthUsersGrid = ({
   selection,
   permissions,
   selectRowByCell,
+  addUserForm,
   onRowsSelected,
   usersToFilterOutById,
 }: Props) => {
@@ -82,10 +88,14 @@ const AuthUsersGrid = ({
   const [usersToBeUpdated, setUsersToBeUpdated] = useState<AuthGroupRef[]>([]);
   const [usersToBeAdded, setUsersToBeAdded] = useState<AuthGroupRef | null>();
 
+  const [addUser, setAddUser] = useState(false);
   const { fetchDataAndNavigate } = useApiAndNavigate();
 
   const [reset, setReset] = useState(false);
 
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [username, setUsername] = useState('');
   const fetchAuthUsers = async () => {
     setIsLoading1(true);
 
@@ -239,8 +249,12 @@ const AuthUsersGrid = ({
   };
 
   const handleOnAdd = () => {
+    if (addUserForm) {
+      setAddUser(true);
+      return;
+    }
     if (onAdd) {
-      return onAdd;
+      return onAdd();
     }
 
     setAddMode(true);
@@ -285,8 +299,73 @@ const AuthUsersGrid = ({
     // groupsToBeAdded && addGroup(groupsToBeAdded);
   }, [usersToBeAdded]);
 
+  const createAuthUser = async () => {
+    const req: AuthUserCreateReq = {
+      password,
+      passwordConfirmation,
+      username,
+    };
+    const res = (await fetchDataAndNavigate(
+      createUser,
+      req,
+    )) as AxiosResponse<AuthUserCreateRes>;
+
+    if (res.status === 200) {
+      fetchAuthUsers();
+    }
+  };
+
   return (
     <>
+      {addUser && (
+        <>
+          <div
+            className="shadow"
+            onClick={() => setAddUser(false)}
+            style={{
+              top: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'black',
+              opacity: 0.1,
+              position: 'absolute',
+              zIndex: 10,
+            }}
+          ></div>
+          <form
+            onSubmit={() => createAuthUser()}
+            style={{
+              position: 'absolute',
+              zIndex: 10,
+              padding: '5rem',
+              display: 'flex',
+              gap: '1rem',
+              flexDirection: 'column',
+              backgroundColor: 'white',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
+          >
+            <label htmlFor="">Username</label>
+            <input type="text" onChange={(e) => setUsername(e.target.value)} />
+            <label htmlFor="">Password</label>
+            <input
+              type="password"
+              name=""
+              id=""
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <label htmlFor="">Password Confirmation</label>
+            <input
+              type="password"
+              name=""
+              id=""
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+            />
+            <button type="submit">Create</button>
+          </form>
+        </>
+      )}
       <PVGridWebiny2
         onCellClicked={onCellClicked}
         cypressAtt="auth-groups-grid"
