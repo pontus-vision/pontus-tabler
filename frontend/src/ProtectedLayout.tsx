@@ -3,31 +3,31 @@ import { useAuth } from './AuthContext';
 import { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import { readUserGroups } from './client';
+import { getJwtClaims } from '../utils';
+import { Accordion } from 'semantic-ui-react';
+import { ReadPaginationFilterFilters } from './typescript/api';
 
 type Props = {
   allowedRoles: string[];
 };
 
 const ProtectedLayout = ({ allowedRoles }: Props) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userGroups } = useAuth();
 
   const [userRole, setUserRole] = useState(() => {
-    const storedAuth = localStorage.getItem('userRole');
+    const storedAuth = localStorage.getItem('userGroupId');
     return storedAuth ? JSON.parse(storedAuth) : null;
   });
 
-  useEffect(() => {
-    console.log({ userRole: allowedRoles?.includes(userRole) });
-  }, [userRole]);
-
-  return allowedRoles?.includes(userRole) ? (
+  return allowedRoles?.some((el) =>
+    userGroups.some((el2) => el2.name === el),
+  ) ? (
     <>
       <Outlet />
     </>
-  ) : userRole ? (
-    <Navigate to="/unauthorized" />
   ) : (
-    <Navigate to="/login" />
+    <Navigate to="/unauthorized" />
   );
 };
 
