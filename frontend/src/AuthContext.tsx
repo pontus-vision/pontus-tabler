@@ -1,17 +1,19 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useLocalStorage } from './UseLocalStorage';
-import { redirect, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { AuthGroupRef } from './typescript/api';
+import { loginUser, readUserGroups } from './client';
+import useLogin from './hooks/useLogin';
+import { getUserIdFromToken } from '../utils';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  userRole: string | null;
+  userGroups: AuthGroupRef[];
   login: (role: string) => void;
   logout: () => void;
 }
-
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
-  userRole: null,
+  userGroups: [],
   login: () => {},
   logout: () => {},
 });
@@ -22,47 +24,44 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(() => {
-    const storedAuth = localStorage.getItem('userRole');
-    return storedAuth ? JSON.parse(storedAuth) : null;
-  });
+  const [userGroups, setUserGroups] = useState<AuthGroupRef[]>([]);
 
-  const [token, setToken] = useState();
+  const { handleLogin } = useLogin();
+
   const navigate = useNavigate();
 
-  const login = (role: string) => {
+  const login = async (userId: string) => {
     setIsAuthenticated(true);
-    setUserRole(role);
-    if (role === 'Admin') {
-      navigate('/admin');
-    } else if (role === 'User') {
-      navigate('/dashboard');
-    }
+
+    const res = await readUserGroups({ id: userId, filters: {} });
+    console.log({ resGroups: res?.data });
+
+    setUserGroups(res?.data.authGroups || []);
+    navigate('/tables/read');
   };
-
-  useEffect(() => {
-    console.log({ userRole });
-  }, [userRole]);
-
-  useEffect(() => {
-    if (userRole) {
-      localStorage.setItem('userRole', JSON.stringify(userRole));
-    }
-  }, [userRole]);
 
   const logout = () => {
     setIsAuthenticated(false);
-    setUserRole(null);
+    setUserGroups([]);
     navigate('/login');
 
-    localStorage.removeItem('userRole');
+    localStorage.removeItem('accessToken');
   };
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken && userGroups.length === 0) {
+      const userId = getUserIdFromToken();
+
+      login(userId);
+    }
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        userRole,
+        userGroups,
         login,
         logout,
       }}

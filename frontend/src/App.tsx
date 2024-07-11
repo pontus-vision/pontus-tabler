@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminView from './views/AdminView';
@@ -27,11 +27,12 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import AuthGroupsView from './views/AuthGroupsView';
 import AuthUsersView from './views/AuthUsersView';
+import RegisterView from './views/Register';
 
 function App() {
   const [count, setCount] = useState(0);
 
-  const { isAuthenticated, userRole } = useContext(AuthContext);
+  const { isAuthenticated, userGroups: userRole } = useContext(AuthContext);
 
   const [dashboardId, setDashboardId] = useState<string>();
 
@@ -39,16 +40,21 @@ function App() {
 
   return (
     <AuthProvider>
-      <Header
-        setOpenedSidebar={setOpenedSidebar}
-        openedSidebar={openedSidebar}
-      />
-      <Sidebar
-        setOpenedSidebar={setOpenedSidebar}
-        openedSidebar={openedSidebar}
-      />
-      <div style={{ paddingTop: '4rem' }}>
+      {
+        <Header
+          setOpenedSidebar={setOpenedSidebar}
+          openedSidebar={openedSidebar}
+        />
+      }
+      {
+        <Sidebar
+          setOpenedSidebar={setOpenedSidebar}
+          openedSidebar={openedSidebar}
+        />
+      }
+      <div className="main-view">
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route
             path="/"
             element={
@@ -81,7 +87,11 @@ function App() {
 
             <Route path="/user/update/:id" element={<UpdateUser />} />
           </Route>
-          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<RegisterView />} />
+          <Route
+            path="/register/admin"
+            element={<RegisterView adminRoute={true} />}
+          />
           <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
             <Route path="/table/update/:id" element={<UpdateTable />} />
             <Route path="/table/read/:id" element={<UpdateTable />} />

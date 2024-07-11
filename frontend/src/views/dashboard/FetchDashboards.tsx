@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { deleteDashboard, getAllDashboards } from '../../client';
 import { MessageRefs } from '../../components/NotificationManager';
 import { ColDef, IRowNode, RowEvent } from 'ag-grid-community';
+import useApiAndNavigate from '../../hooks/useApi';
+import { DashboardsReadReq } from '../../typescript/serialization';
 
 type Props = {
   onRowClicked?: (row: RowEvent<any, any>) => void;
@@ -72,10 +74,22 @@ const FetchDashboards = ({
   const notificationManagerRef = useRef<MessageRefs>();
   const [isLoading1, setIsLoading1] = useState(false);
   const navigate = useNavigate();
+  const {fetchDataAndNavigate} = useApiAndNavigate()
+
 
   const fetchDashboards = async () => {
     setIsLoading1(true);
-    const res = await getAllDashboards({ from, to, filters });
+    
+    const req: DashboardsReadReq = {
+      from, to, filters
+    }
+
+
+    const res = await fetchDataAndNavigate(getAllDashboards, req)
+
+
+    
+
     console.log({ res });
     if (res?.status === 404) {
       setDashboards([]);

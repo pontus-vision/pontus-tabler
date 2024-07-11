@@ -61,8 +61,8 @@ const AuthUsersView = () => {
   });
   const [cols, setCols] = useState<ColDef[]>([
     {
-      headerName: 'Name',
-      field: 'name',
+      headerName: 'Username',
+      field: 'username',
       filter: true,
       sortable: true,
     },

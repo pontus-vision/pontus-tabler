@@ -13,7 +13,6 @@ import {
   initiateTableContainer,
   readTableByName,
 } from './TableService';
-import { ensureSubDocumentIsCreated } from './EdgeService';
 import { v4 as uuidv4 } from 'uuid';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
@@ -51,20 +50,13 @@ export const createTableData = async (data: TableDataCreateReq) => {
 
     const uuid = uuidv4();
 
-    const tableContainer = await initiateTableContainer();
 
     const dataRow = { ...data.cols, edges: [], id: uuid };
 
-    const res = await ensureSubDocumentIsCreated(
-      {
-        container: tableContainer,
-        id: data.id,
-        subCollectionName: 'data',
-        subCollectionPath: 'data',
-        partitionKey: data.tableName,
-      },
-      dataRow,
-    );
+    const tableDataContainer = await fetchContainer(data.tableName);
+
+    const res = await tableDataContainer.items.create(dataRow)
+
     const { _rid, _self, _etag, _attachments, _ts,edges, ...rest } =
       res.resource as any;
 

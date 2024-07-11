@@ -218,7 +218,8 @@ export const sendHttpRequest = async (
     errorResponse?.status !== 404 &&
     errorResponse?.status !== 409 &&
     errorResponse?.status !== 400 &&
-    errorResponse?.status !== 422
+    errorResponse?.status !== 422 && 
+    errorResponse?.status !== 307
   ) {
     throw {
       code: 500,
