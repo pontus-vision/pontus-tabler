@@ -15,14 +15,14 @@ import {
   TableDataEdgeCreateRef,
   EdgeDirectionEnum,
   ReadPaginationFilter,
-} from '../typescript/api';
-import { fetchContainer, filterToQuery } from '../cosmos-utils';
+} from '../../typescript/api';
+import { fetchContainer, filterToQuery } from '../../cosmos-utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
 import {
   BadRequestError,
   ConflictEntityError,
   NotFoundError,
-} from '../generated/api';
+} from '../../generated/api';
 import { AUTH_GROUPS } from './AuthUserService';
 import { initiateAuthGroupContainer } from './AuthGroupService';
 
@@ -303,11 +303,11 @@ export const updateConnection = async (
 
         if (!res.resource?.edges) {
           throw new BadRequestError(
-              `No edges found in record at id: "${value.id}" ${
-                table1?.partitionKeyProp
-                  ? `and ${table1?.partitionKeyProp}: '${partitionKey}'`
-                  : ''
-              }`,
+            `No edges found in record at id: "${value.id}" ${
+              table1?.partitionKeyProp
+                ? `and ${table1?.partitionKeyProp}: '${partitionKey}'`
+                : ''
+            }`,
           );
         }
 
@@ -411,7 +411,7 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
         tableName: data.tableName,
       },
       rowId: row.id as string,
-      rowPartitionKey: row[data.edge.partitionKeyProp]  as string,
+      rowPartitionKey: row[data.edge.partitionKeyProp] as string,
     });
   }
 

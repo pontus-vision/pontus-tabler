@@ -14,272 +14,105 @@ import {
   DashboardGroupAuthDeleteRes,
   DashboardUpdateRes,
   DashboardCreateRes,
-  DashboardAuthGroupsRef,
-  DashboardAuthGroups,
+  InternalServerError,
 } from '../typescript/api';
-import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
-import { NotFoundError } from '../generated/api';
-import { ItemResponse, PatchOperation } from '@azure/cosmos';
-import { CosmosClient } from '@azure/cosmos';
-import { initiateMenuContainer } from './MenuService';
-import {
-  createConnection,
-  createTableDataEdge,
-  deleteTableDataEdge,
-  readTableDataEdge,
-  updateTableDataEdge,
-} from './EdgeService';
-import { AUTH_GROUPS, initiateAuthGroupContainer } from './AuthGroupService';
-import { AUTH_USERS } from './AuthUserService';
-declare function getContext(): any;
+import { COSMOS_DB, DELTA_DB, dbSource } from './AuthGroupService';
+import * as cdb from './cosmosdb';
+import * as deltadb from './delta';
 
 export const DASHBOARDS = 'dashboards';
 
 export const createDashboard = async (
   data: DashboardCreateReq,
 ): Promise<DashboardCreateRes> => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-  const menuContainer = await initiateMenuContainer();
-
-  const res = await dashboardContainer.items.create({
-    ...data,
-    authGroups: [],
-  });
-
-  if (data?.menuItem) {
-    const menuItem = data.menuItem;
-    const child = menuItem.children[0];
-
-    const path = `${menuItem?.path}${menuItem?.path?.endsWith('/') ? '' : '/'}${
-      child.name
-    }`;
-
-    const res = await menuContainer.items.create({
-      ...child,
-      path: path,
-      id: menuItem.id,
-    });
-
-    try {
-      const res2 = await menuContainer
-        .item(menuItem.id, menuItem.path)
-        .patch([{ op: 'add', path: `/children/-`, value: res.resource }]);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError(
-          `Parent folder at path '${menuItem.path}, at id '${menuItem.id} not found.'`,
-        );
-      }
-    }
+  if (dbSource === COSMOS_DB) {
+    return cdb.createDashboard(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.createDashboard(data);
   }
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
-
-  return rest;
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const updateDashboard = async (
   data: DashboardUpdateReq,
 ): Promise<DashboardUpdateRes> => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-  try {
-    const patchArr: PatchOperation[] = [];
-    for (const prop in data) {
-      switch (prop) {
-        case 'name':
-          patchArr.push({
-            op: 'replace',
-            path: '/name',
-            value: data[prop],
-          });
-          break;
-        case 'state':
-          patchArr.push({
-            op: 'replace',
-            path: '/state',
-            value: data[prop],
-          });
-          break;
-        case 'folder':
-          patchArr.push({
-            op: 'replace',
-            path: '/folder',
-            value: data[prop],
-          });
-        case 'owner':
-          patchArr.push({
-            op: 'replace',
-            path: '/owner',
-            value: data[prop],
-          });
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    const res3 = await dashboardContainer
-      .item(data.id, data.id)
-      .patch(patchArr);
-    return res3.resource;
-  } catch (error) {}
+  if (dbSource === COSMOS_DB) {
+    return cdb.updateDashboard(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.updateDashboard(data);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const readDashboardById = async (dashboardId: string) => {
-  const querySpec = {
-    query: 'select * from dashboards p where p.id=@dashboardId',
-    parameters: [
-      {
-        name: '@dashboardId',
-        value: dashboardId,
-      },
-    ],
-  };
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-  const { resources } = await dashboardContainer.items
-    .query(querySpec)
-    .fetchAll();
-  if (resources.length === 1) {
-    return resources[0];
-  } else if (resources.length === 0) {
-    throw new NotFoundError('No dashboard found.');
+  if (dbSource === COSMOS_DB) {
+    return cdb.readDashboardById(dashboardId);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.readDashboardById(dashboardId);
   }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-  const res = await dashboardContainer.item(data.id, data.id).delete();
-
-  return 'Dashboard deleted!';
+  if (dbSource === COSMOS_DB) {
+    return cdb.deleteDashboard(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.deleteDashboard(data);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const readDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<DashboardsReadRes> => {
-  try {
-    const res = await fetchData(body, DASHBOARDS);
-
-    return { dashboards: res.values, totalDashboards: res.count };
-  } catch (error) {
-    if (error?.code === 404) {
-      throw new NotFoundError('No dashboards found');
-    }
+  if (dbSource === COSMOS_DB) {
+    return cdb.readDashboards(body);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.readDashboards(body);
   }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
-  const res = (await createTableDataEdge({
-    edge: 'groups-dashboards',
-    edgeType: 'oneToMany',
-    tableFrom: {
-      tableName: AUTH_GROUPS,
-      rows: data.authGroups as any,
-      partitionKeyProp: 'name',
-    },
-    tableTo: {
-      tableName: DASHBOARDS,
-      rows: data.authGroups.map((group) => {
-        return {
-          id: data.id,
-
-          create: group.create,
-          read: group.read,
-          update: group.update,
-          delete: group.delete,
-        };
-      }),
-    },
-  })) as any;
-
-  return {
-    authGroups: res.map((el) => el.from) as DashboardAuthGroups[],
-    id: data.id,
-    name: res[0].docName,
-  };
+  if (dbSource === COSMOS_DB) {
+    return cdb.createDashboardAuthGroup(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.createDashboardAuthGroup(data);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const readDashboardGroupAuth = async (
   data: DashboardGroupAuthReadReq,
 ): Promise<DashboardGroupAuthReadRes> => {
-  const res = await readTableDataEdge({
-    edge: {
-      direction: 'from',
-      edgeLabel: 'groups-dashboards',
-      tableName: AUTH_GROUPS,
-    },
-    rowId: data.id,
-    tableName: DASHBOARDS,
-    filters: data.filters,
-    from: data.from,
-    to: data.to,
-  });
-
-  if (res.count === 0) {
-    throw new NotFoundError('No group auth found.');
+  if (dbSource === COSMOS_DB) {
+    return cdb.readDashboardGroupAuth(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.readDashboardGroupAuth(data);
   }
-  return {
-    authGroups: res.edges as any[],
-    id: data.id,
-    totalCount: res.count,
-  };
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const deleteDashboardGroupAuth = async (
   data: DashboardGroupAuthDeleteReq,
 ): Promise<DashboardGroupAuthDeleteRes> => {
-  // checkFields(data.authGroups);
-  const res = await deleteTableDataEdge({
-    rowId: data.id,
-    tableName: DASHBOARDS,
-    edge: {
-      direction: 'to',
-      edgeLabel: 'groups-users',
-      tableName: AUTH_GROUPS,
-      rows: data.authGroups as any,
-      partitionKeyProp: 'username',
-    },
-  });
-
-  return 'Auth Groups disassociated from dashboard';
+  if (dbSource === COSMOS_DB) {
+    return cdb.deleteDashboardGroupAuth(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.deleteDashboardGroupAuth(data);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const updateDashboardGroupAuth = async (
   data: DashboardGroupAuthUpdateReq,
 ): Promise<DashboardGroupAuthUpdateRes> => {
-  const authGroupContainer = await fetchContainer(DASHBOARDS);
-
-  const res = await authGroupContainer.item(data.id, data.id).read();
-
-  if (res.statusCode === 404) {
-    throw new NotFoundError(
-      `Did not find any group at id "${data.id}" `,
-    );
+  if (dbSource === COSMOS_DB) {
+    return cdb.updateDashboardGroupAuth(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.updateDashboardGroupAuth(data);
   }
-
-  const res2 = (await updateTableDataEdge({
-    tableFrom: {
-      rows: data.authGroups as any,
-      tableName: AUTH_GROUPS,
-      partitionKeyProp: 'name',
-    },
-    edge: 'groups-dashboards',
-    edgeType: 'oneToMany',
-    tableTo: {
-      tableName: DASHBOARDS,
-      rows: data.authGroups.map((group) => {
-        return { ...group, id: data.id, name: res.resource.name };
-      }) as any,
-    },
-  })) as any;
-
-  return {
-    authGroups: res2.map((el) => el.to) as DashboardAuthGroups[],
-    id: data.id,
-    name: res.resource.name,
-  };
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };

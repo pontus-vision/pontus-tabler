@@ -38,14 +38,14 @@ import {
   RegisterUserReq,
   TokenReq,
   TokenRes,
-} from '../typescript/api';
+} from '../../typescript/api';
 import {
   cosmosDbName,
   fetchContainer,
   fetchData,
   fetchDatabase,
   filterToQuery,
-} from '../cosmos-utils';
+} from '../../cosmos-utils';
 import {
   Container,
   Item,
@@ -60,7 +60,7 @@ import {
   NotFoundError,
   TemporaryRedirect,
   UnauthorizedError,
-} from '../generated/api';
+} from '../../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';

@@ -1,4 +1,5 @@
 import {
+  InternalServerError,
   ReadPaginationFilter,
   TableCreateReq,
   TableCreateRes,
@@ -8,121 +9,66 @@ import {
   TableUpdateReq,
   TablesReadRes,
 } from '../typescript/api';
-import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
-import {
-  Container,
-  PartitionKeyDefinition,
-  UniqueKeyPolicy,
-} from '@azure/cosmos';
-import { NotFoundError } from '../generated/api';
-
-export const TABLES = 'tables';
-
-const partitionKey: string | PartitionKeyDefinition = {
-  paths: ['/name'],
-};
-
-const uniqueKeyPolicy: UniqueKeyPolicy = {
-  uniqueKeys: [{ paths: ['/name'] }],
-};
-
-export const initiateTableContainer = async (): Promise<Container> => {
-  return await fetchContainer(TABLES, partitionKey, uniqueKeyPolicy);
-};
+import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
+import * as cdb from './cosmosdb';
+import * as deltadb from './delta';
 
 export const createTable = async (
   data: TableCreateReq,
 ): Promise<TableCreateRes> => {
-  const tableContainer = await initiateTableContainer();
-
-  const res = await tableContainer.items.create(data);
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
-
-  // return rest;
-
-  return rest;
+  if (dbSource === COSMOS_DB) {
+    return cdb.createTable(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.createTable(data);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const updateTable = async (data: TableUpdateReq) => {
-  try {
-    const tableContainer = await initiateTableContainer();
-
-    const res = await tableContainer.items.upsert(data);
-    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-      res.resource as any;
-
-    return rest;
-  } catch (error) {
-    throw error;
+  if (dbSource === COSMOS_DB) {
+    return cdb.updateTable(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.updateTable(data);
   }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const readTableById = async (
   data: TableReadReq,
 ): Promise<TableReadRes> => {
-  const querySpec = {
-    query: 'select * from tables p where p.id=@tableId',
-    parameters: [
-      {
-        name: '@tableId',
-        value: data.id,
-      },
-    ],
-  };
-  const tableContainer = await initiateTableContainer();
-
-  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-
-  if (resources.length === 1) {
-    return resources[0];
-  } else if (resources.length === 0) {
-    throw new NotFoundError('Table not found');
+  if (dbSource === COSMOS_DB) {
+    return cdb.readTableById(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.readTableById(data);
   }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const readTableByName = async (name: string): Promise<TableReadRes> => {
-  const querySpec = {
-    query: 'select * from tables p where p.name=@tableName',
-    parameters: [
-      {
-        name: '@tableName',
-        value: name,
-      },
-    ],
-  };
-
-  const tableContainer = await initiateTableContainer();
-
-  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-
-  if (resources.length === 1) {
-    return resources[0];
-  } else if (resources.length === 0) {
-    throw { code: 404, message: 'No table found.' };
+  if (dbSource === COSMOS_DB) {
+    return cdb.readTableByName(name);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.readTableByName(name);
   }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const deleteTable = async (data: TableDeleteReq) => {
-  try {
-    const tableContainer = await initiateTableContainer();
-    const res = await tableContainer.item(data.id, data.name).delete();
-
-    const res2 = (await fetchContainer(data.name)).read();
-
-    if ((await res2).statusCode === 200) {
-      const res3 = await deleteContainer(data.name);
-    }
-
-    return 'Table deleted!';
-  } catch (error) {
-    throw error;
+  if (dbSource === COSMOS_DB) {
+    return cdb.deleteTable(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.deleteTable(data);
   }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const readTables = async (
   body: ReadPaginationFilter,
 ): Promise<TablesReadRes> => {
-  const res = await fetchData(body, 'tables');
-  return { totalTables: res.count, tables: res.values };
+  if (dbSource === COSMOS_DB) {
+    return cdb.readTables(body);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.readTables(body);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
