@@ -90,7 +90,6 @@ const EdgeGridView = ({
   };
   useEffect(() => {
     fetchTableRows();
-    console.log('FETCHING EDGES');
   }, [filters, from, to]);
 
   useEffect(() => {
