@@ -1,57 +1,6 @@
 import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
-import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../generated/api';
-import {
-  AuthGroupCreateReq,
-  AuthGroupCreateRes,
-  AuthGroupDashboardCreateReq,
-  AuthGroupDashboardDeleteReq,
-  AuthGroupDashboardDeleteRes,
-  AuthGroupDeleteReq,
-  AuthGroupDeleteRes,
-  AuthGroupReadReq,
-  AuthGroupReadRes,
-  AuthGroupRef,
-  AuthGroupUpdateReq,
-  AuthGroupUpdateRes,
-  AuthGroupsReadRes,
-  AuthGroupDashboardCreateRes,
-  AuthGroupDashboardRef,
-  AuthGroupDashboardsReadRes,
-  AuthGroupDashboardUpdateReq,
-  AuthGroupDashboardUpdateRes,
-  AuthGroupDashboardsReadReq,
-  DashboardAuthGroups,
-  AuthGroupUsersReadReq,
-  AuthGroupUsersReadRes,
-  AuthGroupUsersUpdateReq,
-  AuthGroupUsersUpdateRes,
-  AuthGroupUsersDeleteReq,
-  AuthGroupUsersDeleteRes,
-  AuthGroupUsersCreateReq,
-  AuthGroupUsersCreateRes,
-  AuthGroupTablesCreateReq,
-  AuthGroupTablesCreateRes,
-  AuthGroupTablesDeleteReq,
-  AuthGroupTablesDeleteRes,
-  NameAndIdRef,
-  ReadPaginationFilterFilters,
-  ReadPaginationFilter,
-  AuthGroupTablesReadReq,
-  AuthGroupTablesReadRes,
-  AuthGroupTableCreateReq,
-  AuthGroupTableCreateRes,
-  CrudDocumentRef,
-  AuthGroupTableReadReq,
-  AuthGroupTableReadRes,
-  AuthGroupTableUpdateReq,
-  AuthGroupTableUpdateRes,
-  EdgeDirectionEnum,
-  AuthGroupUsersRef,
-  UsernameAndIdRef,
-  TableDataEdgeRef,
-  TableDataEdgeCreateRef,
-  TableEdgeRef,
-} from '../typescript/api';
+import { AuthGroupCreateReq, AuthGroupDashboardCreateReq, AuthGroupDashboardCreateRes, AuthGroupDashboardDeleteReq, AuthGroupDashboardDeleteRes, AuthGroupDashboardRef, AuthGroupDashboardUpdateReq, AuthGroupDashboardUpdateRes, AuthGroupDashboardsReadReq, AuthGroupDashboardsReadRes, AuthGroupDeleteReq, AuthGroupDeleteRes, AuthGroupReadReq, AuthGroupReadRes, AuthGroupRef, AuthGroupTableReadReq, AuthGroupTableReadRes, AuthGroupTableUpdateReq, AuthGroupTableUpdateRes, AuthGroupTablesCreateReq, AuthGroupTablesCreateRes, AuthGroupTablesDeleteReq, AuthGroupTablesDeleteRes, AuthGroupTablesReadReq, AuthGroupTablesReadRes, AuthGroupUpdateReq, AuthGroupUpdateRes, AuthGroupUsersCreateReq, AuthGroupUsersCreateRes, AuthGroupUsersDeleteReq, AuthGroupUsersDeleteRes, AuthGroupUsersReadReq, AuthGroupUsersReadRes, AuthGroupUsersUpdateReq, AuthGroupUsersUpdateRes, AuthGroupsReadReq, AuthGroupsReadRes, AuthUserIdAndUsername, CrudDocumentRef, InternalServerError, NameAndIdRef, UsernameAndIdRef } from '../generated/api';
+
 import {
   ConflictEntityError,
   NotFoundError,
@@ -72,22 +21,19 @@ import {
   authUserGroupsRead,
 } from './AuthUserService';
 import { TABLES } from './TableService';
-import {
-  GROUPS_DASHBOARDS,
-  GROUPS_TABLES,
-  createConnection,
-  createTableDataEdge,
-  deleteTableDataEdge,
-  readEdge,
-  readTableDataEdge,
-  updateConnection,
-  updateTableDataEdge,
-} from './EdgeService';
+import * as cdb from './cosmosdb';
+import * as deltadb from './delta';
 import { readTableData } from './TableDataService';
 import { snakeCase } from 'lodash';
 import { NODATA } from 'dns';
+import { createTableDataEdge, readTableDataEdge, updateTableDataEdge, deleteTableDataEdge, readEdge, GROUPS_DASHBOARDS, GROUPS_TABLES } from './EdgeService';
 export const AUTH_GROUPS = 'auth_groups';
 export const ADMIN_GROUP_NAME = 'Admin';
+
+const COSMOS_DB = 'cosmosdb';
+const DELTA_DB = 'deltadb';
+
+const dbSource = process.env.DB_SOURCE || COSMOS_DB;
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],
@@ -146,13 +92,11 @@ export const initiateAuthGroupContainer = async (): Promise<Container> => {
   return authGroupContainer;
 };
 
-export const createAuthGroup = async (
-  data: AuthGroupCreateReq,
-) => {
+export const createAuthGroup = async (data: AuthGroupCreateReq) => {
   const authGroupContainer = await initiateAuthGroupContainer();
 
   try {
-    const res = await authGroupContainer.items.create({
+    const res = (await authGroupContainer.items.create({
       ...data,
       tableMetadata: {
         create: false,
@@ -160,7 +104,7 @@ export const createAuthGroup = async (
         update: false,
         delete: false,
       },
-    }) as ItemResponse<AuthGroupRef>;
+    })) as ItemResponse<AuthGroupRef>;
 
     const { name, id, tableMetadata } = res.resource;
     return { name, id, tableMetadata };
@@ -272,55 +216,13 @@ export const readAuthGroup = async (
 export const deleteAuthGroup = async (
   data: AuthGroupDeleteReq,
 ): Promise<AuthGroupDeleteRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
-
-  const res = await authGroupContainer.item(data.id, data.name).read();
-
-  if (res?.statusCode === 404) {
-    throw new NotFoundError(`Auth Group not found at id: ${data.id}`);
+  if (dbSource === COSMOS_DB) {
+    return cdb.deleteAuthGroup(data);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.deleteAuthGroup(data);
   }
 
-  const edges = res.resource?.edges;
-  const arr = [];
-
-  if (Object.values(edges || {}).length > 0) {
-    for (const prop in edges) {
-      const tableName = prop;
-      for (const prop2 in edges[prop]) {
-        const edgeLabel = prop2;
-        for (const prop3 in edges[prop][prop2]) {
-          const direction = prop3;
-          for (const value of edges[prop][prop2][prop3]) {
-            console.log({ value });
-            const snakeTableName = snakeCase(tableName)
-            const res2 = await deleteTableDataEdge({
-              edge: {
-                direction: direction as EdgeDirectionEnum,
-                edgeLabel,
-                tableName: snakeTableName,
-                rows: [value],
-                partitionKeyProp:
-                  snakeTableName === AUTH_GROUPS || snakeTableName === TABLES
-                    ?'name' 
-                    : snakeTableName === AUTH_USERS
-                    ? 'username'
-                    : '',
-              },
-              rowId: data.id,
-              tableName: AUTH_GROUPS,
-              rowPartitionKey: data.name,
-            });
-          }
-        }
-      }
-    }
-  }
-
-  const res3 = (await authGroupContainer
-    .item(data.id, data.name)
-    .delete()) as ItemResponse<AuthGroupRef>;
-
-  return `AuthGroup deleted.`;
+  throw new InternalServerError(`invalid data source. ${dbSource}`)
 };
 
 export const readAuthGroups = async (
