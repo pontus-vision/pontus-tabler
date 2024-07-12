@@ -23,7 +23,7 @@ import {
   ConflictEntityError,
   NotFoundError,
 } from '../../generated/api';
-import { AUTH_GROUPS } from './AuthUserService';
+import { AUTH_GROUPS } from './AuthGroupService';
 import { initiateAuthGroupContainer } from './AuthGroupService';
 
 export const GROUPS_DASHBOARDS = 'groups-dashboards';

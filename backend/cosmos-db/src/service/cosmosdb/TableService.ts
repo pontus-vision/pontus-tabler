@@ -7,14 +7,14 @@ import {
   TableReadRes,
   TableUpdateReq,
   TablesReadRes,
-} from '../typescript/api';
-import { deleteContainer, fetchContainer, fetchData } from '../cosmos-utils';
+} from '../../typescript/api';
+import { deleteContainer, fetchContainer, fetchData } from '../../cosmos-utils';
 import {
   Container,
   PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
-import { NotFoundError } from '../generated/api';
+import { NotFoundError } from '../../generated/api';
 
 export const TABLES = 'tables';
 

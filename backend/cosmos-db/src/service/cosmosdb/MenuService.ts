@@ -5,15 +5,15 @@ import {
   MenuCreateRes,
   MenuReadRes,
   MenuItemTreeRef,
-} from '../typescript/api/index';
-import { fetchContainer } from '../cosmos-utils';
+} from '../../typescript/api/index';
+import { fetchContainer } from '../../cosmos-utils';
 import {
   Container,
   ItemResponse,
   PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
-import { BadRequestError, NotFoundError } from '../generated/api';
+import { BadRequestError, NotFoundError } from '../../generated/api';
 import { updateDashboard, createDashboard } from './DashboardService';
 
 const MENU = 'menu';

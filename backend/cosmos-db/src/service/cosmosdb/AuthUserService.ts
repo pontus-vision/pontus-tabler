@@ -38,14 +38,14 @@ import {
   RegisterUserReq,
   TokenReq,
   TokenRes,
-} from '../typescript/api';
+} from '../../typescript/api';
 import {
   cosmosDbName,
   fetchContainer,
   fetchData,
   fetchDatabase,
   filterToQuery,
-} from '../cosmos-utils';
+} from '../../cosmos-utils';
 import {
   Container,
   Item,
@@ -60,12 +60,13 @@ import {
   NotFoundError,
   TemporaryRedirect,
   UnauthorizedError,
-} from '../generated/api';
+} from '../../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import {
   ADMIN_GROUP_NAME,
+  AUTH_GROUPS,
   createAuthGroup,
   createAuthUserGroup,
   initiateAuthGroupContainer,
@@ -80,7 +81,6 @@ import {
 import { DASHBOARDS } from './DashboardService';
 dotenv.config();
 export const AUTH_USERS = 'auth_users';
-export const AUTH_GROUPS = 'auth_groups';
 export const ADMIN_USER_USERNAME = 'ADMIN';
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/username'],
