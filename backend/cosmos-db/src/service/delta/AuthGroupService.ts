@@ -1,5 +1,5 @@
-import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
-import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../generated/api';
+import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
+import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api';
 import {
   AuthGroupCreateReq,
   AuthGroupCreateRes,
@@ -51,12 +51,12 @@ import {
   TableDataEdgeRef,
   TableDataEdgeCreateRef,
   TableEdgeRef,
-} from '../typescript/api';
+} from '../../typescript/api';
 import {
   ConflictEntityError,
   NotFoundError,
   BadRequestError,
-} from '../generated/api';
+} from '../../generated/api';
 
 import {
   Container,

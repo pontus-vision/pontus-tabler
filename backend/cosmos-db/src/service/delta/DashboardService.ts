@@ -16,9 +16,9 @@ import {
   DashboardCreateRes,
   DashboardAuthGroupsRef,
   DashboardAuthGroups,
-} from '../typescript/api';
-import { fetchContainer, fetchData, filterToQuery } from '../cosmos-utils';
-import { NotFoundError } from '../generated/api';
+} from '../../typescript/api';
+import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
+import { NotFoundError } from '../../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { CosmosClient } from '@azure/cosmos';
 import { initiateMenuContainer } from './MenuService';

@@ -5,8 +5,8 @@ import {
   TableDataReadRes,
   TableDataRowRef,
   TableDataUpdateReq,
-} from '../typescript/api';
-import { fetchContainer, fetchData } from '../cosmos-utils';
+} from '../../typescript/api';
+import { fetchContainer, fetchData } from '../../cosmos-utils';
 import { PatchOperation } from '@azure/cosmos';
 import {
   TABLES,
