@@ -1,7 +1,6 @@
 import { InternalServerError } from 'express-openapi-validator/dist/openapi.validator';
 import {
   BadRequestError,
-  ConflictEntityError,
   NotFoundError,
   UnauthorizedError,
 } from './generated/api';
@@ -64,11 +63,8 @@ import {
   readAuthGroupTables,
   readAuthGroupTable,
   updateAuthGroupTable,
-  checkPermissions,
-  checkTableMetadataPermissions,
 } from './service/AuthGroupService';
 import {
-  AUTH_USERS,
   authUserCreate,
   authUserDelete,
   authUserGroupsCreate,
@@ -78,17 +74,15 @@ import {
   authUserRead,
   authUserUpdate,
   authUsersRead,
-  authenticateToken,
-  checkAdmin,
-  checkUserPermissions,
   loginUser,
   logout,
-  refreshToken,
   registerAdmin,
   registerUser,
   setup,
 } from './service/AuthUserService';
 import { Request } from 'express';
+import { checkPermissions, checkTableMetadataPermissions } from './service/cosmosdb/AuthGroupService';
+import { authenticateToken, refreshToken, checkAdmin } from './service/cosmosdb/AuthUserService';
 
 export default new PontusService({
   registerUserPost: async (req, res) => {
