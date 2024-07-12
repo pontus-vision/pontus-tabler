@@ -17,8 +17,8 @@ import {
   InternalServerError,
 } from '../typescript/api';
 import { COSMOS_DB, DELTA_DB, dbSource } from './AuthGroupService';
-import * as cdb from './cosmosdb';
-import * as deltadb from './delta';
+import * as cdb from './cosmosdb/index';
+import * as deltadb from './delta/index';
 
 export const DASHBOARDS = 'dashboards';
 

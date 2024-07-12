@@ -11,13 +11,12 @@ import {
   InternalServerError,
 } from '../typescript/api';
 import { COSMOS_DB, DELTA_DB, dbSource } from './AuthGroupService';
-import * as cdb from './cosmosdb';
-import * as deltadb from './delta';
+import * as cdb from './cosmosdb/index';
+import * as deltadb from './delta/index';
 
 export const GROUPS_DASHBOARDS = 'groups-dashboards';
 export const GROUPS_USERS = 'groups-users';
 export const GROUPS_TABLES = 'groups-tables';
-
 
 export const createTableDataEdge = async (
   data: TableDataEdgeCreateReq,
@@ -65,9 +64,9 @@ export const createTableEdge = async (
   data: TableEdgeCreateReq,
 ): Promise<any> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.createTableDataEdge(data);
+    return cdb.createTableEdge(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.createTableDataEdge(data);
+    return deltadb.createTableEdge(data);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };

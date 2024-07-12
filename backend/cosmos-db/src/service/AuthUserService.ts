@@ -29,8 +29,8 @@ import {
 } from '../typescript/api';
 import { InternalServerError } from '../generated/api';
 import dotenv from 'dotenv';
-import * as cdb from './cosmosdb';
-import * as deltadb from './delta';
+import * as cdb from './cosmosdb/index';
+import * as deltadb from './delta/index';
 import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
 dotenv.config();
 
@@ -113,9 +113,9 @@ export const authUsersRead = async (
   data: AuthUsersReadReq,
 ): Promise<AuthUsersReadRes> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.authUserRead(data);
+    return cdb.authUsersRead(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.authUserRead(data);
+    return deltadb.authUsersRead(data);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
@@ -124,9 +124,9 @@ export const authUserGroupsCreate = async (
   data: AuthUserGroupsCreateReq,
 ): Promise<AuthUserGroupsCreateRes> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.authUserRead(data);
+    return cdb.authUserGroupsCreate(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.authUserRead(data);
+    return deltadb.authUserGroupsCreate(data);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };

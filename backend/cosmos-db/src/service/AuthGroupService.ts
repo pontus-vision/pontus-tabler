@@ -34,11 +34,13 @@ import {
   AuthGroupUsersUpdateRes,
   AuthGroupsReadReq,
   AuthGroupsReadRes,
+
   InternalServerError,
+
 } from '../generated/api';
 
-import * as cdb from './cosmosdb';
-import * as deltadb from './delta';
+import * as cdb from './cosmosdb/index';
+import * as deltadb from './delta/index';
 
 export const COSMOS_DB = 'cosmosdb';
 export const DELTA_DB = 'deltadb';
@@ -60,7 +62,7 @@ export const updateAuthGroup = async (
   if (dbSource === COSMOS_DB) {
     return cdb.updateAuthGroup(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.updateAuthGroupp(data);
+    return deltadb.updateAuthGroup(data);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
@@ -92,9 +94,9 @@ export const readAuthGroups = async (
   data: AuthGroupsReadReq,
 ): Promise<AuthGroupsReadRes> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.readAuthGroup(data);
+    return cdb.readAuthGroups(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.readAuthGroup(data);
+    return deltadb.readAuthGroups(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
@@ -176,9 +178,9 @@ export const readAuthGroupUsers = async (
   data: AuthGroupUsersReadReq,
 ): Promise<AuthGroupUsersReadRes> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.readAuthGroupTables(data);
+    return cdb.readAuthGroupUsers(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.readAuthGroupTables(data);
+    return deltadb.readAuthGroupUsers(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
@@ -212,9 +214,9 @@ export const createAuthGroupTables = async (
   data: AuthGroupTablesCreateReq,
 ): Promise<AuthGroupTablesCreateRes> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.createAuthGroupUsers(data);
+    return cdb.createAuthGroupTables(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.createAuthGroupUsers(data);
+    return deltadb.createAuthGroupTables(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
@@ -224,9 +226,9 @@ export const deleteAuthGroupTables = async (
   data: AuthGroupTablesDeleteReq,
 ): Promise<AuthGroupTablesDeleteRes> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.createAuthGroupUsers(data);
+    return cdb.deleteAuthGroupTables(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.createAuthGroupUsers(data);
+    return deltadb.deleteAuthGroupTables(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
@@ -238,7 +240,7 @@ export const readAuthGroupTable = async (
   if (dbSource === COSMOS_DB) {
     return cdb.readAuthGroupTable(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.readAuthGroupUsers(data);
+    return deltadb.readAuthGroupTable(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
@@ -250,7 +252,7 @@ export const updateAuthGroupTable = async (
   if (dbSource === COSMOS_DB) {
     return cdb.updateAuthGroupTable(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.updateAuthGroupUsers(data);
+    return deltadb.updateAuthGroupTable(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);

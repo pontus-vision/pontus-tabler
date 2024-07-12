@@ -7,8 +7,8 @@ import {
   TableDataUpdateReq,
 } from '../typescript/api';
 import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
-import * as cdb from './cosmosdb';
-import * as deltadb from './delta';
+import * as cdb from './cosmosdb/index';
+import * as deltadb from './delta/index';
 
 export const createTableData = async (data: TableDataCreateReq) => {
   if (dbSource === COSMOS_DB) {
@@ -41,9 +41,9 @@ export const readTableData = async (
   body: TableDataReadReq,
 ): Promise<TableDataReadRes> => {
   if (dbSource === COSMOS_DB) {
-    return cdb.deleteTableData(body);
+    return cdb.readTableData(body);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.deleteTableData(body);
+    return deltadb.readTableData(body);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };

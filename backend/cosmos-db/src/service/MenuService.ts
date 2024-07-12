@@ -15,8 +15,8 @@ import {
 } from '@azure/cosmos';
 import { InternalServerError } from '../generated/api';
 import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
-import * as cdb from './cosmosdb';
-import * as deltadb from './delta';
+import * as cdb from './cosmosdb/index';
+import * as deltadb from './delta/index';
 
 const MENU = 'menu';
 
