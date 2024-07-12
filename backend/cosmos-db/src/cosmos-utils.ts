@@ -8,20 +8,7 @@ import {
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
-import {
-  ADMIN_GROUP_NAME,
-  AUTH_GROUPS,
-  authGroupContainerProps,
-  createAuthUserGroup,
-  initiateAuthGroupContainer,
-} from './service/AuthGroupService';
-import { createTableDataEdge } from './service/EdgeService';
-import {
-  ADMIN_USER_USERNAME,
-  AUTH_USERS,
-  authUserContainerProps,
-  initiateAuthUserContainer,
-} from './service/AuthUserService';
+import { AUTH_GROUPS, authGroupContainerProps } from './service/cosmosdb';
 
 export interface FetchData {
   count: number;
