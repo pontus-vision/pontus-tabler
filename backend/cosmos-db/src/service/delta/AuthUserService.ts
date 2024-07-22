@@ -70,6 +70,7 @@ import {
   createAuthGroup,
   createAuthUserGroup,
   initiateAuthGroupContainer,
+  objEntriesToStr,
 } from './AuthGroupService';
 import {
   createTableDataEdge,
@@ -79,6 +80,8 @@ import {
   updateTableDataEdge,
 } from './EdgeService';
 import { DASHBOARDS } from './DashboardService';
+import { executeQuery } from '../../../../delta-table/node/index-jdbc';
+import { has } from 'lodash';
 dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const ADMIN_USER_USERNAME = 'ADMIN';
@@ -189,22 +192,26 @@ export const authUserCreate = async (
     );
   }
 
-  const authUserContainer = await initiateAuthUserContainer();
-
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  try {
-    const res = await authUserContainer.items.create({
-      ...data,
-      password: hashedPassword,
-      authGroups: [],
-      refreshTokens: [],
-    });
+  const { keysStr, valuesStr } = objEntriesToStr({...data, password: hashedPassword});
 
-    const { id, username } = res.resource;
+
+  try {
+    const res = executeQuery(
+      `CREATE TABLE IF NOT EXISTS ${AUTH_USERS} (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2'`
+    );
+    
+    const res2 = executeQuery(
+    `INSERT INTO ${AUTH_USERS} (id, username, password) values (1, '${data.username}', '${hashedPassword}')`
+    );
+
+    const res3 = executeQuery(
+      `SELECT * FROM delta.\`/data/delta-test-2\``
+      );
 
     return {
-      username,
-      id,
+      username: '',
+      id: '',
     };
   } catch (error) {
     if (error?.code === 409) {

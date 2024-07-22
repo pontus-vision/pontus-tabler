@@ -58,6 +58,8 @@ import {
   BadRequestError,
 } from '../../generated/api';
 
+import { executeQuery } from '../../../../delta-table/node/index-jdbc';
+
 import {
   Container,
   ItemResponse,
@@ -146,13 +148,38 @@ export const initiateAuthGroupContainer = async (): Promise<Container> => {
   return authGroupContainer;
 };
 
-export const createAuthGroup = async (
-  data: AuthGroupCreateReq,
-) => {
+export const objEntriesToStr = (
+  data: Record<string, any>,
+): { keysStr: string; valuesStr: string } => {
+  const keys = [];
+  const values = [];
+
+  for (const [key, value] of Object.entries(data)) {
+    keys.push(key);
+    const valType = typeof value;
+    if (valType === 'string') {
+      values.push(`'${value}'`);
+    } else if (valType === 'number') {
+      values.push(value);
+    }
+  }
+
+  const keysStr = keys.join(', ');
+  const valuesStr = values.join(', ');
+  return { keysStr, valuesStr };
+};
+
+export const createAuthGroup = async (data: AuthGroupCreateReq) => {
+  const { keysStr, valuesStr } = objEntriesToStr(data);
+
+  const res = executeQuery(
+    `INSERT INTO ${AUTH_GROUPS} (${keysStr}) VALUES (${valuesStr})`,
+  );
+
   const authGroupContainer = await initiateAuthGroupContainer();
 
   try {
-    const res = await authGroupContainer.items.create({
+    const res = (await authGroupContainer.items.create({
       ...data,
       tableMetadata: {
         create: false,
@@ -160,7 +187,7 @@ export const createAuthGroup = async (
         update: false,
         delete: false,
       },
-    }) as ItemResponse<AuthGroupRef>;
+    })) as ItemResponse<AuthGroupRef>;
 
     const { name, id, tableMetadata } = res.resource;
     return { name, id, tableMetadata };
@@ -292,7 +319,7 @@ export const deleteAuthGroup = async (
           const direction = prop3;
           for (const value of edges[prop][prop2][prop3]) {
             console.log({ value });
-            const snakeTableName = snakeCase(tableName)
+            const snakeTableName = snakeCase(tableName);
             const res2 = await deleteTableDataEdge({
               edge: {
                 direction: direction as EdgeDirectionEnum,
@@ -301,7 +328,7 @@ export const deleteAuthGroup = async (
                 rows: [value],
                 partitionKeyProp:
                   snakeTableName === AUTH_GROUPS || snakeTableName === TABLES
-                    ?'name' 
+                    ? 'name'
                     : snakeTableName === AUTH_USERS
                     ? 'username'
                     : '',
@@ -472,25 +499,19 @@ export const deleteAuthGroupDashboards = async (
 export const createAuthUserGroup = async (
   data: AuthGroupUsersCreateReq,
 ): Promise<AuthGroupUsersCreateRes> => {
-  const res = (await createTableDataEdge({
-    edge: 'groups-users',
-    edgeType: 'oneToMany',
-    tableFrom: {
-      tableName: AUTH_GROUPS,
-      rows: [{ id: data.id, name: data.name }],
-      partitionKeyProp: 'name',
-    },
-    tableTo: {
-      tableName: AUTH_USERS,
-      rows: data.authUsers as any,
-      partitionKeyProp: 'username',
-    },
-  })) as any;
+  const { authUsers, id, name } = data;
 
+  const res = executeQuery(
+    `CREATE TABLE IF NOT EXISTS auth_users_groups (group_id INT, user_id INT) USING DELTA LOCATION '/data/delta-test'
+     INSERT INTO auth_users_groups (group_id, user_id) VALUES ${authUsers.map(
+       (user) => `(${id}, ${user.id})`,
+     )}`,
+  );
   return {
     id: data.id,
     name: data.name,
-    authUsers: res.map((el) => el.to) as UsernameAndIdRef[],
+    authUsers: [],
+    // authUsers: res.map((el) => el.to) as UsernameAndIdRef[],
   };
 };
 
