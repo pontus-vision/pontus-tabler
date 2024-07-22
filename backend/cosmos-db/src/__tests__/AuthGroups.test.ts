@@ -67,10 +67,10 @@ import { post, stateObj } from './test-utils';
 import { DashboardGroupAuthCreateReq } from '../generated/api';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
-import { AUTH_GROUPS, createAuthGroup } from '../service/AuthGroupService';
+import { AUTH_GROUPS, createAuthGroup } from '../service/cosmosdb/AuthGroupService';
 import { DASHBOARDS, createDashboard } from '../service/DashboardService';
-import { AUTH_USERS } from '../service/AuthUserService';
-import { TABLES } from '../service/TableService';
+import { AUTH_USERS } from '../service/cosmosdb/AuthUserService';
+import { TABLES } from '../service/cosmosdb/TableService';
 import { create } from 'lodash';
 
 // // Mock the utils.writeJson function
@@ -155,10 +155,10 @@ describe('dashboardCreatePOST', () => {
   beforeEach(async () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    await deleteContainer(AUTH_GROUPS);
-    await deleteContainer(DASHBOARDS);
-    await deleteContainer(AUTH_USERS);
-    await deleteContainer(TABLES);
+    // await deleteContainer(AUTH_GROUPS);
+    // await deleteContainer(DASHBOARDS);
+    // await deleteContainer(AUTH_USERS);
+    // await deleteContainer(TABLES);
 
     const createAdminBody: RegisterAdminReq = {
       username: 'admin',
@@ -192,7 +192,7 @@ describe('dashboardCreatePOST', () => {
     srv.close();
   });
 
-  it('should create a group', async () => {
+  it.only('should create a group', async () => {
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
     };
