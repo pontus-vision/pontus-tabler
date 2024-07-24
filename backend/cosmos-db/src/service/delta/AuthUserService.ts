@@ -133,18 +133,20 @@ export const setup = async (): Promise<InitiateRes> => {
   return '/login';
 };
 
+interface registerUser {
+  data: RegisterUserReq;
+  jdbc: any;
+}
+
 export const registerUser = async (
   data: RegisterUserReq,
+  jdbc: any,
 ): Promise<RegisterUserRes> => {
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }
 
-  const res = await authUserCreate({
-    username: data.username,
-    password: data.password,
-    passwordConfirmation: data.passwordConfirmation,
-  });
+  const res = await authUserCreate(data, jdbc);
 
   return {
     id: res.id,
@@ -154,16 +156,13 @@ export const registerUser = async (
 
 export const registerAdmin = async (
   data: RegisterAdminReq,
+  jdbc: any,
 ): Promise<RegisterAdminRes> => {
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }
 
-  const res = await authUserCreate({
-    username: data.username,
-    password: data.password,
-    passwordConfirmation: data.passwordConfirmation,
-  });
+  const res = await authUserCreate(data, jdbc);
 
   const group = await createAuthGroup({ name: ADMIN_GROUP_NAME });
 
@@ -179,8 +178,14 @@ export const registerAdmin = async (
   };
 };
 
+export interface authUserCreate {
+  jdbc: any;
+  data: AuthUserCreateReq;
+}
+
 export const authUserCreate = async (
   data: AuthUserCreateReq,
+  jdbc: any,
 ): Promise<AuthUserCreateRes> => {
   if (data.password.length < 6) {
     throw new BadRequestError('Please, insert at least 6 characters.');
@@ -193,21 +198,26 @@ export const authUserCreate = async (
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  const { keysStr, valuesStr } = objEntriesToStr({...data, password: hashedPassword});
-
+  const { keysStr, valuesStr } = objEntriesToStr({
+    ...data,
+    password: hashedPassword,
+  });
 
   try {
     const res = executeQuery(
-      `CREATE TABLE IF NOT EXISTS ${AUTH_USERS} (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2'`
+      jdbc,
+      `CREATE TABLE IF NOT EXISTS ${AUTH_USERS} (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2'`,
     );
-    
+
     const res2 = executeQuery(
-    `INSERT INTO ${AUTH_USERS} (id, username, password) values (1, '${data.username}', '${hashedPassword}')`
+      jdbc,
+      `INSERT INTO ${AUTH_USERS} (id, username, password) values (1, '${data.username}', '${hashedPassword}')`,
     );
 
     const res3 = executeQuery(
-      `SELECT * FROM delta.\`/data/delta-test-2\``
-      );
+      jdbc,
+      `SELECT * FROM delta.\`/data/delta-test-2\``,
+    );
 
     return {
       username: '',
@@ -215,7 +225,9 @@ export const authUserCreate = async (
     };
   } catch (error) {
     if (error?.code === 409) {
-      throw new ConflictEntityError('username already taken: ' + data.username);
+      throw new ConflictEntityError(
+        'username already taken: ' + data.username,
+      );
     }
   }
 };

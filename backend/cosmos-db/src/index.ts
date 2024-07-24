@@ -81,18 +81,26 @@ import {
   setup,
 } from './service/AuthUserService';
 import { Request } from 'express';
-import { checkPermissions, checkTableMetadataPermissions } from './service/cosmosdb/AuthGroupService';
-import { authenticateToken, refreshToken, checkAdmin } from './service/cosmosdb/AuthUserService';
+import {
+  checkPermissions,
+  checkTableMetadataPermissions,
+} from './service/cosmosdb/AuthGroupService';
+import {
+  authenticateToken,
+  refreshToken,
+  checkAdmin,
+} from './service/cosmosdb/AuthUserService';
 
 export default new PontusService({
   registerUserPost: async (req, res) => {
     await setup();
 
-    const response = await registerUser(req.body);
+    const response = await registerUser(req.body, req.jdbc);
     res.send(response);
   },
   registerAdminPost: async (req, res) => {
-    const response = await registerAdmin(req.body);
+    const jdbc = req.jdbc as any;
+    const response = await registerAdmin(req.body, req.jdbc);
     res.send(response);
   },
   loginPost: async (req, res) => {
@@ -149,7 +157,7 @@ export default new PontusService({
   },
   authUserCreatePost: async (req, res) => {
     await setup();
-    const response = await authUserCreate(req.body);
+    const response = await authUserCreate(req.body, req.jdbc);
 
     res.send(response);
   },

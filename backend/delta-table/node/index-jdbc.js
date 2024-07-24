@@ -31,11 +31,10 @@ jdbc.initialize((err) => {
         console.log('JDBC initialized');
     }
 });
-const createConnection = (conn) => {
-};
+const createConnection = (conn) => { };
 exports.createConnection = createConnection;
 // Function to execute a query
-function executeQuery(query) {
+function executeQuery(jdbc, query) {
     jdbc.reserve((err, connObj) => {
         if (err) {
             console.log('Error reserving connection', err);
@@ -47,14 +46,7 @@ function executeQuery(query) {
                     console.log('Error creating statement', stmtErr);
                 }
                 else {
-                    /*
-          │ (index) │             application_id             │ level_1_state  │ level_2_state  │ level_3_state  │ level_4_state  │      event_timestamp      │     ingestion_timestamp      │
-          ├─────────┼────────────────────────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼───────────────────────────┼──────────────────────────────┤
-          │    0    │ '0e88bd1f-a83c-4e4b-919d-13ae36637af1' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ '2022-08-22 08:47:07.518' │ '2024-06-11 08:28:51.222479' │
-          │    1    │ '16c4c5f9-9a57-4ee5-ba23-b3e5bc24e685' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ '2022-08-22 08:52:12.696' │ '2024-06-11 08:30:31.452385' │
-          */
                     statement.executeQuery(query, (queryErr, resultSet) => {
-                        //statement.executeQuery("INSERT INTO app_history (application_id,level_1_state, level_2_state,level_3_state,level_4_state, event_timestamp, ingestion_timestamp) VALUES ('aaa', 'bbb','ccc','ddd', 'eee', '2022-08-22 08:47:07.518', '2024-06-11 08:28:51.222479')", (queryErr: Error | null, resultSet: ResultSet) => {
                         if (queryErr) {
                             console.log('Error executing query', queryErr);
                         }
@@ -66,10 +58,17 @@ function executeQuery(query) {
                                 else {
                                     console.table(results);
                                 }
-                                // statement.close((e) => console.log(e));
-                                // close(callback: (err: Error | null) => void): void;
-                                resultSet.close((e) => console.log(`${e}`));
-                                conn.close((e) => console.log(`${e}`));
+                                // Close the result set and connection after use
+                                resultSet.close((closeErr) => {
+                                    if (closeErr) {
+                                        console.log('Error closing result set', closeErr);
+                                    }
+                                });
+                                conn.close((closeErr) => {
+                                    if (closeErr) {
+                                        console.log('Error closing connection', closeErr);
+                                    }
+                                });
                                 // Always release the connection after use
                                 jdbc.release(connObj, (releaseErr) => {
                                     if (releaseErr) {
@@ -88,3 +87,4 @@ function executeQuery(query) {
     });
 }
 exports.executeQuery = executeQuery;
+exports.default = jdbc;

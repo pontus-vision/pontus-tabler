@@ -58,7 +58,7 @@ import {
   BadRequestError,
 } from '../../generated/api';
 
-import { executeQuery } from '../../../../delta-table/node/index-jdbc';
+import jdbc, { executeQuery } from '../../../../delta-table/node/index-jdbc';
 
 import {
   Container,
@@ -172,7 +172,7 @@ export const objEntriesToStr = (
 export const createAuthGroup = async (data: AuthGroupCreateReq) => {
   const { keysStr, valuesStr } = objEntriesToStr(data);
 
-  const res = executeQuery(
+  const res = executeQuery(jdbc,
     `INSERT INTO ${AUTH_GROUPS} (${keysStr}) VALUES (${valuesStr})`,
   );
 
@@ -501,7 +501,7 @@ export const createAuthUserGroup = async (
 ): Promise<AuthGroupUsersCreateRes> => {
   const { authUsers, id, name } = data;
 
-  const res = executeQuery(
+  const res = executeQuery(jdbc,
     `CREATE TABLE IF NOT EXISTS auth_users_groups (group_id INT, user_id INT) USING DELTA LOCATION '/data/delta-test'
      INSERT INTO auth_users_groups (group_id, user_id) VALUES ${authUsers.map(
        (user) => `(${id}, ${user.id})`,

@@ -32,6 +32,7 @@ import dotenv from 'dotenv';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
 import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
+import jdbc from '../../../delta-table/node/index-jdbc';
 dotenv.config();
 
 export const setup = async (): Promise<InitiateRes> => {
@@ -44,34 +45,41 @@ export const setup = async (): Promise<InitiateRes> => {
 };
 
 export const registerUser = async (
-  data: RegisterUserReq,
+  data: RegisterUserReq, jdbc: any
 ): Promise<RegisterUserRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.registerUser(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.registerUser(data);
+    return deltadb.registerUser(data, jdbc );
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
+export interface registerAdmin extends RegisterAdminReq {
+  jdbc: any;
+  data: registerAdmin;
+}
+
 export const registerAdmin = async (
   data: RegisterAdminReq,
+  jdbc: any,
 ): Promise<RegisterAdminRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.registerAdmin(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.registerAdmin(data);
+    return deltadb.registerAdmin(data, jdbc);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export const authUserCreate = async (
   data: AuthUserCreateReq,
+  jdbc: any,
 ): Promise<AuthUserCreateRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.authUserCreate(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.authUserCreate(data);
+    return deltadb.authUserCreate(data, jdbc);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
