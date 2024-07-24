@@ -11,7 +11,8 @@
     "clean": "rimraf dist",
     "prestart": "npm run clean && npm run build",
     "jest": "/usr/bin/env NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0  jest --coverage --detectOpenHandles --runInBand  --config jest.config.js ",
-    "refresh": "npm uninstall ../../frontend/ && npm install ../../frontend/"
+    "refresh": "npm uninstall ../../frontend/ && npm install ../../frontend/",
+    "generate": "npx fern-api generate "
   },
   "exports": {},
   "author": {
@@ -40,6 +41,7 @@
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
     "debug": "^4.1.1",
+    "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "express-openapi-validator": "^4.4.3",
     "http": "^0.0.1-security",
