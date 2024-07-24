@@ -63,7 +63,7 @@ import {
 } from '../../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-//import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import {
   ADMIN_GROUP_NAME,
   AUTH_GROUPS,
@@ -79,7 +79,7 @@ import {
   updateTableDataEdge,
 } from './EdgeService';
 import { DASHBOARDS } from './DashboardService';
-//dotenv.config();
+dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const ADMIN_USER_USERNAME = 'ADMIN';
 const partitionKey: string | PartitionKeyDefinition = {

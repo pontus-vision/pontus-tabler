@@ -63,7 +63,7 @@ import {
 } from '../../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-//import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import {
   ADMIN_GROUP_NAME,
   AUTH_GROUPS,
@@ -82,7 +82,7 @@ import {
 import { DASHBOARDS } from './DashboardService';
 import { executeQuery } from '../../../../delta-table/node/index-jdbc';
 import { has } from 'lodash';
-//dotenv.config();
+dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const ADMIN_USER_USERNAME = 'ADMIN';
 const partitionKey: string | PartitionKeyDefinition = {
