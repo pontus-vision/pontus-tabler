@@ -58,7 +58,7 @@ import {
   BadRequestError,
 } from '../../generated/api';
 
-import { executeQuery } from '../../../../delta-table/node/index-jdbc';
+import * as db from '../../../../delta-table/node/index-jdbc';
 
 import {
   Container,
@@ -90,6 +90,8 @@ import { snakeCase } from 'lodash';
 import { NODATA } from 'dns';
 export const AUTH_GROUPS = 'auth_groups';
 export const ADMIN_GROUP_NAME = 'Admin';
+
+const conn: db.Connection = db.createConnection()
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],
@@ -172,8 +174,9 @@ export const objEntriesToStr = (
 export const createAuthGroup = async (data: AuthGroupCreateReq) => {
   const { keysStr, valuesStr } = objEntriesToStr(data);
 
-  const res = executeQuery(
-    `INSERT INTO ${AUTH_GROUPS} (${keysStr}) VALUES (${valuesStr})`,
+
+  const res = db.executeQuery(
+    `INSERT INTO ${AUTH_GROUPS} (${keysStr}) VALUES (${valuesStr})`,conn
   );
 
   const authGroupContainer = await initiateAuthGroupContainer();
@@ -501,11 +504,11 @@ export const createAuthUserGroup = async (
 ): Promise<AuthGroupUsersCreateRes> => {
   const { authUsers, id, name } = data;
 
-  const res = executeQuery(
+  const res = db.executeQuery(
     `CREATE TABLE IF NOT EXISTS auth_users_groups (group_id INT, user_id INT) USING DELTA LOCATION '/data/delta-test'
      INSERT INTO auth_users_groups (group_id, user_id) VALUES ${authUsers.map(
        (user) => `(${id}, ${user.id})`,
-     )}`,
+     )}`,conn
   );
   return {
     id: data.id,
