@@ -63,7 +63,7 @@ import {
 } from '../../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-//import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import {
   ADMIN_GROUP_NAME,
   AUTH_GROUPS,
@@ -80,11 +80,14 @@ import {
   updateTableDataEdge,
 } from './EdgeService';
 import { DASHBOARDS } from './DashboardService';
-import { executeQuery } from '../../../../delta-table/node/index-jdbc';
+import * as db from '../../../../delta-table/node/index-jdbc';
 import { has } from 'lodash';
-//dotenv.config();
+dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const ADMIN_USER_USERNAME = 'ADMIN';
+
+const conn: db.Connection = db.createConnection()
+
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/username'],
 };
@@ -204,20 +207,20 @@ export const authUserCreate = async (
   });
 
   try {
-    const res = executeQuery(
-      jdbc,
-      `CREATE TABLE IF NOT EXISTS ${AUTH_USERS} (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2'`,
+    const res = db.executeQuery(
+      `CREATE TABLE IF NOT EXISTS ${AUTH_USERS} (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2'`
+      ,conn
+    );
+    
+    const res2 = db.executeQuery(
+    `INSERT INTO ${AUTH_USERS} (id, username, password) values (1, '${data.username}', '${hashedPassword}')`,
+    conn
     );
 
-    const res2 = executeQuery(
-      jdbc,
-      `INSERT INTO ${AUTH_USERS} (id, username, password) values (1, '${data.username}', '${hashedPassword}')`,
-    );
-
-    const res3 = executeQuery(
-      jdbc,
+    const res3 = db.executeQuery(
       `SELECT * FROM delta.\`/data/delta-test-2\``,
-    );
+      conn
+      );
 
     return {
       username: '',

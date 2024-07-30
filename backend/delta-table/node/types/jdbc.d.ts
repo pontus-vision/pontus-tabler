@@ -30,7 +30,7 @@ declare module 'jdbc' {
     constructor(config: JDBCConfig);
 
     initialize(callback: (err: Error | null) => void): void;
-    reserve(callback: (err: Error | null, connObj: ConnectionObject) => void): void;
+    reserve(callback: (err: Error | null, connObj: ConnectionObject) => void): ConnectionObject;
     release(connObj: ConnectionObject, callback: (err: Error | null) => void): void;
   }
 }

@@ -198,10 +198,16 @@ Pool.prototype.reserve = function(callback) {
   }
 
   if (conn === null) {
-    callback(new Error("No more pool connections available"));
+    // callback(new Error("No more pool connections available"));
+   
+      conn = addConnectionSync(self._url, self._props, self._keepalive, self._maxidle);
+      // self._reserved.unshift(conn);
+    return conn;
+
   } else {
     callback(null, conn);
   }
+  return conn;
 };
 
 Pool.prototype._closeIdleConnections = function() {
