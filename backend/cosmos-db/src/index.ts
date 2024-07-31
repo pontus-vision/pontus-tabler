@@ -95,12 +95,11 @@ export default new PontusService({
   registerUserPost: async (req, res) => {
     await setup();
 
-    const response = await registerUser(req.body, req.jdbc);
+    const response = await registerUser(req.body);
     res.send(response);
   },
   registerAdminPost: async (req, res) => {
-    const jdbc = req.jdbc as any;
-    const response = await registerAdmin(req.body, req.jdbc);
+    const response = await registerAdmin(req.body);
     res.send(response);
   },
   loginPost: async (req, res) => {
@@ -157,7 +156,7 @@ export default new PontusService({
   },
   authUserCreatePost: async (req, res) => {
     await setup();
-    const response = await authUserCreate(req.body, req.jdbc);
+    const response = await authUserCreate(req.body);
 
     res.send(response);
   },

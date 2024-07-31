@@ -207,12 +207,12 @@ export const authUserCreate = async (
   });
 
   try {
-    const res = db.executeQuery(
+    const res = await db.executeQuery(
       `CREATE TABLE IF NOT EXISTS ${AUTH_USERS} (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2'`
       ,conn
     );
     
-    const res2 = db.executeQuery(
+    const res2 = await db.executeQuery(
     `INSERT INTO ${AUTH_USERS} (id, username, password) values (1, '${data.username}', '${hashedPassword}')`,
     conn
     );

@@ -45,12 +45,12 @@ export const setup = async (): Promise<InitiateRes> => {
 };
 
 export const registerUser = async (
-  data: RegisterUserReq, jdbc: any
+  data: RegisterUserReq,
 ): Promise<RegisterUserRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.registerUser(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.registerUser(data, jdbc );
+    return deltadb.registerUser(data, jdbc);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
@@ -62,7 +62,6 @@ export interface registerAdmin extends RegisterAdminReq {
 
 export const registerAdmin = async (
   data: RegisterAdminReq,
-  jdbc: any,
 ): Promise<RegisterAdminRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.registerAdmin(data);
@@ -74,7 +73,6 @@ export const registerAdmin = async (
 
 export const authUserCreate = async (
   data: AuthUserCreateReq,
-  jdbc: any,
 ): Promise<AuthUserCreateRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.authUserCreate(data);
