@@ -77,55 +77,53 @@ export function executeQuery(
   conn: Connection,
 ): Promise<object[]> {
   return new Promise((resolve, reject) => {
+    console.log('IN EXECUTE QUERY - 1');
     conn.createStatement((stmtErr: Error | null, statement: Statement) => {
+      console.log('IN EXECUTE QUERY -  2');
+
       if (stmtErr) {
         console.log('Error creating statement', stmtErr);
-        reject(`Error creating statement ${stmtErr}`);
-      } else {
-        /*
-│ (index) │             application_id             │ level_1_state  │ level_2_state  │ level_3_state  │ level_4_state  │      event_timestamp      │     ingestion_timestamp      │
-├─────────┼────────────────────────────────────────┼────────────────┼────────────────┼────────────────┼────────────────┼───────────────────────────┼──────────────────────────────┤
-│    0    │ '0e88bd1f-a83c-4e4b-919d-13ae36637af1' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ '2022-08-22 08:47:07.518' │ '2024-06-11 08:28:51.222479' │
-│    1    │ '16c4c5f9-9a57-4ee5-ba23-b3e5bc24e685' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ 'Unclassified' │ '2022-08-22 08:52:12.696' │ '2024-06-11 08:30:31.452385' │
-*/
-        statement.executeQuery(
-          query,
-          (queryErr: Error | null, resultSet: ResultSet) => {
-            //statement.executeQuery("INSERT INTO app_history (application_id,level_1_state, level_2_state,level_3_state,level_4_state, event_timestamp, ingestion_timestamp) VALUES ('aaa', 'bbb','ccc','ddd', 'eee', '2022-08-22 08:47:07.518', '2024-06-11 08:28:51.222479')", (queryErr: Error | null, resultSet: ResultSet) => {
-            if (queryErr) {
-              console.log('Error executing query', queryErr);
-
-              reject(`Error creating statement ${queryErr}`);
-            } else {
-              resultSet.toObjArray(
-                (resultErr: Error | null, results: object[]) => {
-                  if (resultErr) {
-                    console.log('Error converting result set', resultErr);
-                  } else {
-                    console.table(results);
-                  }
-                  resultSet.close((e) => console.log(`${e}`));
-                  resolve(results);
-                  // statement.close((e) => console.log(e));
-                  // close(callback: (err: Error | null) => void): void;
-                  // conn.close((e) => console.log(`${e}`));
-
-                  // // Always release the connection after use
-                  // jdbc.release(connObj, (releaseErr: Error | null) => {
-                  //   if (releaseErr) {
-                  //     console.log('Error releasing connection', releaseErr);
-                  //   } else {
-                  //     console.log('Connection released');
-                  //   }
-                  // });
-                },
-              );
-            }
-          },
-        );
+        return reject(`Error creating statement ${stmtErr}`);
       }
+      console.log('IN EXECUTE QUERY -3  ');
+      statement.executeQuery(
+        query,
+        (queryErr: Error | null, resultSet: ResultSet) => {
+          if (queryErr) {
+            console.log('Error executing query', queryErr);
+            return reject(`Error executing query ${queryErr}`);
+          }
+          console.log('IN EXECUTE QUERY -4  ');
+          resultSet.toObjArray((resultErr: Error | null, results: object[]) => {
+            if (resultErr) {
+              console.log('Error converting result set', resultErr);
+              resultSet.close((e) => console.log(`${e}`));
+              return reject(`Error converting result set ${resultErr}`);
+            }
+            console.log('IN EXECUTE QUERY -5  ');
+            console.table(results);
+            resultSet.close((closeErr) => {
+              if (closeErr) {
+                console.log('Error closing result set', closeErr);
+                return reject(`Error closing result set ${closeErr}`);
+              }
+              console.log({ results });
+              return resolve(results);
+            });
+          });
+        },
+      );
     });
   });
 }
+
+// (async function () {
+//   console.log('CONNECTING TO DELTA');
+//   const conn = createConnection();
+//   console.log({ conn });
+//   const res = await executeQuery('SELECT 1', conn);
+//   console.log({ res });
+//   console.log('END CONNECTION TO DELTA');
+// })();
 
 export default jdbc;

@@ -111,43 +111,45 @@ Connection.prototype.createSQLXML = function (callback) {
   return callback(new Error('NOT IMPLEMENTED'));
 };
 
-// Connection.prototype.createStatement = function(arg1, arg2, arg3, callback) {
-//   // Get arguments as an array
-//   var args = Array.prototype.slice.call(arguments);
-
-//   // Pull the callback off the end of the arguments
-//   callback = args.pop();
-
-//   // Check arguments for validity, and return error if invalid
-//   var invalidArgs = false;
-//   _.forEach(args, function(arg) {
-//     if (! _.isNumber(arg)) {
-//       invalidArgs = true;
-//       // Lodash break
-//       return false;
-//     }
-//   });
-
-//   if (invalidArgs) {
-//     return callback(new Error("INVALID ARGUMENTS"));
-//   }
-
-//   // Push a callback handler onto the arguments
-//   args.push(function(err, statement) {
-//     if (err) {
-//       return callback(err);
-//     } else {
-// return callback(null, new Statement(statement));
-//     }
-//   });
-
-//   // Forward modified arguments to _conn.createStatement
-// return this._conn.createStatement.apply(this._conn, args);
-// };
-Connection.prototype.createStatement = function () {
+Connection.prototype.createStatement = function (arg1, arg2, arg3, callback) {
   // Get arguments as an array
-  return new Statement(this._conn.createStatement.apply(this._conn));
-};
+  var args = Array.prototype.slice.call(arguments);
+
+  // Pull the callback off the end of the arguments
+  callback = args.pop();
+
+  // Check arguments for validity, and return error if invalid
+  var invalidArgs = false;
+  _.forEach(args, function (arg) {
+    if (!_.isNumber(arg)) {
+      invalidArgs = true;
+      // Lodash break
+      return false;
+    }
+  });
+
+  if (invalidArgs) {
+    return callback(new Error('INVALID ARGUMENTS'));
+  }
+
+  // Push a callback handler onto the arguments
+  args.push(function (err, statement) {
+    if (err) {
+      return callback(err);
+    } else {
+      return callback(null, new Statement(statement));
+    }
+  });
+
+  // Forward modified arguments to _conn.createStatement
+  return this._conn.createStatement.apply(this._conn, args);
+}
+;
+// Connection.prototype.createStatement = function () {
+//   // Get arguments as an array
+//   console.log()
+//   return new Statement(this._conn.createStatement.apply(this._conn));
+// };
 
 Connection.prototype.createStruct = function (typename, attrarr, callback) {
   return callback(new Error('NOT IMPLEMENTED'));

@@ -86,7 +86,7 @@ dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const ADMIN_USER_USERNAME = 'ADMIN';
 
-const conn: db.Connection = db.createConnection()
+const conn: db.Connection = db.createConnection();
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/username'],
@@ -206,33 +206,35 @@ export const authUserCreate = async (
     password: hashedPassword,
   });
 
-  try {
-    const res = await db.executeQuery(
-      `CREATE TABLE IF NOT EXISTS ${AUTH_USERS} (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2'`
-      ,conn
-    );
-    
-    const res2 = await db.executeQuery(
-    `INSERT INTO ${AUTH_USERS} (id, username, password) values (1, '${data.username}', '${hashedPassword}')`,
-    conn
-    );
+  // try {
+  const res = await db.executeQuery(
+    // `CREATE TABLE IF NOT EXISTS bar (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2';`,
+    `CREATE TABLE IF NOT EXISTS delta.\`/data/auth-users\` (id INT, username STRING, password STRING) USING DELTA;`,
+    // `CREATE TABLE ${AUTH_USERS}(id INT NOT NULL, username VARCHAR(255),
+    //  CONSTRAINT ${AUTH_USERS}_pk PRIMARY KEY(id)) USING DELTA LOCATION '/data/delta-test-2';`,
+    // `SELECT 1`,
+    conn,
+  );
 
-    const res3 = db.executeQuery(
-      `SELECT * FROM delta.\`/data/delta-test-2\``,
-      conn
-      );
+  const res2 = await db.executeQuery(
+    `INSERT INTO delta.\`/data/auth-users\` (id, username, password) values (1, '${data.username}', '${hashedPassword}')`,
+    conn,
+  );
 
-    return {
-      username: '',
-      id: '',
-    };
-  } catch (error) {
-    if (error?.code === 409) {
-      throw new ConflictEntityError(
-        'username already taken: ' + data.username,
-      );
-    }
-  }
+  const res3 = await db.executeQuery(
+    `SELECT * FROM delta.\`/data/auth-users\``,
+    conn,
+  );
+
+  return {
+    username: '',
+    id: '',
+  };
+  // } catch (error) {
+  //   if (error?.code === 409) {
+  //     throw new ConflictEntityError('username already taken: ' + data.username);
+  //   }
+  // }
 };
 
 export const authUserRead = async (
