@@ -9,6 +9,7 @@ import {
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
 import { AUTH_GROUPS, authGroupContainerProps } from './service/cosmosdb';
+import { DELTA_DB } from './service/AuthGroupService';
 
 export interface FetchData {
   count: number;
@@ -139,7 +140,8 @@ export const filterToQuery = (
 
   for (let col in cols) {
     if (cols.hasOwnProperty(col)) {
-      const colName = `["${col}"]`;
+      const colName =
+        process.env.DB_SOURCE === DELTA_DB ? `\`${col}\`` : `["${col}"]`;
 
       const condition1Filter = cols[col]?.condition1?.filter;
       const condition2Filter = cols[col]?.condition2?.filter;
@@ -159,102 +161,190 @@ export const filterToQuery = (
       if (filterType === 'text') {
         const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
 
-        if(conditions?.length > 0) {
+        if (conditions?.length > 0) {
           for (const condition of conditions) {
+            if (process.env.DB_SOURCE === DELTA_DB) {
               if (type === 'contains') {
-                colQuery.push(` CONTAINS(${alias}${colName}, "${filter}")`);
+                colQuery.push(` ${colName} LIKE "%${filter}%"`);
               }
-    
+
               if (type === 'not contains') {
-                colQuery.push(` NOT CONTAINS(${alias}${colName}, "${filter}")`);
+                colQuery.push(` ${colName} NOT LIKE "%${filter}%"`);
               }
-    
+
               if (type === 'starts with') {
-                colQuery.push(` STARTSWITH(${alias}${colName}, "${filter}")`);
+                colQuery.push(` ${colName} LIKE "${filter}%"`);
               }
-    
+
               if (type === 'ends with') {
-                colQuery.push(` ENDSWITH(${alias}${colName}, "${filter}")`);
+                colQuery.push(` ${colName} LIKE "%${filter}"`);
               }
-    
+
               if (type === 'equals') {
                 colQuery.push(` ${alias}${colName} = "${filter}"`);
               }
-    
+
               if (type === 'not equals') {
                 colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
               }
+            } else {
+              if (type === 'contains') {
+                colQuery.push(` CONTAINS(${alias}${colName}, "${filter}")`);
+              }
+
+              if (type === 'not contains') {
+                colQuery.push(` NOT CONTAINS(${alias}${colName}, "${filter}")`);
+              }
+
+              if (type === 'starts with') {
+                colQuery.push(` STARTSWITH(${alias}${colName}, "${filter}")`);
+              }
+
+              if (type === 'ends with') {
+                colQuery.push(` ENDSWITH(${alias}${colName}, "${filter}")`);
+              }
+
+              if (type === 'equals') {
+                colQuery.push(` ${alias}${colName} = "${filter}"`);
+              }
+
+              if (type === 'not equals') {
+                colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+              }
+            }
           }
         }
 
         if (!condition1Filter) {
-          if (type === 'contains') {
-            colQuery.push(` CONTAINS(${alias}${colName}, "${filter}")`);
-          }
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            if (type === 'contains') {
+              colQuery.push(` ${colName} LIKE "%${filter}%"`);
+            }
 
-          if (type === 'not contains') {
-            colQuery.push(` NOT CONTAINS(${alias}${colName}, "${filter}")`);
-          }
+            if (type === 'not contains') {
+              colQuery.push(` ${colName} NOT LIKE "%${filter}%"`);
+            }
 
-          if (type === 'starts with') {
-            colQuery.push(` STARTSWITH(${alias}${colName}, "${filter}")`);
-          }
+            if (type === 'starts with') {
+              colQuery.push(` ${colName} LIKE "${filter}%"`);
+            }
 
-          if (type === 'ends with') {
-            colQuery.push(` ENDSWITH(${alias}${colName}, "${filter}")`);
-          }
+            if (type === 'ends with') {
+              colQuery.push(` ${colName} LIKE "%${filter}"`);
+            }
 
-          if (type === 'equals') {
-            colQuery.push(` ${alias}${colName} = "${filter}"`);
-          }
+            if (type === 'equals') {
+              colQuery.push(` ${alias}${colName} = "${filter}"`);
+            }
 
-          if (type === 'not equals') {
-            colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+            if (type === 'not equals') {
+              colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+            }
+          } else {
+            if (type === 'contains') {
+              colQuery.push(` CONTAINS(${alias}${colName}, "${filter}")`);
+            }
+
+            if (type === 'not contains') {
+              colQuery.push(` NOT CONTAINS(${alias}${colName}, "${filter}")`);
+            }
+
+            if (type === 'starts with') {
+              colQuery.push(` STARTSWITH(${alias}${colName}, "${filter}")`);
+            }
+
+            if (type === 'ends with') {
+              colQuery.push(` ENDSWITH(${alias}${colName}, "${filter}")`);
+            }
+
+            if (type === 'equals') {
+              colQuery.push(` ${alias}${colName} = "${filter}"`);
+            }
+
+            if (type === 'not equals') {
+              colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+            }
           }
         }
 
         if (condition1Filter && type1 === 'contains') {
-          colQuery.push(` CONTAINS(${alias}${colName}, "${condition1Filter}")`);
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` ${colName} LIKE "%${condition1Filter}%"`);
+          } else {
+            colQuery.push(
+              ` CONTAINS(${alias}${colName}, "${condition1Filter}")`,
+            );
+          }
         }
 
         if (condition2Filter && type2 === 'contains') {
-          colQuery.push(
-            `${operator} CONTAINS(${alias}${colName}, "${condition2Filter}")`,
-          );
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` ${operator} ${colName} LIKE "%${condition2Filter}%"`);
+          } else {
+            colQuery.push(
+              ` ${operator} AND CONTAINS(${alias}${colName}, "${condition2Filter}")`,
+            );
+          }
         }
 
         if (condition1Filter && type1 === 'not contains') {
-          colQuery.push(
-            ` NOT CONTAINS(${alias}${colName}, "${condition1Filter}")`,
-          );
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` ${colName} LIKE "%${condition1Filter}%"`);
+          } else {
+            colQuery.push(
+              ` CONTAINS(${alias}${colName}, "${condition1Filter}")`,
+            );
+          }
         }
 
         if (condition2Filter && type2 === 'not contains') {
-          colQuery.push(
-            ` ${operator} NOT CONTAINS(${alias}${colName}, "${condition2Filter}")`,
-          );
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` AND ${colName} LIKE "%${condition2Filter}%"`);
+          } else {
+            colQuery.push(
+              ` AND CONTAINS(${alias}${colName}, "${condition2Filter}")`,
+            );
+          }
         }
 
         if (condition1Filter && type1 === 'starts with') {
-          colQuery.push(
-            ` STARTSWITH(${alias}${colName}, "${condition1Filter}")`,
-          );
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` ${colName} LIKE "${condition1Filter}%"`);
+          } else {
+            colQuery.push(
+              ` STARTSWITH(${alias}${colName}, "${condition1Filter}")`,
+            );
+          }
         }
 
         if (condition2Filter && type2 === 'starts with') {
-          colQuery.push(
-            ` ${operator} STARTSWITH(${alias}${colName}, "${condition2Filter}")`,
-          );
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` AND ${colName} LIKE "${condition2Filter}%"`);
+          } else {
+            colQuery.push(
+              ` AND STARTSWITH(${alias}${colName}, "${condition2Filter}")`,
+            );
+          }
         }
 
         if (condition1Filter && type1 === 'ends with') {
-          colQuery.push(` ENDSWITH(${alias}${colName}, "${condition1Filter}")`);
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` ${colName} LIKE "%${condition1Filter}"`);
+          } else {
+            colQuery.push(
+              ` ENDSWITH(${alias}${colName}, "${condition1Filter}")`,
+            );
+          }
         }
 
         if (condition2Filter && type2 === 'ends with') {
-          colQuery.push(
-            ` ${operator} ENDSWITH(${alias}${colName}, "${condition2Filter}")`,
-          );
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            colQuery.push(` AND ${colName} LIKE "%${condition2Filter}"`);
+          } else {
+            colQuery.push(
+              ` ${operator} ENDSWITH(${alias}${colName}, "${condition2Filter}")`,
+            );
+          }
         }
 
         if (condition1Filter && type1 === 'equals') {
@@ -281,19 +371,59 @@ export const filterToQuery = (
         const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
 
         if (!condition1Filter) {
+          if (process.env.DB_SOURCE === DELTA_DB) {
+            if (type === 'greaterThan') {
+              colQuery.push(` ${alias}${colName} > "${condition1Filter}"`);
+            }
+
+            if (type === 'greaterThanOrEquals') {
+              colQuery.push(` ${alias}${colName} >= "${condition1Filter}"`);
+            }
+            if (type === 'lessThan') {
+              colQuery.push(` ${alias}${colName} < "${condition1Filter}"`);
+            }
+
+            if (type === 'lessThanOrEquals') {
+              colQuery.push(` ${alias}${colName} <= "${condition1Filter}"`);
+            }
+
+            if (type === 'equals') {
+              colQuery.push(` ${alias}${colName} = "${filter}"`);
+            }
+
+            if (type === 'notEqual') {
+              colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+            }
+
+            if (type === 'inRange') {
+              const filterFrom = cols[col].filter;
+              const filterTo = cols[col].filterTo;
+              colQuery.push(
+                ` ${alias}${colName} >= "${filterFrom}" AND ${alias}${colName} <= "${filterTo}"`,
+              );
+            }
+
+            if (type === 'blank') {
+              colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+            }
+
+            if (type === 'notBlank') {
+              colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+            }
+          }
           if (type === 'greaterThan') {
-            colQuery.push(` CONTAINS(${alias}${colName}, "${filter}")`);
+            colQuery.push(` ${alias}${colName} > "${condition1Filter}"`);
           }
 
           if (type === 'greaterThanOrEquals') {
-            colQuery.push(` ENDSWITH(${alias}${colName}, "${filter}")`);
+            colQuery.push(` ${alias}${colName} >= "${condition1Filter}"`);
           }
           if (type === 'lessThan') {
-            colQuery.push(` NOT CONTAINS(${alias}${colName}, "${filter}")`);
+            colQuery.push(` ${alias}${colName} < "${condition1Filter}"`);
           }
 
           if (type === 'lessThanOrEquals') {
-            colQuery.push(` STARTSWITH(${alias}${colName}, "${filter}")`);
+            colQuery.push(` ${alias}${colName} <= "${condition1Filter}"`);
           }
 
           if (type === 'equals') {
@@ -574,7 +704,11 @@ export const filterToQuery = (
       }
       const colQueryStr = colQuery.join('').trim();
 
-      query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
+      if (process.env.DB_SOURCE === DELTA_DB) {
+        query.push(`${colQueryStr}`);
+      } else {
+        query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
+      }
     }
   }
 
@@ -586,6 +720,14 @@ export const filterToQuery = (
   }
 
   const hasFilters = Object.keys(body?.filters || {}).length > 0;
+  const fromTo =
+    process.env.DB_SOURCE === DELTA_DB
+      ? ` ${to ? 'LIMIT ' + (to - from) : ''} ${
+          from ? ' OFFSET ' + (from - 1) : ''
+        }`
+      : `${from ? ' OFFSET ' + (from - 1) : ''} ${
+          to ? 'LIMIT ' + (to - from) : ''
+        }`;
 
   const finalQuery = (
     (hasFilters ? ' WHERE ' : '') +
@@ -594,7 +736,7 @@ export const filterToQuery = (
     (additionalClause
       ? ` ${hasFilters ? 'AND' : 'WHERE'} ${additionalClause}`
       : '') +
-    `${from ? ' OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''}`
+    fromTo
   ).trim();
 
   return finalQuery;

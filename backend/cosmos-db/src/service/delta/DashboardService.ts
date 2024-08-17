@@ -29,53 +29,76 @@ import {
   readTableDataEdge,
   updateTableDataEdge,
 } from './EdgeService';
-import { AUTH_GROUPS, initiateAuthGroupContainer } from './AuthGroupService';
+import {
+  AUTH_GROUPS,
+  createSql,
+  initiateAuthGroupContainer,
+  updateSql,
+} from './AuthGroupService';
 import { AUTH_USERS } from './AuthUserService';
 declare function getContext(): any;
+import * as db from '../../../../delta-table/node/index-jdbc';
+import { GROUPS_DASHBOARDS } from '../EdgeService';
 
+const conn: db.Connection = db.createConnection();
+export const DASHBOARDS_GROUPS = 'dashboards_groups';
 export const DASHBOARDS = 'dashboards';
 
 export const createDashboard = async (
   data: DashboardCreateReq,
 ): Promise<DashboardCreateRes> => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-  const menuContainer = await initiateMenuContainer();
+  delete data.menuItem;
+  const sql = (await createSql(
+    DASHBOARDS,
+    'name STRING, owner STRING, state STRING, folder STRING',
+    {
+      ...data,
+      state: JSON.stringify(data.state),
+    },
+  )) as any;
 
-  const res = await dashboardContainer.items.create({
-    ...data,
-    authGroups: [],
-  });
+  // const dashboardContainer = await fetchContainer(DASHBOARDS);
+  // const menuContainer = await initiateMenuContainer();
 
-  if (data?.menuItem) {
-    const menuItem = data.menuItem;
-    const child = menuItem.children[0];
+  // const res = await dashboardContainer.items.create({
+  //   ...data,
+  //   authGroups: [],
+  // });
 
-    const path = `${menuItem?.path}${menuItem?.path?.endsWith('/') ? '' : '/'}${
-      child.name
-    }`;
+  // if (data?.menuItem) {
+  //   const menuItem = data.menuItem;
+  //   const child = menuItem.children[0];
 
-    const res = await menuContainer.items.create({
-      ...child,
-      path: path,
-      id: menuItem.id,
-    });
+  //   const path = `${menuItem?.path}${menuItem?.path?.endsWith('/') ? '' : '/'}${
+  //     child.name
+  //   }`;
 
-    try {
-      const res2 = await menuContainer
-        .item(menuItem.id, menuItem.path)
-        .patch([{ op: 'add', path: `/children/-`, value: res.resource }]);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError(
-          `Parent folder at path '${menuItem.path}, at id '${menuItem.id} not found.'`,
-        );
-      }
-    }
-  }
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
+  //   const res = await menuContainer.items.create({
+  //     ...child,
+  //     path: path,
+  //     id: menuItem.id,
+  //   });
 
-  return rest;
+  //   try {
+  //     const res2 = await menuContainer
+  //       .item(menuItem.id, menuItem.path)
+  //       .patch([{ op: 'add', path: `/children/-`, value: res.resource }]);
+  //   } catch (error) {
+  //     if (error?.code === 404) {
+  //       throw new NotFoundError(
+  //         `Parent folder at path '${menuItem.path}, at id '${menuItem.id} not found.'`,
+  //       );
+  //     }
+  //   }
+  // }
+  // const { _rid, _self, _etag, _attachments, _ts, ...rest } =
+  //   res.resource as any;
+
+  return {
+    ...sql[0],
+    state: typeof sql[0]?.state === 'object' ? JSON.parse(sql[0]?.state) : {},
+    menuItem: sql[0]?.menuItem || null,
+  };
 };
 
 export const updateDashboard = async (
@@ -174,7 +197,7 @@ export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
   const res = (await createTableDataEdge({
-    edge: 'groups-dashboards',
+    edge: GROUPS_DASHBOARDS,
     edgeType: 'oneToMany',
     tableFrom: {
       tableName: AUTH_GROUPS,
@@ -206,10 +229,10 @@ export const createDashboardAuthGroup = async (
 export const readDashboardGroupAuth = async (
   data: DashboardGroupAuthReadReq,
 ): Promise<DashboardGroupAuthReadRes> => {
-  const res = await readTableDataEdge({
+  const res = (await readTableDataEdge({
     edge: {
       direction: 'from',
-      edgeLabel: 'groups-dashboards',
+      edgeLabel: GROUPS_DASHBOARDS,
       tableName: AUTH_GROUPS,
     },
     rowId: data.id,
@@ -217,13 +240,16 @@ export const readDashboardGroupAuth = async (
     filters: data.filters,
     from: data.from,
     to: data.to,
-  });
+  })) as Record<string, any>;
 
   if (res.count === 0) {
     throw new NotFoundError('No group auth found.');
   }
+
   return {
-    authGroups: res.edges as any[],
+    authGroups: res.edges.map((el) => {
+      return { ...el.from };
+    }),
     id: data.id,
     totalCount: res.count,
   };
@@ -251,35 +277,23 @@ export const deleteDashboardGroupAuth = async (
 export const updateDashboardGroupAuth = async (
   data: DashboardGroupAuthUpdateReq,
 ): Promise<DashboardGroupAuthUpdateRes> => {
-  const authGroupContainer = await fetchContainer(DASHBOARDS);
-
-  const res = await authGroupContainer.item(data.id, data.id).read();
-
-  if (res.statusCode === 404) {
-    throw new NotFoundError(
-      `Did not find any group at id "${data.id}" `,
-    );
-  }
-
-  const res2 = (await updateTableDataEdge({
-    tableFrom: {
-      rows: data.authGroups as any,
-      tableName: AUTH_GROUPS,
-      partitionKeyProp: 'name',
-    },
-    edge: 'groups-dashboards',
-    edgeType: 'oneToMany',
-    tableTo: {
-      tableName: DASHBOARDS,
-      rows: data.authGroups.map((group) => {
-        return { ...group, id: data.id, name: res.resource.name };
-      }) as any,
-    },
-  })) as any;
+  const sql = await updateSql(
+    GROUPS_DASHBOARDS,
+    data.authGroups.map((group) => {
+      return {
+        ['table_from__read']: group.read,
+        ['table_from__create']: group.create,
+        ['table_from__update']: group.update,
+        ['table_from__delete']: group.delete,
+        id: group.id,
+      };
+    }),
+    `WHERE table_to__id = ${data.id}`,
+  );
 
   return {
-    authGroups: res2.map((el) => el.to) as DashboardAuthGroups[],
+    authGroups: [],
     id: data.id,
-    name: res.resource.name,
+    name: '',
   };
 };

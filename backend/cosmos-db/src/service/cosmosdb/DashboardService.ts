@@ -252,7 +252,7 @@ export const updateDashboardGroupAuth = async (
   data: DashboardGroupAuthUpdateReq,
 ): Promise<DashboardGroupAuthUpdateRes> => {
   const authGroupContainer = await fetchContainer(DASHBOARDS);
-
+// data.authGroups[0].
   const res = await authGroupContainer.item(data.id, data.id).read();
 
   if (res.statusCode === 404) {

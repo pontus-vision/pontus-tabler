@@ -23,11 +23,12 @@ import {
   ConflictEntityError,
   NotFoundError,
 } from '../../generated/api';
-import { AUTH_GROUPS } from './AuthGroupService';
+import { AUTH_GROUPS, convertToSqlFields, createSql } from './AuthGroupService';
 import { initiateAuthGroupContainer } from './AuthGroupService';
+import * as db from '../../../../delta-table/node/index-jdbc';
+import { snakeCase } from 'lodash';
+const conn: db.Connection = db.createConnection();
 
-export const GROUPS_DASHBOARDS = 'groups-dashboards';
-export const GROUPS_USERS = 'groups-users';
 export const GROUPS_TABLES = 'groups-tables';
 
 const TABLES = 'tables';
@@ -54,151 +55,135 @@ const ensureNestedPathExists = (obj, path) => {
 const snakeToCamel = (snake: string): string => {
   return snake.replace(/(_\w)/g, (match) => match[1].toUpperCase());
 };
+function prependToKeys(obj, prefix) {
+  const newObject = {};
+
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      newObject[prefix + key] = obj[key];
+    }
+  }
+
+  return newObject;
+}
+interface DeltaTableDataEdgeCreateReq extends TableDataEdgeCreateReq {
+  edgeLabel?: string;
+}
+
 export const createTableDataEdge = async (
-  data: TableDataEdgeCreateReq,
+  data: DeltaTableDataEdgeCreateReq,
 ): Promise<TableDataEdgeCreateRes> => {
-  const path = `edges/${snakeToCamel(data.tableTo.tableName)}/${data.edge}/`;
-  const path2 = `edges/${snakeToCamel(data.tableFrom.tableName)}/${data.edge}/`;
-  const res1 = await createConnection(
-    {
-      containerName: data.tableFrom.tableName,
-      values: data.tableFrom.rows,
-      partitionKeyProp: data.tableFrom.partitionKeyProp,
-    },
-    {
-      tableName: data.tableTo.tableName,
-      rowIds: data.tableTo.rows,
-    },
-    path + 'to',
-    data.edgeType,
-  );
-  const res2 = await createConnection(
-    {
-      containerName: data.tableTo.tableName,
-      values: data.tableTo.rows,
-      partitionKeyProp: data.tableTo.partitionKeyProp,
-    },
-    { tableName: data.tableFrom.tableName, rowIds: data.tableFrom.rows },
-    path2 + 'from',
-    data.edgeType,
+  const sql = await db.executeQuery(
+    `SELECT COUNT(*) FROM ${data.tableFrom.tableName} WHERE id IN (
+      ${data.tableFrom.rows.map((table) => `'${table.id}'`).join(', ')});
+     `,
+    conn,
   );
 
-  return res1;
+  if (+sql[0]['count(1)'] !== data.tableFrom.rows.length) {
+    throw new NotFoundError(`A record at ${data.tableFrom} does not exist`);
+  }
+
+  const sql2 = await db.executeQuery(
+    `SELECT COUNT(*) FROM ${
+      data.tableTo.tableName
+    } WHERE id IN (${data.tableTo.rows
+      .map((table) => `'${table.id}'`)
+      .join(', ')});`,
+    conn,
+  );
+
+  if (+sql2[0]['count(1)'] !== data.tableTo.rows.length) {
+    throw new NotFoundError(`A record at ${data.tableTo} does not exist`);
+  }
+
+  const sqlFields = convertToSqlFields(
+    Object.keys(data.tableFrom.rows[0]).map(
+      (el) => `table_from__${snakeCase(el)}`,
+    ),
+  );
+  const sqlFields2 = convertToSqlFields(
+    Object.keys(data.tableTo.rows[0]).map((el) => `table_to__${snakeCase(el)}`),
+  );
+
+  let tableFrom = data.tableFrom.rows.map((row) =>
+    prependToKeys(row, 'table_from__'),
+  );
+  let tableTo = data.tableTo.rows.map((row) =>
+    prependToKeys(row, 'table_to__'),
+  );
+
+  const insertFields = [];
+
+  const maxLength = Math.max(tableFrom.length, tableTo.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    if (tableFrom[i] && tableTo[i]) {
+      // Merge the first elements of both arrays
+      insertFields.push({ ...tableFrom[i], ...tableTo[i] });
+    } else if (tableFrom[i]) {
+      // If there's no corresponding element in tableTo, keep the element from tableFrom
+      insertFields.push(tableFrom[i]);
+    } else if (tableTo[i]) {
+      // If there's no corresponding element in tableFrom, keep the element from tableTo
+      insertFields.push(tableTo[i]);
+    }
+  }
+
+  const res = (await createSql(
+    data.edge,
+    sqlFields + ', ' + sqlFields2 + ', edge_label STRING',
+    insertFields.map((field) => {
+      if (data?.edgeLabel) {
+        return { ...field, ['edge_label']: data?.edgeLabel };
+      } else {
+        return field;
+      }
+    }),
+  )) as TableDataEdgeCreateRes;
+
+  return res;
 };
 
-export const createConnection = async (
+export const createConnection = (
   table1: {
     partitionKeyProp?: string;
     values: Record<string, any>[];
     containerName: string;
   },
   table2: { rowIds: Record<string, any>[]; tableName: string },
-  path: string,
   edgeType: 'oneToOne' | 'oneToMany',
-): Promise<TableDataEdgeCreateRef[]> => {
-  const container = await fetchContainer(table1.containerName);
-
+): Record<string, any>[] => {
   const arrRes = [];
   if (edgeType === 'oneToOne') {
-    for (const [index, rowId] of table1.values.entries()) {
-      const table2Row = table2.rowIds.at(index);
+    for (const [index, row] of table1.values.entries()) {
+      const row2 = table2.rowIds.at(index);
 
-      if (!table2Row) return;
-
-      const partitionKey = table1?.partitionKeyProp
-        ? rowId[table1.partitionKeyProp]
-        : undefined;
-
-      try {
-        await container.item(rowId.id, partitionKey || rowId.id).patch([
-          {
-            op: 'add',
-            path: `/${path}/-`,
-            value: table2Row,
-          },
-        ]);
-        arrRes.push({ from: rowId, to: table2Row });
-      } catch (error) {
-        const { resource: existingDocument } = await container
-          .item(rowId.id, partitionKey || rowId.id)
-          .read();
-
-        ensureNestedPathExists(existingDocument, path);
-
-        const nested = createOrUpdateNestedObjectWithArray(
-          existingDocument,
-          path,
-          [table2Row],
-        );
-        const obj = { ...existingDocument, ...nested };
-        const res = await container
-          .item(rowId.id, partitionKey || rowId.id)
-          .replace(obj);
-
-        arrRes.push({ from: rowId, to: table2Row });
-      }
+      arrRes.push({
+        from_id: row.id,
+        from_table_name: table1.containerName,
+        to_table_name: table2.tableName,
+        to_id: row2.id,
+      });
     }
   } else if (edgeType === 'oneToMany') {
     for (const [index, row] of table1.values.entries()) {
-      for (const [index, rowId2] of table2.rowIds.entries()) {
-        if (!rowId2) return;
+      for (const [index, row2] of table2.rowIds.entries()) {
+        if (!row2) return;
 
-        const partitionKey = table1?.partitionKeyProp
-          ? row[table1.partitionKeyProp]
-          : undefined;
-        try {
-          const res = await container
-            .item(row.id, partitionKey || row.id)
-            .patch([
-              {
-                op: 'add',
-                path: `/${path}/-`,
-                value: rowId2,
-              },
-            ]);
-          arrRes.push({ from: row, to: rowId2, docName: res.resource.name });
-        } catch (error) {
-          if (error?.code === 404) {
-            throw new NotFoundError(
-              `Could not find record at id: "${row.id}" ${
-                table1?.partitionKeyProp
-                  ? `and ${table1?.partitionKeyProp}: '${partitionKey}'`
-                  : ''
-              }`,
-            );
-          }
-          const { resource: existingDocument } = await container
-            .item(row.id, partitionKey || row.id)
-            .read();
-
-          const res2 = await container.items
-            .query({
-              query: 'Select * from c',
-              parameters: [],
-            })
-            .fetchAll();
-
-          ensureNestedPathExists(existingDocument, path);
-
-          const nested = createOrUpdateNestedObjectWithArray(
-            existingDocument,
-            path,
-            rowId2,
-          );
-
-          const obj = { ...existingDocument, ...nested };
-
-          const res = await container
-            .item(row.id, partitionKey || row.id)
-            .replace(obj);
-          arrRes.push({ from: row, to: rowId2, docName: res.resource.name });
-        }
+        arrRes.push({
+          from_id: row.id,
+          from_table_name: table1.containerName,
+          to_table_name: table2.tableName,
+          to_id: row2.id,
+        });
       }
     }
   }
 
   return arrRes;
 };
+
 export const updateTableDataEdge = async (
   data: TableDataEdgeCreateReq,
 ): Promise<TableDataEdgeCreateRes> => {
@@ -237,6 +222,7 @@ export const updateTableDataEdge = async (
 
   return res1;
 };
+
 export const updateConnection = async (
   table1: {
     partitionKeyProp?: string;
@@ -428,31 +414,31 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
   });
 };
 
-export const readEdge = async (data: {
-  containerId: string;
-  edgeContainer: string;
-  direction: EdgeDirectionEnum;
-  edgeLabel: string;
-  filters: ReadPaginationFilter;
-  rowId: string;
-}) => {
+export const readEdge = async (
+  data: {
+    tableToName: string;
+    tableFromName: string;
+    direction: EdgeDirectionEnum;
+    edgeTable: string;
+    filters: ReadPaginationFilter;
+    rowId: string;
+  },
+  conn: db.Connection,
+) => {
   const str = filterToQuery(data.filters, 'p', `c.id = "${data.rowId}"`);
-  const query = `SELECT  p FROM c JOIN p IN c["edges"]["${snakeToCamel(
-    data.edgeContainer,
-  )}"]["${data.edgeLabel}"]["${data.direction}"] ${str}`;
-  const querySpec = {
-    query,
-    parameters: [],
-  };
-  const container = await fetchContainer(data.containerId);
 
-  const { resources: res2 } = await container.items
-    .query({ query: 'select * from C', parameters: [] })
-    .fetchAll();
+  const res3 = await db.executeQuery(
+    `SELECT * FROM ${data.edgeTable}  ${'WHERE'} ${
+      data.direction === 'from' ? `from_id` : 'to_id'
+    } = '${data.rowId}' AND ${
+      data.direction === 'from'
+        ? `from_table_name = '${data.tableFromName}'`
+        : `to_table_name = '${data.tableToName}'`
+    } `,
+    conn,
+  );
 
-  const { resources } = await container.items.query(querySpec).fetchAll();
-
-  return resources.map((el) => el.p);
+  return res3.map((el) => el['']);
 };
 
 export const readTableDataEdge = async (
@@ -465,56 +451,54 @@ export const readTableDataEdge = async (
     `c.id = "${data.rowId}"`,
   );
 
-  //`SELECT ${props} FROM c JOIN p IN c["edges"]["${data.subContainerName}"] ${str2}`
-  const query = `SELECT  p FROM c JOIN p IN c["edges"]["${snakeToCamel(
-    edgeTableName,
-  )}"]["${data.edge.edgeLabel}"]["${data.edge.direction}"] ${str}`;
-  const querySpec = {
-    query,
-    // `select c.edges${edgeTableName ? `["${edgeTableName}"]` : ''}${
-    // edgeLabel ? `["${edgeLabel}"]` : ''
-    // }${
-    // direction ? `["${direction}"]` : ''
-    // },  from c where c.edges["${edgeTableName}"]["${edgeLabel}"]["${direction}"] c.id=@rowId`,
-    parameters: [
-      {
-        name: '@rowId',
-        value: data.rowId,
-      },
-    ],
-  };
+  const sql3 = (await db.executeQuery(
+    `SELECT * FROM ${edgeLabel}`,
+    conn,
+  )) as Record<string, any>;
 
-  let tableContainer;
-
-  if (data.tableName === AUTH_GROUPS) {
-    tableContainer = await initiateAuthGroupContainer();
-  } else {
-    tableContainer = await fetchContainer(data.tableName);
-  }
-
-  const { resources: res5 } = await tableContainer.items
-    .query({ query: 'Select * from c', parameters: [] })
-    .fetchAll();
-
-  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-  const resource = resources[0];
-
-  const str2 = filterToQuery(
-    { filters: data.filters },
-    'p',
-    `c.id = "${data.rowId}"`,
+  const sql = (await db.executeQuery(
+    `SELECT * FROM ${edgeLabel} where ${
+      direction === 'from'
+        ? `table_to__id = '${data.rowId}'`
+        : `table_from__id = '${data.rowId}'`
+    }`,
+    conn,
+  )) as Record<string, any>;
+  const sqlCount = await db.executeQuery(
+    `SELECT COUNT(*) FROM ${edgeLabel} where ${
+      direction === 'from'
+        ? `table_to__id = '${data.rowId}'`
+        : `table_from__id = '${data.rowId}'`
+    }`,
+    conn,
   );
-  const countStr = `SELECT VALUE COUNT(1) FROM c JOIN p IN c["edges"]["${snakeToCamel(
-    edgeTableName,
-  )}"]["${data.edge.edgeLabel}"]["${data.edge.direction}"] ${str2}`;
-  const { resources: countRes } = await tableContainer.items
-    .query({ query: countStr, parameters: [] })
-    .fetchAll();
+
+  const edges = sql.map((edge) => {
+    return {
+      ['to']: {
+        create: edge?.['table_to__create'] === 'true' ? true : false,
+        read: edge?.['table_to__read'] === 'true' ? true : false,
+        update: edge?.['table_to__update'] === 'true' ? true : false,
+        delete: edge?.['table_to__delete'] === 'true' ? true : false,
+        id: edge?.['table_to__id'],
+        name: edge?.['table_to__name'] || edge?.['table_to__username'],
+        ['tableName']: data.tableName,
+      },
+      ['from']: {
+        create: edge?.['table_from__create'] === 'true' ? true : false,
+        read: edge?.['table_from__read'] === 'true' ? true : false,
+        update: edge?.['table_from__update'] === 'true' ? true : false,
+        delete: edge?.['table_from__delete'] === 'true' ? true : false,
+        name: edge?.['table_from__name'],
+        id: edge?.['table_from__id'],
+      },
+    };
+  });
   return {
-    edges: resources.map((resource) => resource.p),
-    count: countRes[0],
-    rowId: data.rowId,
-    tableName: data.tableName,
+    edges,
+    count: +sqlCount[0]['count(1)'],
+    rowId: sql[0]?.['table_to__id'],
+    tableName: edgeTableName,
   };
 };
 

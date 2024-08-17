@@ -66,7 +66,7 @@ export const registerAdmin = async (
   if (dbSource === COSMOS_DB) {
     return cdb.registerAdmin(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.registerAdmin(data, jdbc);
+    return deltadb.registerAdmin(data);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
@@ -77,7 +77,26 @@ export const authUserCreate = async (
   if (dbSource === COSMOS_DB) {
     return cdb.authUserCreate(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.authUserCreate(data, jdbc);
+    return deltadb.authUserCreate(data);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
+};
+export const authenticateToken = async (
+  req,
+  res,
+): Promise<{ username: string; userId: string }> => {
+  if (dbSource === COSMOS_DB) {
+    return cdb.authenticateToken(req, res);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.authenticateToken(req, res);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
+};
+export const checkAdmin = async (userId) => {
+  if (dbSource === COSMOS_DB) {
+    return cdb.checkAdmin(userId);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.checkAdmin(userId);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };

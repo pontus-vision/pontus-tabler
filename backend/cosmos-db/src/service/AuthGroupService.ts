@@ -34,16 +34,16 @@ import {
   AuthGroupUsersUpdateRes,
   AuthGroupsReadReq,
   AuthGroupsReadRes,
-
   InternalServerError,
-
 } from '../generated/api';
+import { CrudDocumentRef } from '../typescript/api';
 
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
 
 export const COSMOS_DB = 'cosmosdb';
 export const DELTA_DB = 'deltadb';
+export const GROUPS_USERS = 'groups_users';
 
 export const dbSource = process.env.DB_SOURCE || COSMOS_DB;
 
@@ -253,6 +253,18 @@ export const updateAuthGroupTable = async (
     return cdb.updateAuthGroupTable(data);
   } else if (dbSource === DELTA_DB) {
     return deltadb.updateAuthGroupTable(data);
+  }
+
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
+};
+
+export const checkTableMetadataPermissions = async (
+  userId: string,
+): Promise<CrudDocumentRef> => {
+  if (dbSource === COSMOS_DB) {
+    return cdb.checkTableMetadataPermissions(userId);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.checkTableMetadataPermissions(userId);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);

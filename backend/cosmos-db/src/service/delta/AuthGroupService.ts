@@ -57,6 +57,7 @@ import {
   NotFoundError,
   BadRequestError,
 } from '../../generated/api';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as db from '../../../../delta-table/node/index-jdbc';
 
@@ -72,10 +73,10 @@ import {
   ADMIN_USER_USERNAME,
   AUTH_USERS,
   authUserGroupsRead,
+  getRowCount,
 } from './AuthUserService';
 import { TABLES } from './TableService';
 import {
-  GROUPS_DASHBOARDS,
   GROUPS_TABLES,
   createConnection,
   createTableDataEdge,
@@ -88,11 +89,22 @@ import {
 import { readTableData } from './TableDataService';
 import { snakeCase } from 'lodash';
 import { NODATA } from 'dns';
+import { GROUPS_DASHBOARDS } from '../EdgeService';
+import { GROUPS_USERS } from '../AuthGroupService';
 export const AUTH_GROUPS = 'auth_groups';
 export const ADMIN_GROUP_NAME = 'Admin';
+export const AUTH_GROUPS_USER_TABLE = 'auth_groups_users';
+const conn: db.Connection = db.createConnection();
 
-const conn: db.Connection = db.createConnection()
+const generateUUIDv6 = () => {
+  const uuid = uuidv4().replace(/-/g, '');
+  const timestamp = new Date().getTime();
 
+  let timestampHex = timestamp.toString(16).padStart(12, '0');
+  let uuidV6 = timestampHex + uuid.slice(12);
+
+  return uuidV6;
+};
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],
 };
@@ -157,12 +169,20 @@ export const objEntriesToStr = (
   const values = [];
 
   for (const [key, value] of Object.entries(data)) {
-    keys.push(key);
+    // keys.push(key);
+    // values.push(value)
+
     const valType = typeof value;
-    if (valType === 'string') {
-      values.push(`'${value}'`);
-    } else if (valType === 'number') {
+    const keyType = typeof key;
+    if (valType === 'boolean') {
+      keys.push(`${snakeCase(key)} BOOLEAN`);
       values.push(value);
+    } else if (valType === 'number') {
+      keys.push(`${snakeCase(key)} INT`);
+      values.push(value);
+    } else {
+      keys.push(`${snakeCase(key)} STRING`);
+      values.push(`'${value}'`);
     }
   }
 
@@ -171,200 +191,273 @@ export const objEntriesToStr = (
   return { keysStr, valuesStr };
 };
 
-export const createAuthGroup = async (data: AuthGroupCreateReq) => {
-  const { keysStr, valuesStr } = objEntriesToStr(data);
+export const convertToSqlFields = (data: any[]): string => {
+  const fields = [];
 
-
-  const res = db.executeQuery(
-    `INSERT INTO ${AUTH_GROUPS} (${keysStr}) VALUES (${valuesStr})`,conn
-  );
-
-  const authGroupContainer = await initiateAuthGroupContainer();
-
-  try {
-    const res = (await authGroupContainer.items.create({
-      ...data,
-      tableMetadata: {
-        create: false,
-        read: true,
-        update: false,
-        delete: false,
-      },
-    })) as ItemResponse<AuthGroupRef>;
-
-    const { name, id, tableMetadata } = res.resource;
-    return { name, id, tableMetadata };
-  } catch (error) {
-    if (error?.code === 409) {
-      throw new ConflictEntityError(`group name: ${data.name} already taken.`);
+  for (const value of data) {
+    const valType = typeof value;
+    if (valType === 'boolean') {
+      fields.push(`${value} BOOLEAN`);
+    } else if (valType === 'number') {
+      fields.push(`${value} INT`);
+    } else {
+      fields.push(`${value} STRING`);
     }
   }
+
+  return fields.join(', ');
+};
+
+export const createSql = async (
+  table: string,
+  fields: string,
+  data: Record<string, any>,
+): Promise<Record<string, any>[]> => {
+  const uuid = generateUUIDv6();
+
+  const entries = objEntriesToStr(data);
+
+  const keys = entries.keysStr;
+  const values = entries.valuesStr;
+  // const resss = await db.executeQuery(
+  //   `DROP TABLE  ${table} `,
+  //   conn,
+  // );
+
+  const res = await db.executeQuery(
+    `CREATE TABLE IF NOT EXISTS ${table} (${
+      data?.id ? '' : 'id STRING, '
+    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`,
+    conn,
+  );
+
+  const insertFields = Array.isArray(data)
+    ? Object.keys(data[0]).join(', ')
+    : Object.keys(data).join(', ');
+
+  const insertValues = [];
+  if (Array.isArray(data)) {
+    for (const el of data) {
+      const entries = objEntriesToStr(el);
+      insertValues.push(`${entries.valuesStr}`);
+    }
+  }
+
+  const insert = `INSERT INTO ${table} (${
+    data?.id ? '' : 'id, '
+  } ${insertFields}) VALUES ('${uuid}', ${
+    Array.isArray(data) ? insertValues.join(', ') : values
+  })`;
+
+  const res2 = await db.executeQuery(insert, conn);
+
+  const res3 = await db.executeQuery(
+    `SELECT * FROM delta.\`/data/pv/${table}\` WHERE id = ${
+      typeof uuid === 'string' ? `'${uuid}'` : uuid
+    }`,
+    conn,
+  );
+
+  return res3.map((el) => {
+    const obj = {};
+    for (const prop in el) {
+      if (el[prop] === 'true') {
+        obj[prop] = true;
+      } else if (el[prop] === 'false') {
+        obj[prop] = false;
+      } else {
+        obj[prop] = el[prop];
+      }
+    }
+    return obj;
+  });
+};
+export const updateSql = async (
+  table: string,
+  data: Record<string, any>,
+  whereClause: string,
+): Promise<Record<string, any>[]> => {
+  const insertValues = [];
+
+  if (Array.isArray(data)) {
+    for (const el of data) {
+      for (const [key, value] of Object.entries(el)) {
+        const val = typeof value === 'string' ? `'${value}'` : value;
+        insertValues.push(`${key} = ${val}`);
+      }
+    }
+  } else {
+    for (const [key, value] of Object.entries(data)) {
+      const val = typeof value === 'string' ? `'${value}'` : value;
+      insertValues.push(`${key} = ${val}`);
+    }
+  }
+
+  const insert = `UPDATE ${table} SET ${insertValues.join(
+    ', ',
+  )} ${whereClause}`;
+
+  const res2 = await db.executeQuery(insert, conn);
+
+  const res3 = await db.executeQuery(
+    `SELECT * FROM delta.\`/data/pv/${table}\` ${whereClause}`,
+    conn,
+  );
+  if (res3.length === 0) {
+    throw new NotFoundError(
+      `did not find any record at table '${table}' (${whereClause})`,
+    );
+  }
+
+  return res3;
+};
+export const createAuthGroup = async (data: AuthGroupCreateReq) => {
+  let id;
+  if (!data.id) {
+    id = generateUUIDv6();
+  } else {
+    id = data.id;
+  }
+
+  const res = await db.executeQuery(
+    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
+    conn,
+  );
+  const res4 = await db.executeQuery(
+    `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
+    conn,
+  );
+  if (+res4[0]['count(1)'] > 0) {
+    throw new ConflictEntityError(`group name: ${data.name} already taken.`);
+  }
+
+  const res2 = await db.executeQuery(
+    `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+    conn,
+  );
+
+  const res3 = await db.executeQuery(
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
+      typeof id === 'string' ? `'${id}'` : id
+    }`,
+    conn,
+  );
+
+  return {
+    name: res3[0]['name'],
+    id,
+    tableMetadata: {
+      create: res3[0]['create_table'],
+      read: res3[0]['read_table'],
+      update: res3[0]['update_table'],
+      delete: res3[0]['delete_table'],
+    },
+  };
 };
 
 export const updateAuthGroup = async (
   data: AuthGroupUpdateReq,
 ): Promise<AuthGroupUpdateRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
-
-  const patchArr: PatchOperation[] = [];
-  for (const prop in data) {
-    switch (prop) {
-      case 'name':
-        patchArr.push({
-          op: 'replace',
-          path: '/name',
-          value: data[prop],
-        });
-        break;
-      default:
-        break;
-    }
+  const sql = (await updateSql(
+    AUTH_GROUPS,
+    { name: data.name },
+    `WHERE id = '${data.id}'`,
+  )) as AuthGroupUpdateRes[];
+  const affectedRows = +sql[0]['num_affected_rows'];
+  if (affectedRows === 0) {
+    throw new NotFoundError(`No Auth Group found at id: ${data.id}`);
   }
-
   try {
-    const res = await authGroupContainer
-      .item(data.id, data.name)
-      .patch(patchArr);
+    const sql2 = await updateSql(
+      GROUPS_DASHBOARDS,
+      { ['table_from__name']: data.name },
+      `WHERE table_from__id = '${data.id}'`,
+    );
 
-    const edges = res.resource.edges;
+    const sql3 = await updateSql(
+      GROUPS_USERS,
+      { ['table_from__name']: data.name },
+      `WHERE table_from__id = '${data.id}'`,
+    );
+  } catch (error) {}
 
-    const dashboards = res?.resource?.dashboards as AuthGroupDashboardRef[];
-    const authUsers = res?.resource?.authUsers;
-    if (dashboards?.length > 0) {
-      const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-      for (const dashboard of dashboards) {
-        const res2 = await dashboardContainer
-          .item(dashboard.id, dashboard.id)
-          .read();
-        const index = res2?.resource?.authGroups.findIndex(
-          (el) => el?.id === data?.id,
-        );
-
-        const res3 = await dashboardContainer
-          .item(dashboard.id, dashboard.id)
-          .patch([
-            {
-              op: 'set',
-              path: `/authGroups/${index}/name`,
-              value: data?.name,
-            },
-          ]);
-      }
-    }
-
-    if (authUsers.length > 0) {
-      const authUsersContainer = await fetchContainer(AUTH_USERS);
-
-      for (const dashboard of dashboards) {
-        const res2 = await authUsersContainer
-          .item(dashboard.id, dashboard.id)
-          .read();
-        const index = res2?.resource?.authGroups.findIndex(
-          (el) => el?.id === data?.id,
-        );
-
-        const res3 = await authUsersContainer
-          .item(dashboard.id, dashboard.id)
-          .patch([
-            {
-              op: 'set',
-              path: `/authGroups/${index}/name`,
-              value: data?.name,
-            },
-          ]);
-      }
-    }
-    return res.resource;
-  } catch (error) {
-    if (error?.code === 404) {
-      throw new NotFoundError(`No Auth Group found at id: ${data.id}`);
-    }
-  }
+  return sql[0];
 };
 
 export const readAuthGroup = async (
   data: AuthGroupReadReq,
 ): Promise<AuthGroupReadRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
+  const id = data.id;
 
-  const res = (await authGroupContainer
-    .item(data.id, data.name)
-    .read()) as ItemResponse<AuthGroupRef>;
+  const res = (await db.executeQuery(
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
+      typeof id === 'string' ? `'${id}'` : id
+    }`,
+    conn,
+  )) as AuthGroupRef[];
 
-  if (res.statusCode === 404) {
+  if (res.length === 0) {
     throw new NotFoundError(`No Auth Group found at id: ${data.id}`);
   }
 
-  return res.resource;
+  return res[0];
 };
 
-export const deleteAuthGroup = async (
-  data: AuthGroupDeleteReq,
-): Promise<AuthGroupDeleteRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
+export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
+  const deleteQuery = await db.executeQuery(
+    `DELETE FROM ${AUTH_GROUPS} WHERE id = '${data.id}'`,
+    conn,
+  );
+  const affectedRows = +deleteQuery[0]['num_affected_rows'];
+  const deleteGroupUsersQuery = await db.executeQuery(
+    `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
+    conn,
+  );
+  const deleteGroupDashQuery = await db.executeQuery(
+    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
+    conn,
+  );
 
-  const res = await authGroupContainer.item(data.id, data.name).read();
-
-  if (res?.statusCode === 404) {
-    throw new NotFoundError(`Auth Group not found at id: ${data.id}`);
+  if (affectedRows === 1) {
+    return `AuthGroup deleted.`;
+  } else if (!affectedRows) {
+    throw new NotFoundError(`No group found at ${data.id}`);
   }
-
-  const edges = res.resource?.edges;
-  const arr = [];
-
-  if (Object.values(edges || {}).length > 0) {
-    for (const prop in edges) {
-      const tableName = prop;
-      for (const prop2 in edges[prop]) {
-        const edgeLabel = prop2;
-        for (const prop3 in edges[prop][prop2]) {
-          const direction = prop3;
-          for (const value of edges[prop][prop2][prop3]) {
-            console.log({ value });
-            const snakeTableName = snakeCase(tableName);
-            const res2 = await deleteTableDataEdge({
-              edge: {
-                direction: direction as EdgeDirectionEnum,
-                edgeLabel,
-                tableName: snakeTableName,
-                rows: [value],
-                partitionKeyProp:
-                  snakeTableName === AUTH_GROUPS || snakeTableName === TABLES
-                    ? 'name'
-                    : snakeTableName === AUTH_USERS
-                    ? 'username'
-                    : '',
-              },
-              rowId: data.id,
-              tableName: AUTH_GROUPS,
-              rowPartitionKey: data.name,
-            });
-          }
-        }
-      }
-    }
-  }
-
-  const res3 = (await authGroupContainer
-    .item(data.id, data.name)
-    .delete()) as ItemResponse<AuthGroupRef>;
-
-  return `AuthGroup deleted.`;
 };
 
 export const readAuthGroups = async (
   data: AuthGroupsReadReq,
 ): Promise<AuthGroupsReadRes> => {
-  try {
-    const res = await fetchData(data, AUTH_GROUPS);
+  const whereClause = filterToQuery(data, 'c');
 
-    return { authGroups: res.values, totalGroups: res.count };
-  } catch (error) {
-    if (error?.code === 404) {
-      throw new NotFoundError(`Auth Group not found.`);
+  const clauses = [];
+  for (const prop in data.filters) {
+    for (const prop2 in data.filters[prop]) {
+      if (data.filters[prop][prop2]) {
+        clauses.push(`\`${prop}\` LIKE '%${data.filters[prop][prop2]}%'`);
+      }
     }
   }
+
+  const selectGroups = (await db.executeQuery(
+    `SELECT * FROM auth_groups
+      ${whereClause};`,
+    conn,
+  )) as AuthGroupRef[];
+  const countGroups = await db.executeQuery(
+    `SELECT COUNT(*) FROM auth_groups
+      ${whereClause};`,
+    conn,
+  );
+  const groupCount = +countGroups[0]['count(1)'];
+  if (groupCount === 0) {
+    throw new NotFoundError(`No group found.`);
+  }
+
+  return {
+    authGroups: selectGroups,
+    totalGroups: +countGroups[0]['count(1)'],
+  };
 };
 
 export const createAuthGroupDashboards = async (
@@ -386,10 +479,19 @@ export const createAuthGroupDashboards = async (
       }),
       partitionKeyProp: 'name',
     },
-    edge: 'groups-dashboards',
+    edge: 'groups_dashboards',
     edgeType: 'oneToMany',
     tableTo: {
-      rows: data.dashboards as Record<string, any>[],
+      rows: data.dashboards.map((dashboard) => {
+        return {
+          id: dashboard.id,
+          name: dashboard.name,
+          create: false,
+          read: false,
+          update: false,
+          delete: false,
+        };
+      }) as Record<string, any>[],
       tableName: DASHBOARDS,
     },
   })) as any;
@@ -405,10 +507,21 @@ export const createAuthGroupDashboards = async (
   //   partitionKey: data.name,
   // });
 
+  const dashboards: AuthGroupDashboardRef[] = res.map((el) => {
+    return {
+      create: el['table_from__create'],
+      delete: el['table_from__delete'],
+      id: el['table_to__id'],
+      name: el['table_to__name'],
+      read: el['table_from__read'],
+      update: el['table_from__update'],
+    };
+  });
+
   return {
     id: data.id,
     name: data.name,
-    dashboards: res.map((el) => el.to) as AuthGroupDashboardRef[],
+    dashboards,
   };
 };
 
@@ -418,7 +531,7 @@ export const readAuthGroupDashboards = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
-      edgeLabel: 'groups-dashboards',
+      edgeLabel: GROUPS_DASHBOARDS,
       tableName: DASHBOARDS,
     },
     rowId: data.id,
@@ -431,43 +544,46 @@ export const readAuthGroupDashboards = async (
   if (res.count === 0) {
     throw new NotFoundError('No group auth found.');
   }
+
   return {
     count: res.count,
-    dashboards: res.edges as AuthGroupDashboardRef[],
+    dashboards: res.edges.map((el) => {
+      return { ...el.from, name: el.to['name'], id: el.to['id'] };
+    }) as AuthGroupDashboardRef[],
   };
 };
 
 export const updateAuthGroupDashboards = async (
   data: AuthGroupDashboardUpdateReq,
 ): Promise<AuthGroupDashboardUpdateRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
+  const sql = await updateSql(
+    GROUPS_DASHBOARDS,
+    data.dashboards.map((dash) => {
+      return {
+        table_from__create: dash.create,
+        table_from__read: dash.read,
+        table_from__update: dash.update,
+        table_from__delete: dash.delete,
+        table_to__id: dash.id,
+        table_to__name: dash.name,
+      };
+    }),
+    `WHERE table_from__id = '${data.id}'`,
+  );
 
-  const res2 = await authGroupContainer.item(data.id, data.name).read();
-
-  if (res2.statusCode === 404) {
-    throw new NotFoundError(
-      `Did not find any group at id "${data.id}" and name:"${data.name}"`,
-    );
-  }
-
-  const res = (await updateTableDataEdge({
-    tableFrom: {
-      rows: data.dashboards.map((dash) => {
-        return { ...dash, id: data.id, name: data.name };
-      }),
-      tableName: AUTH_GROUPS,
-      partitionKeyProp: 'name',
-    },
-    edge: 'groups-dashboards',
-    edgeType: 'oneToMany',
-    tableTo: {
-      tableName: DASHBOARDS,
-      rows: data.dashboards as any,
-    },
-  })) as any;
+  const dashboards: AuthGroupDashboardRef[] = sql.map((el) => {
+    return {
+      name: el['table_to__name'],
+      id: el['table_to__id'],
+      create: el['table_from__create'] === 'true' ? true : false,
+      read: el['table_from__read'] === 'true' ? true : false,
+      update: el['table_from__update'] === 'true' ? true : false,
+      delete: el['table_from__delete'] === 'true' ? true : false,
+    };
+  });
 
   return {
-    dashboards: res.map((el) => el.to) as AuthGroupDashboardRef[],
+    dashboards,
     id: data.id,
     name: data.name,
   };
@@ -476,25 +592,17 @@ export const updateAuthGroupDashboards = async (
 export const deleteAuthGroupDashboards = async (
   data: AuthGroupDashboardDeleteReq,
 ): Promise<AuthGroupDashboardDeleteRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
   if (data.dashboardIds.length === 0) {
     throw new BadRequestError('No dashboardId mentioned.');
   }
+  const sql = await db.executeQuery(
+    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
+    conn,
+  );
 
-  const res = await deleteTableDataEdge({
-    edge: {
-      edgeLabel: 'groups-dashboards',
-      direction: 'to',
-      rows: data.dashboardIds.map((dash) => {
-        return { id: dash };
-      }),
-      tableName: DASHBOARDS,
-    },
-    rowId: data.id,
-    rowPartitionKey: data.name,
-    tableName: AUTH_GROUPS,
-  });
+  if (+sql[0]['num_affected_rows'] === 0) {
+    throw new NotFoundError('Could not found a group at id ' + data.id);
+  }
 
   return '';
 };
@@ -504,16 +612,42 @@ export const createAuthUserGroup = async (
 ): Promise<AuthGroupUsersCreateRes> => {
   const { authUsers, id, name } = data;
 
-  const res = db.executeQuery(
-    `CREATE TABLE IF NOT EXISTS auth_users_groups (group_id INT, user_id INT) USING DELTA LOCATION '/data/delta-test'
-     INSERT INTO auth_users_groups (group_id, user_id) VALUES ${authUsers.map(
-       (user) => `(${id}, ${user.id})`,
-     )}`,conn
-  );
+  const res = (await createTableDataEdge({
+    tableFrom: {
+      tableName: AUTH_GROUPS,
+
+      rows: data.authUsers.map(() => {
+        return {
+          id: data.id,
+          name: data.name,
+        };
+      }),
+      partitionKeyProp: 'name',
+    },
+    edge: GROUPS_USERS,
+    edgeType: 'oneToMany',
+    tableTo: {
+      rows: data.authUsers.map((user) => {
+        return {
+          id: user.id,
+          username: user.username,
+        };
+      }) as Record<string, any>[],
+      tableName: AUTH_USERS,
+    },
+  })) as any;
+
+  const authUsersRes = res.map((el) => {
+    return {
+      username: el['table_to__username'],
+      id: el['table_to__id'],
+    };
+  });
+
   return {
     id: data.id,
     name: data.name,
-    authUsers: [],
+    authUsers: authUsersRes,
     // authUsers: res.map((el) => el.to) as UsernameAndIdRef[],
   };
 };
@@ -554,7 +688,7 @@ export const readAuthGroupUsers = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
-      edgeLabel: 'groups-users',
+      edgeLabel: GROUPS_USERS,
       tableName: AUTH_USERS,
     },
     rowId: data.id,
@@ -567,10 +701,15 @@ export const readAuthGroupUsers = async (
   if (res.count === 0) {
     throw new NotFoundError('No group auth found.');
   }
-
+  const authUsers = res.edges.map((edge) => {
+    const username = edge['to']['name'];
+    delete edge['to']['name'];
+    delete edge['to']['tableName'];
+    return { ...edge['to'], username };
+  });
   return {
     count: res.count,
-    authUsers: res.edges,
+    authUsers,
   };
 };
 
@@ -602,19 +741,12 @@ export const updateAuthGroupUsers = async (
 export const deleteAuthGroupUsers = async (
   data: AuthGroupUsersDeleteReq,
 ): Promise<AuthGroupUsersDeleteRes> => {
-  const res = await deleteTableDataEdge({
-    rowId: data.id,
-    tableName: AUTH_GROUPS,
-    edge: {
-      direction: 'from',
-      edgeLabel: 'groups-users',
-      tableName: AUTH_USERS,
-      rows: data.authUsers as any,
-      partitionKeyProp: 'username',
-    },
-
-    rowPartitionKey: data.name,
-  });
+  const sql = await db.executeQuery(
+    `DELETE FROM ${GROUPS_USERS} WHERE ${data.authUsers
+      .map((user) => `table_to__id = '${user.id}'`)
+      .join(' AND ')} AND table_from__id = '${data.id}'`,
+    conn,
+  );
 
   return '';
 };
@@ -836,14 +968,17 @@ export const checkPermissions = async (
   targetId: string,
   containerId: 'auth_users' | 'dashboards' | 'tables',
 ): Promise<CrudDocumentRef> => {
-  const res = (await readEdge({
-    direction: 'from',
-    edgeLabel: 'groups-users',
-    containerId: AUTH_USERS,
-    edgeContainer: AUTH_GROUPS,
-    filters: {},
-    rowId: userId,
-  })) as AuthGroupRef[];
+  const res = (await readEdge(
+    {
+      direction: 'from',
+      edgeTable: GROUPS_USERS,
+      tableToName: AUTH_USERS,
+      tableFromName: AUTH_GROUPS,
+      filters: {},
+      rowId: userId,
+    },
+    conn,
+  )) as AuthGroupRef[];
 
   if (res.length === 0) {
     throw new NotFoundError('There is no group associated with user');
@@ -863,29 +998,32 @@ export const checkPermissions = async (
         delete: true,
       };
     }
-    const res = await readEdge({
-      direction: 'to',
-      edgeLabel:
-        containerId === DASHBOARDS
-          ? GROUPS_DASHBOARDS
-          : containerId === TABLES
-          ? GROUPS_TABLES
-          : containerId === AUTH_USERS
-          ? GROUPS_TABLES
-          : '',
-      containerId: AUTH_GROUPS,
-      edgeContainer: containerId,
-      filters: {
+    const res = await readEdge(
+      {
+        direction: 'to',
+        edgeTable:
+          containerId === DASHBOARDS
+            ? GROUPS_DASHBOARDS
+            : containerId === TABLES
+            ? GROUPS_TABLES
+            : containerId === AUTH_USERS
+            ? GROUPS_TABLES
+            : '',
+        tableToName: AUTH_GROUPS,
+        tableFromName: containerId,
         filters: {
-          id: {
-            filter: targetId,
-            filterType: 'text',
-            type: 'equals',
+          filters: {
+            id: {
+              filter: targetId,
+              filterType: 'text',
+              type: 'equals',
+            },
           },
         },
+        rowId: group.id,
       },
-      rowId: group.id,
-    });
+      conn,
+    );
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
@@ -921,8 +1059,21 @@ export const checkTableMetadataPermissions = async (
   let read = false;
   let update = false;
   let del = false;
-  for (const group of res.authGroups) {
-    const res2 = await readAuthGroup(group);
+
+  if (
+    res['authGroups'].some(
+      (group) => group['from']['name'] === ADMIN_GROUP_NAME,
+    )
+  ) {
+    return {
+      create: true,
+      read: true,
+      update: true,
+      delete: true,
+    };
+  }
+  for (const group of res['authGroups']) {
+    const res2 = await readAuthGroup(group['from']['id']);
 
     if (res2.tableMetadata?.create) {
       create = res2.tableMetadata?.create;

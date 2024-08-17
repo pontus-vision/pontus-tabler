@@ -62,6 +62,7 @@ import {
   deleteAuthGroupTables,
   readAuthGroupTables,
   readAuthGroupTable,
+  checkTableMetadataPermissions,
   updateAuthGroupTable,
 } from './service/AuthGroupService';
 import {
@@ -81,15 +82,9 @@ import {
   setup,
 } from './service/AuthUserService';
 import { Request } from 'express';
-import {
-  checkPermissions,
-  checkTableMetadataPermissions,
-} from './service/cosmosdb/AuthGroupService';
-import {
-  authenticateToken,
-  refreshToken,
-  checkAdmin,
-} from './service/cosmosdb/AuthUserService';
+import { checkPermissions } from './service/cosmosdb/AuthGroupService';
+import { refreshToken } from './service/cosmosdb/AuthUserService';
+import { authenticateToken, checkAdmin } from './service/AuthUserService';
 
 export default new PontusService({
   registerUserPost: async (req, res) => {
@@ -125,7 +120,7 @@ export default new PontusService({
     await checkAdmin(auth.userId);
     const response = await createAuthGroup(req.body);
 
-    // res.send(response);
+    res.send(response);
   },
   authGroupDeletePost: async (req, res) => {
     const auth = await authenticateToken(req, res);

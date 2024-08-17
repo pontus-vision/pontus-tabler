@@ -73,7 +73,6 @@ import {
 } from './AuthUserService';
 import { TABLES } from './TableService';
 import {
-  GROUPS_DASHBOARDS,
   GROUPS_TABLES,
   createConnection,
   createTableDataEdge,
@@ -86,6 +85,7 @@ import {
 import { readTableData } from './TableDataService';
 import { snakeCase } from 'lodash';
 import { NODATA } from 'dns';
+import { GROUPS_DASHBOARDS } from '../EdgeService';
 export const AUTH_GROUPS = 'auth_groups';
 export const ADMIN_GROUP_NAME = 'Admin';
 

@@ -26,7 +26,6 @@ import {
 import { AUTH_GROUPS } from './AuthGroupService';
 import { initiateAuthGroupContainer } from './AuthGroupService';
 
-export const GROUPS_DASHBOARDS = 'groups-dashboards';
 export const GROUPS_USERS = 'groups-users';
 export const GROUPS_TABLES = 'groups-tables';
 

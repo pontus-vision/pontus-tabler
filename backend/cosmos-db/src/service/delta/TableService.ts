@@ -16,6 +16,8 @@ import {
 } from '@azure/cosmos';
 import { NotFoundError } from '../../generated/api';
 
+import * as db from '../../../../delta-table/node/index-jdbc';
+import { createSql } from './AuthGroupService';
 export const TABLES = 'tables';
 
 const partitionKey: string | PartitionKeyDefinition = {
@@ -33,15 +35,13 @@ export const initiateTableContainer = async (): Promise<Container> => {
 export const createTable = async (
   data: TableCreateReq,
 ): Promise<TableCreateRes> => {
-  const tableContainer = await initiateTableContainer();
+  const sql = (await createSql(
+    TABLES,
+    'name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable STRING, header_name STRING, filter BOOLEAN, kind STRING>>',
+    data,
+  )) as TableCreateRes[];
 
-  const res = await tableContainer.items.create(data);
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
-
-  // return rest;
-
-  return rest;
+  return sql[0];
 };
 
 export const updateTable = async (data: TableUpdateReq) => {

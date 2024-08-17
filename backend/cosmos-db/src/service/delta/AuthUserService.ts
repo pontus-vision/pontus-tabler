@@ -67,8 +67,10 @@ import dotenv from 'dotenv';
 import {
   ADMIN_GROUP_NAME,
   AUTH_GROUPS,
+  AUTH_GROUPS_USER_TABLE,
   createAuthGroup,
   createAuthUserGroup,
+  createSql,
   initiateAuthGroupContainer,
   objEntriesToStr,
 } from './AuthGroupService';
@@ -85,6 +87,8 @@ import { has } from 'lodash';
 dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const ADMIN_USER_USERNAME = 'ADMIN';
+import { v6 as uuidv6 } from 'uuid';
+import { GROUPS_USERS } from '../AuthGroupService';
 
 const conn: db.Connection = db.createConnection();
 
@@ -113,26 +117,19 @@ export const initiateAuthUserContainer = async (): Promise<Container> => {
 };
 
 export const setup = async (): Promise<InitiateRes> => {
-  const database = await fetchDatabase(cosmosDbName);
   try {
-    const container = await database.container(AUTH_USERS).read();
+    const query = `SELECT * from auth_users`;
+
+    const res = await db.executeQuery(query, conn);
+    if (res.length === 0) {
+      throw new TemporaryRedirect('/register/admin');
+    }
   } catch (error) {
     if (error?.code === 404) {
       throw new TemporaryRedirect('/register/admin');
     }
   }
 
-  const authUserContainer = await initiateAuthUserContainer();
-  const res2 = await authUserContainer.items
-    .query({
-      query: 'select * from c',
-      parameters: [],
-    })
-    .fetchAll();
-
-  if (res2.resources.length === 0) {
-    throw new TemporaryRedirect('/register/admin');
-  }
   return '/login';
 };
 
@@ -149,7 +146,7 @@ export const registerUser = async (
     throw new BadRequestError('Password fields does not match.');
   }
 
-  const res = await authUserCreate(data, jdbc);
+  const res = await authUserCreate(data);
 
   return {
     id: res.id,
@@ -159,13 +156,12 @@ export const registerUser = async (
 
 export const registerAdmin = async (
   data: RegisterAdminReq,
-  jdbc: any,
 ): Promise<RegisterAdminRes> => {
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }
 
-  const res = await authUserCreate(data, jdbc);
+  const res = await authUserCreate(data);
 
   const group = await createAuthGroup({ name: ADMIN_GROUP_NAME });
 
@@ -186,55 +182,40 @@ export interface authUserCreate {
   data: AuthUserCreateReq;
 }
 
+export const getRowCount = async (
+  table: string,
+  conn: db.Connection,
+): Promise<string> => {
+  const count = await db.executeQuery(
+    `SELECT count(1) FROM delta.\`/data/${table}\``,
+    conn,
+  );
+
+  return count[0]['count(1)'];
+};
+
 export const authUserCreate = async (
   data: AuthUserCreateReq,
-  jdbc: any,
 ): Promise<AuthUserCreateRes> => {
-  if (data.password.length < 6) {
-    throw new BadRequestError('Please, insert at least 6 characters.');
-  }
-
-  if (data.password !== data.passwordConfirmation) {
-    throw new BadRequestError(
-      'Password and confirmation fields does not match.',
+  try {
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const sql = await createSql(
+      AUTH_USERS,
+      'username STRING, password STRING',
+      {
+        password: hashedPassword,
+        username: data.username,
+      },
     );
+    return {
+      username: sql[0]['username'],
+      id: sql[0]['id'],
+    };
+  } catch (error) {
+    if (error?.code === 409) {
+      throw new ConflictEntityError('username already taken: ' + data.username);
+    }
   }
-
-  const hashedPassword = await bcrypt.hash(data.password, 10);
-  const { keysStr, valuesStr } = objEntriesToStr({
-    ...data,
-    password: hashedPassword,
-  });
-
-  // try {
-  const res = await db.executeQuery(
-    // `CREATE TABLE IF NOT EXISTS bar (id INT, username STRING, password STRING) USING DELTA LOCATION '/data/delta-test-2';`,
-    `CREATE TABLE IF NOT EXISTS delta.\`/data/auth-users\` (id INT, username STRING, password STRING) USING DELTA;`,
-    // `CREATE TABLE ${AUTH_USERS}(id INT NOT NULL, username VARCHAR(255),
-    //  CONSTRAINT ${AUTH_USERS}_pk PRIMARY KEY(id)) USING DELTA LOCATION '/data/delta-test-2';`,
-    // `SELECT 1`,
-    conn,
-  );
-
-  const res2 = await db.executeQuery(
-    `INSERT INTO delta.\`/data/auth-users\` (id, username, password) values (1, '${data.username}', '${hashedPassword}')`,
-    conn,
-  );
-
-  const res3 = await db.executeQuery(
-    `SELECT * FROM delta.\`/data/auth-users\``,
-    conn,
-  );
-
-  return {
-    username: '',
-    id: '',
-  };
-  // } catch (error) {
-  //   if (error?.code === 409) {
-  //     throw new ConflictEntityError('username already taken: ' + data.username);
-  //   }
-  // }
 };
 
 export const authUserRead = async (
@@ -289,6 +270,7 @@ export const authUserUpdate = async (
 export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
+  const sql = await db.executeQuery(`DELETE FROM ${AUTH_USERS}`, conn);
   const authUserContainer = await initiateAuthUserContainer();
   const authGroupContainer = await initiateAuthGroupContainer();
 
@@ -373,7 +355,7 @@ export const authUserGroupsRead = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'from',
-      edgeLabel: 'groups-users',
+      edgeLabel: GROUPS_USERS,
       tableName: AUTH_GROUPS,
     },
     tableName: AUTH_USERS,
@@ -509,22 +491,31 @@ interface IAuthUser extends AuthUserAndGroupsRef {
 }
 
 export const checkAdmin = async (userId) => {
-  const res = await readEdge({
-    containerId: AUTH_USERS,
-    edgeContainer: AUTH_GROUPS,
-    direction: 'from',
-    edgeLabel: 'groups-users',
-    filters: {
-      filters: {
-        name: {
-          filter: ADMIN_GROUP_NAME,
-          filterType: 'text',
-          type: 'equals',
-        },
-      },
-    },
-    rowId: userId,
-  });
+  // const res = await readEdge(
+  //   {
+  //     tableFromName: AUTH_USERS,
+  //     tableToName: AUTH_GROUPS,
+  //     direction: 'from',
+  //     edgeTable: AUTH_GROUPS_USER_TABLE + '_edge',
+  //     filters: {
+  //       filters: {
+  //         name: {
+  //           filter: ADMIN_GROUP_NAME,
+  //           filterType: 'text',
+  //           type: 'equals',
+  //         },
+  //       },
+  //     },
+  //     rowId: userId,
+  //   },
+  //   conn,
+  // );
+
+  const res = await db.executeQuery(
+    `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
+    conn,
+  );
+
   if (res.length === 0) {
     throw new UnauthorizedError('User does not belong to the admin group.');
   } else {
@@ -533,23 +524,16 @@ export const checkAdmin = async (userId) => {
 };
 
 export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
-  const query = `SELECT c.username, c.password, c.authGroups, c.id from authUsers c WHERE c.username = "${data.username}"`;
+  const query = `SELECT * from auth_users WHERE username = "${data.username}"`;
 
-  const authUserContainer = await initiateAuthUserContainer();
-  const res = await authUserContainer.items
-    .query({
-      query,
-      parameters: [],
-    })
-    .fetchAll();
+  const res = await db.executeQuery(query, conn);
 
-  if (res.resources.length === 0) {
+  if (res.length === 0) {
     throw new NotFoundError(`${data.username} not found.`);
   }
-  const user = res.resources[0] as IAuthUser;
+  const user = res[0] as IAuthUser;
   const password = user.password;
   const username = user.username;
-  const authGroups = user.authGroups;
 
   const isPasswordValid = await bcrypt.compare(data.password, password);
 
@@ -557,27 +541,20 @@ export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
     throw new BadRequestError('Wrong password');
   }
 
-  const dashboardsAuth = [];
-
-  const authGroupContainer = await fetchContainer(AUTH_GROUPS);
-
-  for (const group of authGroups) {
-    const res = (await authGroupContainer.item(group.id, group.id).read())
-      .resource.dashboards as AuthGroupDashboardRef;
-
-    dashboardsAuth.push(res);
-  }
   const accessToken = generateAccessToken({ userId: user.id, username });
 
   const refreshToken = jwt.sign(
     { userId: user.id, username },
     process.env.REFRESH_JWT_SECRET_KEY,
   );
-  const authUserRes = await authUserContainer
-    .item(user.id, user.username)
-    .patch([{ op: 'add', path: '/refreshTokens/-', value: refreshToken }]);
 
-  return { accessToken, refreshToken };
+  const res212 = await createSql(
+    'refresh_token',
+    'user_id STRING, refresh_token STRING',
+    { user_id: user.id, refresh_token: refreshToken },
+  );
+
+  return { accessToken, refreshToken: res212[0]['refresh_token'] };
 };
 
 export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
