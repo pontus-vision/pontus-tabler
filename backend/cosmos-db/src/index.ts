@@ -61,6 +61,7 @@ import {
   createAuthGroupTables,
   deleteAuthGroupTables,
   readAuthGroupTables,
+  checkPermissions,
   readAuthGroupTable,
   checkTableMetadataPermissions,
   updateAuthGroupTable,
@@ -82,7 +83,6 @@ import {
   setup,
 } from './service/AuthUserService';
 import { Request } from 'express';
-import { checkPermissions } from './service/cosmosdb/AuthGroupService';
 import { refreshToken } from './service/cosmosdb/AuthUserService';
 import { authenticateToken, checkAdmin } from './service/AuthUserService';
 
