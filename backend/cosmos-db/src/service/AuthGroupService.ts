@@ -44,6 +44,7 @@ import * as deltadb from './delta/index';
 export const COSMOS_DB = 'cosmosdb';
 export const DELTA_DB = 'deltadb';
 export const GROUPS_USERS = 'groups_users';
+export const GROUPS_TABLES = 'groups_tables';
 
 export const dbSource = process.env.DB_SOURCE || COSMOS_DB;
 

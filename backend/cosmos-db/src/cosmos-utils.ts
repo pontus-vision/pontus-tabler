@@ -141,7 +141,11 @@ export const filterToQuery = (
   for (let col in cols) {
     if (cols.hasOwnProperty(col)) {
       const colName =
-        process.env.DB_SOURCE === DELTA_DB ? `\`${col}\`` : `["${col}"]`;
+        process.env.DB_SOURCE === DELTA_DB
+          ? col.includes('-')
+            ? `\`${col}\``
+            : col
+          : `["${col}"]`;
 
       const condition1Filter = cols[col]?.condition1?.filter;
       const condition2Filter = cols[col]?.condition2?.filter;
@@ -279,7 +283,9 @@ export const filterToQuery = (
 
         if (condition2Filter && type2 === 'contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${operator} ${colName} LIKE "%${condition2Filter}%"`);
+            colQuery.push(
+              ` ${operator} ${colName} LIKE "%${condition2Filter}%"`,
+            );
           } else {
             colQuery.push(
               ` ${operator} AND CONTAINS(${alias}${colName}, "${condition2Filter}")`,

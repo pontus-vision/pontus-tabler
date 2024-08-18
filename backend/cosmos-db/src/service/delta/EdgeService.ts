@@ -26,10 +26,8 @@ import {
 import { AUTH_GROUPS, convertToSqlFields, createSql } from './AuthGroupService';
 import { initiateAuthGroupContainer } from './AuthGroupService';
 import * as db from '../../../../delta-table/node/index-jdbc';
-import { snakeCase } from 'lodash';
+import { filter, snakeCase } from 'lodash';
 const conn: db.Connection = db.createConnection();
-
-export const GROUPS_TABLES = 'groups-tables';
 
 const TABLES = 'tables';
 const ensureNestedPathExists = (obj, path) => {
@@ -445,27 +443,24 @@ export const readTableDataEdge = async (
   data: TableDataEdgeReadReq,
 ): Promise<TableDataEdgeReadRes> => {
   const { direction, edgeLabel, tableName: edgeTableName } = data.edge;
-  const str = filterToQuery(
-    { filters: data.filters, from: data.from, to: data.to },
-    'p',
-    `c.id = "${data.rowId}"`,
-  );
-
-  const sql3 = (await db.executeQuery(
-    `SELECT * FROM ${edgeLabel}`,
-    conn,
-  )) as Record<string, any>;
+  const whereClause = filterToQuery({
+    filters: data.filters,
+  });
+  const fromTo = ` ${data.to ? 'LIMIT ' + (data.to - data.from) : ''} ${
+    data.from ? ' OFFSET ' + (data.from - 1) : ''
+  }`;
+  const filtersOn = Object.keys(data.filters).length > 0;
 
   const sql = (await db.executeQuery(
-    `SELECT * FROM ${edgeLabel} where ${
+    `SELECT * FROM ${edgeLabel} ${filtersOn ? whereClause + ' AND ' : 'WHERE'} ${
       direction === 'from'
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
-    }`,
+    }` + fromTo,
     conn,
   )) as Record<string, any>;
   const sqlCount = await db.executeQuery(
-    `SELECT COUNT(*) FROM ${edgeLabel} where ${
+    `SELECT COUNT(*) FROM ${edgeLabel} ${filtersOn ? whereClause + ' AND ' : 'WHERE'} ${
       direction === 'from'
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`

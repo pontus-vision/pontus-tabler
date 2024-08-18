@@ -17,9 +17,10 @@ import {
 import { NotFoundError } from '../../generated/api';
 
 import * as db from '../../../../delta-table/node/index-jdbc';
-import { createSql } from './AuthGroupService';
+import { createSql, generateUUIDv6 } from './AuthGroupService';
 export const TABLES = 'tables';
 
+const conn: db.Connection = db.createConnection();
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],
 };
@@ -35,13 +36,44 @@ export const initiateTableContainer = async (): Promise<Container> => {
 export const createTable = async (
   data: TableCreateReq,
 ): Promise<TableCreateRes> => {
-  const sql = (await createSql(
-    TABLES,
-    'name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable STRING, header_name STRING, filter BOOLEAN, kind STRING>>',
-    data,
+  const uuid = generateUUIDv6();
+
+  const sql = (await db.executeQuery(
+    `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, header_name STRING, filter BOOLEAN, kind STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`,
+    conn,
   )) as TableCreateRes[];
 
-  return sql[0];
+
+  const sql5 = (await db.executeQuery(
+    `SELECT * FROM ${TABLES};`,
+    conn,
+  )) as TableCreateRes[];
+
+  const cols = [];
+
+  for (const col of data.cols) {
+    const uuid = generateUUIDv6();
+
+    cols.push(
+      `struct('${uuid}', '${col.name}', '${col.field}', ${col.sortable}, '${
+        col.headerName
+      }', ${col.filter}, ${col.kind ? `'${col.kind}` : null} )`,
+    );
+  }
+
+  const sql2 = await db.executeQuery(
+    `INSERT INTO ${TABLES} (id, name, label, cols) VALUES ('${uuid}', '${data.label}', '${
+      data.name
+    }', array(${cols.join(', ')}));`,
+    conn,
+  );
+
+  const sql3 = (await db.executeQuery(
+    `SELECT * FROM ${TABLES} WHERE id = '${uuid}'`,
+    conn,
+  )) as TableCreateRes[];
+
+  return {...sql3[0], cols: JSON.parse(sql3[0].cols as any)};
 };
 
 export const updateTable = async (data: TableUpdateReq) => {

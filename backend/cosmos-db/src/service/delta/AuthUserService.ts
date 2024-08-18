@@ -73,6 +73,7 @@ import {
   createSql,
   initiateAuthGroupContainer,
   objEntriesToStr,
+  updateSql,
 } from './AuthGroupService';
 import {
   createTableDataEdge,
@@ -83,7 +84,7 @@ import {
 } from './EdgeService';
 import { DASHBOARDS } from './DashboardService';
 import * as db from '../../../../delta-table/node/index-jdbc';
-import { has } from 'lodash';
+import { filter, has } from 'lodash';
 dotenv.config();
 export const AUTH_USERS = 'auth_users';
 export const ADMIN_USER_USERNAME = 'ADMIN';
@@ -221,20 +222,15 @@ export const authUserCreate = async (
 export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
-  const authUserContainer = await initiateAuthUserContainer();
-
-  const userId = data.id;
-  const usernameInput = data.username;
-
-  const res = (await authUserContainer
-    .item(userId, usernameInput)
-    .read()) as ItemResponse<AuthUserRef>;
-
-  if (res.statusCode === 404) {
+  const res = (await db.executeQuery(
+    `SELECT * FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    conn,
+  )) as { username: string; id: string }[];
+  if (res.length === 0) {
     throw new NotFoundError(`User not found at id: ${data.id}`);
   }
 
-  const { id, username } = res.resource;
+  const { id, username } = res[0];
 
   return {
     id,
@@ -245,89 +241,71 @@ export const authUserRead = async (
 export const authUserUpdate = async (
   data: AuthUserUpdateReq,
 ): Promise<AuthUserUpdateRes> => {
-  const authUserContainer = await initiateAuthUserContainer();
-
-  try {
-    const res = (await authUserContainer
-      .item(data.id, data.username)
-      .patch([
-        { op: 'replace', path: '/username', value: data.username },
-      ])) as ItemResponse<AuthUserRef>;
-
-    const { id, username } = res.resource;
-
-    return {
-      id,
-      username,
-    };
-  } catch (error) {
-    if (error?.code === 404) {
-      throw new NotFoundError(`No user found at id: ${data.id}`);
-    }
+  const sql = await updateSql(
+    AUTH_USERS,
+    { username: data.username },
+    `WHERE id = '${data.id}'`,
+  );
+  if (sql.length === 0) {
+    throw new NotFoundError(`No user found at id: ${data.id}`);
   }
+
+  return {
+    id: sql[0].id,
+    username: sql[0].username,
+  };
 };
 
 export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
-  const sql = await db.executeQuery(`DELETE FROM ${AUTH_USERS}`, conn);
-  const authUserContainer = await initiateAuthUserContainer();
-  const authGroupContainer = await initiateAuthGroupContainer();
-
-  const authUserDoc = await authUserContainer.item(data.id, data.username);
-
-  const res = (await authUserDoc.read()) as ItemResponse<AuthUserAndGroupsRef>;
-
-  if (res.statusCode === 404) {
+  const sql = await db.executeQuery(
+    `DELETE FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    conn,
+  );
+  const affectedRows = +sql[0]['num_affected_rows'];
+  if (affectedRows === 0) {
     throw new NotFoundError(`No user found at id: ${data.id}`);
   }
 
-  for (const [index, authGroup] of res.resource.authGroups.entries()) {
-    try {
-      const authGroupDoc = await authGroupContainer.item(
-        authGroup.id,
-        authGroup.id,
-      );
-      const res = await authGroupDoc.read();
-
-      const index = res.resource.authUsers.findIndex((el) => el.id === data.id);
-
-      const res2 = await authGroupDoc.patch([
-        { op: 'remove', path: `/authUsers/${index}` },
-      ]);
-    } catch (error) {}
-  }
-
-  const res2 = await authUserDoc.delete();
-
-  if (res2.statusCode !== 204) {
-    throw new InternalServerError(`Could not delete User at id '${data.id}'`);
-  }
-
+  try {
+    const sql = await db.executeQuery(
+      `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id}'`,
+      conn,
+    );
+  } catch (error) {}
   return `User at id "${data.id}" deleted!`;
 };
 
 export const authUsersRead = async (
   data: AuthUsersReadReq,
 ): Promise<AuthUsersReadRes> => {
-  try {
-    const res = await fetchData(data, AUTH_USERS);
-    return {
-      authUsers: res.values,
-      count: res.count,
-    };
-  } catch (error) {
-    if (error?.code === 404) {
-      throw new NotFoundError(`Auth User(s) not found.`);
-    }
+  const whereClause = filterToQuery(data);
+  const sql = await db.executeQuery(
+    `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
+    conn,
+  );
+  const whereClause2 = filterToQuery({ filters: data.filters });
+  const sqlCount = await db.executeQuery(
+    `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
+    conn,
+  );
+  if (+sqlCount[0]['count(1)'] === 0) {
+    throw new NotFoundError(`Auth User(s) not found.`);
   }
+  return {
+    authUsers: sql.map((el) => {
+      return { id: el['id'], username: el['username'] };
+    }),
+    count: +sqlCount[0]['count(1)'],
+  };
 };
 
 export const authUserGroupsCreate = async (
   data: AuthUserGroupsCreateReq,
 ): Promise<AuthUserGroupsCreateRes> => {
   const res = await createTableDataEdge({
-    edge: 'groups-users',
+    edge: GROUPS_USERS,
     edgeType: 'oneToMany',
     tableFrom: {
       tableName: AUTH_GROUPS,
@@ -352,6 +330,16 @@ export const authUserGroupsCreate = async (
 export const authUserGroupsRead = async (
   data: AuthUserGroupsReadReq,
 ): Promise<AuthUserGroupsReadRes> => {
+  const filtersRefactor = {};
+
+  for (const prop in data.filters) {
+    if (prop === 'name') {
+      filtersRefactor['table_from__name'] = {
+        ...data.filters[prop],
+      };
+    }
+  }
+
   const res = (await readTableDataEdge({
     edge: {
       direction: 'from',
@@ -360,7 +348,7 @@ export const authUserGroupsRead = async (
     },
     tableName: AUTH_USERS,
     rowId: data.id,
-    filters: data.filters,
+    filters: filtersRefactor,
     from: data.from,
     to: data.to,
   })) as any;
@@ -370,7 +358,9 @@ export const authUserGroupsRead = async (
   }
   return {
     count: res.count,
-    authGroups: res.edges as NameAndIdRef[],
+    authGroups: res.edges.map((edge) => {
+      return { ...edge.to, id: edge.from.id, name: edge.from.name };
+    }) as NameAndIdRef[],
   };
 };
 
@@ -410,20 +400,18 @@ export const authUserGroupsUpdate = async (
 export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,
 ): Promise<AuthUserGroupsDeleteRes> => {
-  const res = await deleteTableDataEdge({
-    rowId: data.id,
-    tableName: AUTH_USERS,
-    edge: {
-      direction: 'from',
-      edgeLabel: 'groups-users',
-      tableName: AUTH_GROUPS,
-      rows: data.authGroups,
-      partitionKeyProp: 'name',
-    },
+  const sqlStr = `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${
+    data.id
+  }' AND ${data.authGroups
+    .map((group) => `table_from__id = '${group.id}'`)
+    .join(' OR ')}`;
 
-    rowPartitionKey: data.username,
-  });
+  const sql = await db.executeQuery(sqlStr, conn);
+  const affectedRows = +sql[0]['num_affected_rows'];
 
+  if (affectedRows === 0) {
+    throw new NotFoundError('no rows deleted.');
+  }
   return '';
 };
 

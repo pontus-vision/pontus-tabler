@@ -77,7 +77,6 @@ import {
 } from './AuthUserService';
 import { TABLES } from './TableService';
 import {
-  GROUPS_TABLES,
   createConnection,
   createTableDataEdge,
   deleteTableDataEdge,
@@ -90,13 +89,13 @@ import { readTableData } from './TableDataService';
 import { snakeCase } from 'lodash';
 import { NODATA } from 'dns';
 import { GROUPS_DASHBOARDS } from '../EdgeService';
-import { GROUPS_USERS } from '../AuthGroupService';
+import { GROUPS_TABLES, GROUPS_USERS } from '../AuthGroupService';
 export const AUTH_GROUPS = 'auth_groups';
 export const ADMIN_GROUP_NAME = 'Admin';
 export const AUTH_GROUPS_USER_TABLE = 'auth_groups_users';
 const conn: db.Connection = db.createConnection();
 
-const generateUUIDv6 = () => {
+export const generateUUIDv6 = () => {
   const uuid = uuidv4().replace(/-/g, '');
   const timestamp = new Date().getTime();
 
@@ -444,9 +443,12 @@ export const readAuthGroups = async (
       ${whereClause};`,
     conn,
   )) as AuthGroupRef[];
+
+  const whereClause2 = filterToQuery({ filters: data.filters }, 'c');
+
   const countGroups = await db.executeQuery(
     `SELECT COUNT(*) FROM auth_groups
-      ${whereClause};`,
+      ${whereClause2};`,
     conn,
   );
   const groupCount = +countGroups[0]['count(1)'];
@@ -596,9 +598,14 @@ export const deleteAuthGroupDashboards = async (
     throw new BadRequestError('No dashboardId mentioned.');
   }
   const sql = await db.executeQuery(
-    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
+    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = ${
+      data.id
+    } AND ${data.dashboardIds
+      .map((dashboardId) => `table_to__id = ${dashboardId}`)
+      .join(' OR ')}`,
     conn,
   );
+  
 
   if (+sql[0]['num_affected_rows'] === 0) {
     throw new NotFoundError('Could not found a group at id ' + data.id);
@@ -655,12 +662,10 @@ export const createAuthUserGroup = async (
 export const readAuthGroupTables = async (
   data: AuthGroupTablesReadReq,
 ): Promise<AuthGroupTablesReadRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
-
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
-      edgeLabel: 'groups-tables',
+      edgeLabel: GROUPS_TABLES,
       tableName: TABLES,
     },
     rowId: data.id,
@@ -676,8 +681,12 @@ export const readAuthGroupTables = async (
     );
   }
 
+  const tables = res.edges.map((edge) => {
+    return { ...edge.from, name: edge['to']['name'], id: edge['to']['id'] };
+  }) as NameAndIdRef[];
+
   return {
-    tables: res.edges as NameAndIdRef[],
+    tables,
     count: res.count,
   };
 };
@@ -754,11 +763,8 @@ export const deleteAuthGroupUsers = async (
 export const createAuthGroupTables = async (
   data: AuthGroupTablesCreateReq,
 ): Promise<AuthGroupTablesCreateRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
-  const tablesContainer = await fetchContainer(TABLES);
-
   const res = await createTableDataEdge({
-    edge: 'groups-tables',
+    edge: GROUPS_TABLES,
     edgeType: 'oneToMany',
     tableFrom: {
       rows: [{ id: data.id, name: data.name }],
@@ -772,33 +778,29 @@ export const createAuthGroupTables = async (
     },
   });
 
-  console.log({ res });
-
   return {
     name: data.name,
     id: data.id,
-    tables: [],
+    tables: res.map((el) => {
+      return {
+        id: el['table_to__id'],
+        name: el['table_to__name'],
+      };
+    }),
   };
 };
 
 export const deleteAuthGroupTables = async (
   data: AuthGroupTablesDeleteReq,
 ): Promise<AuthGroupTablesDeleteRes> => {
-  const authGroupContainer = await initiateAuthGroupContainer();
-  const tablesContainer = await fetchContainer(TABLES);
+  const sql = await db.executeQuery(
+    `DELETE FROM ${GROUPS_TABLES} WHERE table_from__id = '${data.id}'`,
+    conn,
+  );
 
-  const res = await deleteTableDataEdge({
-    edge: {
-      direction: 'to',
-      edgeLabel: 'groups-tables',
-      rows: data.tables as any,
-      tableName: TABLES,
-      partitionKeyProp: 'name',
-    },
-    rowId: data.id,
-    tableName: AUTH_GROUPS,
-    rowPartitionKey: data.name,
-  });
+  if (+sql[0]['num_affected_rows'] === 0) {
+    throw new NotFoundError('Could not found a group at id ' + data.id);
+  }
 
   return '';
 };
