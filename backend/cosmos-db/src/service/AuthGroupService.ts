@@ -270,3 +270,17 @@ export const checkTableMetadataPermissions = async (
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
+
+export const checkPermissions = async (
+  userId: string,
+  targetId: string,
+  containerId: 'auth_users' | 'dashboards' | 'tables',
+): Promise<CrudDocumentRef> => {
+  if (dbSource === COSMOS_DB) {
+    return cdb.checkPermissions(userId, targetId, containerId);
+  } else if (dbSource === DELTA_DB) {
+    return deltadb.checkPermissions(userId, targetId, containerId);
+  }
+
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
+};
