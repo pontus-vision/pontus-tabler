@@ -173,8 +173,15 @@ export const readDashboardById = async (dashboardId: string) => {
 };
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
-  const dashboardContainer = await fetchContainer(DASHBOARDS);
-  const res = await dashboardContainer.item(data.id, data.id).delete();
+
+  const sql = await db.executeQuery(`DELETE FROM ${DASHBOARDS} WHERE id = '${data.id}'`, conn)
+
+
+  const affectedRows = +sql[0]['num_affected_rows'];
+
+  if (affectedRows === 0) {
+    throw new NotFoundError(`No dashboard found at id: ${data.id}`);
+  }
 
   return 'Dashboard deleted!';
 };

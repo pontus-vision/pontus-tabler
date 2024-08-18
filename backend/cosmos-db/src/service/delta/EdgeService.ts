@@ -423,20 +423,29 @@ export const readEdge = async (
   },
   conn: db.Connection,
 ) => {
-  const str = filterToQuery(data.filters, 'p', `c.id = "${data.rowId}"`);
-
-  const res3 = await db.executeQuery(
-    `SELECT * FROM ${data.edgeTable}  ${'WHERE'} ${
-      data.direction === 'from' ? `from_id` : 'to_id'
-    } = '${data.rowId}' AND ${
-      data.direction === 'from'
-        ? `from_table_name = '${data.tableFromName}'`
-        : `to_table_name = '${data.tableToName}'`
-    } `,
-    conn,
+  const whereClause = filterToQuery(
+    {
+      filters: data.filters.filters,
+    },
+    '',
   );
+  const fromTo = ` ${
+    data.filters.to ? 'LIMIT ' + (data.filters.to - data.filters.from) : ''
+  } ${data.filters.from ? ' OFFSET ' + (data.filters.from - 1) : ''}`;
+  const filtersOn = Object.keys(data.filters).length > 0;
 
-  return res3.map((el) => el['']);
+  const sql = (await db.executeQuery(
+    `SELECT * FROM ${data.edgeTable} ${
+      filtersOn ? whereClause + ' AND ' : 'WHERE'
+    } ${
+      data.direction === 'from'
+        ? `table_to__id = '${data.rowId}'`
+        : `table_from__id = '${data.rowId}'`
+    }` + fromTo,
+    conn,
+  )) as Record<string, any>;
+
+  return sql;
 };
 
 export const readTableDataEdge = async (
@@ -452,7 +461,9 @@ export const readTableDataEdge = async (
   const filtersOn = Object.keys(data.filters).length > 0;
 
   const sql = (await db.executeQuery(
-    `SELECT * FROM ${edgeLabel} ${filtersOn ? whereClause + ' AND ' : 'WHERE'} ${
+    `SELECT * FROM ${edgeLabel} ${
+      filtersOn ? whereClause + ' AND ' : 'WHERE'
+    } ${
       direction === 'from'
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
@@ -460,7 +471,9 @@ export const readTableDataEdge = async (
     conn,
   )) as Record<string, any>;
   const sqlCount = await db.executeQuery(
-    `SELECT COUNT(*) FROM ${edgeLabel} ${filtersOn ? whereClause + ' AND ' : 'WHERE'} ${
+    `SELECT COUNT(*) FROM ${edgeLabel} ${
+      filtersOn ? whereClause + ' AND ' : 'WHERE'
+    } ${
       direction === 'from'
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`

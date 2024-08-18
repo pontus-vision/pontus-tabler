@@ -992,7 +992,7 @@ export const checkPermissions = async (
   let del = false;
 
   for (const group of res) {
-    if (group.name === ADMIN_GROUP_NAME) {
+    if (group['table_from__name'] === ADMIN_GROUP_NAME) {
       return {
         create: true,
         read: true,
@@ -1015,31 +1015,31 @@ export const checkPermissions = async (
         tableFromName: containerId,
         filters: {
           filters: {
-            id: {
+            table_to__id: {
               filter: targetId,
               filterType: 'text',
               type: 'equals',
             },
           },
         },
-        rowId: group.id,
+        rowId: group['table_from__id'],
       },
       conn,
-    );
+    ) as any[]
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
-        if (dashboard?.create) {
-          create = dashboard?.create;
+        if (dashboard?.['table_from__create']) {
+          create = dashboard?.['table_from__create'] === 'true';
         }
-        if (dashboard?.read) {
-          read = dashboard?.read;
+        if (dashboard?.['table_from__read']) {
+          read = dashboard?.['table_from__read'] === 'true';
         }
-        if (dashboard?.update) {
-          update = dashboard?.update;
+        if (dashboard?.['table_from__update']) {
+          update = dashboard?.['table_from__update']=== 'true';
         }
-        if (dashboard?.delete) {
-          del = dashboard?.delete;
+        if (dashboard?.['table_from__delete']) {
+          del = dashboard?.['table_from__delete']=== 'true';
         }
       }
     }

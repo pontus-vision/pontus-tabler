@@ -550,23 +550,19 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
   const username = claims.username;
   const userId = claims.userId;
 
-  const authUserContainer = await initiateAuthUserContainer();
+  const sql = await db.executeQuery(
+    `DELETE FROM refresh_token WHERE user_id = '${userId}'`,
+    conn,
+  );
 
-  const res = await authUserContainer.item(userId, username).read();
-
-  const index = res.resource.refreshTokens.findIndex((el) => el === data.token);
-
-  if (index === -1) {
+  const affectedRows = +sql[0]['num_affected_rows'];
+  if (affectedRows === 0) {
     throw new NotFoundError(
       'There is no such refresh token stored in the database',
     );
   }
 
-  const res2 = await authUserContainer
-    .item(userId, username)
-    .patch([{ op: 'remove', path: `/refreshTokens/${index}` }]);
-
-  return;
+  return 'Token deleted.'
 };
 
 export const refreshToken = async (data: TokenReq): Promise<TokenRes> => {
