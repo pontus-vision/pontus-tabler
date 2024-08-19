@@ -12,13 +12,25 @@ import {
   TableDataEdgeCreateReq,
   TableDataReadReq,
   TableDataReadRes,
+  AuthUserCreateReq,
+  AuthUserCreateRes,
+  LoginReq,
+  LoginRes,
+  LogoutReq,
+  RegisterAdminReq,
+  RegisterAdminRes,
 } from '../typescript/api';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../cosmos-utils';
+import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
 import { TableEdgeCreateReq } from '../generated/api';
+import { DELTA_DB } from '../service/AuthGroupService';
+import { GROUPS_DASHBOARDS } from '../service/EdgeService';
+import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
+import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
 
+import * as db from '../../../delta-table/node/index-jdbc';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),
@@ -30,22 +42,129 @@ import { TableEdgeCreateReq } from '../generated/api';
 //   dashboardsReadPOST: jest.fn(),
 // }));
 jest.setTimeout(1000000);
+const conn: db.Connection = db.createConnection();
 
 describe('tableControllerTest', () => {
-  const OLD_ENV = process.env;
+  let adminToken;
+  const postAdmin = async (
+    endpoint: string,
+    body: Record<string, any>,
+  ): Promise<AxiosResponse> => {
+    const res = (await post(endpoint, body, {
+      Authorization: 'Bearer ' + adminToken,
+    })) as AxiosResponse<any, any>;
 
+    return res;
+  };
+
+  let userToken;
+
+  const postUser = async (
+    endpoint: string,
+    body: Record<string, any>,
+  ): Promise<AxiosResponse> => {
+    const res = (await post(endpoint, body, {
+      Authorization: 'Bearer ' + userToken,
+    })) as AxiosResponse<any, any>;
+
+    return res;
+  };
+
+  let admin = {} as RegisterAdminRes;
+
+  let user = {} as AuthUserCreateRes;
+  const loginUser = async () => {
+    if (adminToken) {
+      const logoutBody: LogoutReq = {
+        token: adminToken,
+      };
+
+      const res = await post('/logout', logoutBody);
+
+      expect(res.status).toBe(200);
+    }
+
+    const userCreateBody: AuthUserCreateReq = {
+      password: '12345678',
+      passwordConfirmation: '12345678',
+      username: 'user1',
+    };
+
+    const userCreateRes = await post('/auth/user/create', userCreateBody);
+
+    expect(userCreateRes.status).toBe(200);
+
+    user = userCreateRes.data;
+    const loginUserBody: LoginReq = {
+      password: '12345678',
+      username: 'user1',
+    };
+    const res = (await post(
+      '/login',
+      loginUserBody,
+    )) as AxiosResponse<LoginRes>;
+
+    userToken = res.data.accessToken;
+
+    expect(res.status).toBe(200);
+  };
+  const OLD_ENV = process.env;
   beforeEach(async () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    await deleteDatabase('pv_db');
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      const sql = await db.executeQuery(
+        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
+        conn,
+      );
+      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
+      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
+      const sql4 = await db.executeQuery(`DELETE FROM ${DASHBOARDS};`, conn);
+      const sql5 = await db.executeQuery(
+        `DELETE FROM ${GROUPS_DASHBOARDS};`,
+        conn,
+      );
+    } else {
+      await deleteContainer(AUTH_GROUPS);
+      await deleteContainer(DASHBOARDS);
+      await deleteContainer(AUTH_USERS);
+      await deleteContainer(TABLES);
+    }
+
+    const createAdminBody: RegisterAdminReq = {
+      username: 'admin',
+      password: 'pontusvision',
+      passwordConfirmation: 'pontusvision',
+    };
+
+    const adminCreateRes = (await postAdmin(
+      '/register/admin',
+      createAdminBody,
+    )) as AxiosResponse<RegisterAdminRes>;
+    expect(adminCreateRes.status).toBe(200);
+
+    admin = adminCreateRes.data;
+    const loginBody: LoginReq = {
+      username: 'admin',
+
+      password: 'pontusvision',
+    };
+
+    const LoginRes = (await post(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(200);
+
+    adminToken = LoginRes.data.accessToken;
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     process.env = OLD_ENV; // Restore old environment
     srv.close();
   });
 
-  it('should do the CRUD "happy path"', async () => {
+  it.only('should do the CRUD "happy path"', async () => {
     // Creating 2 tables.
 
     const body: TableCreateReq = {
@@ -71,13 +190,13 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createTable1 = (await post(
+    const createTable1 = (await postAdmin(
       'table/create',
       body,
     )) as AxiosResponse<TableCreateRes>;
     expect(createTable1.status === 200);
 
-    const createTable2 = (await post('table/create', {
+    const createTable2 = (await postAdmin('table/create', {
       ...body,
       name: 'person-natural-2',
       label: 'Person Natural 2',
@@ -97,7 +216,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableEdge = (await post(
+    const createTableEdge = (await postAdmin(
       'table/edge/create',
       edgesBodyTo,
     )) as AxiosResponse<TableEdgeCreateRes>;
@@ -116,7 +235,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableEdge2 = (await post(
+    const createTableEdge2 = (await postAdmin(
       'table/edge/create',
       edgesBodyFrom,
     )) as AxiosResponse<TableEdgeCreateRes>;
@@ -125,7 +244,7 @@ describe('tableControllerTest', () => {
 
     // reading the edge "to" of table 1
 
-    const readTableEdge = (await post('table/edge/read', {
+    const readTableEdge = (await postAdmin('table/edge/read', {
       tableId: table1Data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
@@ -146,7 +265,7 @@ describe('tableControllerTest', () => {
 
     // reading the edge "from" of table 2
 
-    const readTableEdge2 = (await post('table/edge/read', {
+    const readTableEdge2 = (await postAdmin('table/edge/read', {
       tableId: createTable2.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
@@ -181,7 +300,7 @@ describe('tableControllerTest', () => {
       tableName: edgesBodyTo.name,
     };
 
-    const deleteTableEdge = (await post(
+    const deleteTableEdge = (await postAdmin(
       'table/edge/delete',
       deleteEdgeTo,
     )) as AxiosResponse<string>;
@@ -190,13 +309,13 @@ describe('tableControllerTest', () => {
 
     // Checking if it is indeed deleted
 
-    const readTableEdgeTo = (await post('table/edge/read', {
+    const readTableEdgeTo = (await postAdmin('table/edge/read', {
       tableId: createTable1.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
     expect(readTableEdgeTo.data.edges['has_email']?.[0]?.to?.id).toBeFalsy();
 
-    const readTableEdgeFrom = (await post('table/edge/read', {
+    const readTableEdgeFrom = (await postAdmin('table/edge/read', {
       tableId: createTable2.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
@@ -212,7 +331,7 @@ describe('tableControllerTest', () => {
       tableName: edgesBodyFrom.name,
     };
 
-    const deleteTableEdgeFrom = (await post(
+    const deleteTableEdgeFrom = (await postAdmin(
       'table/edge/delete',
       deleteEdgeFrom,
     )) as AxiosResponse<string>;
@@ -221,7 +340,7 @@ describe('tableControllerTest', () => {
 
     // Checking if it is indeed deleted
 
-    const readTableEdgeFrom2 = (await post('table/edge/read', {
+    const readTableEdgeFrom2 = (await postAdmin('table/edge/read', {
       tableId: createTable1.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
@@ -229,7 +348,7 @@ describe('tableControllerTest', () => {
       readTableEdgeFrom2.data.edges?.['has_email']?.[0]?.to?.id,
     ).toBeFalsy();
 
-    const readTableEdgeTo2 = (await post('table/edge/read', {
+    const readTableEdgeTo2 = (await postAdmin('table/edge/read', {
       tableId: createTable2.data.id,
     })) as AxiosResponse<TableEdgeReadRes>;
 
@@ -261,13 +380,13 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createTable1 = (await post(
+    const createTable1 = (await postAdmin(
       'table/create',
       table,
     )) as AxiosResponse<TableCreateRes>;
     expect(createTable1.status === 200);
 
-    const createTable2 = (await post('table/create', {
+    const createTable2 = (await postAdmin('table/create', {
       ...table,
       name: 'person-natural-2',
       label: 'Person Natural 2',
@@ -277,17 +396,17 @@ describe('tableControllerTest', () => {
     const table1 = createTable1.data;
     const table2 = createTable2.data;
 
-    const createRetVal = await post('table/edge/create', {});
+    const createRetVal = await postAdmin('table/edge/create', {});
 
     expect(createRetVal.status).toBe(422);
 
-    const readRetVal = await post('table/edge/read', {
+    const readRetVal = await postAdmin('table/edge/read', {
       tableId: 'foo',
     });
 
     expect(readRetVal.status).toBe(404);
 
-    const deleteRetVal = await post('table/edge/delete', { foo: 'bar' });
+    const deleteRetVal = await postAdmin('table/edge/delete', { foo: 'bar' });
 
     expect(deleteRetVal.status).toBe(422);
 
@@ -299,7 +418,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createEdge1 = await post('table/edge/create', edgesBodyFoo);
+    const createEdge1 = await postAdmin('table/edge/create', edgesBodyFoo);
 
     expect(createEdge1.status).toBe(404);
     expect(createEdge1.data).toBe('No table found at id: foo');
@@ -312,10 +431,10 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createRetVal2 = await post('table/edge/create', edgesBody);
+    const createRetVal2 = await postAdmin('table/edge/create', edgesBody);
 
     expect(createRetVal2.status).toBe(200);
-    const createRetVal3 = await post('table/edge/create', edgesBody);
+    const createRetVal3 = await postAdmin('table/edge/create', edgesBody);
 
     expect(createRetVal3.status).toBe(409);
 
@@ -334,7 +453,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createEdgeNonExistingTable = await post(
+    const createEdgeNonExistingTable = await postAdmin(
       'table/edge/create',
       createEdgeNonExistingTableBody,
     );
@@ -365,13 +484,13 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createTable1 = (await post(
+    const createTable1 = (await postAdmin(
       'table/create',
       table,
     )) as AxiosResponse<TableCreateRes>;
     expect(createTable1.status === 200);
 
-    const createTable2 = (await post('table/create', {
+    const createTable2 = (await postAdmin('table/create', {
       ...table,
       name: 'person-natural-2',
       label: 'Person Natural 2',
@@ -387,7 +506,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableData = await post('table/data/create', body);
+    const createTableData = await postAdmin('table/data/create', body);
 
     expect(createTableData.status).toBe(200);
 
@@ -399,7 +518,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableData2 = await post('table/data/create', body2);
+    const createTableData2 = await postAdmin('table/data/create', body2);
 
     expect(createTableData2.status).toBe(200);
 
@@ -416,7 +535,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableConnectionData = await post(
+    const createTableConnectionData = await postAdmin(
       'table/data/edge/create',
       bodyCreateConnection,
     );
@@ -430,7 +549,7 @@ describe('tableControllerTest', () => {
       tableName: bodyCreateConnection.tableTo.tableName,
     };
 
-    const createTableData3 = await post('table/data/create', body2);
+    const createTableData3 = await postAdmin('table/data/create', body2);
 
     expect(createTableData3.status).toBe(200);
 
@@ -447,7 +566,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableConnectionData2 = await post(
+    const createTableConnectionData2 = await postAdmin(
       'table/data/edge/create',
       bodyCreateConnection2,
     );
@@ -459,12 +578,12 @@ describe('tableControllerTest', () => {
       tableName: 'person-natural',
     };
 
-    const table1DataRead = (await post(
+    const table1DataRead = (await postAdmin(
       'table/data/read',
       table1DataReadBody,
     )) as AxiosResponse<TableDataReadRes>;
 
-    const table4DataRead = (await post(
+    const table4DataRead = (await postAdmin(
       'table/data/read',
       table2DataReadBody,
     )) as AxiosResponse<TableDataReadRes>;
@@ -514,13 +633,13 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createTable1 = (await post(
+    const createTable1 = (await postAdmin(
       'table/create',
       table,
     )) as AxiosResponse<TableCreateRes>;
     expect(createTable1.status === 200);
 
-    const createTable2 = (await post('table/create', {
+    const createTable2 = (await postAdmin('table/create', {
       ...table,
       name: 'person-natural-2',
       label: 'Person Natural 2',
@@ -536,7 +655,7 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableData = await post('table/data/create', body);
+    const createTableData = await postAdmin('table/data/create', body);
 
     expect(createTableData.status).toBe(200);
 
@@ -548,11 +667,11 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableData2 = await post('table/data/create', body2);
+    const createTableData2 = await postAdmin('table/data/create', body2);
 
     expect(createTableData2.status).toBe(200);
 
-    const createTableData3 = await post('table/data/create', body2);
+    const createTableData3 = await postAdmin('table/data/create', body2);
 
     expect(createTableData3.status).toBe(200);
 
@@ -572,12 +691,12 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const createTableConnectionData = await post(
+    const createTableConnectionData = await postAdmin(
       'table/data/edge/create',
       bodyCreateConnection,
     );
 
-    const createTableConnectionData2 = await post('table/data/edge/create', {
+    const createTableConnectionData2 = await postAdmin('table/data/edge/create', {
       tableFrom: {
         tableName: body.tableName,
         rowIds: [createTableData.data.id],
@@ -620,12 +739,12 @@ describe('tableControllerTest', () => {
       tableName: 'person-natural',
     };
 
-    const table1DataRead = (await post(
+    const table1DataRead = (await postAdmin(
       'table/data/read',
       table1DataReadBody,
     )) as AxiosResponse<TableDataReadRes>;
 
-    const table2DataRead = (await post(
+    const table2DataRead = (await postAdmin(
       'table/data/read',
       table2DataReadBody,
     )) as AxiosResponse<TableDataReadRes>;
