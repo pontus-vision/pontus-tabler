@@ -34,9 +34,13 @@ import {
 } from '../generated/api';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
-import { AUTH_GROUPS, AUTH_USERS } from '../service/AuthUserService';
 import { DASHBOARDS } from '../service/DashboardService';
+import { AUTH_USERS, GROUPS_TABLES, TABLES } from '../service/cosmosdb';
+import { AUTH_GROUPS, AUTH_GROUPS_USER_TABLE } from '../service/delta';
+import { DELTA_DB } from '../service/AuthGroupService';
+import { GROUPS_DASHBOARDS } from '../service/EdgeService';
 
+import * as db from '../../../delta-table/node/index-jdbc';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),
@@ -49,6 +53,7 @@ import { DASHBOARDS } from '../service/DashboardService';
 // }));
 jest.setTimeout(1000000);
 
+const conn: db.Connection = db.createConnection();
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
@@ -68,9 +73,28 @@ describe('dashboardCreatePOST', () => {
   beforeEach(async () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    await deleteContainer(DASHBOARDS);
-    await deleteContainer(AUTH_USERS);
-    await deleteContainer(AUTH_GROUPS);
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      const sql = await db.executeQuery(
+        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
+        conn,
+      );
+      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
+      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
+      const sql4 = await db.executeQuery(`DELETE FROM ${DASHBOARDS};`, conn);
+      const sql5 = await db.executeQuery(
+        `DELETE FROM ${GROUPS_DASHBOARDS};`,
+        conn,
+      );
+      const sql8 = await db.executeQuery(
+        `DELETE FROM ${GROUPS_DASHBOARDS};`,
+        conn,
+      );
+    } else {
+      await deleteContainer(AUTH_GROUPS);
+      await deleteContainer(DASHBOARDS);
+      await deleteContainer(AUTH_USERS);
+      await deleteContainer(TABLES);
+    }
 
     const createBody: RegisterAdminReq = {
       username: 'user1',
@@ -216,7 +240,7 @@ describe('dashboardCreatePOST', () => {
     const createUserBody: AuthUserCreateReq = {
       username: 'foo',
       password: 'foobar',
-      passwordConfirmation: 'foobar'
+      passwordConfirmation: 'foobar',
     };
 
     const authUserCreateRes = (await post(
@@ -280,14 +304,16 @@ describe('dashboardCreatePOST', () => {
       id: createRetVal.data.id,
     };
 
-    const createRetVal2 = await postAdmin(
+    const createRetVal2 = (await postAdmin(
       'dashboard/group/auth/create',
       dashboardGroupBody,
-    ) as AxiosResponse<DashboardGroupAuthCreateRes>
+    )) as AxiosResponse<DashboardGroupAuthCreateRes>;
 
     expect(createRetVal2.status).toBe(200);
 
-    expect(createRetVal2.data.authGroups).toMatchObject(dashboardGroupBody.authGroups)
+    expect(createRetVal2.data.authGroups).toMatchObject(
+      dashboardGroupBody.authGroups,
+    );
 
     const readRetVal = await post(
       'dashboard/read',
@@ -345,15 +371,9 @@ describe('dashboardCreatePOST', () => {
     );
 
     expect(updateDashGroupRetVal.status).toBe(200);
-    const readRetVal2 = await post(
-      'dashboard/read',
-      {
-        id: createRetVal.data.id,
-      },
-      {
-        Authorization: bearerToken,
-      },
-    );
+    const readRetVal2 = await postAdmin('dashboard/read', {
+      id: createRetVal.data.id,
+    });
 
     expect(readRetVal2.status).toBe(200);
 
@@ -379,12 +399,10 @@ describe('dashboardCreatePOST', () => {
 
     const updateDashBody: DashboardUpdateReq = {
       id: createRetVal.data.id,
-      state: {'foo': 'bar'}
-    }
+      state: { foo: 'bar' },
+    };
 
-    const updateRetVal2 = await post('dashboard/update', updateDashBody, {
-      Authorization: bearerToken,
-    });
+    const updateRetVal2 = await postAdmin('dashboard/update', updateDashBody);
     expect(updateRetVal2.status).toBe(200);
 
     const updateGroupDashBody3: DashboardGroupAuthUpdateReq = {
@@ -407,13 +425,11 @@ describe('dashboardCreatePOST', () => {
 
     expect(updateDashGroupRetVal3.status).toBe(200);
 
-      const dashDeleteBody:DashboardDeleteReq = {
-        id: createRetVal.data.id
-      }
+    const dashDeleteBody: DashboardDeleteReq = {
+      id: createRetVal.data.id,
+    };
 
-    const updateRetVal3 = await post('dashboard/delete', dashDeleteBody, {
-      Authorization: bearerToken,
-    });
+    const updateRetVal3 = await postAdmin('dashboard/delete', dashDeleteBody);
     expect(updateRetVal3.status).toBe(200);
   });
   it('should do the CRUD "sad path"', async () => {
@@ -539,6 +555,7 @@ describe('dashboardCreatePOST', () => {
           },
           filterType: 'text',
         },
+        
       },
     };
 
