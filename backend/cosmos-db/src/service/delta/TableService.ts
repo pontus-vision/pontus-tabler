@@ -62,8 +62,8 @@ export const createTable = async (
   }
 
   const sql2 = await db.executeQuery(
-    `INSERT INTO ${TABLES} (id, name, label, cols) VALUES ('${uuid}', '${data.label}', '${
-      data.name
+    `INSERT INTO ${TABLES} (id, name, label, cols) VALUES ('${uuid}', '${data.name}', '${
+      data.label
     }', array(${cols.join(', ')}));`,
     conn,
   );
