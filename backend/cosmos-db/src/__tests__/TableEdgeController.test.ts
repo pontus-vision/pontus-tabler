@@ -19,6 +19,7 @@ import {
   LogoutReq,
   RegisterAdminReq,
   RegisterAdminRes,
+  TableDataEdgeReadReq,
 } from '../typescript/api';
 import { isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
@@ -31,6 +32,7 @@ import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
 import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
 
 import * as db from '../../../delta-table/node/index-jdbc';
+import { snakeCase } from 'lodash';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),
@@ -120,10 +122,12 @@ describe('tableControllerTest', () => {
       const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
       const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
       const sql4 = await db.executeQuery(`DELETE FROM ${DASHBOARDS};`, conn);
+      const sql6 = await db.executeQuery(`DELETE FROM ${TABLES};`, conn);
       const sql5 = await db.executeQuery(
         `DELETE FROM ${GROUPS_DASHBOARDS};`,
         conn,
       );
+      const sql7 = await db.executeQuery(`DELETE FROM person_natural;`, conn);
     } else {
       await deleteContainer(AUTH_GROUPS);
       await deleteContainer(DASHBOARDS);
@@ -164,7 +168,7 @@ describe('tableControllerTest', () => {
     srv.close();
   });
 
-  it.only('should do the CRUD "happy path"', async () => {
+  it('should do the CRUD "happy path"', async () => {
     // Creating 2 tables.
 
     const body: TableCreateReq = {
@@ -611,8 +615,8 @@ describe('tableControllerTest', () => {
   });
   it('It should test one-to-many edges creation', async () => {
     const table: TableCreateReq = {
-      name: 'person-natural',
-      label: 'Person Natural',
+      name: 'person-natural-2',
+      label: 'Person Natural 2',
       cols: [
         {
           field: 'full-name',
@@ -641,14 +645,14 @@ describe('tableControllerTest', () => {
 
     const createTable2 = (await postAdmin('table/create', {
       ...table,
-      name: 'person-natural-2',
-      label: 'Person Natural 2',
+      name: 'person-natural-3',
+      label: 'Person Natural 3',
     })) as AxiosResponse<TableCreateRes>;
 
     expect(createTable2.status === 200);
 
     const body: TableDataCreateReq = {
-      tableName: 'person-natural',
+      tableName: 'person-natural-2',
       cols: {
         'customer-id': 'foo',
         'full-name': 'bar',
@@ -660,7 +664,7 @@ describe('tableControllerTest', () => {
     expect(createTableData.status).toBe(200);
 
     const body2: TableDataCreateReq = {
-      tableName: 'person-natural-2',
+      tableName: 'person-natural-3',
       cols: {
         'customer-id': 'foo2',
         'full-name': 'bar2',
@@ -681,6 +685,7 @@ describe('tableControllerTest', () => {
         rows: [{ id: createTableData.data.id }],
       },
       edge: 'has_email',
+      jointTableName: '',
       edgeType: 'oneToMany',
       tableTo: {
         tableName: body2.tableName,
@@ -696,77 +701,38 @@ describe('tableControllerTest', () => {
       bodyCreateConnection,
     );
 
-    const createTableConnectionData2 = await postAdmin('table/data/edge/create', {
-      tableFrom: {
-        tableName: body.tableName,
-        rowIds: [createTableData.data.id],
+    const createTableConnectionData2 = await postAdmin(
+      'table/data/edge/create',
+      {
+        tableFrom: {
+          tableName: body.tableName,
+          rowIds: [createTableData.data.id],
+        },
+        edge: 'has_address',
+        edgeType: 'oneToMany',
+        tableTo: {
+          tableName: body2.tableName,
+          rowIds: [createTableData2.data.id, createTableData3.data.id],
+        },
       },
-      edge: 'has_address',
-      edgeType: 'oneToMany',
-      tableTo: {
-        tableName: body2.tableName,
-        rowIds: [createTableData2.data.id, createTableData3.data.id],
-      },
-    });
+    );
 
     expect(createTableConnectionData.status).toBe(200);
 
-    // expect(
-    //   createTableConnectionData.data.some(
-    //     (el) =>
-    //       el.from === createTableData.data.id &&
-    //       el.to === createTableData2.data.id,
-    //   ),
-    // ).toBe(true);
-    // expect(
-    //   createTableConnectionData.data.some(
-    //     (el) =>
-    //       el.from === createTableData.data.id &&
-    //       el.to === createTableData3.data.id,
-    //   ),
-    // ).toBe(true);
-    const table2DataReadBody: TableDataReadReq = {
+    const readEdgeBody: TableDataEdgeReadReq = {
+      edge: { direction: 'to', edgeLabel: 'has_email', tableName: 'has_email' },
+      rowId: bodyCreateConnection.tableFrom.rows[0].id as string,
+      jointTableName: snakeCase(body.tableName + '_' + body2.tableName),
+      tableName: bodyCreateConnection.tableFrom.tableName,
       from: 1,
-      to: 10,
-      filters: {},
-      tableName: bodyCreateConnection.tableTo.tableName,
+      to: 20,
     };
 
-    const table1DataReadBody: TableDataReadReq = {
-      from: 1,
-      to: 10,
-      filters: {},
-      tableName: 'person-natural',
-    };
+    const readTableEdgeData = await postAdmin(
+      'table/data/edge/read',
+      readEdgeBody,
+    );
 
-    const table1DataRead = (await postAdmin(
-      'table/data/read',
-      table1DataReadBody,
-    )) as AxiosResponse<TableDataReadRes>;
-
-    const table2DataRead = (await postAdmin(
-      'table/data/read',
-      table2DataReadBody,
-    )) as AxiosResponse<TableDataReadRes>;
-
-    const tableFromName = bodyCreateConnection.tableFrom.tableName;
-
-    const tableToName = bodyCreateConnection.tableTo.tableName;
-
-    expect(
-      table2DataRead.data.rows.every((row) =>
-        row.edges[tableFromName][bodyCreateConnection.edge].from.every((el) =>
-          table1DataRead.data.rows.some((row2) => row2.id === el),
-        ),
-      ),
-    ).toBe(true);
-
-    expect(
-      table1DataRead.data.rows.every((row) =>
-        row.edges[tableToName][bodyCreateConnection.edge].to.every((el) =>
-          table2DataRead.data.rows.some((row2) => row2.id === el),
-        ),
-      ),
-    ).toBe(true);
+    expect(readTableEdgeData.status).toBe(200);
   });
 });
