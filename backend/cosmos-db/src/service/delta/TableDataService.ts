@@ -1,98 +1,125 @@
 import {
   TableDataCreateReq,
+  TableDataCreateRes,
   TableDataDeleteReq,
   TableDataReadReq,
   TableDataReadRes,
   TableDataRowRef,
   TableDataUpdateReq,
 } from '../../typescript/api';
-import { fetchContainer, fetchData } from '../../cosmos-utils';
+import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
 import { PatchOperation } from '@azure/cosmos';
 import {
   TABLES,
+  TABLE_DATA,
   initiateTableContainer,
   readTableByName,
 } from './TableService';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  convertToSqlFields,
+  createSql,
+  generateUUIDv6,
+  objEntriesToStr,
+  updateSql,
+} from './AuthGroupService';
+import * as db from '../../../../delta-table/node/index-jdbc';
+import { snakeCase } from 'lodash';
+import { NotFoundError } from '../../generated/api';
 
+const conn: db.Connection = db.createConnection();
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
-  try {
-    const resTable = await readTableByName(tableName);
+  const res = (await db.executeQuery(
+    `SELECT * FROM ${TABLES} WHERE name = '${tableName}'`,
+    conn,
+  )) as any;
 
-    const colsChecked = [];
+  const resTable = res.map((el) => {
+    return { ...el, cols: JSON.parse(res[0].cols) };
+  });
 
-    for (const col in cols) {
-      let found = false;
-      for (const colReq of resTable?.cols) {
-        if (col === colReq?.name) {
-          found = true;
-          continue;
-        }
-      }
-      if (!found) {
-        colsChecked.push(col);
+  const colsChecked = [];
+
+  for (const col in cols) {
+    let found = false;
+    for (const colReq of resTable[0]?.cols) {
+      if (col === colReq?.name) {
+        found = true;
+        continue;
       }
     }
-
-    if (colsChecked?.length > 0) {
-      throw {
-        code: 400,
-        message: `Cols are not defined in table: ${colsChecked.join(', ')}`,
-      };
+    if (!found) {
+      colsChecked.push(col);
     }
-  } catch (error) {
-    throw error;
+  }
+
+  if (colsChecked?.length > 0) {
+    throw {
+      code: 400,
+      message: `Cols are not defined in table: ${colsChecked.join(', ')}`,
+    };
   }
 };
-export const createTableData = async (data: TableDataCreateReq) => {
+export const createTableData = async (
+  data: TableDataCreateReq,
+): Promise<TableDataCreateRes> => {
+  const tableName = snakeCase(data.tableName);
+
+  const cols = {};
+
+  for (const prop in data.cols) {
+    // if (prop === 'name') {
+    //   cols[snakeCase(prop)] = data.cols[prop];
+    // } else {
+    cols[snakeCase(prop)] = data.cols[prop];
+    // }
+  }
+
   try {
-    await checkTableCols(data.tableName, data?.cols);
-
-    const uuid = uuidv4();
-
-
-    const dataRow = { ...data.cols, edges: [], id: uuid };
-
-    const tableDataContainer = await fetchContainer(data.tableName);
-
-    const res = await tableDataContainer.items.create(dataRow)
-
-    const { _rid, _self, _etag, _attachments, _ts,edges, ...rest } =
-      res.resource as any;
-
-    return dataRow;
+    await checkTableCols(tableName, cols);
   } catch (error) {
     throw error;
   }
+
+  const uuid = generateUUIDv6();
+  const fields = objEntriesToStr(data.cols);
+
+  // const res = await db.executeQuery(
+  //   `CREATE TABLE IF NOT EXISTS ${tableName} (id STRING, ${fields.keysStr}) USING DELTA LOCATION '/data/pv/${tableName}';`,
+  //   conn,
+  // );
+  // const query = `INSERT INTO ${tableName} (id, ${Object.keys(data.cols).map(
+  //   (key) =>
+  //     typeof key === 'number' || typeof key === 'boolean' ? key : `'${key}'`,
+  // )}) VALUES (${})`;
+
+  // const res2 = await db.executeQuery(query, conn);
+
+  // const cols = {};
+
+  // for (const prop in data.cols) {
+  //   cols[snakeCase(prop)] = data.cols[prop];
+  // }
+
+  const res = await createSql(tableName, fields.keysStr, cols);
+
+  return res[0] as any;
 };
 
 export const updateTableData = async (data: TableDataUpdateReq) => {
-  try {
-    const tableDataContainer = await fetchContainer(data.tableName);
+  const tableName = snakeCase(data.tableName);
 
-    await checkTableCols(data.tableName, data.cols);
+  const cols = {};
 
-    const patchArr: PatchOperation[] = [];
-
-    for (const prop in data.cols) {
-      patchArr.push({
-        op: 'replace',
-        path: `/${prop}`,
-        value: data.cols[prop],
-      });
-    }
-
-    const res = await tableDataContainer
-      .item(data.rowId, data.rowId)
-      .patch(patchArr);
-
-    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-      res.resource as any;
-
-    return rest;
-  } catch (error) {
-    throw error;
+  for (const prop in data.cols) {
+    cols[snakeCase(prop)] = data.cols[prop];
   }
+  await checkTableCols(tableName, cols);
+
+
+  const sql = await updateSql(tableName, cols, `WHERE id = '${data.rowId}'`);
+
+  return { ...sql[0] };
 };
 
 // export const readTableById = async (data: TableDataReadReq) => {
@@ -119,25 +146,62 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
 
 export const deleteTableData = async (data: TableDataDeleteReq) => {
   try {
-    const tableDataContainer = await fetchContainer(data.tableName);
-    const res = await tableDataContainer.item(data.rowId, data.rowId).delete();
+    const sql = await db.executeQuery(
+      `DELETE FROM ${snakeCase(data.tableName)} WHERE id = '${data.rowId}'`,
+      conn,
+    );
 
+    if (+sql[0]['num_affected_rows'] === 0) {
+      // throw new NotFoundError();
+      throw {
+        code: 404,
+        message: `Did not find any row at id "${data.rowId}"`,
+      };
+    }
     return 'Row deleted!';
   } catch (error) {
-    throw error;
+    if (error.includes('[TABLE_OR_VIEW_NOT_FOUND]')) {
+      throw {
+        code: 404,
+        message: `Did not find table "${data.tableName}"`,
+      };
+    }
   }
 };
 
 export const readTableData = async (
   body: TableDataReadReq,
 ): Promise<TableDataReadRes> => {
-  try {
-    const res1 = await checkTableCols(body.tableName, body.filters);
+  const tableName = snakeCase(body.tableName);
+  const filtersSnakeCase = {};
 
-    const res2 = await fetchData(body, body.tableName);
-
-    return { rowsCount: res2.count, rows: res2.values };
-  } catch (error) {
-    throw error;
+  for (const prop in body.filters) {
+    filtersSnakeCase[snakeCase(prop)] = body.filters[prop];
   }
+
+  const res1 = await checkTableCols(tableName, filtersSnakeCase);
+
+  const filters = filterToQuery(filtersSnakeCase);
+  const filtersCount = filterToQuery({
+    filters: filtersSnakeCase,
+    to: body.to,
+    from: body.from,
+  });
+
+  const res2 = (await db.executeQuery(
+    `SELECT * FROM ${tableName} ${filters}`,
+    conn,
+  )) as Record<string, any>[];
+
+  if (res2.length === 0) {
+    // throw new NotFoundError(`Could not find any row`);
+    throw new NotFoundError(`no data found at table ${tableName}`);
+  }
+
+  const res = await db.executeQuery(
+    `SELECT COUNT(*) FROM ${tableName} ${filtersCount}`,
+    conn,
+  );
+
+  return { rowsCount: +res[0]['count(1)'], rows: res2 };
 };
