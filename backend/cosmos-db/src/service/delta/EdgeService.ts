@@ -15,6 +15,7 @@ import {
   TableDataEdgeCreateRef,
   EdgeDirectionEnum,
   ReadPaginationFilter,
+  TableEdgeCreateRes,
 } from '../../typescript/api';
 import { fetchContainer, filterToQuery } from '../../cosmos-utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
@@ -69,10 +70,11 @@ interface DeltaTableDataEdgeCreateReq extends TableDataEdgeCreateReq {
 }
 
 export const createTableDataEdge = async (
-  data: DeltaTableDataEdgeCreateReq,
+  data: TableDataEdgeCreateReq,
 ): Promise<TableDataEdgeCreateRes> => {
+  const tableNameFrom = snakeCase(data.tableFrom.tableName);
   const sql = await db.executeQuery(
-    `SELECT COUNT(*) FROM ${data.tableFrom.tableName} WHERE id IN (
+    `SELECT COUNT(*) FROM ${tableNameFrom} WHERE id IN (
       ${data.tableFrom.rows.map((table) => `'${table.id}'`).join(', ')});
      `,
     conn,
@@ -81,11 +83,10 @@ export const createTableDataEdge = async (
   if (+sql[0]['count(1)'] !== data.tableFrom.rows.length) {
     throw new NotFoundError(`A record at ${data.tableFrom} does not exist`);
   }
+  const tableNameTo = snakeCase(data.tableTo.tableName);
 
   const sql2 = await db.executeQuery(
-    `SELECT COUNT(*) FROM ${
-      data.tableTo.tableName
-    } WHERE id IN (${data.tableTo.rows
+    `SELECT COUNT(*) FROM ${tableNameTo} WHERE id IN (${data.tableTo.rows
       .map((table) => `'${table.id}'`)
       .join(', ')});`,
     conn,
@@ -114,33 +115,65 @@ export const createTableDataEdge = async (
   const insertFields = [];
 
   const maxLength = Math.max(tableFrom.length, tableTo.length);
-
-  for (let i = 0; i < maxLength; i++) {
-    if (tableFrom[i] && tableTo[i]) {
-      // Merge the first elements of both arrays
-      insertFields.push({ ...tableFrom[i], ...tableTo[i] });
-    } else if (tableFrom[i]) {
-      // If there's no corresponding element in tableTo, keep the element from tableFrom
-      insertFields.push(tableFrom[i]);
-    } else if (tableTo[i]) {
-      // If there's no corresponding element in tableFrom, keep the element from tableTo
-      insertFields.push(tableTo[i]);
+  if (data.edgeType === 'oneToOne') {
+    for (let i = 0; i < maxLength; i++) {
+      if (tableFrom[i] && tableTo[i]) {
+        insertFields.push({ ...tableFrom[i], ...tableTo[i] });
+      } else if (tableFrom[i]) {
+        insertFields.push(tableFrom[i]);
+      } else if (tableTo[i]) {
+        insertFields.push(tableTo[i]);
+      }
+    }
+  } else {
+    for (let i = 0; i < maxLength; i++) {
+      if (tableFrom[i] && tableTo[i]) {
+        insertFields.push({ ...tableFrom[i], ...tableTo[i] });
+      } else if (!tableFrom[i]) {
+        insertFields.push({
+          ...tableFrom[tableFrom.length - 1],
+          ...tableTo[i],
+        });
+      } else if (!tableTo[i]) {
+        insertFields.push({
+          ...tableFrom[i],
+          ...tableTo[tableFrom.length - 1],
+        });
+      }
     }
   }
 
   const res = (await createSql(
-    data.edge,
+    data.jointTableName ||
+      `${tableNameFrom}_${tableNameTo}`,
     sqlFields + ', ' + sqlFields2 + ', edge_label STRING',
     insertFields.map((field) => {
-      if (data?.edgeLabel) {
-        return { ...field, ['edge_label']: data?.edgeLabel };
+      if (data?.edge) {
+        return { ...field, ['edge_label']: data?.edge };
       } else {
         return field;
       }
     }),
   )) as TableDataEdgeCreateRes;
 
-  return res;
+  const retVal = res.map((el) => {
+    const obj = {from: {}, to: {}};
+    for (const prop in el) {
+      if (prop.startsWith('table_from')) {
+        obj['from'][prop] = el[prop];
+      }
+      if (prop.startsWith('table_to')) {
+        obj['to'][prop] = el[prop];
+      }
+      // if (prop === 'id') {
+      //   obj['id'] = el[prop];
+      // }
+    }
+
+    return obj as TableDataEdgeCreateRef;
+  });
+
+  return retVal
 };
 
 export const createConnection = (
@@ -458,26 +491,26 @@ export const readTableDataEdge = async (
   const fromTo = ` ${data.to ? 'LIMIT ' + (data.to - data.from) : ''} ${
     data.from ? ' OFFSET ' + (data.from - 1) : ''
   }`;
-  const filtersOn = Object.keys(data.filters).length > 0;
+  const filtersOn = Object.keys(data?.filters || {}).length > 0;
 
   const sql = (await db.executeQuery(
-    `SELECT * FROM ${edgeLabel} ${
+    `SELECT * FROM ${data?.jointTableName || edgeTableName} ${
       filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${
       direction === 'from'
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
-    }` + fromTo,
+    }` + `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` + fromTo,
     conn,
   )) as Record<string, any>;
   const sqlCount = await db.executeQuery(
-    `SELECT COUNT(*) FROM ${edgeLabel} ${
+    `SELECT COUNT(*) FROM ${data?.jointTableName || edgeTableName} ${
       filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${
       direction === 'from'
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
-    }`,
+    }` + `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}`,
     conn,
   );
 
@@ -537,90 +570,38 @@ const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
 
 export const createTableEdge = async (
   data: TableEdgeCreateReq,
-): Promise<any> => {
-  const tableContainer = await fetchContainer(TABLES);
-
-  const res = (await tableContainer
-    .item(data.id, data.name)
-    .read()) as ItemResponse<TableRef>;
-
-  if (res.statusCode === 404) {
-    throw new NotFoundError('Table not found');
-  }
-
-  const document = res.resource;
-  if (!document?.hasOwnProperty('edges')) {
-    document['edges'] = {};
-  }
-
+): Promise<TableEdgeCreateRes> => {
+  const values = [];
   for (const prop in data.edges) {
-    if (!Array.isArray(document.edges[prop])) {
-      document.edges[prop] = [];
-    }
+    const obj = {};
+    for (const edge of data.edges[prop]) {
+      obj['edge_label'] = prop;
 
-    const duplicates = data.edges[prop].filter((edge) =>
-      document.edges[prop].some((existingEdge) => {
-        if (!!edge.from) {
-          return (
-            existingEdge?.from?.id === edge?.from?.id &&
-            existingEdge?.from?.tableName === edge?.from?.tableName
-          );
-        } else if (!!edge.to) {
-          return (
-            existingEdge?.to?.id === edge?.to?.id &&
-            existingEdge?.to?.tableName === edge?.to?.tableName
-          );
-        }
-      }),
-    );
-
-    if (duplicates.length > 0) {
-      throw new ConflictEntityError(
-        `Duplicate edge(s) detected for property '${prop}': ${JSON.stringify(
-          duplicates,
-        )}`,
-      );
-    }
-    document.edges[prop] = document.edges[prop].concat(data.edges[prop]);
-    for (const edge of data?.edges[prop]) {
-      await readTableEdgesByTableId({
-        tableId: edge?.from?.id || edge?.to?.id,
-      });
-    }
-  }
-
-  const res2 = await tableContainer.item(data.id, data.name).replace(document);
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res2.resource as any;
-
-  const updateRelatedDocumentsPromises = [];
-  for (const prop in data.edges) {
-    data.edges[prop].forEach((edge) => {
-      if (edge.from) {
-        updateRelatedDocumentsPromises.push(
-          updateRelatedDocumentEdges({
-            id: edge.from.id,
-            name: edge.from.tableName,
-            edges: { [prop]: [{ to: { id: data.id, tableName: data.name } }] },
-          }),
-        );
-      } else if (edge.to) {
-        updateRelatedDocumentsPromises.push(
-          updateRelatedDocumentEdges({
-            id: edge.to.id,
-            name: edge.to.tableName,
-            edges: {
-              [prop]: [{ from: { id: data.id, tableName: data.name } }],
-            },
-          }),
-        );
+      if (edge?.from?.id && edge?.from?.tableName) {
+        obj['table_from__id'] = edge?.from.id;
+        obj['table_from__name'] = edge?.from.tableName;
+      } else {
+        obj['table_from__id'] = data.id;
+        obj['table_from__name'] = data.name;
       }
-    });
+      if (edge?.to?.id && edge?.to?.tableName) {
+        obj['table_to__id'] = edge?.to.id;
+        obj['table_to__name'] = edge?.to.tableName;
+      } else {
+        obj['table_to__id'] = data.id;
+        obj['table_to__name'] = data.name;
+      }
+    }
+    values.push(obj);
   }
 
-  await Promise.all(updateRelatedDocumentsPromises);
+  const sql = await createSql(
+    'tables_edges',
+    'table_from__name STRING, table_from__id STRING, table_to__name STRING, table_to__id STRING, edge_label STRING',
+    values,
+  );
 
-  return rest;
+  return data;
 };
 
 //export const updateTableEdge = async (data: TableEdgeUpdateReq) => {
