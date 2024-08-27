@@ -223,10 +223,12 @@ export const createSql = async (
   //   conn,
   // );
 
-  const res = await db.executeQuery(
-    `CREATE TABLE IF NOT EXISTS ${table} (${
+  const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${
       data?.id ? '' : 'id STRING, '
-    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`,
+    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`
+
+  const res = await db.executeQuery(
+    createQuery,
     conn,
   );
 
@@ -242,34 +244,46 @@ export const createSql = async (
     }
   }
 
+  const ids = []
+
   const insert = `INSERT INTO ${table} (${
     data?.id ? '' : 'id, '
-  } ${insertFields}) VALUES ('${uuid}', ${
-    Array.isArray(data) ? insertValues.join(', ') : values
-  })`;
+  } ${insertFields}) VALUES ${
+    Array.isArray(data)
+      ? insertValues
+          .map((el) => {
+            const uuid = generateUUIDv6();
+            ids.push(uuid)
+            return `('${uuid}', ${el})`;
+          })
+          .join(', ')
+      : `('${uuid}',` + values + ')'
+  }`;
 
   const res2 = await db.executeQuery(insert, conn);
 
+  const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id ? `id = '${data?.id}'` : ids.length > 0 ? ids.map(id=> `id = '${id}'`).join(" OR ") : `id = '${uuid}'`}`
+
   const res3 = await db.executeQuery(
-    `SELECT * FROM delta.\`/data/pv/${table}\` WHERE id = ${
-      typeof uuid === 'string' ? `'${uuid}'` : uuid
-    }`,
+    selectQuery,
     conn,
   );
 
-  return res3.map((el) => {
-    const obj = {};
-    for (const prop in el) {
-      if (el[prop] === 'true') {
-        obj[prop] = true;
-      } else if (el[prop] === 'false') {
-        obj[prop] = false;
-      } else {
-        obj[prop] = el[prop];
-      }
-    }
-    return obj;
-  });
+  return res3;
+
+  // return res3.map((el) => {
+  //   const obj = {};
+  //   for (const prop in el) {
+  //     if (el[prop] === 'true') {
+  //       obj[prop] = true;
+  //     } else if (el[prop] === 'false') {
+  //       obj[prop] = false;
+  //     } else {
+  //       obj[prop] = el[prop];
+  //     }
+  //   }
+  //   return obj;
+  // });
 };
 export const updateSql = async (
   table: string,
@@ -297,9 +311,14 @@ export const updateSql = async (
   )} ${whereClause}`;
 
   const res2 = await db.executeQuery(insert, conn);
+  if (+res2[0]['num_affected_rows'] === 0) {
+    throw new NotFoundError(
+      `did not find any record at table '${table}' (${whereClause})`,
+    );
+  }
 
   const res3 = await db.executeQuery(
-    `SELECT * FROM delta.\`/data/pv/${table}\` ${whereClause}`,
+    `SELECT * FROM ${table} ${whereClause}`,
     conn,
   );
   if (res3.length === 0) {
@@ -530,6 +549,16 @@ export const createAuthGroupDashboards = async (
 export const readAuthGroupDashboards = async (
   data: AuthGroupDashboardsReadReq,
 ): Promise<AuthGroupDashboardsReadRes> => {
+  const filtersAdapted = {};
+
+  for (const prop in data.filters) {
+    if (prop === 'name') {
+      filtersAdapted['table_to__name'] = data.filters[prop];
+    }
+    if (prop === 'id') {
+      filtersAdapted['table_to__id'] = data.filters[prop];
+    }
+  }
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
@@ -538,7 +567,7 @@ export const readAuthGroupDashboards = async (
     },
     rowId: data.id,
     tableName: AUTH_GROUPS,
-    filters: data.filters,
+    filters: filtersAdapted,
     from: data.from,
     to: data.to,
   })) as any;
@@ -598,14 +627,13 @@ export const deleteAuthGroupDashboards = async (
     throw new BadRequestError('No dashboardId mentioned.');
   }
   const sql = await db.executeQuery(
-    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = ${
+    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${
       data.id
-    } AND ${data.dashboardIds
-      .map((dashboardId) => `table_to__id = ${dashboardId}`)
+    }' AND ${data.dashboardIds
+      .map((dashboardId) => `table_to__id = '${dashboardId}'`)
       .join(' OR ')}`,
     conn,
   );
-  
 
   if (+sql[0]['num_affected_rows'] === 0) {
     throw new NotFoundError('Could not found a group at id ' + data.id);
@@ -631,7 +659,8 @@ export const createAuthUserGroup = async (
       }),
       partitionKeyProp: 'name',
     },
-    edge: GROUPS_USERS,
+    edge: '',
+    jointTableName: GROUPS_USERS,
     edgeType: 'oneToMany',
     tableTo: {
       rows: data.authUsers.map((user) => {
@@ -662,6 +691,16 @@ export const createAuthUserGroup = async (
 export const readAuthGroupTables = async (
   data: AuthGroupTablesReadReq,
 ): Promise<AuthGroupTablesReadRes> => {
+  const filtersAdapted = {};
+
+  for (const prop in data.filters) {
+    if (prop === 'name') {
+      filtersAdapted['table_to__name'] = data.filters[prop];
+    }
+    if (prop === 'id') {
+      filtersAdapted['table_to__id'] = data.filters[prop];
+    }
+  }
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
@@ -670,7 +709,7 @@ export const readAuthGroupTables = async (
     },
     rowId: data.id,
     tableName: AUTH_GROUPS,
-    filters: data.filters,
+    filters: filtersAdapted,
     from: data.from,
     to: data.to,
   })) as any;
@@ -694,6 +733,16 @@ export const readAuthGroupTables = async (
 export const readAuthGroupUsers = async (
   data: AuthGroupUsersReadReq,
 ): Promise<AuthGroupUsersReadRes> => {
+  const filtersAdapted = {};
+
+  for (const prop in data.filters) {
+    if (prop === 'name') {
+      filtersAdapted['table_to__username'] = data.filters[prop];
+    }
+    if (prop === 'id') {
+      filtersAdapted['table_to__id'] = data.filters[prop];
+    }
+  }
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
@@ -702,7 +751,7 @@ export const readAuthGroupUsers = async (
     },
     rowId: data.id,
     tableName: AUTH_GROUPS,
-    filters: data.filters,
+    filters: filtersAdapted,
     from: data.from,
     to: data.to,
   })) as { count: number; edges: any[] };
@@ -1000,7 +1049,7 @@ export const checkPermissions = async (
         delete: true,
       };
     }
-    const res = await readEdge(
+    const res = (await readEdge(
       {
         direction: 'to',
         edgeTable:
@@ -1025,7 +1074,7 @@ export const checkPermissions = async (
         rowId: group['table_from__id'],
       },
       conn,
-    ) as any[]
+    )) as any[];
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
@@ -1036,10 +1085,10 @@ export const checkPermissions = async (
           read = dashboard?.['table_from__read'] === 'true';
         }
         if (dashboard?.['table_from__update']) {
-          update = dashboard?.['table_from__update']=== 'true';
+          update = dashboard?.['table_from__update'] === 'true';
         }
         if (dashboard?.['table_from__delete']) {
-          del = dashboard?.['table_from__delete']=== 'true';
+          del = dashboard?.['table_from__delete'] === 'true';
         }
       }
     }
@@ -1062,11 +1111,7 @@ export const checkTableMetadataPermissions = async (
   let update = false;
   let del = false;
 
-  if (
-    res['authGroups'].some(
-      (group) => group['from']['name'] === ADMIN_GROUP_NAME,
-    )
-  ) {
+  if (res['authGroups'].some((group) => group['name'] === ADMIN_GROUP_NAME)) {
     return {
       create: true,
       read: true,
