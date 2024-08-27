@@ -5,11 +5,19 @@ import {
   TableReadRes,
   TableUpdateReq,
   TableCreateReq,
+  AuthUserCreateRes,
+  RegisterAdminReq,
+  LoginReq,
+  LoginRes
 } from '../typescript/api';
 import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../cosmos-utils';
+import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
+import { DELTA_DB } from '../service/AuthGroupService';
+import { GROUPS_DASHBOARDS } from '../service/EdgeService';
+import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
+import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -23,13 +31,65 @@ import { AxiosResponse } from 'axios';
 // }));
 jest.setTimeout(1000000);
 
+import * as db from '../../../delta-table/node/index-jdbc';
+import { snakeCase } from 'lodash';
+const conn: db.Connection = db.createConnection();
 describe('tableControllerTest', () => {
   const OLD_ENV = process.env;
 
+  let adminToken;
+  const postAdmin = async (
+    endpoint: string,
+    body: Record<string, any>,
+  ): Promise<AxiosResponse> => {
+    const res = (await post(endpoint, body, {
+      Authorization: 'Bearer ' + adminToken,
+    })) as AxiosResponse<any, any>;
+
+    return res;
+  };
+  let admin = {} as AuthUserCreateRes;
   beforeEach(async () => {
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    await deleteDatabase('pv_db');
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      const sql = await db.executeQuery(
+        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
+        conn,
+      );
+      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
+      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
+      const sql6 = await db.executeQuery(`DELETE FROM ${TABLES};`, conn);
+    } else {
+      await deleteContainer(AUTH_GROUPS);
+      await deleteContainer(DASHBOARDS);
+      await deleteContainer(AUTH_USERS);
+      await deleteContainer(TABLES);
+    }
+    const createBody: RegisterAdminReq = {
+      username: 'user1',
+      password: 'pontusvision',
+      passwordConfirmation: 'pontusvision',
+    };
+    const adminCreateRes = (await postAdmin(
+      'register/admin',
+      createBody,
+    )) as AxiosResponse<AuthUserCreateRes>;
+    expect(adminCreateRes.status).toBe(200);
+
+    admin = adminCreateRes.data;
+    const loginBody: LoginReq = {
+      username: 'user1',
+
+      password: 'pontusvision',
+    };
+    const LoginRes = (await postAdmin(
+      '/login',
+      loginBody,
+    )) as AxiosResponse<LoginRes>;
+    expect(LoginRes.status).toBe(200);
+
+    adminToken = LoginRes.data.accessToken;
   });
 
   afterAll(() => {
@@ -61,7 +121,7 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createRetVal = (await post(
+    const createRetVal = (await postAdmin(
       'table/create',
       body,
     )) as AxiosResponse<TableCreateRes>;
@@ -69,9 +129,12 @@ describe('tableControllerTest', () => {
     let resPayload: TableCreateRes = createRetVal.data;
     let id = resPayload.id;
 
-    expect(isSubset(body, createRetVal.data)).toBe(true);
+    expect(createRetVal.status).toBe(200)
+    expect(createRetVal.data.name).toBe(snakeCase(body.name))
+    expect(createRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name))
+    expect(createRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name))
 
-    const readRetVal = await post('table/read', {
+    const readRetVal = await postAdmin('table/read', {
       id,
     });
 
@@ -79,7 +142,12 @@ describe('tableControllerTest', () => {
 
     // console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
-    expect(isSubset(body, readRetVal.data)).toBe(true);
+    // expect(isSubset(body, readRetVal.data)).toBe(true);
+
+    expect(readRetVal.status).toBe(200)
+    expect(readRetVal.data.name).toBe(snakeCase(body.name))
+    expect(readRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name))
+    expect(readRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name))
 
     const body2: TableUpdateReq = {
       name: 'person-natural',
@@ -105,7 +173,7 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const updateRetVal = await post('table/update', body2);
+    const updateRetVal = await postAdmin('table/update', body2);
 
     let resPayload3: TableUpdateReq = updateRetVal.data;
 
@@ -116,32 +184,32 @@ describe('tableControllerTest', () => {
       name: resPayload3.name,
     };
 
-    const deleteRetVal = await post('table/delete', body3);
+    const deleteRetVal = await postAdmin('table/delete', body3);
 
     let resPayload4 = deleteRetVal.data;
 
     expect(deleteRetVal.status).toBe(200);
 
-    const readRetVal2 = await post('table/read', { id: body3.id });
+    const readRetVal2 = await postAdmin('table/read', { id: body3.id });
 
     expect(readRetVal2.status).toBe(404);
   });
   it('should do the CRUD "sad path"', async () => {
-    const createRetVal = await post('table/create', {});
+    const createRetVal = await postAdmin('table/create', {});
 
     expect(createRetVal.status).toBe(422);
 
-    const readRetVal = await post('table/read', {
+    const readRetVal = await postAdmin('table/read', {
       id: 'foo',
     });
 
     expect(readRetVal.status).toBe(404);
 
-    const updateRetVal = await post('table/update', { foo: 'bar' });
+    const updateRetVal = await postAdmin('table/update', { foo: 'bar' });
 
     expect(updateRetVal.status).toBe(422);
 
-    const deleteRetVal = await post('table/delete', { foo: 'bar' });
+    const deleteRetVal = await postAdmin('table/delete', { foo: 'bar' });
 
     let resPayload4 = deleteRetVal.data;
 
@@ -162,9 +230,9 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    await post('table/create', table);
+    await postAdmin('table/create', table);
 
-    const createRetVal2 = await post('table/create', table);
+    const createRetVal2 = await postAdmin('table/create', table);
 
     expect(createRetVal2.status).toBe(409);
   });
@@ -192,9 +260,9 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createRetVal = await post('table/create', body);
+    const createRetVal = await postAdmin('table/create', body);
 
-    const createRetVal2 = await post('table/create', {
+    const createRetVal2 = await postAdmin('table/create', {
       ...body,
       name: 'person-natural2',
     });
@@ -211,20 +279,20 @@ describe('tableControllerTest', () => {
       },
     };
 
-    const readRetVal: { data: TablesReadRes } = await post(
+    const readRetVal: { data: TablesReadRes } = await postAdmin(
       'tables/read',
       readBody,
     );
 
     expect(readRetVal.data.totalTables).toBe(2);
 
-    const deleteVal = await post('table/delete', {
+    const deleteVal = await postAdmin('table/delete', {
       id: createRetVal.data.id,
       name: createRetVal.data.name,
     });
 
     expect(deleteVal.status).toBe(200);
-    const deleteVal2 = await post('table/delete', {
+    const deleteVal2 = await postAdmin('table/delete', {
       id: createRetVal2.data.id,
       name: createRetVal2.data.name,
     });
