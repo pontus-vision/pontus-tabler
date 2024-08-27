@@ -86,7 +86,7 @@ describe('dashboardCreatePOST', () => {
         conn,
       );
       const sql8 = await db.executeQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS};`,
+        `DELETE FROM person_natural`,
         conn,
       );
     } else {
