@@ -141,7 +141,6 @@ interface registerUser {
 
 export const registerUser = async (
   data: RegisterUserReq,
-  jdbc: any,
 ): Promise<RegisterUserRes> => {
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');

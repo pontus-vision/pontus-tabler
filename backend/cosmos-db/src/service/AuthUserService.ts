@@ -50,7 +50,7 @@ export const registerUser = async (
   if (dbSource === COSMOS_DB) {
     return cdb.registerUser(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.registerUser(data, jdbc);
+    return deltadb.registerUser(data);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
