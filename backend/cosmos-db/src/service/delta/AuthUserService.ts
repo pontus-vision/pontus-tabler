@@ -169,6 +169,7 @@ export const registerAdmin = async (
   const userGroup = await createAuthUserGroup({
     id: group.id,
     name: group.name,
+    jointTableName: GROUPS_USERS,
     authUsers: [{ id: res.id, username: res.username }],
   });
 
@@ -307,6 +308,7 @@ export const authUserGroupsCreate = async (
   const res = await createTableDataEdge({
     edge: GROUPS_USERS,
     edgeType: 'oneToMany',
+
     tableFrom: {
       tableName: AUTH_GROUPS,
       rows: data.authGroups as any,
@@ -343,8 +345,8 @@ export const authUserGroupsRead = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'from',
-      edgeLabel: GROUPS_USERS,
-      tableName: AUTH_GROUPS,
+      // edgeLabel: AUTH_GROUPS,
+      tableName: GROUPS_USERS,
     },
     tableName: AUTH_USERS,
     rowId: data.id,
