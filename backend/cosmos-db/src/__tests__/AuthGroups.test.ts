@@ -1057,7 +1057,7 @@ describe('dashboardCreatePOST', () => {
       body,
     )) as AxiosResponse<AuthGroupCreateRes>;
 
-    expect(createRetVal.status).toBe(200)
+    expect(createRetVal.status).toBe(200);
 
     const createBody: AuthGroupUsersCreateReq = {
       authUsers: [
@@ -1302,7 +1302,7 @@ describe('dashboardCreatePOST', () => {
       tableBody,
     )) as AxiosResponse<TableCreateRes>;
 
-    expect(createTableRetVal.status).toBe(200)
+    expect(createTableRetVal.status).toBe(200);
 
     const createGroupTablesBody: AuthGroupTablesCreateReq = {
       id: createGroupRetVal.data.id,
