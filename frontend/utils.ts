@@ -71,3 +71,35 @@ export const deepEqual = (obj1: Record<any, any>, obj2: Record<any, any>) => {
   // If neither of the above conditions are met, compare primitive values
   return obj1 === obj2;
 };
+
+export const base64UrlDecode = (str) => {
+  // Replace '-' with '+' and '_' with '/'
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  // Pad the string with '=' to make its length a multiple of 4
+  while (str.length % 4) {
+    str += '=';
+  }
+  // Decode the Base64 string
+  return atob(str);
+};
+
+export const getJwtClaims = (token) => {
+  // Split the token into parts
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    throw new Error('Invalid JWT token');
+  }
+  // Decode the payload
+  const payload = base64UrlDecode(parts[1]);
+  // Parse the JSON string to get the claims
+  const claims = JSON.parse(payload);
+  return claims;
+};
+
+export const getUserIdFromToken = (): string => {
+  const storedAuth = localStorage.getItem('accessToken');
+  const token = storedAuth && storedAuth.split(' ')[1];
+  const claims = getJwtClaims(token);
+  const userId = claims.userId;
+  return userId;
+};

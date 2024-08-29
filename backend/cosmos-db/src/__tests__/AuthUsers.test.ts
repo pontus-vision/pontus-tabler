@@ -41,8 +41,8 @@ import { srv } from '../server';
 import { post } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { deleteContainer } from '../cosmos-utils';
-import { AUTH_USERS } from '../service/AuthUserService';
-import { AUTH_GROUPS } from '../service/AuthGroupService';
+import { AUTH_USERS } from '../service/cosmosdb/AuthUserService';
+import { AUTH_GROUPS } from '../service/cosmosdb/AuthGroupService';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -80,6 +80,7 @@ describe('dashboardCreatePOST', () => {
     const createBody: AuthUserCreateReq = {
       username: 'user1',
       password: 'pontusvision',
+      passwordConfirmation: 'pontusvision',
     };
     const userCreateRes = (await postReq(
       '/auth/user/create',
@@ -112,6 +113,7 @@ describe('dashboardCreatePOST', () => {
     const createBody: AuthUserCreateReq = {
       username: 'user2',
       password: 'pontusvision',
+      passwordConfirmation: 'pontusvision',
     };
 
     const userCreateRes = (await postReq(
@@ -171,6 +173,7 @@ describe('dashboardCreatePOST', () => {
     const createBody: AuthUserCreateReq = {
       username: 'group1',
       password: 'pontusvision',
+      passwordConfirmation: 'pontusvision',
     };
 
     const authGroupCreateRes = (await postReq(
@@ -181,6 +184,7 @@ describe('dashboardCreatePOST', () => {
     const createBody2: AuthUserCreateReq = {
       username: 'user2',
       password: 'pontusvision',
+      passwordConfirmation: 'pontusvision',
     };
 
     const authGroupCreateRes2 = (await postReq(

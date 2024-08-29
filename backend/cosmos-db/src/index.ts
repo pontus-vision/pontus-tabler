@@ -1,7 +1,6 @@
 import { InternalServerError } from 'express-openapi-validator/dist/openapi.validator';
 import {
   BadRequestError,
-  ConflictEntityError,
   NotFoundError,
   UnauthorizedError,
 } from './generated/api';
@@ -41,7 +40,7 @@ import {
   createTableDataEdge,
   createTableEdge,
   deleteTableEdge,
-  readTableDataEdges,
+  readTableDataEdge,
   readTableEdgesByTableId,
   // updateTableEdge,
 } from './service/EdgeService';
@@ -64,11 +63,8 @@ import {
   readAuthGroupTables,
   readAuthGroupTable,
   updateAuthGroupTable,
-  checkPermissions,
-  checkTableMetadataPermissions,
 } from './service/AuthGroupService';
 import {
-  AUTH_USERS,
   authUserCreate,
   authUserDelete,
   authUserGroupsCreate,
@@ -78,18 +74,23 @@ import {
   authUserRead,
   authUserUpdate,
   authUsersRead,
-  authenticateToken,
-  checkAdmin,
-  checkUserPermissions,
   loginUser,
   logout,
-  refreshToken,
   registerAdmin,
+  registerUser,
   setup,
 } from './service/AuthUserService';
 import { Request } from 'express';
+import { checkPermissions, checkTableMetadataPermissions } from './service/cosmosdb/AuthGroupService';
+import { authenticateToken, refreshToken, checkAdmin } from './service/cosmosdb/AuthUserService';
 
 export default new PontusService({
+  registerUserPost: async (req, res) => {
+    await setup();
+
+    const response = await registerUser(req.body);
+    res.send(response);
+  },
   registerAdminPost: async (req, res) => {
     const response = await registerAdmin(req.body);
     res.send(response);
@@ -107,41 +108,41 @@ export default new PontusService({
     res.send(response);
   },
   tokenPost: async (req, res) => {
-    await authenticateToken(req,res);
+    await authenticateToken(req, res);
     const response = await refreshToken(req.body);
 
     res.send(response);
   },
   authGroupCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res)
-    await checkAdmin(auth.userId)
+    const auth = await authenticateToken(req, res);
+    await checkAdmin(auth.userId);
     const response = await createAuthGroup(req.body);
 
     // res.send(response);
   },
   authGroupDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res)
-    await checkAdmin(auth.userId)
+    const auth = await authenticateToken(req, res);
+    await checkAdmin(auth.userId);
     const response = await deleteAuthGroup(req.body);
 
     res.send(response);
   },
   authGroupReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res)
-    await checkAdmin(auth.userId)
+    const auth = await authenticateToken(req, res);
+    await checkAdmin(auth.userId);
     const response = await readAuthGroup(req.body);
 
     res.send(response);
   },
   authGroupsReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res)
+    const auth = await authenticateToken(req, res);
     const response = await readAuthGroups(req.body);
 
     res.send(response);
   },
   authGroupUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res)
-    await checkAdmin(auth.userId)
+    const auth = await authenticateToken(req, res);
+    await checkAdmin(auth.userId);
     const response = await updateAuthGroup(req.body);
 
     res.send(response);
@@ -153,25 +154,25 @@ export default new PontusService({
     res.send(response);
   },
   authUserDeletePost: async (req, res) => {
-    await authenticateToken(req,res);
+    await authenticateToken(req, res);
     const response = await authUserDelete(req.body);
 
     res.send(response);
   },
   authUserReadPost: async (req, res) => {
-    await authenticateToken(req,res);
+    await authenticateToken(req, res);
     const response = await authUserRead(req.body);
 
     res.send(response);
   },
   authUsersReadPost: async (req, res) => {
-    await authenticateToken(req,res);
+    await authenticateToken(req, res);
     const response = await authUsersRead(req.body);
 
     res.send(response);
   },
   authUserUpdatePost: async (req, res) => {
-    await authenticateToken(req,res);
+    await authenticateToken(req, res);
     const response = await authUserUpdate(req.body);
 
     res.send(response);
@@ -312,7 +313,6 @@ export default new PontusService({
     }
 
     const auth = await authenticateToken(req, res);
-
 
     const response = await createDashboard(req.body);
 
@@ -509,6 +509,8 @@ export default new PontusService({
     }
   },
   tablesReadPost: async (req, res) => {
+    const auth = await authenticateToken(req, res);
+
     try {
       const response = await readTables(req.body);
 
@@ -520,6 +522,7 @@ export default new PontusService({
     }
   },
   tableDataCreatePost: async (req, res) => {
+    await authenticateToken(req, res);
     try {
       const response = await createTableData(req.body);
 
@@ -533,6 +536,7 @@ export default new PontusService({
     }
   },
   tableDataDeletePost: async (req, res) => {
+    await authenticateToken(req, res);
     try {
       const response = await deleteTableData(req.body);
 
@@ -544,6 +548,7 @@ export default new PontusService({
     }
   },
   tableDataReadPost: async (req, res) => {
+    await authenticateToken(req, res);
     try {
       const response = await readTableData(req.body);
 
@@ -566,6 +571,7 @@ export default new PontusService({
     }
   },
   tableEdgeCreatePost: async (req, res) => {
+    await authenticateToken(req, res);
     const response = await createTableEdge(req.body);
 
     res.send(response);
@@ -576,6 +582,7 @@ export default new PontusService({
     res.send(response);
   },
   tableEdgeReadPost: async (req, res) => {
+    await authenticateToken(req, res);
     const response = await readTableEdgesByTableId(req.body);
 
     res.send(response);
@@ -585,6 +592,7 @@ export default new PontusService({
     // res.send(response);
   },
   tableDataEdgeCreatePost: async (req, res) => {
+    await authenticateToken(req, res);
     try {
       const response = await createTableDataEdge(req.body);
 
@@ -592,7 +600,8 @@ export default new PontusService({
     } catch (error) {}
   },
   tableDataEdgeReadPost: async (req, res) => {
-    const response = await readTableDataEdges(req.body);
+    await authenticateToken(req, res);
+    const response = await readTableDataEdge(req.body);
 
     res.send(response);
   },

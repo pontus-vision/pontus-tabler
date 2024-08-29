@@ -8,20 +8,7 @@ import {
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
-import {
-  ADMIN_GROUP_NAME,
-  AUTH_GROUPS,
-  authGroupContainerProps,
-  createAuthUserGroup,
-  initiateAuthGroupContainer,
-} from './service/AuthGroupService';
-import { createTableDataEdge } from './service/EdgeService';
-import {
-  ADMIN_USER_USERNAME,
-  AUTH_USERS,
-  authUserContainerProps,
-  initiateAuthUserContainer,
-} from './service/AuthUserService';
+import { AUTH_GROUPS, authGroupContainerProps } from './service/cosmosdb';
 
 export interface FetchData {
   count: number;
@@ -156,6 +143,7 @@ export const filterToQuery = (
 
       const condition1Filter = cols[col]?.condition1?.filter;
       const condition2Filter = cols[col]?.condition2?.filter;
+      const conditions = cols[col]?.conditions;
 
       const filterType = cols[col]?.filterType;
 
@@ -170,6 +158,34 @@ export const filterToQuery = (
 
       if (filterType === 'text') {
         const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
+
+        if(conditions?.length > 0) {
+          for (const condition of conditions) {
+              if (type === 'contains') {
+                colQuery.push(` CONTAINS(${alias}${colName}, "${filter}")`);
+              }
+    
+              if (type === 'not contains') {
+                colQuery.push(` NOT CONTAINS(${alias}${colName}, "${filter}")`);
+              }
+    
+              if (type === 'starts with') {
+                colQuery.push(` STARTSWITH(${alias}${colName}, "${filter}")`);
+              }
+    
+              if (type === 'ends with') {
+                colQuery.push(` ENDSWITH(${alias}${colName}, "${filter}")`);
+              }
+    
+              if (type === 'equals') {
+                colQuery.push(` ${alias}${colName} = "${filter}"`);
+              }
+    
+              if (type === 'not equals') {
+                colQuery.push(` NOT ${alias}${colName} = "${filter}"`);
+              }
+          }
+        }
 
         if (!condition1Filter) {
           if (type === 'contains') {

@@ -64,6 +64,8 @@ import {
   AuthGroupsReadRes,
   AuthGroupDashboardCreateReq,
   AuthGroupDashboardCreateRes,
+  RegisterUserReq,
+  RegisterUserRes,
   AuthGroupDashboardsReadReq,
   AuthGroupDashboardsReadRes,
   AuthGroupDashboardUpdateReq,
@@ -74,6 +76,10 @@ import {
   AuthGroupUpdateRes,
   AuthGroupDeleteReq,
   AuthGroupDeleteRes,
+  LoginReq,
+  LoginRes,
+  RegisterAdminReq,
+  RegisterAdminRes,
 } from './typescript/api';
 import { AuthUserGroupsCreateReq } from './typescript/api/resources/pontus/client/requests/AuthUserGroupsCreateReq';
 import { AuthUserGroupsCreateRes } from './typescript/api/resources/pontus/types/AuthUserGroupsCreateRes';
@@ -98,6 +104,7 @@ import { AuthGroupUsersDeleteReq } from './typescript/api/resources/pontus/clien
 import { AuthGroupUsersReadReq } from './typescript/api/resources/pontus/client/requests/AuthGroupUsersReadReq';
 import { AuthGroupUsersDeleteRes } from './typescript/api/resources/pontus/types/AuthGroupUsersDeleteRes';
 import { AuthGroupUsersReadRes } from './typescript/api/resources/pontus/types/AuthGroupUsersReadRes';
+import {} from './typescript/serialization';
 
 export const getModelData = async (
   modelId: string,
@@ -141,15 +148,33 @@ const api = axios.create({
 
 // wrapper for every post request. eg. handling errors like Too Many Requests (429), internal server error (500), 503...
 const post = async (url: string, data?: any) => {
+  const accessToken = localStorage.getItem('accessToken') || '';
+  const refreshToken = localStorage.getItem('refreshToken') || '';
+
   const baseURL = 'http://localhost:8080/PontusTest/1.0.0';
   const headers = {
-    Authorization: 'Bearer 123456',
+    Authorization: `${accessToken}`,
     Accept: 'application/json',
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
   };
 
-  return sendHttpRequest(baseURL + url, headers, '', data, 'POST');
+  console.log({ headers, accessToken, json: JSON.stringify(accessToken) });
+
+  const res = await sendHttpRequest(baseURL + url, headers, '', data, 'POST');
+
+  return res;
+};
+
+export const loginUser = async (
+  body: LoginReq,
+): Promise<AxiosResponse<LoginRes>> => {
+  return post('/login', body);
+};
+export const registerAdmin = async (
+  body: RegisterAdminReq,
+): Promise<AxiosResponse<RegisterAdminRes>> => {
+  return post('/register/admin', body);
 };
 
 export const createMenu = async (
@@ -412,6 +437,13 @@ export const deleteDashboardGroupAuth = async (
   data: DashboardGroupAuthDeleteReq,
 ): Promise<AxiosResponse<DashboardGroupAuthDeleteRes> | undefined> => {
   return post('/dashboard/group/auth/delete', data);
+};
+
+export const registerUser = async (
+  data: RegisterUserReq,
+): Promise<RegisterUserRes> => {
+  console.log({ data });
+  return post('/register/user', data);
 };
 
 // export const getApiKeys = async () => {

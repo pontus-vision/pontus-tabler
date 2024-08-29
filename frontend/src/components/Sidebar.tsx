@@ -4,6 +4,7 @@ import {
   Dispatch,
   SetStateAction,
   ChangeEvent,
+  useContext,
 } from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';
 import { Child, Dashboard, DataRoot } from '../types';
 import { setDashboardId } from '../store/sliceDashboards';
-import { useAuth } from '../AuthContext';
+import { AuthContext, useAuth } from '../AuthContext';
 import TreeView from './Tree/TreeView';
 import { createMenu, readMenu } from '../client';
 import data from './Tree/data';
@@ -37,12 +38,16 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [openAdminOptions, setOpenAdminOptions] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { logout } = useAuth();
   const { value: dashboards } = useSelector((state: RootState) => {
     return state.dashboards;
   });
   const { t, i18n } = useTranslation();
 
+  const {
+    isAuthenticated,
+    userGroups: userRole,
+    logout,
+  } = useContext(AuthContext);
   const [tree, setTree] = useState({
     name: '/',
     kind: 'folder',
@@ -114,6 +119,8 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   useEffect(() => {
     console.log(deviceSize);
   }, [deviceSize]);
+
+  if (!isAuthenticated) return;
 
   return (
     <div className={`${openedSidebar ? 'active' : ''}` + ' sidebar'}>
