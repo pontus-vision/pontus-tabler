@@ -32,7 +32,7 @@ import dotenv from 'dotenv';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
 import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
-import jdbc from '../../../delta-table/node/index-jdbc';
+import jdbc from './../../delta-table/node/index-jdbc';
 dotenv.config();
 
 export const setup = async (): Promise<InitiateRes> => {

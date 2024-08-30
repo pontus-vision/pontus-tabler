@@ -10,7 +10,7 @@ import {
 } from '@azure/functions';
 import * as http from 'http';
 import https from 'https';
-import jdbc from '../../delta-table/node/index-jdbc';
+import jdbc from './../delta-table/node/index-jdbc';
 
 const agent = new https.Agent({
   rejectUnauthorized: false, // Disables certificate validation

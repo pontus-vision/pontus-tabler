@@ -42,7 +42,7 @@ import {
 // import axios from 'axios';
 import { srv } from '../server';
 
-import * as db from '../../../delta-table/node/index-jdbc';
+import * as db from './../../delta-table/node/index-jdbc';
 import { post } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { deleteContainer } from '../cosmos-utils';

@@ -38,7 +38,7 @@ import {
 } from './AuthGroupService';
 import { AUTH_USERS } from './AuthUserService';
 declare function getContext(): any;
-import * as db from '../../../../delta-table/node/index-jdbc';
+import * as db from './../../../delta-table/node/index-jdbc';
 import { GROUPS_DASHBOARDS } from '../EdgeService';
 
 const conn: db.Connection = db.createConnection();

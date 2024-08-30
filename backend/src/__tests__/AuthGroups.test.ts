@@ -63,7 +63,7 @@ import {
 // import axios from 'axios';
 import { srv } from '../server';
 
-import * as db from '../../../delta-table/node/index-jdbc';
+import * as db from '../../delta-table/node/index-jdbc';
 import { post, stateObj } from './test-utils';
 import { DashboardGroupAuthCreateReq } from '../generated/api';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';

@@ -23,7 +23,7 @@ import {
   objEntriesToStr,
   updateSql,
 } from './AuthGroupService';
-import * as db from '../../../../delta-table/node/index-jdbc';
+import * as db from './../../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from '../../generated/api';
 

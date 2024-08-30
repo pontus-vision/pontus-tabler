@@ -83,7 +83,7 @@ import {
   updateTableDataEdge,
 } from './EdgeService';
 import { DASHBOARDS } from './DashboardService';
-import * as db from '../../../../delta-table/node/index-jdbc';
+import * as db from './../../../delta-table/node/index-jdbc';
 import { filter, has } from 'lodash';
 dotenv.config();
 export const AUTH_USERS = 'auth_users';

@@ -40,7 +40,7 @@ import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS, TABLE_DATA } from '../service/delt
 // }));
 jest.setTimeout(1000000);
 
-import * as db from '../../../delta-table/node/index-jdbc';
+import * as db from './../../delta-table/node/index-jdbc';
 const conn: db.Connection = db.createConnection();
 describe('testing tabledata', () => {
   const OLD_ENV = process.env;

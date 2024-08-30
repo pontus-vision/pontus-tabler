@@ -1,3 +1,7 @@
+import { isSubset, post } from './test-utils';
+import { deleteDatabase } from '../cosmos-utils';
+import { app, srv } from '../server';
+import { AxiosResponse } from 'axios';
 import {
   MenuItemTreeRef,
   MenuCreateRes,
@@ -6,12 +10,9 @@ import {
   MenuUpdateRes,
   MenuReadReq,
   MenuCreateReq,
-} from 'pontus-tabler/src/pontus-api/typescript-fetch-client-generated';
-import { isSubset, post } from './test-utils';
-import { deleteDatabase } from '../cosmos-utils';
-import { app, srv } from '../server';
-import { AxiosResponse } from 'axios';
-import { DashboardReadReq, DashboardReadRes } from '../typescript/api';
+  DashboardReadReq,
+  DashboardReadRes,
+} from '../typescript/api';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({

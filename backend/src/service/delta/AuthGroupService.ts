@@ -59,7 +59,7 @@ import {
 } from '../../generated/api';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as db from '../../../../delta-table/node/index-jdbc';
+import * as db from './../../../delta-table/node/index-jdbc';
 
 import {
   Container,

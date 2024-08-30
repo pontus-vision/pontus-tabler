@@ -22,7 +22,7 @@ import {
 } from '@azure/cosmos';
 import { ConflictEntityError, NotFoundError } from '../../generated/api';
 
-import * as db from '../../../../delta-table/node/index-jdbc';
+import * as db from './../../../delta-table/node/index-jdbc';
 import { createSql, generateUUIDv6, updateSql } from './AuthGroupService';
 import { snakeCase } from 'lodash';
 export const TABLES = 'tables';

@@ -31,7 +31,7 @@ import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
 // }));
 jest.setTimeout(1000000);
 
-import * as db from '../../../delta-table/node/index-jdbc';
+import * as db from './../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
 const conn: db.Connection = db.createConnection();
 describe('tableControllerTest', () => {

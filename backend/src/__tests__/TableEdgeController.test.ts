@@ -31,7 +31,7 @@ import { GROUPS_DASHBOARDS } from '../service/EdgeService';
 import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
 import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
 
-import * as db from '../../../delta-table/node/index-jdbc';
+import * as db from './../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
