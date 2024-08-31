@@ -347,6 +347,7 @@ export const authUserGroupsRead = async (
       // edgeLabel: AUTH_GROUPS,
       tableName: GROUPS_USERS,
     },
+    jointTableName: GROUPS_USERS,
     tableName: AUTH_USERS,
     rowId: data.id,
     filters: filtersRefactor,

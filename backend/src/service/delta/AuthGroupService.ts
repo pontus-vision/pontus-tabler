@@ -224,13 +224,10 @@ export const createSql = async (
   // );
 
   const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${
-      data?.id ? '' : 'id STRING, '
-    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`
+    data?.id ? '' : 'id STRING, '
+  } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
 
-  const res = await db.executeQuery(
-    createQuery,
-    conn,
-  );
+  const res = await db.executeQuery(createQuery, conn);
 
   const insertFields = Array.isArray(data)
     ? Object.keys(data[0]).join(', ')
@@ -244,7 +241,7 @@ export const createSql = async (
     }
   }
 
-  const ids = []
+  const ids = [];
 
   const insert = `INSERT INTO ${table} (${
     data?.id ? '' : 'id, '
@@ -253,7 +250,7 @@ export const createSql = async (
       ? insertValues
           .map((el) => {
             const uuid = generateUUIDv6();
-            ids.push(uuid)
+            ids.push(uuid);
             return `('${uuid}', ${el})`;
           })
           .join(', ')
@@ -262,12 +259,15 @@ export const createSql = async (
 
   const res2 = await db.executeQuery(insert, conn);
 
-  const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id ? `id = '${data?.id}'` : ids.length > 0 ? ids.map(id=> `id = '${id}'`).join(" OR ") : `id = '${uuid}'`}`
+  const selectQuery = `SELECT * FROM ${table} WHERE ${
+    data?.id
+      ? `id = '${data?.id}'`
+      : ids.length > 0
+      ? ids.map((id) => `id = '${id}'`).join(' OR ')
+      : `id = '${uuid}'`
+  }`;
 
-  const res3 = await db.executeQuery(
-    selectQuery,
-    conn,
-  );
+  const res3 = await db.executeQuery(selectQuery, conn);
 
   return res3;
 
@@ -487,7 +487,6 @@ export const createAuthGroupDashboards = async (
   const res = (await createTableDataEdge({
     tableFrom: {
       tableName: AUTH_GROUPS,
-
       rows: data.dashboards.map((dashboard) => {
         return {
           id: data.id,
@@ -530,12 +529,12 @@ export const createAuthGroupDashboards = async (
 
   const dashboards: AuthGroupDashboardRef[] = res.map((el) => {
     return {
-      create: el['table_from__create'],
-      delete: el['table_from__delete'],
-      id: el['table_to__id'],
-      name: el['table_to__name'],
-      read: el['table_from__read'],
-      update: el['table_from__update'],
+      id: el['to']['table_to__id'],
+      name: el['to']['table_to__name'],
+      create: el['from']['table_from__create'] === 'true',
+      delete: el['from']['table_from__delete'] === 'true',
+      read: el['from']['table_from__read'] === 'true',
+      update: el['from']['table_from__update'] === 'true',
     };
   });
 
@@ -562,9 +561,9 @@ export const readAuthGroupDashboards = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
-      edgeLabel: GROUPS_DASHBOARDS,
       tableName: DASHBOARDS,
     },
+    jointTableName: GROUPS_DASHBOARDS,
     rowId: data.id,
     tableName: AUTH_GROUPS,
     filters: filtersAdapted,
@@ -675,8 +674,8 @@ export const createAuthUserGroup = async (
 
   const authUsersRes = res.map((el) => {
     return {
-      username: el['table_to__username'],
-      id: el['table_to__id'],
+      username: el['to']['table_to__username'],
+      id: el['to']['table_to__id'],
     };
   });
 
@@ -704,10 +703,10 @@ export const readAuthGroupTables = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
-      edgeLabel: GROUPS_TABLES,
       tableName: TABLES,
     },
     rowId: data.id,
+    jointTableName: GROUPS_TABLES,
     tableName: AUTH_GROUPS,
     filters: filtersAdapted,
     from: data.from,
@@ -746,9 +745,9 @@ export const readAuthGroupUsers = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
-      edgeLabel: GROUPS_USERS,
       tableName: AUTH_USERS,
     },
+    jointTableName:GROUPS_USERS,
     rowId: data.id,
     tableName: AUTH_GROUPS,
     filters: filtersAdapted,
@@ -815,6 +814,7 @@ export const createAuthGroupTables = async (
   const res = await createTableDataEdge({
     edge: GROUPS_TABLES,
     edgeType: 'oneToMany',
+    jointTableName: GROUPS_TABLES,
     tableFrom: {
       rows: [{ id: data.id, name: data.name }],
       tableName: AUTH_GROUPS,
@@ -832,8 +832,8 @@ export const createAuthGroupTables = async (
     id: data.id,
     tables: res.map((el) => {
       return {
-        id: el['table_to__id'],
-        name: el['table_to__name'],
+        id: el['to']['table_to__id'] as string,
+        name: el['to']['table_to__name'] as string,
       };
     }),
   };

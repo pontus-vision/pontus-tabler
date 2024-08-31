@@ -243,9 +243,9 @@ export const readDashboardGroupAuth = async (
   const res = (await readTableDataEdge({
     edge: {
       direction: 'from',
-      edgeLabel: GROUPS_DASHBOARDS,
       tableName: AUTH_GROUPS,
     },
+    jointTableName: GROUPS_DASHBOARDS,
     rowId: data.id,
     tableName: DASHBOARDS,
     filters: filtersAdapted,
