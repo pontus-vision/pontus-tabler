@@ -176,6 +176,10 @@ describe('dashboardCreatePOST', () => {
         `DELETE FROM ${GROUPS_DASHBOARDS};`,
         conn,
       );
+      const sql6 = await db.executeQuery(
+        `DELETE FROM ${TABLES};`,
+        conn,
+      );
     } else {
       await deleteContainer(AUTH_GROUPS);
       await deleteContainer(DASHBOARDS);
