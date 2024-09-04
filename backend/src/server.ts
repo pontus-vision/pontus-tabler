@@ -10,7 +10,6 @@ import {
 } from '@azure/functions';
 import * as http from 'http';
 import https from 'https';
-import jdbc from './../delta-table/node/index-jdbc';
 
 const agent = new https.Agent({
   rejectUnauthorized: false, // Disables certificate validation
@@ -22,10 +21,9 @@ const port = 8080;
 
 app.use(cors());
 export function jdbcMiddleware(req, res, next) {
-  req.jdbc = jdbc;
   next();
 }
-app.use(jdbcMiddleware)
+app.use(jdbcMiddleware);
 
 app.use(express.json());
 
