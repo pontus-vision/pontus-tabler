@@ -1,4 +1,4 @@
-import { deleteDb, isSubset, post } from './test-utils';
+import { prepareDbAndAuth, isSubset, post } from './test-utils';
 import { deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
@@ -43,17 +43,11 @@ describe('testing Menu', () => {
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
   beforeEach(async () => {
-    let tables = [
-      AUTH_GROUPS,
-      AUTH_USERS,
-      DASHBOARDS,
-      TABLES,
-      
-    ];
+    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
     if (process.env.DB_SOURCE === DELTA_DB) {
-      tables = [...tables, GROUPS_USERS,GROUPS_DASHBOARDS, 'person_natural'];
+      tables = [...tables, GROUPS_USERS, GROUPS_DASHBOARDS, 'person_natural'];
     }
-    const dbUtils = await deleteDb(tables);
+    const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache

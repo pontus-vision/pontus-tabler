@@ -21,7 +21,7 @@ import {
   RegisterAdminRes,
   TableDataEdgeReadReq,
 } from '../typescript/api';
-import { deleteDb, isSubset, post } from './test-utils';
+import { prepareDbAndAuth, isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
@@ -54,7 +54,7 @@ describe('tableControllerTest', () => {
     if (process.env.DB_SOURCE === DELTA_DB) {
       tables = [...tables, GROUPS_DASHBOARDS, 'person_natural'];
     }
-    const dbUtils = await deleteDb(tables);
+    const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy

@@ -20,7 +20,7 @@ import {
 } from '../typescript/api';
 
 import { srv } from '../server';
-import { deleteDb, isSubset, post } from './test-utils';
+import { prepareDbAndAuth, isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { AxiosResponse } from 'axios';
 import { DELTA_DB } from '../service/AuthGroupService';
@@ -56,7 +56,7 @@ describe('testing tabledata', () => {
     if (process.env.DB_SOURCE === DELTA_DB) {
       tables = [...tables, GROUPS_DASHBOARDS, 'person_natural'];
     }
-    const dbUtils = await deleteDb(tables);
+    const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache

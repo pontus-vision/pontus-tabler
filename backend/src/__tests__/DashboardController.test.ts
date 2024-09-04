@@ -27,7 +27,7 @@ import {
 // import axios from 'axios';
 import { srv } from '../server';
 
-import { deleteDb, post, stateObj } from './test-utils';
+import { prepareDbAndAuth, post, stateObj } from './test-utils';
 import {
   AuthGroupUsersCreateReq,
   DashboardGroupAuthCreateReq,
@@ -64,7 +64,7 @@ describe('dashboardCreatePOST', () => {
     if (process.env.DB_SOURCE === DELTA_DB) {
       tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS, 'person_natural'];
     }
-    const dbUtils = await deleteDb(tables);
+    const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache

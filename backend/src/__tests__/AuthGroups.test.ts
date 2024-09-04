@@ -64,7 +64,7 @@ import {
 import { srv } from '../server';
 
 import * as db from '../../delta-table/node/index-jdbc';
-import { deleteDb, post, stateObj } from './test-utils';
+import { prepareDbAndAuth, post, stateObj } from './test-utils';
 import { DashboardGroupAuthCreateReq } from '../generated/api';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
@@ -99,17 +99,11 @@ describe('dashboardCreatePOST', () => {
   let postAdmin;
   let admin;
   beforeEach(async () => {
-    let tables = [
-      AUTH_GROUPS,
-      AUTH_USERS,
-      DASHBOARDS,
-      TABLES,
-      
-    ];
+    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
     if (process.env.DB_SOURCE === DELTA_DB) {
-      tables = [...tables,GROUPS_DASHBOARDS, GROUPS_USERS];
+      tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS];
     }
-    const dbUtils = await deleteDb(tables);
+    const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache
