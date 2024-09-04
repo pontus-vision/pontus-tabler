@@ -8,13 +8,13 @@ import {
   AuthUserCreateRes,
   RegisterAdminReq,
   LoginReq,
-  LoginRes
+  LoginRes,
 } from '../typescript/api';
-import { isSubset, post } from './test-utils';
+import { deleteDb, isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
-import { DELTA_DB } from '../service/AuthGroupService';
+import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
 import { GROUPS_DASHBOARDS } from '../service/EdgeService';
 import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
 import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
@@ -38,58 +38,20 @@ describe('tableControllerTest', () => {
   const OLD_ENV = process.env;
 
   let adminToken;
-  const postAdmin = async (
-    endpoint: string,
-    body: Record<string, any>,
-  ): Promise<AxiosResponse> => {
-    const res = (await post(endpoint, body, {
-      Authorization: 'Bearer ' + adminToken,
-    })) as AxiosResponse<any, any>;
 
-    return res;
-  };
   let admin = {} as AuthUserCreateRes;
+  let postAdmin;
   beforeEach(async () => {
+    let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      tables = [...tables, GROUPS_USERS];
+    }
+    const dbUtils = await deleteDb(tables);
+    postAdmin = dbUtils.postAdmin;
+    admin = dbUtils.admin;
+    adminToken = dbUtils.adminToken;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await db.executeQuery(
-        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
-        conn,
-      );
-      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
-      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
-      const sql6 = await db.executeQuery(`DELETE FROM ${TABLES};`, conn);
-    } else {
-      await deleteContainer(AUTH_GROUPS);
-      await deleteContainer(DASHBOARDS);
-      await deleteContainer(AUTH_USERS);
-      await deleteContainer(TABLES);
-    }
-    const createBody: RegisterAdminReq = {
-      username: 'user1',
-      password: 'pontusvision',
-      passwordConfirmation: 'pontusvision',
-    };
-    const adminCreateRes = (await postAdmin(
-      'register/admin',
-      createBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(adminCreateRes.status).toBe(200);
-
-    admin = adminCreateRes.data;
-    const loginBody: LoginReq = {
-      username: 'user1',
-
-      password: 'pontusvision',
-    };
-    const LoginRes = (await postAdmin(
-      '/login',
-      loginBody,
-    )) as AxiosResponse<LoginRes>;
-    expect(LoginRes.status).toBe(200);
-
-    adminToken = LoginRes.data.accessToken;
   });
 
   afterAll(() => {
@@ -129,10 +91,10 @@ describe('tableControllerTest', () => {
     let resPayload: TableCreateRes = createRetVal.data;
     let id = resPayload.id;
 
-    expect(createRetVal.status).toBe(200)
-    expect(createRetVal.data.name).toBe(snakeCase(body.name))
-    expect(createRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name))
-    expect(createRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name))
+    expect(createRetVal.status).toBe(200);
+    expect(createRetVal.data.name).toBe(snakeCase(body.name));
+    expect(createRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name));
+    expect(createRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name));
 
     const readRetVal = await postAdmin('table/read', {
       id,
@@ -144,10 +106,10 @@ describe('tableControllerTest', () => {
 
     // expect(isSubset(body, readRetVal.data)).toBe(true);
 
-    expect(readRetVal.status).toBe(200)
-    expect(readRetVal.data.name).toBe(snakeCase(body.name))
-    expect(readRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name))
-    expect(readRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name))
+    expect(readRetVal.status).toBe(200);
+    expect(readRetVal.data.name).toBe(snakeCase(body.name));
+    expect(readRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name));
+    expect(readRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name));
 
     const body2: TableUpdateReq = {
       name: 'person-natural',

@@ -1,5 +1,27 @@
 import { HttpRequest, InvocationContext } from '@azure/functions';
 import httpTrigger from '../server';
+import { AxiosResponse } from 'axios';
+import { deleteContainer } from '../cosmos-utils';
+import { DELTA_DB } from '../service/AuthGroupService';
+import { GROUPS_DASHBOARDS } from '../service/EdgeService';
+import {
+  AUTH_GROUPS_USER_TABLE,
+  AUTH_GROUPS,
+  AUTH_USERS,
+  DASHBOARDS,
+  TABLES,
+} from '../service/delta';
+import {
+  RegisterAdminRes,
+  AuthUserCreateRes,
+  LogoutReq,
+  AuthUserCreateReq,
+  LoginReq,
+  LoginRes,
+  RegisterAdminReq,
+} from '../typescript/api';
+import * as db from './../../delta-table/node/index-jdbc';
+const conn: db.Connection = db.createConnection();
 
 export const post = async (
   endpoint: string,
@@ -28,18 +50,18 @@ export const post = async (
   //   );
   //   return res;
 
-//  const res = await fetch(
-//    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-//    {
-//      method: 'POST',
-//      headers: {
-//        'Content-Type': 'application/json',
-//        Authorization:  headers['Authorization'] || 'Bearer 123456',
-//      },
-//      body: JSON.stringify(body),
-//    },
-//  )
-//  const json = await res.json()
+  //  const res = await fetch(
+  //    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+  //    {
+  //      method: 'POST',
+  //      headers: {
+  //        'Content-Type': 'application/json',
+  //        Authorization:  headers['Authorization'] || 'Bearer 123456',
+  //      },
+  //      body: JSON.stringify(body),
+  //    },
+  //  )
+  //  const json = await res.json()
 
   const res = await httpTrigger(
     new HttpRequest({
@@ -47,7 +69,7 @@ export const post = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...headers
+        ...headers,
       },
       url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
     }),
@@ -187,4 +209,113 @@ export const stateObj = {
       },
     ],
   },
+};
+
+export const prepareDbAndAuth = async (
+  tables: string[],
+): Promise<{
+  postAdmin: (
+    endpoint: string,
+    body: Record<string, any>,
+  ) => Promise<AxiosResponse>;
+  admin: RegisterAdminRes;
+  adminToken: string;
+}> => {
+  let adminToken;
+  const postAdmin = async (
+    endpoint: string,
+    body: Record<string, any>,
+  ): Promise<AxiosResponse> => {
+    const res = (await post(endpoint, body, {
+      Authorization: 'Bearer ' + adminToken,
+    })) as AxiosResponse<any, any>;
+
+    return res;
+  };
+
+  let userToken;
+
+  const postUser = async (
+    endpoint: string,
+    body: Record<string, any>,
+  ): Promise<AxiosResponse> => {
+    const res = (await post(endpoint, body, {
+      Authorization: 'Bearer ' + userToken,
+    })) as AxiosResponse<any, any>;
+
+    return res;
+  };
+
+  let admin = {} as RegisterAdminRes;
+
+  let user = {} as AuthUserCreateRes;
+  const loginUser = async () => {
+    if (adminToken) {
+      const logoutBody: LogoutReq = {
+        token: adminToken,
+      };
+
+      const res = await post('/logout', logoutBody);
+
+      expect(res.status).toBe(200);
+    }
+
+    const userCreateBody: AuthUserCreateReq = {
+      password: '12345678',
+      passwordConfirmation: '12345678',
+      username: 'user1',
+    };
+
+    const userCreateRes = await post('/auth/user/create', userCreateBody);
+
+    expect(userCreateRes.status).toBe(200);
+
+    user = userCreateRes.data;
+    const loginUserBody: LoginReq = {
+      password: '12345678',
+      username: 'user1',
+    };
+    const res = (await post(
+      '/login',
+      loginUserBody,
+    )) as AxiosResponse<LoginRes>;
+
+    userToken = res.data.accessToken;
+
+    expect(res.status).toBe(200);
+  };
+  const OLD_ENV = process.env;
+  for (const table of tables) {
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      const sql = await db.executeQuery(`DELETE FROM ${table};`, conn);
+    } else {
+      await deleteContainer(table);
+    }
+  }
+
+  const createAdminBody: RegisterAdminReq = {
+    username: 'admin',
+    password: 'pontusvision',
+    passwordConfirmation: 'pontusvision',
+  };
+
+  const adminCreateRes = (await postAdmin(
+    '/register/admin',
+    createAdminBody,
+  )) as AxiosResponse<RegisterAdminRes>;
+  expect(adminCreateRes.status).toBe(200);
+
+  admin = adminCreateRes.data;
+  const loginBody: LoginReq = {
+    username: 'admin',
+
+    password: 'pontusvision',
+  };
+
+  const LoginRes = (await post('/login', loginBody)) as AxiosResponse<LoginRes>;
+  expect(LoginRes.status).toBe(200);
+
+  adminToken = LoginRes.data.accessToken;
+
+  return { postAdmin, admin, adminToken };
 };

@@ -27,7 +27,7 @@ import {
 // import axios from 'axios';
 import { srv } from '../server';
 
-import { post, stateObj } from './test-utils';
+import { deleteDb, post, stateObj } from './test-utils';
 import {
   AuthGroupUsersCreateReq,
   DashboardGroupAuthCreateReq,
@@ -37,7 +37,7 @@ import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { DASHBOARDS } from '../service/DashboardService';
 import { AUTH_USERS, GROUPS_TABLES, TABLES } from '../service/cosmosdb';
 import { AUTH_GROUPS, AUTH_GROUPS_USER_TABLE } from '../service/delta';
-import { DELTA_DB } from '../service/AuthGroupService';
+import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
 import { GROUPS_DASHBOARDS } from '../service/EdgeService';
 
 import * as db from './../../delta-table/node/index-jdbc';
@@ -57,69 +57,18 @@ const conn: db.Connection = db.createConnection();
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
-  let adminToken;
-  const postAdmin = async (
-    endpoint: string,
-    body: Record<string, any>,
-  ): Promise<AxiosResponse> => {
-    const res = (await post(endpoint, body, {
-      Authorization: 'Bearer ' + adminToken,
-    })) as AxiosResponse<any, any>;
-
-    return res;
-  };
-
   let admin = {} as AuthUserCreateRes;
+  let postAdmin;
   beforeEach(async () => {
+    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS, 'person_natural'];
+    }
+    const dbUtils = await deleteDb(tables);
+    postAdmin = dbUtils.postAdmin;
+    admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await db.executeQuery(
-        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
-        conn,
-      );
-      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
-      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
-      const sql4 = await db.executeQuery(`DELETE FROM ${DASHBOARDS};`, conn);
-      const sql5 = await db.executeQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS};`,
-        conn,
-      );
-      const sql8 = await db.executeQuery(
-        `DELETE FROM person_natural`,
-        conn,
-      );
-    } else {
-      await deleteContainer(AUTH_GROUPS);
-      await deleteContainer(DASHBOARDS);
-      await deleteContainer(AUTH_USERS);
-      await deleteContainer(TABLES);
-    }
-
-    const createBody: RegisterAdminReq = {
-      username: 'user1',
-      password: 'pontusvision',
-      passwordConfirmation: 'pontusvision',
-    };
-    const adminCreateRes = (await postAdmin(
-      'register/admin',
-      createBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(adminCreateRes.status).toBe(200);
-
-    admin = adminCreateRes.data;
-    const loginBody: LoginReq = {
-      username: 'user1',
-
-      password: 'pontusvision',
-    };
-    const LoginRes = (await postAdmin(
-      '/login',
-      loginBody,
-    )) as AxiosResponse<LoginRes>;
-    expect(LoginRes.status).toBe(200);
-
-    adminToken = LoginRes.data.accessToken;
   });
 
   afterAll(() => {
@@ -555,7 +504,6 @@ describe('dashboardCreatePOST', () => {
           },
           filterType: 'text',
         },
-        
       },
     };
 

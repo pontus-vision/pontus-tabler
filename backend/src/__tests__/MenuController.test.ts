@@ -1,4 +1,4 @@
-import { isSubset, post } from './test-utils';
+import { deleteDb, isSubset, post } from './test-utils';
 import { deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
@@ -12,7 +12,17 @@ import {
   MenuCreateReq,
   DashboardReadReq,
   DashboardReadRes,
+  AuthUserCreateRes,
 } from '../typescript/api';
+import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
+import { GROUPS_DASHBOARDS } from '../service/EdgeService';
+import {
+  AUTH_GROUPS,
+  AUTH_USERS,
+  DASHBOARDS,
+  TABLES,
+  AUTH_GROUPS_USER_TABLE,
+} from '../service/delta';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -30,16 +40,29 @@ jest.setTimeout(1000000);
 describe('testing Menu', () => {
   const OLD_ENV = process.env;
 
+  let admin = {} as AuthUserCreateRes;
+  let postAdmin;
   beforeEach(async () => {
+    let tables = [
+      AUTH_GROUPS,
+      AUTH_USERS,
+      DASHBOARDS,
+      TABLES,
+      
+    ];
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      tables = [...tables, GROUPS_USERS,GROUPS_DASHBOARDS, 'person_natural'];
+    }
+    const dbUtils = await deleteDb(tables);
+    postAdmin = dbUtils.postAdmin;
+    admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    await deleteDatabase('pv_db');
   });
 
   afterAll(async () => {
     process.env = OLD_ENV; // Restore old environment
     srv.close();
-    await deleteDatabase('pv_db');
   });
 
   it('should read the root', async () => {

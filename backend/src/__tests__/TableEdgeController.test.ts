@@ -21,7 +21,7 @@ import {
   RegisterAdminRes,
   TableDataEdgeReadReq,
 } from '../typescript/api';
-import { isSubset, post } from './test-utils';
+import { deleteDb, isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
@@ -47,120 +47,17 @@ jest.setTimeout(1000000);
 const conn: db.Connection = db.createConnection();
 
 describe('tableControllerTest', () => {
-  let adminToken;
-  const postAdmin = async (
-    endpoint: string,
-    body: Record<string, any>,
-  ): Promise<AxiosResponse> => {
-    const res = (await post(endpoint, body, {
-      Authorization: 'Bearer ' + adminToken,
-    })) as AxiosResponse<any, any>;
-
-    return res;
-  };
-
-  let userToken;
-
-  const postUser = async (
-    endpoint: string,
-    body: Record<string, any>,
-  ): Promise<AxiosResponse> => {
-    const res = (await post(endpoint, body, {
-      Authorization: 'Bearer ' + userToken,
-    })) as AxiosResponse<any, any>;
-
-    return res;
-  };
-
-  let admin = {} as RegisterAdminRes;
-
-  let user = {} as AuthUserCreateRes;
-  const loginUser = async () => {
-    if (adminToken) {
-      const logoutBody: LogoutReq = {
-        token: adminToken,
-      };
-
-      const res = await post('/logout', logoutBody);
-
-      expect(res.status).toBe(200);
-    }
-
-    const userCreateBody: AuthUserCreateReq = {
-      password: '12345678',
-      passwordConfirmation: '12345678',
-      username: 'user1',
-    };
-
-    const userCreateRes = await post('/auth/user/create', userCreateBody);
-
-    expect(userCreateRes.status).toBe(200);
-
-    user = userCreateRes.data;
-    const loginUserBody: LoginReq = {
-      password: '12345678',
-      username: 'user1',
-    };
-    const res = (await post(
-      '/login',
-      loginUserBody,
-    )) as AxiosResponse<LoginRes>;
-
-    userToken = res.data.accessToken;
-
-    expect(res.status).toBe(200);
-  };
   const OLD_ENV = process.env;
+  let postAdmin;
   beforeEach(async () => {
+    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      tables = [...tables, GROUPS_DASHBOARDS, 'person_natural'];
+    }
+    const dbUtils = await deleteDb(tables);
+    postAdmin = dbUtils.postAdmin;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await db.executeQuery(
-        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
-        conn,
-      );
-      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
-      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
-      const sql4 = await db.executeQuery(`DELETE FROM ${DASHBOARDS};`, conn);
-      const sql6 = await db.executeQuery(`DELETE FROM ${TABLES};`, conn);
-      const sql5 = await db.executeQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS};`,
-        conn,
-      );
-      const sql7 = await db.executeQuery(`DELETE FROM person_natural;`, conn);
-    } else {
-      await deleteContainer(AUTH_GROUPS);
-      await deleteContainer(DASHBOARDS);
-      await deleteContainer(AUTH_USERS);
-      await deleteContainer(TABLES);
-    }
-
-    const createAdminBody: RegisterAdminReq = {
-      username: 'admin',
-      password: 'pontusvision',
-      passwordConfirmation: 'pontusvision',
-    };
-
-    const adminCreateRes = (await postAdmin(
-      '/register/admin',
-      createAdminBody,
-    )) as AxiosResponse<RegisterAdminRes>;
-    expect(adminCreateRes.status).toBe(200);
-
-    admin = adminCreateRes.data;
-    const loginBody: LoginReq = {
-      username: 'admin',
-
-      password: 'pontusvision',
-    };
-
-    const LoginRes = (await post(
-      '/login',
-      loginBody,
-    )) as AxiosResponse<LoginRes>;
-    expect(LoginRes.status).toBe(200);
-
-    adminToken = LoginRes.data.accessToken;
   });
 
   afterAll(async () => {

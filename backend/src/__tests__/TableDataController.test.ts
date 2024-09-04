@@ -20,13 +20,17 @@ import {
 } from '../typescript/api';
 
 import { srv } from '../server';
-import { isSubset, post } from './test-utils';
+import { deleteDb, isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { AxiosResponse } from 'axios';
 import { DELTA_DB } from '../service/AuthGroupService';
 import { GROUPS_DASHBOARDS } from '../service/EdgeService';
 import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
-import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS, TABLE_DATA } from '../service/delta';
+import {
+  AUTH_GROUPS_USER_TABLE,
+  AUTH_GROUPS,
+  TABLE_DATA,
+} from '../service/delta';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -45,102 +49,24 @@ const conn: db.Connection = db.createConnection();
 describe('testing tabledata', () => {
   const OLD_ENV = process.env;
 
-  let adminToken;
-  const postAdmin = async (
-    endpoint: string,
-    body: Record<string, any>,
-  ): Promise<AxiosResponse> => {
-    const res = (await post(endpoint, body, {
-      Authorization: 'Bearer ' + adminToken,
-    })) as AxiosResponse<any, any>;
-
-    return res;
-  };
   let admin = {} as AuthUserCreateRes;
+  let postAdmin;
   beforeEach(async () => {
+    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      tables = [...tables, GROUPS_DASHBOARDS, 'person_natural'];
+    }
+    const dbUtils = await deleteDb(tables);
+    postAdmin = dbUtils.postAdmin;
+    admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await db.executeQuery(
-        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
-        conn,
-      );
-      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
-      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
-      const sql4 = await db.executeQuery(`DELETE FROM ${DASHBOARDS};`, conn);
-      const sql6 = await db.executeQuery(`DELETE FROM ${TABLES};`, conn);
-      // const sql7 = await db.executeQuery(`DELETE FROM ${TABLE_DATA};`, conn);
-      const sql5 = await db.executeQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS};`,
-        conn,
-      );
-      const sql8 = await db.executeQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS};`,
-        conn,
-      );
-      const sql9 = await db.executeQuery(
-        `DELETE FROM person_natural;`,
-        conn,
-      );
-    } else {
-      await deleteContainer(AUTH_GROUPS);
-      await deleteContainer(DASHBOARDS);
-      await deleteContainer(AUTH_USERS);
-      await deleteContainer(TABLES);
-    }
-    const createBody: RegisterAdminReq = {
-      username: 'user1',
-      password: 'pontusvision',
-      passwordConfirmation: 'pontusvision',
-    };
-    const adminCreateRes = (await postAdmin(
-      'register/admin',
-      createBody,
-    )) as AxiosResponse<AuthUserCreateRes>;
-    expect(adminCreateRes.status).toBe(200);
-
-    admin = adminCreateRes.data;
-    const loginBody: LoginReq = {
-      username: 'user1',
-
-      password: 'pontusvision',
-    };
-    const LoginRes = (await postAdmin(
-      '/login',
-      loginBody,
-    )) as AxiosResponse<LoginRes>;
-    expect(LoginRes.status).toBe(200);
-
-    adminToken = LoginRes.data.accessToken;
   });
 
   afterAll(async () => {
     process.env = OLD_ENV; // Restore old environment
     srv.close();
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await db.executeQuery(
-        `DELETE FROM ${AUTH_GROUPS_USER_TABLE};`,
-        conn,
-      );
-      const sql2 = await db.executeQuery(`DELETE FROM ${AUTH_GROUPS};`, conn);
-      const sql3 = await db.executeQuery(`DELETE FROM ${AUTH_USERS};`, conn);
-      const sql4 = await db.executeQuery(`DELETE FROM ${DASHBOARDS};`, conn);
-      const sql5 = await db.executeQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS};`,
-        conn,
-      );
-      const sql8 = await db.executeQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS};`,
-        conn,
-      );
-    } else {
-      await deleteContainer(AUTH_GROUPS);
-      await deleteContainer(DASHBOARDS);
-      await deleteContainer(AUTH_USERS);
-      await deleteContainer(TABLES);
-    }
   });
-
 
   it('should do the CRUD "happy path"', async () => {
     const table: TableCreateReq = {
@@ -173,7 +99,9 @@ describe('testing tabledata', () => {
     const createRetVal = await postAdmin('table/data/create', body);
 
     expect(createRetVal.status).toBe(200);
-    expect(isSubset({['column_1']:body.cols.column1}, createRetVal.data)).toBe(true);
+    expect(
+      isSubset({ ['column_1']: body.cols.column1 }, createRetVal.data),
+    ).toBe(true);
 
     // Reading accordingly and checking if it will be listed.
 
@@ -196,7 +124,9 @@ describe('testing tabledata', () => {
     )) as AxiosResponse<TableDataReadRes>;
 
     expect(
-      readRetVal.data.rows.some((value) => isSubset({['column_1']:body.cols.column1}, value)),
+      readRetVal.data.rows.some((value) =>
+        isSubset({ ['column_1']: body.cols.column1 }, value),
+      ),
     ).toBe(true);
 
     // Updating it.
@@ -211,7 +141,9 @@ describe('testing tabledata', () => {
 
     const updateRetVal = await postAdmin('table/data/update', bodyUpdate);
 
-    expect(isSubset({['column_1']: bodyUpdate.cols.column1}, updateRetVal.data)).toBe(true);
+    expect(
+      isSubset({ ['column_1']: bodyUpdate.cols.column1 }, updateRetVal.data),
+    ).toBe(true);
 
     // Reading it again
 
@@ -234,7 +166,9 @@ describe('testing tabledata', () => {
     )) as AxiosResponse<TableDataReadRes>;
 
     expect(
-      readRetVal3.data.rows.some((value) => isSubset({['column_1']: bodyUpdate.cols.column1}, value)),
+      readRetVal3.data.rows.some((value) =>
+        isSubset({ ['column_1']: bodyUpdate.cols.column1 }, value),
+      ),
     ).toBe(true);
 
     expect(readRetVal3.data.rowsCount).toBe(1);
@@ -423,4 +357,3 @@ describe('testing tabledata', () => {
     expect(createTableDataRetVal.status).toBe(200);
   });
 });
-
