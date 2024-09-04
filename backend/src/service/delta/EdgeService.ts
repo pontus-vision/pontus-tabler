@@ -17,7 +17,8 @@ import {
   ReadPaginationFilter,
   TableEdgeCreateRes,
 } from '../../typescript/api';
-import { fetchContainer, filterToQuery } from '../../cosmos-utils';
+import { fetchContainer } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
 import {
   BadRequestError,
@@ -144,8 +145,7 @@ export const createTableDataEdge = async (
   }
 
   const res = (await createSql(
-    data.jointTableName ||
-      `${tableNameFrom}_${tableNameTo}`,
+    data.jointTableName || data.edge || `${tableNameFrom}_${tableNameTo}`,
     sqlFields + ', ' + sqlFields2 + ', edge_label STRING',
     insertFields.map((field) => {
       if (data?.edge) {
@@ -157,7 +157,7 @@ export const createTableDataEdge = async (
   )) as TableDataEdgeCreateRes;
 
   const retVal = res.map((el) => {
-    const obj = {from: {}, to: {}};
+    const obj = { from: {}, to: {} };
     for (const prop in el) {
       if (prop.startsWith('table_from')) {
         obj['from'][prop] = el[prop];
@@ -173,7 +173,7 @@ export const createTableDataEdge = async (
     return obj as TableDataEdgeCreateRef;
   });
 
-  return retVal
+  return retVal;
 };
 
 export const createConnection = (
@@ -498,7 +498,9 @@ export const readTableDataEdge = async (
       direction === 'from'
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
-    }` + `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` + fromTo,
+    }` +
+      `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` +
+      fromTo,
     conn,
   )) as Record<string, any>;
   const sqlCount = await db.executeQuery(

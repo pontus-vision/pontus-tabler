@@ -18,7 +18,8 @@ import {
   DashboardAuthGroups,
   Dashboard,
 } from '../../typescript/api';
-import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
+import { fetchContainer, fetchData } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import { NotFoundError } from '../../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { CosmosClient } from '@azure/cosmos';

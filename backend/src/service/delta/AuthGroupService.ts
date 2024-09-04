@@ -1,4 +1,5 @@
-import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
+import { fetchContainer, fetchData,  } from '../../cosmos-utils';
+import {filterToQuery} from '../../db-utils'
 import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api';
 import {
   AuthGroupCreateReq,

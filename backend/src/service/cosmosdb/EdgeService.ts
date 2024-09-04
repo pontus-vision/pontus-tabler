@@ -16,7 +16,8 @@ import {
   EdgeDirectionEnum,
   ReadPaginationFilter,
 } from '../../typescript/api';
-import { fetchContainer, filterToQuery } from '../../cosmos-utils';
+import { fetchContainer } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
 import {
   BadRequestError,

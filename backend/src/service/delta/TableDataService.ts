@@ -7,7 +7,7 @@ import {
   TableDataRowRef,
   TableDataUpdateReq,
 } from '../../typescript/api';
-import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import { PatchOperation } from '@azure/cosmos';
 import {
   TABLES,
@@ -115,7 +115,6 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
     cols[snakeCase(prop)] = data.cols[prop];
   }
   await checkTableCols(tableName, cols);
-
 
   const sql = await updateSql(tableName, cols, `WHERE id = '${data.rowId}'`);
 

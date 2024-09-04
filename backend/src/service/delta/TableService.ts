@@ -9,12 +9,8 @@ import {
   TablesReadRes,
   TablesReadResTablesItem,
 } from '../../typescript/api';
-import {
-  deleteContainer,
-  fetchContainer,
-  fetchData,
-  filterToQuery,
-} from '../../cosmos-utils';
+import { deleteContainer, fetchContainer, fetchData } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import {
   Container,
   PartitionKeyDefinition,

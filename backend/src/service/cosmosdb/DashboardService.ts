@@ -17,7 +17,8 @@ import {
   DashboardAuthGroupsRef,
   DashboardAuthGroups,
 } from '../../typescript/api';
-import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
+import { fetchContainer, fetchData } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import { NotFoundError } from '../../generated/api';
 import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import { CosmosClient } from '@azure/cosmos';
@@ -252,13 +253,10 @@ export const updateDashboardGroupAuth = async (
   data: DashboardGroupAuthUpdateReq,
 ): Promise<DashboardGroupAuthUpdateRes> => {
   const authGroupContainer = await fetchContainer(DASHBOARDS);
-// data.authGroups[0].
   const res = await authGroupContainer.item(data.id, data.id).read();
 
   if (res.statusCode === 404) {
-    throw new NotFoundError(
-      `Did not find any group at id "${data.id}" `,
-    );
+    throw new NotFoundError(`Did not find any group at id "${data.id}" `);
   }
 
   const res2 = (await updateTableDataEdge({

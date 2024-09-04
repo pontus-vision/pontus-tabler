@@ -1,4 +1,5 @@
-import { fetchContainer, fetchData, filterToQuery } from '../../cosmos-utils';
+import { fetchContainer, fetchData } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api';
 import {
   AuthGroupCreateReq,
@@ -146,13 +147,11 @@ export const initiateAuthGroupContainer = async (): Promise<Container> => {
   return authGroupContainer;
 };
 
-export const createAuthGroup = async (
-  data: AuthGroupCreateReq,
-) => {
+export const createAuthGroup = async (data: AuthGroupCreateReq) => {
   const authGroupContainer = await initiateAuthGroupContainer();
 
   try {
-    const res = await authGroupContainer.items.create({
+    const res = (await authGroupContainer.items.create({
       ...data,
       tableMetadata: {
         create: false,
@@ -160,7 +159,7 @@ export const createAuthGroup = async (
         update: false,
         delete: false,
       },
-    }) as ItemResponse<AuthGroupRef>;
+    })) as ItemResponse<AuthGroupRef>;
 
     const { name, id, tableMetadata } = res.resource;
     return { name, id, tableMetadata };
@@ -292,7 +291,7 @@ export const deleteAuthGroup = async (
           const direction = prop3;
           for (const value of edges[prop][prop2][prop3]) {
             console.log({ value });
-            const snakeTableName = snakeCase(tableName)
+            const snakeTableName = snakeCase(tableName);
             const res2 = await deleteTableDataEdge({
               edge: {
                 direction: direction as EdgeDirectionEnum,
@@ -301,7 +300,7 @@ export const deleteAuthGroup = async (
                 rows: [value],
                 partitionKeyProp:
                   snakeTableName === AUTH_GROUPS || snakeTableName === TABLES
-                    ?'name' 
+                    ? 'name'
                     : snakeTableName === AUTH_USERS
                     ? 'username'
                     : '',

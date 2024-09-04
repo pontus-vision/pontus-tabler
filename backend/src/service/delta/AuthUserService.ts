@@ -44,8 +44,8 @@ import {
   fetchContainer,
   fetchData,
   fetchDatabase,
-  filterToQuery,
 } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import {
   Container,
   Item,
@@ -307,7 +307,7 @@ export const authUserGroupsCreate = async (
   const res = await createTableDataEdge({
     edge: GROUPS_USERS,
     edgeType: 'oneToMany',
-
+    jointTableName: GROUPS_USERS,
     tableFrom: {
       tableName: AUTH_GROUPS,
       rows: data.authGroups as any,
@@ -481,26 +481,6 @@ interface IAuthUser extends AuthUserAndGroupsRef {
 }
 
 export const checkAdmin = async (userId) => {
-  // const res = await readEdge(
-  //   {
-  //     tableFromName: AUTH_USERS,
-  //     tableToName: AUTH_GROUPS,
-  //     direction: 'from',
-  //     edgeTable: AUTH_GROUPS_USER_TABLE + '_edge',
-  //     filters: {
-  //       filters: {
-  //         name: {
-  //           filter: ADMIN_GROUP_NAME,
-  //           filterType: 'text',
-  //           type: 'equals',
-  //         },
-  //       },
-  //     },
-  //     rowId: userId,
-  //   },
-  //   conn,
-  // );
-
   const res = await db.executeQuery(
     `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
     conn,
@@ -564,7 +544,7 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
     );
   }
 
-  return 'Token deleted.'
+  return 'Token deleted.';
 };
 
 export const refreshToken = async (data: TokenReq): Promise<TokenRes> => {

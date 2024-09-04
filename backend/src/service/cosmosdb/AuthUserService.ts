@@ -44,8 +44,8 @@ import {
   fetchContainer,
   fetchData,
   fetchDatabase,
-  filterToQuery,
 } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import {
   Container,
   Item,
