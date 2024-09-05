@@ -9,7 +9,6 @@ import {
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
 import { AUTH_GROUPS, authGroupContainerProps } from './service/cosmosdb';
-import { DELTA_DB } from './service/AuthGroupService';
 import { filterToQuery } from './db-utils';
 
 export interface FetchData {
