@@ -1,7 +1,0 @@
-export * from './AuthGroupService'
-export * from './AuthUserService'
-export * from './DashboardService'
-export * from './EdgeService'
-export * from './TableService'
-export * from './MenuService'
-export * from './TableDataService'

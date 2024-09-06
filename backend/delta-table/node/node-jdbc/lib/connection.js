@@ -1,7 +1,7 @@
 /* jshint node: true */
-"use strict";
-var _ = require("lodash");
-var jinst = require("./jinst");
+'use strict';
+var _ = require('lodash');
+var jinst = require('./jinst');
 var CallableStatement = require('./callablestatement');
 var PreparedStatement = require('./preparedstatement');
 var DatabaseMetaData = require('./databasemetadata');
@@ -10,30 +10,52 @@ var SQLWarning = require('./sqlwarning');
 var java = jinst.getInstance();
 
 if (!jinst.isJvmCreated()) {
-  jinst.addOption("-Xrs");
+  jinst.addOption('-Xrs');
 }
 
 function Connection(conn) {
   this._conn = conn;
-  this._txniso = (function() {
+  this._txniso = (function () {
     var txniso = [];
 
-    txniso[java.getStaticFieldValue("java.sql.Connection", "TRANSACTION_NONE")] = "TRANSACTION_NONE";
-    txniso[java.getStaticFieldValue("java.sql.Connection", "TRANSACTION_READ_COMMITTED")] = "TRANSACTION_READ_COMMITTED";
-    txniso[java.getStaticFieldValue("java.sql.Connection", "TRANSACTION_READ_UNCOMMITTED")] = "TRANSACTION_READ_UNCOMMITTED";
-    txniso[java.getStaticFieldValue("java.sql.Connection", "TRANSACTION_REPEATABLE_READ")] = "TRANSACTION_REPEATABLE_READ";
-    txniso[java.getStaticFieldValue("java.sql.Connection", "TRANSACTION_SERIALIZABLE")] = "TRANSACTION_SERIALIZABLE";
+    txniso[
+      java.getStaticFieldValue('java.sql.Connection', 'TRANSACTION_NONE')
+    ] = 'TRANSACTION_NONE';
+    txniso[
+      java.getStaticFieldValue(
+        'java.sql.Connection',
+        'TRANSACTION_READ_COMMITTED',
+      )
+    ] = 'TRANSACTION_READ_COMMITTED';
+    txniso[
+      java.getStaticFieldValue(
+        'java.sql.Connection',
+        'TRANSACTION_READ_UNCOMMITTED',
+      )
+    ] = 'TRANSACTION_READ_UNCOMMITTED';
+    txniso[
+      java.getStaticFieldValue(
+        'java.sql.Connection',
+        'TRANSACTION_REPEATABLE_READ',
+      )
+    ] = 'TRANSACTION_REPEATABLE_READ';
+    txniso[
+      java.getStaticFieldValue(
+        'java.sql.Connection',
+        'TRANSACTION_SERIALIZABLE',
+      )
+    ] = 'TRANSACTION_SERIALIZABLE';
 
     return txniso;
   })();
 }
 
-Connection.prototype.abort = function(executor, callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
+Connection.prototype.abort = function (executor, callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.clearWarnings = function(callback) {
-  this._conn.clearWarnings(function(err) {
+Connection.prototype.clearWarnings = function (callback) {
+  this._conn.clearWarnings(function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -42,14 +64,14 @@ Connection.prototype.clearWarnings = function(callback) {
   });
 };
 
-Connection.prototype.close = function(callback) {
+Connection.prototype.close = function (callback) {
   var self = this;
 
   if (self._conn === null) {
     return callback(null);
   }
 
-  self._conn.close(function(err) {
+  self._conn.close(function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -59,8 +81,8 @@ Connection.prototype.close = function(callback) {
   });
 };
 
-Connection.prototype.commit = function(callback) {
-  this._conn.commit(function(err) {
+Connection.prototype.commit = function (callback) {
+  this._conn.commit(function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -69,27 +91,27 @@ Connection.prototype.commit = function(callback) {
   });
 };
 
-Connection.prototype.createArrayOf = function(typename, objarr, callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
+Connection.prototype.createArrayOf = function (typename, objarr, callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.createBlob = function(callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
+Connection.prototype.createBlob = function (callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.createClob = function(callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
+Connection.prototype.createClob = function (callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.createNClob = function(callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
+Connection.prototype.createNClob = function (callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.createSQLXML = function(callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
+Connection.prototype.createSQLXML = function (callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.createStatement = function(arg1, arg2, arg3, callback) {
+Connection.prototype.createStatement = function (arg1, arg2, arg3, callback) {
   // Get arguments as an array
   var args = Array.prototype.slice.call(arguments);
 
@@ -98,8 +120,8 @@ Connection.prototype.createStatement = function(arg1, arg2, arg3, callback) {
 
   // Check arguments for validity, and return error if invalid
   var invalidArgs = false;
-  _.forEach(args, function(arg) {
-    if (! _.isNumber(arg)) {
+  _.forEach(args, function (arg) {
+    if (!_.isNumber(arg)) {
       invalidArgs = true;
       // Lodash break
       return false;
@@ -107,11 +129,11 @@ Connection.prototype.createStatement = function(arg1, arg2, arg3, callback) {
   });
 
   if (invalidArgs) {
-    return callback(new Error("INVALID ARGUMENTS"));
+    return callback(new Error('INVALID ARGUMENTS'));
   }
 
   // Push a callback handler onto the arguments
-  args.push(function(err, statement) {
+  args.push(function (err, statement) {
     if (err) {
       return callback(err);
     } else {
@@ -120,15 +142,21 @@ Connection.prototype.createStatement = function(arg1, arg2, arg3, callback) {
   });
 
   // Forward modified arguments to _conn.createStatement
-  this._conn.createStatement.apply(this._conn, args);
+  return this._conn.createStatement.apply(this._conn, args);
+}
+;
+// Connection.prototype.createStatement = function () {
+//   // Get arguments as an array
+//   console.log()
+//   return new Statement(this._conn.createStatement.apply(this._conn));
+// };
+
+Connection.prototype.createStruct = function (typename, attrarr, callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.createStruct = function(typename, attrarr, callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
-};
-
-Connection.prototype.getAutoCommit = function(callback) {
-  this._conn.getAutoCommit(function(err, result) {
+Connection.prototype.getAutoCommit = function (callback) {
+  this._conn.getAutoCommit(function (err, result) {
     if (err) {
       return callback(err);
     } else {
@@ -137,8 +165,8 @@ Connection.prototype.getAutoCommit = function(callback) {
   });
 };
 
-Connection.prototype.getCatalog = function(callback) {
-  this._conn.getCatalog(function(err, catalog) {
+Connection.prototype.getCatalog = function (callback) {
+  this._conn.getCatalog(function (err, catalog) {
     if (err) {
       return callback(err);
     } else {
@@ -147,7 +175,7 @@ Connection.prototype.getCatalog = function(callback) {
   });
 };
 
-Connection.prototype.getClientInfo = function(name, callback) {
+Connection.prototype.getClientInfo = function (name, callback) {
   // Get arguments as an array
   var args = Array.prototype.slice.call(arguments);
 
@@ -155,7 +183,7 @@ Connection.prototype.getClientInfo = function(name, callback) {
   callback = args.pop();
 
   // Push a callback handler onto the arguments
-  args.push(function(err, result) {
+  args.push(function (err, result) {
     if (err) {
       return callback(err);
     } else {
@@ -167,8 +195,8 @@ Connection.prototype.getClientInfo = function(name, callback) {
   this._conn.getClientInfo.apply(this._conn, args);
 };
 
-Connection.prototype.getHoldability = function(callback) {
-  this._conn.getClientInfo(function(err, holdability) {
+Connection.prototype.getHoldability = function (callback) {
+  this._conn.getClientInfo(function (err, holdability) {
     if (err) {
       return callback(err);
     } else {
@@ -177,8 +205,8 @@ Connection.prototype.getHoldability = function(callback) {
   });
 };
 
-Connection.prototype.getMetaData = function(callback) {
-  this._conn.getMetaData(function(err, dbm) {
+Connection.prototype.getMetaData = function (callback) {
+  this._conn.getMetaData(function (err, dbm) {
     if (err) {
       return callback(err);
     } else {
@@ -187,8 +215,8 @@ Connection.prototype.getMetaData = function(callback) {
   });
 };
 
-Connection.prototype.getNetworkTimeout = function(callback) {
-  this._conn.getNetworkTimeout(function(err, ms) {
+Connection.prototype.getNetworkTimeout = function (callback) {
+  this._conn.getNetworkTimeout(function (err, ms) {
     if (err) {
       return callback(err);
     } else {
@@ -197,8 +225,8 @@ Connection.prototype.getNetworkTimeout = function(callback) {
   });
 };
 
-Connection.prototype.getSchema = function(callback) {
-  this._conn.getSchema(function(err, schema) {
+Connection.prototype.getSchema = function (callback) {
+  this._conn.getSchema(function (err, schema) {
     if (err) {
       return callback(err);
     } else {
@@ -207,10 +235,10 @@ Connection.prototype.getSchema = function(callback) {
   });
 };
 
-Connection.prototype.getTransactionIsolation = function(callback) {
+Connection.prototype.getTransactionIsolation = function (callback) {
   var self = this;
 
-  self._conn.getTransactionIsolation(function(err, txniso) {
+  self._conn.getTransactionIsolation(function (err, txniso) {
     if (err) {
       return callback(err);
     } else {
@@ -219,8 +247,8 @@ Connection.prototype.getTransactionIsolation = function(callback) {
   });
 };
 
-Connection.prototype.getTypeMap = function(callback) {
-  this._conn.getTypeMap(function(err, map) {
+Connection.prototype.getTypeMap = function (callback) {
+  this._conn.getTypeMap(function (err, map) {
     if (err) {
       return callback(err);
     } else {
@@ -229,8 +257,8 @@ Connection.prototype.getTypeMap = function(callback) {
   });
 };
 
-Connection.prototype.getWarnings = function(callback) {
-  this._conn.getWarnings(function(err, sqlwarning) {
+Connection.prototype.getWarnings = function (callback) {
+  this._conn.getWarnings(function (err, sqlwarning) {
     if (err) {
       return callback(err);
     } else {
@@ -239,19 +267,19 @@ Connection.prototype.getWarnings = function(callback) {
   });
 };
 
-Connection.prototype.isClosed = function(callback) {
-  this._conn.isClosed(function(err, closed) {
+Connection.prototype.isClosed = function (callback) {
+  this._conn.isClosed(function (err, closed) {
     if (err) return callback(err);
     callback(null, closed);
   });
 };
 
-Connection.prototype.isClosedSync = function() {
+Connection.prototype.isClosedSync = function () {
   return this._conn.isClosedSync();
 };
 
-Connection.prototype.isReadOnly = function(callback) {
-  this._conn.isReadOnly(function(err, readonly) {
+Connection.prototype.isReadOnly = function (callback) {
+  this._conn.isReadOnly(function (err, readonly) {
     if (err) {
       return callback(err);
     } else {
@@ -260,12 +288,12 @@ Connection.prototype.isReadOnly = function(callback) {
   });
 };
 
-Connection.prototype.isReadOnlySync = function() {
+Connection.prototype.isReadOnlySync = function () {
   return this._conn.isReadOnlySync();
 };
 
-Connection.prototype.isValid = function(timeout, callback) {
-  this._conn.isValid(timeout, function(err, valid) {
+Connection.prototype.isValid = function (timeout, callback) {
+  this._conn.isValid(timeout, function (err, valid) {
     if (err) {
       return callback(err);
     } else {
@@ -274,15 +302,21 @@ Connection.prototype.isValid = function(timeout, callback) {
   });
 };
 
-Connection.prototype.isValidSync = function(timeout) {
+Connection.prototype.isValidSync = function (timeout) {
   return this._conn.isValidSync(timeout);
 };
 
-Connection.prototype.nativeSQL = function(sql, callback) {
-  return callback(new Error("NOT IMPLEMENTED"));
+Connection.prototype.nativeSQL = function (sql, callback) {
+  return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.prepareCall = function(sql, rstype, rsconcurrency, rsholdability, callback) {
+Connection.prototype.prepareCall = function (
+  sql,
+  rstype,
+  rsconcurrency,
+  rsholdability,
+  callback,
+) {
   // Get arguments as an array
   var args = Array.prototype.slice.call(arguments);
 
@@ -290,12 +324,12 @@ Connection.prototype.prepareCall = function(sql, rstype, rsconcurrency, rsholdab
   callback = args.pop();
 
   // Check arguments for validity, and return error if invalid
-  if (! args[0] || (args[1] && ! args[2])) {
-    return callback(new Error("INVALID ARGUMENTS"));
+  if (!args[0] || (args[1] && !args[2])) {
+    return callback(new Error('INVALID ARGUMENTS'));
   }
 
   // Push a callback handler onto the arguments
-  args.push(function(err, callablestatement) {
+  args.push(function (err, callablestatement) {
     if (err) {
       return callback(err);
     } else {
@@ -308,7 +342,7 @@ Connection.prototype.prepareCall = function(sql, rstype, rsconcurrency, rsholdab
 };
 
 function allType(array, type) {
-  _.each(array, function(el) {
+  _.each(array, function (el) {
     if (typeof el !== type) {
       return false;
     }
@@ -332,7 +366,13 @@ function allType(array, type) {
  * @param {number} [arg3] - resultSetHoldability
  * @param {prepareStatementCallback} callback - The callback that handles the prepare statement response
  */
-Connection.prototype.prepareStatement = function(sql, arg1, arg2, arg3, callback) {
+Connection.prototype.prepareStatement = function (
+  sql,
+  arg1,
+  arg2,
+  arg3,
+  callback,
+) {
   // Get arguments as an array
   var args = Array.prototype.slice.call(arguments);
 
@@ -343,7 +383,7 @@ Connection.prototype.prepareStatement = function(sql, arg1, arg2, arg3, callback
   var errMsg = 'INVALID ARGUMENTS';
 
   // The first arg (sql) must be present
-  if (! args[0]) {
+  if (!args[0]) {
     return callback(new Error(errMsg));
   }
 
@@ -356,11 +396,16 @@ Connection.prototype.prepareStatement = function(sql, arg1, arg2, arg3, callback
   // processing arg1, arg2, and arg3; and not sql (or callback, which
   // was already removed from the args array).
   var invalidArgs = false;
-  _.forEach(_.tail(args), function(arg, idx) {
+  _.forEach(_.tail(args), function (arg, idx) {
     // Check for the special case where arg1 can be an array of strings or numbers
     // if arg2 and arg3 are not given
-    if (idx === 0 && _.isArray(arg) && _.isUndefined(args[2]) && _.isUndefined(args[3])) {
-      if (! (allType(arg, 'string') || allType(arg, 'number'))) {
+    if (
+      idx === 0 &&
+      _.isArray(arg) &&
+      _.isUndefined(args[2]) &&
+      _.isUndefined(args[3])
+    ) {
+      if (!(allType(arg, 'string') || allType(arg, 'number'))) {
         invalidArgs = true;
 
         // Lodash break
@@ -372,7 +417,7 @@ Connection.prototype.prepareStatement = function(sql, arg1, arg2, arg3, callback
     }
 
     // Other than the special case above, these args must be numbers
-    if (! _.isNumber(arg)) {
+    if (!_.isNumber(arg)) {
       invalidArgs = true;
 
       // Lodash break
@@ -385,7 +430,7 @@ Connection.prototype.prepareStatement = function(sql, arg1, arg2, arg3, callback
   }
 
   // Push a callback handler onto the arguments
-  args.push(function(err, ps) {
+  args.push(function (err, ps) {
     if (err) {
       return callback(err);
     } else {
@@ -397,8 +442,8 @@ Connection.prototype.prepareStatement = function(sql, arg1, arg2, arg3, callback
   this._conn.prepareStatement.apply(this._conn, args);
 };
 
-Connection.prototype.releaseSavepoint = function(savepoint, callback) {
-  this._conn.releaseSavepoint(savepoint, function(err) {
+Connection.prototype.releaseSavepoint = function (savepoint, callback) {
+  this._conn.releaseSavepoint(savepoint, function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -407,7 +452,7 @@ Connection.prototype.releaseSavepoint = function(savepoint, callback) {
   });
 };
 
-Connection.prototype.rollback = function(savepoint, callback) {
+Connection.prototype.rollback = function (savepoint, callback) {
   // Get arguments as an array
   var args = Array.prototype.slice.call(arguments);
 
@@ -420,7 +465,7 @@ Connection.prototype.rollback = function(savepoint, callback) {
   // }
 
   // Push a callback handler onto the arguments
-  args.push(function(err) {
+  args.push(function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -432,8 +477,8 @@ Connection.prototype.rollback = function(savepoint, callback) {
   this._conn.rollback.apply(this._conn, args);
 };
 
-Connection.prototype.setAutoCommit = function(autocommit, callback) {
-  this._conn.setAutoCommit(autocommit, function(err) {
+Connection.prototype.setAutoCommit = function (autocommit, callback) {
+  this._conn.setAutoCommit(autocommit, function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -442,8 +487,8 @@ Connection.prototype.setAutoCommit = function(autocommit, callback) {
   });
 };
 
-Connection.prototype.setCatalog = function(catalog, callback) {
-  this._conn.setCatalog(catalog, function(err) {
+Connection.prototype.setCatalog = function (catalog, callback) {
+  this._conn.setCatalog(catalog, function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -452,7 +497,7 @@ Connection.prototype.setCatalog = function(catalog, callback) {
   });
 };
 
-Connection.prototype.setClientInfo = function(props, name, value, callback) {
+Connection.prototype.setClientInfo = function (props, name, value, callback) {
   // Get arguments as an array
   var args = Array.prototype.slice.call(arguments);
 
@@ -467,11 +512,11 @@ Connection.prototype.setClientInfo = function(props, name, value, callback) {
     // Remove first argument (props) from args array
     args.shift();
   } else {
-    return callback(new Error("INVALID ARGUMENTS"));
+    return callback(new Error('INVALID ARGUMENTS'));
   }
 
   // Push a callback handler onto the arguments
-  args.push(function(err) {
+  args.push(function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -483,8 +528,8 @@ Connection.prototype.setClientInfo = function(props, name, value, callback) {
   this._conn.setClientInfo.apply(this._conn, args);
 };
 
-Connection.prototype.setHoldability = function(holdability, callback) {
-  this._conn.setHoldability(holdability, function(err) {
+Connection.prototype.setHoldability = function (holdability, callback) {
+  this._conn.setHoldability(holdability, function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -493,12 +538,12 @@ Connection.prototype.setHoldability = function(holdability, callback) {
   });
 };
 
-Connection.prototype.setNetworkTimeout = function(executor, ms, callback) {
+Connection.prototype.setNetworkTimeout = function (executor, ms, callback) {
   return callback(new Error('NOT IMPLEMENTED'));
 };
 
-Connection.prototype.setReadOnly = function(readonly, callback) {
-  this._conn.setReadOnly(readonly, function(err) {
+Connection.prototype.setReadOnly = function (readonly, callback) {
+  this._conn.setReadOnly(readonly, function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -507,7 +552,7 @@ Connection.prototype.setReadOnly = function(readonly, callback) {
   });
 };
 
-Connection.prototype.setSavepoint = function(name, callback) {
+Connection.prototype.setSavepoint = function (name, callback) {
   // Get arguments as an array
   var args = Array.prototype.slice.call(arguments);
 
@@ -515,12 +560,12 @@ Connection.prototype.setSavepoint = function(name, callback) {
   callback = args.pop();
 
   // Check arguments for validity, and return error if invalid
-  if (! (_.isUndefined(args[0]) || _.isString(args[0]))) {
-    return callback(new Error("INVALID ARGUMENTS"));
+  if (!(_.isUndefined(args[0]) || _.isString(args[0]))) {
+    return callback(new Error('INVALID ARGUMENTS'));
   }
 
   // Push a callback handler onto the arguments
-  args.push(function(err, savepoint) {
+  args.push(function (err, savepoint) {
     if (err) {
       return callback(err);
     } else {
@@ -532,8 +577,8 @@ Connection.prototype.setSavepoint = function(name, callback) {
   this._conn.setSavepoint.apply(this._conn, args);
 };
 
-Connection.prototype.setSchema = function(schema, callback) {
-  this._conn.setSchema(schema, function(err) {
+Connection.prototype.setSchema = function (schema, callback) {
+  this._conn.setSchema(schema, function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -542,8 +587,8 @@ Connection.prototype.setSchema = function(schema, callback) {
   });
 };
 
-Connection.prototype.setTransactionIsolation = function(txniso, callback) {
-  this._conn.setTransactionIsolation(txniso, function(err) {
+Connection.prototype.setTransactionIsolation = function (txniso, callback) {
+  this._conn.setTransactionIsolation(txniso, function (err) {
     if (err) {
       return callback(err);
     } else {
@@ -552,7 +597,7 @@ Connection.prototype.setTransactionIsolation = function(txniso, callback) {
   });
 };
 
-Connection.prototype.setTypeMap = function(map, callback) {
+Connection.prototype.setTypeMap = function (map, callback) {
   return callback(new Error('NOT IMPLEMENTED'));
 };
 
