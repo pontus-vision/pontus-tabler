@@ -579,8 +579,9 @@ export const authenticateToken = async (
 
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  if (!token) throw new BadRequestError('No token was detected in the input.');
-
+  if (!token) {
+    throw { code: 400, message: 'No token was detected in the input.' };
+  }
   const claims = getJwtClaims(token);
 
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
