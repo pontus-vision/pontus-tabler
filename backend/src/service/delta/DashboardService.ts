@@ -213,17 +213,17 @@ export const createDashboardAuthGroup = async (
   return {
     authGroups: res.map((el) => {
       return {
-        id: el['table_from__id'],
-        name: el['table_from__name'],
+        id: el['from']['table_from__id'] ,
+        name: el['from']['table_from__name'],
 
-        create: el['table_to__create'],
-        read: el['table_to__read'],
-        update: el['table_to__update'],
-        delete: el['table_to__delete'],
+        create: el['to']['table_to__create']==='true',
+        read: el['to']['table_to__read']==='true',
+        update: el['to']['table_to__update']==='true',
+        delete: el['to']['table_to__delete']==='true',
       };
     }) as DashboardAuthGroups[],
     id: data.id,
-    name: res[0]['table_to__name'],
+    name: res[0]['to']['table_to__name'],
   };
 };
 
