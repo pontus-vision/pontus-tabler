@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import pontus from './index';
 import cors from 'cors';
 import { register } from './generated/register';
@@ -10,6 +10,17 @@ import {
 } from '@azure/functions';
 import * as http from 'http';
 import https from 'https';
+import {
+  AUTH_GROUPS,
+  AUTH_GROUPS_USER_TABLE,
+  checkPermissions,
+} from './service/delta/AuthGroupService';
+import { NotFoundError, UnauthorizedError } from './generated/api';
+import { DASHBOARDS, authenticateToken } from './service/delta';
+import { authUserGroupsRead } from './service/AuthUserService';
+import { GROUPS_USERS } from './service/AuthGroupService';
+import { GROUPS_DASHBOARDS } from './service/EdgeService';
+import { replace } from 'lodash';
 
 const agent = new https.Agent({
   rejectUnauthorized: false, // Disables certificate validation
@@ -21,9 +32,61 @@ const port = 8080;
 
 app.use(cors());
 
+const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const replaceSlashes = (str: string) => {
+    return str.replace(/\//g, '');
+  };
+  const path = replaceSlashes(req.path);
+
+  if (
+    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
+    path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
+    path === replaceSlashes('/PontusTest/1.0.0//login') ||
+    path === replaceSlashes('/PontusTest/1.0.0/logout')
+  ) {
+    return next();
+  }
+
+  try {
+    const authorization = await authenticateToken(req, res);
+    const userId = authorization['userId'];
+
+    const arr = req.path.split('/');
+
+    const crudAction = arr[arr.length - 1];
+
+    const entity = arr[arr.length - 2];
+
+    const tableName = entity === 'dashboard' ? GROUPS_DASHBOARDS : GROUPS_USERS;
+
+    let targetId = '';
+
+    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
+      return next()
+    }
+
+    if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
+      targetId = req.body?.['id'];
+    }
+
+    const permissions = await checkPermissions(userId, targetId, tableName);
+    if (permissions[crudAction]) {
+      next();
+    } else {
+      throw { code: 401, message: 'You do not have this permission' };
+    }
+  } catch (error) {
+    res.status(error?.code).json(error?.message);
+  }
+};
 
 app.use(express.json());
 
+app.use(authMiddleware);
 register(app, { pontus });
 
 // app.listen(port, () => {
