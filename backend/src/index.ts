@@ -88,7 +88,7 @@ import { authenticateToken, checkAdmin } from './service/AuthUserService';
 
 export default new PontusService({
   registerUserPost: async (req, res) => {
-    await setup();
+    // await setup();
 
     const response = await registerUser(req.body);
     res.send(response);
@@ -98,7 +98,7 @@ export default new PontusService({
     res.send(response);
   },
   loginPost: async (req, res) => {
-    await setup();
+    // await setup();
     const response = await loginUser(req.body);
 
     res.send(response);
@@ -110,272 +110,177 @@ export default new PontusService({
     res.send(response);
   },
   tokenPost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await refreshToken(req.body);
 
     res.send(response);
   },
   authGroupCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    await checkAdmin(auth.userId);
     const response = await createAuthGroup(req.body);
 
     res.send(response);
   },
   authGroupDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    await checkAdmin(auth.userId);
     const response = await deleteAuthGroup(req.body);
 
     res.send(response);
   },
   authGroupReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    await checkAdmin(auth.userId);
     const response = await readAuthGroup(req.body);
 
     res.send(response);
   },
   authGroupsReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     const response = await readAuthGroups(req.body);
 
     res.send(response);
   },
   authGroupUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    await checkAdmin(auth.userId);
     const response = await updateAuthGroup(req.body);
 
     res.send(response);
   },
   authUserCreatePost: async (req, res) => {
-    await setup();
+    // await setup();
+
     const response = await authUserCreate(req.body);
 
     res.send(response);
   },
   authUserDeletePost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await authUserDelete(req.body);
 
     res.send(response);
   },
   authUserReadPost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await authUserRead(req.body);
-
-    res.send(response);
+    const auth = res.send(response);
   },
   authUsersReadPost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await authUsersRead(req.body);
 
     res.send(response);
   },
   authUserUpdatePost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await authUserUpdate(req.body);
 
     res.send(response);
   },
   authUserGroupsCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await authUserGroupsCreate(req.body);
 
     res.send(response);
   },
   authUserGroupsDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await authUserGroupsDelete(req.body);
 
     res.send(response);
   },
   authUserGroupsReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await authUserGroupsRead(req.body);
 
     res.send(response);
   },
   authUserGroupsUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await authUserGroupsUpdate(req.body);
 
     res.send(response);
   },
   dashboardGroupAuthCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await createDashboardAuthGroup(req.body);
 
     res.send(response);
   },
   dashboardGroupAuthDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await deleteDashboardGroupAuth(req.body);
 
     res.send(response);
   },
   dashboardGroupAuthReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await readDashboardGroupAuth(req.body);
 
     res.send(response);
   },
   dashboardGroupAuthUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await updateDashboardGroupAuth(req.body);
 
     res.send(response);
   },
   authGroupDashboardCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await createAuthGroupDashboards(req.body);
 
     res.send(response);
   },
   authGroupDashboardDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await deleteAuthGroupDashboards(req.body);
 
     res.send(response);
   },
   authGroupDashboardsReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await readAuthGroupDashboards(req.body);
 
     res.send(response);
   },
   authGroupDashboardUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await updateAuthGroupDashboards(req.body);
 
     res.send(response);
   },
   authGroupUsersCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await createAuthUserGroup(req.body);
 
     res.send(response);
   },
   authGroupUsersDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await deleteAuthGroupUsers(req.body);
 
     res.send(response);
   },
   authGroupUsersReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await readAuthGroupUsers(req.body);
 
     res.send(response);
   },
   authGroupUsersUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    await checkAdmin(auth.userId);
     const response = await updateAuthGroupUsers(req.body);
 
     res.send(response);
   },
   dashboardCreatePost: async (req, res) => {
-    if (Object.keys(req.body).length === 0) {
-      throw new BadRequestError(
-        'Please, send dashboard properties in the body.',
-      );
+    if(Object.keys(req.body).length === 0) {
+      throw new BadRequestError('Body is empty.')
     }
-
-    const auth = await authenticateToken(req, res);
 
     const response = await createDashboard(req.body);
 
     res.send(response);
   },
   dashboardDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    const res2 = await checkPermissions(auth.userId, req.body.id, DASHBOARDS);
-    if (!res2.delete) {
-      throw new UnauthorizedError(
-        'User group does not have the permission to delete this dashboard',
-      );
-    }
+ 
     const response = await deleteDashboard(req.body);
 
     res.send(response);
   },
   dashboardReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    const res2 = await checkPermissions(auth.userId, req.body.id, DASHBOARDS);
-    if (!res2.read) {
-      throw new UnauthorizedError(
-        'User group does not have the permission to delete this dashboard',
-      );
-    }
+   
     const response = await readDashboardById(req.body.id);
 
     res.send(response);
   },
   dashboardsReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     const response = await readDashboards(req.body);
 
     res.send(response);
   },
   dashboardUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
-    const res2 = await checkPermissions(auth.userId, req.body.id, DASHBOARDS);
-    if (!res2.update) {
-      throw new UnauthorizedError(
-        'User group does not have the permission to update this dashboard',
-      );
-    }
     const response = await updateDashboard(req.body);
     res.send(response);
   },
   menuCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    if (Object.keys(req.body).length === 0) {
-      throw new BadRequestError('Please, insert request body');
-    }
     const response = await createMenuItem(req.body);
 
     res.send(response);
   },
   menuDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
     try {
       const response = await deleteMenuItem(req.body);
       res.send(response);
@@ -386,7 +291,6 @@ export default new PontusService({
     }
   },
   menuReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     try {
       if (req.body === undefined) {
         throw new BadRequestError('Please, insert request body');
@@ -402,7 +306,6 @@ export default new PontusService({
     }
   },
   menuUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     try {
       const response = await updateMenuItem(req.body);
 
@@ -422,19 +325,16 @@ export default new PontusService({
     }
   },
   authGroupsTablesCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     const response = await createAuthGroupTables(req.body);
 
     res.send(response);
   },
   authGroupsTablesDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     const response = await deleteAuthGroupTables(req.body);
 
     res.send(response);
   },
   authGroupsTablesReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     const response = await readAuthGroupTables(req.body);
 
     res.send(response);
@@ -442,7 +342,6 @@ export default new PontusService({
   authGroupTableCreatePost: async (req, res) => {},
   authGroupTableDeletePost(req, res) {},
   authGroupTablesReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
     const response = await readAuthGroupTable(req.body);
 
     res.send(response);
@@ -453,8 +352,7 @@ export default new PontusService({
     res.send(response);
   },
   tableCreatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    const perms = await checkTableMetadataPermissions(auth.userId);
+    const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.create) {
       throw new UnauthorizedError(
@@ -465,8 +363,7 @@ export default new PontusService({
     res.send(response);
   },
   tableReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    const perms = await checkTableMetadataPermissions(auth.userId);
+    const perms = await checkTableMetadataPermissions(req['userId']);
 
     if (!perms.read) {
       throw new UnauthorizedError(
@@ -478,8 +375,7 @@ export default new PontusService({
     res.send(response);
   },
   tableUpdatePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    const perms = await checkTableMetadataPermissions(auth.userId);
+    const perms = await checkTableMetadataPermissions(req['userId']);
 
     if (!perms.update) {
       throw new UnauthorizedError(
@@ -492,8 +388,7 @@ export default new PontusService({
     res.send(response);
   },
   tableDeletePost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-    const perms = await checkTableMetadataPermissions(auth.userId);
+    const perms = await checkTableMetadataPermissions(req['userId']);
 
     if (!perms.delete) {
       throw new UnauthorizedError(
@@ -511,8 +406,6 @@ export default new PontusService({
     }
   },
   tablesReadPost: async (req, res) => {
-    const auth = await authenticateToken(req, res);
-
     try {
       const response = await readTables(req.body);
 
@@ -524,7 +417,6 @@ export default new PontusService({
     }
   },
   tableDataCreatePost: async (req, res) => {
-    await authenticateToken(req, res);
     try {
       const response = await createTableData(req.body);
 
@@ -538,7 +430,6 @@ export default new PontusService({
     }
   },
   tableDataDeletePost: async (req, res) => {
-    await authenticateToken(req, res);
     try {
       const response = await deleteTableData(req.body);
 
@@ -550,7 +441,6 @@ export default new PontusService({
     }
   },
   tableDataReadPost: async (req, res) => {
-    await authenticateToken(req, res);
     try {
       const response = await readTableData(req.body);
 
@@ -573,7 +463,6 @@ export default new PontusService({
     }
   },
   tableEdgeCreatePost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await createTableEdge(req.body);
 
     res.send(response);
@@ -584,7 +473,6 @@ export default new PontusService({
     res.send(response);
   },
   tableEdgeReadPost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await readTableEdgesByTableId(req.body);
 
     res.send(response);
@@ -594,7 +482,6 @@ export default new PontusService({
     // res.send(response);
   },
   tableDataEdgeCreatePost: async (req, res) => {
-    await authenticateToken(req, res);
     try {
       const response = await createTableDataEdge(req.body);
 
@@ -602,7 +489,6 @@ export default new PontusService({
     } catch (error) {}
   },
   tableDataEdgeReadPost: async (req, res) => {
-    await authenticateToken(req, res);
     const response = await readTableDataEdge(req.body);
 
     res.send(response);
