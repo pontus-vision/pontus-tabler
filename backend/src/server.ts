@@ -31,6 +31,10 @@ export const app = express();
 const port = 8080;
 
 app.use(cors());
+export function jdbcMiddleware(req, res, next) {
+  next();
+}
+app.use(jdbcMiddleware);
 
 const authMiddleware = async (
   req: Request,
