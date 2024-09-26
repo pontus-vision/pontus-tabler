@@ -20,7 +20,6 @@ import { DASHBOARDS, authenticateToken } from './service/delta';
 import { authUserGroupsRead } from './service/AuthUserService';
 import { GROUPS_USERS } from './service/AuthGroupService';
 import { GROUPS_DASHBOARDS } from './service/EdgeService';
-import { replace } from 'lodash';
 
 const agent = new https.Agent({
   rejectUnauthorized: false, // Disables certificate validation
@@ -70,7 +69,7 @@ const authMiddleware = async (
     let targetId = '';
 
     if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
-      return next()
+      return next();
     }
 
     if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
