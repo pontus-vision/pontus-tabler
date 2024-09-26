@@ -192,7 +192,7 @@ describe('dashboardCreatePOST', () => {
       passwordConfirmation: 'foobar',
     };
 
-    const authUserCreateRes = (await post(
+    const authUserCreateRes = (await postAdmin(
       '/auth/user/create',
       createUserBody,
     )) as AxiosResponse<AuthUserCreateRes>;

@@ -1,5 +1,5 @@
-import { fetchContainer, fetchData,  } from '../../cosmos-utils';
-import {filterToQuery} from '../../db-utils'
+import { fetchContainer, fetchData } from '../../cosmos-utils';
+import { filterToQuery } from '../../db-utils';
 import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api';
 import {
   AuthGroupCreateReq,
@@ -748,7 +748,7 @@ export const readAuthGroupUsers = async (
       direction: 'to',
       tableName: AUTH_USERS,
     },
-    jointTableName:GROUPS_USERS,
+    jointTableName: GROUPS_USERS,
     rowId: data.id,
     tableName: AUTH_GROUPS,
     filters: filtersAdapted,
@@ -1018,7 +1018,7 @@ export const updateAuthGroupTable = async (
 export const checkPermissions = async (
   userId: string,
   targetId: string,
-  containerId: 'auth_users' | 'dashboards' | 'tables',
+  containerId: string,
 ): Promise<CrudDocumentRef> => {
   const res = (await readEdge(
     {
@@ -1033,7 +1033,7 @@ export const checkPermissions = async (
   )) as AuthGroupRef[];
 
   if (res.length === 0) {
-    throw new NotFoundError('There is no group associated with user');
+    throw {code: 404, message:'There is no group associated with user'};
   }
 
   let create = false;
@@ -1053,14 +1053,7 @@ export const checkPermissions = async (
     const res = (await readEdge(
       {
         direction: 'to',
-        edgeTable:
-          containerId === DASHBOARDS
-            ? GROUPS_DASHBOARDS
-            : containerId === TABLES
-            ? GROUPS_TABLES
-            : containerId === AUTH_USERS
-            ? GROUPS_TABLES
-            : '',
+        edgeTable: containerId,
         tableToName: AUTH_GROUPS,
         tableFromName: containerId,
         filters: {
@@ -1077,7 +1070,7 @@ export const checkPermissions = async (
       conn,
     )) as any[];
 
-    if (containerId === DASHBOARDS) {
+    // if (containerId === DASHBOARDS ) {
       for (const dashboard of res) {
         if (dashboard?.['table_from__create']) {
           create = dashboard?.['table_from__create'] === 'true';
@@ -1092,7 +1085,7 @@ export const checkPermissions = async (
           del = dashboard?.['table_from__delete'] === 'true';
         }
       }
-    }
+    // }
   }
   return {
     create,
