@@ -578,10 +578,10 @@ export const authenticateToken = async (
   await setup();
 
   const authHeader = req.headers['authorization'];
-  if (authHeader.length !== 2) {
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token.length !== 2) {
     throw { code: 400, message: 'wrong format of token' };
   }
-  const token = authHeader && authHeader.split(' ')[1];
   if (!token) {
     throw { code: 400, message: 'No token was detected in the input.' };
   }
