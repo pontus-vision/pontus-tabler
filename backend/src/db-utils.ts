@@ -1,6 +1,59 @@
 import { DELTA_DB } from './service/AuthGroupService';
 import { ReadPaginationFilter } from './typescript/api';
 
+import { Pool } from 'pontus-node-jdbc';
+
+const pool = new Pool({
+  url: 'jdbc:your_database_url', // Replace with your JDBC URL
+  properties: {
+    user: 'your_username', // Database username
+    password: 'your_password', // Database password
+  },
+  minpoolsize: 2,
+  maxpoolsize: 10,
+  keepalive: {
+    interval: 60000,
+    query: 'SELECT 1',
+    enabled: true,
+  },
+  logging: {
+    level: 'info',
+  },
+});
+
+// Initialize pool
+async function initializePool() {
+  try {
+    await pool.initialize();
+    console.log('Pool initialized successfully.');
+  } catch (error) {
+    console.error('Error initializing the pool:', error);
+  }
+}
+
+(async () => {
+  await initializePool();
+})();
+
+export async function runQuery(query: string): Promise<Record<string,any>[]> {
+  try {
+      const connection = await pool.reserve();
+      const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
+
+      const resultSet = await preparedStatement.executeQuery();
+      const results = await resultSet.toArray(); // Assuming you have a method to convert ResultSet to an array
+
+      console.log('Query Results:', results);
+      
+      // Remember to release the connection after you are done
+      await pool.release(connection);
+
+      return results
+  } catch (error) {
+      console.error('Error executing query:', error);
+  }
+}
+
 export const filterToQuery = (
   body: ReadPaginationFilter,
   alias = 'c',

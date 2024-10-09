@@ -1,5 +1,5 @@
 import { fetchContainer, fetchData } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { filterToQuery, runQuery } from '../../db-utils';
 import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api';
 import {
   AuthGroupCreateReq,
@@ -219,7 +219,7 @@ export const createSql = async (
 
   const keys = entries.keysStr;
   const values = entries.valuesStr;
-  // const resss = await db.executeQuery(
+  // const resss = await runQuery(
   //   `DROP TABLE  ${table} `,
   //   conn,
   // );
@@ -228,7 +228,7 @@ export const createSql = async (
     data?.id ? '' : 'id STRING, '
   } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
 
-  const res = await db.executeQuery(createQuery, conn);
+  const res = await runQuery(createQuery);
 
   const insertFields = Array.isArray(data)
     ? Object.keys(data[0]).join(', ')
@@ -258,7 +258,7 @@ export const createSql = async (
       : `('${uuid}',` + values + ')'
   }`;
 
-  const res2 = await db.executeQuery(insert, conn);
+  const res2 = await runQuery(insert);
 
   const selectQuery = `SELECT * FROM ${table} WHERE ${
     data?.id
@@ -268,7 +268,7 @@ export const createSql = async (
       : `id = '${uuid}'`
   }`;
 
-  const res3 = await db.executeQuery(selectQuery, conn);
+  const res3 = await runQuery(selectQuery);
 
   return res3;
 
@@ -311,16 +311,16 @@ export const updateSql = async (
     ', ',
   )} ${whereClause}`;
 
-  const res2 = await db.executeQuery(insert, conn);
+  const res2 = await runQuery(insert);
   if (+res2[0]['num_affected_rows'] === 0) {
     throw new NotFoundError(
       `did not find any record at table '${table}' (${whereClause})`,
     );
   }
 
-  const res3 = await db.executeQuery(
+  const res3 = await runQuery(
     `SELECT * FROM ${table} ${whereClause}`,
-    conn,
+    
   );
   if (res3.length === 0) {
     throw new NotFoundError(
@@ -338,28 +338,28 @@ export const createAuthGroup = async (data: AuthGroupCreateReq) => {
     id = data.id;
   }
 
-  const res = await db.executeQuery(
+  const res = await runQuery(
     `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-    conn,
+    
   );
-  const res4 = await db.executeQuery(
+  const res4 = await runQuery(
     `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
-    conn,
+    
   );
   if (+res4[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
   }
 
-  const res2 = await db.executeQuery(
+  const res2 = await runQuery(
     `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
-    conn,
+    
   );
 
-  const res3 = await db.executeQuery(
+  const res3 = await runQuery(
     `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
       typeof id === 'string' ? `'${id}'` : id
     }`,
-    conn,
+    
   );
 
   return {
@@ -408,11 +408,11 @@ export const readAuthGroup = async (
 ): Promise<AuthGroupReadRes> => {
   const id = data.id;
 
-  const res = (await db.executeQuery(
+  const res = (await runQuery(
     `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
       typeof id === 'string' ? `'${id}'` : id
     }`,
-    conn,
+    
   )) as AuthGroupRef[];
 
   if (res.length === 0) {
@@ -423,18 +423,18 @@ export const readAuthGroup = async (
 };
 
 export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
-  const deleteQuery = await db.executeQuery(
+  const deleteQuery = await runQuery(
     `DELETE FROM ${AUTH_GROUPS} WHERE id = '${data.id}'`,
-    conn,
+    
   );
   const affectedRows = +deleteQuery[0]['num_affected_rows'];
-  const deleteGroupUsersQuery = await db.executeQuery(
+  const deleteGroupUsersQuery = await runQuery(
     `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
-    conn,
+    
   );
-  const deleteGroupDashQuery = await db.executeQuery(
+  const deleteGroupDashQuery = await runQuery(
     `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
-    conn,
+    
   );
 
   if (affectedRows === 1) {
@@ -458,18 +458,17 @@ export const readAuthGroups = async (
     }
   }
 
-  const selectGroups = (await db.executeQuery(
+  const selectGroups = (await runQuery(
     `SELECT * FROM auth_groups
       ${whereClause};`,
-    conn,
   )) as AuthGroupRef[];
 
   const whereClause2 = filterToQuery({ filters: data.filters }, 'c');
 
-  const countGroups = await db.executeQuery(
+  const countGroups = await runQuery(
     `SELECT COUNT(*) FROM auth_groups
       ${whereClause2};`,
-    conn,
+    
   );
   const groupCount = +countGroups[0]['count(1)'];
   if (groupCount === 0) {
@@ -626,13 +625,13 @@ export const deleteAuthGroupDashboards = async (
   if (data.dashboardIds.length === 0) {
     throw new BadRequestError('No dashboardId mentioned.');
   }
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${
       data.id
     }' AND ${data.dashboardIds
       .map((dashboardId) => `table_to__id = '${dashboardId}'`)
       .join(' OR ')}`,
-    conn,
+    
   );
 
   if (+sql[0]['num_affected_rows'] === 0) {
@@ -799,11 +798,11 @@ export const updateAuthGroupUsers = async (
 export const deleteAuthGroupUsers = async (
   data: AuthGroupUsersDeleteReq,
 ): Promise<AuthGroupUsersDeleteRes> => {
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `DELETE FROM ${GROUPS_USERS} WHERE ${data.authUsers
       .map((user) => `table_to__id = '${user.id}'`)
       .join(' AND ')} AND table_from__id = '${data.id}'`,
-    conn,
+    
   );
 
   return '';
@@ -843,9 +842,8 @@ export const createAuthGroupTables = async (
 export const deleteAuthGroupTables = async (
   data: AuthGroupTablesDeleteReq,
 ): Promise<AuthGroupTablesDeleteRes> => {
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `DELETE FROM ${GROUPS_TABLES} WHERE table_from__id = '${data.id}'`,
-    conn,
   );
 
   if (+sql[0]['num_affected_rows'] === 0) {
