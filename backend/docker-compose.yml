@@ -16,6 +16,7 @@ services:
       ADMIN_PASSWORD: admin
       USER_PASSWORD: user
       DB_SOURCE: deltadb
+      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
     volumes:
       - .:/usr/src/app
     depends_on:
@@ -29,6 +30,10 @@ services:
         cd pontus-node-jdbc
         npm install
         cd ..
+        cd delta-table/node
+        export CLASSPATH="$(ls $(pwd)/jars/*|xargs|sed -e 's/ /,/g' )"
+        cd -
+        # sleep 1000000
         npm install
         npm run jest
         
@@ -45,6 +50,8 @@ services:
     networks:
       - app-network
     restart: "no"  # Ensures this runs once and exits
+    ports:
+      - "10000:10000"
         
 networks:
   app-network:
