@@ -17,6 +17,7 @@ services:
       USER_PASSWORD: user
       DB_SOURCE: deltadb
       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
+      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
     volumes:
       - .:/usr/src/app
     depends_on:
@@ -38,7 +39,7 @@ services:
         npm run jest
         
 
-  db-setup:
+  delta-db:
     build:
       context: ./delta-table/docker/
       dockerfile: Dockerfile
