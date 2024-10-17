@@ -28,9 +28,12 @@ services:
       - /usr/bin/bash
       - -c
       - |
+        # npx fern generate 
+        cd delta-table
+        npm i -g java --unsafe-perm
+        cd ..
         cd pontus-node-jdbc
         npm install
-        
         cd ..
         cd delta-table/node
         export CLASSPATH="$(ls $(pwd)/jars/*|xargs|sed -e 's/ /,/g' )"
