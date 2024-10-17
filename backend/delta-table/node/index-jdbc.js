@@ -14,7 +14,7 @@ if (!jinst_1.default.isJvmCreated()) {
     jinst_1.default.setupClasspath(exports.classPath || []); // Path to your JDBC driver JAR file
 }
 exports.config = {
-    url: 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
+    url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
     drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
     properties: {
         user: 'NBuser',
