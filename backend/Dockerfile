@@ -5,6 +5,7 @@ RUN apt update && \
 RUN apt install make g++
 RUN npm i -g java --unsafe-perm
 RUN npm install -g ts-node typescript jest 
+RUN npm install -g fern-api
 
 
 WORKDIR /usr/src/app
