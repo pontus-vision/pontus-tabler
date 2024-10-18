@@ -18,8 +18,10 @@ services:
       DB_SOURCE: deltadb
       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
       P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
+      FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
     volumes:
       - .:/usr/src/app
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - delta-db 
     networks:
@@ -29,9 +31,10 @@ services:
       - -c
       - |
         # npx fern generate 
-        cd delta-table
-        npm i -g java --unsafe-perm
-        cd ..
+        fern generate 
+        # cd delta-table
+        # npm i -g java --unsafe-perm
+        # cd ..
         cd pontus-node-jdbc
         npm install
         cd ..
