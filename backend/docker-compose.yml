@@ -43,7 +43,9 @@ services:
         cd -
         # sleep 1000000
         npm install
-        npm run jest
+        # npm run jest
+        cd pontus-node-jdbc/src
+        node index.js
         
 
   delta-db:
