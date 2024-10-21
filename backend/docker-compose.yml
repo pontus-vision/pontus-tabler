@@ -31,21 +31,25 @@ services:
       - -c
       - |
         # npx fern generate 
-        fern generate 
-        # cd delta-table
-        # npm i -g java --unsafe-perm
-        # cd ..
+        if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
+        #cd delta-table
+        #npm i -g java --unsafe-perm
+        #cd ..
         cd pontus-node-jdbc
         npm install
         cd ..
         cd delta-table/node
         export CLASSPATH="$(ls $(pwd)/jars/*|xargs|sed -e 's/ /,/g' )"
         cd -
-        # sleep 1000000
+        cd delta-table/node/node-jdbc
+        npm i
+        cd ..
         npm install
         # npm run jest
         cd pontus-node-jdbc/src
         node index.js
+        # npm run jest || true
+        # sleep 1000000
         
 
   delta-db:
