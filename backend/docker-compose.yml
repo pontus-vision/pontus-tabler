@@ -17,7 +17,7 @@ services:
       USER_PASSWORD: user
       DB_SOURCE: deltadb
       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
-      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
+      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000 
       FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
     volumes:
       - .:/usr/src/app
@@ -46,10 +46,13 @@ services:
         cd ..
         npm install
         # npm run jest
+        cd ../..
+
         cd pontus-node-jdbc/src
+        npm run build
         node index.js
         # npm run jest || true
-        # sleep 1000000
+        sleep 1000000
         
 
   delta-db:
