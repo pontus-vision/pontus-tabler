@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import jinst from './jinst';
-import ResultSetMetaData from './resultsetmetadata';
-import winston from 'winston';
+import jinst from './jinst.js';
+import ResultSetMetaData from './resultsetmetadata.js';
+import console from 'console';
 
 const java = jinst.getInstance();
 
