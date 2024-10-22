@@ -23,8 +23,7 @@
   "license": "MIT",
   "dependencies": {
     "java": "^0.14.0",
-    "lodash": "^4.17.21",
-    "winston": "^3.3.3"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/java": "^0.9.5",
