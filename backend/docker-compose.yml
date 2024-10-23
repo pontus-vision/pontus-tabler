@@ -38,9 +38,7 @@ services:
         cd pontus-node-jdbc
         npm install
         cd ..
-        cd delta-table/node
-        export CLASSPATH="$(ls $(pwd)/jars/*|xargs|sed -e 's/ /,/g' )"
-        cd -
+        export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
         cd delta-table/node/node-jdbc
         npm i
         cd ..
@@ -50,6 +48,10 @@ services:
 
         cd pontus-node-jdbc
         npm run build
+        export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
+        echo  'PRINTING CLASSPATH !!!!!!!!!!!!!!!!!!!!'
+
+        echo $CLASSPATH
         node dist/index.js
         # npm run jest || true
         sleep 1000000

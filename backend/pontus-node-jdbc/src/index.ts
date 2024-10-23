@@ -16,6 +16,7 @@ const pool = new Pool({
       user: 'admin',           // Database username
       password: 'user'        // Database password
     },
+    drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
     minpoolsize: 2,
     maxpoolsize: 10,
     keepalive: {
