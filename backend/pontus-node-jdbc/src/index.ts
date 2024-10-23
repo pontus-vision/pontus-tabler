@@ -8,6 +8,14 @@
 // export { default as SQLWarning } from './sqlwarning';
 // export { default as Statement } from './statement';
 
+export const classPath = process.env['CLASSPATH']?.split(',');
+import Jinst from './jinst.js'; // Use default import
+
+if (!Jinst.isJvmCreated()) {
+	  Jinst.addOption('-Xrs');
+	    Jinst.setupClasspath(classPath || []); // Path to your JDBC driver JAR file
+}
+
 import Pool from './pool.js'
 
 const pool = new Pool({
