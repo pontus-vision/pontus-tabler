@@ -48,9 +48,9 @@ services:
         # npm run jest
         cd ../..
 
-        cd pontus-node-jdbc/src
+        cd pontus-node-jdbc
         npm run build
-        node index.js
+        node dist/index.js
         # npm run jest || true
         sleep 1000000
         
