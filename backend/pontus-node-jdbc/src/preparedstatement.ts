@@ -58,13 +58,7 @@ class PreparedStatement extends Statement {
 
   async executeQuery(): Promise<ResultSet> {
     return new Promise((resolve, reject) => {
-      this._ps.executeQuery((err: any, resultset: any) => {
-        if (err) {
-          console.error(err);
-          return reject(err);
-        }
-        resolve(new ResultSet(resultset));
-      });
+      return resolve( new ResultSet(this._ps.executeQuerySync()));
     });
   }
 
