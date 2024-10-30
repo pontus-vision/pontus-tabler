@@ -9,6 +9,8 @@
 // export { default as Statement } from './statement';
 
 export const classPath = process.env['CLASSPATH']?.split(',');
+import Connection from './connection.js';
+import JDBC from './jdbc.js'; // Use default import
 import Jinst from './jinst.js'; // Use default import
 
 if (!Jinst.isJvmCreated()) {
@@ -18,6 +20,14 @@ if (!Jinst.isJvmCreated()) {
 
 import Pool from './pool.js'
 
+export const config= {
+  url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
+  drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
+  properties: {
+    user: 'NBuser',
+    password: '',
+  },
+};
 const pool = new Pool({
     url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
     properties: {
@@ -36,7 +46,7 @@ const pool = new Pool({
       level: 'info'
     }
   });
-  
+  const jdbc = new JDBC(config);
   // Initialize pool
   async function initializePool() {
     try {
@@ -47,7 +57,34 @@ const pool = new Pool({
     }
   }
 
+  export const createConnection = async():Promise<Connection> => {
+    return jdbc.reserve()
+  };
+
+  async function runQuery(query:string) {
+    try {
+
+        const connection = await createConnection()
+
+      
+        const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
+
+        const resultSet = await preparedStatement.executeQuery();
+        console.log({resultSet})
+        const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
+
+        console.log('Query Results:', results);
+        
+        // Remember to release the connection after you are done
+        await pool.release(connection);
+    } catch (error) {
+        console.error('Error executing query:', error);
+    }
+}
+
   (async()=>{
     await initializePool()
-
+    await runQuery(`CREATE TABLE IF NOT EXISTS foo (id STRING, name STRING  ) USING DELTA LOCATION '/data/pv/foo';`)
+    await runQuery(`INSERT INTO foo (id , name) VALUES (1, 'foo') `)
+    await runQuery('SELECT * FROM delta.`/data/pv/foo`')
   })()
