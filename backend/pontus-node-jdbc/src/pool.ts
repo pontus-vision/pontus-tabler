@@ -214,7 +214,7 @@ class Pool {
     }
   }
 
-  async reserve(): Promise<any> {
+  async reserve(): Promise<{[key: string]: any,conn: Connection}> {
     this._closeIdleConnections();
 
     let conn = null;

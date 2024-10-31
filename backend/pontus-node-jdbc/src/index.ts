@@ -58,7 +58,8 @@ const pool = new Pool({
   }
 
   export const createConnection = async():Promise<Connection> => {
-    return jdbc.reserve()
+    const reservedConn = await jdbc.reserve()
+    return reservedConn.conn
   };
 
   async function runQuery(query:string) {
