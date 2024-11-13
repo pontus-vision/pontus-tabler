@@ -60,7 +60,6 @@ import {
 } from '../../generated/api';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as db from './../../../delta-table/node/index-jdbc';
 
 import {
   Container,
@@ -94,7 +93,6 @@ import { GROUPS_TABLES, GROUPS_USERS } from '../AuthGroupService';
 export const AUTH_GROUPS = 'auth_groups';
 export const ADMIN_GROUP_NAME = 'Admin';
 export const AUTH_GROUPS_USER_TABLE = 'auth_groups_users';
-const conn: db.Connection = db.createConnection();
 
 export const generateUUIDv6 = () => {
   const uuid = uuidv4().replace(/-/g, '');
@@ -802,7 +800,6 @@ export const deleteAuthGroupUsers = async (
     `DELETE FROM ${GROUPS_USERS} WHERE ${data.authUsers
       .map((user) => `table_to__id = '${user.id}'`)
       .join(' AND ')} AND table_from__id = '${data.id}'`,
-    
   );
 
   return '';
@@ -1027,7 +1024,6 @@ export const checkPermissions = async (
       filters: {},
       rowId: userId,
     },
-    conn,
   )) as AuthGroupRef[];
 
   if (res.length === 0) {
@@ -1065,7 +1061,6 @@ export const checkPermissions = async (
         },
         rowId: group['table_from__id'],
       },
-      conn,
     )) as any[];
 
     // if (containerId === DASHBOARDS ) {

@@ -45,7 +45,7 @@ import {
   fetchData,
   fetchDatabase,
 } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { filterToQuery, runQuery } from '../../db-utils';
 import {
   Container,
   Item,
@@ -83,7 +83,6 @@ import {
   updateTableDataEdge,
 } from './EdgeService';
 import { DASHBOARDS } from './DashboardService';
-import * as db from './../../../delta-table/node/index-jdbc';
 import { filter, has } from 'lodash';
 dotenv.config();
 export const AUTH_USERS = 'auth_users';
@@ -91,7 +90,6 @@ export const ADMIN_USER_USERNAME = 'ADMIN';
 import { v6 as uuidv6 } from 'uuid';
 import { GROUPS_USERS } from '../AuthGroupService';
 
-const conn: db.Connection = db.createConnection();
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/username'],
@@ -121,7 +119,7 @@ export const setup = async (): Promise<InitiateRes> => {
   try {
     const query = `SELECT * from auth_users`;
 
-    const res = await db.executeQuery(query, conn);
+   const res = await runQuery(query);
     if (res.length === 0) {
       throw new TemporaryRedirect('/register/admin');
     }
@@ -185,11 +183,9 @@ export interface authUserCreate {
 
 export const getRowCount = async (
   table: string,
-  conn: db.Connection,
 ): Promise<string> => {
-  const count = await db.executeQuery(
+  const count = await runQuery(
     `SELECT count(1) FROM delta.\`/data/${table}\``,
-    conn,
   );
 
   return count[0]['count(1)'];
@@ -222,9 +218,8 @@ export const authUserCreate = async (
 export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
-  const res = (await db.executeQuery(
+  const res = (await runQuery(
     `SELECT * FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
-    conn,
   )) as { username: string; id: string }[];
   if (res.length === 0) {
     throw new NotFoundError(`User not found at id: ${data.id}`);
@@ -259,9 +254,8 @@ export const authUserUpdate = async (
 export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `DELETE FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
-    conn,
   );
   const affectedRows = +sql[0]['num_affected_rows'];
   if (affectedRows === 0) {
@@ -269,9 +263,8 @@ export const authUserDelete = async (
   }
 
   try {
-    const sql = await db.executeQuery(
+    const sql = await runQuery(
       `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id}'`,
-      conn,
     );
   } catch (error) {}
   return `User at id "${data.id}" deleted!`;
@@ -281,14 +274,12 @@ export const authUsersRead = async (
   data: AuthUsersReadReq,
 ): Promise<AuthUsersReadRes> => {
   const whereClause = filterToQuery(data);
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
-    conn,
   );
   const whereClause2 = filterToQuery({ filters: data.filters });
-  const sqlCount = await db.executeQuery(
+  const sqlCount = await runQuery(
     `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
-    conn,
   );
   if (+sqlCount[0]['count(1)'] === 0) {
     throw new NotFoundError(`Auth User(s) not found.`);
@@ -408,7 +399,7 @@ export const authUserGroupsDelete = async (
     .map((group) => `table_from__id = '${group.id}'`)
     .join(' OR ')}`;
 
-  const sql = await db.executeQuery(sqlStr, conn);
+  const sql = await runQuery(sqlStr);
   const affectedRows = +sql[0]['num_affected_rows'];
 
   if (affectedRows === 0) {
@@ -481,9 +472,8 @@ interface IAuthUser extends AuthUserAndGroupsRef {
 }
 
 export const checkAdmin = async (userId) => {
-  const res = await db.executeQuery(
+  const res = await runQuery(
     `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
-    conn,
   );
 
   if (res.length === 0) {
@@ -496,7 +486,7 @@ export const checkAdmin = async (userId) => {
 export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
   const query = `SELECT * from auth_users WHERE username = "${data.username}"`;
 
-  const res = await db.executeQuery(query, conn);
+  const res = await runQuery(query);
 
   if (res.length === 0) {
     throw new NotFoundError(`${data.username} not found.`);
@@ -532,9 +522,8 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
   const username = claims.username;
   const userId = claims.userId;
 
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `DELETE FROM refresh_token WHERE user_id = '${userId}'`,
-    conn,
   );
 
   const affectedRows = +sql[0]['num_affected_rows'];

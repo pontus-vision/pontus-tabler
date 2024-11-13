@@ -63,9 +63,7 @@ import {
 // import axios from 'axios';
 import { srv } from '../server';
 
-import * as db from '../../delta-table/node/index-jdbc';
 import { prepareDbAndAuth, post, stateObj } from './test-utils';
-import { DashboardGroupAuthCreateReq } from '../generated/api';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import {
@@ -91,7 +89,6 @@ import { GROUPS_DASHBOARDS } from '../service/EdgeService';
 //   dashboardsReadPOST: jest.fn(),
 // }));
 jest.setTimeout(1000000);
-const conn: db.Connection = db.createConnection();
 
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;

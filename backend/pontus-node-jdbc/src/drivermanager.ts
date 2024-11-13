@@ -1,7 +1,8 @@
-import _ from "lodash";
-import jinst from "./jinst.js";
+import Jinst from "./jinst";
 
-const java = jinst.getInstance();
+
+import Connection from "./connection.js";
+const java = Jinst.getInstance();
 
 const DM = "java.sql.DriverManager";
 
@@ -34,32 +35,28 @@ const driverManager: DriverManager = {
     url: string,
     propsoruser?: string | Record<string, any>,
     password?: string
-  ): Promise<any> {
+  ): Promise<Connection> {
     const args = [url, propsoruser, password].filter(
       (arg) => arg !== undefined
     );
 
     const validArgs =
-      args[0] &&
-      // propsoruser and password can both be falsey
-      (!(args[1] || args[2]) ||
+    args[0] &&
+    // propsoruser and password can both be falsey
+    (!(args[1] || args[2]) ||
         // propsoruser and password can both be strings
-        (_.isString(args[1]) && _.isString(args[2])) ||
+        (typeof args[1] === 'string' && typeof args[2] === 'string') ||
         // propsoruser can be an object if password is falsey
-        (_.isObject(args[1]) && !args[2]));
+        (typeof args[1] === 'object' && !args[2]));
+
 
     if (!validArgs) {
       throw new Error("INVALID ARGUMENTS");
     }
 
     return new Promise((resolve, reject) => {
-      const callback = (err: Error | null, conn: any) => {
-        if (err) reject(err);
-        else resolve(conn);
-      };
-
-      args.push(callback);
-      java.callStaticMethod.apply(java, [DM, "getConnection", ...args]);
+    
+      java.callStaticMethodSync.apply(java, [DM, "getConnection", ...args]);
     });
   },
 
@@ -73,10 +70,11 @@ const driverManager: DriverManager = {
     ) as DriverManagerArgs;
 
     const validArgs =
-      args[0] &&
-      (!(args[1] || args[2]) ||
-        (_.isString(args[1]) && _.isString(args[2])) ||
-        (_.isObject(args[1]) && !args[2]));
+    args[0] &&
+    (!(args[1] || args[2]) ||
+        (typeof args[1] === 'string' && typeof args[2] === 'string') ||
+        (typeof args[1] === 'object' && args[1] !== null && !args[2]));
+
 
     if (!validArgs) {
       throw new Error("INVALID ARGUMENTS");
@@ -90,41 +88,22 @@ const driverManager: DriverManager = {
 
   async getLoginTimeout(): Promise<number> {
     return new Promise((resolve, reject) => {
-      java.callStaticMethod(
-        DM,
-        "getLoginTimeout",
-        (err: Error | null, seconds: number) => {
-          if (err) reject(err);
-          else resolve(seconds);
-        }
-      );
+      resolve(java.callStaticMethodSync(DM, "getLoginTimeout"));
     });
   },
 
   async registerDriver(driver: any): Promise<void> {
     return new Promise((resolve, reject) => {
-      java.callStaticMethod(
-        DM,
-        "registerDriver",
-        driver,
-        (err: Error | null) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
+      resolve(java.callStaticMethodSync(DM, "registerDriver", driver))
     });
   },
 
   async setLoginTimeout(seconds: number): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      java.callStaticMethod(
+      java.callStaticMethodSync(
         DM,
         "setLoginTimeout",
-        seconds,
-        (err: Error | null) => {
-          if (err) reject(err);
-          else resolve(true);
-        }
+        seconds
       );
     });
   },

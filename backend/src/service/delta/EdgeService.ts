@@ -2,13 +2,10 @@ import {
   TableEdgeCreateReq,
   TableEdgeDeleteReq,
   TableEdgeReadReq,
-  TableEdgeUpdateReq,
   TableRef,
-  TableReadRes,
   TableEdgeReadRes,
   TableDataEdgeCreateReq,
   TableDataEdgeCreateRes,
-  TableDataRowRef,
   TableDataEdgeReadReq,
   TableDataEdgeReadRes,
   TableDataEdgeDeleteReq,
@@ -18,18 +15,14 @@ import {
   TableEdgeCreateRes,
 } from '../../typescript/api';
 import { fetchContainer } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
-import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
+import { filterToQuery, runQuery } from '../../db-utils';
+import { ItemResponse, PatchOperation } from '@azure/cosmos';
 import {
   BadRequestError,
-  ConflictEntityError,
   NotFoundError,
 } from '../../generated/api';
-import { AUTH_GROUPS, convertToSqlFields, createSql } from './AuthGroupService';
-import { initiateAuthGroupContainer } from './AuthGroupService';
-import * as db from './../../../delta-table/node/index-jdbc';
-import { filter, snakeCase } from 'lodash';
-const conn: db.Connection = db.createConnection();
+import { convertToSqlFields, createSql } from './AuthGroupService';
+import { snakeCase } from 'lodash';
 
 const TABLES = 'tables';
 const ensureNestedPathExists = (obj, path) => {
@@ -74,11 +67,10 @@ export const createTableDataEdge = async (
   data: TableDataEdgeCreateReq,
 ): Promise<TableDataEdgeCreateRes> => {
   const tableNameFrom = snakeCase(data.tableFrom.tableName);
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `SELECT COUNT(*) FROM ${tableNameFrom} WHERE id IN (
       ${data.tableFrom.rows.map((table) => `'${table.id}'`).join(', ')});
      `,
-    conn,
   );
 
   if (+sql[0]['count(1)'] !== data.tableFrom.rows.length) {
@@ -86,11 +78,10 @@ export const createTableDataEdge = async (
   }
   const tableNameTo = snakeCase(data.tableTo.tableName);
 
-  const sql2 = await db.executeQuery(
+  const sql2 = await runQuery(
     `SELECT COUNT(*) FROM ${tableNameTo} WHERE id IN (${data.tableTo.rows
       .map((table) => `'${table.id}'`)
       .join(', ')});`,
-    conn,
   );
 
   if (+sql2[0]['count(1)'] !== data.tableTo.rows.length) {
@@ -452,7 +443,6 @@ export const readEdge = async (
     filters: ReadPaginationFilter;
     rowId: string;
   },
-  conn: db.Connection,
 ) => {
   const whereClause = filterToQuery(
     {
@@ -465,7 +455,7 @@ export const readEdge = async (
   } ${data.filters.from ? ' OFFSET ' + (data.filters.from - 1) : ''}`;
   const filtersOn = Object.keys(data.filters).length > 0;
 
-  const sql = (await db.executeQuery(
+  const sql = (await runQuery(
     `SELECT * FROM ${data.edgeTable} ${
       filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${
@@ -473,7 +463,6 @@ export const readEdge = async (
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
     }` + fromTo,
-    conn,
   )) as Record<string, any>;
 
   return sql;
@@ -491,7 +480,7 @@ export const readTableDataEdge = async (
   }`;
   const filtersOn = Object.keys(data?.filters || {}).length > 0;
 
-  const sql = (await db.executeQuery(
+  const sql = (await runQuery(
     `SELECT * FROM ${data?.jointTableName || edgeTableName} ${
       filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${
@@ -501,9 +490,9 @@ export const readTableDataEdge = async (
     }` +
       `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` +
       fromTo,
-    conn,
   )) as Record<string, any>;
-  const sqlCount = await db.executeQuery(
+
+  const sqlCount = await runQuery(
     `SELECT COUNT(*) FROM ${data?.jointTableName || edgeTableName} ${
       filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${
@@ -511,7 +500,6 @@ export const readTableDataEdge = async (
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
     }` + `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}`,
-    conn,
   );
 
   const edges = sql.map((edge) => {

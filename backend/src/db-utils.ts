@@ -1,25 +1,36 @@
 import { DELTA_DB } from './service/AuthGroupService';
 import { ReadPaginationFilter } from './typescript/api';
+import Pool, { IConnection }  from '../pontus-node-jdbc/src/pool';
+import {JDBC} from '../pontus-node-jdbc/src/index';
 
-import { Pool } from 'pontus-node-jdbc';
+export const config= {
+  url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
+  drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
+  properties: {
+    user: 'NBuser',
+    password: '',
+  },
+};
 
 const pool = new Pool({
-  url: 'jdbc:your_database_url', // Replace with your JDBC URL
-  properties: {
-    user: 'your_username', // Database username
-    password: 'your_password', // Database password
-  },
-  minpoolsize: 2,
-  maxpoolsize: 10,
-  keepalive: {
-    interval: 60000,
-    query: 'SELECT 1',
-    enabled: true,
-  },
-  logging: {
-    level: 'info',
-  },
-});
+    url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
+    properties: {
+      user: 'admin',           // Database username
+      password: 'user'        // Database password
+    },
+    drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
+    minpoolsize: 2,
+    maxpoolsize: 10,
+    keepalive: {
+      interval: 60000,
+      query: 'SELECT 1',
+      enabled: true
+    },
+    logging: {
+      level: 'info'
+    }
+  });
+  const jdbc = new JDBC(config);
 
 // Initialize pool
 async function initializePool() {
@@ -34,14 +45,19 @@ async function initializePool() {
 (async () => {
   await initializePool();
 })();
+  export const createConnection = async():Promise<IConnection> => {
+    const reservedConn = await jdbc.reserve()
+    return reservedConn.conn
+  };
 
 export async function runQuery(query: string): Promise<Record<string,any>[]> {
   try {
-      const connection = await pool.reserve();
+    console.log({query})
+      const connection = await createConnection();
       const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
       const resultSet = await preparedStatement.executeQuery();
-      const results = await resultSet.toArray(); // Assuming you have a method to convert ResultSet to an array
+      const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
       console.log('Query Results:', results);
       

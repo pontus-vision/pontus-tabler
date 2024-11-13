@@ -221,6 +221,7 @@ export const prepareDbAndAuth = async (
   admin: RegisterAdminRes;
   adminToken: string;
 }> => {
+
   let adminToken;
   const postAdmin = async (
     endpoint: string,
