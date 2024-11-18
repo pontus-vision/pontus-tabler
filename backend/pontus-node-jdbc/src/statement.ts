@@ -1,5 +1,4 @@
 /* jshint node: true */
-"use strict";
 
 import ResultSet from "./resultset";
 import Jinst from "./jinst";
