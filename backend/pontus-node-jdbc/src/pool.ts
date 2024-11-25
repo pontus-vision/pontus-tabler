@@ -87,6 +87,7 @@ const addConnection = async (
   ka: { enabled: boolean; interval: number; query: string },
   maxIdle: number | null
 ): Promise<any> => {
+  console.log({url})
   return new Promise((resolve, reject) => {
     dm.getConnection(url, props)
       .then((conn: any) => {

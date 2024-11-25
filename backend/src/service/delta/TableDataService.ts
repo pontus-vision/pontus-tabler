@@ -7,18 +7,10 @@ import {
   TableDataRowRef,
   TableDataUpdateReq,
 } from '../../typescript/api';
-import {
-  TABLES
-} from './TableService';
-import {
-  createSql,
-  generateUUIDv6,
-  objEntriesToStr,
-  updateSql,
-} from './AuthGroupService';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from '../../generated/api';
-import { filterToQuery, runQuery } from '../../db-utils';
+import { createSql, filterToQuery, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from '../../db-utils';
+import { TABLES } from '../../consts';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
   const res = (await runQuery(

@@ -15,8 +15,8 @@ import {
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { NotFoundError } from '../../generated/api';
+import { TABLES } from '../../consts';
 
-export const TABLES = 'tables';
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],

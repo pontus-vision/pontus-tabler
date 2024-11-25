@@ -24,13 +24,12 @@ import {
   ConflictEntityError,
   NotFoundError,
 } from '../../generated/api';
-import { AUTH_GROUPS } from './AuthGroupService';
 import { initiateAuthGroupContainer } from './AuthGroupService';
+import { AUTH_GROUPS, TABLES } from '../../consts';
 
 export const GROUPS_USERS = 'groups-users';
 export const GROUPS_TABLES = 'groups-tables';
 
-const TABLES = 'tables';
 const ensureNestedPathExists = (obj, path) => {
   const parts = path.split('/');
   let current = obj;

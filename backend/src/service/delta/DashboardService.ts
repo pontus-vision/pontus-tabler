@@ -18,34 +18,21 @@ import {
   DashboardAuthGroups,
   Dashboard,
 } from '../../typescript/api';
-import { fetchContainer, fetchData } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { createSql, filterToQuery, updateSql } from '../../db-utils';
 import { NotFoundError } from '../../generated/api';
-import { ItemResponse, PatchOperation } from '@azure/cosmos';
-import { CosmosClient } from '@azure/cosmos';
-import { initiateMenuContainer } from './MenuService';
 import {
-  createConnection,
   createTableDataEdge,
   deleteTableDataEdge,
   readTableDataEdge,
-  updateTableDataEdge,
 } from './EdgeService';
-import {
-  AUTH_GROUPS,
-  createSql,
-  initiateAuthGroupContainer,
-  updateSql,
-} from './AuthGroupService';
-import { AUTH_USERS } from './AuthUserService';
+
+
 declare function getContext(): any;
 import * as db from './../../../delta-table/node/index-jdbc';
-import { GROUPS_DASHBOARDS } from '../EdgeService';
+import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS } from '../../consts';
+
 
 const conn: db.Connection = db.createConnection();
-export const DASHBOARDS_GROUPS = 'dashboards_groups';
-export const DASHBOARDS = 'dashboards';
-
 export const createDashboard = async (
   data: DashboardCreateReq,
 ): Promise<DashboardCreateRes> => {

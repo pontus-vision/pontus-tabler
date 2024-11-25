@@ -1,7 +1,12 @@
-import { DELTA_DB } from './service/AuthGroupService';
 import { ReadPaginationFilter } from './typescript/api';
-import Pool, { IConnection }  from '../pontus-node-jdbc/src/pool';
+import { Pool } from '../pontus-node-jdbc/src/index';
 import {JDBC} from '../pontus-node-jdbc/src/index';
+import { v4 as uuidv4 } from 'uuid';
+import { snakeCase } from 'lodash';
+import { NotFoundError } from './generated/api';
+import { IConnection } from '../pontus-node-jdbc/src/pool';
+
+export const DELTA_DB = 'deltadb'
 
 export const config= {
   url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
@@ -42,9 +47,189 @@ async function initializePool() {
   }
 }
 
-(async () => {
-  await initializePool();
-})();
+// (async () => {
+//   await initializePool();
+// })();
+
+export const convertToSqlFields = (data: any[]): string => {
+  const fields = [];
+
+  for (const value of data) {
+    const valType = typeof value;
+    if (valType === 'boolean') {
+      fields.push(`${value} BOOLEAN`);
+    } else if (valType === 'number') {
+      fields.push(`${value} INT`);
+    } else {
+      fields.push(`${value} STRING`);
+    }
+  }
+
+  return fields.join(', ');
+};
+
+
+export const updateSql = async (
+  table: string,
+  data: Record<string, any>,
+  whereClause: string,
+): Promise<Record<string, any>[]> => {
+  const insertValues = [];
+
+  if (Array.isArray(data)) {
+    for (const el of data) {
+      for (const [key, value] of Object.entries(el)) {
+        const val = typeof value === 'string' ? `'${value}'` : value;
+        insertValues.push(`${key} = ${val}`);
+      }
+    }
+  } else {
+    for (const [key, value] of Object.entries(data)) {
+      const val = typeof value === 'string' ? `'${value}'` : value;
+      insertValues.push(`${key} = ${val}`);
+    }
+  }
+
+  const insert = `UPDATE ${table} SET ${insertValues.join(
+    ', ',
+  )} ${whereClause}`;
+
+  const res2 = await runQuery(insert);
+  if (+res2[0]['num_affected_rows'] === 0) {
+    throw new NotFoundError(
+      `did not find any record at table '${table}' (${whereClause})`,
+    );
+  }
+
+  const res3 = await runQuery(
+    `SELECT * FROM ${table} ${whereClause}`,
+    
+  );
+  if (res3.length === 0) {
+    throw new NotFoundError(
+      `did not find any record at table '${table}' (${whereClause})`,
+    );
+  }
+
+  return res3;
+};
+
+export const objEntriesToStr = (
+  data: Record<string, any>,
+): { keysStr: string; valuesStr: string } => {
+  const keys = [];
+  const values = [];
+
+  for (const [key, value] of Object.entries(data)) {
+    // keys.push(key);
+    // values.push(value)
+
+    const valType = typeof value;
+    const keyType = typeof key;
+    if (valType === 'boolean') {
+      keys.push(`${snakeCase(key)} BOOLEAN`);
+      values.push(value);
+    } else if (valType === 'number') {
+      keys.push(`${snakeCase(key)} INT`);
+      values.push(value);
+    } else {
+      keys.push(`${snakeCase(key)} STRING`);
+      values.push(`'${value}'`);
+    }
+  }
+
+  const keysStr = keys.join(', ');
+  const valuesStr = values.join(', ');
+  return { keysStr, valuesStr };
+};
+export const generateUUIDv6 = () => {
+  const uuid = uuidv4().replace(/-/g, '');
+  const timestamp = new Date().getTime();
+
+  let timestampHex = timestamp.toString(16).padStart(12, '0');
+  let uuidV6 = timestampHex + uuid.slice(12);
+
+  return uuidV6;
+};
+export const createSql = async (
+  table: string,
+  fields: string,
+  data: Record<string, any>,
+): Promise<Record<string, any>[]> => {
+  const uuid = generateUUIDv6();
+
+  const entries = objEntriesToStr(data);
+
+  const keys = entries.keysStr;
+  const values = entries.valuesStr;
+  // const resss = await runQuery(
+  //   `DROP TABLE  ${table} `,
+  //   conn,
+  // );
+
+  const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${
+    data?.id ? '' : 'id STRING, '
+  } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
+
+  const res = await runQuery(createQuery);
+
+  const insertFields = Array.isArray(data)
+    ? Object.keys(data[0]).join(', ')
+    : Object.keys(data).join(', ');
+
+  const insertValues = [];
+  if (Array.isArray(data)) {
+    for (const el of data) {
+      const entries = objEntriesToStr(el);
+      insertValues.push(`${entries.valuesStr}`);
+    }
+  }
+
+  const ids = [];
+
+  const insert = `INSERT INTO ${table} (${
+    data?.id ? '' : 'id, '
+  } ${insertFields}) VALUES ${
+    Array.isArray(data)
+      ? insertValues
+          .map((el) => {
+            const uuid = generateUUIDv6();
+            ids.push(uuid);
+            return `('${uuid}', ${el})`;
+          })
+          .join(', ')
+      : `('${uuid}',` + values + ')'
+  }`;
+
+  const res2 = await runQuery(insert);
+
+  const selectQuery = `SELECT * FROM ${table} WHERE ${
+    data?.id
+      ? `id = '${data?.id}'`
+      : ids.length > 0
+      ? ids.map((id) => `id = '${id}'`).join(' OR ')
+      : `id = '${uuid}'`
+  }`;
+
+  const res3 = await runQuery(selectQuery);
+
+  return res3;
+
+  // return res3.map((el) => {
+  //   const obj = {};
+  //   for (const prop in el) {
+  //     if (el[prop] === 'true') {
+  //       obj[prop] = true;
+  //     } else if (el[prop] === 'false') {
+  //       obj[prop] = false;
+  //     } else {
+  //       obj[prop] = el[prop];
+  //     }
+  //   }
+  //   return obj;
+  // });
+};
+
   export const createConnection = async():Promise<IConnection> => {
     const reservedConn = await jdbc.reserve()
     return reservedConn.conn
@@ -62,7 +247,9 @@ export async function runQuery(query: string): Promise<Record<string,any>[]> {
       console.log('Query Results:', results);
       
       // Remember to release the connection after you are done
-      await pool.release(connection);
+      // await pool.release(connection);
+
+      await connection.close()
 
       return results
   } catch (error) {

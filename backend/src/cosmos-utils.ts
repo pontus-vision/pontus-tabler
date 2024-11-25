@@ -8,8 +8,9 @@ import {
   UniqueKeyPolicy,
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
-import { AUTH_GROUPS, authGroupContainerProps } from './service/cosmosdb';
+import { authGroupContainerProps } from './service/cosmosdb';
 import { filterToQuery } from './db-utils';
+import { AUTH_GROUPS } from './consts';
 
 export interface FetchData {
   count: number;

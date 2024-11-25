@@ -1,3 +1,4 @@
+import { COSMOS_DB, dbSource, DELTA_DB } from '../consts';
 import {
   InternalServerError,
   TableDataCreateReq,
@@ -6,7 +7,6 @@ import {
   TableDataReadRes,
   TableDataUpdateReq,
 } from '../typescript/api';
-import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
 

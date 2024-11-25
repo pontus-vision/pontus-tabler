@@ -24,13 +24,8 @@ import { prepareDbAndAuth, isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { AxiosResponse } from 'axios';
 import { DELTA_DB } from '../service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
-import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
-import {
-  AUTH_GROUPS_USER_TABLE,
-  AUTH_GROUPS,
-  TABLE_DATA,
-} from '../service/delta';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '../consts';
+
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({

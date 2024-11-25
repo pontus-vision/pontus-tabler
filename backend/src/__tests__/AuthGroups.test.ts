@@ -1,17 +1,9 @@
 import {
   DashboardCreateReq,
   DashboardCreateRes,
-  DashboardReadRes,
-  DashboardRef,
-  DashboardUpdateRes,
-  DashboardUpdateReq,
-  DashboardReadReq,
   DashboardGroupAuthReadRes,
   DashboardGroupAuthReadReq,
-  DashboardGroupAuthCreateRes,
-  DashboardGroupAuthUpdateReq,
   DashboardGroupAuthUpdateRes,
-  DashboardGroupAuthDeleteReq,
   DashboardGroupAuthDeleteRes,
   AuthGroupCreateReq,
   AuthGroupUpdateReq,
@@ -29,17 +21,11 @@ import {
   AuthGroupDashboardsReadReq,
   AuthGroupDashboardsReadRes,
   AuthGroupDashboardUpdateRes,
-  AuthUserGroupsCreateReq,
   AuthGroupUsersCreateReq,
   AuthGroupUsersCreateRes,
   AuthGroupUsersReadReq,
   AuthGroupUsersReadRes,
-  AuthGroupUsersUpdateReq,
-  AuthGroupUsersUpdateRes,
   AuthGroupUsersDeleteReq,
-  AuthUserCreateRes,
-  AuthUserCreateReq,
-  AuthUserGroupsCreateRes,
   TableCreateReq,
   TableCreateRes,
   AuthGroupTablesCreateRes,
@@ -49,34 +35,16 @@ import {
   AuthGroupTablesDeleteReq,
   AuthGroupTablesDeleteRes,
   AuthGroupDashboardDeleteRes,
-  LoginReq,
-  LoginRes,
-  AuthGroupTableCreateReq,
   AuthGroupUpdateRes,
-  AuthUserUpdateReq,
-  RegisterAdminRes,
-  RegisterAdminReq,
-  LogoutReq,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
 import { srv } from '../server';
 
-import { prepareDbAndAuth, post, stateObj } from './test-utils';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { deleteContainer, deleteDatabase } from '../cosmos-utils';
-import {
-  AUTH_GROUPS,
-  createAuthGroup,
-} from '../service/cosmosdb/AuthGroupService';
-import { DASHBOARDS, createDashboard } from '../service/DashboardService';
-import { AUTH_USERS } from '../service/cosmosdb/AuthUserService';
-import { TABLES } from '../service/cosmosdb/TableService';
-import { create } from 'lodash';
-import { AUTH_GROUPS_USER_TABLE } from '../service/delta';
-import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
+import { prepareDbAndAuth } from './test-utils';
+import { AxiosResponse } from 'axios';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS } from '../consts';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -96,6 +64,7 @@ describe('dashboardCreatePOST', () => {
   let postAdmin;
   let admin;
   beforeEach(async () => {
+    console.log(process.env.DB_SOURCE)
     let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
     if (process.env.DB_SOURCE === DELTA_DB) {
       tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS];

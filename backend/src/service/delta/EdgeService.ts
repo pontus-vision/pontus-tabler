@@ -2,7 +2,6 @@ import {
   TableEdgeCreateReq,
   TableEdgeDeleteReq,
   TableEdgeReadReq,
-  TableRef,
   TableEdgeReadRes,
   TableDataEdgeCreateReq,
   TableDataEdgeCreateRes,
@@ -14,17 +13,12 @@ import {
   ReadPaginationFilter,
   TableEdgeCreateRes,
 } from '../../typescript/api';
-import { fetchContainer } from '../../cosmos-utils';
-import { filterToQuery, runQuery } from '../../db-utils';
-import { ItemResponse, PatchOperation } from '@azure/cosmos';
+import { convertToSqlFields, createSql, filterToQuery, runQuery } from '../../db-utils';
 import {
-  BadRequestError,
   NotFoundError,
 } from '../../generated/api';
-import { convertToSqlFields, createSql } from './AuthGroupService';
 import { snakeCase } from 'lodash';
 
-const TABLES = 'tables';
 const ensureNestedPathExists = (obj, path) => {
   const parts = path.split('/');
   let current = obj;
@@ -254,90 +248,91 @@ export const updateConnection = async (
   direction: EdgeDirectionEnum,
   edgeType: 'oneToOne' | 'oneToMany',
 ): Promise<TableDataEdgeCreateRef[]> => {
-  const container = await fetchContainer(table1.containerName);
+  return 
+  // const container = await fetchContainer(table1.containerName);
 
-  const path = `edges/${snakeToCamel(
-    table2.tableName,
-  )}/${edgeLabel}/${direction}`;
-  const arrRes = [];
-  if (edgeType === 'oneToOne') {
-    for (const [index, value] of table1.values.entries()) {
-      const table2Value = table2.rowIds.at(index);
+  // const path = `edges/${snakeToCamel(
+  //   table2.tableName,
+  // )}/${edgeLabel}/${direction}`;
+  // const arrRes = [];
+  // if (edgeType === 'oneToOne') {
+  //   for (const [index, value] of table1.values.entries()) {
+  //     const table2Value = table2.rowIds.at(index);
 
-      if (!table2Value) return;
+  //     if (!table2Value) return;
 
-      const partitionKey = table1?.partitionKeyProp
-        ? value[table1.partitionKeyProp]
-        : undefined;
+  //     const partitionKey = table1?.partitionKeyProp
+  //       ? value[table1.partitionKeyProp]
+  //       : undefined;
 
-      const res = await container
-        .item(value.id, partitionKey || value.id)
-        .read();
+  //     const res = await container
+  //       .item(value.id, partitionKey || value.id)
+  //       .read();
 
-      const index2 = res.resource.edges[snakeToCamel(table2.tableName)][
-        edgeLabel
-      ][direction].findIndex((el) => el.id === table2Value.id);
+  //     const index2 = res.resource.edges[snakeToCamel(table2.tableName)][
+  //       edgeLabel
+  //     ][direction].findIndex((el) => el.id === table2Value.id);
 
-      try {
-        await container.item(value.id, partitionKey || value.id).patch([
-          {
-            op: 'set',
-            path: `/${path}/${index2}`,
-            value: table2Value,
-          },
-        ]);
-        arrRes.push({ from: value, to: table2Value });
-      } catch (error) {}
-    }
-  } else if (edgeType === 'oneToMany') {
-    for (const [index, value] of table1.values.entries()) {
-      for (const [index, value2] of table2.rowIds.entries()) {
-        if (!value2) return;
+  //     try {
+  //       await container.item(value.id, partitionKey || value.id).patch([
+  //         {
+  //           op: 'set',
+  //           path: `/${path}/${index2}`,
+  //           value: table2Value,
+  //         },
+  //       ]);
+  //       arrRes.push({ from: value, to: table2Value });
+  //     } catch (error) {}
+  //   }
+  // } else if (edgeType === 'oneToMany') {
+  //   for (const [index, value] of table1.values.entries()) {
+  //     for (const [index, value2] of table2.rowIds.entries()) {
+  //       if (!value2) return;
 
-        const partitionKey = table1?.partitionKeyProp
-          ? value[table1.partitionKeyProp]
-          : undefined;
-        const res = await container
-          .item(value.id, partitionKey || value.id)
-          .read();
+  //       const partitionKey = table1?.partitionKeyProp
+  //         ? value[table1.partitionKeyProp]
+  //         : undefined;
+  //       const res = await container
+  //         .item(value.id, partitionKey || value.id)
+  //         .read();
 
-        if (res.statusCode === 404) {
-          throw new NotFoundError(
-            `id "${value2.id} not found at ${table2.tableName} at id ${value.id}"`,
-          );
-        }
+  //       if (res.statusCode === 404) {
+  //         throw new NotFoundError(
+  //           `id "${value2.id} not found at ${table2.tableName} at id ${value.id}"`,
+  //         );
+  //       }
 
-        if (!res.resource?.edges) {
-          throw new BadRequestError(
-            `No edges found in record at id: "${value.id}" ${
-              table1?.partitionKeyProp
-                ? `and ${table1?.partitionKeyProp}: '${partitionKey}'`
-                : ''
-            }`,
-          );
-        }
+  //       if (!res.resource?.edges) {
+  //         throw new BadRequestError(
+  //           `No edges found in record at id: "${value.id}" ${
+  //             table1?.partitionKeyProp
+  //               ? `and ${table1?.partitionKeyProp}: '${partitionKey}'`
+  //               : ''
+  //           }`,
+  //         );
+  //       }
 
-        const index2 = res.resource?.edges[snakeToCamel(table2.tableName)][
-          edgeLabel
-        ][direction].findIndex((el) => el.id === value2.id);
+  //       const index2 = res.resource?.edges[snakeToCamel(table2.tableName)][
+  //         edgeLabel
+  //       ][direction].findIndex((el) => el.id === value2.id);
 
-        try {
-          const res = await container
-            .item(value.id, partitionKey || value.id)
-            .patch([
-              {
-                op: 'set',
-                path: `/${path}/${index2}`,
-                value: value2,
-              },
-            ]);
-          arrRes.push({ from: value, to: value2 });
-        } catch (error) {}
-      }
-    }
-  }
+  //       try {
+  //         const res = await container
+  //           .item(value.id, partitionKey || value.id)
+  //           .patch([
+  //             {
+  //               op: 'set',
+  //               path: `/${path}/${index2}`,
+  //               value: value2,
+  //             },
+  //           ]);
+  //         arrRes.push({ from: value, to: value2 });
+  //       } catch (error) {}
+  //     }
+  //   }
+  // }
 
-  return arrRes;
+  // return arrRes;
 };
 function createOrUpdateNestedObjectWithArray(
   obj: Record<string, any>,
@@ -366,72 +361,72 @@ function createOrUpdateNestedObjectWithArray(
   return obj;
 }
 export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
-  const deleteConnection = async (data: TableDataEdgeDeleteReq) => {
-    const container = await fetchContainer(data.tableName);
+  // const deleteConnection = async (data: TableDataEdgeDeleteReq) => {
+  //   const container = await fetchContainer(data.tableName);
 
-    const res = await container
-      .item(data.rowId, data?.rowPartitionKey || data.rowId)
-      .read();
-    if (res.statusCode === 404) {
-      throw new NotFoundError(
-        `did not found document at id ${data.rowId} ${
-          data?.rowPartitionKey
-            ? `and partition key: ${data.rowPartitionKey} `
-            : ''
-        }`,
-      );
-    }
+  //   const res = await container
+  //     .item(data.rowId, data?.rowPartitionKey || data.rowId)
+  //     .read();
+  //   if (res.statusCode === 404) {
+  //     throw new NotFoundError(
+  //       `did not found document at id ${data.rowId} ${
+  //         data?.rowPartitionKey
+  //           ? `and partition key: ${data.rowPartitionKey} `
+  //           : ''
+  //       }`,
+  //     );
+  //   }
 
-    const resource = res.resource;
-    const { direction, edgeLabel, rows, tableName: edgeTableName } = data.edge;
+  //   const resource = res.resource;
+  //   const { direction, edgeLabel, rows, tableName: edgeTableName } = data.edge;
 
-    for (const row of rows) {
-      const index = resource.edges[snakeToCamel(edgeTableName)][edgeLabel][
-        direction
-      ].findIndex((el) => el.id === row.id);
+  //   for (const row of rows) {
+  //     const index = resource.edges[snakeToCamel(edgeTableName)][edgeLabel][
+  //       direction
+  //     ].findIndex((el) => el.id === row.id);
 
-      if (index === -1) {
-        throw new NotFoundError(`Did not find row at id: ${row.id}.`);
-      }
+  //     if (index === -1) {
+  //       throw new NotFoundError(`Did not find row at id: ${row.id}.`);
+  //     }
 
-      const resPatch = await container
-        .item(data.rowId, data?.rowPartitionKey || data.rowId)
-        .patch([
-          {
-            op: 'remove',
-            path: `/edges/${snakeToCamel(
-              edgeTableName,
-            )}/${edgeLabel}/${direction}/${index}`,
-          },
-        ]);
-    }
-  };
+  //     const resPatch = await container
+  //       .item(data.rowId, data?.rowPartitionKey || data.rowId)
+  //       .patch([
+  //         {
+  //           op: 'remove',
+  //           path: `/edges/${snakeToCamel(
+  //             edgeTableName,
+  //           )}/${edgeLabel}/${direction}/${index}`,
+  //         },
+  //       ]);
+  //   }
+  // };
 
-  for (const row of data.edge.rows) {
-    await deleteConnection({
-      tableName: data.edge.tableName,
-      edge: {
-        direction: 'from',
-        edgeLabel: data.edge.edgeLabel,
-        rows: [{ id: data.rowId }],
-        tableName: data.tableName,
-      },
-      rowId: row.id as string,
-      rowPartitionKey: row[data.edge.partitionKeyProp] as string,
-    });
-  }
+  // for (const row of data.edge.rows) {
+  //   await deleteConnection({
+  //     tableName: data.edge.tableName,
+  //     edge: {
+  //       direction: 'from',
+  //       edgeLabel: data.edge.edgeLabel,
+  //       rows: [{ id: data.rowId }],
+  //       tableName: data.tableName,
+  //     },
+  //     rowId: row.id as string,
+  //     rowPartitionKey: row[data.edge.partitionKeyProp] as string,
+  //   });
+  // }
 
-  await deleteConnection({
-    tableName: data.tableName,
-    edge: {
-      direction: 'to',
-      edgeLabel: data.edge.edgeLabel,
-      rows: data.edge.rows,
-      tableName: data.edge.tableName,
-    },
-    rowId: data.rowId,
-    rowPartitionKey: data.rowPartitionKey,
-  });
+  // await deleteConnection({
+  //   tableName: data.tableName,
+  //   edge: {
+  //     direction: 'to',
+  //     edgeLabel: data.edge.edgeLabel,
+  //     rows: data.edge.rows,
+  //     tableName: data.edge.tableName,
+  //   },
+  //   rowId: data.rowId,
+  //   rowPartitionKey: data.rowPartitionKey,
+  // });
 };
 
 export const readEdge = async (
@@ -532,28 +527,28 @@ export const readTableDataEdge = async (
 };
 
 const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
-  const tableContainer = await fetchContainer(TABLES);
-  const res = (await tableContainer
-    .item(relatedData.id, relatedData.name)
-    .read()) as ItemResponse<TableRef>;
+  // const tableContainer = await fetchContainer(TABLES);
+  // const res = (await tableContainer
+  //   .item(relatedData.id, relatedData.name)
+  //   .read()) as ItemResponse<TableRef>;
 
-  const relatedDocument = res.resource;
-  if (!relatedDocument?.hasOwnProperty('edges')) {
-    relatedDocument['edges'] = {};
-  }
+  // const relatedDocument = res.resource;
+  // if (!relatedDocument?.hasOwnProperty('edges')) {
+  //   relatedDocument['edges'] = {};
+  // }
 
-  for (const prop in relatedData.edges) {
-    if (!Array.isArray(relatedDocument.edges[prop])) {
-      relatedDocument.edges[prop] = [];
-    }
-    relatedDocument.edges[prop] = relatedDocument.edges[prop].concat(
-      relatedData.edges[prop],
-    );
-  }
+  // for (const prop in relatedData.edges) {
+  //   if (!Array.isArray(relatedDocument.edges[prop])) {
+  //     relatedDocument.edges[prop] = [];
+  //   }
+  //   relatedDocument.edges[prop] = relatedDocument.edges[prop].concat(
+  //     relatedData.edges[prop],
+  //   );
+  // }
 
-  await tableContainer
-    .item(relatedData.id, relatedData.name)
-    .replace(relatedDocument);
+  // await tableContainer
+  //   .item(relatedData.id, relatedData.name)
+  //   .replace(relatedDocument);
 };
 
 export const createTableEdge = async (
@@ -631,151 +626,154 @@ export const createTableEdge = async (
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
 ): Promise<TableEdgeReadRes> => {
-  const querySpec = {
-    query: 'select c.edges, c.id, c.name from c where c.id=@tableId',
-    parameters: [
-      {
-        name: '@tableId',
-        value: data.tableId,
-      },
-    ],
-  };
+  return 
+  // const querySpec = {
+  //   query: 'select c.edges, c.id, c.name from c where c.id=@tableId',
+  //   parameters: [
+  //     {
+  //       name: '@tableId',
+  //       value: data.tableId,
+  //     },
+  //   ],
+  // };
 
-  const tableContainer = await fetchContainer(TABLES);
+  // const tableContainer = await fetchContainer(TABLES);
 
-  const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-  const resource = resources[0];
+  // const { resources } = await tableContainer.items.query(querySpec).fetchAll();
+  // const resource = resources[0];
 
-  if (resources.length === 1) {
-    return resource;
-  } else if (resources.length === 0) {
-    throw new NotFoundError(`No table found at id: ${data.tableId}`);
-  }
+  // if (resources.length === 1) {
+  //   return resource;
+  // } else if (resources.length === 0) {
+  //   throw new NotFoundError(`No table found at id: ${data.tableId}`);
+  // }
 };
 
 const deleteRelatedDocumentEdges = async (relatedData: TableEdgeDeleteReq) => {
-  const tableContainer = await fetchContainer(TABLES);
+  return
+  // const tableContainer = await fetchContainer(TABLES);
 
-  const res = (await tableContainer
-    .item(relatedData.id, relatedData.tableName)
-    .read()) as ItemResponse<TableRef>;
+  // const res = (await tableContainer
+  //   .item(relatedData.id, relatedData.tableName)
+  //   .read()) as ItemResponse<TableRef>;
 
-  const resource = res.resource;
+  // const resource = res.resource;
 
-  const patchArr: PatchOperation[] = [];
+  // const patchArr: PatchOperation[] = [];
 
-  for (const prop in relatedData.edges) {
-    const edgeArr = resource?.edges[prop];
-    const edgeInputArr = relatedData.edges[prop];
-    for (const [index, el] of edgeArr?.entries()) {
-      if (
-        edgeInputArr.some(
-          (edge) =>
-            el?.from?.id === edge?.from?.id &&
-            el?.to?.id === edge?.to?.id &&
-            el?.from?.tableName === edge?.from?.tableName &&
-            el?.to?.tableName === edge?.to?.tableName,
-        )
-      ) {
-        const patchOp: PatchOperation = {
-          op: 'remove',
-          path: `/edges/${prop}/${index}`,
-          value: el,
-        };
-        patchArr.push(patchOp);
-      }
-    }
-  }
+  // for (const prop in relatedData.edges) {
+  //   const edgeArr = resource?.edges[prop];
+  //   const edgeInputArr = relatedData.edges[prop];
+  //   for (const [index, el] of edgeArr?.entries()) {
+  //     if (
+  //       edgeInputArr.some(
+  //         (edge) =>
+  //           el?.from?.id === edge?.from?.id &&
+  //           el?.to?.id === edge?.to?.id &&
+  //           el?.from?.tableName === edge?.from?.tableName &&
+  //           el?.to?.tableName === edge?.to?.tableName,
+  //       )
+  //     ) {
+  //       const patchOp: PatchOperation = {
+  //         op: 'remove',
+  //         path: `/edges/${prop}/${index}`,
+  //         value: el,
+  //       };
+  //       patchArr.push(patchOp);
+  //     }
+  //   }
+  // }
 
-  const res2 = await tableContainer
-    .item(relatedData.id, relatedData.tableName)
-    .patch(patchArr);
+  // const res2 = await tableContainer
+  //   .item(relatedData.id, relatedData.tableName)
+  //   .patch(patchArr);
 
-  for (const prop in relatedData?.edges) {
-    if (res2.resource.edges[prop].length === 0) {
-      const res = await tableContainer
-        .item(relatedData.id, relatedData.tableName)
-        .patch([{ op: 'remove', path: `/edges/${prop}` }]);
-    }
-  }
+  // for (const prop in relatedData?.edges) {
+  //   if (res2.resource.edges[prop].length === 0) {
+  //     const res = await tableContainer
+  //       .item(relatedData.id, relatedData.tableName)
+  //       .patch([{ op: 'remove', path: `/edges/${prop}` }]);
+  //   }
+  // }
 };
 
 export const deleteTableEdge = async (data: TableEdgeDeleteReq) => {
-  const tableContainer = await fetchContainer(TABLES);
+  return
+  // const tableContainer = await fetchContainer(TABLES);
 
-  const res = (await tableContainer
-    .item(data.id, data.tableName)
-    .read()) as ItemResponse<TableRef>;
+  // const res = (await tableContainer
+  //   .item(data.id, data.tableName)
+  //   .read()) as ItemResponse<TableRef>;
 
-  const resource = res.resource;
+  // const resource = res.resource;
 
-  const patchArr: PatchOperation[] = [];
+  // const patchArr: PatchOperation[] = [];
 
-  const message = [];
+  // const message = [];
 
-  for (const prop in data?.edges) {
-    const edgeArr = resource?.edges[prop];
-    const edgeInputArr = data?.edges[prop];
-    for (const [index, el] of edgeArr?.entries()) {
-      if (
-        edgeInputArr.some(
-          (edge) =>
-            el?.from?.id === edge?.from?.id &&
-            el?.to?.id === edge?.to?.id &&
-            el?.from?.tableName === edge?.from?.tableName &&
-            el?.to?.tableName === edge?.to?.tableName,
-        )
-      ) {
-        const patchOp: PatchOperation = {
-          op: 'remove',
-          path: `/edges/${prop}/${index}`,
-          value: el,
-        };
-        patchArr.push(patchOp);
-      }
-    }
-  }
+  // for (const prop in data?.edges) {
+  //   const edgeArr = resource?.edges[prop];
+  //   const edgeInputArr = data?.edges[prop];
+  //   for (const [index, el] of edgeArr?.entries()) {
+  //     if (
+  //       edgeInputArr.some(
+  //         (edge) =>
+  //           el?.from?.id === edge?.from?.id &&
+  //           el?.to?.id === edge?.to?.id &&
+  //           el?.from?.tableName === edge?.from?.tableName &&
+  //           el?.to?.tableName === edge?.to?.tableName,
+  //       )
+  //     ) {
+  //       const patchOp: PatchOperation = {
+  //         op: 'remove',
+  //         path: `/edges/${prop}/${index}`,
+  //         value: el,
+  //       };
+  //       patchArr.push(patchOp);
+  //     }
+  //   }
+  // }
 
-  const res2 = await tableContainer
-    .item(data.id, data.tableName)
-    .patch(patchArr);
+  // const res2 = await tableContainer
+  //   .item(data.id, data.tableName)
+  //   .patch(patchArr);
 
-  for (const prop in data?.edges) {
-    if (res2.resource.edges[prop].length === 0) {
-      const res = await tableContainer
-        .item(data.id, data.tableName)
-        .patch([{ op: 'remove', path: `/edges/${prop}` }]);
-    }
-  }
+  // for (const prop in data?.edges) {
+  //   if (res2.resource.edges[prop].length === 0) {
+  //     const res = await tableContainer
+  //       .item(data.id, data.tableName)
+  //       .patch([{ op: 'remove', path: `/edges/${prop}` }]);
+  //   }
+  // }
 
-  const updateRelatedDocumentsPromises = [];
-  for (const prop in data?.edges) {
-    data?.edges[prop].forEach((edge) => {
-      if (edge.from) {
-        updateRelatedDocumentsPromises.push(
-          deleteRelatedDocumentEdges({
-            id: edge.from.id,
-            tableName: edge.from.tableName,
-            edges: {
-              [prop]: [{ to: { id: data.id, tableName: data.tableName } }],
-            },
-          }),
-        );
-      } else if (edge.to) {
-        updateRelatedDocumentsPromises.push(
-          deleteRelatedDocumentEdges({
-            id: edge.to.id,
-            tableName: edge.to.tableName,
-            edges: {
-              [prop]: [{ from: { id: data.id, tableName: data.tableName } }],
-            },
-          }),
-        );
-      }
-    });
-  }
+  // const updateRelatedDocumentsPromises = [];
+  // for (const prop in data?.edges) {
+  //   data?.edges[prop].forEach((edge) => {
+  //     if (edge.from) {
+  //       updateRelatedDocumentsPromises.push(
+  //         deleteRelatedDocumentEdges({
+  //           id: edge.from.id,
+  //           tableName: edge.from.tableName,
+  //           edges: {
+  //             [prop]: [{ to: { id: data.id, tableName: data.tableName } }],
+  //           },
+  //         }),
+  //       );
+  //     } else if (edge.to) {
+  //       updateRelatedDocumentsPromises.push(
+  //         deleteRelatedDocumentEdges({
+  //           id: edge.to.id,
+  //           tableName: edge.to.tableName,
+  //           edges: {
+  //             [prop]: [{ from: { id: data.id, tableName: data.tableName } }],
+  //           },
+  //         }),
+  //       );
+  //     }
+  //   });
+  // }
 
-  await Promise.all(updateRelatedDocumentsPromises);
+  // await Promise.all(updateRelatedDocumentsPromises);
 
-  return `Table edges (from:${data.edges['']}) deleted!`;
+  // return `Table edges (from:${data.edges['']}) deleted!`;
 };

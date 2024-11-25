@@ -14,10 +14,7 @@ import { prepareDbAndAuth, isSubset, post } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
-import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
-import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
-import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
+
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -33,6 +30,7 @@ jest.setTimeout(1000000);
 
 import * as db from './../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
+import { AUTH_GROUPS, AUTH_USERS, TABLES, DELTA_DB, GROUPS_USERS } from '../consts';
 const conn: db.Connection = db.createConnection();
 describe('tableControllerTest', () => {
   const OLD_ENV = process.env;

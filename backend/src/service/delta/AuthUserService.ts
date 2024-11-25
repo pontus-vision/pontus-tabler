@@ -1,26 +1,19 @@
 import {
-  AuthGroupAuthRef,
   AuthGroupCreateReq,
-  AuthGroupDashboardRef,
   AuthGroupRef,
   AuthUserAndGroupsRef,
   AuthUserCreateReq,
   AuthUserCreateRes,
   AuthUserDeleteReq,
   AuthUserDeleteRes,
-  AuthUserGroupRef,
   AuthUserGroupsCreateReq,
   AuthUserGroupsCreateRes,
   AuthUserGroupsDeleteReq,
   AuthUserGroupsDeleteRes,
   AuthUserGroupsReadReq,
   AuthUserGroupsReadRes,
-  AuthUserGroupsUpdateReq,
-  AuthUserGroupsUpdateRes,
-  AuthUserIdAndUsername,
   AuthUserReadReq,
   AuthUserReadRes,
-  AuthUserRef,
   AuthUserUpdateReq,
   AuthUserUpdateRes,
   AuthUsersReadReq,
@@ -36,83 +29,119 @@ import {
   RegisterAdminRes,
   RegisterUserRes,
   RegisterUserReq,
-  TokenReq,
-  TokenRes,
+  AuthGroupUsersCreateReq,
+  AuthGroupUsersCreateRes,
 } from '../../typescript/api';
-import {
-  cosmosDbName,
-  fetchContainer,
-  fetchData,
-  fetchDatabase,
-} from '../../cosmos-utils';
-import { filterToQuery, runQuery } from '../../db-utils';
-import {
-  Container,
-  Item,
-  ItemResponse,
-  PartitionKeyDefinition,
-  PatchOperation,
-  UniqueKeyPolicy,
-} from '@azure/cosmos';
+// import {
+//   cosmosDbName,
+//   fetchContainer,
+//   fetchData,
+//   fetchDatabase,
+// } from '../../cosmos-utils';
+import { createSql, filterToQuery, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
+
 import {
   BadRequestError,
-  InternalServerError,
   NotFoundError,
   TemporaryRedirect,
   UnauthorizedError,
 } from '../../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
-import {
-  ADMIN_GROUP_NAME,
-  AUTH_GROUPS,
-  AUTH_GROUPS_USER_TABLE,
-  createAuthGroup,
-  createAuthUserGroup,
-  createSql,
-  initiateAuthGroupContainer,
-  objEntriesToStr,
-  updateSql,
-} from './AuthGroupService';
 import {
   createTableDataEdge,
-  deleteTableDataEdge,
-  readEdge,
   readTableDataEdge,
-  updateTableDataEdge,
 } from './EdgeService';
-import { DASHBOARDS } from './DashboardService';
-import { filter, has } from 'lodash';
-dotenv.config();
-export const AUTH_USERS = 'auth_users';
-export const ADMIN_USER_USERNAME = 'ADMIN';
-import { v6 as uuidv6 } from 'uuid';
-import { GROUPS_USERS } from '../AuthGroupService';
+import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, GROUPS_USERS } from '../../consts';
 
+const createAuthGroup = async (data: AuthGroupCreateReq) => {
+  let id;
+  if (!data.id) {
+    id = generateUUIDv6();
+  } else {
+    id = data.id;
+  }
 
-const partitionKey: string | PartitionKeyDefinition = {
-  paths: ['/username'],
-};
+  const res = await runQuery(
+    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
+    
+  );
+  const res4 = await runQuery(
+    `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
+    
+  );
+  if (+res4[0]['count(1)'] > 0) {
+    throw new ConflictEntityError(`group name: ${data.name} already taken.`);
+  }
 
-const uniqueKeyPolicy: UniqueKeyPolicy = {
-  uniqueKeys: [{ paths: ['/username'] }],
-};
-
-export const authUserContainerProps = {
-  AUTH_USERS,
-  partitionKey,
-  uniqueKeyPolicy,
-};
-
-export const initiateAuthUserContainer = async (): Promise<Container> => {
-  const authUserContainer = await fetchContainer(
-    AUTH_USERS,
-    partitionKey,
-    uniqueKeyPolicy,
+  const res2 = await runQuery(
+    `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+    
   );
 
-  return authUserContainer;
+  const res3 = await runQuery(
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
+      typeof id === 'string' ? `'${id}'` : id
+    }`,
+    
+  );
+
+  return {
+    name: res3[0]['name'],
+    id,
+    tableMetadata: {
+      create: res3[0]['create_table'],
+      read: res3[0]['read_table'],
+      update: res3[0]['update_table'],
+      delete: res3[0]['delete_table'],
+    },
+  };
+};
+
+const createAuthUserGroup = async (
+  data: AuthGroupUsersCreateReq,
+): Promise<AuthGroupUsersCreateRes> => {
+  const { authUsers, id, name } = data;
+
+  const res = (await createTableDataEdge({
+    tableFrom: {
+      tableName: AUTH_GROUPS,
+
+      rows: data.authUsers.map(() => {
+        return {
+          id: data.id,
+          name: data.name,
+        };
+      }),
+      partitionKeyProp: 'name',
+    },
+    edge: '',
+    jointTableName: GROUPS_USERS,
+    edgeType: 'oneToMany',
+    tableTo: {
+      rows: data.authUsers.map((user) => {
+        return {
+          id: user.id,
+          username: user.username,
+        };
+      }) as Record<string, any>[],
+      tableName: AUTH_USERS,
+    },
+  })) as any;
+
+  const authUsersRes = res.map((el) => {
+    return {
+      username: el['to']['table_to__username'],
+      id: el['to']['table_to__id'],
+    };
+  });
+
+  return {
+    id: data.id,
+    name: data.name,
+    authUsers: authUsersRes,
+    // authUsers: res.map((el) => el.to) as UsernameAndIdRef[],
+  };
 };
 
 export const setup = async (): Promise<InitiateRes> => {
@@ -357,39 +386,6 @@ export const authUserGroupsRead = async (
   };
 };
 
-export const authUserGroupsUpdate = async (
-  data: AuthUserGroupsUpdateReq,
-): Promise<AuthUserGroupsUpdateRes> => {
-  const usersContainer = await fetchContainer(AUTH_USERS);
-
-  const res2 = await usersContainer.item(data.id, data.id).read();
-
-  if (res2.statusCode === 404) {
-    throw new NotFoundError(`Did not find any group at id "${data.id}"`);
-  }
-  const username = res2.resource.username;
-
-  const res = (await updateTableDataEdge({
-    tableFrom: {
-      rows: data.authGroups as any,
-      tableName: AUTH_GROUPS,
-      partitionKeyProp: 'name',
-    },
-    edge: 'groups-users',
-    edgeType: 'oneToMany',
-    tableTo: {
-      tableName: AUTH_USERS,
-      rows: [{ username, id: data.id }] as any,
-      partitionKeyProp: 'username',
-    },
-  })) as any;
-
-  return {
-    authGroups: res.map((el) => el.to) as AuthGroupDashboardRef[],
-    id: data.id,
-    username,
-  };
-};
 export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,
 ): Promise<AuthUserGroupsDeleteRes> => {
@@ -406,65 +402,6 @@ export const authUserGroupsDelete = async (
     throw new NotFoundError('no rows deleted.');
   }
   return '';
-};
-
-export const checkUserPermissions = async (data: {
-  userId: string;
-  username?: string;
-  authTable: 'table' | 'dashboard' | 'tableData';
-}): Promise<{
-  create: boolean;
-  read: boolean;
-  update: boolean;
-  delete: boolean;
-}> => {
-  const authUserContainer = await initiateAuthUserContainer();
-  const authGroupContainer = await initiateAuthGroupContainer();
-
-  const user = await authUserContainer.item(data.userId, data.username).read();
-
-  const userGroups = user.resource.authGroups as AuthGroupRef[];
-
-  if (userGroups.some((el) => el.name === ADMIN_GROUP_NAME)) {
-    return {
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-    };
-  }
-
-  let create = false;
-  let read = false;
-  let update = false;
-  let del = false;
-
-  for (const group of userGroups) {
-    const res = (await authGroupContainer
-      .item(group.id, group.name)
-      .read()) as ItemResponse<AuthGroupRef>;
-    const permissions = res.resource.tableMetadata;
-
-    if (permissions.create) {
-      create = true;
-    }
-    if (permissions.read) {
-      read = true;
-    }
-    if (permissions.update) {
-      update = true;
-    }
-    if (permissions.delete) {
-      del = true;
-    }
-  }
-
-  return {
-    create,
-    read,
-    update,
-    delete: del,
-  };
 };
 
 interface IAuthUser extends AuthUserAndGroupsRef {
@@ -536,29 +473,7 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
   return 'Token deleted.';
 };
 
-export const refreshToken = async (data: TokenReq): Promise<TokenRes> => {
-  const authUserContainer = await initiateAuthUserContainer();
 
-  const claims = getJwtClaims(data.token.split(' ')[1]);
-  const username = claims.username;
-  const userId = claims.userId;
-
-  const refreshToken = data.token;
-
-  const refreshTokens = (await authUserContainer.item(userId, username).read())
-    .resource.refreshTokens;
-
-  if (refreshToken == null) throw new BadRequestError('Please insert a token.');
-  if (!refreshTokens.includes(refreshToken))
-    throw new NotFoundError('refresh token not found.');
-  let res;
-  jwt.verify(refreshToken, process.env.REFRESH_JWT_SECRET_KEY, (err, user) => {
-    if (err) throw new BadRequestError('Wrong token inserted.');
-    const accessToken = generateAccessToken({ name: user.name });
-    res = accessToken;
-  });
-  return res;
-};
 
 export const authenticateToken = async (
   req,

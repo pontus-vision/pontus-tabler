@@ -1,7 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
-import pontus from './index';
 import cors from 'cors';
-import { register } from './generated/register';
 import {
   app as azureApp,
   HttpRequest,
@@ -9,21 +7,11 @@ import {
   InvocationContext,
 } from '@azure/functions';
 import * as http from 'http';
-import https from 'https';
-import {
-  AUTH_GROUPS,
-  AUTH_GROUPS_USER_TABLE,
-  checkPermissions,
-} from './service/delta/AuthGroupService';
-import { NotFoundError, UnauthorizedError } from './generated/api';
-import { DASHBOARDS, authenticateToken } from './service/delta';
-import { authUserGroupsRead } from './service/AuthUserService';
-import { GROUPS_USERS } from './service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from './service/EdgeService';
-
-const agent = new https.Agent({
-  rejectUnauthorized: false, // Disables certificate validation
-});
+import pontus from './index'
+import { register } from './generated';
+import { authenticateToken } from './service/AuthUserService';
+import { GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
+import { checkPermissions } from './service/AuthGroupService';
 
 export const app = express();
 
@@ -54,6 +42,7 @@ const authMiddleware = async (
     return next();
   }
 
+  console.log(process.env.DB_SOURCE)
   try {
     const authorization = await authenticateToken(req, res);
     const userId = authorization['userId'];
@@ -76,9 +65,10 @@ const authMiddleware = async (
       targetId = req.body?.['id'];
     }
 
-    const permissions = await checkPermissions(userId, targetId, tableName);
+    const permissions = await checkPermissions('', '', '');
     if (permissions[crudAction]) {
-      next();
+    // if (permissions['']) {
+      // next();
     } else {
       throw { code: 401, message: 'You do not have this permission' };
     }
@@ -92,9 +82,9 @@ app.use(express.json());
 app.use(authMiddleware);
 register(app, { pontus });
 
-// app.listen(port, () => {
-//   console.log(`listening on port ${port}`);
-// });
+app.listen(port, () => {
+  console.log(`listening on port ${port}`);
+});
 
 const validate = (_request, _scopes, _schema) => {
   return true;
@@ -112,6 +102,7 @@ const httpTrigger = async (
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> => {
+ 
   context.log(`Http function processed request for url "${request.url}"`);
 
   srv.closeIdleConnections();
@@ -165,51 +156,8 @@ const httpTrigger = async (
   srv.closeIdleConnections();
 
   return resp;
-  //   const resp: HttpResponseInit = {
-  //     body: "",
-  //     cookies: undefined,
-  //     enableContentNegotiation: undefined,
-  //     headers: {},
-  //     // jsonBody: await ret.json(),
-  //     status: 200
-  //   };
-
-  // return new Promise<HttpResponseInit>(
-  //   (
-  //     resolve: (value: HttpResponseInit | PromiseLike<HttpResponseInit>) => void,
-  //     reject: (reason: any) => void,
-  //   ) => {
-
-  //     const req = http.request(reqOpts, (res: http.IncomingMessage) => {
-  //       resp.status = res.statusCode;
-  //       resp.headers = res.headers;
-
-  //       context.log(`STATUS: ${res.statusCode}`);
-  //       context.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-  //       res.setEncoding('utf8');
-  //       res.on('data', (chunk) => {
-  //         resp.body += chunk as string;
-  //       });
-  //       res.on('end', () => {
-  //         context.log('No more data in response.');
-  //         resolve(resp);
-  //       });
-  //     });
-
-  //     req.on('error', (e) => {
-  //       context.error(`problem with request: ${e.message}`);
-  //       resp.body = JSON.stringify( {
-  //         error: e.message,
-  //       });
-  //       reject(resp);
-  //     });
-
-  //     // Write data to request body
-  //     req.write(data);
-  //     req.end();
-
-  //   },
-  // );
+    
+  
 };
 
 azureApp.http('httpTrigger', {
