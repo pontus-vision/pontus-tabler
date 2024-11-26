@@ -1,5 +1,5 @@
-import jinst from './jinst';
-import ResultSetMetaData from './resultsetmetadata';
+import jinst from './jinst.js';
+import ResultSetMetaData from './resultsetmetadata.js';
 
 const java = jinst.getInstance();
 

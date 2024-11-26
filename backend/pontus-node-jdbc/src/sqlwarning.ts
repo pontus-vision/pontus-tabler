@@ -1,4 +1,5 @@
 /* jshint node: true */
+"use strict";
 
 class SQLWarning {
   private _sqlwarning: any;

@@ -1,8 +1,9 @@
 /* jshint node: true */
+"use strict";
 
-import ResultSet from './resultset';
-import ResultSetMetaData from './resultsetmetadata';
-import Statement from './statement';
+import ResultSet from './resultset.js';
+import ResultSetMetaData from './resultsetmetadata.js';
+import Statement from './statement.js';
 
 class PreparedStatement extends Statement {
   private _ps: any;

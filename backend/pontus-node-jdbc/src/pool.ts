@@ -1,18 +1,19 @@
 import { v4 as uuidv4 } from "uuid";
-import Jinst from "./jinst";
-import dm from "./drivermanager";
-import Connection from "./connection";
-import Statement from "./statement";
+import * as console from "console";
+import Jinst from "./jinst.js";
+import dm from "./drivermanager.js";
+import Connection from "./connection.js";
+import Statement from "./statement.js";
 import { ConnectOpts } from "net";
 
 interface ConnStatus {
   uuid: string; closed: boolean; readonly?: boolean; valid?: boolean
 }
 
-export interface ConnObj {
+export interface PoolConnObj {
     uuid: string;
     conn: Connection;
-    keepalive: number | boolean |NodeJS.Timeout ;
+    keepalive: number | boolean;
     lastIdle: number | undefined ;
   }
 
@@ -57,7 +58,7 @@ interface PoolConnStatus {
 
 const java = Jinst.getInstance();
 
-export interface IConnection extends ConnObj, Connection {}
+export interface IConnection extends PoolConnObj, Connection {}
 
 
 if (!Jinst.getInstance().isJvmCreated()) {
@@ -87,7 +88,6 @@ const addConnection = async (
   ka: { enabled: boolean; interval: number; query: string },
   maxIdle: number | null
 ): Promise<any> => {
-  console.log({url})
   return new Promise((resolve, reject) => {
     dm.getConnection(url, props)
       .then((conn: any) => {
@@ -118,7 +118,7 @@ const addConnectionSync = (
   maxIdle: number | null
 ) => {
   const conn = dm.getConnectionSync(url, props);
-  const connobj: ConnObj = {
+  const connobj: PoolConnObj = {
     uuid: uuidv4(),
     conn: new Connection(conn),
     keepalive: ka.enabled
@@ -189,7 +189,7 @@ class Pool {
   }
 
   private async connStatus(acc: ConnStatus[], pool: PoolConnStatus[]): Promise<ConnStatus[]> {
-    return await pool.reduce((conns, connobj) => {
+    return pool.reduce((conns, connobj) => {
         const conn = connobj.conn;
         const closed = conn.isClosedSync() as boolean;
         const readonly = conn.isReadOnlySync();
@@ -288,7 +288,7 @@ private async _addConnectionsOnInitialize(): Promise<void> {
     this.closeIdleConnectionsInArray(this._reserved, this._maxidle);
   }
 
-  private closeIdleConnectionsInArray(array: ConnObj[], maxIdle: number): void {
+  private closeIdleConnectionsInArray(array: PoolConnObj[], maxIdle: number): void {
     const time = new Date().getTime();
     const maxLastIdle = time - maxIdle;
 
@@ -304,7 +304,7 @@ private async _addConnectionsOnInitialize(): Promise<void> {
     }
   }
 
-  async release(conn: ConnObj): Promise<void> {
+  async release(conn: PoolConnObj): Promise<void> {
     if (typeof conn === "object") {
         const uuid = conn.uuid;
 

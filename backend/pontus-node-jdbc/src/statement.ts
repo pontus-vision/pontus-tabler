@@ -1,7 +1,8 @@
 /* jshint node: true */
+"use strict";
 
-import ResultSet from "./resultset";
-import Jinst from "./jinst";
+import ResultSet from "./resultset.js";
+import Jinst from "./jinst.js";
 const java = Jinst.getInstance();
 
 class Statement {

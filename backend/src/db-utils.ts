@@ -47,9 +47,9 @@ async function initializePool() {
   }
 }
 
-// (async () => {
-//   await initializePool();
-// })();
+(async () => {
+  await initializePool();
+})();
 
 export const convertToSqlFields = (data: any[]): string => {
   const fields = [];
@@ -237,8 +237,8 @@ export const createSql = async (
 
 export async function runQuery(query: string): Promise<Record<string,any>[]> {
   try {
-    console.log({query})
       const connection = await createConnection();
+    console.log({connection})
       const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
       const resultSet = await preparedStatement.executeQuery();

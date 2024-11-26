@@ -12,7 +12,10 @@
     "prestart": "npm run clean && npm run build",
     "jest": "/usr/bin/env NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0  jest --coverage --detectOpenHandles --runInBand  --config jest.config.js ",
     "refresh": "npm uninstall ../frontend/ && npm install ../frontend/",
-    "generate": "npx fern-api generate "
+    "generate": "npx fern-api generate ",
+    "test-debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js",
+    "test-watch": "jest --watchAll",
+      "test-watch-debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --watchAll --runInBand"
   },
   "exports": {},
   "author": {

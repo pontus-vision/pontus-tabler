@@ -1,6 +1,6 @@
-import ResultSet from "./resultset";
-import Connection from "./connection";
-import Jinst from "./jinst";
+import ResultSet from "./resultset.js";
+import Connection from "./connection.js";
+import Jinst from "./jinst.js";
 
 const java = Jinst.getInstance();
 

@@ -1,6 +1,7 @@
 import Jinst from "./jinst";
-import Connection from "./connection";
 
+
+import Connection from "./connection";
 const java = Jinst.getInstance();
 
 const DM = "java.sql.DriverManager";
