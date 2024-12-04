@@ -70,6 +70,8 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
     `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
     
   );
+  console.log({res4, query:`SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`})
+
   if (+res4[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
   }
@@ -345,7 +347,6 @@ export const authUserGroupsCreate = async (
   return {
     id: data.id,
     authGroups: data.authGroups as AuthGroupRef[],
-
     username: data.username,
   };
 };

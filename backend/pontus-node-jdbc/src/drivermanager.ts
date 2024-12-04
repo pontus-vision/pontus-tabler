@@ -56,7 +56,7 @@ const driverManager: DriverManager = {
 
     return new Promise((resolve, reject) => {
     
-      java.callStaticMethodSync.apply(java, [DM, "getConnection", ...args]);
+      resolve(java.callStaticMethodSync.apply(java, [DM, "getConnection", ...args]));
     });
   },
 

@@ -51,6 +51,7 @@ import {
 } from '@azure/cosmos';
 import {
   createTableDataEdge,
+  readEdge,
   readTableDataEdge,
   updateTableDataEdge,
 } from './EdgeService';
@@ -739,6 +740,87 @@ export const checkTableMetadataPermissions = async (
     }
   }
 
+  return {
+    create,
+    read,
+    update,
+    delete: del,
+  };
+};
+
+export const checkPermissions = async (
+  userId: string,
+  targetId: string,
+  containerId:string ,
+): Promise<CrudDocumentRef> => {
+  const res = (await readEdge({
+    direction: 'from',
+    edgeTable: 'groups-users',
+    tableFromName: AUTH_USERS,
+    tableToName: AUTH_GROUPS,
+    filters: {},
+    rowId: userId,
+  })) as AuthGroupRef[];
+
+  if (res.length === 0) {
+    throw new NotFoundError('There is no group associated with user');
+  }
+
+  let create = false;
+  let read = false;
+  let update = false;
+  let del = false;
+
+  for (const group of res) {
+    if (group.name === ADMIN_GROUP_NAME) {
+      return {
+        create: true,
+        read: true,
+        update: true,
+        delete: true,
+      };
+    }
+    const res = await readEdge({
+      direction: 'to',
+      edgeTable:
+        containerId === DASHBOARDS
+          ? GROUPS_DASHBOARDS
+          : containerId === TABLES
+          ? GROUPS_TABLES
+          : containerId === AUTH_USERS
+          ? GROUPS_TABLES
+          : '',
+      tableFromName: AUTH_GROUPS,
+      tableToName: containerId,
+      filters: {
+        filters: {
+          id: {
+            filter: targetId,
+            filterType: 'text',
+            type: 'equals',
+          },
+        },
+      },
+      rowId: group.id,
+    });
+
+    if (containerId === DASHBOARDS) {
+      for (const dashboard of res) {
+        if (dashboard?.create) {
+          create = dashboard?.create;
+        }
+        if (dashboard?.read) {
+          read = dashboard?.read;
+        }
+        if (dashboard?.update) {
+          update = dashboard?.update;
+        }
+        if (dashboard?.delete) {
+          del = dashboard?.delete;
+        }
+      }
+    }
+  }
   return {
     create,
     read,

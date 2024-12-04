@@ -458,7 +458,7 @@ export const readEdge = async (
         ? `table_to__id = '${data.rowId}'`
         : `table_from__id = '${data.rowId}'`
     }` + fromTo,
-  )) as Record<string, any>;
+  )) as Record<string, any>[];
 
   return sql;
 };

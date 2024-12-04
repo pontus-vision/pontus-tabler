@@ -13,7 +13,7 @@ import {
   LoginRes,
 } from '../typescript/api';
 import { runQuery } from '../db-utils';
-import { DELTA_DB } from '../consts';
+import { dbSource, DELTA_DB } from '../consts';
 
 export const post = async (
   endpoint: string,
@@ -41,34 +41,34 @@ export const post = async (
   //     },
   //   );
   //   return res;
-  console.log({endpoint})
+  console.log({endpoint,headers})
 
-   const res = await fetch(
-     'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-     {
-       method: 'POST',
-       headers: {
-         'Content-Type': 'application/json',
-         Authorization:  headers['Authorization'] || 'Bearer 123456',
-       },
-       body: JSON.stringify(body),
-     },
-   )
-   const json = await res.json()
-   console.log({json})
+  //  const res = await fetch(
+  //    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+  //    {
+  //      method: 'POST',
+  //      headers: {
+  //        'Content-Type': 'application/json',
+  //        Authorization:  headers['Authorization'] || 'Bearer 123456',
+  //      },
+  //      body: JSON.stringify(body),
+  //    },
+  //  )
+  //  const json = await res.json()
+  //  console.log({json})
 
-  // const res = await httpTrigger(
-  //   new HttpRequest({
-  //     body: { string: JSON.stringify(body) },
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       ...headers,
-  //     },
-  //     url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-  //   }),
-  //   new InvocationContext(),
-  // );
+  const res = await httpTrigger(
+    new HttpRequest({
+      body: { string: JSON.stringify(body) },
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+    }),
+    new InvocationContext(),
+  );
 
   const retVal = {
     status: res.status,
@@ -283,11 +283,12 @@ export const prepareDbAndAuth = async (
 
   for (const table of tables) {
     if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await runQuery(`DELETE FROM ${table};`);
+      // const sql = await runQuery(`DELETE FROM ${table};`);
     } else {
       await deleteContainer(table);
     }
   }
+  console.log({dbSource})
 
   const createAdminBody: RegisterAdminReq = {
     username: 'admin',
@@ -299,6 +300,9 @@ export const prepareDbAndAuth = async (
     '/register/admin',
     createAdminBody,
   )) as AxiosResponse<RegisterAdminRes>;
+
+  console.log({adminCreateRes})
+
   expect(adminCreateRes.status).toBe(200);
 
   admin = adminCreateRes.data;
@@ -310,6 +314,7 @@ export const prepareDbAndAuth = async (
 
   const LoginRes = (await post('/login', loginBody)) as AxiosResponse<LoginRes>;
   expect(LoginRes.status).toBe(200);
+
 
   adminToken = LoginRes.data.accessToken;
 

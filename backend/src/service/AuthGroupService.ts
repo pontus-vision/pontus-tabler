@@ -275,7 +275,7 @@ export const checkPermissions = async (
   if (dbSource === COSMOS_DB) {
     return cdb.checkPermissions(userId, targetId, containerId);
   } else if (dbSource === DELTA_DB) {
-    // return deltadb.checkPermissions(userId, targetId, containerId);
+    return deltadb.checkPermissions(userId, targetId, containerId);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);

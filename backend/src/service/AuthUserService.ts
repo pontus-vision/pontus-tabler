@@ -30,7 +30,11 @@ import {
 import { InternalServerError } from '../generated/api';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
-import { COSMOS_DB, dbSource, DELTA_DB } from '../consts';
+import { COSMOS_DB,  DELTA_DB } from '../consts';
+
+
+
+export const dbSource = process.env.DB_SOURCE ;
 
 export const setup = async (): Promise<InitiateRes> => {
   if (dbSource === COSMOS_DB) {
@@ -49,7 +53,7 @@ export const registerUser = async (
   } else if (dbSource === DELTA_DB) {
     return deltadb.registerUser(data);
   }
-  throw new InternalServerError(`invalid data source. ${dbSource}`);
+  // throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export interface registerAdmin extends RegisterAdminReq {
@@ -164,16 +168,16 @@ export const authUserGroupsRead = async (
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
-// export const authUserGroupsUpdate = async (
-//   data: AuthUserGroupsUpdateReq,
-// ): Promise<AuthUserGroupsUpdateRes> => {
-//   if (dbSource === COSMOS_DB) {
-//     return cdb.authUserGroupsUpdate(data);
-//   } else if (dbSource === DELTA_DB) {
-//     return deltadb.authUserGroupsUpdate(data);
-//   }
-//   throw new InternalServerError(`invalid data source. ${dbSource}`);
-// };
+export const authUserGroupsUpdate = async (
+  data: AuthUserGroupsUpdateReq,
+): Promise<AuthUserGroupsUpdateRes> => {
+  if (dbSource === COSMOS_DB) {
+    return cdb.authUserGroupsUpdate(data);
+  } else if (dbSource === DELTA_DB) {
+    // return deltadb.authUserGroupsUpdate(data);
+  }
+  throw new InternalServerError(`invalid data source. ${dbSource}`);
+};
 
 export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,

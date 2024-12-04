@@ -1,5 +1,5 @@
 import { ReadPaginationFilter } from './typescript/api';
-import { Pool } from '../pontus-node-jdbc/src/index';
+import { Jinst, Pool } from '../pontus-node-jdbc/src/index';
 import {JDBC} from '../pontus-node-jdbc/src/index';
 import { v4 as uuidv4 } from 'uuid';
 import { snakeCase } from 'lodash';
@@ -7,6 +7,13 @@ import { NotFoundError } from './generated/api';
 import { IConnection } from '../pontus-node-jdbc/src/pool';
 
 export const DELTA_DB = 'deltadb'
+
+export const classPath = process.env['CLASSPATH']?.split(',');
+
+if (!Jinst.getInstance().isJvmCreated()) {
+	  Jinst.getInstance().addOption('-Xrs');
+	    Jinst.getInstance().setupClasspath(classPath || []); // Path to your JDBC driver JAR file
+}
 
 export const config= {
   url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
@@ -170,8 +177,11 @@ export const createSql = async (
   const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${
     data?.id ? '' : 'id STRING, '
   } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
+  console.log({createQuery})
 
   const res = await runQuery(createQuery);
+
+  console.log({res})
 
   const insertFields = Array.isArray(data)
     ? Object.keys(data[0]).join(', ')
@@ -238,18 +248,18 @@ export const createSql = async (
 export async function runQuery(query: string): Promise<Record<string,any>[]> {
   try {
       const connection = await createConnection();
-    console.log({connection})
+      // console.log({connection, query, FOO: 'BAR'})
       const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
       const resultSet = await preparedStatement.executeQuery();
       const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
-      console.log('Query Results:', results);
+      console.log('Query Results:', results.length);
       
       // Remember to release the connection after you are done
       // await pool.release(connection);
 
-      await connection.close()
+      await pool.release(connection)
 
       return results
   } catch (error) {
