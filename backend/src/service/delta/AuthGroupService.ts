@@ -93,7 +93,41 @@ import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARD
       return { ...edge.to, id: edge.from.id, name: edge.from.name };
     }) as NameAndIdRef[],
   };
-};
+}
+
+// export const authUserGroupsUpdate = async (
+//     data: AuthUserGroupsUpdateReq,
+//   ): Promise<AuthUserGroupsUpdateRes> => {
+//     const usersContainer = await fetchContainer(AUTH_USERS);
+  
+//     const res2 = await usersContainer.item(data.id, data.id).read();
+  
+//     if (res2.statusCode === 404) {
+//       throw new NotFoundError(`Did not find any group at id "${data.id}"`);
+//     }
+//     const username = res2.resource.username;
+  
+//     const res = (await updateTableDataEdge({
+//       tableFrom: {
+//         rows: data.authGroups as any,
+//         tableName: AUTH_GROUPS,
+//         partitionKeyProp: 'name',
+//       },
+//       edge: 'groups-users',
+//       edgeType: 'oneToMany',
+//       tableTo: {
+//         tableName: AUTH_USERS,
+//         rows: [{ username, id: data.id }] as any,
+//         partitionKeyProp: 'username',
+//       },
+//     })) as any;
+  
+//     return {
+//       authGroups: res.map((el) => el.to) as AuthGroupDashboardRef[],
+//       id: data.id,
+//       username,
+//     };
+//   };
 
 
 export const createAuthGroup = async (data: AuthGroupCreateReq) => {

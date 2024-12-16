@@ -80,7 +80,7 @@ describe('dashboardCreatePOST', () => {
     srv.close();
   });
 
-  it.only('should create a user', async () => {
+  it('should create a user', async () => {
     const createBody: AuthUserCreateReq = {
       username: 'user2',
       password: 'pontusvision',
@@ -93,52 +93,52 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<AuthUserCreateRes>;
     expect(userCreateRes.status).toBe(200);
 
-    // expect(userCreateRes.data.username).toBe(createBody.username);
+    expect(userCreateRes.data.username).toBe(createBody.username);
 
-    // const readBody: AuthUserReadReq = {
-    //   id: userCreateRes.data.id,
-    //   username: userCreateRes.data.username,
-    // };
+    const readBody: AuthUserReadReq = {
+      id: userCreateRes.data.id,
+      username: userCreateRes.data.username,
+    };
 
-    // const authGroupReadRes = (await postAdmin(
-    //   '/auth/user/read',
-    //   readBody,
-    // )) as AxiosResponse<AuthUserReadRes>;
+    const authGroupReadRes = (await postAdmin(
+      '/auth/user/read',
+      readBody,
+    )) as AxiosResponse<AuthUserReadRes>;
 
-    // expect(authGroupReadRes.status).toBe(200);
+    expect(authGroupReadRes.status).toBe(200);
 
-    // expect(authGroupReadRes.data).toMatchObject(userCreateRes.data);
+    expect(authGroupReadRes.data).toMatchObject(userCreateRes.data);
 
-    // const updateBody: AuthUserUpdateReq = {
-    //   id: userCreateRes.data.id,
-    //   username: userCreateRes.data.username,
-    // };
+    const updateBody: AuthUserUpdateReq = {
+      id: userCreateRes.data.id,
+      username: userCreateRes.data.username,
+    };
 
-    // const authGroupUpdateRes = (await postAdmin(
-    //   '/auth/user/update',
-    //   updateBody,
-    // )) as AxiosResponse<AuthUserCreateRes>;
+    const authGroupUpdateRes = (await postAdmin(
+      '/auth/user/update',
+      updateBody,
+    )) as AxiosResponse<AuthUserCreateRes>;
 
-    // expect(authGroupUpdateRes.status).toBe(200);
-    // expect(authGroupUpdateRes.data).toMatchObject(updateBody);
-    // const deleteBody: AuthUserDeleteReq = {
-    //   id: userCreateRes.data.id,
-    //   username: userCreateRes.data.username,
-    // };
+    expect(authGroupUpdateRes.status).toBe(200);
+    expect(authGroupUpdateRes.data).toMatchObject(updateBody);
+    const deleteBody: AuthUserDeleteReq = {
+      id: userCreateRes.data.id,
+      username: userCreateRes.data.username,
+    };
 
-    // const authGroupDeleteRes = (await postAdmin(
-    //   '/auth/user/delete',
-    //   deleteBody,
-    // )) as AxiosResponse<AuthUserDeleteRes>;
+    const authGroupDeleteRes = (await postAdmin(
+      '/auth/user/delete',
+      deleteBody,
+    )) as AxiosResponse<AuthUserDeleteRes>;
 
-    // expect(authGroupDeleteRes.status).toBe(200);
+    expect(authGroupDeleteRes.status).toBe(200);
 
-    // const authGroupReadRes2 = (await postAdmin(
-    //   '/auth/user/read',
-    //   readBody,
-    // )) as AxiosResponse<AuthUserReadRes>;
+    const authGroupReadRes2 = (await postAdmin(
+      '/auth/user/read',
+      readBody,
+    )) as AxiosResponse<AuthUserReadRes>;
 
-    // expect(authGroupReadRes2.status).toBe(404);
+    expect(authGroupReadRes2.status).toBe(404);
   });
   it('should read many users', async () => {
     const createBody: AuthUserCreateReq = {

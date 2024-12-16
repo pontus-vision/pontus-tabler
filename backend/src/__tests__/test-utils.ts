@@ -41,7 +41,7 @@ export const post = async (
   //     },
   //   );
   //   return res;
-  console.log({endpoint,headers})
+  console.log({ endpoint, headers })
 
   //  const res = await fetch(
   //    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
@@ -283,12 +283,11 @@ export const prepareDbAndAuth = async (
 
   for (const table of tables) {
     if (process.env.DB_SOURCE === DELTA_DB) {
-      // const sql = await runQuery(`DELETE FROM ${table};`);
+      const sql = await runQuery(`DELETE FROM ${table};`);
     } else {
       await deleteContainer(table);
     }
   }
-  console.log({dbSource})
 
   const createAdminBody: RegisterAdminReq = {
     username: 'admin',
@@ -301,7 +300,7 @@ export const prepareDbAndAuth = async (
     createAdminBody,
   )) as AxiosResponse<RegisterAdminRes>;
 
-  console.log({adminCreateRes})
+  console.log({ adminCreateRes })
 
   expect(adminCreateRes.status).toBe(200);
 

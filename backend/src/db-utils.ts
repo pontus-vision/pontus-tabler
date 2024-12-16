@@ -1,6 +1,6 @@
 import { ReadPaginationFilter } from './typescript/api';
 import { Jinst, Pool } from '../pontus-node-jdbc/src/index';
-import {JDBC} from '../pontus-node-jdbc/src/index';
+import { JDBC } from '../pontus-node-jdbc/src/index';
 import { v4 as uuidv4 } from 'uuid';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from './generated/api';
@@ -11,11 +11,11 @@ export const DELTA_DB = 'deltadb'
 export const classPath = process.env['CLASSPATH']?.split(',');
 
 if (!Jinst.getInstance().isJvmCreated()) {
-	  Jinst.getInstance().addOption('-Xrs');
-	    Jinst.getInstance().setupClasspath(classPath || []); // Path to your JDBC driver JAR file
+  Jinst.getInstance().addOption('-Xrs');
+  Jinst.getInstance().setupClasspath(classPath || []); // Path to your JDBC driver JAR file
 }
 
-export const config= {
+export const config = {
   url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
   drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
   properties: {
@@ -25,24 +25,24 @@ export const config= {
 };
 
 const pool = new Pool({
-    url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
-    properties: {
-      user: 'admin',           // Database username
-      password: 'user'        // Database password
-    },
-    drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
-    minpoolsize: 2,
-    maxpoolsize: 10,
-    keepalive: {
-      interval: 60000,
-      query: 'SELECT 1',
-      enabled: true
-    },
-    logging: {
-      level: 'info'
-    }
-  });
-  const jdbc = new JDBC(config);
+  url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
+  properties: {
+    user: 'admin',           // Database username
+    password: 'user'        // Database password
+  },
+  drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
+  minpoolsize: 2,
+  maxpoolsize: 10,
+  keepalive: {
+    interval: 60000,
+    query: 'SELECT 1',
+    enabled: true
+  },
+  logging: {
+    level: 'info'
+  }
+});
+const jdbc = new JDBC(config);
 
 // Initialize pool
 async function initializePool() {
@@ -110,7 +110,7 @@ export const updateSql = async (
 
   const res3 = await runQuery(
     `SELECT * FROM ${table} ${whereClause}`,
-    
+
   );
   if (res3.length === 0) {
     throw new NotFoundError(
@@ -174,14 +174,13 @@ export const createSql = async (
   //   conn,
   // );
 
-  const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${
-    data?.id ? '' : 'id STRING, '
-  } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
-  console.log({createQuery})
+  const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
+    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
+  console.log({ createQuery })
 
   const res = await runQuery(createQuery);
 
-  console.log({res})
+  console.log({ res })
 
   const insertFields = Array.isArray(data)
     ? Object.keys(data[0]).join(', ')
@@ -197,29 +196,26 @@ export const createSql = async (
 
   const ids = [];
 
-  const insert = `INSERT INTO ${table} (${
-    data?.id ? '' : 'id, '
-  } ${insertFields}) VALUES ${
-    Array.isArray(data)
+  const insert = `INSERT INTO ${table} (${data?.id ? '' : 'id, '
+    } ${insertFields}) VALUES ${Array.isArray(data)
       ? insertValues
-          .map((el) => {
-            const uuid = generateUUIDv6();
-            ids.push(uuid);
-            return `('${uuid}', ${el})`;
-          })
-          .join(', ')
+        .map((el) => {
+          const uuid = generateUUIDv6();
+          ids.push(uuid);
+          return `('${uuid}', ${el})`;
+        })
+        .join(', ')
       : `('${uuid}',` + values + ')'
-  }`;
+    }`;
 
   const res2 = await runQuery(insert);
 
-  const selectQuery = `SELECT * FROM ${table} WHERE ${
-    data?.id
+  const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id
       ? `id = '${data?.id}'`
       : ids.length > 0
-      ? ids.map((id) => `id = '${id}'`).join(' OR ')
-      : `id = '${uuid}'`
-  }`;
+        ? ids.map((id) => `id = '${id}'`).join(' OR ')
+        : `id = '${uuid}'`
+    }`;
 
   const res3 = await runQuery(selectQuery);
 
@@ -240,30 +236,30 @@ export const createSql = async (
   // });
 };
 
-  export const createConnection = async():Promise<IConnection> => {
-    const reservedConn = await jdbc.reserve()
-    return reservedConn.conn
-  };
+export const createConnection = async (): Promise<IConnection> => {
+  const reservedConn = await jdbc.reserve()
+  return reservedConn.conn
+};
 
-export async function runQuery(query: string): Promise<Record<string,any>[]> {
+export async function runQuery(query: string): Promise<Record<string, any>[]> {
   try {
-      const connection = await createConnection();
-      // console.log({connection, query, FOO: 'BAR'})
-      const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
+    const connection = await createConnection();
+    // console.log({connection, query, FOO: 'BAR'})
+    const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
-      const resultSet = await preparedStatement.executeQuery();
-      const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
+    const resultSet = await preparedStatement.executeQuery();
+    const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
-      console.log('Query Results:', results.length);
-      
-      // Remember to release the connection after you are done
-      // await pool.release(connection);
+    console.log('Query Results:', results.length);
 
-      await pool.release(connection)
+    // Remember to release the connection after you are done
+    // await pool.release(connection)
 
-      return results
+    await connection.close()
+
+    return results
   } catch (error) {
-      console.error('Error executing query:', error);
+    console.error('Error executing query:', error);
   }
 }
 
@@ -828,18 +824,16 @@ export const filterToQuery = (
         if (condition1DateFrom && type1 === 'inrange') {
           const multiCol = Object.keys(cols).length > 1;
           colQuery.push(
-            ` ${
-              multiCol ? '(' : ''
+            ` ${multiCol ? '(' : ''
             }${alias}${colName} >= '${condition1DateFrom}' AND ${alias}${colName} <= '${condition1DateTo}'` +
-              (condition2DateFrom ? ')' : ''),
+            (condition2DateFrom ? ')' : ''),
           );
         }
 
         if (condition2DateFrom && type2 === 'inrange') {
           const multiCol = Object.keys(cols).length > 1;
           colQuery.push(
-            ` ${operator} (${alias}${colName} >= '${condition2DateFrom}' AND ${alias}${colName} <= '${condition2DateTo}'${
-              multiCol ? ')' : ''
+            ` ${operator} (${alias}${colName} >= '${condition2DateFrom}' AND ${alias}${colName} <= '${condition2DateTo}'${multiCol ? ')' : ''
             }`,
           );
         }
@@ -870,12 +864,10 @@ export const filterToQuery = (
   const hasFilters = Object.keys(body?.filters || {}).length > 0;
   const fromTo =
     process.env.DB_SOURCE === DELTA_DB
-      ? ` ${to ? 'LIMIT ' + (to - from) : ''} ${
-          from ? ' OFFSET ' + (from - 1) : ''
-        }`
-      : `${from ? ' OFFSET ' + (from - 1) : ''} ${
-          to ? 'LIMIT ' + (to - from) : ''
-        }`;
+      ? ` ${to ? 'LIMIT ' + (to - from) : ''} ${from ? ' OFFSET ' + (from - 1) : ''
+      }`
+      : `${from ? ' OFFSET ' + (from - 1) : ''} ${to ? 'LIMIT ' + (to - from) : ''
+      }`;
 
   const finalQuery = (
     (hasFilters ? ' WHERE ' : '') +
