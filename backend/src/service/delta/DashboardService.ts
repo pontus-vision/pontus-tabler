@@ -18,33 +18,18 @@ import {
   DashboardAuthGroups,
   Dashboard,
 } from '../../typescript/api';
-import { fetchContainer, fetchData } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { createSql, filterToQuery, runQuery, updateSql } from '../../db-utils';
 import { NotFoundError } from '../../generated/api';
-import { ItemResponse, PatchOperation } from '@azure/cosmos';
-import { CosmosClient } from '@azure/cosmos';
-import { initiateMenuContainer } from './MenuService';
 import {
-  createConnection,
   createTableDataEdge,
   deleteTableDataEdge,
   readTableDataEdge,
-  updateTableDataEdge,
 } from './EdgeService';
-import {
-  AUTH_GROUPS,
-  createSql,
-  initiateAuthGroupContainer,
-  updateSql,
-} from './AuthGroupService';
-import { AUTH_USERS } from './AuthUserService';
-declare function getContext(): any;
-import * as db from './../../../delta-table/node/index-jdbc';
-import { GROUPS_DASHBOARDS } from '../EdgeService';
 
-const conn: db.Connection = db.createConnection();
-export const DASHBOARDS_GROUPS = 'dashboards_groups';
-export const DASHBOARDS = 'dashboards';
+
+import * as db from './../../../delta-table/node/index-jdbc';
+import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS } from '../../consts';
+
 
 export const createDashboard = async (
   data: DashboardCreateReq,
@@ -123,9 +108,8 @@ export const updateDashboard = async (
 };
 
 export const readDashboardById = async (dashboardId: string) => {
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
-    conn,
   );
 
   if (sql.length === 0) {
@@ -136,9 +120,8 @@ export const readDashboardById = async (dashboardId: string) => {
 };
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `DELETE FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
-    conn,
   );
 
   const affectedRows = +sql[0]['num_affected_rows'];
@@ -155,13 +138,11 @@ export const readDashboards = async (
 ): Promise<DashboardsReadRes> => {
   const whereClause = filterToQuery(body);
   const whereClause2 = filterToQuery({ filters: body.filters });
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
-    conn,
   );
-  const sqlCount = await db.executeQuery(
+  const sqlCount = await runQuery(
     `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
-    conn,
   );
   const count = +sqlCount[0]['count(1)'];
   if (count === 0) {
@@ -182,9 +163,8 @@ export const readDashboards = async (
 export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
-  const sql = await db.executeQuery(
+  const sql = await runQuery(
     `SELECT name FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
-    conn,
   );
 
   const res = (await createTableDataEdge({

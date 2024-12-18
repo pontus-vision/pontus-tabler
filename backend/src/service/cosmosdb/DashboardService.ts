@@ -30,11 +30,10 @@ import {
   readTableDataEdge,
   updateTableDataEdge,
 } from './EdgeService';
-import { AUTH_GROUPS, initiateAuthGroupContainer } from './AuthGroupService';
-import { AUTH_USERS } from './AuthUserService';
+import { initiateAuthGroupContainer } from './AuthGroupService';
+import { AUTH_GROUPS, DASHBOARDS } from '../../consts';
 declare function getContext(): any;
 
-export const DASHBOARDS = 'dashboards';
 
 export const createDashboard = async (
   data: DashboardCreateReq,

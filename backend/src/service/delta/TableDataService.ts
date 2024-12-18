@@ -7,31 +7,14 @@ import {
   TableDataRowRef,
   TableDataUpdateReq,
 } from '../../typescript/api';
-import { filterToQuery } from '../../db-utils';
-import { PatchOperation } from '@azure/cosmos';
-import {
-  TABLES,
-  TABLE_DATA,
-  initiateTableContainer,
-  readTableByName,
-} from './TableService';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  convertToSqlFields,
-  createSql,
-  generateUUIDv6,
-  objEntriesToStr,
-  updateSql,
-} from './AuthGroupService';
-import * as db from './../../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from '../../generated/api';
+import { createSql, filterToQuery, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from '../../db-utils';
+import { TABLES } from '../../consts';
 
-const conn: db.Connection = db.createConnection();
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
-  const res = (await db.executeQuery(
+  const res = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = '${tableName}'`,
-    conn,
   )) as any;
 
   const resTable = res.map((el) => {
@@ -63,6 +46,7 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
 export const createTableData = async (
   data: TableDataCreateReq,
 ): Promise<TableDataCreateRes> => {
+  console.log({data})
   const tableName = snakeCase(data.tableName);
 
   const cols = {};
@@ -84,16 +68,16 @@ export const createTableData = async (
   const uuid = generateUUIDv6();
   const fields = objEntriesToStr(data.cols);
 
-  // const res = await db.executeQuery(
+  // const res = await runQuery(
   //   `CREATE TABLE IF NOT EXISTS ${tableName} (id STRING, ${fields.keysStr}) USING DELTA LOCATION '/data/pv/${tableName}';`,
-  //   conn,
+  //   
   // );
   // const query = `INSERT INTO ${tableName} (id, ${Object.keys(data.cols).map(
   //   (key) =>
   //     typeof key === 'number' || typeof key === 'boolean' ? key : `'${key}'`,
   // )}) VALUES (${})`;
 
-  // const res2 = await db.executeQuery(query, conn);
+  // const res2 = await runQuery(query, conn);
 
   // const cols = {};
 
@@ -145,9 +129,9 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
 
 export const deleteTableData = async (data: TableDataDeleteReq) => {
   try {
-    const sql = await db.executeQuery(
+    const sql = await runQuery(
       `DELETE FROM ${snakeCase(data.tableName)} WHERE id = '${data.rowId}'`,
-      conn,
+      
     );
 
     if (+sql[0]['num_affected_rows'] === 0) {
@@ -187,9 +171,9 @@ export const readTableData = async (
     from: body.from,
   });
 
-  const res2 = (await db.executeQuery(
+  const res2 = (await runQuery(
     `SELECT * FROM ${tableName} ${filters}`,
-    conn,
+    
   )) as Record<string, any>[];
 
   if (res2.length === 0) {
@@ -197,9 +181,9 @@ export const readTableData = async (
     throw new NotFoundError(`no data found at table ${tableName}`);
   }
 
-  const res = await db.executeQuery(
+  const res = await runQuery(
     `SELECT COUNT(*) FROM ${tableName} ${filtersCount}`,
-    conn,
+    
   );
 
   return { rowsCount: +res[0]['count(1)'], rows: res2 };

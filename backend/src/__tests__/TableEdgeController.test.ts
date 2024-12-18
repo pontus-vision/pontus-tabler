@@ -27,12 +27,9 @@ import { app, srv } from '../server';
 import { AxiosResponse } from 'axios';
 import { TableEdgeCreateReq } from '../generated/api';
 import { DELTA_DB } from '../service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
-import { AUTH_USERS, DASHBOARDS, TABLES } from '../service/cosmosdb';
-import { AUTH_GROUPS_USER_TABLE, AUTH_GROUPS } from '../service/delta';
-
 import * as db from './../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '../consts';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),

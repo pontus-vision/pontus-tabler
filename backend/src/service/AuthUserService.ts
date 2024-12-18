@@ -28,12 +28,13 @@ import {
   AuthUserGroupsDeleteReq,
 } from '../typescript/api';
 import { InternalServerError } from '../generated/api';
-import dotenv from 'dotenv';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
-import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
-import jdbc from './../../delta-table/node/index-jdbc';
-dotenv.config();
+import { COSMOS_DB,  DELTA_DB } from '../consts';
+
+
+
+export const dbSource = process.env.DB_SOURCE ;
 
 export const setup = async (): Promise<InitiateRes> => {
   if (dbSource === COSMOS_DB) {
@@ -52,7 +53,7 @@ export const registerUser = async (
   } else if (dbSource === DELTA_DB) {
     return deltadb.registerUser(data);
   }
-  throw new InternalServerError(`invalid data source. ${dbSource}`);
+  // throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
 export interface registerAdmin extends RegisterAdminReq {
@@ -173,7 +174,7 @@ export const authUserGroupsUpdate = async (
   if (dbSource === COSMOS_DB) {
     return cdb.authUserGroupsUpdate(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.authUserGroupsUpdate(data);
+    // return deltadb.authUserGroupsUpdate(data);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };

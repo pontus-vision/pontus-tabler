@@ -1,3 +1,4 @@
+import { COSMOS_DB, dbSource, DELTA_DB } from '../consts';
 import {
   TableEdgeCreateReq,
   TableEdgeDeleteReq,
@@ -10,13 +11,8 @@ import {
   TableDataEdgeDeleteReq,
   InternalServerError,
 } from '../typescript/api';
-import { COSMOS_DB, DELTA_DB, dbSource } from './AuthGroupService';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
-
-export const GROUPS_DASHBOARDS = 'groups_dashboards';
-export const GROUPS_USERS = 'groups-users';
-export const GROUPS_TABLES = 'groups-tables';
 
 export const createTableDataEdge = async (
   data: TableDataEdgeCreateReq,

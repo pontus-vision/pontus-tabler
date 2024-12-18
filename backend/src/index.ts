@@ -34,7 +34,6 @@ import {
   updateDashboardGroupAuth,
   deleteDashboardGroupAuth,
   updateDashboard,
-  DASHBOARDS,
 } from './service/DashboardService';
 import {
   createTableDataEdge,
@@ -72,7 +71,7 @@ import {
   authUserGroupsCreate,
   authUserGroupsDelete,
   authUserGroupsRead,
-  authUserGroupsUpdate,
+  // authUserGroupsUpdate,
   authUserRead,
   authUserUpdate,
   authUsersRead,
@@ -82,13 +81,13 @@ import {
   registerUser,
   setup,
 } from './service/AuthUserService';
-import { Request } from 'express';
-import { refreshToken } from './service/cosmosdb/AuthUserService';
-import { authenticateToken, checkAdmin } from './service/AuthUserService';
+
+
 
 export default new PontusService({
   registerUserPost: async (req, res) => {
     // await setup();
+    console.log({admin:req})
 
     const response = await registerUser(req.body);
     res.send(response);
@@ -110,9 +109,9 @@ export default new PontusService({
     res.send(response);
   },
   tokenPost: async (req, res) => {
-    const response = await refreshToken(req.body);
+    // const response = await refreshToken(req.body);
 
-    res.send(response);
+    // res.send(response);
   },
   authGroupCreatePost: async (req, res) => {
     const response = await createAuthGroup(req.body);
@@ -141,6 +140,7 @@ export default new PontusService({
   },
   authUserCreatePost: async (req, res) => {
     // await setup();
+    console.log({req})
 
     const response = await authUserCreate(req.body);
 
@@ -181,9 +181,9 @@ export default new PontusService({
     res.send(response);
   },
   authUserGroupsUpdatePost: async (req, res) => {
-    const response = await authUserGroupsUpdate(req.body);
+    // const response = await authUserGroupsUpdate(req.body);
 
-    res.send(response);
+    // res.send(response);
   },
   dashboardGroupAuthCreatePost: async (req, res) => {
     const response = await createDashboardAuthGroup(req.body);
@@ -468,9 +468,9 @@ export default new PontusService({
     res.send(response);
   },
   tableEdgeDeletePost: async (req, res) => {
-    const response = await deleteTableEdge(req.body);
+    // const response = await deleteTableEdge(req.body);
 
-    res.send(response);
+    // res.send(response);
   },
   tableEdgeReadPost: async (req, res) => {
     const response = await readTableEdgesByTableId(req.body);

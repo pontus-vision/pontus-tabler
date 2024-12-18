@@ -5,21 +5,16 @@ import {
   DashboardRef,
   DashboardUpdateRes,
   DashboardUpdateReq,
-  DashboardReadReq,
-  DashboardGroupAuthReadRes,
   DashboardGroupAuthReadReq,
   DashboardGroupAuthCreateRes,
   DashboardGroupAuthUpdateReq,
   DashboardGroupAuthUpdateRes,
-  DashboardGroupAuthDeleteReq,
-  DashboardGroupAuthDeleteRes,
   AuthUserCreateRes,
   AuthUserCreateReq,
   LoginReq,
   LoginRes,
   AuthGroupCreateReq,
   AuthGroupCreateRes,
-  RegisterAdminReq,
   DashboardDeleteReq,
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
@@ -27,20 +22,13 @@ import {
 // import axios from 'axios';
 import { srv } from '../server';
 
-import { prepareDbAndAuth, post, stateObj } from './test-utils';
+import { prepareDbAndAuth, post } from './test-utils';
 import {
   AuthGroupUsersCreateReq,
   DashboardGroupAuthCreateReq,
 } from '../generated/api';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { deleteContainer, deleteDatabase } from '../cosmos-utils';
-import { DASHBOARDS } from '../service/DashboardService';
-import { AUTH_USERS, GROUPS_TABLES, TABLES } from '../service/cosmosdb';
-import { AUTH_GROUPS, AUTH_GROUPS_USER_TABLE } from '../service/delta';
-import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
-
-import * as db from './../../delta-table/node/index-jdbc';
+import { AxiosResponse } from 'axios';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS } from '../consts';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),
@@ -53,7 +41,6 @@ import * as db from './../../delta-table/node/index-jdbc';
 // }));
 jest.setTimeout(1000000);
 
-const conn: db.Connection = db.createConnection();
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
@@ -73,7 +60,7 @@ describe('dashboardCreatePOST', () => {
 
   afterAll(() => {
     process.env = OLD_ENV; // Restore old environment
-    srv.close();
+    // srv.close();
   });
 
   it('should do the CRUD "happy path" with authorization', async () => {

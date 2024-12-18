@@ -6,45 +6,12 @@ import {
   MenuReadRes,
   MenuItemTreeRef,
 } from '../typescript/api/index';
-import { fetchContainer } from '../cosmos-utils';
-import {
-  Container,
-  ItemResponse,
-  PartitionKeyDefinition,
-  UniqueKeyPolicy,
-} from '@azure/cosmos';
+
 import { InternalServerError } from '../generated/api';
-import { dbSource, COSMOS_DB, DELTA_DB } from './AuthGroupService';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
-
-const MENU = 'menu';
-
-const partitionKey: string | PartitionKeyDefinition = {
-  paths: ['/path'],
-};
-
-const uniqueKeyPolicy: UniqueKeyPolicy = {
-  uniqueKeys: [{ paths: ['/path'] }],
-};
-
-const initialDoc: MenuItemTreeRef = {
-  name: '/',
-  kind: 'folder',
-  path: '/',
-  children: [],
-};
-
-export const initiateMenuContainer = async (): Promise<Container> => {
-  const menuContainer = await fetchContainer(
-    MENU,
-    partitionKey,
-    uniqueKeyPolicy,
-    [initialDoc],
-  );
-
-  return menuContainer;
-};
+import { COSMOS_DB, dbSource, DELTA_DB } from '../consts';
+import { ItemResponse } from '@azure/cosmos';
 
 export const createMenuItem = async (
   data: MenuCreateReq,

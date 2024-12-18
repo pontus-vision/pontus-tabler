@@ -15,9 +15,9 @@ import {
 } from '@azure/cosmos';
 import { BadRequestError, NotFoundError } from '../../generated/api';
 import { updateDashboard, createDashboard } from './DashboardService';
+import { DASHBOARDS, MENU } from '../../consts';
 
-const MENU = 'menu';
-const DASHBOARDS = 'dashboards';
+
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/path'],

@@ -1,6 +1,5 @@
 import { prepareDbAndAuth, isSubset, post } from './test-utils';
-import { deleteDatabase } from '../cosmos-utils';
-import { app, srv } from '../server';
+import { srv } from '../server';
 import { AxiosResponse } from 'axios';
 import {
   MenuItemTreeRef,
@@ -9,20 +8,12 @@ import {
   MenuUpdateReq,
   MenuUpdateRes,
   MenuReadReq,
-  MenuCreateReq,
   DashboardReadReq,
   DashboardReadRes,
   AuthUserCreateRes,
 } from '../typescript/api';
-import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
-import {
-  AUTH_GROUPS,
-  AUTH_USERS,
-  DASHBOARDS,
-  TABLES,
-  AUTH_GROUPS_USER_TABLE,
-} from '../service/delta';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS, TABLES } from '../consts';
+
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({

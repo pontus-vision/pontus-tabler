@@ -12,7 +12,10 @@
     "prestart": "npm run clean && npm run build",
     "jest": "/usr/bin/env NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED=0  jest --coverage --detectOpenHandles --runInBand  --config jest.config.js ",
     "refresh": "npm uninstall ../frontend/ && npm install ../frontend/",
-    "generate": "npx fern-api generate "
+    "generate": "npx fern-api generate ",
+    "test-debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js",
+    "test-watch": "jest --watchAll",
+      "test-watch-debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --watchAll --runInBand"
   },
   "exports": {},
   "author": {
@@ -45,6 +48,7 @@
     "express": "^4.18.2",
     "express-openapi-validator": "^4.4.3",
     "http": "^0.0.1-security",
+    "java": "^0.14.0",
     "js-yaml": "^3.13.1",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.15",
@@ -52,6 +56,7 @@
     "multer": "^1.4.2",
     "parseurl": "^1.3.3",
     "path-to-regexp": "^3.2.0",
+    "pontus-node-jdbc": "file:./pontus-node-jdbc/dist",
     "pontus-tabler": "file:../../frontend",
     "qs": "^6.9.1",
     "serve-static": "^1.14.1",

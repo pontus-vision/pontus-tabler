@@ -42,17 +42,10 @@ import {
 // import axios from 'axios';
 import { srv } from '../server';
 
-import * as db from './../../delta-table/node/index-jdbc';
 import { prepareDbAndAuth, post } from './test-utils';
 import { AxiosResponse } from 'axios';
-import { deleteContainer } from '../cosmos-utils';
-import { AUTH_USERS } from '../service/cosmosdb/AuthUserService';
-import { AUTH_GROUPS } from '../service/cosmosdb/AuthGroupService';
-import { DELTA_DB, GROUPS_USERS } from '../service/AuthGroupService';
-import { AUTH_GROUPS_USER_TABLE, DASHBOARDS, TABLES } from '../service/delta';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS } from '../consts';
 
-const conn: db.Connection = db.createConnection();
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),

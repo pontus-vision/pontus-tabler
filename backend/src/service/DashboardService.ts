@@ -1,3 +1,4 @@
+import { COSMOS_DB, dbSource, DELTA_DB } from '../consts';
 import {
   DashboardDeleteReq,
   DashboardCreateReq,
@@ -16,11 +17,8 @@ import {
   DashboardCreateRes,
   InternalServerError,
 } from '../typescript/api';
-import { COSMOS_DB, DELTA_DB, dbSource } from './AuthGroupService';
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
-
-export const DASHBOARDS = 'dashboards';
 
 export const createDashboard = async (
   data: DashboardCreateReq,

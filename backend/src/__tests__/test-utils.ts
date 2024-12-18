@@ -2,26 +2,18 @@ import { HttpRequest, InvocationContext } from '@azure/functions';
 import httpTrigger from '../server';
 import { AxiosResponse } from 'axios';
 import { deleteContainer } from '../cosmos-utils';
-import { DELTA_DB } from '../service/AuthGroupService';
-import { GROUPS_DASHBOARDS } from '../service/EdgeService';
-import {
-  AUTH_GROUPS_USER_TABLE,
-  AUTH_GROUPS,
-  AUTH_USERS,
-  DASHBOARDS,
-  TABLES,
-} from '../service/delta';
+
 import {
   RegisterAdminRes,
   AuthUserCreateRes,
   LogoutReq,
   AuthUserCreateReq,
   LoginReq,
-  LoginRes,
   RegisterAdminReq,
+  LoginRes,
 } from '../typescript/api';
-import * as db from './../../delta-table/node/index-jdbc';
-const conn: db.Connection = db.createConnection();
+import { runQuery } from '../db-utils';
+import { dbSource, DELTA_DB } from '../consts';
 
 export const post = async (
   endpoint: string,
@@ -49,6 +41,7 @@ export const post = async (
   //     },
   //   );
   //   return res;
+  console.log({ endpoint, headers })
 
   //  const res = await fetch(
   //    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
@@ -62,6 +55,7 @@ export const post = async (
   //    },
   //  )
   //  const json = await res.json()
+  //  console.log({json})
 
   const res = await httpTrigger(
     new HttpRequest({
@@ -221,6 +215,7 @@ export const prepareDbAndAuth = async (
   admin: RegisterAdminRes;
   adminToken: string;
 }> => {
+
   let adminToken;
   const postAdmin = async (
     endpoint: string,
@@ -285,9 +280,10 @@ export const prepareDbAndAuth = async (
     expect(res.status).toBe(200);
   };
   const OLD_ENV = process.env;
+
   for (const table of tables) {
     if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await db.executeQuery(`DELETE FROM ${table};`, conn);
+      const sql = await runQuery(`DELETE FROM ${table};`);
     } else {
       await deleteContainer(table);
     }
@@ -303,6 +299,9 @@ export const prepareDbAndAuth = async (
     '/register/admin',
     createAdminBody,
   )) as AxiosResponse<RegisterAdminRes>;
+
+  console.log({ adminCreateRes })
+
   expect(adminCreateRes.status).toBe(200);
 
   admin = adminCreateRes.data;
@@ -314,6 +313,7 @@ export const prepareDbAndAuth = async (
 
   const LoginRes = (await post('/login', loginBody)) as AxiosResponse<LoginRes>;
   expect(LoginRes.status).toBe(200);
+
 
   adminToken = LoginRes.data.accessToken;
 

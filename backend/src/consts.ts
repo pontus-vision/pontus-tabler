@@ -1,0 +1,16 @@
+export const COSMOS_DB = 'cosmosdb';
+export const DELTA_DB = 'deltadb';
+export const GROUPS_USERS = 'groups_users';
+export const GROUPS_TABLES = 'groups_tables';
+export const DASHBOARDS_GROUPS = 'dashboards_groups';
+export const DASHBOARDS = 'dashboards';
+export const AUTH_GROUPS = 'auth_groups';
+export const ADMIN_GROUP_NAME = 'Admin';
+export const dbSource = process.env.DB_SOURCE || COSMOS_DB;
+export const GROUPS_DASHBOARDS = 'groups_dashboards';
+export const AUTH_USERS = 'auth_users';
+export const ADMIN_USER_USERNAME = 'ADMIN';
+export const MENU = 'menu';
+export const TABLES = 'tables';
+export const TABLE_DATA = 'table_data';
+export const AUTH_GROUPS_USER_TABLE = 'auth_groups_users';

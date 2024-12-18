@@ -37,18 +37,13 @@ import {
   InternalServerError,
 } from '../generated/api';
 import { CrudDocumentRef } from '../typescript/api';
+import { COSMOS_DB, dbSource, DELTA_DB } from '../consts';
 
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
 
-export const COSMOS_DB = 'cosmosdb';
-export const DELTA_DB = 'deltadb';
-export const GROUPS_USERS = 'groups_users';
-export const GROUPS_TABLES = 'groups_tables';
-
-export const dbSource = process.env.DB_SOURCE || COSMOS_DB;
-
 export const createAuthGroup = async (data: AuthGroupCreateReq) => {
+  console.log({dbSource})
   if (dbSource === COSMOS_DB) {
     return cdb.createAuthGroup(data);
   } else if (dbSource === DELTA_DB) {
@@ -241,7 +236,7 @@ export const readAuthGroupTable = async (
   if (dbSource === COSMOS_DB) {
     return cdb.readAuthGroupTable(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.readAuthGroupTable(data);
+    // return deltadb.readAuthGroupTable(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
@@ -253,7 +248,7 @@ export const updateAuthGroupTable = async (
   if (dbSource === COSMOS_DB) {
     return cdb.updateAuthGroupTable(data);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.updateAuthGroupTable(data);
+    // return deltadb.updateAuthGroupTable(data);
   }
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
@@ -274,7 +269,8 @@ export const checkTableMetadataPermissions = async (
 export const checkPermissions = async (
   userId: string,
   targetId: string,
-  containerId: 'auth_users' | 'dashboards' | 'tables',
+  containerId: string,
+
 ): Promise<CrudDocumentRef> => {
   if (dbSource === COSMOS_DB) {
     return cdb.checkPermissions(userId, targetId, containerId);
@@ -284,3 +280,5 @@ export const checkPermissions = async (
 
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
+export { dbSource, COSMOS_DB, DELTA_DB };
+

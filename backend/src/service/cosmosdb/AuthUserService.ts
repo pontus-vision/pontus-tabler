@@ -63,10 +63,8 @@ import {
 } from '../../generated/api';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
+
 import {
-  ADMIN_GROUP_NAME,
-  AUTH_GROUPS,
   createAuthGroup,
   createAuthUserGroup,
   initiateAuthGroupContainer,
@@ -78,10 +76,7 @@ import {
   readTableDataEdge,
   updateTableDataEdge,
 } from './EdgeService';
-import { DASHBOARDS } from './DashboardService';
-dotenv.config();
-export const AUTH_USERS = 'auth_users';
-export const ADMIN_USER_USERNAME = 'ADMIN';
+import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS } from '../../consts';
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/username'],
 };

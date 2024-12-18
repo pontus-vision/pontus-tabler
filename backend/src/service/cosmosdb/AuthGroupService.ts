@@ -66,13 +66,10 @@ import {
   PatchOperation,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
-import { DASHBOARDS } from './DashboardService';
 import {
-  ADMIN_USER_USERNAME,
-  AUTH_USERS,
+
   authUserGroupsRead,
 } from './AuthUserService';
-import { TABLES } from './TableService';
 import {
   GROUPS_TABLES,
   createConnection,
@@ -86,9 +83,8 @@ import {
 import { readTableData } from './TableDataService';
 import { snakeCase } from 'lodash';
 import { NODATA } from 'dns';
-import { GROUPS_DASHBOARDS } from '../EdgeService';
-export const AUTH_GROUPS = 'auth_groups';
-export const ADMIN_GROUP_NAME = 'Admin';
+import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '../../consts';
+
 
 const partitionKey: string | PartitionKeyDefinition = {
   paths: ['/name'],
@@ -806,10 +802,11 @@ export const updateAuthGroupTable = async (
     }
   }
 };
+
 export const checkPermissions = async (
   userId: string,
   targetId: string,
-  containerId: 'auth_users' | 'dashboards' | 'tables',
+  containerId:string ,
 ): Promise<CrudDocumentRef> => {
   const res = (await readEdge({
     direction: 'from',

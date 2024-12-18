@@ -8,11 +8,7 @@ import {
 } from '../../typescript/api';
 import { fetchContainer, fetchData } from '../../cosmos-utils';
 import { PatchOperation } from '@azure/cosmos';
-import {
-  TABLES,
-  initiateTableContainer,
-  readTableByName,
-} from './TableService';
+import { readTableByName } from './TableService';
 import { v4 as uuidv4 } from 'uuid';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
