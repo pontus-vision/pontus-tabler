@@ -12,9 +12,10 @@ import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
 import { GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
+import { authenticateToken } from './service/AuthUserService';
 
 console.log('STEP 0')
-console.log({dbSource : process.env.DB_SOURCE})
+console.log({ dbSource: process.env.DB_SOURCE })
 
 export const app = express();
 
@@ -28,7 +29,6 @@ app.use(cors());
 // }
 // app.use(jdbcMiddleware);
 
-console.log('STEP 2')
 const authMiddleware = async (
   req: Request,
   res: Response,
@@ -48,60 +48,52 @@ const authMiddleware = async (
     return next();
   }
 
-  console.log(process.env.DB_SOURCE)
-  // try {
-  //   const authorization = await authenticateToken(req, res);
-  //   const userId = authorization['userId'];
+  try {
+    const authorization = await authenticateToken(req, res);
+    const userId = authorization['userId'];
+    console.log({ USER_ID: userId })
 
-  //   const arr = req.path.split('/');
+    const arr = req.path.split('/');
 
-  //   const crudAction = arr[arr.length - 1];
+    const crudAction = arr[arr.length - 1];
 
-  //   const entity = arr[arr.length - 2];
+    const entity = arr[arr.length - 2];
 
-  //   const tableName = entity === 'dashboard' ? GROUPS_DASHBOARDS : GROUPS_USERS;
+    const tableName = entity === 'dashboard' ? GROUPS_DASHBOARDS : GROUPS_USERS;
 
-  //   let targetId = '';
+    let targetId = '';
 
-  //   if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
-  //     return next();
-  //   }
+    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
+      return next();
+    }
 
-  //   if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
-  //     targetId = req.body?.['id'];
-  //   }
+    if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
+      targetId = req.body?.['id'];
+    }
 
-  //   const permissions = await checkPermissions('', '', '');
-  //   if (permissions[crudAction]) {
-  //   // if (permissions['']) {
-  //     // next();
-  //   } else {
-  //     throw { code: 401, message: 'You do not have this permission' };
-  //   }
-  // } catch (error) {
-  //   res.status(error?.code).json(error?.message);
-  // }
+    const permissions = await checkPermissions(userId, targetId, tableName);
+    if (permissions[crudAction]) {
+      // if (permissions['']) {
+      next();
+    } else {
+      throw { code: 401, message: 'You do not have this permission' };
+    }
+  } catch (error) {
+    res.status(error?.code).json(error?.message);
+  }
 };
 
 app.use(express.json());
 
-console.log('STEP 3')
-// app.use(authMiddleware);
-console.log('STEP 4')
+app.use(authMiddleware);
+
 register(app, { pontus });
 
-console.log('STEP 5')
-// app.listen(port, () => {
-//   console.log(`listening on port ${port}`);
-// });
-
-console.log('STEP 6')
 const validate = (_request, _scopes, _schema) => {
   return true;
 };
 
-console.log('STEP 7')
-export const srv = http.createServer(app).listen(port, function () {
+export const srv = http.createServer(app).listen(port, function() {
   console.log(
     'Your server is listening on port %d (http://localhost:%d)',
     port,
@@ -109,12 +101,11 @@ export const srv = http.createServer(app).listen(port, function () {
   );
 });
 
-console.log('STEP 8')
 const httpTrigger = async (
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> => {
-  
+
   context.log(`Http function processed request for url "${request.url}"`);
 
   srv.closeIdleConnections();
@@ -168,8 +159,8 @@ const httpTrigger = async (
   srv.closeIdleConnections();
 
   return resp;
-    
-  
+
+
 };
 
 azureApp.http('httpTrigger', {

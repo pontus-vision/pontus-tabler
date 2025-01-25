@@ -211,10 +211,10 @@ export const createSql = async (
   const res2 = await runQuery(insert);
 
   const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id
-      ? `id = '${data?.id}'`
-      : ids.length > 0
-        ? ids.map((id) => `id = '${id}'`).join(' OR ')
-        : `id = '${uuid}'`
+    ? `id = '${data?.id}'`
+    : ids.length > 0
+      ? ids.map((id) => `id = '${id}'`).join(' OR ')
+      : `id = '${uuid}'`
     }`;
 
   const res3 = await runQuery(selectQuery);
@@ -244,7 +244,7 @@ export const createConnection = async (): Promise<IConnection> => {
 export async function runQuery(query: string): Promise<Record<string, any>[]> {
   try {
     const connection = await createConnection();
-    // console.log({connection, query, FOO: 'BAR'})
+    console.log({ connection, query, FOO: 'BAR' })
     const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
     const resultSet = await preparedStatement.executeQuery();
