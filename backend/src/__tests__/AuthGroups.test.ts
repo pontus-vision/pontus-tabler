@@ -81,7 +81,7 @@ describe('dashboardCreatePOST', () => {
     srv.close();
   });
 
-  it.only('should create a group', async () => {
+  it('should create a group', async () => {
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -1128,7 +1128,7 @@ describe('dashboardCreatePOST', () => {
 
     expect(readRetVal2.status).toBe(404);
   });
-  it.only('should create a an authgroup, associate a table and delete its reference', async () => {
+  it('should create a an authgroup, associate a table and delete its reference', async () => {
     const body: AuthGroupCreateReq = {
       name: 'group1',
     };

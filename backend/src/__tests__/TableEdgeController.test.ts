@@ -41,7 +41,6 @@ import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '
 //   dashboardsReadPOST: jest.fn(),
 // }));
 jest.setTimeout(1000000);
-const conn: db.Connection = db.createConnection();
 
 describe('tableControllerTest', () => {
   const OLD_ENV = process.env;

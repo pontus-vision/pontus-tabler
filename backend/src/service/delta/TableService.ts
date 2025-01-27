@@ -24,10 +24,12 @@ export const createTable = async (
 
   const sqlCheck = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
-    
+
   )) as TableCreateRes[];
 
-  if (sqlCheck.length !== 0) {
+  console.log({ sqlCheck })
+
+  if (sqlCheck && sqlCheck?.length !== 0) {
     throw new ConflictEntityError(
       `There is already a table with this name (${data.name})`,
     );
@@ -35,7 +37,7 @@ export const createTable = async (
 
   const sql = (await runQuery(
     `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, header_name STRING, filter BOOLEAN, kind STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`,
-    
+
   )) as TableCreateRes[];
 
   // const sql5 = (await runQuery(
@@ -49,10 +51,8 @@ export const createTable = async (
     const uuid = generateUUIDv6();
 
     cols.push(
-      `struct('${uuid}', '${snakeCase(col.name)}', '${col.field}', ${
-        col.sortable
-      }, '${col.headerName}', ${col.filter}, ${
-        col.kind ? `'${col.kind}'` : null
+      `struct('${uuid}', '${snakeCase(col.name)}', '${col.field}', ${col.sortable
+      }, '${col.headerName}', ${col.filter}, ${col.kind ? `'${col.kind}'` : null
       } )`,
     );
   }
@@ -64,7 +64,7 @@ export const createTable = async (
 
   const sql3 = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE id = '${uuid}'`,
-    
+
   )) as TableCreateRes[];
 
   return { ...sql3[0], cols: JSON.parse(sql3[0].cols as any) };
@@ -129,21 +129,18 @@ export const updateTable = async (data: TableUpdateReq) => {
       continue;
     }
     fields.push(
-      `${prop} = ${
-        typeof data[prop] === 'number' || typeof data[prop] === 'boolean'
-          ? data[prop]
-          : `'${data[prop]}'`
+      `${prop} = ${typeof data[prop] === 'number' || typeof data[prop] === 'boolean'
+        ? data[prop]
+        : `'${data[prop]}'`
       }`,
     );
   }
 
-  const strCols = `${data.name ? ` name = '${data.name}' ` : ''} ${
-    data.label ? ` label = '${data.label}' ` : ''
-  }`;
+  const strCols = `${data.name ? ` name = '${data.name}' ` : ''} ${data.label ? ` label = '${data.label}' ` : ''
+    }`;
 
-  const query = `UPDATE ${TABLES} SET ${fields.join(', ')} WHERE id = '${
-    data.id
-  }';`;
+  const query = `UPDATE ${TABLES} SET ${fields.join(', ')} WHERE id = '${data.id
+    }';`;
 
   const sql = await runQuery(query);
 
@@ -161,7 +158,7 @@ export const readTableById = async (
 ): Promise<TableReadRes> => {
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE id = '${data.id}'`,
-    
+
   )) as any;
 
   if (sql.length === 1) {
@@ -174,7 +171,7 @@ export const readTableById = async (
 export const readTableByName = async (name: string): Promise<TableReadRes> => {
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = '${name}'`,
-    
+
   )) as any;
 
   if (sql.length === 1) {
@@ -188,7 +185,7 @@ export const deleteTable = async (data: TableDeleteReq) => {
   try {
     const sql = (await runQuery(
       `DELETE FROM ${TABLES} WHERE id = '${data.id}'`,
-      
+
     )) as any;
 
     const affectedRows = +sql[0]['num_affected_rows'];
@@ -227,7 +224,7 @@ export const readTables = async (
 
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} ${whereClause}`,
-    
+
   )) as TablesReadResTablesItem[];
 
   if (sql.length === 0) {
@@ -236,7 +233,7 @@ export const readTables = async (
 
   const sql2 = await runQuery(
     `SELECT COUNT(*) FROM ${TABLES} ${whereClause2}`,
-    
+
   );
 
   return {

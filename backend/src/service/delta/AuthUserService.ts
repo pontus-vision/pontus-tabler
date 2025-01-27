@@ -64,13 +64,13 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
 
   const res = await runQuery(
     `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-    
+
   );
   const res4 = await runQuery(
     `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
-    
+
   );
-  console.log({res4, query:`SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`})
+  console.log({ res4, query: `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'` })
 
   if (+res4[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
@@ -78,14 +78,13 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
 
   const res2 = await runQuery(
     `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
-    
+
   );
 
   const res3 = await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
-      typeof id === 'string' ? `'${id}'` : id
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
     }`,
-    
+
   );
 
   return {
@@ -150,7 +149,7 @@ export const setup = async (): Promise<InitiateRes> => {
   try {
     const query = `SELECT * from auth_users`;
 
-   const res = await runQuery(query);
+    const res = await runQuery(query);
     if (res.length === 0) {
       throw new TemporaryRedirect('/register/admin');
     }
@@ -187,7 +186,7 @@ export const registerAdmin = async (
   data: RegisterAdminReq,
 ): Promise<RegisterAdminRes> => {
 
-    console.log({admin:data})
+  console.log({ admin: data })
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }
@@ -299,7 +298,7 @@ export const authUserDelete = async (
     const sql = await runQuery(
       `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id}'`,
     );
-  } catch (error) {}
+  } catch (error) { }
   return `User at id "${data.id}" deleted!`;
 };
 
@@ -392,11 +391,10 @@ export const authUserGroupsRead = async (
 export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,
 ): Promise<AuthUserGroupsDeleteRes> => {
-  const sqlStr = `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${
-    data.id
-  }' AND ${data.authGroups
-    .map((group) => `table_from__id = '${group.id}'`)
-    .join(' OR ')}`;
+  const sqlStr = `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id
+    }' AND ${data.authGroups
+      .map((group) => `table_from__id = '${group.id}'`)
+      .join(' OR ')}`;
 
   const sql = await runQuery(sqlStr);
   const affectedRows = +sql[0]['num_affected_rows'];
@@ -485,10 +483,11 @@ export const authenticateToken = async (
   await setup();
 
   const authHeader = req.headers['authorization'];
-  
+
+
   const tokenArr = authHeader && authHeader?.split(' ');
 
-  const token =  tokenArr[1]
+  const token = tokenArr[1]
 
   if (tokenArr.length !== 2) {
     throw { code: 400, message: 'wrong format of token' };

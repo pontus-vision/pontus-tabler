@@ -778,20 +778,21 @@ export const checkTableMetadataPermissions = async (
     delete: del,
   };
 };
-
 export const checkPermissions = async (
   userId: string,
   targetId: string,
   containerId: string,
 ): Promise<CrudDocumentRef> => {
-  const res = (await readEdge({
-    direction: 'from',
-    edgeTable: GROUPS_USERS,
-    tableFromName: AUTH_USERS,
-    tableToName: AUTH_GROUPS,
-    filters: {},
-    rowId: userId,
-  })) as AuthGroupRef[];
+  const res = (await readEdge(
+    {
+      direction: 'from',
+      edgeTable: GROUPS_USERS,
+      tableToName: AUTH_USERS,
+      tableFromName: AUTH_GROUPS,
+      filters: {},
+      rowId: userId,
+    },
+  )) as AuthGroupRef[];
 
   if (res.length === 0) {
     throw new NotFoundError('There is no group associated with user');
@@ -803,7 +804,7 @@ export const checkPermissions = async (
   let del = false;
 
   for (const group of res) {
-    if (group.name === ADMIN_GROUP_NAME) {
+    if (group['table_from__name'] === ADMIN_GROUP_NAME) {
       return {
         create: true,
         read: true,
@@ -811,43 +812,45 @@ export const checkPermissions = async (
         delete: true,
       };
     }
-    const res = await readEdge({
-      direction: 'to',
-      edgeTable:
-        containerId === DASHBOARDS
-          ? GROUPS_DASHBOARDS
-          : containerId === TABLES
-            ? GROUPS_TABLES
-            : containerId === AUTH_USERS
+    const res = (await readEdge(
+      {
+        direction: 'to',
+        edgeTable:
+          containerId === DASHBOARDS
+            ? GROUPS_DASHBOARDS
+            : containerId === TABLES
               ? GROUPS_TABLES
-              : '',
-      tableFromName: AUTH_GROUPS,
-      tableToName: containerId,
-      filters: {
+              : containerId === AUTH_USERS
+                ? GROUPS_TABLES
+                : '',
+        tableToName: AUTH_GROUPS,
+        tableFromName: containerId,
         filters: {
-          id: {
-            filter: targetId,
-            filterType: 'text',
-            type: 'equals',
+          filters: {
+            table_to__id: {
+              filter: targetId,
+              filterType: 'text',
+              type: 'equals',
+            },
           },
         },
+        rowId: group['table_from__id'],
       },
-      rowId: group.id,
-    });
+    )) as any[];
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
-        if (dashboard?.create) {
-          create = dashboard?.create;
+        if (dashboard?.['table_from__create']) {
+          create = dashboard?.['table_from__create'] === 'true';
         }
-        if (dashboard?.read) {
-          read = dashboard?.read;
+        if (dashboard?.['table_from__read']) {
+          read = dashboard?.['table_from__read'] === 'true';
         }
-        if (dashboard?.update) {
-          update = dashboard?.update;
+        if (dashboard?.['table_from__update']) {
+          update = dashboard?.['table_from__update'] === 'true';
         }
-        if (dashboard?.delete) {
-          del = dashboard?.delete;
+        if (dashboard?.['table_from__delete']) {
+          del = dashboard?.['table_from__delete'] === 'true';
         }
       }
     }

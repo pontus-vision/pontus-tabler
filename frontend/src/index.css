@@ -1,6 +1,6 @@
 /* @import '~ag-grid-community/dist/styles/ag-grid.css'; */
 /* @import '~ag-grid-community/dist/styles/ag-theme-alpine.css'; */
-@import 'main.css';
+/* @import 'main.css'; */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
