@@ -244,13 +244,12 @@ export const createConnection = async (): Promise<IConnection> => {
 export async function runQuery(query: string): Promise<Record<string, any>[]> {
   try {
     const connection = await createConnection();
-    console.log({ connection, query, FOO: 'BAR' })
     const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
     const resultSet = await preparedStatement.executeQuery();
     const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
-    console.log('Query Results:', results.length);
+    console.log({ 'Query Results:': results, Qtd: results.length });
 
     // Remember to release the connection after you are done
     // await pool.release(connection)

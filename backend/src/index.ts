@@ -87,8 +87,6 @@ import {
 export default new PontusService({
   registerUserPost: async (req, res) => {
     // await setup();
-    console.log({admin:req})
-
     const response = await registerUser(req.body);
     res.send(response);
   },
@@ -140,7 +138,7 @@ export default new PontusService({
   },
   authUserCreatePost: async (req, res) => {
     // await setup();
-    console.log({req})
+    console.log({ req })
 
     const response = await authUserCreate(req.body);
 
@@ -246,7 +244,7 @@ export default new PontusService({
     res.send(response);
   },
   dashboardCreatePost: async (req, res) => {
-    if(Object.keys(req.body).length === 0) {
+    if (Object.keys(req.body).length === 0) {
       throw new BadRequestError('Body is empty.')
     }
 
@@ -255,13 +253,13 @@ export default new PontusService({
     res.send(response);
   },
   dashboardDeletePost: async (req, res) => {
- 
+
     const response = await deleteDashboard(req.body);
 
     res.send(response);
   },
   dashboardReadPost: async (req, res) => {
-   
+
     const response = await readDashboardById(req.body.id);
 
     res.send(response);
@@ -339,8 +337,8 @@ export default new PontusService({
 
     res.send(response);
   },
-  authGroupTableCreatePost: async (req, res) => {},
-  authGroupTableDeletePost(req, res) {},
+  authGroupTableCreatePost: async (req, res) => { },
+  authGroupTableDeletePost(req, res) { },
   authGroupTablesReadPost: async (req, res) => {
     const response = await readAuthGroupTable(req.body);
 
@@ -352,6 +350,7 @@ export default new PontusService({
     res.send(response);
   },
   tableCreatePost: async (req, res) => {
+    console.log({ tableCreateReqUserId: req['userId'] })
     const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.create) {
@@ -486,12 +485,12 @@ export default new PontusService({
       const response = await createTableDataEdge(req.body);
 
       res.send(response);
-    } catch (error) {}
+    } catch (error) { }
   },
   tableDataEdgeReadPost: async (req, res) => {
     const response = await readTableDataEdge(req.body);
 
     res.send(response);
   },
-  tableDataEdgeDeletePost(req, res) {},
+  tableDataEdgeDeletePost(req, res) { },
 });

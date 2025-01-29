@@ -29,11 +29,17 @@ const LoginPage = () => {
   const { fetchDataAndNavigate } = useApiAndNavigate();
 
   const { handleLogin } = useLogin();
+
+  useEffect(()=>{
+    console.log('foo')
+  },[])
+
   const loginUser = async (e) => {
     e.preventDefault();
+  console.log({VITE_uRL: import.meta.env.VITE_BACKEND_URL})
 
-    handleLogin(username, password);
-    navigate('/auth/users');
+    // handleLogin(username, password);
+    // navigate('/auth/users');
   };
 
   return (

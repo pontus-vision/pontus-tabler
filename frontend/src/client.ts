@@ -104,7 +104,7 @@ import { AuthGroupUsersDeleteReq } from './typescript/api/resources/pontus/clien
 import { AuthGroupUsersReadReq } from './typescript/api/resources/pontus/client/requests/AuthGroupUsersReadReq';
 import { AuthGroupUsersDeleteRes } from './typescript/api/resources/pontus/types/AuthGroupUsersDeleteRes';
 import { AuthGroupUsersReadRes } from './typescript/api/resources/pontus/types/AuthGroupUsersReadRes';
-import {} from './typescript/serialization';
+import { } from './typescript/serialization';
 
 export const getModelData = async (
   modelId: string,
@@ -114,10 +114,10 @@ export const getModelData = async (
   sorting?: string,
 ): Promise<
   | {
-      columnNames: ICmsGetContentModelDataField[];
-      modelContentListData: IListModelResponseData[];
-      meta: Meta;
-    }
+    columnNames: ICmsGetContentModelDataField[];
+    modelContentListData: IListModelResponseData[];
+    meta: Meta;
+  }
   | undefined
 > => {
   const cmsContentModel = await cmsGetContentModel(modelId);
@@ -137,7 +137,7 @@ export const getModelData = async (
 };
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/PontusTest/1.0.0/',
+  baseURL: 'http://node-app:8080/PontusTest/1.0.0/',
   headers: {
     Authorization: 'Bearer 123456',
     Accept: 'application/json',
@@ -146,12 +146,16 @@ const api = axios.create({
   },
 });
 
+(() => {
+  console.log(import.meta.env.VITE_BACKEND_URL)
+})()
+
 // wrapper for every post request. eg. handling errors like Too Many Requests (429), internal server error (500), 503...
 const post = async (url: string, data?: any) => {
   const accessToken = localStorage.getItem('accessToken') || '';
   const refreshToken = localStorage.getItem('refreshToken') || '';
 
-  const baseURL = 'http://localhost:8080/PontusTest/1.0.0';
+  const baseURL = 'http://node-app:8080/PontusTest/1.0.0';
   const headers = {
     Authorization: `${accessToken}`,
     Accept: 'application/json',

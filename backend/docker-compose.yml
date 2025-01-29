@@ -5,7 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: node-app
     ports:
-      - "3000:3000"
+      - "8080:8080"
+      - "3001:3001"
     environment:
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       COSMOSDB_NAME: pv_db
@@ -22,6 +23,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix
     depends_on:
       - delta-db 
     networks:
@@ -72,4 +74,4 @@ services:
         
 networks:
   app-network:
-    driver: bridge
+    external: true

@@ -484,10 +484,11 @@ export const authenticateToken = async (
 
   const authHeader = req.headers['authorization'];
 
-
   const tokenArr = authHeader && authHeader?.split(' ');
 
   const token = tokenArr[1]
+
+  console.log({ token })
 
   if (tokenArr.length !== 2) {
     throw { code: 400, message: 'wrong format of token' };

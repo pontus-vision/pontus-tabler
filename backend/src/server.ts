@@ -40,13 +40,13 @@ const authMiddleware = async (
   const path = replaceSlashes(req.path);
 
   if (
-    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout')
   ) {
     return next();
   }
+
 
   try {
     const authorization = await authenticateToken(req, res);
