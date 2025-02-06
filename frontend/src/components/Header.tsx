@@ -20,7 +20,7 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
   if(!isAuthenticated) return
 
   return (
-    <div className="header absolute">
+    <div data-cy="header" className="header absolute">
       <Form.Select
         data-testid="language-select"
         className="header__language-selector"

@@ -70,8 +70,10 @@ const authMiddleware = async (
     if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
       targetId = req.body?.['id'];
     }
+    console.log({ targetId })
 
     const permissions = await checkPermissions(userId, targetId, tableName);
+    console.log({ permissions })
     if (permissions[crudAction]) {
       // if (permissions['']) {
       next();
@@ -79,6 +81,7 @@ const authMiddleware = async (
       throw { code: 401, message: 'You do not have this permission' };
     }
   } catch (error) {
+    console.log({ error })
     res.status(error?.code).json(error?.message);
   }
 };

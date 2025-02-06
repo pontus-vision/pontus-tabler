@@ -109,7 +109,8 @@ export const updateDashboard = async (
 
 export const readDashboardById = async (dashboardId: string) => {
   const sql = await runQuery(
-    `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
+    // `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
+    `SELECT * FROM delta.\`/data/pv/${DASHBOARDS}\` WHERE id = '${dashboardId}'`,
   );
 
   if (sql.length === 0) {
@@ -139,10 +140,12 @@ export const readDashboards = async (
   const whereClause = filterToQuery(body);
   const whereClause2 = filterToQuery({ filters: body.filters });
   const sql = await runQuery(
-    `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
+    // `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
+    `SELECT * FROM delta.\`/data/pv/${DASHBOARDS}\` ${whereClause}`,
   );
   const sqlCount = await runQuery(
-    `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
+    // `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
+    `SELECT COUNT(*) FROM delta.\`/data/pv/${DASHBOARDS}\` ${whereClause2}`,
   );
   const count = +sqlCount[0]['count(1)'];
   if (count === 0) {
@@ -164,7 +167,8 @@ export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
   const sql = await runQuery(
-    `SELECT name FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
+    // `SELECT name FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
+    `SELECT name FROM delta.\`/data/pv/${DASHBOARDS}\` WHERE id = '${data.id}'`,
   );
 
   const res = (await createTableDataEdge({

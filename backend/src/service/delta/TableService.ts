@@ -23,7 +23,8 @@ export const createTable = async (
   const uuid = generateUUIDv6();
 
   const sqlCheck = (await runQuery(
-    `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
+    // `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
+    `SELECT * FROM delta.\`/data/pv/${snakeCase(data.name)}\` WHERE name = '${snakeCase(data.name)}'`,
 
   )) as TableCreateRes[];
 

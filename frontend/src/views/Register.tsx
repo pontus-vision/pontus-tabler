@@ -35,9 +35,9 @@ const RegisterView = ({ adminRoute }: Props) => {
 
     if (adminRoute) {
       const res = await registerAdmin(obj);
+      console.log({res})
 
       if (res.status === 200) {
-        console.log({ res });
         handleLogin(username, passwd);
         navigate('/auth/users');
       }
@@ -46,12 +46,15 @@ const RegisterView = ({ adminRoute }: Props) => {
         registerUser,
         obj,
       )) as AxiosResponse<RegisterUserRes>;
+      console.log({res})
+
       if (res.status === 200) {
-        console.log({ res });
         handleLogin(username, passwd);
         navigate('/auth/users');
       }
     }
+
+
   };
 
   return (
@@ -68,6 +71,7 @@ const RegisterView = ({ adminRoute }: Props) => {
           <label for="username">Username:</label>
           <input
             type="text"
+            data-cy="username-input"
             onChange={(e) => setUsername(e.target.value)}
             id="username"
             name="username"
@@ -78,6 +82,7 @@ const RegisterView = ({ adminRoute }: Props) => {
           <label for="password">Password:</label>
           <input
             onChange={(e) => setPasswd(e.target.value as string)}
+            data-cy="password-input"
             type="password"
             id="password"
             name="password"
@@ -89,6 +94,7 @@ const RegisterView = ({ adminRoute }: Props) => {
           <input
             onChange={(e) => setPasswdConfirmation(e.target.value)}
             type="password"
+            data-cy="password-confirmation-input"
             id="password_confirm"
             name="password_confirm"
             required

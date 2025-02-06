@@ -54,13 +54,10 @@ services:
         node dist/index.js
         # npm run jest || true
         sleep 1000000
-        
 
   delta-db:
-    build:
-      context: ./delta-table/docker/
-      dockerfile: Dockerfile
-    container_name: db-setup
+    image: pontusvisiongdpr/pv-deltadb:latest
+    container_name: delta-db
     volumes:
       - ./delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
       - ./delta-table/data:/data 

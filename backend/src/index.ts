@@ -234,6 +234,7 @@ export default new PontusService({
     res.send(response);
   },
   authGroupUsersReadPost: async (req, res) => {
+    console.log({ groupUsersReq: req })
     const response = await readAuthGroupUsers(req.body);
 
     res.send(response);

@@ -55,7 +55,7 @@ async function initializePool() {
 }
 
 (async () => {
-  await initializePool();
+  //  await initializePool();
 })();
 
 export const convertToSqlFields = (data: any[]): string => {
@@ -174,8 +174,10 @@ export const createSql = async (
   //   conn,
   // );
 
-  const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
-    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
+  // const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
+  //   } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
+  const createQuery = `CREATE TABLE IF NOT EXISTS delta.\`/data/pv/${table}\` (${data?.id ? '' : 'id STRING, '
+    } ${fields});`;
   console.log({ createQuery })
 
   const res = await runQuery(createQuery);

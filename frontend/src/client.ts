@@ -137,7 +137,7 @@ export const getModelData = async (
 };
 
 const api = axios.create({
-  baseURL: 'http://node-app:8080/PontusTest/1.0.0/',
+  baseURL: 'http://172.18.0.3:8080/PontusTest/1.0.0/',
   headers: {
     Authorization: 'Bearer 123456',
     Accept: 'application/json',
@@ -155,7 +155,7 @@ const post = async (url: string, data?: any) => {
   const accessToken = localStorage.getItem('accessToken') || '';
   const refreshToken = localStorage.getItem('refreshToken') || '';
 
-  const baseURL = 'http://node-app:8080/PontusTest/1.0.0';
+  const baseURL = 'http://172.18.0.3:8080/PontusTest/1.0.0';
   const headers = {
     Authorization: `${accessToken}`,
     Accept: 'application/json',
@@ -163,9 +163,11 @@ const post = async (url: string, data?: any) => {
     'Access-Control-Allow-Origin': '*',
   };
 
-  console.log({ headers, accessToken, json: JSON.stringify(accessToken) });
 
-  const res = await sendHttpRequest(baseURL + url, headers, '', data, 'POST');
+  const res = await api.post(baseURL + url, data, {headers})
+  console.log({res})
+
+  // const res = await sendHttpRequest(baseURL + url, headers, '', data, 'POST');
 
   return res;
 };

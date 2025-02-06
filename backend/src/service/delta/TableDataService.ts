@@ -14,7 +14,8 @@ import { TABLES } from '../../consts';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
   const res = (await runQuery(
-    `SELECT * FROM ${TABLES} WHERE name = '${tableName}'`,
+    // `SELECT * FROM ${TABLES} WHERE name = '${tableName}'`,
+    `SELECT * FROM delta.\`/data/pv/${TABLES}\` WHERE name = '${tableName}'`,
   )) as any;
 
   const resTable = res.map((el) => {
@@ -172,8 +173,8 @@ export const readTableData = async (
   });
 
   const res2 = (await runQuery(
-    `SELECT * FROM ${tableName} ${filters}`,
-    
+    // `SELECT * FROM ${tableName} ${filters}`,
+    `SELECT * FROM delta.\`/data/pv/${tableName}\` ${filters}`,
   )) as Record<string, any>[];
 
   if (res2.length === 0) {

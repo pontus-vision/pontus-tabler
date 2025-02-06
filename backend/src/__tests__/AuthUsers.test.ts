@@ -492,7 +492,7 @@ describe('dashboardCreatePOST', () => {
 
     expect(authUserGroupDeleteRes2.status).toBe(404);
   });
-  it.only('should create authgroup subdocuments', async () => {
+  it('should create authgroup subdocuments', async () => {
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -527,6 +527,8 @@ describe('dashboardCreatePOST', () => {
 
     const readGroup2 = await postAdmin('auth/group/read', readGroupsBody2);
 
+    console.log({ readGroup2 })
+
     const deleteGroupBody: AuthUserDeleteReq = {
       id: admin.id,
       username: admin.username,
@@ -545,12 +547,14 @@ describe('dashboardCreatePOST', () => {
       filters: {},
     };
 
+    console.log({ readGroupsBody })
+
     const readGroupUsers = await postAdmin(
       'auth/group/users/read',
       readGroupsBody,
     );
 
-    //expect(readGroupUsers.status).toBe(404);
+    expect(readGroupUsers.status).toBe(404);
   });
   it('should login and authorize', async () => {
     const logoutBody: LogoutReq = {

@@ -63,12 +63,12 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
   }
 
   const res = await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-
+    // `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
+    `CREATE TABLE IF NOT EXISTS delta.\`/data/pv/${AUTH_GROUPS}\` (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN );`,
   );
   const res4 = await runQuery(
-    `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
-
+    // `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
+    `SELECT COUNT(*) FROM delta.\`/data/pv/${AUTH_GROUPS}\` WHERE name = '${data.name}'`,
   );
   console.log({ res4, query: `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'` })
 
@@ -77,12 +77,13 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
   }
 
   const res2 = await runQuery(
-    `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
-
+    // `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+    `INSERT INTO delta.\`/data/pv/${AUTH_GROUPS}\` (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
   );
 
   const res3 = await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
+    // `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
+    `SELECT * FROM delta.\`/data/pv/${AUTH_GROUPS}\` WHERE id = ${typeof id === 'string' ? `'${id}'` : id
     }`,
 
   );
@@ -147,7 +148,8 @@ const createAuthUserGroup = async (
 
 export const setup = async (): Promise<InitiateRes> => {
   try {
-    const query = `SELECT * from auth_users`;
+    // const query = `SELECT * from auth_users`;
+    const query = `SELECT * from delta.\`/data/pv/${AUTH_GROUPS}\``;
 
     const res = await runQuery(query);
     if (res.length === 0) {
@@ -217,7 +219,7 @@ export const getRowCount = async (
   table: string,
 ): Promise<string> => {
   const count = await runQuery(
-    `SELECT count(1) FROM delta.\`/data/${table}\``,
+    `SELECT count(1) FROM delta.\`/data/pv/${table}\``,
   );
 
   return count[0]['count(1)'];
@@ -236,6 +238,8 @@ export const authUserCreate = async (
         username: data.username,
       },
     );
+
+    console.log({ sql })
     return {
       username: sql[0]['username'],
       id: sql[0]['id'],
@@ -251,7 +255,8 @@ export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
   const res = (await runQuery(
-    `SELECT * FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    // `SELECT * FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    `SELECT * FROM delta.\`/data/pv/${AUTH_USERS}\` WHERE id = '${data.id}'`,
   )) as { username: string; id: string }[];
   if (res.length === 0) {
     throw new NotFoundError(`User not found at id: ${data.id}`);
@@ -287,7 +292,8 @@ export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
   const sql = await runQuery(
-    `DELETE FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    // `DELETE FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    `DELETE FROM delta.\`/data/pv/${AUTH_USERS}\` WHERE id = '${data.id}'`,
   );
   const affectedRows = +sql[0]['num_affected_rows'];
   if (affectedRows === 0) {
@@ -296,7 +302,7 @@ export const authUserDelete = async (
 
   try {
     const sql = await runQuery(
-      `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id}'`,
+      `DELETE FROM delta.\`/data/pv/${GROUPS_USERS}\` WHERE table_to__id = '${data.id}'`,
     );
   } catch (error) { }
   return `User at id "${data.id}" deleted!`;
@@ -307,12 +313,15 @@ export const authUsersRead = async (
 ): Promise<AuthUsersReadRes> => {
   const whereClause = filterToQuery(data);
   const sql = await runQuery(
-    `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
+    // `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
+    `SELECT * FROM delta.\`/data/pv/${AUTH_USERS}\` ${whereClause}`,
   );
   const whereClause2 = filterToQuery({ filters: data.filters });
   const sqlCount = await runQuery(
-    `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
+    // `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
+    `SELECT COUNT(*) FROM delta.\`/data/pv/${AUTH_USERS}\` ${whereClause2}`,
   );
+  console.log({ sqlCount })
   if (+sqlCount[0]['count(1)'] === 0) {
     throw new NotFoundError(`Auth User(s) not found.`);
   }
@@ -411,7 +420,8 @@ interface IAuthUser extends AuthUserAndGroupsRef {
 
 export const checkAdmin = async (userId) => {
   const res = await runQuery(
-    `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
+    // `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
+    `SELECT COUNT(*) FROM delta.\`/data/pv/${GROUPS_USERS}\` WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
   );
 
   if (res.length === 0) {
@@ -422,7 +432,9 @@ export const checkAdmin = async (userId) => {
 };
 
 export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
-  const query = `SELECT * from auth_users WHERE username = "${data.username}"`;
+  // const query = `SELECT * from auth_users WHERE username = "${data.username}"`;
+  const query = `SELECT * from delta.\`/data/pv/${AUTH_USERS}\` WHERE username = "${data.username}"`;
+
 
   const res = await runQuery(query);
 
@@ -483,6 +495,9 @@ export const authenticateToken = async (
   await setup();
 
   const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    throw { code: 400, message: 'No token was detected in the input.' };
+  }
 
   const tokenArr = authHeader && authHeader?.split(' ');
 
@@ -492,9 +507,6 @@ export const authenticateToken = async (
 
   if (tokenArr.length !== 2) {
     throw { code: 400, message: 'wrong format of token' };
-  }
-  if (!token) {
-    throw { code: 400, message: 'No token was detected in the input.' };
   }
   const claims = getJwtClaims(token);
 
