@@ -1,27 +1,33 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Form from 'react-bootstrap/esm/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/esm/Button';
 import { AuthContext, useAuth } from '../AuthContext';
+import useLogin from '../hooks/useLogin';
 
 const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation()
   const { isAuthenticated, logout } = useContext(AuthContext);
   const { i18n } = useTranslation();
+
+  const { loading } = useLogin()
 
   const handleLanguageChange = (event) => {
     const selectedLanguage = event.target.value;
     i18n.changeLanguage(selectedLanguage);
   };
 
-  if(!isAuthenticated) return
+
+  if (location.pathname.endsWith('login') || location.pathname.endsWith('register/admin')) return
+  if (!isAuthenticated) return
 
   return (
     <div data-cy="header" className="header absolute">
-      <Form.Select
+      {/*<Form.Select
         data-testid="language-select"
         className="header__language-selector"
         defaultValue="en"
@@ -29,8 +35,9 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
       >
         <option value="en">English</option>
         <option value="ptBr">Português</option>
-      </Form.Select>
+      </Form.Select>*/}
       <label
+        data-cy="burguer-menu-input"
         className={`header__hamburguer-menu ${openedSidebar ? 'active' : ''}`}
       >
         <input
@@ -48,6 +55,12 @@ const Header = ({ setOpenedSidebar, openedSidebar }: HeaderProps) => {
         onClick={() => navigate('/')}
         src="/src/assets/pontus-logo.png"
       />
+      <button
+        className="logout-btn "
+        onClick={() => logout()}
+      >
+        Logout
+      </button>
     </div>
   );
 };
