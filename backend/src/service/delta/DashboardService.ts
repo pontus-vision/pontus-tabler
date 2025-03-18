@@ -18,14 +18,13 @@ import {
   DashboardAuthGroups,
   Dashboard,
 } from '../../typescript/api';
-import { createSql, filterToQuery, runQuery, updateSql } from '../../db-utils';
+import { createSql, filterToQuery, generateUUIDv6, isJSONParsable, runQuery, updateSql } from '../../db-utils';
 import { NotFoundError } from '../../generated/api';
 import {
   createTableDataEdge,
   deleteTableDataEdge,
   readTableDataEdge,
 } from './EdgeService';
-
 
 import * as db from './../../../delta-table/node/index-jdbc';
 import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS } from '../../consts';
@@ -34,7 +33,8 @@ import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS } from '../../consts';
 export const createDashboard = async (
   data: DashboardCreateReq,
 ): Promise<DashboardCreateRes> => {
-  delete data.menuItem;
+
+  console.log({ data })
   const sql = (await createSql(
     DASHBOARDS,
     'name STRING, owner STRING, state STRING, folder STRING',
@@ -43,6 +43,16 @@ export const createDashboard = async (
       state: JSON.stringify(data.state),
     },
   )) as any;
+
+  await runQuery(
+    `CREATE OR REPLACE TEMP VIEW source_table AS
+     SELECT '${data?.id ? data.id : generateUUIDv6()}' AS id, 
+     ${data.name} AS name,
+     ${data.owner} AS owner, 
+     ${data.state} AS state, 
+     ${data.folder} AS folder`
+  )
+
 
   // const dashboardContainer = await fetchContainer(DASHBOARDS);
   // const menuContainer = await initiateMenuContainer();
@@ -109,10 +119,10 @@ export const updateDashboard = async (
 
 export const readDashboardById = async (dashboardId: string) => {
   const sql = await runQuery(
-    // `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
-    `SELECT * FROM delta.\`/data/pv/${DASHBOARDS}\` WHERE id = '${dashboardId}'`,
+    `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
   );
 
+  console.log({ sqlQuery: `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'` })
   if (sql.length === 0) {
     throw new NotFoundError('Dashboard not found at id ' + dashboardId);
   }
@@ -137,26 +147,61 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 export const readDashboards = async (
   body: ReadPaginationFilter,
 ): Promise<DashboardsReadRes> => {
-  const whereClause = filterToQuery(body);
-  const whereClause2 = filterToQuery({ filters: body.filters });
+  const whereClause = filterToQuery(body, "");
+  const whereClause2 = filterToQuery({ filters: body.filters }, "");
   const sql = await runQuery(
-    // `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
-    `SELECT * FROM delta.\`/data/pv/${DASHBOARDS}\` ${whereClause}`,
+    `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
   );
   const sqlCount = await runQuery(
-    // `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
-    `SELECT COUNT(*) FROM delta.\`/data/pv/${DASHBOARDS}\` ${whereClause2}`,
+    `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
   );
   const count = +sqlCount[0]['count(1)'];
+  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
   if (count === 0) {
     throw new NotFoundError('No dashboards found');
   }
+  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
 
   return {
     dashboards: sql.map((dash) => {
+      console.log({ dash })
       return {
         ...dash,
-        state: JSON.parse(dash['state']),
+        state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",
+      };
+    }) as Dashboard[],
+    totalDashboards: count,
+  };
+};
+
+export const readDashboards2 = async (
+  body: ReadPaginationFilter,
+): Promise<DashboardsReadRes> => {
+  `SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = :user_id;
+`
+  runQuery("SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = '019596452d884d44a40258a9aa05ad3e'")
+
+  const whereClause = filterToQuery(body, "");
+  const whereClause2 = filterToQuery({ filters: body.filters }, "");
+  const sql = await runQuery(
+    `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
+  );
+  const sqlCount = await runQuery(
+    `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
+  );
+  const count = +sqlCount[0]['count(1)'];
+  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
+  if (count === 0) {
+    throw new NotFoundError('No dashboards found');
+  }
+  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
+
+  return {
+    dashboards: sql.map((dash) => {
+      console.log({ dash })
+      return {
+        ...dash,
+        state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",
       };
     }) as Dashboard[],
     totalDashboards: count,
@@ -167,8 +212,7 @@ export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
   const sql = await runQuery(
-    // `SELECT name FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
-    `SELECT name FROM delta.\`/data/pv/${DASHBOARDS}\` WHERE id = '${data.id}'`,
+    `SELECT name FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
   );
 
   const res = (await createTableDataEdge({
@@ -197,13 +241,13 @@ export const createDashboardAuthGroup = async (
   return {
     authGroups: res.map((el) => {
       return {
-        id: el['from']['table_from__id'] ,
+        id: el['from']['table_from__id'],
         name: el['from']['table_from__name'],
 
-        create: el['to']['table_to__create']==='true',
-        read: el['to']['table_to__read']==='true',
-        update: el['to']['table_to__update']==='true',
-        delete: el['to']['table_to__delete']==='true',
+        create: el['to']['table_to__create'] === 'true',
+        read: el['to']['table_to__read'] === 'true',
+        update: el['to']['table_to__update'] === 'true',
+        delete: el['to']['table_to__delete'] === 'true',
       };
     }) as DashboardAuthGroups[],
     id: data.id,
