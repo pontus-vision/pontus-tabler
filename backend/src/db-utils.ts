@@ -1,4 +1,4 @@
-import { ReadPaginationFilter } from './typescript/api';
+import { ReadPaginationFilter, ReadPaginationFilterFilters } from './typescript/api';
 import { Jinst, Pool } from '../pontus-node-jdbc/src/index';
 import { JDBC } from '../pontus-node-jdbc/src/index';
 import { v4 as uuidv4 } from 'uuid';
@@ -55,7 +55,7 @@ async function initializePool() {
 }
 
 (async () => {
-  //  await initializePool();
+  await initializePool();
 })();
 
 export const convertToSqlFields = (data: any[]): string => {
@@ -102,6 +102,7 @@ export const updateSql = async (
   )} ${whereClause}`;
 
   const res2 = await runQuery(insert);
+
   if (+res2[0]['num_affected_rows'] === 0) {
     throw new NotFoundError(
       `did not find any record at table '${table}' (${whereClause})`,
@@ -110,8 +111,8 @@ export const updateSql = async (
 
   const res3 = await runQuery(
     `SELECT * FROM ${table} ${whereClause}`,
-
   );
+
   if (res3.length === 0) {
     throw new NotFoundError(
       `did not find any record at table '${table}' (${whereClause})`,
@@ -165,24 +166,26 @@ export const createSql = async (
 ): Promise<Record<string, any>[]> => {
   const uuid = generateUUIDv6();
 
-  const entries = objEntriesToStr(data);
+  let entries
+  if (data?.id) {
+    const { id, ...rest } = data
+    entries = objEntriesToStr(rest);
+  } else {
+    entries = objEntriesToStr(data);
+  }
 
   const keys = entries.keysStr;
-  const values = entries.valuesStr;
+  let values = entries.valuesStr;
   // const resss = await runQuery(
   //   `DROP TABLE  ${table} `,
   //   conn,
   // );
 
-  // const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
-  //   } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
-  const createQuery = `CREATE TABLE IF NOT EXISTS delta.\`/data/pv/${table}\` (${data?.id ? '' : 'id STRING, '
-    } ${fields});`;
-  console.log({ createQuery })
+  const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
+    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
 
   const res = await runQuery(createQuery);
 
-  console.log({ res })
 
   const insertFields = Array.isArray(data)
     ? Object.keys(data[0]).join(', ')
@@ -198,6 +201,7 @@ export const createSql = async (
 
   const ids = [];
 
+
   const insert = `INSERT INTO ${table} (${data?.id ? '' : 'id, '
     } ${insertFields}) VALUES ${Array.isArray(data)
       ? insertValues
@@ -207,7 +211,7 @@ export const createSql = async (
           return `('${uuid}', ${el})`;
         })
         .join(', ')
-      : `('${uuid}',` + values + ')'
+      : `('${data?.id ? data?.id : uuid}',` + values + ')'
     }`;
 
   const res2 = await runQuery(insert);
@@ -251,7 +255,6 @@ export async function runQuery(query: string): Promise<Record<string, any>[]> {
     const resultSet = await preparedStatement.executeQuery();
     const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
-    console.log({ 'Query Results:': results, Qtd: results.length });
 
     // Remember to release the connection after you are done
     // await pool.release(connection)
@@ -276,6 +279,9 @@ export const filterToQuery = (
   const { from, to } = body;
 
   let colSortStr = '';
+  if (process.env.DB_SOURCE && alias) {
+    alias = `${alias}.`
+  }
 
   for (let col in cols) {
     if (cols.hasOwnProperty(col)) {
@@ -300,10 +306,8 @@ export const filterToQuery = (
       const operator = cols[col]?.operator;
 
       const colQuery = [];
-
       if (filterType === 'text') {
         const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
-
         if (conditions?.length > 0) {
           for (const condition of conditions) {
             if (process.env.DB_SOURCE === DELTA_DB) {
@@ -921,4 +925,30 @@ const convertToISOString = (dateString) => {
     'Z';
 
   return isoDateString;
+};
+
+export const filtersToSnakeCase = (data: ReadPaginationFilter): Record<string, ReadPaginationFilterFilters> => {
+  const filtersSnakeCase: Record<string, ReadPaginationFilterFilters> = {};
+
+  for (const prop in data.filters) {
+    const snakeKey = snakeCase(prop);
+
+    filtersSnakeCase[snakeKey] = {
+      ...data.filters[prop],
+      filter: typeof data.filters[prop].filter === "string"
+        ? snakeCase(data.filters[prop].filter as string)
+        : data.filters[prop].filter,
+    };
+  }
+
+  return filtersSnakeCase;
+};
+
+export const isJSONParsable = (str: string): boolean => {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
 };
