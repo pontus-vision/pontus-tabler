@@ -25,7 +25,8 @@
 // @use '../components/styles/Sidebar.scss';
 
 #root {
-  height: 100%;
+  height: fit-content;
+  min-height: 100vh;
 }
 
 .success-msg {
