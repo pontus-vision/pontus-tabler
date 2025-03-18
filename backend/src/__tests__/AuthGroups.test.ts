@@ -69,7 +69,6 @@ describe('dashboardCreatePOST', () => {
     tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS];
   }
   beforeEach(async () => {
-    console.log(process.env.DB_SOURCE)
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
