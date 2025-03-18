@@ -449,18 +449,13 @@ export const readEdge = async (
     } ${data.filters.from ? ' OFFSET ' + (data.filters.from - 1) : ''}`;
   const filtersOn = Object.keys(data.filters).length > 0;
 
-  // const queryStr = `SELECT * FROM ${data.edgeTable} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
-  //   } ${data.direction === 'from'
-  //     ? `table_to__id = '${data.rowId}'`
-  //     : `table_from__id = '${data.rowId}'`
-  //   }` + fromTo
-
-  const queryStr = `SELECT * FROM delta.\`/data/${data.edgeTable}\` ${filtersOn ? whereClause + ' AND ' : 'WHERE'
+  const queryStr = `SELECT * FROM ${data.edgeTable} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${data.direction === 'from'
       ? `table_to__id = '${data.rowId}'`
       : `table_from__id = '${data.rowId}'`
     }` + fromTo
-  console.log({ queryStr })
+
+  console.log({ queryStr, data })
 
   const sql = (await runQuery(queryStr)) as Record<string, any>[];
 
@@ -479,14 +474,7 @@ export const readTableDataEdge = async (
   const filtersOn = Object.keys(data?.filters || {}).length > 0;
 
   const sql = (await runQuery(
-    // `SELECT * FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
-    // } ${direction === 'from'
-    //   ? `table_to__id = '${data.rowId}'`
-    //   : `table_from__id = '${data.rowId}'`
-    // }` +
-    // `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` +
-    // fromTo,
-    `SELECT * FROM delta.\`/data/${data?.jointTableName || edgeTableName}\` ${filtersOn ? whereClause + ' AND ' : 'WHERE'
+    `SELECT * FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${direction === 'from'
       ? `table_to__id = '${data.rowId}'`
       : `table_from__id = '${data.rowId}'`
@@ -496,12 +484,7 @@ export const readTableDataEdge = async (
   )) as Record<string, any>;
 
   const sqlCount = await runQuery(
-    // `SELECT COUNT(*) FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
-    // } ${direction === 'from'
-    //   ? `table_to__id = '${data.rowId}'`
-    //   : `table_from__id = '${data.rowId}'`
-    // }` + `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}`,
-    `SELECT COUNT(*) FROM delta.\`/data/${data?.jointTableName || edgeTableName}\` ${filtersOn ? whereClause + ' AND ' : 'WHERE'
+    `SELECT COUNT(*) FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${direction === 'from'
       ? `table_to__id = '${data.rowId}'`
       : `table_from__id = '${data.rowId}'`
