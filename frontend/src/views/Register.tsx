@@ -24,7 +24,9 @@ const RegisterView = ({ adminRoute }: Props) => {
 
   const { fetchDataAndNavigate } = useApiAndNavigate();
   const navigate = useNavigate();
-  const { handleLogin } = useLogin();
+  const { handleLogin, loading } = useLogin();
+
+  const [isRegistered, setIsRegistered] = useState(false)
 
   const register = async () => {
     const obj: RegisterUserReq | RegisterAdminReq = {
@@ -35,28 +37,38 @@ const RegisterView = ({ adminRoute }: Props) => {
 
     if (adminRoute) {
       const res = await registerAdmin(obj);
-      console.log({res})
+      console.log({ res })
 
       if (res.status === 200) {
         handleLogin(username, passwd);
-        navigate('/auth/users');
+        setIsRegistered(true)
+
+        //       navigate('/tables/read');
       }
     } else {
       const res = (await fetchDataAndNavigate(
         registerUser,
         obj,
       )) as AxiosResponse<RegisterUserRes>;
-      console.log({res})
+      console.log({ res })
 
-      if (res.status === 200) {
-        handleLogin(username, passwd);
-        navigate('/auth/users');
-      }
+      // if (res.status === 200) {
+      //   handleLogin(username, passwd);
+      //   navigate('/auth/users');
+      // }
     }
 
 
   };
 
+  useEffect(() => {
+    console.log({ loading })
+    if (!isRegistered) return
+
+    if (!loading) {
+      navigate('/tables/read');
+    }
+  }, [loading])
   return (
     <div className="container">
       <h2>{adminRoute ? 'Admin' : 'User'} Registration</h2>
