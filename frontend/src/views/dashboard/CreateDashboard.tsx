@@ -27,7 +27,6 @@ const CreateDashboard = () => {
 
   const dashboardCreate = async (body: DashboardRef) => {
     const folder = location?.state;
-    console.log({ menuState, folder, dashboardMenuItem })
     try {
       if (!menuState && !dashboardMenuItem?.path) {
         notificationManagerRef?.current?.addMessage(
@@ -44,7 +43,6 @@ const CreateDashboard = () => {
         folder: menuState?.path || dashboardMenuItem?.path,
         state: body.state,
       }
-      console.log({ obj })
 
       const res = await createDashboard(obj);
       if (res?.status !== 200) {
@@ -57,7 +55,6 @@ const CreateDashboard = () => {
           id: dashboardMenuItem.id,
           kind: 'file',
         })
-        console.log({ res2 })
       }
       notificationManagerRef?.current?.addMessage(
         'success',
@@ -76,7 +73,6 @@ const CreateDashboard = () => {
 
   const handleCreate = async (folder: MenuItemTreeRef) => {
     if (folder.kind === 'folder') {
-      console.log({ folder })
       setDashboardMenuItem(folder);
     }
   };
