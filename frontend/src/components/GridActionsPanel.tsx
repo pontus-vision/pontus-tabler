@@ -34,6 +34,7 @@ type Props = {
   testId?: string;
   changesMade?: boolean;
   updateModeOnRows?: boolean;
+  onEditOnGrid?: (val: boolean) => void;
 };
 
 const GridActionsPanel = ({
@@ -59,6 +60,7 @@ const GridActionsPanel = ({
   changesMade,
   updateModeOnRows,
   onUpdate,
+  onEditOnGrid
 }: Props) => {
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
@@ -80,6 +82,7 @@ const GridActionsPanel = ({
       ?.offsetWidth;
     setCmpWidth(cmpWidth);
   }, [windowWidth]);
+
 
   if (!!cmpWidth && cmpWidth < 514) {
     return (
@@ -134,7 +137,6 @@ const GridActionsPanel = ({
             </div>
           )}
         </div>
-
         <div
           className={`grid-actions-panel ${openActionsPanel ? 'active' : ''}`}
         >
@@ -189,6 +191,23 @@ const GridActionsPanel = ({
               Delete Mode
             </Button>
           )}
+          {(<>
+            <label class="switch">
+              <input type="checkbox" />
+              <span class="slider round"></span>
+            </label>
+            <Button
+              name="edit-on-grid-mode"
+              data-cy="edit-on-grid-toggle"
+              className="grid-actions-panel__edit-on-grid-btn btn"
+              onClick={(e) => {
+                onEditOnGrid && onEditOnGrid(e.target.checked);
+              }}
+            >
+              Edit on Grid
+            </Button>
+          </>
+          )}
           {updateMode || deleteMode || (
             <Button
               className="grid-actions-panel__update-btn btn"
@@ -236,15 +255,18 @@ const GridActionsPanel = ({
             }}
           />
         ))}
+
       {updateMode || deleteMode || (
         <GrUpdate
           className="grid-actions-panel__restore-btn"
           onClick={() => {
             onRefresh && onRefresh();
           }}
+          data-cy="grid-action-refresh-btn"
           data-testid={`${testId}-refresh-btn`}
         />
       )}
+
       {updateMode || deleteMode || (
         <button
           className="grid-actions-panel__select-btn"
@@ -255,6 +277,7 @@ const GridActionsPanel = ({
           Select Columns
         </button>
       )}
+
       {updateMode ||
         deleteMode ||
         (permissions?.deleteAction && (
@@ -293,6 +316,32 @@ const GridActionsPanel = ({
               </button>
             )
           )))}
+      {(!deleteMode && permissions?.updateAction && !updateMode) && (
+        (
+          <button
+            data-testid={`${testId}-update-mode`}
+            className="grid-actions-panel__update-btn"
+            onClick={() => {
+              setUpdateMode && setUpdateMode(!updateMode);
+            }}
+          >
+            Update Mode
+          </button>
+        )
+      )}
+
+      {(<div style={{ height: "2.2rem", border: '2px solid black', borderRadius: '.5rem', padding: '.2em', display: 'flex', alignItems: 'center', gap: '3px' }}>
+        <label style={{ fontSize: '100%' }}>Edit on Grid</label>
+        <label class="switch" data-cy="edit-on-grid-toggle">
+
+          <input type="checkbox"
+            onClick={(e) => {
+              onEditOnGrid && onEditOnGrid(e.target.checked);
+            }}
+          />
+          <span class="slider round"></span>
+        </label>
+      </div>)}
 
       {deleteMode && (
         <div
@@ -327,6 +376,7 @@ const GridActionsPanel = ({
           ></i>
         </div>
       )}
+
       {updateMode && (
         <div className="grid-actions-panel__update-actions">
           <i
