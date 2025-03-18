@@ -137,7 +137,7 @@ export const getModelData = async (
 };
 
 const api = axios.create({
-  baseURL: 'http://172.18.0.3:8080/PontusTest/1.0.0/',
+  baseURL: 'http://172.19.0.3:8080/PontusTest/1.0.0/',
   headers: {
     Authorization: 'Bearer 123456',
     Accept: 'application/json',
@@ -146,16 +146,13 @@ const api = axios.create({
   },
 });
 
-(() => {
-  console.log(import.meta.env.VITE_BACKEND_URL)
-})()
 
 // wrapper for every post request. eg. handling errors like Too Many Requests (429), internal server error (500), 503...
 const post = async (url: string, data?: any) => {
   const accessToken = localStorage.getItem('accessToken') || '';
   const refreshToken = localStorage.getItem('refreshToken') || '';
 
-  const baseURL = 'http://172.18.0.3:8080/PontusTest/1.0.0';
+  const baseURL = 'http://172.19.0.3:8080/PontusTest/1.0.0';
   const headers = {
     Authorization: `${accessToken}`,
     Accept: 'application/json',
@@ -164,8 +161,7 @@ const post = async (url: string, data?: any) => {
   };
 
 
-  const res = await api.post(baseURL + url, data, {headers})
-  console.log({res})
+  const res = await api.post(baseURL + url, data, { headers })
 
   // const res = await sendHttpRequest(baseURL + url, headers, '', data, 'POST');
 
@@ -448,7 +444,6 @@ export const deleteDashboardGroupAuth = async (
 export const registerUser = async (
   data: RegisterUserReq,
 ): Promise<RegisterUserRes> => {
-  console.log({ data });
   return post('/register/user', data);
 };
 
