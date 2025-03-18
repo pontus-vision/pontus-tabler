@@ -61,9 +61,8 @@ export const createMenuItem = async (
           delete child?.children;
         }
 
-        const path = `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
-          child.name
-        }`;
+        const path = `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${child.name
+          }`;
 
         const res = await menuContainer.items.create({
           ...child,
@@ -103,7 +102,7 @@ export const createMenuItem = async (
 
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
-): Promise<ItemResponse<MenuCreateRes>> => {
+): Promise<MenuCreateRes> => {
   const menuContainer = await initiateMenuContainer();
 
   const patchArr = [];
@@ -125,9 +124,8 @@ export const updateMenuItem = async (
 
         const res = await menuContainer.items.upsert({
           ...child,
-          path: `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
-            child.name
-          }`,
+          path: `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${child.name
+            }`,
         });
 
         const res2 = (await menuContainer
@@ -167,7 +165,13 @@ export const updateMenuItem = async (
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
-  return res;
+  return {
+    id: rest.id,
+    name: rest.name,
+    path: rest.path,
+    kind: rest.kind,
+    children: rest.children
+  };
 };
 
 export const readMenuItemByPath = async (
