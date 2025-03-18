@@ -53,7 +53,6 @@ services:
         cd pontus-node-jdbc
         npm run build
         ./run-docker.sh 
-        node dist/index.js
         # npm run jest || true
         sleep 1000000
   delta-db:
