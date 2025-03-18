@@ -10,16 +10,11 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
+import { DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
 
-console.log('STEP 0')
-console.log({ dbSource: process.env.DB_SOURCE })
-
 export const app = express();
-
-console.log('STEP 1')
 
 const port = 8080;
 
@@ -41,17 +36,18 @@ const authMiddleware = async (
 
   if (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
+    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout')
   ) {
     return next();
   }
 
-
   try {
+
     const authorization = await authenticateToken(req, res);
-    const userId = authorization['userId'];
-    console.log({ USER_ID: userId })
+
+    const userId = authorization?.['userId'];
 
     const arr = req.path.split('/');
 
@@ -59,7 +55,7 @@ const authMiddleware = async (
 
     const entity = arr[arr.length - 2];
 
-    const tableName = entity === 'dashboard' ? GROUPS_DASHBOARDS : GROUPS_USERS;
+    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : GROUPS_USERS;
 
     let targetId = '';
 
@@ -70,10 +66,10 @@ const authMiddleware = async (
     if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
       targetId = req.body?.['id'];
     }
-    console.log({ targetId })
 
-    const permissions = await checkPermissions(userId, targetId, tableName);
-    console.log({ permissions })
+    const permissions = await checkPermissions(userId, //'01959666c546457a9590c351cb5a7e0f' //dashboardId
+      targetId, tableName);
+
     if (permissions[crudAction]) {
       // if (permissions['']) {
       next();
