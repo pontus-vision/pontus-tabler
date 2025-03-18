@@ -23,6 +23,7 @@ import DeleteEntriesModal from '../components/DeleteEntriesModal';
 import GridActionsPanel from '../components/GridActionsPanel';
 import { tableRead, tableDataRead } from '../client';
 import { ReadPaginationFilter } from '../pontus-api/typescript-fetch-client-generated';
+import { TableDataReadReq } from '../typescript/api';
 
 type Props = {
   gridState?: IJsonModel;
@@ -38,6 +39,7 @@ type Props = {
     deleteAction: boolean;
     readAction: boolean;
   };
+  onLayoutChange?: () => void
 };
 
 const PVFlexLayout = ({
@@ -49,6 +51,7 @@ const PVFlexLayout = ({
   setDeletion,
   deletion,
   permissions,
+  onLayoutChange
 }: Props) => {
   const initialJson: IJsonModel = {
     global: {},
@@ -141,27 +144,29 @@ const PVFlexLayout = ({
 
       useEffect(() => {
         const fetchTable = async () => {
-          const input: AgGridInput = {
-            // cols:
+          const input: TableDataReadReq = {
+            to: 20,
+            from: 1,
+            filters: {},
+            tableName: config.title
           };
-          const colsRes = await tableRead(config.tableId);
-
-          const readDataTableRes = await tableDataRead(input);
+          const colsRes = await tableRead({ id: config.tableId });
 
           const colsData = colsRes?.data;
 
-          const dataTableData = readDataTableRes?.data;
-
           // setRows(data.records?.map((record) => JSON?.parse(record)));
           colsData?.cols && setCols(colsData?.cols);
-          data?.records &&
-            // setRows(data.records?.map((record) => JSON?.parse(record)));
-            setRows(
-              data.records.map((rec) => {
-                return { field: rec };
-              }),
-            );
-          setTotalCount(data.totalAvailable || 2);
+          const readDataTableRes = await tableDataRead(input);
+          const dataTableData = readDataTableRes?.data;
+
+          // data?.records &&
+          //   // setRows(data.records?.map((record) => JSON?.parse(record)));
+          //   setRows(
+          //     data.records.map((rec) => {
+          //       return { field: rec };
+          //     }),
+          //   );
+          setTotalCount(readDataTableRes.data.rowsCount || 2);
         };
 
         fetchTable();
@@ -274,6 +279,8 @@ const PVFlexLayout = ({
   };
 
   const onModelChange = () => {
+    onLayoutChange && onLayoutChange()
+
     if (setIsEditing) {
       setIsEditing(true);
     }
@@ -291,14 +298,14 @@ const PVFlexLayout = ({
     setContainerHeight(calcContainerHeight() || '400px');
   };
 
-  const addComponent = (entry: FlexLayoutCmp) => {
+  const addComponent = (entry: Record<string, any>) => {
     const aggridCmp: IJsonTabNode = {
       type: 'tab',
       name: entry.cmp?.name || entry.componentName,
       component: entry.componentName,
       config: {
         title: entry.cmp?.name,
-        tableId: entry.cmp?.tableId,
+        tableId: entry.cmp?.id as string,
         lastState: [],
       },
     };
@@ -385,6 +392,7 @@ const PVFlexLayout = ({
             overflowY: 'auto',
             flexGrow: 1,
             flexDirection: 'column',
+
           }}
         >
           <Layout
