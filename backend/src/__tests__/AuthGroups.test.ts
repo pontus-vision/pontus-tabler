@@ -85,7 +85,6 @@ describe('dashboardCreatePOST', () => {
   });
 
   it('should create a group', async () => {
-    console.log("TEST CASE: 1")
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -126,7 +125,6 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupDeleteRes.status).toBe(200);
   });
   it('should read many groups', async () => {
-    console.log("TEST CASE: 2")
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -187,7 +185,6 @@ describe('dashboardCreatePOST', () => {
     ).toBeTruthy();
   });
   it('should do the sad path', async () => {
-    console.log("TEST CASE: 3")
     const readBody: AuthGroupReadReq = {
       id: 'foo',
 
@@ -299,7 +296,6 @@ describe('dashboardCreatePOST', () => {
     expect(delete2RetVal.status).toBe(404);
   });
   it('should create dashboards subdocuments', async () => {
-    console.log("TEST CASE: 4")
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
@@ -382,7 +378,6 @@ describe('dashboardCreatePOST', () => {
     });
   });
   it('should update dashboards subdocuments', async () => {
-    console.log("TEST CASE: 5")
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
@@ -504,7 +499,6 @@ describe('dashboardCreatePOST', () => {
     );
   });
   it('should update a authGroup and its reference in a dashboard', async () => {
-    console.log("TEST CASE: 6")
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
@@ -555,7 +549,6 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupReadRes.data.name).toBe(authGroupCreateRes.data.name);
   });
   it('should delete dashboards subdocuments', async () => {
-    console.log("TEST CASE: 7")
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
@@ -711,7 +704,6 @@ describe('dashboardCreatePOST', () => {
     expect(readRetVal3.status).toBe(404);
   });
   it('should create a an authgroup, associate a dashboard and delete it, and its reference in the dashboard', async () => {
-    console.log("TEST CASE: 8")
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
@@ -793,7 +785,6 @@ describe('dashboardCreatePOST', () => {
     expect(readRetVal2.status).toBe(404);
   });
   it('should UPDATE dashboards subdocuments incorreclty', async () => {
-    console.log("TEST CASE: 9")
     const body: DashboardCreateReq = {
       owner: 'Joe',
       name: 'PontusVision',
@@ -836,7 +827,6 @@ describe('dashboardCreatePOST', () => {
     expect(readRetVal.status).toBe(404);
   });
   it('should associate a dashboard to an incorrect authGroup', async () => {
-    console.log("TEST CASE: 10")
     const createDashBody: DashboardCreateReq = {
       name: 'dashboard1',
       owner: 'foo',
@@ -925,7 +915,6 @@ describe('dashboardCreatePOST', () => {
     expect(groupDashCreateRes3.status).toBe(404);
   });
   it('should create a an authgroup, associate an authuser and delete it, and its reference in the dashboard', async () => {
-    console.log("TEST CASE: 11")
     const body: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -996,7 +985,6 @@ describe('dashboardCreatePOST', () => {
     expect(readRetVal2.status).toBe(404);
   });
   it('should update a authGroup and its reference in a authUser', async () => {
-    console.log("TEST CASE: 12")
     const body: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -1077,7 +1065,6 @@ describe('dashboardCreatePOST', () => {
     expect(readRetVal2.status).toBe(404);
   });
   it('should create a an authgroup, associate an authuser and delete its reference', async () => {
-    console.log("TEST CASE: 13")
     const body: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -1145,7 +1132,6 @@ describe('dashboardCreatePOST', () => {
     expect(readRetVal2.status).toBe(404);
   });
   it('should create a an authgroup, associate a table and delete its reference', async () => {
-    console.log("TEST CASE: 14")
     const body: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -1202,48 +1188,48 @@ describe('dashboardCreatePOST', () => {
       createGroupTablesBody,
     )) as AxiosResponse<AuthGroupTablesCreateRes>;
 
-    //    const readBody: AuthGroupTablesReadReq = {
-    //      id: createGroupRetVal.data.id,
-    //      name: createGroupRetVal.data.name,
-    //      filters: {
-    //        name: {
-    //          condition1: {
-    //            filter: createTableRetVal.data.name,
-    //            filterType: 'text',
-    //            type: 'contains',
-    //          },
-    //          filterType: 'text',
-    //        },
-    //      },
-    //    };
-    //
-    //    const readRetVal = (await postAdmin(
-    //      'auth/group/tables/read',
-    //      readBody,
-    //    )) as AxiosResponse<AuthGroupTablesReadRes>;
-    //
-    //    expect(readRetVal.data.tables[0].id).toBe(createTableRetVal.data.id);
-    //
-    //    const deleteBody2: AuthGroupTablesDeleteReq = {
-    //      id: createGroupRetVal.data.id,
-    //      name: createGroupRetVal.data.name,
-    //      tables: [
-    //        { name: createTableRetVal.data.name, id: createTableRetVal.data.id },
-    //      ],
-    //    };
-    //
-    //    const authGroupDeleteRes = (await postAdmin(
-    //      '/auth/group/tables/delete',
-    //      deleteBody2,
-    //    )) as AxiosResponse<AuthGroupTablesDeleteRes>;
-    //
-    //    expect(authGroupDeleteRes.status).toBe(200);
-    //
-    //    const readRetVal2 = (await postAdmin(
-    //      'auth/group/tables/read',
-    //      readBody,
-    //    )) as AxiosResponse<AuthGroupUsersReadRes>;
-    //
-    //    expect(readRetVal2.status).toBe(404);
+    const readBody: AuthGroupTablesReadReq = {
+      id: createGroupRetVal.data.id,
+      name: createGroupRetVal.data.name,
+      filters: {
+        name: {
+          condition1: {
+            filter: createTableRetVal.data.name,
+            filterType: 'text',
+            type: 'contains',
+          },
+          filterType: 'text',
+        },
+      },
+    };
+
+    const readRetVal = (await postAdmin(
+      'auth/group/tables/read',
+      readBody,
+    )) as AxiosResponse<AuthGroupTablesReadRes>;
+
+    expect(readRetVal.data.tables[0].id).toBe(createTableRetVal.data.id);
+
+    const deleteBody2: AuthGroupTablesDeleteReq = {
+      id: createGroupRetVal.data.id,
+      name: createGroupRetVal.data.name,
+      tables: [
+        { name: createTableRetVal.data.name, id: createTableRetVal.data.id },
+      ],
+    };
+
+    const authGroupDeleteRes = (await postAdmin(
+      '/auth/group/tables/delete',
+      deleteBody2,
+    )) as AxiosResponse<AuthGroupTablesDeleteRes>;
+
+    expect(authGroupDeleteRes.status).toBe(200);
+
+    const readRetVal2 = (await postAdmin(
+      'auth/group/tables/read',
+      readBody,
+    )) as AxiosResponse<AuthGroupUsersReadRes>;
+
+    expect(readRetVal2.status).toBe(404);
   });
 });
