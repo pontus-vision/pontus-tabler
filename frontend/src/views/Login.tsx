@@ -22,7 +22,6 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log({ isAuthenticated })
       navigate('/tables/read')
     }
   }, [])
