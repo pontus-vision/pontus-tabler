@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import Notification from './Notification';
 
-interface Message {
+export interface Message {
   id: number;
   type: 'success' | 'error' | 'info'
   title: string;
