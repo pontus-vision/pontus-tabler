@@ -22,6 +22,7 @@ import {
   IDatasource,
   IGetRowsParams,
   IRowNode,
+  RowClickedEvent,
   RowEvent,
   SelectionChangedEvent,
 } from 'ag-grid-community';
@@ -70,6 +71,8 @@ type Props = {
     deleteAction?: boolean;
     readAction?: boolean;
   };
+  onCreateRow?: (e: Record<string, any>) => void
+  onUpdateRow?: (e: Record<string, any>) => void
   onCellsChange?: (data: CellValueChangedEvent[]) => void;
   onFiltersChange?: (filters: {
     [key: string]: ReadPaginationFilterFilters;
@@ -85,6 +88,9 @@ type Props = {
   testId?: string;
   resetRowsChangedState?: boolean;
   updateModeOnRows?: boolean;
+  paginationPageSize?: number
+  addRowOnEditMode?: boolean
+  editOnGrid?: boolean
 };
 
 const PVGridWebiny2 = ({
@@ -121,6 +127,11 @@ const PVGridWebiny2 = ({
   testId,
   cypressAtt,
   updateModeOnRows,
+  paginationPageSize = 6,
+  addRowOnEditMode = true,
+  onCreateRow,
+  onUpdateRow,
+  editOnGrid = true
 }: Props) => {
   const [deleteMode, setDeleteMode] = useState(false);
   const [columnState, setColumnState] = useState<ColumnState[]>();
@@ -133,6 +144,7 @@ const PVGridWebiny2 = ({
   const [cachedRowParams, setCachedRowParams] = useState<IGetRowsParams>();
   const [to, setTo] = useState();
   const [from, setFrom] = useState();
+  const [editMode, setEditMode] = useState(false)
   const [rowStateHasChanged, setRowsStateHasChanged] = useState(false);
   // const [deleteMode, setDeleteMode] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
@@ -141,6 +153,7 @@ const PVGridWebiny2 = ({
   );
   const [showGrid, setShowGrid] = useState(true);
   const [checkHiddenObjects, setCheckHiddenObjects] = useState(false);
+  const [columns, setColumns] = useState<ColDef[]>(cols)
 
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [initialRows, setInitialRows] = useState<string>();
@@ -155,7 +168,7 @@ const PVGridWebiny2 = ({
     // onValueChange(id, columnState);
   }, [columnState, id]);
 
-  useEffect(() => {
+  const emitRowAlterations = () => {
     const alterations = rowsAlterations.filter((row) => {
       if (!initialRows) return;
       return !JSON.parse(initialRows).some((row2: Record<string, any>) =>
@@ -164,9 +177,24 @@ const PVGridWebiny2 = ({
     });
 
     rowsAlterations && setRowsStateHasChanged(alterations.length > 0);
+    if (alterations.length > 0) {
+      setRowsStateHasChanged(true)
+      onRowsStateChange && rowsAlterations && onRowsStateChange(alterations);
+    } else {
+      setRowsStateHasChanged(false)
+    }
+    console.log({ alterations })
+  }
 
-    onRowsStateChange && rowsAlterations && onRowsStateChange(alterations);
+  useEffect(() => {
+    emitRowAlterations()
   }, [rowsAlterations]);
+
+  useEffect(() => {
+    if (!editMode) {
+      setRowsAlterations([])
+    }
+  }, [editMode])
 
   useEffect(() => {
     if (!resetRowsChangedState) return;
@@ -180,7 +208,16 @@ const PVGridWebiny2 = ({
   useEffect(() => {
     paramsChange();
     selectRows();
+    if (editMode && addRowOnEditMode) {
+      addNewEmptyRow()
+    }
   }, [cachedRowParams]);
+
+  useEffect(() => {
+    if (editMode && addRowOnEditMode) {
+      addNewEmptyRow()
+    }
+  }, [columnState]);
 
   useEffect(() => {
     onColumnState && columnState && onColumnState(columnState);
@@ -237,7 +274,6 @@ const PVGridWebiny2 = ({
             {
               headerName: '',
               field: 'delete',
-
               checkboxSelection: true,
               width: 30,
               colId: 'delete-mode',
@@ -305,14 +341,27 @@ const PVGridWebiny2 = ({
                   <i
                     data-testid={`${testId}-update-row-btn`}
                     className="fa-solid fa-pen-to-square"
+                    data-cy="update-row-icon-pen"
                   ></i>
                 );
               },
               onCellClicked: handleUpdateIconClick,
             },
 
-            ...cols,
-          ]);
+            ...columns,
+          ].sort((a, b) => a?.pivotIndex - b?.pivotIndex).map(colDef => {
+            if (colDef?.regex) {
+              const re = new RegExp(colDef?.regex)
+              return {
+                ...colDef, valueGetter: e => {
+                  if (re.test(e?.data?.[e?.colDef?.colId])) {
+                    //return 'wrong format'
+                  }
+                }
+              }
+            }
+            return colDef
+          }));
 
           // ...data.columnNames.map((field) => {
           //   if (
@@ -362,6 +411,7 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (!rows) return;
+    console.log({ ROWS: rows, cols: gridApi?.getColumnDefs() })
     cachedRowParams?.successCallback(rows, totalCount);
   }, [rows, filterState, cachedRowParams]);
 
@@ -386,9 +436,9 @@ const PVGridWebiny2 = ({
     if (checkHiddenObj) {
       setColumnDefs(
         (prevState) =>
-          (prevState = prevState?.filter(
-            (col) => !objects.some((obj) => obj === col),
-          )),
+        (prevState = prevState?.filter(
+          (col) => !objects.some((obj) => obj === col),
+        )),
       );
     }
   }, [columnState]);
@@ -422,14 +472,6 @@ const PVGridWebiny2 = ({
     rowModelType: 'infinite',
     cacheBlockSize: 100,
     suppressRowClickSelection: true,
-    onRowClicked: (e) => {
-      if (
-        !e.api.getColumn('update-mode')?.isVisible() &&
-        !e.api.getColumn('delete-mode')?.isVisible()
-      ) {
-        onRowClicked && onRowClicked(e);
-      }
-    },
   };
 
   // const defaultColDef = useMemo<ColDef>(() => {
@@ -462,6 +504,10 @@ const PVGridWebiny2 = ({
     onFilterChanged();
   };
 
+  useEffect(() => {
+    console.log({ cols })
+  }, [cols])
+
   const handleColumnSelect = (cols: Array<string | undefined>) => {
     const hidden = columnState
       ?.filter((colState) => !cols.some((col) => colState.colId === col))
@@ -474,6 +520,90 @@ const PVGridWebiny2 = ({
     !cols.some((col) => col === undefined) &&
       gridApi?.setColumnsVisible(cols as string[], true);
   };
+
+  const handleEditOnGrid = (val: boolean) => {
+    console.log({ editOnGrid })
+    if (!editOnGrid) return
+    setEditMode(val)
+    setColumnDefs(prevState => prevState.map((col) => {
+      const isNotEditable = col.field === 'id' || col.field === 'delete' || col.field === 'select' || col.field === 'click'
+      return { ...col, editable: isNotEditable ? false : val }
+      const index = cols.findIndex(el => el.field === col.field)
+      console.log({ index })
+      if (index === -1) return col
+      if (cols[index]?.editable === false) return col
+      return { ...col, editable: isNotEditable ? false : !col?.editable }
+    }))
+    gridApi.setGridOption("columnDefs", columnDefs)
+    if (!val) {
+      gridApi.stopEditing(true)
+    }
+  }
+
+  const [rowsState, setRowsState] = useState<{ [key: string]: any }[]>(rows)
+  const [gridTotalCount, setGridTotalCount] = useState<number>()
+  const addNewEmptyRow = () => {
+    if (totalCount === 1 && rows.length === 0) {
+      console.log({ rows })
+      return
+    }
+    const newRow = {}
+    for (const columnDef of columnDefs) {
+      newRow[columnDef.field] = ''
+    }
+
+    //rows.push(newRow)
+    console.log({ newRow, rowsState, totalCount })
+    if (Array.isArray(rows)) {
+      setRowsState([...rows, newRow])
+    }
+    setGridTotalCount((totalCount || 1) + 1)
+    console.log({ rowsState, totalCount: totalCount || 1 })
+    cachedRowParams?.successCallback(rowsState, totalCount || 1);
+  }
+
+
+  useEffect(() => {
+    if (!addRowOnEditMode) return
+    addNewEmptyRow()
+  }, [editMode])
+
+
+
+  useEffect(() => {
+    if (!rows) return
+    if (!editMode) {
+      cachedRowParams?.successCallback(rows, totalCount);
+    } else {
+      cachedRowParams?.successCallback(rowsState, gridTotalCount || 1);
+    }
+  }, [rowsState])
+
+  useEffect(() => {
+    console.log({ editOnGrid })
+    if (!gridApi?.setGridOption || !editOnGrid) return
+    console.log({ rows })
+    const toggleBtn: HTMLInputElement = document.querySelector('.switch > input')
+    console.log({ toggleBtn })
+    setColumnDefs(prevState => prevState.map((col) => {
+      const isNotEditable = col.field === 'id' || col.field === 'delete' || col.field === 'select' || col.field === 'click'
+      return { ...col, editable: isNotEditable ? false : editMode }
+      const index = cols.findIndex(el => el.field === col.field)
+      console.log({ index })
+      if (index === -1) return col
+      if (cols[index]?.editable === false) return col
+      return { ...col, editable: isNotEditable ? false : !col?.editable }
+    }))
+    gridApi.setGridOption("columnDefs", columnDefs)
+    console.log({ columnDefs })
+    if (!editMode) {
+      gridApi.stopEditing(true)
+    }
+  }, [cachedRowParams])
+
+  useEffect(() => {
+    console.log({ rows })
+  }, [rows])
 
   useEffect(() => {
     if (deleteMode) {
@@ -534,7 +664,7 @@ const PVGridWebiny2 = ({
     setSelectedRows(selectedRows);
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
 
   useEffect(() => {
     setEntriesToBeDeleted &&
@@ -551,10 +681,14 @@ const PVGridWebiny2 = ({
     }
   };
   const [cellsChanged, setCellsChanged] = useState<CellValueChangedEvent[]>([]);
+
+
+
   const onCellValueChanged = (cell: CellValueChangedEvent) => {
     onCellValueChange && onCellValueChange(cell);
 
     setCellsChanged([...cellsChanged, cell]);
+
     setRowsAlterations((prevState) => [...new Set([...prevState, cell.data])]);
   };
 
@@ -592,12 +726,27 @@ const PVGridWebiny2 = ({
     };
   }, []);
 
+  const createOnEnter = (e: RowClickedEvent) => {
+    if (e.event?.key !== 'Enter') return
+    if (e.data.id && onUpdateRow) {
+      onUpdateRow(e.data)
+    }
+
+
+    if (!e.data?.id || onCreateRow) {
+      onCreateRow && onCreateRow(e.data)
+      //onRowsStateChange([e.data])
+      //emitRowAlterations()
+    }
+  }
+
   return (
     <>
       <div
         data-cy={cypressAtt}
         style={{ width: '100%', height: '100%', position: 'relative' }}
         data-testid={testId}
+        data-cy="read-tables-aggrid"
         className={'ag-theme-alpine' + ' ' + gridId}
       >
         {cols && (
@@ -616,6 +765,7 @@ const PVGridWebiny2 = ({
           onDelete={onDelete}
           setShowColumnSelector={setShowColumnSelector}
           deleteMode={deleteMode}
+
           onRefresh={onRefresh}
           updateModeOnRows={updateModeOnRows}
           changesMade={rowStateHasChanged}
@@ -624,14 +774,24 @@ const PVGridWebiny2 = ({
           setDeleteMode={setDeleteMode}
           setUpdateMode={setUpdateMode}
           entriesToBeDeleted={entriesToBeDeleted}
+          onEditOnGrid={handleEditOnGrid}
         />
         <AgGridReact
           data-testid="ag-grid-component"
           gridOptions={gridOptions}
+          onRowClicked={(e) => {
+            if (
+              !e.api.getColumn('update-mode')?.isVisible() &&
+              !e.api.getColumn('delete-mode')?.isVisible()
+            ) {
+              if (editMode) return
+              onRowClicked && onRowClicked(e);
+            }
+          }}
           // enableRangeSelection={true}
           // paginationAutoPageSize={true}
-          onCellClicked={(e) => onCellClicked && onCellClicked(e)}
-          paginationPageSize={6}
+          onCellClicked={(e) => { if (editMode) return; onCellClicked && onCellClicked(e) }}
+          paginationPageSize={paginationPageSize}
           defaultColDef={defaultColDef}
           rowSelection={'multiple'}
           rowMultiSelectWithClick={true}
@@ -645,13 +805,16 @@ const PVGridWebiny2 = ({
           onColumnVisible={handleGridStateChanged}
           onSortChanged={handleGridStateChanged}
           domLayout="autoHeight"
+          onCellKeyDown={e => {
+            createOnEnter(e)
+          }}
           pagination={true}
           datasource={datasource}
           paginationPageSizeSelector={false}
           columnDefs={columnDefs}
           ref={gridContainerRef}
-          // onSelectionChanged={onSelectionChanged}
-          // onCellValueChanged={(e) => console.log({ e })}
+        // onSelectionChanged={onSelectionChanged}
+        // onCellValueChanged={(e) => console.log({ e })}
         ></AgGridReact>
       </div>
     </>
