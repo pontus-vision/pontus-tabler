@@ -17,6 +17,7 @@ import {
   AuthUserUpdateRes,
   AuthUsersReadReq,
   AuthUsersReadRes,
+  ReadPaginationFilterFilters,
 } from '../typescript/api';
 import NotificationManager, {
   MessageRefs,
@@ -81,7 +82,11 @@ const AuthUsersGrid = ({
   const [usersChanged, setUsersChanged] = useState<AuthGroupRef[]>([]);
   const [usersToBeUpdated, setUsersToBeUpdated] = useState<AuthGroupRef[]>([]);
   const [usersToBeAdded, setUsersToBeAdded] = useState<AuthGroupRef | null>();
-
+  const [from, setFrom] = useState<number>(1);
+  const [to, setTo] = useState<number>(100);
+  const [filters, setFilters] = useState<{
+    [key: string]: ReadPaginationFilterFilters;
+  }>();
   const { fetchDataAndNavigate } = useApiAndNavigate();
 
   const [reset, setReset] = useState(false);
@@ -89,44 +94,46 @@ const AuthUsersGrid = ({
   const fetchAuthUsers = async () => {
     setIsLoading1(true);
 
-    const req: AuthUsersReadReq = { from: 1, to: 100, filters: {} };
+    const req: AuthUsersReadReq = { from, to, filters };
 
-    const res = (await fetchDataAndNavigate(
-      readUsers,
-      req,
-    )) as AxiosResponse<AuthUsersReadRes>;
+    try {
+      const res = (await fetchDataAndNavigate(
+        readUsers,
+        req,
+      )) as AxiosResponse<AuthUsersReadRes>;
 
-    const authUsers = res?.data.authUsers;
+      const authUsers = res?.data.authUsers;
+      if (usersToFilterOutById) {
+        const filtered = res?.data.authUsers?.filter(
+          (dash1) => !usersToFilterOutById.some((dash2) => dash1.id === dash2.id),
+        );
 
-    if (res?.status === 404) {
-      setUsers([]);
-      setTotalUsers(0);
+        filtered && setUsers(filtered);
+        setTotalUsers(filtered?.length);
+      } else {
+        authUsers && setUsers(authUsers);
+        setTotalUsers(res?.data.count);
+      }
       setIsLoading1(false);
-      return;
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not fetch Auth User(s)!',
-      );
-      setUsers([]);
-      setTotalUsers(0);
-      setIsLoading1(false);
-      return;
-    }
+    } catch (error) {
 
-    if (usersToFilterOutById) {
-      const filtered = res?.data.authUsers?.filter(
-        (dash1) => !usersToFilterOutById.some((dash2) => dash1.id === dash2.id),
-      );
-
-      filtered && setUsers(filtered);
-      setTotalUsers(filtered?.length);
-    } else {
-      authUsers && setUsers(authUsers);
-      setTotalUsers(res?.data.count);
+      if (error?.status === 404) {
+        setUsers([]);
+        setTotalUsers(0);
+        setIsLoading1(false);
+        return;
+      } else if (error?.status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Something went wrong. Could not fetch Auth User(s)!',
+        );
+        setUsers([]);
+        setTotalUsers(0);
+        setIsLoading1(false);
+        return;
+      }
     }
-    setIsLoading1(false);
   };
 
   const delAuthUsers = async (arr: AuthUserRef[]) => {
@@ -156,35 +163,6 @@ const AuthUsersGrid = ({
       }
     }
   };
-
-  // const addUser = async (data: AuthUserRef) => {
-  //   if (!addMode || data.id) return;
-
-  //   const res = await createAuthGroup({ username: data.username });
-
-  //   if (res?.status === 200) {
-  //     notificationManagerRef?.current?.addMessage(
-  //       'success',
-  //       'Success',
-  //       `AuthGroup(s) created!`,
-  //     );
-
-  //     await fetchAuthUsers();
-  //   } else {
-  //     notificationManagerRef?.current?.addMessage(
-  //       'error',
-  //       'Error',
-  //       'Something went wrong. Could not create Auth Group(s)!',
-  //     );
-  //   }
-
-  //   setUsersToBeAdded(null);
-  //   // setGroupsChanged(groupsChanged.filter((group) => !!group.id));
-  //   // console.log({ groupsChanged });
-  //   resetRowsState();
-  //   setUsersChanged([]);
-  //   setAddMode(false);
-  // };
 
   const resetRowsState = () => {
     setReset(true);
@@ -249,6 +227,9 @@ const AuthUsersGrid = ({
   };
 
   const handleRowsStateChange = (e: Record<string, any>[]) => {
+    if (onRowsStateChange) {
+      return onRowsStateChange(e)
+    }
     // if(authGroups.some(group=> ))
     setUsersChanged(e as AuthGroupRef[]);
 
@@ -279,23 +260,26 @@ const AuthUsersGrid = ({
 
   useEffect(() => {
     fetchAuthUsers();
-  }, []);
+  }, [filters, from, to]);
 
-  useEffect(() => {
-    // groupsToBeAdded && addGroup(groupsToBeAdded);
-  }, [usersToBeAdded]);
+  const handleParamsChange = (params: IGetRowsParams) => {
+    setFilters(params.filterModel);
+    setFrom(params.startRow + 1);
+    setTo(params.endRow);
+  };
 
   return (
     <>
       <PVGridWebiny2
         onCellClicked={onCellClicked}
+        //onCreateRow={e => console.log({ e })}
         cypressAtt="auth-groups-grid"
         onRefresh={() => fetchAuthUsers()}
         add={() => handleOnAdd()}
         onDelete={(e) => delAuthUsers(e)}
         permissions={permissions}
         selection={selection}
-        onParamsChange={onParamsChange}
+        onParamsChange={handleParamsChange}
         isLoading={isLoading1}
         onRowsSelected={onRowsSelected}
         updateModeOnRows={true}
