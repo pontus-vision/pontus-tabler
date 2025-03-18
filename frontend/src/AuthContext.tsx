@@ -14,8 +14,8 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   userGroups: [],
-  login: () => {},
-  logout: () => {},
+  login: () => { },
+  logout: () => { },
 });
 
 interface AuthProviderProps {
@@ -34,10 +34,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsAuthenticated(true);
 
     const res = await readUserGroups({ id: userId, filters: {} });
-    console.log({ resGroups: res?.data });
 
     setUserGroups(res?.data.authGroups || []);
-    navigate('/tables/read');
+    if (location.pathname === '/login') {
+      navigate('/tables/read');
+    }
   };
 
   const logout = () => {
