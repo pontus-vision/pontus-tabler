@@ -6,201 +6,201 @@ import {
   MenuReadRes,
   MenuItemTreeRef,
 } from '../../typescript/api/index';
-import { fetchContainer } from '../../cosmos-utils';
-import {
-  Container,
-  ItemResponse,
-  PartitionKeyDefinition,
-  UniqueKeyPolicy,
-} from '@azure/cosmos';
-import { NotFoundError } from '../../generated/api';
-import { createDashboard } from './DashboardService';
 import { DASHBOARDS, MENU } from '../../consts';
+import { generateUUIDv6, runQuery } from '../../db-utils';
+import { NotFoundError } from '../../generated/api';
 
+const updateAndRetrieveTree = (path: string, obj: any, modifyCallback: (node) => void) => {
+  if (path === obj.path) {
+    modifyCallback(obj)
+    return obj
+  }
+  if (obj.kind === 'file') {
+    return obj
+  }
+  for (const child of obj?.children) {
+    const result = updateAndRetrieveTree(path, child, modifyCallback)
+    if (result) return obj
+  }
+}
 
-const partitionKey: string | PartitionKeyDefinition = {
-  paths: ['/path'],
-};
+const findNestedObject = (path: string, obj: any) => {
+  if (path === obj.path) {
+    return obj
+  }
 
-const uniqueKeyPolicy: UniqueKeyPolicy = {
-  uniqueKeys: [{ paths: ['/path'] }],
-};
+  console.log({ obj: JSON.stringify(obj) })
+  if (obj.kind === 'file') {
+    return obj
+  }
+  for (const child of obj?.children) {
+    const result = findNestedObject(path, child)
+    if (result) return result
+  }
+}
 
-const initialDoc: MenuItemTreeRef = {
-  name: '/',
-  kind: 'folder',
-  path: '/',
-  children: [],
-};
+const createTree = async (item: MenuItemTreeRef, path: string) => {
 
-export const initiateMenuContainer = async (): Promise<Container> => {
-  const menuContainer = await fetchContainer(
-    MENU,
-    partitionKey,
-    uniqueKeyPolicy,
-    [initialDoc],
+  const res = await runQuery(
+    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`,
   );
 
+  let res2 = await runQuery(`SELECT * FROM ${MENU}`)
 
-  return menuContainer;
-};
+  if (res2.length === 0) {
+    const obj: MenuItemTreeRef = {
+      children: [],
+      id: generateUUIDv6(),
+      kind: 'folder',
+      name: 'root',
+      path: '/'
+    }
+    const resInsert = await runQuery(`INSERT INTO ${MENU} (id, tree_obj_str) VALUES ('${generateUUIDv6()}','${JSON.stringify(obj)}')`)
+
+    res2 = await runQuery(`SELECT * FROM ${MENU}`)
+  }
+
+  const treeObjStr = res2[0]['tree_obj_str'] as string
+
+  const treeObjId = res2[0]['id']
+
+  const treeObj = JSON.parse(treeObjStr)
+
+  let obj
+
+  if (item.kind === 'folder') {
+    obj = { ...item, children: [] }
+  } else {
+    obj = item
+  }
+
+  console.log({ objOnCreate: obj })
+
+  const treeObjModified = updateAndRetrieveTree(path, treeObj, (node) => { node.children.push({ ...obj, id: generateUUIDv6(), path: item.path + item.name }) })
+
+  if (!treeObjModified) {
+    throw new NotFoundError(`No menu item found at path "${path}"`)
+  }
+
+  const treeObjStr2 = JSON.stringify(treeObjModified)
+
+  const res3 = await runQuery(`UPDATE ${MENU} SET tree_obj_str = '${treeObjStr2}' WHERE id = '${treeObjId}'`)
+
+  const res4 = await runQuery(`SELECT * FROM ${MENU}`)
+
+  console.log({ res4, treeObjModified, obj, item })
+
+  const treeObjFinal = JSON.parse(res4[0]['tree_obj_str'])
+  console.log({ item, treeObjFinal: JSON.stringify(treeObjFinal) })
+  return findNestedObject(item.path + item.name, treeObjFinal)
+}
 
 export const createMenuItem = async (
   data: MenuCreateReq,
 ): Promise<MenuCreateRes | any> => {
-  const menuContainer = await initiateMenuContainer();
-
-  const patchArr = [];
-  for (const prop in data) {
-    switch (prop) {
-      case 'children':
-        const child = data[prop][0];
-
-        if (child.kind === 'file') {
-          delete child?.children;
-        }
-
-        const path = `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
-          child.name
-        }`;
-
-        const res = await menuContainer.items.create({
-          ...child,
-          path,
-        });
-
-        const res2 = await createDashboard({
-          id: res.resource.id,
-          name: child.name,
-        });
-
-        if (res.statusCode === 201) {
-          patchArr.push({
-            op: 'add',
-            path: '/children/-',
-            value: res.resource,
-          });
-        }
-        break;
-      default:
-        break;
-    }
-  }
-  try {
-    const res = await menuContainer.item(data.id, data.path).patch(patchArr);
-    const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-      res.resource as any;
-    return rest;
-  } catch (error) {
-    if (error.code === 404) {
-      throw new NotFoundError(
-        `Menu item at path '${data.path}' and id '${data.id}' not found.`,
-      );
-    }
-  }
+  return createTree(data, data.path)
 };
 
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
-): Promise<ItemResponse<MenuCreateRes>> => {
-  const menuContainer = await initiateMenuContainer();
+): Promise<MenuCreateRes> => {
+  const treeObjStr = JSON.stringify(data)
 
-  const patchArr = [];
+  const res = await runQuery(`SELECT * FROM ${MENU}`)
 
-  // Partial Update Docs https://learn.microsoft.com/en-us/azure/cosmos-db/partial-document-update
+  const treeObj = JSON.parse(res[0]['tree_obj_str'])
 
-  const child = data?.children?.[0];
+  const treeUpdated = updateAndRetrieveTree(data.path, treeObj, (node) => { node.name = data.name })
 
-  for (const prop in data) {
-    switch (prop) {
-      case 'name':
-        patchArr.push({ op: 'replace', path: '/name', value: data[prop] });
-        break;
-      case 'kind':
-        patchArr.push({ op: 'replace', path: '/kind', value: data[prop] });
-        break;
-      case 'children':
-        if (data.kind === 'file') break;
-
-        const res = await menuContainer.items.upsert({
-          ...child,
-          path: `${data?.path}${data?.path?.endsWith('/') ? '' : '/'}${
-            child.name
-          }`,
-        });
-
-        const res2 = (await menuContainer
-          .item(data.id, data.path)
-          .read()) as ItemResponse<MenuItemTreeRef>;
-
-        const index = res2.resource.children.findIndex(
-          (el) => el.id === child.id,
-        );
-
-        res.statusCode === 201 &&
-          patchArr.push({
-            op: 'set',
-            path: `/children/${index}`,
-            value: res.resource,
-          });
-
-        const dashboardContainer = await fetchContainer(DASHBOARDS);
-
-        const res3 = await dashboardContainer
-          .item(child.id, child.id)
-          .patch([{ op: 'set', path: '/name', value: child.name }]);
-
-        break;
-      default:
-        break;
-    }
+  if (!treeUpdated) {
+    throw new NotFoundError(`No menu item found at path "${data.path}"`)
   }
 
-  if (patchArr.length === 0) {
-    throw { code: 400, message: 'No menu item property defined' };
-  }
-  const res = await menuContainer.item(data.id, data.path).patch(patchArr);
+  const treeObjStr2 = JSON.stringify(treeUpdated)
 
-  await menuContainer.item(child.id, child.path).delete();
+  const treeObjId = res[0]['id']
 
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } =
-    res.resource as any;
 
-  return res;
+  const res3 = await runQuery(`UPDATE ${MENU} SET tree_obj_str = '${treeObjStr2}' WHERE id = '${treeObjId}'`)
+
+  const res2 = await runQuery(`SELECT * FROM ${MENU}`)
+
+
+  const treeObj2 = JSON.parse(res2[0]['tree_obj_str'])
+
+  const retObj = findNestedObject(data.path, treeObj2)
+
+  console.log({ retObj })
+
+  return retObj
 };
 
-export const readMenuItemByPath = async (
+export const readMenuTree = async (
   path: string,
 ): Promise<MenuReadRes> => {
-  const querySpec = {
-    query: 'select * from menu p where p.path=@path',
-    parameters: [
-      {
-        name: '@path',
-        value: path,
-      },
-    ],
-  };
-  const menuContainer = await initiateMenuContainer();
 
-  const { resources, requestCharge } = await menuContainer.items
-    .query(querySpec)
-    .fetchAll();
+  const res = await runQuery(
+    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`,
+  );
 
-  if (resources.length === 1) {
-    return resources[0];
-  } else if (resources.length === 0) {
-    throw { code: 404, message: `No menu item found at path "${path}".` };
+  let res2 = await runQuery(`SELECT * FROM ${MENU}`)
+
+  if (res2.length === 0) {
+    const obj: MenuItemTreeRef = {
+      children: [],
+      id: generateUUIDv6(),
+      kind: 'folder',
+      name: 'root',
+      path: '/'
+    }
+    const resInsert = await runQuery(`INSERT INTO ${MENU} (id, tree_obj_str) VALUES ('${generateUUIDv6()}','${JSON.stringify(obj)}')`)
+
+    res2 = await runQuery(`SELECT * FROM ${MENU}`)
   }
+
+  const treeObj = JSON.parse(res2[0]['tree_obj_str'])
+
+  const tree = findNestedObject(path, treeObj)
+
+  if (!tree) {
+    throw new NotFoundError(`No menu item found at path "${path}"`)
+  }
+
+  return tree
 };
 
 export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
-  try {
-    const menuContainer = await initiateMenuContainer();
+  const res = await runQuery(`SELECT * FROM ${MENU}`)
 
-    const res = await menuContainer.item(data.id, data.path).delete();
-    return 'menu item deleted!';
-  } catch (error) {
-    throw error;
+  const treeObj = JSON.parse(res[0]['tree_obj_str'])
+
+  let parentPath
+  const parentSplit = data.path.split(/(\/)/);
+  if (parentSplit.length < 2) {
+    const parentSplice = parentSplit.splice(0, -2)
+    parentPath = parentSplice.join()
+  } else {
+    parentPath = "/"
   }
+
+  console.log({ path: data.path, parentPath })
+
+
+  const updatedTree = updateAndRetrieveTree(parentPath, treeObj, (node) => {
+    node.children = node.children.filter(el => el.path !== data.path)
+  })
+  if (!updatedTree) {
+    throw new NotFoundError(`No menu item found at path "${data.path}"`)
+  }
+
+  console.log({ updatedTree })
+
+
+  const treeObjId = res[0]['id']
+
+  const updatedTreeStr = JSON.stringify(updatedTree)
+
+  const res3 = await runQuery(`UPDATE ${MENU} SET tree_obj_str = '${updatedTreeStr}' WHERE id = '${treeObjId}'`)
+
+  return 'deleted'
 };
