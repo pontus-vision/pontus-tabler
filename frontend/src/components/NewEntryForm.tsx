@@ -79,7 +79,7 @@ const NewEntryForm = ({
             } else {
               setFormInputs((prevState) => ({
                 ...prevState,
-                [`${field.name}`]: e.target.value,
+                [`${field.field}`]: e.target.value,
               }));
             }
           }}
@@ -99,8 +99,8 @@ const NewEntryForm = ({
                   objFieldId && rowState?.[objFieldId]
                     ? rowState?.[objFieldId]?.[field.fieldId]
                     : rowState
-                    ? rowState?.[field.fieldId]
-                    : undefined
+                      ? rowState?.[field.fieldId]
+                      : undefined
                 }
                 key={index}
                 type="checkbox"
@@ -166,8 +166,8 @@ const NewEntryForm = ({
                 objFieldId && rowState && rowState?.[objFieldId]
                   ? rowState?.[objFieldId]?.[field.fieldId]
                   : rowState
-                  ? rowState?.[field.fieldId]
-                  : undefined
+                    ? rowState?.[field.fieldId]
+                    : undefined
               }
               onChange={(e) => {
                 if (objFieldId) {
@@ -200,8 +200,8 @@ const NewEntryForm = ({
         const defaultValue = rowState?.[objFieldId]?.[field.fieldId]
           ? rowState?.[objFieldId]?.[field.fieldId]
           : rowState?.[field.fieldId]
-          ? rowState?.[field.fieldId]
-          : undefined;
+            ? rowState?.[field.fieldId]
+            : undefined;
         return (
           <div className="field form__text-input">
             <Form.Label>{field.label}</Form.Label>
@@ -271,8 +271,8 @@ const NewEntryForm = ({
                 objFieldId && rowState?.[objFieldId]
                   ? rowState?.[objFieldId]?.[field.fieldId]
                   : rowState
-                  ? ''
-                  : undefined
+                    ? ''
+                    : undefined
               }
               onChange={(e: any) => {
                 const ref: WebinyRefInput = {
@@ -347,8 +347,8 @@ const NewEntryForm = ({
                   objFieldId && rowState?.[objFieldId]
                     ? rowState?.[objFieldId]?.[field.fieldId]
                     : rowState
-                    ? rowState?.[field.fieldId]
-                    : undefined
+                      ? rowState?.[field.fieldId]
+                      : undefined
                 }
                 onChange={(e) => {
                   if (objFieldId) {
@@ -385,6 +385,7 @@ const NewEntryForm = ({
       );
     }
   };
+
 
   const fields = () => {
     let num = 0;
