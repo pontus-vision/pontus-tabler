@@ -39,9 +39,9 @@ const Dashboards = () => {
   const [filters, setFilters] = useState<{
     [key: string]: ReadPaginationFilterFilters;
   }>({
-    groupName: { filter: '', filterType: 'text', type: 'contains' },
+    name: { filter: '', filterType: 'text', type: 'contains' },
   });
-    const [addGroup, setAddGroup] = useState(false);
+  const [addGroup, setAddGroup] = useState(false);
   const [newGroups, setNewGroups] = useState<AuthGroupRef[]>([]);
   const notificationManagerRef = useRef<MessageRefs>();
   const [selectedDashboard, setSelectedDashboard] =
@@ -53,7 +53,7 @@ const Dashboards = () => {
     if (!selectedDashboard?.id) return;
     setIsLoading2(true);
     const res = await readDashboardGroupAuth({
-      dashboardId: selectedDashboard?.id,
+      id: selectedDashboard?.id,
       filters,
       from,
       to,
@@ -81,10 +81,8 @@ const Dashboards = () => {
   const updateDashboardAuthGroup = async () => {
     if (!selectedDashboard?.id || !groupsChanged) return;
 
-    console.log({ groupsChanged });
-
     const res = await updateDashboardGroupAuth({
-      dashboardId: selectedDashboard?.id,
+      id: selectedDashboard?.id,
       authGroups: groupsChanged,
     });
 
@@ -111,13 +109,12 @@ const Dashboards = () => {
 
   const addDashboardAuthGroups = async () => {
     if (!selectedDashboard?.id) return;
-    console.log({ newGroups });
     const res = await createDashboardGroupAuth({
-      dashboardId: selectedDashboard?.id,
+      id: selectedDashboard?.id,
       authGroups: newGroups.map((group) => {
         return {
-          groupName: group.name,
-          groupId: group.id,
+          name: group.name,
+          id: group.id,
           create: false,
           delete: false,
           read: false,
@@ -125,8 +122,6 @@ const Dashboards = () => {
         };
       }),
     });
-
-    console.log({ res });
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
@@ -147,11 +142,11 @@ const Dashboards = () => {
 
   const deleteDashboardsAuthGroup = async (data: DashboardAuthGroups[]) => {
     if (!selectedDashboard?.id) return;
-    const ids = data.map((el) => el.groupId);
+    const ids = data.map((el) => el.id);
 
     const res = await deleteDashboardGroupAuth({
       authGroups: ids,
-      dashboardId: selectedDashboard?.id,
+      id: selectedDashboard?.id,
     });
 
     if (res?.status === 200) {
@@ -176,7 +171,7 @@ const Dashboards = () => {
     setTo(params.endRow);
   };
 
-  
+
 
   return (
     <div className={styles.dashboardAuthGroupsView}>
@@ -186,11 +181,12 @@ const Dashboards = () => {
           onClick={() => setAddGroup(false)}
         ></div>
       )}
-      
+
 
       <div className={styles.dashboardAuthGroupsViewContainer}>
         {/* <div></div> */}
         <FetchDashboards
+          addRowOnEditMode={false}
           onRowClicked={(e) => {
             setSelectedDashboard(null);
             setTimeout(() => {
@@ -216,6 +212,7 @@ const Dashboards = () => {
               onUpdate={updateDashboardAuthGroup}
               onRefresh={() => fetchDashboardAuthGroups()}
               onDelete={(e) => deleteDashboardsAuthGroup(e)}
+
               permissions={{
                 updateAction: true,
                 createAction: true,
@@ -226,12 +223,12 @@ const Dashboards = () => {
               cols={[
                 {
                   headerName: 'Group',
-                  field: 'groupName',
+                  field: 'name',
                   editable: true,
                 },
                 {
                   headerName: 'Group Id',
-                  field: 'groupId',
+                  field: 'id',
                   // hide: true,
                   editable: true,
                 },
