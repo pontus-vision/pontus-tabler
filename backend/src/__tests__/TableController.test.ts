@@ -103,10 +103,6 @@ describe('tableControllerTest', () => {
 
     let resPayload2: TableReadRes = readRetVal.data;
 
-    // console.log(`res2: ${JSON.stringify(resPayload2)}`);
-
-    // expect(isSubset(body, readRetVal.data)).toBe(true);
-
     expect(readRetVal.status).toBe(200);
     expect(readRetVal.data.name).toBe(snakeCase(body.name));
     expect(readRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name));
@@ -143,8 +139,6 @@ describe('tableControllerTest', () => {
     const updateRetVal = await postAdmin('table/update', body2);
 
     let resPayload3: TableUpdateReq = updateRetVal.data;
-
-    console.log({ body2, resPayload3 })
 
     expect(isSubset(body2, resPayload3)).toBe(true);
 
