@@ -41,7 +41,6 @@ export const post = async (
   //     },
   //   );
   //   return res;
-  console.log({ endpoint, headers })
 
   //  const res = await fetch(
   //    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,

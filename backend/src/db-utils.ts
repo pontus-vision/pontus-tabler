@@ -226,20 +226,6 @@ export const createSql = async (
   const res3 = await runQuery(selectQuery);
 
   return res3;
-
-  // return res3.map((el) => {
-  //   const obj = {};
-  //   for (const prop in el) {
-  //     if (el[prop] === 'true') {
-  //       obj[prop] = true;
-  //     } else if (el[prop] === 'false') {
-  //       obj[prop] = false;
-  //     } else {
-  //       obj[prop] = el[prop];
-  //     }
-  //   }
-  //   return obj;
-  // });
 };
 
 export const createConnection = async (): Promise<IConnection> => {
