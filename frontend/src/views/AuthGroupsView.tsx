@@ -248,27 +248,29 @@ const DashboardAuthGroupsView = () => {
       to: toDashboards || 1,
     };
 
-    const res = (await fetchDataAndNavigate(
-      readAuthGroupsDashboards,
-      obj,
-    )) as AxiosResponse<AuthGroupDashboardsReadRes>;
+    try {
+      const res = (await fetchDataAndNavigate(
+        readAuthGroupsDashboards,
+        obj,
+      )) as AxiosResponse<AuthGroupDashboardsReadRes>;
+      const dashboards = res?.data.dashboards;
+      const totalCount = res?.data.count;
 
-    if (res?.status === 404) {
-      setDashboards([]);
-      setTotalDashboards(0);
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not fetch Dashboard(s)!',
-      );
+      dashboards && setDashboards(dashboards);
+      totalCount && setTotalDashboards(totalCount);
+    } catch (error) {
+      if (error?.status === 404) {
+        setDashboards([]);
+        setTotalDashboards(0);
+      } else if (error?.status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Something went wrong. Could not fetch Dashboard(s)!',
+        );
+      }
     }
 
-    const dashboards = res?.data.dashboards;
-    const totalCount = res?.data.count;
-
-    dashboards && setDashboards(dashboards);
-    totalCount && setTotalDashboards(totalCount);
     setIsLoading2(false);
   };
 
@@ -282,27 +284,28 @@ const DashboardAuthGroupsView = () => {
       from: fromUsers || 1,
       to: toUsers || 1,
     };
+    try {
+      const res = (await fetchDataAndNavigate(
+        readAuthGroupsUsers,
+        req,
+      )) as AxiosResponse<AuthGroupUsersReadRes>;
 
-    const res = (await fetchDataAndNavigate(
-      readAuthGroupsUsers,
-      req,
-    )) as AxiosResponse<AuthGroupUsersReadRes>;
-
-    if (res?.status === 404) {
-      setUsers([]);
-      setTotalUsers(0);
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not fetch Dashboard(s)!',
-      );
-    } else {
       const authUsers = res?.data.authUsers;
       const totalCount = res?.data.count;
 
       authUsers && setUsers(authUsers);
       totalCount && setTotalUsers(totalCount);
+    } catch (error) {
+      if (error?.status === 404) {
+        setUsers([]);
+        setTotalUsers(0);
+      } else if (error?.status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Something went wrong. Could not fetch Dashboard(s)!',
+        );
+      }
     }
     setIsLoading3(false);
   };
@@ -312,7 +315,13 @@ const DashboardAuthGroupsView = () => {
 
     const req: AuthGroupDashboardUpdateReq = {
       id: selectedGroup.id,
-      dashboards: dashboardsChanged,
+      dashboards: dashboardsChanged.reduce((acc, cur) => {
+        if (!acc.some(el => el.id === cur.id)) {
+          acc.push(cur)
+        }
+        return acc
+
+      }, []),
       name: selectedGroup.name,
     };
 
@@ -471,7 +480,7 @@ const DashboardAuthGroupsView = () => {
       name: selectedGroup.name
     }
 
-    const res = await fetchDataAndNavigate(deleteAuthGroupDashboards,req);
+    const res = await fetchDataAndNavigate(deleteAuthGroupDashboards, req);
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
@@ -497,10 +506,10 @@ const DashboardAuthGroupsView = () => {
     const req: AuthGroupUsersDeleteReq = {
       id: selectedGroup?.id,
       name: selectedGroup.name,
-      authUsers: arr.map((el) => {return{id: el.id, username: el.username}}),
+      authUsers: arr.map((el) => { return { id: el.id, username: el.username } }),
     }
 
-    const res = await fetchDataAndNavigate(deleteAuthGroupUsers,req);
+    const res = await fetchDataAndNavigate(deleteAuthGroupUsers, req);
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
@@ -521,17 +530,12 @@ const DashboardAuthGroupsView = () => {
   };
 
   const handleCellClicked = (e: CellClickedEvent<any, any>) => {
-    console.log({ e });
     if (e.colDef.field !== 'click') return;
     setSelectedGroup(null);
     setTimeout(() => {
       setSelectedGroup(e.data);
     }, 1);
   };
-
-  useEffect(() => {
-    console.log({ totalUsers, users });
-  }, [users, totalUsers]);
 
   const handleGroupDashboards = (data: IGetRowsParams) => {
     setFromDashboards(data.startRow);
@@ -570,6 +574,7 @@ const DashboardAuthGroupsView = () => {
                 updateAction: true,
               }}
               onParamsChange={handleParamsChange}
+              paginationPageSize={16}
               isLoading={isLoading1}
               selectRowByCell={true}
               onRowsStateChange={(e) => {
@@ -601,6 +606,7 @@ const DashboardAuthGroupsView = () => {
               onRowsStateChange={(e) => {
                 setDashboardsChanged(e as AuthGroupDashboardRef[]);
               }}
+              editOnGrid={false}
               onParamsChange={handleGroupDashboards}
               updateModeOnRows={true}
               totalCount={totalDashboards}
@@ -620,8 +626,8 @@ const DashboardAuthGroupsView = () => {
               add={() => setAddUsers(true)}
               cols={[
                 {
-                  headerName: 'Name',
-                  field: 'name',
+                  headerName: 'Username',
+                  field: 'username',
                   sortable: true,
 
                   filter: true,
@@ -643,7 +649,7 @@ const DashboardAuthGroupsView = () => {
                 updateAction: true,
               }}
               onRowsStateChange={(e) => {
-                setDashboardsChanged(e as AuthGroupDashboardRef[]);
+                setGroupsChanged(e as AuthGroupDashboardRef[]);
               }}
               onParamsChange={handleGroupGroups}
               updateModeOnRows={true}
