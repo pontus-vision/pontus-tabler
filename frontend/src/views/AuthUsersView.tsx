@@ -24,6 +24,7 @@ import {
   AuthGroupDashboardRef,
   AuthGroupRef,
   AuthUserAndGroupsRef,
+  AuthUserCreateReq,
   Dashboard,
   DashboardAuthGroups,
   ReadPaginationFilterFilters,
@@ -49,6 +50,8 @@ import AuthGroups from './authGroups/AuthGroups';
 import { AuthUserGroupRef } from '../typescript/api/resources/pontus/types/AuthUserGroupRef';
 import AuthUsersGrid from '../components/AuthUsersGrid';
 import { AuthUserRef } from '../typescript/api/resources/pontus/types/AuthUserRef';
+import useApiAndNavigate from '../hooks/useApi';
+import { createUser } from '../../src/client';
 
 const AuthUsersView = () => {
   const [users, setAuthUsers] = useState<AuthGroupRef[]>([]);
@@ -61,8 +64,8 @@ const AuthUsersView = () => {
   });
   const [cols, setCols] = useState<ColDef[]>([
     {
-      headerName: 'Username',
-      field: 'username',
+      headerName: 'Name',
+      field: 'name',
       filter: true,
       sortable: true,
     },
@@ -76,7 +79,7 @@ const AuthUsersView = () => {
 
   const [addMode, setAddMode] = useState(false);
 
-  const [selectedUser, setSelectedUser] = useState<AuthGroupRef | null>();
+  const [selectedUser, setSelectedUser] = useState<AuthUserRef | null>();
   const [groupsChanged, setGroupsChanged] = useState<AuthUserGroupRef[]>([]);
   const [selectedDashboard, setSelectedDashboard] =
     useState<Dashboard | null>();
@@ -86,12 +89,13 @@ const AuthUsersView = () => {
   const [totalGroups, setTotalGroups] = useState<number>();
 
   const [addDashboard, setAddDashboard] = useState(false);
-  const [newGroups, setNewGroups] = useState<AuthUserAndGroupsRef[]>([]);
+  const [newGroups, setNewGroups] = useState<AuthGroupRef[]>([]);
   const [userGroupsToBeDeleted, setUserGroupsToBeDeleted] =
     useState<string[]>();
   const notificationManagerRef = useRef<MessageRefs>();
   const [isLoading1, setIsLoading1] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
+  const { fetchDataAndNavigate } = useApiAndNavigate()
 
   const fetchAuthGroups = async () => {
     setIsLoading1(true);
@@ -149,17 +153,47 @@ const AuthUsersView = () => {
   const fetchAuthUserGroups = async () => {
     if (!selectedUser?.id) return;
     setIsLoading2(true);
-    const res = await readUserGroups({
-      id: selectedUser.id,
-      filters,
-      from,
-      to,
-    });
+    try {
+      const res = await readUserGroups({
+        id: selectedUser.id,
+        filters,
+        from,
+        to,
+      });
 
-    if (res?.status === 404) {
-      setGroups([]);
-      setTotalGroups(0);
-    } else if (res?.status === 500) {
+
+      const authGroups = res?.data.authGroups;
+      const totalCount = res?.data.count;
+
+      authGroups && setGroups(authGroups);
+      totalCount && setTotalGroups(totalCount);
+      setIsLoading2(false);
+    } catch (error) {
+
+      if (error?.status === 404) {
+        setGroups([]);
+        setTotalGroups(0);
+      } else if (error?.status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Something went wrong. Could not fetch Group(s)!',
+        );
+      }
+    }
+  };
+
+  const createAuthUser = async (data: AuthUserCreateReq) => {
+    try {
+      const res = await fetchDataAndNavigate(createUser, data)
+
+
+      notificationManagerRef?.current?.addMessage(
+        'success',
+        'Saved',
+        'User saved successfully.',
+      );
+    } catch (error) {
       notificationManagerRef?.current?.addMessage(
         'error',
         'Error',
@@ -167,20 +201,15 @@ const AuthUsersView = () => {
       );
     }
 
-    const authGroups = res?.data.authGroups;
-    const totalCount = res?.data.count;
 
-    authGroups && setGroups(authGroups);
-    totalCount && setTotalGroups(totalCount);
-    setIsLoading2(false);
-  };
+  }
 
   useEffect(() => {
     fetchAuthUserGroups();
   }, [selectedUser, filters, to, from]);
 
   useEffect(() => {
-    fetchAuthGroups();
+    //fetchAuthGroups();
   }, []);
 
   const handleParamsChange = (params: IGetRowsParams) => {
@@ -190,17 +219,18 @@ const AuthUsersView = () => {
   };
 
   const addAuthUserGroup = async () => {
-    if (!selectedUser?.id || !selectedUser.name) return;
+    if (!selectedUser?.id || !selectedUser.username) return;
     const res = await createUserGroups({
       id: selectedUser?.id,
-      authGroupsIds: newGroups.map((group) => group.id),
+      username: selectedUser.username,
+      authGroups: newGroups.map((group) => { return { id: group.id, name: group.name } }),
     });
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
         'Success',
-        `Dashboard(s) added to ${selectedUser.name}`,
+        `AuthGroup(s) added to ${selectedUser.username}`,
       );
 
       await fetchAuthUserGroups();
@@ -290,17 +320,15 @@ const AuthUsersView = () => {
               onRefresh={() => fetchAuthGroups()}
               onDelete={(e) => deleteAuthUsers(e)}
               permissions={{
-                createAction: true,
+                createAction: false,
                 deleteAction: true,
                 updateAction: true,
               }}
+
               onParamsChange={handleParamsChange}
               isLoading={isLoading1}
               selectRowByCell={true}
-              onRowsStateChange={(e) => {
-                setAddMode(false);
-                setGroupsChanged(e as AuthUserRef[]);
-              }}
+
             />
             {groupsChanged.length > 0 && !addMode && (
               <button onClick={() => updateGroups()}>
