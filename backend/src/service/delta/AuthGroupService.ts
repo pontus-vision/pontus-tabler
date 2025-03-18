@@ -1,5 +1,5 @@
 import { filterToQuery, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
-import { AuthGroupsReadReq } from '../../generated/api';
+import { AuthGroupsReadReq, UnauthorizedError } from '../../generated/api';
 import {
   AuthGroupCreateReq,
   AuthGroupDashboardCreateReq,
@@ -139,26 +139,26 @@ export const createAuthGroup = async (data: AuthGroupCreateReq) => {
   }
 
   const res = await runQuery(
-    // `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-    `CREATE TABLE IF NOT EXISTS delta.\`/data/pv/${AUTH_GROUPS}\` (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN );`,
+    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
+
   );
   const res4 = await runQuery(
-    // `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
-    `SELECT COUNT(*) FROM delta.\`/data/pv/${AUTH_GROUPS}\` WHERE name = '${data.name}'`,
+    `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
+
   );
   if (+res4[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
   }
 
   const res2 = await runQuery(
-    // `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
-    `INSERT INTO delta.\`/data/pv/${AUTH_GROUPS}\` (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+    `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+
   );
 
   const res3 = await runQuery(
-    // `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
-    `SELECT * FROM delta.\`/data/pv/${AUTH_GROUPS}\` WHERE id = ${typeof id === 'string' ? `'${id}'` : id
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
     }`,
+
   );
 
   return {
@@ -208,8 +208,7 @@ export const readAuthGroup = async (
   const id = data.id;
 
   const res = (await runQuery(
-    // `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
-    `SELECT * FROM delta.\`/data/pv/${AUTH_GROUPS}\` WHERE id = ${typeof id === 'string' ? `'${id}'` : id
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
     }`,
 
   )) as AuthGroupRef[];
@@ -222,18 +221,22 @@ export const readAuthGroup = async (
 };
 
 export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
+  if (data.name === ADMIN_GROUP_NAME) {
+    throw new BadRequestError('Cannot delete admin group')
+  }
+
   const deleteQuery = await runQuery(
     `DELETE FROM ${AUTH_GROUPS} WHERE id = '${data.id}'`,
-
   );
+
   const affectedRows = +deleteQuery[0]['num_affected_rows'];
+
   const deleteGroupUsersQuery = await runQuery(
     `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
-
   );
+
   const deleteGroupDashQuery = await runQuery(
     `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
-
   );
 
   if (affectedRows === 1) {
@@ -258,20 +261,16 @@ export const readAuthGroups = async (
   }
 
   const selectGroups = (await runQuery(
-    // `SELECT * FROM auth_groups
-    //   ${whereClause};`,
-
-    `SELECT * FROM delta.\`/data/pv/${AUTH_GROUPS}\`
+    `SELECT * FROM auth_groups
       ${whereClause};`,
   )) as AuthGroupRef[];
 
   const whereClause2 = filterToQuery({ filters: data.filters }, 'c');
 
   const countGroups = await runQuery(
-    // `SELECT COUNT(*) FROM auth_groups
-    //   ${whereClause2};`,
-    `SELECT COUNT(*) FROM delta.\`/data/pv/${AUTH_GROUPS}\`
-      ${whereClause};`,
+    `SELECT COUNT(*) FROM auth_groups
+      ${whereClause2};`,
+
   );
   const groupCount = +countGroups[0]['count(1)'];
   if (groupCount === 0) {
@@ -535,7 +534,6 @@ export const readAuthGroupUsers = async (
   data: AuthGroupUsersReadReq,
 ): Promise<AuthGroupUsersReadRes> => {
   const filtersAdapted = {};
-  console.log({ readAuthGroupUsersData: data })
 
   for (const prop in data.filters) {
     if (prop === 'name') {
@@ -545,7 +543,6 @@ export const readAuthGroupUsers = async (
       filtersAdapted['table_to__id'] = data.filters[prop];
     }
   }
-
   const res = (await readTableDataEdge({
     edge: {
       direction: 'to',
@@ -558,7 +555,6 @@ export const readAuthGroupUsers = async (
     from: data.from,
     to: data.to,
   })) as { count: number; edges: any[] };
-
 
   if (res.count === 0) {
     throw new NotFoundError('No group auth found.');
@@ -786,6 +782,7 @@ export const checkTableMetadataPermissions = async (
     delete: del,
   };
 };
+
 export const checkPermissions = async (
   userId: string,
   targetId: string,
@@ -803,7 +800,7 @@ export const checkPermissions = async (
   )) as AuthGroupRef[];
 
   if (res.length === 0) {
-    throw new NotFoundError('There is no group associated with user');
+    throw { code: 404, message: 'There is no group associated with user' };
   }
 
   let create = false;
