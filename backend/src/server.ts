@@ -67,8 +67,7 @@ const authMiddleware = async (
       targetId = req.body?.['id'];
     }
 
-    const permissions = await checkPermissions(userId, //'01959666c546457a9590c351cb5a7e0f' //dashboardId
-      targetId, tableName);
+    const permissions = await checkPermissions(userId, targetId, tableName);
 
     if (permissions[crudAction]) {
       // if (permissions['']) {
