@@ -16,20 +16,22 @@ const useLogin = () => {
 
   const handleLogin = async (username: string, password: string) => {
     // e.preventDefault();
+    setLoading(true)
 
     const res = (await fetchDataAndNavigate(loginUser, {
       password,
       username,
     })) as AxiosResponse<LoginRes>;
 
-    if (res.status === 200) {
+    if (res?.status === 200) {
       localStorage.setItem('accessToken', 'Bearer ' + res.data.accessToken);
       localStorage.setItem('refreshToken', 'Bearer ' + res.data.refreshToken);
       const userId = getUserIdFromToken();
       await login(userId);
     }
+    setLoading(false)
   };
-  return { handleLogin };
+  return { handleLogin, loading };
 };
 
 export default useLogin;
