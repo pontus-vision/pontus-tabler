@@ -786,8 +786,6 @@ describe('dashboardCreatePOST', () => {
 
     const token = LoginUserRes.data.accessToken;
 
-    onsole.log({ token })
-
     const dashDelBody: DashboardDeleteReq = {
       id: createDash.data.id,
     };
