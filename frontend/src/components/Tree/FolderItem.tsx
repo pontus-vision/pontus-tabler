@@ -7,7 +7,6 @@ export type Folder = {
   id: string;
   name: string;
   type: string;
-
   children: Array<Folder | File>;
 };
 
@@ -32,6 +31,7 @@ type FolderItemProps = {
   actionsMode: boolean;
   onUpdate?: (data: MenuItemTreeRef) => void;
   onCreate?: (data: MenuItemTreeRef) => void;
+  selectionOnly?: boolean
 };
 
 const FolderItem = ({
@@ -45,6 +45,7 @@ const FolderItem = ({
   actionsMode,
   onUpdate,
   onCreate,
+  selectionOnly
 }: FolderItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -125,6 +126,7 @@ const FolderItem = ({
 
   return (
     <div
+      key={folder.path}
       onBlur={() => setContextMenu(null)}
       // actionsMode={actionsMode}
       onContextMenu={handleContextMenu}
@@ -159,9 +161,8 @@ const FolderItem = ({
         />
       ) : (
         <span
-          className={`cursor-pointer ${
-            selected === path ? 'text-blue-500' : ''
-          } ${selected === folder.path ? 'tree-item__highlighted' : ''}`}
+          className={`cursor-pointer ${selected === path ? 'text-blue-500' : ''
+            } ${selected === folder.path ? 'tree-item__highlighted' : ''}`}
           onClick={onSelect ? handleSelect : toggleFolder}
           onDragStart={() => console.log('Dragging')}
         >
@@ -173,10 +174,12 @@ const FolderItem = ({
           type="text"
           onKeyDown={(e) => {
             if (e.key.toLowerCase() === 'enter') {
+              console.log({ folder })
               onCreate({
                 path: folder.path,
                 id: folder.id,
-                children: [{ name: event.target.value, kind: 'file' }],
+                name: event.target.value,
+                kind: 'file'
               });
               setCreation(false);
             }
@@ -189,6 +192,7 @@ const FolderItem = ({
             <li key={child.id}>
               {child.kind === 'folder' ? (
                 <FolderItem
+                  selectionOnly={selectionOnly}
                   onDragStart={onDragStart}
                   index={index}
                   folder={child}
@@ -202,6 +206,7 @@ const FolderItem = ({
                 />
               ) : (
                 <FileItem
+                  selectionOnly={selectionOnly}
                   parentFolder={folder}
                   file={child}
                   onSelect={onSelect}
@@ -209,6 +214,7 @@ const FolderItem = ({
                   selected={selected || ''}
                   path={`${!!path ? path : ''}/${child.name}`}
                   actionsMode={actionsMode}
+                  key={folder.path}
                 />
               )}
             </li>
@@ -232,12 +238,12 @@ const FolderItem = ({
           >
             Delete
           </div>
-          <div
+          {!selectionOnly && <div
             className="cursor-pointer hover:bg-gray-100 p-1"
             onClick={() => handleContextMenuClick('create')}
           >
             Create
-          </div>
+          </div>}
         </div>
       )}
     </div>

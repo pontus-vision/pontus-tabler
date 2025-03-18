@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DataRoot, Child } from '../../types';
 import { MenuItemTreeRef } from '../../pontus-api/typescript-fetch-client-generated';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MenuUpdateReq } from '../../typescript/api';
 
 type Props = {
@@ -12,6 +12,7 @@ type Props = {
   parentFolder: MenuItemTreeRef;
   file: any;
   actionsMode: boolean;
+  selectionOnly: boolean
 };
 
 const FileItem = ({
@@ -22,18 +23,21 @@ const FileItem = ({
   onSelect,
   onUpdate,
   parentFolder,
+  selectionOnly
 }: Props) => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
-  } | null>();
+  } | null>()
+  const location = useLocation()
 
   const handleSelect = () => {
+    if (selectionOnly) return
     onSelect && onSelect({ ...file, path: path || '/' });
 
-    navigate(`/dashboard/update/${file.id}`);
+    navigate(`/dashboard/update/${file.id}`, { state: { ...file, path } });
   };
 
   const handleContextMenuClick = (action: 'rename' | 'delete' | 'create') => {
@@ -61,6 +65,7 @@ const FileItem = ({
 
   return (
     <div
+      key={file?.id}
       onBlur={() => setContextMenu(null)}
       // actionsMode={actionsMode}
       onContextMenu={handleContextMenu}
@@ -93,9 +98,8 @@ const FileItem = ({
       ) : (
         <div
           onClick={handleSelect}
-          className={`cursor-pointer pl-2 ${
-            selected === path ? 'text-blue-500' : ''
-          }`}
+          className={`cursor-pointer pl-2 ${selected === path ? 'text-blue-500' : ''
+            }`}
         >
           📄 {file.name}
         </div>
@@ -117,12 +121,12 @@ const FileItem = ({
           >
             Delete
           </div>
-          <div
+          {!selectionOnly && <div
             className="cursor-pointer hover:bg-gray-100 p-1"
             onClick={() => handleContextMenuClick('create')}
           >
             Create
-          </div>
+          </div>}
         </div>
       )}
     </div>
