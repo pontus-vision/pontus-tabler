@@ -82,7 +82,6 @@ describe('dashboardCreatePOST', () => {
 
   it('should create a user', async () => {
 
-    console.log("TEST CASE: 1")
     const createBody: AuthUserCreateReq = {
       username: 'user2',
       password: 'pontusvision',
@@ -143,7 +142,6 @@ describe('dashboardCreatePOST', () => {
     expect(authGroupReadRes2.status).toBe(404);
   });
   it('should read many users', async () => {
-    console.log("TEST CASE: 2")
     const createBody: AuthUserCreateReq = {
       username: 'group1',
       password: 'pontusvision',
@@ -200,7 +198,6 @@ describe('dashboardCreatePOST', () => {
     expect(readUsers.data.authUsers).toContainEqual(authGroupCreateRes2.data);
   });
   it('should do the sad path', async () => {
-    console.log("TEST CASE: 3")
     const readBody: AuthUserReadReq = {
       id: 'foo',
       username: 'bar',
@@ -254,7 +251,6 @@ describe('dashboardCreatePOST', () => {
     expect(readGroups.status).toBe(404);
   });
   it('should create authgroup subdocuments', async () => {
-    console.log("TEST CASE: 4")
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -284,7 +280,6 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupCreateRes.status).toBe(200);
   });
   it('should create INCORRECTLY authgroup subdocuments', async () => {
-    console.log("TEST CASE: 5")
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -314,7 +309,6 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupCreateRes2.status).toBe(404);
   });
   it('should read authgroup subdocuments', async () => {
-    console.log("TEST CASE: 6")
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -415,7 +409,6 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupReadRes.status).toBe(404);
   });
   it('should delete authgroup subdocuments', async () => {
-    console.log("TEST CASE: 7")
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -459,7 +452,6 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupDeleteRes.status).toBe(200);
   });
   it('should delete INCORRECTLY authgroup subdocuments', async () => {
-    console.log("TEST CASE: 8")
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -502,7 +494,6 @@ describe('dashboardCreatePOST', () => {
     expect(authUserGroupDeleteRes2.status).toBe(404);
   });
   it('should create authgroup subdocuments', async () => {
-    console.log("TEST CASE: 9")
     const createGroupBody: AuthGroupCreateReq = {
       name: 'group1',
     };
@@ -545,8 +536,6 @@ describe('dashboardCreatePOST', () => {
 
     const readGroup2 = await postAdmin('auth/group/read', readGroupsBody2);
 
-    console.log({ readGroup2 })
-
     const deleteGroupBody: AuthUserDeleteReq = {
       id: authUserCreateRes.data.id,
       username: authUserCreateRes.data.username,
@@ -565,8 +554,6 @@ describe('dashboardCreatePOST', () => {
       filters: {},
     };
 
-    console.log({ readGroupsBody })
-
     const readGroupUsers = await postAdmin(
       'auth/group/users/read',
       readGroupsBody,
@@ -575,7 +562,6 @@ describe('dashboardCreatePOST', () => {
     expect(readGroupUsers.status).toBe(404);
   });
   it('should login and authorize', async () => {
-    console.log("TEST CASE: 10")
     const logoutBody: LogoutReq = {
       token: adminToken,
     };
@@ -595,7 +581,6 @@ describe('dashboardCreatePOST', () => {
     expect(LogoutRes.status).toBe(200);
   });
   it('should login incorrectly', async () => {
-    console.log("TEST CASE: 11")
     const loginBody: LoginReq = {
       username: admin.username,
 
@@ -619,7 +604,6 @@ describe('dashboardCreatePOST', () => {
     expect(createGroup.status).toBe(400);
   });
   it('should check dashboard permissions ', async () => {
-    console.log("TEST CASE: 12")
     const loginBody: LoginReq = {
       username: admin.username,
 
@@ -698,7 +682,6 @@ describe('dashboardCreatePOST', () => {
     expect(delDash.status).toBe(200);
   });
   it('should check dashboard permissions from regular User', async () => {
-    console.log("TEST CASE: 13")
     const createGroupBody: AuthGroupCreateReq = {
       name: 'bar',
     };
@@ -762,8 +745,6 @@ describe('dashboardCreatePOST', () => {
 
     expect(userReadRes.status).toBe(200)
 
-    console.log({ userReadResData: userReadRes.data })
-
     admin = userCreateRes.data;
 
     const loginUserBody: LoginReq = {
@@ -805,7 +786,7 @@ describe('dashboardCreatePOST', () => {
 
     const token = LoginUserRes.data.accessToken;
 
-    console.log({ token })
+    onsole.log({ token })
 
     const dashDelBody: DashboardDeleteReq = {
       id: createDash.data.id,
