@@ -134,7 +134,6 @@ const FetchDashboards = ({
     arr.forEach(async (item) => {
       if (!item?.id) return;
       const res = await deleteDashboard(item.id);
-      console.log(res);
     });
     fetchDashboards();
   };
