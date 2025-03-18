@@ -26,7 +26,7 @@ export const createMenuItem = async (
 
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
-): Promise<ItemResponse<MenuCreateRes>> => {
+): Promise<MenuCreateRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.updateMenuItem(data);
   } else if (dbSource === DELTA_DB) {
@@ -41,7 +41,7 @@ export const readMenuItemByPath = async (
   if (dbSource === COSMOS_DB) {
     return cdb.readMenuItemByPath(path);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.readMenuItemByPath(path);
+    return deltadb.readMenuTree(path);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
