@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminView from './views/AdminView';
@@ -28,6 +28,8 @@ import Sidebar from './components/Sidebar';
 import AuthGroupsView from './views/AuthGroupsView';
 import AuthUsersView from './views/AuthUsersView';
 import RegisterView from './views/Register';
+import RegisterUser from './views/users/RegisterUser'
+import NotificationManager, { MessageRefs } from './components/NotificationManager';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -55,66 +57,56 @@ function App() {
       <div className="main-view">
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={
-              <Navigate
-                to={
-                  localStorage.getItem('userRole')
-                    ? '/dashboards/read'
-                    : '/login'
-                }
-              />
-            }
-          />
           <Route path="/auth/users" element={<AuthUsersView />} />
           <Route path="/table/edges" element={<EdgesView />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route element={<ProtectedLayout allowedRoles={['User', 'Admin']} />}>
-            <Route path="/dashboard" element={<DashboardView />} />
-          </Route>
-          <Route element={<ProtectedLayout allowedRoles={['Admin']} />}>
-            <Route path="/admin" element={<AdminView />} />
-            <Route path="/tables/read" element={<TablesReadView />} />
-            <Route
-              path="/table/data/read/:id"
-              element={<TableDataReadView />}
-            />
-            <Route path="/dashboard/:id" element={<DashboardView />} />
-            <Route path="/auth/groups" element={<AuthGroupsView />} />
-            <Route path="/users/read" element={<ReadUsers />} />
-            <Route path="/user/create" element={<CreateUser />} />
+          <Route path="/dashboard" element={<DashboardView />} />
+          <Route path="/admin" element={<AdminView />} />
+          <Route path="/tables/read" element={<TablesReadView />} />
+          <Route
+            path="/table/data/read/:id"
+            element={<TableDataReadView />}
+          />
+          <Route path="/dashboard/:id" element={<DashboardView />} />
+          <Route path="/auth/groups" element={<AuthGroupsView />} />
+          <Route path="/users/read" element={<ReadUsers />} />
+          <Route path="/user/create" element={<CreateUser />} />
 
-            <Route path="/user/update/:id" element={<UpdateUser />} />
-          </Route>
+          <Route path="/user/update/:id" element={<UpdateUser />} />
           <Route path="/register" element={<RegisterView />} />
+          <Route path="/register/user" element={<RegisterUser />} />
           <Route
             path="/register/admin"
             element={<RegisterView adminRoute={true} />}
           />
-          <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
-            <Route path="/table/update/:id" element={<UpdateTable />} />
-            <Route path="/table/read/:id" element={<UpdateTable />} />
-            <Route path="/table/create" element={<CreateTableView />} />
-            <Route path="/table/delete" element={<DeleteTableView />} />
-            <Route path="/dashboards" element={<Dashboards />} />
-            <Route path="/dashboard/create" element={<CreateDashboard />} />
-            <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
-            <Route
-              path="/table/data/read/:id"
-              element={<TableDataReadView />}
-            />
-            <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
-            <Route path="/auth/group/create" element={<CreateAuthGroup />} />
-            <Route
-              path="/auth/group/update/:id"
-              element={<UpdateAuthGroup />}
-            />
-            <Route
-              path="dashboard/auth/group"
-              element={<DashboardAuthGroup />}
-            />
+          {/*
+            <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
+          */}
+          <Route path="/table/update/:id" element={<UpdateTable />} />
+          <Route path="/table/read/:id" element={<UpdateTable />} />
+          <Route path="/table/create" element={<CreateTableView />} />
+          <Route path="/table/delete" element={<DeleteTableView />} />
+          <Route path="/dashboards" element={<Dashboards />} />
+          <Route path="/dashboard/create" element={<CreateDashboard />} />
+          <Route path="/dashboard/create/:id" element={<CreateDashboard />} />
+          <Route path="/dashboard/update/:id" element={<UpdateDashboard />} />
+          <Route
+            path="/table/data/read/:id"
+            element={<TableDataReadView />}
+          />
+          <Route path="/auth/groups/read" element={<ReadAuthGroups />} />
+          <Route path="/auth/group/create" element={<CreateAuthGroup />} />
+          <Route
+            path="/auth/group/update/:id"
+            element={<UpdateAuthGroup />}
+          />
+          <Route
+            path="dashboard/auth/group"
+            element={<DashboardAuthGroup />}
+          />
+          {/*
           </Route>
+          */}
         </Routes>
       </div>
     </AuthProvider>
