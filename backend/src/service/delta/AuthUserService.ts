@@ -38,7 +38,7 @@ import {
 //   fetchData,
 //   fetchDatabase,
 // } from '../../cosmos-utils';
-import { createSql, filterToQuery, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
+import { createSql, filtersToSnakeCase, filterToQuery, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
 
 import {
   BadRequestError,
@@ -63,27 +63,25 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
   }
 
   const res = await runQuery(
-    // `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-    `CREATE TABLE IF NOT EXISTS delta.\`/data/pv/${AUTH_GROUPS}\` (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN );`,
+    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
+
   );
   const res4 = await runQuery(
-    // `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
-    `SELECT COUNT(*) FROM delta.\`/data/pv/${AUTH_GROUPS}\` WHERE name = '${data.name}'`,
+    `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
+
   );
-  console.log({ res4, query: `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'` })
 
   if (+res4[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
   }
 
   const res2 = await runQuery(
-    // `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
-    `INSERT INTO delta.\`/data/pv/${AUTH_GROUPS}\` (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+    `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+
   );
 
   const res3 = await runQuery(
-    // `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
-    `SELECT * FROM delta.\`/data/pv/${AUTH_GROUPS}\` WHERE id = ${typeof id === 'string' ? `'${id}'` : id
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
     }`,
 
   );
@@ -148,8 +146,7 @@ const createAuthUserGroup = async (
 
 export const setup = async (): Promise<InitiateRes> => {
   try {
-    // const query = `SELECT * from auth_users`;
-    const query = `SELECT * from delta.\`/data/pv/${AUTH_GROUPS}\``;
+    const query = `SELECT * from auth_users`;
 
     const res = await runQuery(query);
     if (res.length === 0) {
@@ -187,8 +184,6 @@ export const registerUser = async (
 export const registerAdmin = async (
   data: RegisterAdminReq,
 ): Promise<RegisterAdminRes> => {
-
-  console.log({ admin: data })
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }
@@ -219,7 +214,7 @@ export const getRowCount = async (
   table: string,
 ): Promise<string> => {
   const count = await runQuery(
-    `SELECT count(1) FROM delta.\`/data/pv/${table}\``,
+    `SELECT count(1) FROM delta.\`/data/${table}\``,
   );
 
   return count[0]['count(1)'];
@@ -238,8 +233,6 @@ export const authUserCreate = async (
         username: data.username,
       },
     );
-
-    console.log({ sql })
     return {
       username: sql[0]['username'],
       id: sql[0]['id'],
@@ -255,8 +248,7 @@ export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
   const res = (await runQuery(
-    // `SELECT * FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
-    `SELECT * FROM delta.\`/data/pv/${AUTH_USERS}\` WHERE id = '${data.id}'`,
+    `SELECT * FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
   )) as { username: string; id: string }[];
   if (res.length === 0) {
     throw new NotFoundError(`User not found at id: ${data.id}`);
@@ -292,8 +284,7 @@ export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
   const sql = await runQuery(
-    // `DELETE FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
-    `DELETE FROM delta.\`/data/pv/${AUTH_USERS}\` WHERE id = '${data.id}'`,
+    `DELETE FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
   );
   const affectedRows = +sql[0]['num_affected_rows'];
   if (affectedRows === 0) {
@@ -302,7 +293,7 @@ export const authUserDelete = async (
 
   try {
     const sql = await runQuery(
-      `DELETE FROM delta.\`/data/pv/${GROUPS_USERS}\` WHERE table_to__id = '${data.id}'`,
+      `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id}'`,
     );
   } catch (error) { }
   return `User at id "${data.id}" deleted!`;
@@ -311,20 +302,24 @@ export const authUserDelete = async (
 export const authUsersRead = async (
   data: AuthUsersReadReq,
 ): Promise<AuthUsersReadRes> => {
-  const whereClause = filterToQuery(data);
+  const dataSnake = data.filters //filtersToSnakeCase(data)
+
+  const whereClause = filterToQuery({ filters: dataSnake, to: data.to, from: data.from }, "");
+
   const sql = await runQuery(
-    // `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
-    `SELECT * FROM delta.\`/data/pv/${AUTH_USERS}\` ${whereClause}`,
+    `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
   );
-  const whereClause2 = filterToQuery({ filters: data.filters });
+
+  const whereClause2 = filterToQuery({ filters: dataSnake }, "");
+
   const sqlCount = await runQuery(
-    // `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
-    `SELECT COUNT(*) FROM delta.\`/data/pv/${AUTH_USERS}\` ${whereClause2}`,
+    `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
   );
-  console.log({ sqlCount })
+
   if (+sqlCount[0]['count(1)'] === 0) {
     throw new NotFoundError(`Auth User(s) not found.`);
   }
+
   return {
     authUsers: sql.map((el) => {
       return { id: el['id'], username: el['username'] };
@@ -420,8 +415,7 @@ interface IAuthUser extends AuthUserAndGroupsRef {
 
 export const checkAdmin = async (userId) => {
   const res = await runQuery(
-    // `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
-    `SELECT COUNT(*) FROM delta.\`/data/pv/${GROUPS_USERS}\` WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
+    `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
   );
 
   if (res.length === 0) {
@@ -432,9 +426,7 @@ export const checkAdmin = async (userId) => {
 };
 
 export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
-  // const query = `SELECT * from auth_users WHERE username = "${data.username}"`;
-  const query = `SELECT * from delta.\`/data/pv/${AUTH_USERS}\` WHERE username = "${data.username}"`;
-
+  const query = `SELECT * from auth_users WHERE username = "${data.username}"`;
 
   const res = await runQuery(query);
 
@@ -495,27 +487,28 @@ export const authenticateToken = async (
   await setup();
 
   const authHeader = req.headers['authorization'];
-  if (!authHeader) {
-    throw { code: 400, message: 'No token was detected in the input.' };
-  }
 
   const tokenArr = authHeader && authHeader?.split(' ');
 
   const token = tokenArr[1]
 
-  console.log({ token })
-
   if (tokenArr.length !== 2) {
     throw { code: 400, message: 'wrong format of token' };
   }
+
+  if (!token) {
+    throw { code: 400, message: 'No token was detected in the input.' };
+  }
+
   const claims = getJwtClaims(token);
 
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
-    console.log(err);
+    console.log({ tokenErr: err });
     if (err) throw new BadRequestError(`token needed.`);
     req.user = user;
     return true;
   });
+
   return claims;
 };
 
@@ -539,9 +532,11 @@ function base64UrlDecode(str) {
 function getJwtClaims(token) {
   // Split the token into parts
   const parts = token.split('.');
+
   if (parts.length !== 3) {
     throw new Error('Invalid JWT token');
   }
+
   // Decode the payload
   const payload = base64UrlDecode(parts[1]);
   // Parse the JSON string to get the claims
