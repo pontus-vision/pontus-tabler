@@ -37,6 +37,7 @@ type Props = {
   isLoading?: boolean;
   onRowsStateChange?: (data: Record<string, any>[]) => void;
   onCellsChange?: (data: CellValueChangedEvent[]) => void;
+  paginationPageSize?: number
 };
 
 const AuthGroups = ({
@@ -54,6 +55,7 @@ const AuthGroups = ({
   selectRowByCell,
   onRowsSelected,
   groupsToFilterOutById,
+  paginationPageSize
 }: Props) => {
   const [totalGroups, setTotalGroups] = useState<number>();
   const [isLoading1, setIsLoading1] = useState(false);
@@ -110,7 +112,7 @@ const AuthGroups = ({
 
   const delAuthGroup = async (arr: AuthGroupRef[]) => {
     for (const [index, group] of arr.entries()) {
-      const res = await deleteAuthGroup({ id: group.id });
+      const res = await deleteAuthGroup({ id: group.id, name: group.name });
 
       if (index === arr.length - 1) {
         if (res?.status === 200) {
@@ -132,7 +134,7 @@ const AuthGroups = ({
   };
 
   const addGroup = async (data: AuthGroupRef) => {
-    if (!addMode || data.id) return;
+    if (!addMode || data?.id) return;
 
     const res = await createAuthGroup({ name: data.name });
 
@@ -152,6 +154,7 @@ const AuthGroups = ({
       );
     }
 
+    return
     setGroupsToBeAdded(null);
     // setGroupsChanged(groupsChanged.filter((group) => !!group.id));
     // console.log({ groupsChanged });
@@ -212,9 +215,9 @@ const AuthGroups = ({
       return onAdd;
     }
 
-    setAddMode(true);
-    setTotalGroups((totalGroups || 0) + 1);
-    setAuthGroups([...authGroups, { name: '', id: '' }]);
+    // setAddMode(true);
+    // setTotalGroups((totalGroups || 0) + 1);
+    // setAuthGroups([...authGroups, { name: '', id: '' }]);
   };
 
   const handleRowsStateChange = (e: Record<string, any>[]) => {
@@ -265,14 +268,16 @@ const AuthGroups = ({
         add={() => handleOnAdd()}
         onDelete={(e) => delAuthGroup(e)}
         permissions={permissions}
+        paginationPageSize={paginationPageSize}
         selection={selection}
         onParamsChange={onParamsChange}
         isLoading={isLoading1}
         onRowsSelected={onRowsSelected}
         updateModeOnRows={true}
+        onCreateRow={e => addGroup({ name: e.name })}
         onUpdate={updateGroups}
         resetRowsChangedState={reset}
-        onCellValueChange={(e) => addGroup(e.data)}
+        //onCellValueChange={(e) => addGroup(e.data)}
         onCellsChange={(e) => handleOnCellsChange(e)}
         selectRowByCell={selectRowByCell}
         onRowsStateChange={(e) => handleRowsStateChange(e)}
@@ -283,7 +288,6 @@ const AuthGroups = ({
             sortable: true,
 
             filter: true,
-            editable: permissions?.updateAction,
             // cellEditor: SimpleTextEditor,
           },
           {
