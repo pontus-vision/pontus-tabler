@@ -25,7 +25,9 @@ const useApiAndNavigate = () => {
 
       return res;
     } catch (error) {
+      throw error
       console.log({ error });
+
     } finally {
       setLoading(false);
     }
