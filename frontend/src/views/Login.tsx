@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Select } from 'semantic-ui-react';
-import FormSelect from 'react-bootstrap/esm/FormSelect';
-// import { listApiKeys } from '../webinyApi';
 import { useDispatch } from 'react-redux';
-import { defineConfig } from 'vite';
-import { loginUser } from '../client';
 import useApiAndNavigate from '../hooks/useApi';
-import { AxiosResponse } from 'axios';
-import { LoginRes } from '../typescript/api';
-import { getUserIdFromToken } from '../../utils';
 import useLogin from '../hooks/useLogin';
 
-// import { getApiKeys } from '../client';
-
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [role, setRole] = useState('Admin');
   const [apiKeys, setApiKeys] = useState();
   const [password, setPassword] = useState('');
@@ -28,19 +18,22 @@ const LoginPage = () => {
 
   const { fetchDataAndNavigate } = useApiAndNavigate();
 
-  const { handleLogin } = useLogin();
+  const { handleLogin, loading } = useLogin();
 
-  useEffect(()=>{
-    console.log('foo')
-  },[])
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log({ isAuthenticated })
+      navigate('/tables/read')
+    }
+  }, [])
 
   const loginUser = async (e) => {
     e.preventDefault();
-  console.log({VITE_uRL: import.meta.env.VITE_BACKEND_URL})
 
-    // handleLogin(username, password);
-    // navigate('/auth/users');
-  };
+    handleLogin(username, password);
+  }
+
+  if (isAuthenticated) return
 
   return (
     <div className="login-page">
@@ -59,6 +52,7 @@ const LoginPage = () => {
             <div className="mb-3">
               <label>username</label>
               <input
+                data-cy="username-login-input"
                 onChange={(e) => setUsername(e.target.value)}
                 type="text"
                 className="form-control"
@@ -68,6 +62,7 @@ const LoginPage = () => {
             <div className="mb-3">
               <label>Password</label>
               <input
+                data-cy="password-login-input"
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 className="form-control"
