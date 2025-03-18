@@ -14,8 +14,7 @@ import { TABLES } from '../../consts';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
   const res = (await runQuery(
-    // `SELECT * FROM ${TABLES} WHERE name = '${tableName}'`,
-    `SELECT * FROM delta.\`/data/pv/${TABLES}\` WHERE name = '${tableName}'`,
+    `SELECT * FROM ${TABLES} WHERE name = '${tableName}'`,
   )) as any;
 
   const resTable = res.map((el) => {
@@ -47,7 +46,6 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
 export const createTableData = async (
   data: TableDataCreateReq,
 ): Promise<TableDataCreateRes> => {
-  console.log({data})
   const tableName = snakeCase(data.tableName);
 
   const cols = {};
@@ -129,28 +127,23 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
 // };
 
 export const deleteTableData = async (data: TableDataDeleteReq) => {
-  try {
-    const sql = await runQuery(
-      `DELETE FROM ${snakeCase(data.tableName)} WHERE id = '${data.rowId}'`,
-      
-    );
+  const sql = await runQuery(
+    `DELETE FROM ${snakeCase(data.tableName)} WHERE id = '${data.rowId}'`,
 
-    if (+sql[0]['num_affected_rows'] === 0) {
-      // throw new NotFoundError();
-      throw {
-        code: 404,
-        message: `Did not find any row at id "${data.rowId}"`,
-      };
-    }
-    return 'Row deleted!';
-  } catch (error) {
-    if (error.includes('[TABLE_OR_VIEW_NOT_FOUND]')) {
-      throw {
-        code: 404,
-        message: `Did not find table "${data.tableName}"`,
-      };
-    }
+  );
+
+  if (+sql?.[0]?.['num_affected_rows'] === 0) {
+    // throw new NotFoundError();
+
+    throw new NotFoundError(`Did not find any row at id "${data.rowId}"`);
+
   }
+
+  if (!sql) {
+
+    throw new NotFoundError(`Did not find table "${data.tableName}"`);
+  }
+  return 'Row deleted!';
 };
 
 export const readTableData = async (
@@ -173,8 +166,8 @@ export const readTableData = async (
   });
 
   const res2 = (await runQuery(
-    // `SELECT * FROM ${tableName} ${filters}`,
-    `SELECT * FROM delta.\`/data/pv/${tableName}\` ${filters}`,
+    `SELECT * FROM ${tableName} ${filters}`,
+
   )) as Record<string, any>[];
 
   if (res2.length === 0) {
@@ -184,7 +177,6 @@ export const readTableData = async (
 
   const res = await runQuery(
     `SELECT COUNT(*) FROM ${tableName} ${filtersCount}`,
-    
   );
 
   return { rowsCount: +res[0]['count(1)'], rows: res2 };
