@@ -37,7 +37,6 @@ const RegisterView = ({ adminRoute }: Props) => {
 
     if (adminRoute) {
       const res = await registerAdmin(obj);
-      console.log({ res })
 
       if (res.status === 200) {
         handleLogin(username, passwd);
@@ -50,7 +49,6 @@ const RegisterView = ({ adminRoute }: Props) => {
         registerUser,
         obj,
       )) as AxiosResponse<RegisterUserRes>;
-      console.log({ res })
 
       // if (res.status === 200) {
       //   handleLogin(username, passwd);
@@ -62,7 +60,6 @@ const RegisterView = ({ adminRoute }: Props) => {
   };
 
   useEffect(() => {
-    console.log({ loading })
     if (!isRegistered) return
 
     if (!loading) {
