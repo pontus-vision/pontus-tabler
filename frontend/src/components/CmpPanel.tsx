@@ -34,10 +34,13 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
         <div className="dropdown-panels__tables">
           {t('tables')}
           <BootstrapForm.Select
+            data-cy="cmp-panel-select-tables"
             onChange={(e) => {
+              const table = tables.find(table => table.name === e.target.value)
+
               const cmp: FlexLayoutCmp = {
                 componentName: 'PVGridWebiny2',
-                cmp: JSON.parse(e.target.value),
+                cmp: table,
               };
               setSelectedCmp(cmp);
             }}
@@ -46,8 +49,8 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
             <option value="option"></option>
             {tables &&
               tables.map((table, index) => (
-                <option key={index} value={JSON.stringify(table)}>
-                  {table.name}
+                <option key={index} value={table.name}>
+                  {table.label}
                 </option>
               ))}
           </BootstrapForm.Select>
@@ -55,6 +58,7 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
         <div className="dropdown-panels__charts">
           {t('graphics')}
           <BootstrapForm.Select
+            data-cy="cmp-panel-select-graphics"
             onChange={(e) => {
               const cmp: FlexLayoutCmp = {
                 componentName: 'PVDoughnutChart2',
@@ -63,7 +67,7 @@ const CmpPanel = ({ setSelectedCmp }: Props) => {
             }}
           >
             <option></option>
-            <option>{t('donut-chart')}</option>
+            <option value="donut-chart">{t('donut-chart')}</option>
           </BootstrapForm.Select>
         </div>
       </div>
