@@ -9,7 +9,7 @@ import {
   TablesReadRes,
   TablesReadResTablesItem,
 } from '../../typescript/api';
-import { filterToQuery, generateUUIDv6, runQuery } from '../../db-utils';
+import { filtersToSnakeCase, filterToQuery, generateUUIDv6, runQuery } from '../../db-utils';
 
 import { ConflictEntityError, NotFoundError } from '../../generated/api';
 
@@ -23,12 +23,10 @@ export const createTable = async (
   const uuid = generateUUIDv6();
 
   const sqlCheck = (await runQuery(
-    // `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
-    `SELECT * FROM delta.\`/data/pv/${snakeCase(data.name)}\` WHERE name = '${snakeCase(data.name)}'`,
+    `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
 
   )) as TableCreateRes[];
 
-  console.log({ sqlCheck })
 
   if (sqlCheck && sqlCheck?.length !== 0) {
     throw new ConflictEntityError(
@@ -36,10 +34,12 @@ export const createTable = async (
     );
   }
 
-  const sql = (await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, header_name STRING, filter BOOLEAN, kind STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`,
+  const createQuery = `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, 
+      cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, 
+      header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`
 
-  )) as TableCreateRes[];
+  const sql = (await runQuery(createQuery)) as TableCreateRes[];
+
 
   // const sql5 = (await runQuery(
   //   `SELECT * FROM ${TABLES};`,
@@ -52,15 +52,24 @@ export const createTable = async (
     const uuid = generateUUIDv6();
 
     cols.push(
-      `struct('${uuid}', '${snakeCase(col.name)}', '${col.field}', ${col.sortable
-      }, '${col.headerName}', ${col.filter}, ${col.kind ? `'${col.kind}'` : null
-      } )`,
+      `struct('${uuid}', 
+      '${snakeCase(col.name)}', '${snakeCase(col.field)}', ${col.sortable}, 
+      '${col.headerName}', ${col.filter}, ${col.kind ? `'${col.kind}'` : null}, 
+      ${col.pivotIndex ? `'${col.pivotIndex}'` : null},
+      ${col.description ? `'${col.description}'` : null},
+      ${col.regex ? `'${col.regex}'` : null}
+       )`,
     );
   }
 
+  //  cols.push(
+  //    `struct('${uuid}', '${snakeCase(col.name)}', '${col.field}', ${col.sortable
+  //    }, '${col.headerName}', ${col.filter}, ${col.kind ? `'${col.kind}'` : null
+  //    } )`,
   const query = `INSERT INTO ${TABLES} (id, name, label, cols) VALUES ('${uuid}', '${snakeCase(
     data.name,
   )}', '${data.label}', array(${cols.join(', ')}));`;
+
   const sql2 = await runQuery(query);
 
   const sql3 = (await runQuery(
@@ -84,11 +93,14 @@ export const updateTable = async (data: TableUpdateReq) => {
     const arr1 = [];
     arr1.push(`'${col?.id || uuid}' AS id`);
     arr1.push(`'${snakeCase(col.name)}' AS name`);
-    arr1.push(`'${col.field}' AS field`);
-    arr1.push(`${col.sortable} AS sortable`);
-    arr1.push(`'${col.headerName}' AS header_name`);
-    arr1.push(`${col.filter} AS filter`);
-    arr1.push(`'${col.kind}' AS kind`);
+    arr1.push(`'${col?.field}' AS field`);
+    arr1.push(`${col?.sortable} AS sortable`);
+    arr1.push(`'${col?.headerName}' AS header_name`);
+    arr1.push(`${col?.filter} AS filter`);
+    arr1.push(`'${col?.kind}' AS kind`);
+    arr1.push(`'${col?.pivotIndex}' AS pivotIndex`);
+    arr1.push(`'${col?.description}' AS description`);
+    arr1.push(`'${col?.regex}' AS regex`);
     const colSnakeCase = [];
 
     // for (const el of arr1) {
@@ -129,6 +141,10 @@ export const updateTable = async (data: TableUpdateReq) => {
       fields.push(`cols = array(${cols.join(', ')})`);
       continue;
     }
+    if (prop === 'name' || prop === 'field') {
+      fields.push(`${prop} = '${snakeCase(data[prop])}'`);
+      continue
+    }
     fields.push(
       `${prop} = ${typeof data[prop] === 'number' || typeof data[prop] === 'boolean'
         ? data[prop]
@@ -163,7 +179,9 @@ export const readTableById = async (
   )) as any;
 
   if (sql.length === 1) {
-    return { ...sql[0], cols: JSON.parse(sql[0].cols) };
+    const parsed = JSON.parse(sql[0].cols)
+    const finalObj = { ...sql[0], cols: parsed.map(col => { return { ...col, headerName: col['header_name'] } }) }
+    return finalObj;
   } else if (sql.length === 0) {
     throw new NotFoundError(`No table found at id "${data.id}"`);
   }
@@ -174,6 +192,7 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
     `SELECT * FROM ${TABLES} WHERE name = '${name}'`,
 
   )) as any;
+
 
   if (sql.length === 1) {
     return { ...sql[0], cols: JSON.parse(sql[0].cols) };
@@ -186,6 +205,14 @@ export const deleteTable = async (data: TableDeleteReq) => {
   try {
     const sql = (await runQuery(
       `DELETE FROM ${TABLES} WHERE id = '${data.id}'`,
+
+    )) as any;
+    //   const sql2 = (await runQuery(
+    //     `DELETE FROM ${snakeCase(data.name)}`,
+
+    //   )) as any;
+    const sql3 = (await runQuery(
+      `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
 
     )) as any;
 
@@ -202,30 +229,18 @@ export const deleteTable = async (data: TableDeleteReq) => {
 export const readTables = async (
   body: ReadPaginationFilter,
 ): Promise<TablesReadRes> => {
-  const filtersSnakeCase = {};
-
-  for (const prop in body.filters) {
-    if (prop === 'name') {
-      filtersSnakeCase[prop] = {
-        ...body.filters,
-        name: {
-          ...body.filters.name,
-          filter: snakeCase(body.filters.name.filter as string),
-        },
-      };
-    }
-  }
+  const filtersSnakeCase = filtersToSnakeCase(body)
 
   const whereClause = filterToQuery({
     filters: filtersSnakeCase,
     from: body.from,
     to: body.to,
-  });
-  const whereClause2 = filterToQuery({ filters: filtersSnakeCase });
+  }, "");
+  const whereClause2 = filterToQuery({ filters: filtersSnakeCase }, "");
+
 
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} ${whereClause}`,
-
   )) as TablesReadResTablesItem[];
 
   if (sql.length === 0) {
