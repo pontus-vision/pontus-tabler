@@ -31,35 +31,41 @@ const CreateTableView = ({ testId }: Props) => {
   const { t, i18n } = useTranslation();
 
   const handleCreate = async (data: TableColumnRef[]) => {
+    console.log({ data })
     const isAnyFieldInvalid = Object.values(validationError).some(
       (field) => field,
     );
+    console.log({ validationError })
     if (isAnyFieldInvalid) return;
 
     let colsEmpty = false;
 
+    console.log({ data })
     for (const [key, value] of Object.entries(data)) {
-      if (!value.headerName) {
+      if (!value.headerName || !value.field) {
         colsEmpty = true;
       }
     }
 
     try {
+      console.log({ name, colsEmpty })
       if (!name || colsEmpty) {
         throw `Please, there are some empty fields.`;
       }
 
+
       const obj = {
         label: name || '',
-        name: formatToCosmosDBPattern(name || ''),
+        name: name || '',
         cols: data.map((col) => {
           return {
             ...col,
-            name: formatToCosmosDBPattern(col.name || ''),
-            field: formatToCosmosDBPattern(col.name || ''),
+            headerName: col.name || '',
+            field: col.field || '',
           };
         }),
       };
+      console.log({ obj })
       const createRes = await createTable(obj);
 
       if (createRes?.status === 400) {
@@ -74,6 +80,7 @@ const CreateTableView = ({ testId }: Props) => {
         'Table created!',
       );
     } catch (error: any) {
+      console.log({ error })
       notificationManagerRef?.current?.addMessage(
         'error',
         'Error',
@@ -93,7 +100,6 @@ const CreateTableView = ({ testId }: Props) => {
   // const handleColsCreation = (data: TableColumnRef[]) => {
   //   setCols(data);
   // };
-
 
   return (
     <>

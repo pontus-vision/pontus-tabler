@@ -17,6 +17,7 @@ import {
   DashboardAuthGroupsRef,
   DashboardAuthGroups,
   Dashboard,
+  DashboardsReadReq,
 } from '../../typescript/api';
 import { createSql, filterToQuery, generateUUIDv6, isJSONParsable, runQuery, updateSql } from '../../db-utils';
 import { NotFoundError } from '../../generated/api';
@@ -145,8 +146,27 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 };
 
 export const readDashboards = async (
-  body: ReadPaginationFilter,
+  body: DashboardsReadReq,
+  userId?: string
 ): Promise<DashboardsReadRes> => {
+
+  console.log('READ DASHBOARDS', { body, userId })
+
+  if (userId) {
+    const isAdminCheck = await runQuery(`
+SELECT EXISTS (
+    SELECT 1
+    FROM groups_users
+    WHERE table_to__id = '${userId}' and table_from__name = 'Admin'
+) AS record_exists;
+`)
+    console.log({ RECORD_EXISTS: typeof isAdminCheck[0]['record_exists'], isAdminCheck: isAdminCheck[0] })
+    if (isAdminCheck[0]['record_exists'] === false) {
+      return readDashboards2(body, userId)
+
+    }
+  }
+
   const whereClause = filterToQuery(body, "");
   const whereClause2 = filterToQuery({ filters: body.filters }, "");
   const sql = await runQuery(
@@ -175,26 +195,33 @@ export const readDashboards = async (
 };
 
 export const readDashboards2 = async (
-  body: ReadPaginationFilter,
+  body: DashboardsReadReq,
+  userId: string
 ): Promise<DashboardsReadRes> => {
-  `SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = :user_id;
-`
-  runQuery("SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = '019596452d884d44a40258a9aa05ad3e'")
+  const whereClause = filterToQuery(body, "A", undefined, true);
+  const whereClause2 = filterToQuery({ filters: body.filters }, "A", undefined, true);
+  console.log({ whereClause, whereClause2 })
+  const selectQuery = `SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = '${userId}' AND B.table_from__read = TRUE ${Object.keys(body.filters).length > 0 ? `AND ${whereClause}` : whereClause}`
+  const countQuery = `SELECT COUNT(*) AS total_count FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE  GU.table_to__id = '${userId}' AND B.table_from__read = TRUE ${whereClause2 ? `AND ${whereClause2}` : ''}`
 
-  const whereClause = filterToQuery(body, "");
-  const whereClause2 = filterToQuery({ filters: body.filters }, "");
+  const query1 = `${selectQuery}`
+
+  const query2 = `${countQuery}`
+
   const sql = await runQuery(
-    `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
+    query1,
   );
   const sqlCount = await runQuery(
-    `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
+    `${query2}`,
   );
+
+  console.log({ query1, sql, query2, sqlCount })
+
+
   const count = +sqlCount[0]['count(1)'];
-  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
   if (count === 0) {
     throw new NotFoundError('No dashboards found');
   }
-  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
 
   return {
     dashboards: sql.map((dash) => {

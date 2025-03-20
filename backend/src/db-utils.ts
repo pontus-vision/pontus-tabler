@@ -101,6 +101,7 @@ export const updateSql = async (
     ', ',
   )} ${whereClause}`;
 
+  console.log({ updateQuery: insert, groups_dashboards: await runQuery('SELECT * FROM groups_dashboards') })
   const res2 = await runQuery(insert);
 
   if (+res2[0]['num_affected_rows'] === 0) {
@@ -257,6 +258,7 @@ export const filterToQuery = (
   body: ReadPaginationFilter,
   alias = 'c',
   additionalClause?: string,
+  onlyParams = false
 ) => {
   const query = [];
 
@@ -268,6 +270,7 @@ export const filterToQuery = (
   if (process.env.DB_SOURCE && alias) {
     alias = `${alias}.`
   }
+  console.log({ alias })
 
   for (let col in cols) {
     if (cols.hasOwnProperty(col)) {
@@ -298,23 +301,23 @@ export const filterToQuery = (
           for (const condition of conditions) {
             if (process.env.DB_SOURCE === DELTA_DB) {
               if (type === 'contains') {
-                colQuery.push(` ${colName} LIKE '%${filter}%'`);
+                colQuery.push(` ${alias}${colName} LIKE '%${filter}%'`);
               }
 
               if (type === 'not contains') {
-                colQuery.push(` ${colName} NOT LIKE '%${filter}%'`);
+                colQuery.push(` ${alias}${colName} NOT LIKE '%${filter}%'`);
               }
 
               if (type === 'starts with') {
-                colQuery.push(` ${colName} LIKE '${filter}%'`);
+                colQuery.push(` ${alias}${colName} LIKE '${filter}%'`);
               }
 
               if (type === 'ends with') {
-                colQuery.push(` ${colName} LIKE '%${filter}'`);
+                colQuery.push(` ${alias}${colName} LIKE '%${filter}'`);
               }
 
               if (type === 'equals') {
-                colQuery.push(` ${alias}${colName} = '${filter}'`);
+                colQuery.push(` ${alias}${alias}${colName} = '${filter}'`);
               }
 
               if (type === 'not equals') {
@@ -351,19 +354,19 @@ export const filterToQuery = (
         if (!condition1Filter) {
           if (process.env.DB_SOURCE === DELTA_DB) {
             if (type === 'contains') {
-              colQuery.push(` ${colName} LIKE '%${filter}%'`);
+              colQuery.push(` ${alias}${colName} LIKE '%${filter}%'`);
             }
 
             if (type === 'not contains') {
-              colQuery.push(` ${colName} NOT LIKE '%${filter}%'`);
+              colQuery.push(` ${alias}${colName} NOT LIKE '%${filter}%'`);
             }
 
             if (type === 'starts with') {
-              colQuery.push(` ${colName} LIKE '${filter}%'`);
+              colQuery.push(` ${alias}${colName} LIKE '${filter}%'`);
             }
 
             if (type === 'ends with') {
-              colQuery.push(` ${colName} LIKE '%${filter}'`);
+              colQuery.push(` ${alias}${colName} LIKE '%${filter}'`);
             }
 
             if (type === 'equals') {
@@ -402,7 +405,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '%${condition1Filter}%'`);
+            colQuery.push(` ${alias}${colName} LIKE '%${condition1Filter}%'`);
           } else {
             colQuery.push(
               ` CONTAINS(${alias}${colName}, '${condition1Filter}')`,
@@ -413,7 +416,7 @@ export const filterToQuery = (
         if (condition2Filter && type2 === 'contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
             colQuery.push(
-              ` ${operator} ${colName} LIKE '%${condition2Filter}%'`,
+              ` ${operator} ${alias}${colName} LIKE '%${condition2Filter}%'`,
             );
           } else {
             colQuery.push(
@@ -424,7 +427,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'not contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '%${condition1Filter}%'`);
+            colQuery.push(` ${alias}${colName} LIKE '%${condition1Filter}%'`);
           } else {
             colQuery.push(
               ` CONTAINS(${alias}${colName}, '${condition1Filter}')`,
@@ -434,7 +437,7 @@ export const filterToQuery = (
 
         if (condition2Filter && type2 === 'not contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` AND ${colName} LIKE '%${condition2Filter}%'`);
+            colQuery.push(` AND ${alias}${colName} LIKE '%${condition2Filter}%'`);
           } else {
             colQuery.push(
               ` AND CONTAINS(${alias}${colName}, '${condition2Filter}')`,
@@ -444,7 +447,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'starts with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '${condition1Filter}%'`);
+            colQuery.push(` ${alias}${colName} LIKE '${condition1Filter}%'`);
           } else {
             colQuery.push(
               ` STARTSWITH(${alias}${colName}, '${condition1Filter}')`,
@@ -454,7 +457,7 @@ export const filterToQuery = (
 
         if (condition2Filter && type2 === 'starts with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` AND ${colName} LIKE '${condition2Filter}%'`);
+            colQuery.push(` AND ${alias}${colName} LIKE '${condition2Filter}%'`);
           } else {
             colQuery.push(
               ` AND STARTSWITH(${alias}${colName}, '${condition2Filter}')`,
@@ -464,7 +467,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'ends with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '%${condition1Filter}'`);
+            colQuery.push(` ${alias}${colName} LIKE '%${condition1Filter}'`);
           } else {
             colQuery.push(
               ` ENDSWITH(${alias}${colName}, '${condition1Filter}')`,
@@ -474,7 +477,7 @@ export const filterToQuery = (
 
         if (condition2Filter && type2 === 'ends with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` AND ${colName} LIKE '%${condition2Filter}'`);
+            colQuery.push(` AND ${alias}${colName} LIKE '%${condition2Filter}'`);
           } else {
             colQuery.push(
               ` ${operator} ENDSWITH(${alias}${colName}, '${condition2Filter}')`,
@@ -861,7 +864,7 @@ export const filterToQuery = (
       }`;
 
   const finalQuery = (
-    (hasFilters ? ' WHERE ' : '') +
+    (hasFilters && !onlyParams ? ' WHERE ' : '') +
     query.join(' and ') +
     (colSortStr ? ` ORDER BY ${colSortStr}` : '') +
     (additionalClause

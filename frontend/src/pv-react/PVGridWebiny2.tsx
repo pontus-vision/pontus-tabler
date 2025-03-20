@@ -182,6 +182,7 @@ const PVGridWebiny2 = ({
       onRowsStateChange && rowsAlterations && onRowsStateChange(alterations);
     } else {
       setRowsStateHasChanged(false)
+      onRowsStateChange && rowsAlterations && onRowsStateChange(alterations);
     }
     console.log({ alterations })
   }

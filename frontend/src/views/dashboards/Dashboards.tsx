@@ -30,6 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import FetchDashboards from '../dashboard/FetchDashboards';
 import AuthGroups from '../authGroups/AuthGroups';
 import MenuTree from '../../components/MenuTree';
+import useApiAndNavigate from '../../hooks/useApi';
 
 const Dashboards = () => {
   const [groupsChanged, setGroupsChanged] = useState<DashboardAuthGroups[]>([]);
@@ -48,33 +49,37 @@ const Dashboards = () => {
     useState<Dashboard | null>();
   const [isLoading2, setIsLoading2] = useState(false);
   const [totalGroups, setTotalGroups] = useState<number>();
+  const { fetchDataAndNavigate } = useApiAndNavigate();
 
   const fetchDashboardAuthGroups = async () => {
     if (!selectedDashboard?.id) return;
     setIsLoading2(true);
-    const res = await readDashboardGroupAuth({
-      id: selectedDashboard?.id,
-      filters,
-      from,
-      to,
-    });
+    try {
+      const res = await readDashboardGroupAuth({
+        id: selectedDashboard?.id,
+        filters,
+        from,
+        to,
+      });
+    } catch (error) {
+      if (error?.status === 404) {
+        setGroups([]);
+        setTotalGroups(0);
+      } else if (error?.status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Something went wrong. Could not fetch Auth Group(s)!',
+        );
+      }
 
-    if (res?.status === 404) {
-      setGroups([]);
-      setTotalGroups(0);
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not fetch Auth Group(s)!',
-      );
+      const authGroups = error?.data.authGroups;
+      const totalCount = error?.data.totalCount;
+
+      authGroups && setGroups(authGroups);
+      totalCount && setTotalGroups(totalCount);
     }
 
-    const authGroups = res?.data.authGroups;
-    const totalCount = res?.data.totalCount;
-
-    authGroups && setGroups(authGroups);
-    totalCount && setTotalGroups(totalCount);
     setIsLoading2(false);
   };
 

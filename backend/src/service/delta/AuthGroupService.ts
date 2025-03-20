@@ -388,34 +388,38 @@ export const readAuthGroupDashboards = async (
 export const updateAuthGroupDashboards = async (
   data: AuthGroupDashboardUpdateReq,
 ): Promise<AuthGroupDashboardUpdateRes> => {
-  const sql = await updateSql(
-    GROUPS_DASHBOARDS,
-    data.dashboards.map((dash) => {
-      return {
-        table_from__create: dash.create,
-        table_from__read: dash.read,
-        table_from__update: dash.update,
-        table_from__delete: dash.delete,
-        table_to__id: dash.id,
-        table_to__name: dash.name,
-      };
-    }),
-    `WHERE table_from__id = '${data.id}'`,
-  );
+  const dashboards = []
+  for (const dashboard of data.dashboards) {
 
-  const dashboards: AuthGroupDashboardRef[] = sql.map((el) => {
-    return {
-      name: el['table_to__name'],
-      id: el['table_to__id'],
-      create: el['table_from__create'] === 'true' ? true : false,
-      read: el['table_from__read'] === 'true' ? true : false,
-      update: el['table_from__update'] === 'true' ? true : false,
-      delete: el['table_from__delete'] === 'true' ? true : false,
-    };
-  });
+    const sql = await updateSql(
+      GROUPS_DASHBOARDS,
+      {
+        table_from__create: dashboard.create,
+        table_from__read: dashboard.read,
+        table_from__update: dashboard.update,
+        table_from__delete: dashboard.delete,
+        table_from__id: data.id,
+        table_from__name: data.name,
+      },
+
+      `WHERE table_to__id = '${dashboard.id}'`,
+    );
+    dashboards.push(sql.map((el) => {
+      return {
+        name: el['table_to__name'],
+        id: el['table_to__id'],
+        create: el['table_from__create'] === 'true' ? true : false,
+        read: el['table_from__read'] === 'true' ? true : false,
+        update: el['table_from__update'] === 'true' ? true : false,
+        delete: el['table_from__delete'] === 'true' ? true : false,
+      };
+    }));
+  }
+
+
 
   return {
-    dashboards,
+    dashboards: dashboards[0],
     id: data.id,
     name: data.name,
   };
@@ -782,6 +786,7 @@ export const checkTableMetadataPermissions = async (
     delete: del,
   };
 };
+
 
 export const checkPermissions = async (
   userId: string,

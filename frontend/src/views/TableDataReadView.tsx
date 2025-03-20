@@ -23,6 +23,10 @@ const TableDataReadView = () => {
           return { ...col, editable: true };
         }),
       );
+
+      console.log({
+        res
+      })
       setTableName(res?.data.name || '');
     };
 
@@ -45,7 +49,7 @@ const TableDataReadView = () => {
   return (
     <>
       {colDefs && (
-        <PVGridWebiny2 onFiltersChange={handleFiltersChange} cols={colDefs} />
+        <PVGridWebiny2 add={() => { console.log('foo') }} onFiltersChange={handleFiltersChange} cols={colDefs} />
       )}
     </>
   );

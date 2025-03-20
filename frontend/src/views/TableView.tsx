@@ -40,12 +40,10 @@ const TableView = ({
   setValidationError,
 }: Props) => {
   let [cols, setCols] = useState<TableColumnRef[]>([]);
-
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const name = cols.length > 0 ? cols[0]?.name : '';
-    console.log({ cols });
   }, [cols]);
 
   useEffect(() => {
@@ -56,11 +54,13 @@ const TableView = ({
   }, [table]);
 
   useEffect(() => {
-    onColsCreation && onColsCreation(cols);
+    console.log({ cols })
+    const { pivotIndex, originalIndex } = cols
+    //   onColsCreation && onColsCreation(cols);
   }, [cols]);
 
   return (
-    <div className="update-table" data-testid={testId}>
+    <div className="update-table" data-testid={testId} >
       {
         <div className="update-table-overflow-container">
           <div className="update-table-container">
@@ -74,28 +74,32 @@ const TableView = ({
                     <th className="update-table-table-header-cell">
                       {t('col-type')}
                     </th>
-                    <th className="update-table-table-header-cell">
+                    <th className="update-table-table-header-cell center">
                       {t('filter')}
                     </th>
-                    <th className="update-table-table-header-cell">
+                    <th className="update-table-table-header-cell center">
                       {t('sortable')}
                     </th>
-                    <th className="update-table-table-header-cell">Actions</th>
+                    <th className="update-table-table-header-cell center">Order</th>
+                    <th className="update-table-table-header-cell center">Description</th>
+                    <th className="update-table-table-header-cell center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="update-table-table-body">
                   {cols &&
                     cols.map((col, index) => (
-                      <NewTableCol
-                        setValidationError={setValidationError}
-                        onInputChange={onInputChange}
-                        validationError={validationError}
-                        key={col.id}
-                        colDef={col}
-                        setCols={setCols}
-                        index={index}
-                        testId={`${testId}-col-${index}`}
-                      />
+                      <>
+                        <NewTableCol
+                          setValidationError={setValidationError}
+                          onInputChange={onInputChange}
+                          validationError={validationError}
+                          key={index}
+                          colsLength={cols.length}
+                          colDef={col}
+                          setCols={setCols}
+                          index={index}
+                          testId={`${testId}-col-${index}`}
+                        /></>
                     ))}
                 </tbody>
               </table>
@@ -130,7 +134,12 @@ const TableView = ({
         <button
           type="button"
           onClick={() => {
-            cols && onUpdate({ cols: cols });
+            const colsReq = cols.map(col => {
+              const { pivotIndex, originalIndex, ...rest } = col
+              return { ...rest, pivotIndex: (pivotIndex as number) }
+            })
+            console.log({ colsReq })
+            cols && onUpdate(colsReq);
           }}
           className="update-table-update-button"
           data-testid={`${testId}-update-btn`}
@@ -145,7 +154,12 @@ const TableView = ({
           data-testid={`${testId}-create-btn`}
           data-cy={`create-table-btn`}
           onClick={() => {
-            onCreate && cols && onCreate(cols);
+            const colsReq = cols.map(col => {
+              const { pivotIndex, originalIndex, ...rest } = col
+              return { ...rest, pivotIndex: (pivotIndex as number) }
+            })
+            console.log({ colsReq })
+            onCreate && cols && onCreate(colsReq);
           }}
           className="update-table-update-button"
         >

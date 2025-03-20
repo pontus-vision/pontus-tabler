@@ -48,11 +48,14 @@ const TableDataReadView = () => {
           return { ...col, editable: true };
         });
 
+        console.log({ res: res.data.cols.map(col => col) })
+
+
+
         setTable(res?.data);
         colsRes && setCols(colsRes);
         setTableName(res?.data.name || '');
 
-        console.log({ res: res?.data });
       } catch (error: any) {
         notificationManagerRef?.current?.addMessage(
           'error',

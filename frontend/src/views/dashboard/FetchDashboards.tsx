@@ -119,7 +119,7 @@ const FetchDashboards = ({
 
   useEffect(() => {
     fetchDashboards();
-  }, []);
+  }, [filters, from, to]);
 
   const handleParamsChange = (params: IGetRowsParams) => {
     setFilters(params.filterModel);

@@ -18,16 +18,19 @@ const useLogin = () => {
     // e.preventDefault();
     setLoading(true)
 
-    const res = (await fetchDataAndNavigate(loginUser, {
-      password,
-      username,
-    })) as AxiosResponse<LoginRes>;
+    try {
+      const res = (await fetchDataAndNavigate(loginUser, {
+        password,
+        username,
+      })) as AxiosResponse<LoginRes>;
 
-    if (res?.status === 200) {
-      localStorage.setItem('accessToken', 'Bearer ' + res.data.accessToken);
-      localStorage.setItem('refreshToken', 'Bearer ' + res.data.refreshToken);
-      const userId = getUserIdFromToken();
-      await login(userId);
+      if (res?.status === 200) {
+        localStorage.setItem('accessToken', 'Bearer ' + res.data.accessToken);
+        localStorage.setItem('refreshToken', 'Bearer ' + res.data.refreshToken);
+        const userId = getUserIdFromToken();
+        await login(userId);
+      }
+    } catch (error) {
     }
     setLoading(false)
   };

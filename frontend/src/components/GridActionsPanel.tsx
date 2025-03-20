@@ -297,6 +297,7 @@ const GridActionsPanel = ({
         (permissions?.updateAction &&
           (changesMade ? (
             <div
+              data-cy="grid-action-panel-save-btn"
               onClick={() => {
                 onUpdate && onUpdate();
               }}

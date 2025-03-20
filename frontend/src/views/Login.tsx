@@ -49,7 +49,7 @@ const LoginPage = () => {
           <form onSubmit={loginUser}>
             <h3>Sign In</h3>
             <div className="mb-3">
-              <label>username</label>
+              <label>Username</label>
               <input
                 data-cy="username-login-input"
                 onChange={(e) => setUsername(e.target.value)}

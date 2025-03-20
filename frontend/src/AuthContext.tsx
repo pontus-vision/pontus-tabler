@@ -33,11 +33,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (userId: string) => {
     setIsAuthenticated(true);
 
-    const res = await readUserGroups({ id: userId, filters: {} });
+    try {
+      const res = await readUserGroups({ id: userId, filters: {} });
 
-    setUserGroups(res?.data.authGroups || []);
-    if (location.pathname === '/login') {
-      navigate('/tables/read');
+      setUserGroups(res?.data.authGroups || []);
+      if (location.pathname === '/login') {
+        navigate('/tables/read');
+      }
+    } catch (error) {
+      console.error({ error })
     }
   };
 

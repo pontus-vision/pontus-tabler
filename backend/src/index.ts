@@ -264,8 +264,8 @@ export default new PontusService({
     res.send(response);
   },
   dashboardsReadPost: async (req, res) => {
-
-    const response = await readDashboards(req.body);
+    const userId = req['user']['userId']
+    const response = await readDashboards(req.body, userId);
 
     res.send(response);
   },

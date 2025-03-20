@@ -62,11 +62,12 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
 
 export const readDashboards = async (
   body: ReadPaginationFilter,
+  userId?: string
 ): Promise<DashboardsReadRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.readDashboards(body);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.readDashboards(body);
+    return deltadb.readDashboards(body, userId);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };

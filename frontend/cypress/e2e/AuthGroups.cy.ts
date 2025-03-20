@@ -34,7 +34,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
     cy.contains('Register').click();
 
 
-    cy.get("[data-cy='header']", { timeout: 10000 }).should('exist')
+    cy.get("[data-cy='header']").should('exist')
     cy.contains('Logout').click()
   }),
     beforeEach(() => {
@@ -44,11 +44,9 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.contains('Submit').click();
 
-      cy.contains('Logout', { timeout: 10000 })
+      cy.contains('Logout')
 
     })
-  it('should create an user', () => {
-  })
   it('should associate user to group and group to dashboards', () => {
     cy.visit(`${url}/auth/groups`)
 
@@ -56,30 +54,88 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
-    cy.contains('Loading...', { timeout: 10000 }).should('not.exist')
+    cy.contains('Loading...', { timeout: 15000 }).should('not.exist')
 
-    cy.get("[row-index='1'] [col-id='name']", { timeout: 10000 }).dblclick({ force: true });
+    cy.get("[row-index='1'] [col-id='name']").dblclick({ force: true });
 
-    cy.get("[row-index='1'] [col-id='name']", { timeout: 10000 }).type('Regular User{enter}');
+    cy.get("[row-index='1'] [col-id='name']").type('Regular User{enter}');
 
-    cy.contains('AuthGroup(s) created!', { timeout: 10000 }).should('exist')
+    cy.contains('AuthGroup(s) created!', { timeout: 15000 }).should('exist')
 
-    cy.get(`[data-cy="grid-action-refresh-btn"]`, { timeout: 10000 }).click()
+    cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
     cy.get("[data-cy='edit-on-grid-toggle']").click()
 
-
-    cy.contains('Regular User', { timeout: 10000 }).siblings('[col-id="click"]').dblclick()
+    cy.contains('Regular User').siblings('[col-id="click"]').dblclick()
 
     cy.contains('Regular User Dashboards:').next().find("[data-cy='grid-add-btn']").click();
 
-
-    cy.contains('Dash 1', { timeout: 10000 }).siblings('[col-id="selection-mode"]').find('input').click()
+    cy.contains('Dash 1', { timeout: 15000 }).siblings('[col-id="selection-mode"]').find('input').click()
 
     cy.contains('Add Group(s)').click()
 
+    cy.contains('Success').should('exist')
 
-    cy.contains('Success', { timeout: 10000 }).should('exist')
     cy.get('body').click('bottomLeft')
+
+    cy.contains('Regular User Dashboards:').next().find("[data-cy='grid-add-btn']").click();
+
+    cy.contains('Dash 2').siblings('[col-id="selection-mode"]').find('input').click()
+
+    cy.contains('Add Group(s)').click()
+
+    cy.contains('Success').should('exist')
+
+    cy.get('body').click('bottomLeft')
+
+    cy.contains('Dash 2').siblings('[col-id="read"]').find('input').click()
+
+    cy.get("[data-cy='grid-action-panel-save-btn']").click()
+
+    cy.contains('Dashboard(s) updated!').should('be.visible')
+
+    cy.contains('Dashboard(s) updated!').should('be.visible')
+
+    cy.wait(2000)
+
+    cy.contains('Dash 1').should('be.visible')
+
+    cy.contains('Dash 2').should('be.visible')
+
+    cy.contains('Dash 2').siblings('[col-id="read"]').find('input').should('be.checked')
+
+    cy.contains('Dash 1').siblings('[col-id="read"]').find('input').should('not.be.checked')
+
+    cy.contains('Regular User Users:').next().find("[data-cy='grid-add-btn']").click();
+
+    cy.contains('User 1').siblings('[col-id="selection-mode"]').find('input').click()
+
+    cy.contains('Add User(s)').click()
+
+    cy.contains('Success').should('exist')
+
+    cy.get('body').click('bottomLeft')
+
+    cy.contains('Logout').click()
+
+    cy.wait(1000)
+    cy.visit(`${url}/login`)
+
+    cy.contains('Username').siblings('input').click().type('User 1')
+
+    cy.contains('Password').siblings('input').click().type('1234567')
+
+    cy.contains('Submit').click()
+
+    cy.wait(11000)
+
+    cy.visit(`${url}/dashboards`)
+
+    cy.get('[data-cy="read-tables-aggrid"]').contains('Dash 2').should('be.visible')
+
+    cy.get('[data-cy="read-tables-aggrid"]').contains('Dash 1').should('not.exist')
+
   })
+  //  it('should login as user and see only Dash 2', () => {
+  //  })
 })

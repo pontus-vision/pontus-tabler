@@ -37,10 +37,13 @@ const UpdateTableView = ({ tableId }: Props) => {
     const data = await tableRead({ id });
     setTable(data?.data);
 
-    data?.data.cols && setCols(data?.data.cols);
-    data?.data.name && setName(data?.data.name);
+    data?.data.cols && setCols(data?.data.cols.sort((a, b) => a.pivotIndex - b.pivotIndex));
+    data?.data.label && setName(data?.data.label);
   };
 
+  useEffect(() => {
+    console.log({ table })
+  }, [table])
   useEffect(() => {
     if (params.id || tableId) {
       fetchTable(params.id || tableId || '');
@@ -65,21 +68,23 @@ const UpdateTableView = ({ tableId }: Props) => {
     }
   };
 
-  const handleUpdate = async (data: TableRef) => {
+  const handleUpdate = async (data: TableColumnRef[]) => {
+    console.log({ data, newName, name })
     try {
       const obj: TableUpdateReq = {
-        ...data,
         id: params.id || tableId || '',
-        name: formatToCosmosDBPattern(newName || name || ''),
-        label: name,
-        cols: data?.cols?.map((col) => {
+        name: newName || name || '',
+        label: newName || name || '',
+        cols: data?.map((col) => {
           return {
             ...col,
-            name: formatToCosmosDBPattern(col.name || ''),
-            field: formatToCosmosDBPattern(col.name || ''),
+            headerName: col.headerName || '',
+            field: formatToCosmosDBPattern(col.field || ''),
           };
         }),
       };
+      console.log({ obj })
+
       const updateRes = await updateTable(obj);
       if (updateRes?.status === 400) {
         throw 'Some error in the form';
@@ -93,7 +98,8 @@ const UpdateTableView = ({ tableId }: Props) => {
         'Table updated successfully',
       );
     } catch (error: any) {
-      notificationManagerRef?.current?.addMessage('error', 'Success', error);
+      console.log({ error })
+      notificationManagerRef?.current?.addMessage('error', 'Success', JSON.stringify(error));
     }
   };
 
@@ -108,6 +114,7 @@ const UpdateTableView = ({ tableId }: Props) => {
         type="text"
         defaultValue={name}
         data-testid="update-table-view-input"
+        data-cy="update-table-view-input"
         className="update-table__name-input"
       />
       <TableView

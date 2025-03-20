@@ -311,6 +311,7 @@ const DashboardAuthGroupsView = () => {
   };
 
   const updateAuthGroupDash = async () => {
+    console.log({ dashboardsChanged })
     if (!selectedGroup?.id || !dashboardsChanged) return;
 
     const req: AuthGroupDashboardUpdateReq = {
