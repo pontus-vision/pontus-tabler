@@ -31,10 +31,13 @@ const useLogin = () => {
         await login(userId);
       }
     } catch (error) {
+      console.log({ error })
+      if (error?.status === 404 || error?.status === 400)
+        setError('Username and/or password is wrong!')
     }
     setLoading(false)
   };
-  return { handleLogin, loading };
+  return { handleLogin, loading, error };
 };
 
 export default useLogin;

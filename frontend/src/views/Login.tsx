@@ -18,7 +18,7 @@ const LoginPage = () => {
 
   const { fetchDataAndNavigate } = useApiAndNavigate();
 
-  const { handleLogin, loading } = useLogin();
+  const { handleLogin, loading, error } = useLogin();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -68,6 +68,7 @@ const LoginPage = () => {
                 placeholder="Enter password"
               />
             </div>
+            {error && <p>{error}</p>}
             <div className="mb-3">
               <div className="custom-control custom-checkbox">
                 <input

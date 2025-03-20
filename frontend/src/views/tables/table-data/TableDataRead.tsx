@@ -130,6 +130,8 @@ const TableDataReadView = () => {
         tableName: table?.name,
         cols: data,
       };
+
+      console.log({ obj })
       const res = await tableDataCreate(obj);
 
       if (res?.status === 200) {
@@ -193,6 +195,7 @@ const TableDataReadView = () => {
             permissions={{ createAction: true, deleteAction: true }}
             totalCount={rowCount}
             onRefresh={fetchTableData}
+            onCreateRow={createTableDataRow}
           />
         )}
       </div>
