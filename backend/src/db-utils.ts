@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { ReadPaginationFilter, ReadPaginationFilterFilters } from './typescript/api';
+=======
+import { ReadPaginationFilter } from './typescript/api';
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
 import { Jinst, Pool } from '../pontus-node-jdbc/src/index';
 import { JDBC } from '../pontus-node-jdbc/src/index';
 import { v4 as uuidv4 } from 'uuid';
@@ -101,9 +105,13 @@ export const updateSql = async (
     ', ',
   )} ${whereClause}`;
 
+<<<<<<< HEAD
   console.log({ updateQuery: insert, groups_dashboards: await runQuery('SELECT * FROM groups_dashboards') })
   const res2 = await runQuery(insert);
 
+=======
+  const res2 = await runQuery(insert);
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
   if (+res2[0]['num_affected_rows'] === 0) {
     throw new NotFoundError(
       `did not find any record at table '${table}' (${whereClause})`,
@@ -112,8 +120,13 @@ export const updateSql = async (
 
   const res3 = await runQuery(
     `SELECT * FROM ${table} ${whereClause}`,
+<<<<<<< HEAD
   );
 
+=======
+
+  );
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
   if (res3.length === 0) {
     throw new NotFoundError(
       `did not find any record at table '${table}' (${whereClause})`,
@@ -167,6 +180,7 @@ export const createSql = async (
 ): Promise<Record<string, any>[]> => {
   const uuid = generateUUIDv6();
 
+<<<<<<< HEAD
   let entries
   if (data?.id) {
     const { id, ...rest } = data
@@ -177,6 +191,12 @@ export const createSql = async (
 
   const keys = entries.keysStr;
   let values = entries.valuesStr;
+=======
+  const entries = objEntriesToStr(data);
+
+  const keys = entries.keysStr;
+  const values = entries.valuesStr;
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
   // const resss = await runQuery(
   //   `DROP TABLE  ${table} `,
   //   conn,
@@ -184,9 +204,17 @@ export const createSql = async (
 
   const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
     } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
+<<<<<<< HEAD
 
   const res = await runQuery(createQuery);
 
+=======
+  console.log({ createQuery })
+
+  const res = await runQuery(createQuery);
+
+  console.log({ res })
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
 
   const insertFields = Array.isArray(data)
     ? Object.keys(data[0]).join(', ')
@@ -202,7 +230,10 @@ export const createSql = async (
 
   const ids = [];
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
   const insert = `INSERT INTO ${table} (${data?.id ? '' : 'id, '
     } ${insertFields}) VALUES ${Array.isArray(data)
       ? insertValues
@@ -212,21 +243,49 @@ export const createSql = async (
           return `('${uuid}', ${el})`;
         })
         .join(', ')
+<<<<<<< HEAD
       : `('${data?.id ? data?.id : uuid}',` + values + ')'
+=======
+      : `('${uuid}',` + values + ')'
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
     }`;
 
   const res2 = await runQuery(insert);
 
   const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id
+<<<<<<< HEAD
     ? `id = '${data?.id}'`
     : ids.length > 0
       ? ids.map((id) => `id = '${id}'`).join(' OR ')
       : `id = '${uuid}'`
+=======
+      ? `id = '${data?.id}'`
+      : ids.length > 0
+        ? ids.map((id) => `id = '${id}'`).join(' OR ')
+        : `id = '${uuid}'`
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
     }`;
 
   const res3 = await runQuery(selectQuery);
 
   return res3;
+<<<<<<< HEAD
+=======
+
+  // return res3.map((el) => {
+  //   const obj = {};
+  //   for (const prop in el) {
+  //     if (el[prop] === 'true') {
+  //       obj[prop] = true;
+  //     } else if (el[prop] === 'false') {
+  //       obj[prop] = false;
+  //     } else {
+  //       obj[prop] = el[prop];
+  //     }
+  //   }
+  //   return obj;
+  // });
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
 };
 
 export const createConnection = async (): Promise<IConnection> => {
@@ -237,11 +296,19 @@ export const createConnection = async (): Promise<IConnection> => {
 export async function runQuery(query: string): Promise<Record<string, any>[]> {
   try {
     const connection = await createConnection();
+<<<<<<< HEAD
+=======
+    // console.log({connection, query, FOO: 'BAR'})
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
     const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
     const resultSet = await preparedStatement.executeQuery();
     const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
+<<<<<<< HEAD
+=======
+    console.log('Query Results:', results.length);
+>>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
 
     // Remember to release the connection after you are done
     // await pool.release(connection)

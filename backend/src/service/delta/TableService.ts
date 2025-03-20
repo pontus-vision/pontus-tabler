@@ -24,7 +24,6 @@ export const createTable = async (
 
   const sqlCheck = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
-
   )) as TableCreateRes[];
 
 
@@ -175,7 +174,6 @@ export const readTableById = async (
 ): Promise<TableReadRes> => {
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE id = '${data.id}'`,
-
   )) as any;
 
   if (sql.length === 1) {
@@ -190,7 +188,6 @@ export const readTableById = async (
 export const readTableByName = async (name: string): Promise<TableReadRes> => {
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = '${name}'`,
-
   )) as any;
 
 
@@ -249,7 +246,6 @@ export const readTables = async (
 
   const sql2 = await runQuery(
     `SELECT COUNT(*) FROM ${TABLES} ${whereClause2}`,
-
   );
 
   return {

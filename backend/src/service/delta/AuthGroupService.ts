@@ -1,5 +1,5 @@
 import { filterToQuery, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
-import { AuthGroupsReadReq, UnauthorizedError } from '../../generated/api';
+import { AuthGroupsReadReq } from '../../generated/api';
 import {
   AuthGroupCreateReq,
   AuthGroupDashboardCreateReq,
@@ -99,14 +99,14 @@ const authUserGroupsRead = async (
 //     data: AuthUserGroupsUpdateReq,
 //   ): Promise<AuthUserGroupsUpdateRes> => {
 //     const usersContainer = await fetchContainer(AUTH_USERS);
-
+  
 //     const res2 = await usersContainer.item(data.id, data.id).read();
-
+  
 //     if (res2.statusCode === 404) {
 //       throw new NotFoundError(`Did not find any group at id "${data.id}"`);
 //     }
 //     const username = res2.resource.username;
-
+  
 //     const res = (await updateTableDataEdge({
 //       tableFrom: {
 //         rows: data.authGroups as any,
@@ -121,7 +121,7 @@ const authUserGroupsRead = async (
 //         partitionKeyProp: 'username',
 //       },
 //     })) as any;
-
+  
 //     return {
 //       authGroups: res.map((el) => el.to) as AuthGroupDashboardRef[],
 //       id: data.id,
@@ -270,7 +270,6 @@ export const readAuthGroups = async (
   const countGroups = await runQuery(
     `SELECT COUNT(*) FROM auth_groups
       ${whereClause2};`,
-
   );
   const groupCount = +countGroups[0]['count(1)'];
   if (groupCount === 0) {

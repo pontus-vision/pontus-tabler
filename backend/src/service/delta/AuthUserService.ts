@@ -184,6 +184,8 @@ export const registerUser = async (
 export const registerAdmin = async (
   data: RegisterAdminReq,
 ): Promise<RegisterAdminRes> => {
+
+    console.log({admin:data})
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }

@@ -60,7 +60,7 @@ describe('dashboardCreatePOST', () => {
 
   afterAll(() => {
     process.env = OLD_ENV; // Restore old environment
-    srv.close();
+    // srv.close();
   });
 
   it('should do the CRUD "happy path" with authorization', async () => {

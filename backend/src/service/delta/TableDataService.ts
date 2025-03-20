@@ -46,6 +46,7 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
 export const createTableData = async (
   data: TableDataCreateReq,
 ): Promise<TableDataCreateRes> => {
+  console.log({data})
   const tableName = snakeCase(data.tableName);
 
   const cols = {};
@@ -167,7 +168,6 @@ export const readTableData = async (
 
   const res2 = (await runQuery(
     `SELECT * FROM ${tableName} ${filters}`,
-
   )) as Record<string, any>[];
 
   if (res2.length === 0) {

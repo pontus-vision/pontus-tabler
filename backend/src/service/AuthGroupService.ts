@@ -43,6 +43,7 @@ import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
 
 export const createAuthGroup = async (data: AuthGroupCreateReq) => {
+  console.log({dbSource})
   if (dbSource === COSMOS_DB) {
     return cdb.createAuthGroup(data);
   } else if (dbSource === DELTA_DB) {
