@@ -87,11 +87,6 @@ import {
 export default new PontusService({
   registerUserPost: async (req, res) => {
     // await setup();
-<<<<<<< HEAD
-=======
-    console.log({admin:req})
-
->>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
     const response = await registerUser(req.body);
     res.send(response);
   },
