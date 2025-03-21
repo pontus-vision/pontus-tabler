@@ -6,16 +6,15 @@ import {
   useState,
 } from 'react';
 import {
+  TableColumnCrud,
   TableColumnRef,
   TableRef,
-} from '../pontus-api/typescript-fetch-client-generated';
+} from '../typescript/api';
 import { useTranslation } from 'react-i18next';
 import NewTableCol from '../components/NewTable/ColumnDef';
-import { capitalizeFirstLetter } from '../webinyApi';
-import { OpenApiValidationFail } from '../types';
 
 type Props = {
-  onUpdate?: (data: TableColumnRef[]) => void;
+  onUpdate?: (data: TableColumnRef[], tableColsCrud: TableColumnCrud) => void;
   onCreate?: (data: TableColumnRef[]) => void;
   table?: TableRef;
   testId?: string;
@@ -41,10 +40,14 @@ const TableView = ({
 }: Props) => {
   let [cols, setCols] = useState<TableColumnRef[]>([]);
   const { t, i18n } = useTranslation();
+  const [renameCols, setRenameCols] = useState<Record<string, string>>()
+  const [addCols, setAddCols] = useState<Record<string, Record<string, string>>>()
+  const [deleteCols, setDeleteCols] = useState<string[]>([])
 
   useEffect(() => {
     const name = cols.length > 0 ? cols[0]?.name : '';
   }, [cols]);
+
 
   useEffect(() => {
     // table && setNewTable(table);
@@ -54,10 +57,16 @@ const TableView = ({
   }, [table]);
 
   useEffect(() => {
-    console.log({ cols })
-    const { pivotIndex, originalIndex } = cols
-    //   onColsCreation && onColsCreation(cols);
-  }, [cols]);
+    console.log({ renameCols })
+  }, [renameCols]);
+
+  useEffect(() => {
+    console.log({ addCols })
+  }, [addCols]);
+
+  useEffect(() => {
+    console.log({ deleteCols })
+  }, [deleteCols]);
 
   return (
     <div className="update-table" data-testid={testId} >
@@ -92,6 +101,10 @@ const TableView = ({
                         <NewTableCol
                           setValidationError={setValidationError}
                           onInputChange={onInputChange}
+                          setRenameCols={setRenameCols}
+                          setDeleteCols={setDeleteCols}
+                          setAddCols={setAddCols}
+                          onCreate={onUpdate}
                           validationError={validationError}
                           key={index}
                           colsLength={cols.length}
@@ -117,6 +130,7 @@ const TableView = ({
                         headerName: '',
                         name: '',
                         sortable: false,
+                        newCol: true
                       },
                     ];
                   })
@@ -138,8 +152,15 @@ const TableView = ({
               const { pivotIndex, originalIndex, ...rest } = col
               return { ...rest, pivotIndex: (pivotIndex as number) }
             })
-            console.log({ colsReq })
-            cols && onUpdate(colsReq);
+
+            const addColumns = {}
+            for (const prop in addCols) {
+              for (const prop2 in addCols[prop]) {
+                addColumns[prop2] = addCols[prop][prop2]
+              }
+            }
+
+            cols && onUpdate(colsReq, { tableName: table?.name, addColumns, renameColumns: renameCols, dropColumns: deleteCols });
           }}
           className="update-table-update-button"
           data-testid={`${testId}-update-btn`}

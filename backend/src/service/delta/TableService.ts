@@ -14,7 +14,7 @@ import { filtersToSnakeCase, filterToQuery, generateUUIDv6, runQuery } from '../
 import { ConflictEntityError, NotFoundError } from '../../generated/api';
 
 // import * as db from './../../../delta-table/node/index-jdbc';
-import { snakeCase } from 'lodash';
+import { add, snakeCase } from 'lodash';
 import { TABLES } from '../../consts';
 
 export const createTable = async (
@@ -164,10 +164,47 @@ export const updateTable = async (data: TableUpdateReq) => {
     throw new NotFoundError(`did not find any record at id "${data.id}"`);
   }
 
+  if (data?.tableColsCrud) {
+    const { renameColumns, tableName, addColumns, dropColumns } = data.tableColsCrud
+    await updateTableSchema(snakeCase(tableName), renameColumns, addColumns, dropColumns)
+  }
+
   return {
     ...data,
   };
 };
+
+async function updateTableSchema(tableName: string, renameColumns: Record<string, string>, addColumns: Record<string, string>, dropColumns: string[]) {
+  const alterStatements = [];
+
+  // Handle renaming
+  for (const [oldCol, newCol] of Object.entries(renameColumns)) {
+    alterStatements.push(`ALTER TABLE ${tableName} RENAME COLUMN ${snakeCase(oldCol)} TO ${snakeCase(newCol)}`);
+  }
+
+  // Add new columns
+  for (const [col, type] of Object.entries(addColumns)) {
+    alterStatements.push(`ALTER TABLE ${tableName} ADD COLUMN ${snakeCase(col)} ${snakeCase(type)}`);
+  }
+
+  // Drop columns
+  for (const col of dropColumns) {
+    alterStatements.push(`ALTER TABLE ${tableName} DROP COLUMN ${snakeCase(col)}`);
+  }
+
+  // Execute SQL queries
+  if (alterStatements.length > 0) {
+    for (const stmt of alterStatements) {
+      try {
+        await runQuery(stmt);
+      } catch (error) {
+        throw error
+      }
+    }
+  }
+
+  return { message: "Schema updated successfully", executedQueries: alterStatements };
+}
 
 export const readTableById = async (
   data: TableReadReq,

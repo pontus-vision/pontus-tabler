@@ -491,7 +491,8 @@ service:
       request:
         name: TableUpdateReq
         body:
-          properties: {}
+          properties: 
+            tableColsCrud: optional<TableColumnCRUD>
           extends:
             - BaseModelRef
             - TableRef
@@ -2089,9 +2090,12 @@ types:
         type: optional<string>
       description:
         type: optional<string>
-
-
-
+  TableColumnCRUD:
+    properties:
+      tableName: string
+      renameColumns: map<string, string>
+      addColumns: map<string,TableColumnRefKind>
+      dropColumns: list<string>
   TableRef:
     properties:
       edges: optional<TableEdgeRef>

@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { BsCheckCircleFill } from 'react-icons/bs';
 import { FaRegCircleXmark } from 'react-icons/fa6';
+import { generateUUIDv6 } from '../../../utils';
 import {
   TableColumnRef,
   TableColumnRefKindEnum,
@@ -22,6 +23,7 @@ export interface TableCol {
 }
 
 type Props = {
+  onSubmit?: boolean;
   setCols?: Dispatch<SetStateAction<TableColumnRef[]>>;
   index: number;
   colDef?: TableColumnRef;
@@ -34,6 +36,9 @@ type Props = {
   validationError: Record<string, any>;
   setValidationError: Dispatch<SetStateAction<Record<string, any>>>;
   colsLength: number
+  setRenameCols?: Dispatch<SetStateAction<Record<string, string>>>;
+  setAddCols?: Dispatch<SetStateAction<Record<string, Record<string, string>>>>;
+  setDeleteCols?: Dispatch<SetStateAction<string[]>>
 };
 
 const NewTableCol = ({
@@ -44,7 +49,11 @@ const NewTableCol = ({
   colDef,
   testId,
   setValidationError,
-  colsLength
+  colsLength,
+  setRenameCols,
+  setAddCols,
+  setDeleteCols,
+  onSubmit
 }: Props) => {
   const [header, setHeader] = useState<string>(colDef?.headerName || '');
   const [field, setField] = useState<string>(colDef?.field || '');
@@ -57,11 +66,49 @@ const NewTableCol = ({
   const [description, setDescription] = useState<string>()
   const [regex, setRegex] = useState<string>()
   const [openRegexField, setOpenRegexField] = useState(false)
+  const [originalName, setOriginalName] = useState<string>()
+  const [isNewCol, setIsNewCol] = useState(false)
+  const [colUUID, setColUUID] = useState<string>()
 
   useEffect(() => {
-    console.log({ header })
+    if (!setRenameCols || !originalName || isNewCol) return;
+    setRenameCols((prevState) => {
+
+      return {
+        ...prevState,
+        [originalName]: header
+      }
+    }
+
+    )
   }, [header])
 
+
+  useEffect(() => {
+    if (!setAddCols || !isNewCol || !colUUID) return;
+
+    setAddCols((prevState) => {
+
+      return {
+        ...prevState, [colUUID]: {
+          [header]: kind
+        }
+      }
+    }
+
+    )
+  }, [header, kind])
+
+
+  useEffect(() => {
+    const uuid = generateUUIDv6()
+    setColUUID(uuid)
+    setOriginalName(colDef.headerName)
+
+    if (colDef?.newCol) {
+      setIsNewCol(true)
+    }
+  }, [])
 
   useEffect(() => {
     if (!setCols) return;
@@ -288,24 +335,29 @@ const NewTableCol = ({
           <div className="table-row__flex-container">
             <div className="table-row__icon--transform">
               <svg
-                onClick={() => deleteCol()}
-                data-testid={`${testId}-delete-btn`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                onClick={() =>{
+                  setDeleteCols((prevState) => {
+                    if(!Array.isArray(prevState)) {return}
+                    return[...prevState,originalName]});
+              deleteCol()
+                }}
+              data-testid={`${testId}-delete-btn`}
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-            </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
           </div>
-        </td>
-      </tr>
+        </div>
+      </td>
+    </tr>
 
     </>
   );

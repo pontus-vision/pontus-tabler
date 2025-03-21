@@ -7,12 +7,13 @@ import {
   TableColumnRef,
   TableRef,
   TableUpdateReq,
-} from '../../pontus-api/typescript-fetch-client-generated';
+} from '../../typescript/api';
 import TableView from '../TableView';
 import { formatToCosmosDBPattern } from './CreateTable';
 import NotificationManager, {
   MessageRefs,
 } from '../../components/NotificationManager';
+import { TableColumnCrud } from '../../typescript/api';
 
 type Props = {
   tableId?: string;
@@ -68,7 +69,7 @@ const UpdateTableView = ({ tableId }: Props) => {
     }
   };
 
-  const handleUpdate = async (data: TableColumnRef[]) => {
+  const handleUpdate = async (data: TableColumnRef[], tableColsCrud: TableColumnCrud) => {
     console.log({ data, newName, name })
     try {
       const obj: TableUpdateReq = {
@@ -82,7 +83,9 @@ const UpdateTableView = ({ tableId }: Props) => {
             field: formatToCosmosDBPattern(col.field || ''),
           };
         }),
+        tableColsCrud
       };
+
       console.log({ obj })
 
       const updateRes = await updateTable(obj);

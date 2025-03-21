@@ -10,17 +10,9 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-<<<<<<< HEAD
 import { DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
-=======
-import { GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
-import { checkPermissions } from './service/AuthGroupService';
-
-console.log('STEP 0')
-console.log({dbSource : process.env.DB_SOURCE})
->>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
 
 export const app = express();
 
@@ -29,13 +21,6 @@ console.log('STEP 1')
 const port = 8080;
 
 app.use(cors());
-<<<<<<< HEAD
-=======
-// export function jdbcMiddleware(req, res, next) {
-//   next();
-// }
-// app.use(jdbcMiddleware);
->>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
 
 console.log('STEP 2')
 const authMiddleware = async (
@@ -57,18 +42,11 @@ const authMiddleware = async (
     return next();
   }
 
-<<<<<<< HEAD
   try {
 
     const authorization = await authenticateToken(req, res);
 
     const userId = authorization?.['userId'];
-=======
-  console.log(process.env.DB_SOURCE)
-  // try {
-  //   const authorization = await authenticateToken(req, res);
-  //   const userId = authorization['userId'];
->>>>>>> 7c91f81a0c780f99208427d5c314a8d7d8657186
 
   //   const arr = req.path.split('/');
 

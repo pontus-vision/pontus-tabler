@@ -1,4 +1,15 @@
 import { ChangeEvent, Dispatch, SetStateAction } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
+export const generateUUIDv6 = () => {
+  const uuid = uuidv4().replace(/-/g, '');
+  const timestamp = new Date().getTime();
+
+  let timestampHex = timestamp.toString(16).padStart(12, '0');
+  let uuidV6 = timestampHex + uuid.slice(12);
+
+  return uuidV6;
+};
 
 export const handleInputChange = (
   e: ChangeEvent<HTMLInputElement>,
