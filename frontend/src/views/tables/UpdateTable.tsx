@@ -80,7 +80,7 @@ const UpdateTableView = ({ tableId }: Props) => {
           return {
             ...col,
             headerName: col.headerName || '',
-            field: formatToCosmosDBPattern(col.field || ''),
+            field: col.field || '',
           };
         }),
         tableColsCrud
