@@ -19,6 +19,8 @@ export default defineConfig({
             const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
             const deleteMenu = await runQuery('DELETE FROM menu;');
             const deleteDashboards = await runQuery('DELETE FROM dashboards;');
+            const dropTable1 = await runQuery('DROP TABLE IF EXISTS table_1;');
+            const dropTable2 = await runQuery('DROP TABLE IF EXISTS table_2;');
 
             return { deleteGroups, deleteUsers };  // ✅ Directly return result
           } catch (error) {
