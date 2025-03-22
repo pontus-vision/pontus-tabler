@@ -350,19 +350,26 @@ const PVGridWebiny2 = ({
             },
 
             ...columns,
-          ].sort((a, b) => a?.pivotIndex - b?.pivotIndex).map(colDef => {
-            if (colDef?.regex) {
-              const re = new RegExp(colDef?.regex)
-              return {
-                ...colDef, valueGetter: e => {
-                  if (re.test(e?.data?.[e?.colDef?.colId])) {
-                    //return 'wrong format'
-                  }
-                }
+          ].sort((a, b) => a?.pivotIndex - b?.pivotIndex)
+            .map(colDef => {
+              //   if (colDef?.regex) {
+              //     const re = new RegExp(colDef?.regex)
+              //     return {
+              //       ...colDef, valueGetter: e => {
+              //         if (re.test(e?.data?.[e?.colDef?.colId])) {
+              //           //return 'wrong format'
+              //         }
+              //       }
+              //     }
+              //  }
+              const kind = colDef?.kind
+              if (kind === 'checkboxes') {
+                return { ...colDef, checkboxSelection: true }
+
               }
-            }
-            return colDef
-          }));
+              return colDef
+            })
+          );
 
           // ...data.columnNames.map((field) => {
           //   if (
@@ -735,6 +742,12 @@ const PVGridWebiny2 = ({
 
 
     if (!e.data?.id || onCreateRow) {
+      delete e.data.create
+      delete e.data.update
+      delete e.data.select
+      delete e.data.click
+      delete e.data.delete
+
       onCreateRow && onCreateRow(e.data)
       //onRowsStateChange([e.data])
       //emitRowAlterations()
