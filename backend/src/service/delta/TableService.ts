@@ -1,5 +1,7 @@
 import {
+  InternalServerError,
   ReadPaginationFilter,
+  TableColumnRefKind,
   TableCreateReq,
   TableCreateRes,
   TableDeleteReq,
@@ -9,12 +11,9 @@ import {
   TablesReadRes,
   TablesReadResTablesItem,
 } from '../../typescript/api';
-import { filtersToSnakeCase, filterToQuery, generateUUIDv6, runQuery } from '../../db-utils';
-
+import { filtersToSnakeCase, filterToQuery, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
 import { ConflictEntityError, NotFoundError } from '../../generated/api';
-
-// import * as db from './../../../delta-table/node/index-jdbc';
-import { add, snakeCase } from 'lodash';
+import { snakeCase } from 'lodash';
 import { TABLES } from '../../consts';
 
 export const createTable = async (
@@ -46,9 +45,14 @@ export const createTable = async (
   // )) as TableCreateRes[];
 
   const cols = [];
+  const arr2 = []
 
   for (const col of data.cols) {
     const uuid = generateUUIDv6();
+
+    if (col.name !== 'id') {
+      arr2.push(`${snakeCase(col.name)} ${col.kind === 'integer' ? 'INTEGER' : col.kind === 'checkboxes' ? 'BOOLEAN' : 'STRING'}`)
+    }
 
     cols.push(
       `struct('${uuid}', 
@@ -76,6 +80,12 @@ export const createTable = async (
 
   )) as TableCreateRes[];
 
+  const table_name = snakeCase(data.name)
+
+  "CREATE TABLE IF NOT EXISTS table_2 (id STRING ) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5')"
+
+  const queryCreate = `CREATE TABLE IF NOT EXISTS ${table_name} (id STRING ${arr2.length > 0 ? `, ${arr2.join(", ")})` : ')'} USING DELTA LOCATION '/data/pv/${table_name}' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5')`
+  const res = await runQuery(queryCreate)
   return { ...sql3[0], cols: JSON.parse(sql3[0].cols as any) };
 };
 
@@ -92,7 +102,7 @@ export const updateTable = async (data: TableUpdateReq) => {
     const arr1 = [];
     arr1.push(`'${col?.id || uuid}' AS id`);
     arr1.push(`'${snakeCase(col.name)}' AS name`);
-    arr1.push(`'${col?.field}' AS field`);
+    arr1.push(`'${snakeCase(col?.field)}' AS field`);
     arr1.push(`${col?.sortable} AS sortable`);
     arr1.push(`'${col?.headerName}' AS header_name`);
     arr1.push(`${col?.filter} AS filter`);
@@ -100,6 +110,8 @@ export const updateTable = async (data: TableUpdateReq) => {
     arr1.push(`'${col?.pivotIndex}' AS pivotIndex`);
     arr1.push(`'${col?.description}' AS description`);
     arr1.push(`'${col?.regex}' AS regex`);
+
+
     const colSnakeCase = [];
 
     // for (const el of arr1) {
@@ -135,7 +147,9 @@ export const updateTable = async (data: TableUpdateReq) => {
 
   const fields = [];
 
-  for (const prop in data) {
+  const { tableColsCrud, ...rest } = data
+
+  for (const prop in rest) {
     if (prop === 'cols') {
       fields.push(`cols = array(${cols.join(', ')})`);
       continue;
@@ -164,33 +178,45 @@ export const updateTable = async (data: TableUpdateReq) => {
     throw new NotFoundError(`did not find any record at id "${data.id}"`);
   }
 
-  if (data?.tableColsCrud) {
+  if (!isEmpty(data?.tableColsCrud)) {
     const { renameColumns, tableName, addColumns, dropColumns } = data.tableColsCrud
-    await updateTableSchema(snakeCase(tableName), renameColumns, addColumns, dropColumns)
+    const table_name = snakeCase(tableName)
+
+    try {
+      await updateTableSchema(table_name, renameColumns, addColumns, dropColumns)
+    } catch (error) {
+      console.error({ error })
+      throw new InternalServerError(isJSONParsable(error) ? JSON.stringify(error) : error)
+    }
   }
 
-  return {
-    ...data,
-  };
+  return data
 };
 
-async function updateTableSchema(tableName: string, renameColumns: Record<string, string>, addColumns: Record<string, string>, dropColumns: string[]) {
+async function updateTableSchema(tableName: string, renameColumns: Record<string, string>, addColumns: Record<string, TableColumnRefKind>, dropColumns: string[]) {
   const alterStatements = [];
 
+  if (Array.isArray(dropColumns) && dropColumns.length > 0) {
+    for (const col of dropColumns) {
+      alterStatements.push(`ALTER TABLE ${tableName} DROP COLUMN ${snakeCase(col)}`);
+    }
+  }
   // Handle renaming
-  for (const [oldCol, newCol] of Object.entries(renameColumns)) {
-    alterStatements.push(`ALTER TABLE ${tableName} RENAME COLUMN ${snakeCase(oldCol)} TO ${snakeCase(newCol)}`);
+  if (!isEmpty(renameColumns)) {
+    for (const [oldCol, newCol] of Object.entries(renameColumns)) {
+      alterStatements.push(`ALTER TABLE ${tableName} RENAME COLUMN ${snakeCase(oldCol)} TO ${snakeCase(newCol)}`);
+    }
   }
 
   // Add new columns
-  for (const [col, type] of Object.entries(addColumns)) {
-    alterStatements.push(`ALTER TABLE ${tableName} ADD COLUMN ${snakeCase(col)} ${snakeCase(type)}`);
+  if (!isEmpty(addColumns)) {
+    for (const [col, type] of Object.entries(addColumns)) {
+      const typeCol = type === 'integer' ? 'INTEGER' : type === 'checkboxes' ? 'BOOLEAN' : 'STRING'
+      alterStatements.push(`ALTER TABLE ${tableName} ADD COLUMN ${snakeCase(col)} ${snakeCase(typeCol)}`);
+    }
   }
 
   // Drop columns
-  for (const col of dropColumns) {
-    alterStatements.push(`ALTER TABLE ${tableName} DROP COLUMN ${snakeCase(col)}`);
-  }
 
   // Execute SQL queries
   if (alterStatements.length > 0) {
