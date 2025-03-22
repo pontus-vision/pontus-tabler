@@ -2093,9 +2093,9 @@ types:
   TableColumnCRUD:
     properties:
       tableName: string
-      renameColumns: map<string, string>
-      addColumns: map<string,TableColumnRefKind>
-      dropColumns: list<string>
+      renameColumns: optional<map<string, string>> 
+      addColumns: optional<map<string,TableColumnRefKind>>
+      dropColumns: optional<list<string>>
   TableRef:
     properties:
       edges: optional<TableEdgeRef>
