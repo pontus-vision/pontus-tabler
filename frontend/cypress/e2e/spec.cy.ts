@@ -23,6 +23,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
       cy.get("[data-cy='password-login-input']").type("1234567");
 
       cy.contains('Submit').click();
+      cy.get("[data-cy='header']").should('exist')
     }),
     it('should test menu', () => {
       cy.get("[data-cy='header']").should('exist')
@@ -110,9 +111,8 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
-      cy.wait(2000)
+      cy.wait(3000)
 
-      cy.contains('Table 1').click()
 
       cy.contains('Update Mode').click()
 
@@ -182,11 +182,55 @@ describe('Test Table (meta-data and data) CRUD', () => {
     it("should create a table-data row", () => {
       //     cy.visit(`${url}/login`);
       //cy.get("[data-cy='edit-on-grid-toggle']").click()
+      cy.visit(`${url}/tables/read`)
+      cy.contains('Table 1').should('be.visible')
+      cy.wait(6000)
+      cy.contains('Update Mode').click()
 
-      cy.get(`[role="row"][row-index="0"]`).dblclick()
+      cy.contains('Table 1').siblings("[col-id='update-mode']").find('[data-cy="update-row-icon-pen"]').click()
 
+      cy.get('[data-testid="update-view-col-1"]').find("[data-testid='update-view-col-1-delete-btn']").click()
+      cy.get('[data-testid="update-view-col-0"]').find("[data-testid='update-view-col-0-delete-btn']").click()
 
+      cy.contains('Add').click()
 
+      cy.get('[data-cy="create-table-col-def-input-0"]').type('column 1');
+
+      cy.get('[data-cy="create-table-col-def-type-0"]').select('text')
+
+      cy.contains('Add').click()
+
+      cy.get('[data-cy="create-table-col-def-input-1"]').type('column 2');
+
+      cy.get('[data-cy="create-table-col-def-type-1"]').select('text')
+
+      cy.contains('Update').click()
+
+      cy.contains('Table updated successfully').should('exist')
+
+      cy.visit(`${url}/tables/read`)
+
+      cy.contains('Table 1').click()
+
+      cy.contains('Table 1').should('be.visible')
+
+      cy.contains('column 1').should('exist')
+
+      cy.wait(3000)
+
+      cy.get("[data-cy='edit-on-grid-toggle']").click()
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').dblclick()
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').type('Foo')
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_2"]').type('Bar{enter}')
+
+      cy.contains('Table row created.').should('exist')
+
+      cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').should('have.text', 'Foo')
     }),
     it.skip('should get unauthorized page', () => {
       cy.task('log', 'This will be output to the terminal');
