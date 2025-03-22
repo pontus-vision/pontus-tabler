@@ -48,10 +48,6 @@ const TableDataReadView = () => {
           return { ...col, editable: true };
         });
 
-        console.log({ res: res.data.cols.map(col => col) })
-
-
-
         setTable(res?.data);
         colsRes && setCols(colsRes);
         setTableName(res?.data.name || '');
@@ -126,12 +122,13 @@ const TableDataReadView = () => {
   const createTableDataRow = async (data: TableDataRowRef) => {
     try {
       if (!table?.name) return;
+
+      delete data.id
       const obj: TableDataCreateReq = {
         tableName: table?.name,
         cols: data,
       };
 
-      console.log({ obj })
       const res = await tableDataCreate(obj);
 
       if (res?.status === 200) {
