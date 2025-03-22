@@ -295,7 +295,7 @@ const GridActionsPanel = ({
       {updateMode ||
         deleteMode ||
         (permissions?.updateAction &&
-          (changesMade ? (
+          (changesMade && (
             <div
               data-cy="grid-action-panel-save-btn"
               onClick={() => {
@@ -304,18 +304,6 @@ const GridActionsPanel = ({
             >
               <IoIosSave style={{ fontSize: '1.3rem' }} />
             </div>
-          ) : (
-            updateModeOnRows || (
-              <button
-                data-testid={`${testId}-update-mode`}
-                className="grid-actions-panel__update-btn"
-                onClick={() => {
-                  setUpdateMode && setUpdateMode(!updateMode);
-                }}
-              >
-                Update Mode
-              </button>
-            )
           )))}
       {(!deleteMode && permissions?.updateAction && !updateMode) && (
         (
