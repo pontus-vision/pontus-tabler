@@ -845,6 +845,10 @@ export const filterToQuery = (
     }
   }
 
+  const sorting = body?.sortModel?.[0]
+
+  const sortingStr = sorting ? ` ORDER BY ${alias}${sorting.colId} ${sorting.sort.toUpperCase()}` : ''
+
   for (let i = 0; i < query.length; i++) {
     // Replace the first occurrence of 'WHERE' with 'AND' in each element
     if (i > 0) {
@@ -866,7 +870,7 @@ export const filterToQuery = (
     (colSortStr ? ` ORDER BY ${colSortStr}` : '') +
     (additionalClause
       ? ` ${hasFilters ? 'AND' : 'WHERE'} ${additionalClause}`
-      : '') +
+      : '') + sortingStr +
     fromTo
   ).trim();
 
