@@ -173,11 +173,66 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       //    cy.contains('Update').click()
     }),
-    it('should do the CRUD of table-metadata and table-data', () => {
+    it('should do test filters and sorting', () => {
+      cy.contains('Table 1').should('be.visible')
+      cy.contains('Table 2').should('be.visible')
 
-      cy.get("[data-cy='header']").should('exist')
-      cy.get("[data-cy='burguer-menu-input']").should('exist')
-      cy.get("[data-cy='burguer-menu-input']").click()
+      cy.get("span.ag-icon.ag-icon-menu").click()
+
+      cy.get('input.ag-input-field-input.ag-text-field-input[placeholder="Filter..."]').type('Table 1')
+
+      cy.contains('Contains').click()
+
+
+      cy.get('body').click("bottomLeft")
+
+      cy.contains('Table 1').should('be.visible')
+
+      cy.contains('Table 2').should('not.exist')
+
+      cy.get("span.ag-icon.ag-icon-menu").click()
+
+      cy.contains('Contains').click()
+
+      cy.contains('Equals').click()
+
+      cy.get('input.ag-input-field-input.ag-text-field-input[placeholder="Filter..."]').first()
+
+      cy.get('body').click("bottomLeft")
+
+      cy.contains('Loading...').should('not.exist')
+
+      cy.contains('Table 1').should('be.visible')
+
+      cy.contains('Table 2').should('not.exist')
+
+      cy.get("span.ag-icon.ag-icon-menu").click()
+
+      cy.get('input.ag-input-field-input.ag-text-field-input[placeholder="Filter..."]').first().clear()
+
+      cy.contains('Loading...').should('not.exist')
+
+      cy.get('.ag-header-row.ag-header-row-column[role="row"][aria-rowindex="1"]').find('.ag-header-cell-label[role="presentation"]').click('center')
+
+      cy.get('.ag-sort-indicator-icon.ag-sort-ascending-icon').should('exist')
+
+      cy.get('.ag-sort-indicator-icon.ag-sort-descending-icon.ag-hidden').should('exist')
+
+      cy.contains('Loading...').should('not.exist')
+
+      cy.get('[role="row"][row-index="0"]', { timeout: 15000 }).find('[role="gridcell"]', { timeout: 20000 }).should('contain.text', "Table 1")
+
+      cy.get('[role="row"][row-index="1"]', { timeout: 15000 }).find('[role="gridcell"]', { timeout: 20000 }).should('contain.text', "Table 2")
+
+      cy.get('.ag-header-row.ag-header-row-column[role="row"][aria-rowindex="1"]').find('.ag-header-cell-label[role="presentation"]').click('center')
+
+      cy.contains('Loading...').should('not.exist')
+
+      cy.get('.ag-sort-indicator-icon.ag-sort-descending-icon').should('exist')
+
+      cy.get('[role="row"][row-index="0"]', { timeout: 15000 }).find('[role="gridcell"]', { timeout: 20000 }).should('contain.text', "Table 2")
+
+      cy.get('[role="row"][row-index="1"]', { timeout: 15000 }).find('[role="gridcell"]', { timeout: 20000 }).should('contain.text', "Table 1")
     }),
     it("should create a table-data row", () => {
       //     cy.visit(`${url}/login`);
