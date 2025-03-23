@@ -2228,6 +2228,15 @@ types:
       from: optional<integer>
       to: optional<integer>
       filters: optional<map<string, ReadPaginationFilterFilters>>
+      sortModel: optional<list<SortModel>>
+  SortModel:
+    properties:
+      colId: string
+      sort: SortAscDescEnum
+  SortAscDescEnum:
+    enum:
+      - asc
+      - desc
   TableDataDeleteRes: string
   TableDataReadRes:
     properties:
