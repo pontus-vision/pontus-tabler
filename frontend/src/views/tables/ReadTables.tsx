@@ -5,9 +5,9 @@ import {
   ReadPaginationFilterFilters,
   TableRef,
   TableUpdateReq,
-} from '../../pontus-api/typescript-fetch-client-generated';
+} from '../../typescript/api';
 import { createTable, deleteTable, getTables, updateTable } from '../../client';
-import { ColDef, IGetRowsParams, RowEvent } from 'ag-grid-community';
+import { ColDef, IGetRowsParams, RowEvent, SortModelItem } from 'ag-grid-community';
 import { useNavigate } from 'react-router-dom';
 
 import NotificationManager, {
@@ -29,9 +29,11 @@ const TablesReadView = ({ rowsTested }: Props) => {
   const [filters, setFilters] = useState<{
     [key: string]: ReadPaginationFilterFilters;
   }>({});
+  const [sort, setSort] = useState<SortModelItem[]>()
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(8);
   const [totalCount, setTotalCount] = useState<number>();
+  const [isLoading, setIsLoading] = useState(false)
   const notificationManagerRef = useRef<MessageRefs>();
   const navigate = useNavigate();
   const { fetchDataAndNavigate } = useApiAndNavigate()
@@ -44,8 +46,11 @@ const TablesReadView = ({ rowsTested }: Props) => {
       const req: ReadPaginationFilter = {
         from,
         to,
-        filters: { name: { ...filters['label'] } }
+        filters: { name: { ...filters['label'] } },
+        sortModel: sort
       };
+
+      setIsLoading(true)
 
       const data = await fetchDataAndNavigate(getTables, req)
 
@@ -57,6 +62,8 @@ const TablesReadView = ({ rowsTested }: Props) => {
     } catch (error) {
       setRows([]);
       setTotalCount(1)
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -73,6 +80,7 @@ const TablesReadView = ({ rowsTested }: Props) => {
   };
 
   const handleParamsChange = (params: IGetRowsParams) => {
+    setSort(params.sortModel)
     setFilters(params.filterModel);
     setFrom(params.startRow + 1);
     setTo(params.endRow);
@@ -157,8 +165,8 @@ const TablesReadView = ({ rowsTested }: Props) => {
           onUpdate={handleUpdate}
           totalCount={totalCount}
           onParamsChange={handleParamsChange}
+          isLoading={isLoading}
           onRefresh={handleOnRefresh}
-          //onRowsStateChange={e => handleRowsStateChange(e)}
           onCreateRow={e => handleCreateRow(e)}
           onUpdateRow={e => handleUpdateRow(e)}
           cols={cols}
