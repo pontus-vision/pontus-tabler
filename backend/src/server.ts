@@ -64,7 +64,10 @@ const authMiddleware = async (
     }
 
     const permissions = await checkPermissions(userId, targetId, tableName);
-    if (path === replaceSlashes('/PontusTest/1.0.0//dashboards/read')) {
+    if (
+      path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
+      path === replaceSlashes('/PontusTest/1.0.0//tables/read')
+    ) {
       return next();
     }
 
