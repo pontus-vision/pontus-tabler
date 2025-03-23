@@ -295,9 +295,9 @@ export const readTables = async (
     filters: filtersSnakeCase,
     from: body.from,
     to: body.to,
+    sortModel: body.sortModel
   }, "");
   const whereClause2 = filterToQuery({ filters: filtersSnakeCase }, "");
-
 
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} ${whereClause}`,
