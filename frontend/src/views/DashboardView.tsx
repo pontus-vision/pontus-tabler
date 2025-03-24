@@ -2,7 +2,7 @@ import { IJsonModel } from 'flexlayout-react';
 import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import CmpPanel from '../components/CmpPanel';
 import PVFlexLayout from '../pv-react/PVFlexLayout';
 import { RootState } from '../store/store';
@@ -53,7 +53,7 @@ const DashboardView = ({
   const [name, setName] = useState<string>();
   const [successMsg, setSuccessMsg] = useState<string>();
   const [owner, setOwner] = useState<string>();
-
+  const location = useLocation()
   const [createAction, setCreateAction] = useState(false);
   const [readAction, setReadAction] = useState(false);
   const [updateAction, setUpdateAction] = useState(true);
@@ -114,6 +114,7 @@ const DashboardView = ({
         name: dashboardName,
         owner,
         state: gridState,
+        id: location.state.id
       });
 
       if (data?.status === 200) {
@@ -171,107 +172,100 @@ const DashboardView = ({
       create && setCreateAction(create);
       read && setReadAction(read);
       updt && setUpdateAction(updt);
-      console.log(dashboardPermissions?.delete, {
-        userGroups,
-        res2,
-        del,
-        create,
-        read,
-        updt,
-      });
     };
-    console.log(id);
-    id && groupPermissions(id);
+    dashboard && id && groupPermissions(id);
   }, []);
 
   useEffect(() => {
     if (!id) return;
     const fetchDashboard = async () => {
-      const res = await readDashboard(id);
-      console.log({ res });
+      try {
+        const res = await readDashboard(id);
 
-      if (res?.status !== 200) {
+        if (res?.status !== 200) {
+          setName(res?.data.name || '');
+          setDashboard(res?.data);
+
+          setInitialState({
+            global: {},
+            borders: [],
+            layout: {
+              type: 'row',
+              id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
+              children: [],
+            },
+          });
+        }
         setName(res?.data.name || '');
         setDashboard(res?.data);
 
-        setInitialState({
-          global: {},
-          borders: [],
-          layout: {
-            type: 'row',
-            id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
-            children: [],
+        setInitialState(
+          res?.data.state || {
+            global: {},
+            borders: [],
+            layout: {
+              type: 'row',
+              id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
+              children: [
+                {
+                  type: 'row',
+                  id: '#63ec4f08-7081-4557-b2c0-6fe74bf2893e',
+                  children: [
+                    {
+                      type: 'tabset',
+                      id: '#3155bc6f-ea47-4e9b-822e-bc023ced5e60',
+                      children: [
+                        {
+                          type: 'tab',
+                          id: '#ba731bfa-a493-445b-a74f-dcf042b53593',
+                          name: 'name',
+                          component: 'PVGridWebiny2',
+                          config: {
+                            title: 'name',
+                            tableId: 'tableId',
+                            lastState: [],
+                            height: 249,
+                          },
+                        },
+                      ],
+                    },
+                    {
+                      type: 'tabset',
+                      id: '#f6d34c55-6a57-4266-bc09-ad5099853b89',
+                      children: [
+                        {
+                          type: 'tab',
+                          id: '#ca5bdcac-9cd2-4b7a-861a-034b6117af34',
+                          name: 'name',
+                          component: 'PVGridWebiny2',
+                          config: {
+                            title: 'name',
+                            tableId: 'tableId',
+                            lastState: [],
+                            height: 249,
+                          },
+                        },
+                      ],
+                      active: true,
+                    },
+                  ],
+                },
+              ],
+            },
           },
-        });
-        return;
+        );
+      } catch (error) {
+        if (error?.status === 404) {
+          console.log({ error })
+          const state = location.state
+          navigate('/dashboard/create/' + id, { state: { ...state } })
+        }
       }
-
-      setName(res?.data.name || '');
-      setDashboard(res?.data);
-
-      setInitialState(
-        res?.data.state || {
-          global: {},
-          borders: [],
-          layout: {
-            type: 'row',
-            id: '#a880b6c8-8981-4ea8-93c4-810a7ac41e3f',
-            children: [
-              {
-                type: 'row',
-                id: '#63ec4f08-7081-4557-b2c0-6fe74bf2893e',
-                children: [
-                  {
-                    type: 'tabset',
-                    id: '#3155bc6f-ea47-4e9b-822e-bc023ced5e60',
-                    children: [
-                      {
-                        type: 'tab',
-                        id: '#ba731bfa-a493-445b-a74f-dcf042b53593',
-                        name: 'name',
-                        component: 'PVGridWebiny2',
-                        config: {
-                          title: 'name',
-                          tableId: 'tableId',
-                          lastState: [],
-                          height: 249,
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    type: 'tabset',
-                    id: '#f6d34c55-6a57-4266-bc09-ad5099853b89',
-                    children: [
-                      {
-                        type: 'tab',
-                        id: '#ca5bdcac-9cd2-4b7a-861a-034b6117af34',
-                        name: 'name',
-                        component: 'PVGridWebiny2',
-                        config: {
-                          title: 'name',
-                          tableId: 'tableId',
-                          lastState: [],
-                          height: 249,
-                        },
-                      },
-                    ],
-                    active: true,
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      );
     };
 
     fetchDashboard();
   }, [id]);
 
-  useEffect(() => {
-    console.log({ state: JSON.stringify(initialState) });
-  }, [initialState]);
 
   const handleDashboardCreate = () => {
     const obj: DashboardRef = {
@@ -291,7 +285,6 @@ const DashboardView = ({
       name: name || dashboard?.name,
       owner: owner || dashboard?.owner,
     };
-    console.log({ obj });
 
     onDashboardSave && onDashboardSave(obj);
   };
@@ -300,14 +293,11 @@ const DashboardView = ({
     <div className="dashboard-view">
       <h1 className="title">{dashboard?.name}</h1>
 
-      {userRole === 'Admin' && (
+      {userRole.some(role => role.name === 'Admin') && (
         <div className="actions-panel">
           {/* {addCmp && <div className="shadow-mobile"></div>} */}
-          {updateAction && addCmp && (
+          {updateAction && (
             <CmpPanel setSelectedCmp={setSelectedCmp} />
-          )}
-          {!addCmp && (
-            <i onClick={() => setAddCmp(true)} className="fa-light fa-plus"></i>
           )}
           {onDashboardSave && (
             <button
@@ -331,7 +321,6 @@ const DashboardView = ({
             <button
               className="actions-panel__save"
               onClick={() => {
-                console.log('HEEEY', onDashboardSave);
                 onDashboardCreate && handleDashboardCreate();
                 onDashboardSave && handleDashboardSave();
               }}
@@ -357,6 +346,7 @@ const DashboardView = ({
         setGridState={setGridState}
         setIsEditing={setIsEditing}
         gridState={initialState}
+
       />
 
       <Alert

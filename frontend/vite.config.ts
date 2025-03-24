@@ -24,6 +24,10 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
     },
   },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+  },
   plugins: [react()],
   // base: '/app_dist',
   build: {

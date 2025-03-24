@@ -284,7 +284,7 @@ export const authUserDelete = async (
       const res2 = await authGroupDoc.patch([
         { op: 'remove', path: `/authUsers/${index}` },
       ]);
-    } catch (error) {}
+    } catch (error) { }
   }
 
   const res2 = await authUserDoc.delete();

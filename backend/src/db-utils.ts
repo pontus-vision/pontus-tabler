@@ -1,4 +1,4 @@
-import { ReadPaginationFilter } from './typescript/api';
+import { ReadPaginationFilter, ReadPaginationFilterFilters } from './typescript/api';
 import { Jinst, Pool } from '../pontus-node-jdbc/src/index';
 import { JDBC } from '../pontus-node-jdbc/src/index';
 import { v4 as uuidv4 } from 'uuid';
@@ -110,8 +110,8 @@ export const updateSql = async (
 
   const res3 = await runQuery(
     `SELECT * FROM ${table} ${whereClause}`,
-
   );
+
   if (res3.length === 0) {
     throw new NotFoundError(
       `did not find any record at table '${table}' (${whereClause})`,
@@ -165,10 +165,16 @@ export const createSql = async (
 ): Promise<Record<string, any>[]> => {
   const uuid = generateUUIDv6();
 
-  const entries = objEntriesToStr(data);
+  let entries
+  if (data?.id) {
+    const { id, ...rest } = data
+    entries = objEntriesToStr(rest);
+  } else {
+    entries = objEntriesToStr(data);
+  }
 
   const keys = entries.keysStr;
-  const values = entries.valuesStr;
+  let values = entries.valuesStr;
   // const resss = await runQuery(
   //   `DROP TABLE  ${table} `,
   //   conn,
@@ -176,11 +182,9 @@ export const createSql = async (
 
   const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
     } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
-  console.log({ createQuery })
 
   const res = await runQuery(createQuery);
 
-  console.log({ res })
 
   const insertFields = Array.isArray(data)
     ? Object.keys(data[0]).join(', ')
@@ -205,35 +209,21 @@ export const createSql = async (
           return `('${uuid}', ${el})`;
         })
         .join(', ')
-      : `('${uuid}',` + values + ')'
+      : `('${data?.id ? data?.id : uuid}',` + values + ')'
     }`;
 
   const res2 = await runQuery(insert);
 
   const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id
-      ? `id = '${data?.id}'`
-      : ids.length > 0
-        ? ids.map((id) => `id = '${id}'`).join(' OR ')
-        : `id = '${uuid}'`
+    ? `id = '${data?.id}'`
+    : ids.length > 0
+      ? ids.map((id) => `id = '${id}'`).join(' OR ')
+      : `id = '${uuid}'`
     }`;
 
   const res3 = await runQuery(selectQuery);
 
   return res3;
-
-  // return res3.map((el) => {
-  //   const obj = {};
-  //   for (const prop in el) {
-  //     if (el[prop] === 'true') {
-  //       obj[prop] = true;
-  //     } else if (el[prop] === 'false') {
-  //       obj[prop] = false;
-  //     } else {
-  //       obj[prop] = el[prop];
-  //     }
-  //   }
-  //   return obj;
-  // });
 };
 
 export const createConnection = async (): Promise<IConnection> => {
@@ -244,13 +234,11 @@ export const createConnection = async (): Promise<IConnection> => {
 export async function runQuery(query: string): Promise<Record<string, any>[]> {
   try {
     const connection = await createConnection();
-    // console.log({connection, query, FOO: 'BAR'})
     const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
     const resultSet = await preparedStatement.executeQuery();
     const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
-    console.log('Query Results:', results.length);
 
     // Remember to release the connection after you are done
     // await pool.release(connection)
@@ -267,6 +255,7 @@ export const filterToQuery = (
   body: ReadPaginationFilter,
   alias = 'c',
   additionalClause?: string,
+  onlyParams = false
 ) => {
   const query = [];
 
@@ -275,6 +264,10 @@ export const filterToQuery = (
   const { from, to } = body;
 
   let colSortStr = '';
+  if (process.env.DB_SOURCE && alias) {
+    alias = `${alias}.`
+  }
+  console.log({ alias })
 
   for (let col in cols) {
     if (cols.hasOwnProperty(col)) {
@@ -299,31 +292,29 @@ export const filterToQuery = (
       const operator = cols[col]?.operator;
 
       const colQuery = [];
-
       if (filterType === 'text') {
         const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
-
         if (conditions?.length > 0) {
           for (const condition of conditions) {
             if (process.env.DB_SOURCE === DELTA_DB) {
               if (type === 'contains') {
-                colQuery.push(` ${colName} LIKE '%${filter}%'`);
+                colQuery.push(` ${alias}${colName} LIKE '%${filter}%'`);
               }
 
               if (type === 'not contains') {
-                colQuery.push(` ${colName} NOT LIKE '%${filter}%'`);
+                colQuery.push(` ${alias}${colName} NOT LIKE '%${filter}%'`);
               }
 
               if (type === 'starts with') {
-                colQuery.push(` ${colName} LIKE '${filter}%'`);
+                colQuery.push(` ${alias}${colName} LIKE '${filter}%'`);
               }
 
               if (type === 'ends with') {
-                colQuery.push(` ${colName} LIKE '%${filter}'`);
+                colQuery.push(` ${alias}${colName} LIKE '%${filter}'`);
               }
 
               if (type === 'equals') {
-                colQuery.push(` ${alias}${colName} = '${filter}'`);
+                colQuery.push(` ${alias}${alias}${colName} = '${filter}'`);
               }
 
               if (type === 'not equals') {
@@ -360,19 +351,19 @@ export const filterToQuery = (
         if (!condition1Filter) {
           if (process.env.DB_SOURCE === DELTA_DB) {
             if (type === 'contains') {
-              colQuery.push(` ${colName} LIKE '%${filter}%'`);
+              colQuery.push(` ${alias}${colName} LIKE '%${filter}%'`);
             }
 
             if (type === 'not contains') {
-              colQuery.push(` ${colName} NOT LIKE '%${filter}%'`);
+              colQuery.push(` ${alias}${colName} NOT LIKE '%${filter}%'`);
             }
 
             if (type === 'starts with') {
-              colQuery.push(` ${colName} LIKE '${filter}%'`);
+              colQuery.push(` ${alias}${colName} LIKE '${filter}%'`);
             }
 
             if (type === 'ends with') {
-              colQuery.push(` ${colName} LIKE '%${filter}'`);
+              colQuery.push(` ${alias}${colName} LIKE '%${filter}'`);
             }
 
             if (type === 'equals') {
@@ -411,7 +402,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '%${condition1Filter}%'`);
+            colQuery.push(` ${alias}${colName} LIKE '%${condition1Filter}%'`);
           } else {
             colQuery.push(
               ` CONTAINS(${alias}${colName}, '${condition1Filter}')`,
@@ -422,7 +413,7 @@ export const filterToQuery = (
         if (condition2Filter && type2 === 'contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
             colQuery.push(
-              ` ${operator} ${colName} LIKE '%${condition2Filter}%'`,
+              ` ${operator} ${alias}${colName} LIKE '%${condition2Filter}%'`,
             );
           } else {
             colQuery.push(
@@ -433,7 +424,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'not contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '%${condition1Filter}%'`);
+            colQuery.push(` ${alias}${colName} LIKE '%${condition1Filter}%'`);
           } else {
             colQuery.push(
               ` CONTAINS(${alias}${colName}, '${condition1Filter}')`,
@@ -443,7 +434,7 @@ export const filterToQuery = (
 
         if (condition2Filter && type2 === 'not contains') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` AND ${colName} LIKE '%${condition2Filter}%'`);
+            colQuery.push(` AND ${alias}${colName} LIKE '%${condition2Filter}%'`);
           } else {
             colQuery.push(
               ` AND CONTAINS(${alias}${colName}, '${condition2Filter}')`,
@@ -453,7 +444,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'starts with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '${condition1Filter}%'`);
+            colQuery.push(` ${alias}${colName} LIKE '${condition1Filter}%'`);
           } else {
             colQuery.push(
               ` STARTSWITH(${alias}${colName}, '${condition1Filter}')`,
@@ -463,7 +454,7 @@ export const filterToQuery = (
 
         if (condition2Filter && type2 === 'starts with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` AND ${colName} LIKE '${condition2Filter}%'`);
+            colQuery.push(` AND ${alias}${colName} LIKE '${condition2Filter}%'`);
           } else {
             colQuery.push(
               ` AND STARTSWITH(${alias}${colName}, '${condition2Filter}')`,
@@ -473,7 +464,7 @@ export const filterToQuery = (
 
         if (condition1Filter && type1 === 'ends with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` ${colName} LIKE '%${condition1Filter}'`);
+            colQuery.push(` ${alias}${colName} LIKE '%${condition1Filter}'`);
           } else {
             colQuery.push(
               ` ENDSWITH(${alias}${colName}, '${condition1Filter}')`,
@@ -483,7 +474,7 @@ export const filterToQuery = (
 
         if (condition2Filter && type2 === 'ends with') {
           if (process.env.DB_SOURCE === DELTA_DB) {
-            colQuery.push(` AND ${colName} LIKE '%${condition2Filter}'`);
+            colQuery.push(` AND ${alias}${colName} LIKE '%${condition2Filter}'`);
           } else {
             colQuery.push(
               ` ${operator} ENDSWITH(${alias}${colName}, '${condition2Filter}')`,
@@ -854,6 +845,10 @@ export const filterToQuery = (
     }
   }
 
+  const sorting = body?.sortModel?.[0]
+
+  const sortingStr = sorting ? ` ORDER BY ${alias}${sorting.colId} ${sorting.sort.toUpperCase()}` : ''
+
   for (let i = 0; i < query.length; i++) {
     // Replace the first occurrence of 'WHERE' with 'AND' in each element
     if (i > 0) {
@@ -870,12 +865,12 @@ export const filterToQuery = (
       }`;
 
   const finalQuery = (
-    (hasFilters ? ' WHERE ' : '') +
+    (hasFilters && !onlyParams ? ' WHERE ' : '') +
     query.join(' and ') +
     (colSortStr ? ` ORDER BY ${colSortStr}` : '') +
     (additionalClause
       ? ` ${hasFilters ? 'AND' : 'WHERE'} ${additionalClause}`
-      : '') +
+      : '') + sortingStr +
     fromTo
   ).trim();
 
@@ -921,3 +916,38 @@ const convertToISOString = (dateString) => {
 
   return isoDateString;
 };
+
+export const filtersToSnakeCase = (data: ReadPaginationFilter): Record<string, ReadPaginationFilterFilters> => {
+  const filtersSnakeCase: Record<string, ReadPaginationFilterFilters> = {};
+
+  for (const prop in data.filters) {
+    const snakeKey = snakeCase(prop);
+
+    filtersSnakeCase[snakeKey] = {
+      ...data.filters[prop],
+      filter: typeof data.filters[prop].filter === "string"
+        ? snakeCase(data.filters[prop].filter as string)
+        : data.filters[prop].filter,
+    };
+  }
+
+  return filtersSnakeCase;
+};
+
+export const isJSONParsable = (str: string): boolean => {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+export function isEmpty(obj) {
+  for (var prop in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+      return false;
+    }
+  }
+
+  return true
+}

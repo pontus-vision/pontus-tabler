@@ -124,6 +124,7 @@ const DragAndDropArray = () => {
         <div className="flex flex-col space-y-4 w-52">
           <h2 className="text-xl font-semibold mb-2">Dashboards</h2>
           <FolderItem
+            selectionOnly={true}
             selected={selectedDashboard?.path}
             onSelect={handleDashboardSelect}
             onDragStart={handleDragStart}
@@ -139,21 +140,19 @@ const DragAndDropArray = () => {
             <h2 className="text-xl font-semibold mb-2">Create</h2>
             <div
               onClick={() => setSelectedCrud('Create')}
-              className={`drop-target bg-gray-200 p-4 rounded ${
-                selectedCrud === 'Create'
+              className={`drop-target bg-gray-200 p-4 rounded ${selectedCrud === 'Create'
                   ? 'border-blue-700 border-2 border-solid'
                   : ''
-              }`}
+                }`}
             >
               {createArr?.map((item, index) => (
                 <div
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
-                  className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === 'Create'
+                  className={`dropped-item bg-green-300 p-2 rounded ${item === selectedArrItem && selectedCrud === 'Create'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
-                  }`}
+                    }`}
                 >
                   {item?.path}
                 </div>
@@ -174,21 +173,19 @@ const DragAndDropArray = () => {
             <h2 className="text-xl font-semibold mb-2">Read</h2>
             <div
               onClick={() => setSelectedCrud('Read')}
-              className={`drop-target bg-gray-200 p-4 rounded ${
-                selectedCrud === 'Read'
+              className={`drop-target bg-gray-200 p-4 rounded ${selectedCrud === 'Read'
                   ? 'border-blue-700 border-2 border-solid'
                   : ''
-              }`}
+                }`}
             >
               {readArr?.map((item, index) => (
                 <div
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
-                  className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === 'Read'
+                  className={`dropped-item bg-green-300 p-2 rounded ${item === selectedArrItem && selectedCrud === 'Read'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
-                  }`}
+                    }`}
                 >
                   {item?.path}
                 </div>
@@ -210,21 +207,19 @@ const DragAndDropArray = () => {
             <h2 className="text-xl font-semibold mb-2">Update</h2>
             <div
               onClick={() => setSelectedCrud('Update')}
-              className={`drop-target bg-gray-200 p-4 rounded ${
-                selectedCrud === 'Update'
+              className={`drop-target bg-gray-200 p-4 rounded ${selectedCrud === 'Update'
                   ? 'border-blue-700 border-2 border-solid'
                   : ''
-              }`}
+                }`}
             >
               {updateArr?.map((item, index) => (
                 <div
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
-                  className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === 'Update'
+                  className={`dropped-item bg-green-300 p-2 rounded ${item === selectedArrItem && selectedCrud === 'Update'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
-                  }`}
+                    }`}
                 >
                   {item?.path}
                 </div>
@@ -245,21 +240,19 @@ const DragAndDropArray = () => {
             <h2 className="text-xl font-semibold mb-2">Delete</h2>
             <div
               onClick={() => setSelectedCrud('Delete')}
-              className={`drop-target bg-gray-200 p-4 rounded ${
-                selectedCrud === 'Delete'
+              className={`drop-target bg-gray-200 p-4 rounded ${selectedCrud === 'Delete'
                   ? 'border-blue-700 border-2 border-solid'
                   : ''
-              }`}
+                }`}
             >
               {deleteArr?.map((item, index) => (
                 <div
                   onClick={() => setSelectedArrItem(item)}
                   key={index}
-                  className={`dropped-item bg-green-300 p-2 rounded ${
-                    item === selectedArrItem && selectedCrud === 'Delete'
+                  className={`dropped-item bg-green-300 p-2 rounded ${item === selectedArrItem && selectedCrud === 'Delete'
                       ? 'border-solid border-blue-700 border-4'
                       : ''
-                  }`}
+                    }`}
                 >
                   {item?.path}
                 </div>
@@ -290,6 +283,7 @@ const DragAndDropArray = () => {
             <label htmlFor="">Selected: {selectedGroup.name}</label>
           )}
           <FolderItem
+            selectionOnly={true}
             onSelect={handleGroupSelect}
             selected={selectedGroup?.path}
             onDragStart={handleDragStart}

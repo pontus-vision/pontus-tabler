@@ -16,20 +16,28 @@ const useLogin = () => {
 
   const handleLogin = async (username: string, password: string) => {
     // e.preventDefault();
+    setLoading(true)
 
-    const res = (await fetchDataAndNavigate(loginUser, {
-      password,
-      username,
-    })) as AxiosResponse<LoginRes>;
+    try {
+      const res = (await fetchDataAndNavigate(loginUser, {
+        password,
+        username,
+      })) as AxiosResponse<LoginRes>;
 
-    if (res.status === 200) {
-      localStorage.setItem('accessToken', 'Bearer ' + res.data.accessToken);
-      localStorage.setItem('refreshToken', 'Bearer ' + res.data.refreshToken);
-      const userId = getUserIdFromToken();
-      await login(userId);
+      if (res?.status === 200) {
+        localStorage.setItem('accessToken', 'Bearer ' + res.data.accessToken);
+        localStorage.setItem('refreshToken', 'Bearer ' + res.data.refreshToken);
+        const userId = getUserIdFromToken();
+        await login(userId);
+      }
+    } catch (error) {
+      console.log({ error })
+      if (error?.status === 404 || error?.status === 400)
+        setError('Username and/or password is wrong!')
     }
+    setLoading(false)
   };
-  return { handleLogin };
+  return { handleLogin, loading, error };
 };
 
 export default useLogin;

@@ -1,3 +1,12 @@
+.dashboard {
+  &__name{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+  }
+}
+
 .dashboard-view {
   display: flex;
   flex-direction: column;

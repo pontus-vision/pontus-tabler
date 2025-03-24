@@ -1,12 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { useEffect, useState } from 'react';
-import Header from './components/Header';
-import Sidebar from './components/Sidebar';
-import { readUserGroups } from './client';
-import { getJwtClaims } from '../utils';
-import { Accordion } from 'semantic-ui-react';
-import { ReadPaginationFilterFilters } from './typescript/api';
+import { useState } from 'react';
 
 type Props = {
   allowedRoles: string[];

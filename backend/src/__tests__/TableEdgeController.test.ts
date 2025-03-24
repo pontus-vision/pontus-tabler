@@ -41,7 +41,6 @@ import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '
 //   dashboardsReadPOST: jest.fn(),
 // }));
 jest.setTimeout(1000000);
-const conn: db.Connection = db.createConnection();
 
 describe('tableControllerTest', () => {
   const OLD_ENV = process.env;
@@ -76,6 +75,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Full_Name',
           name: 'full-name',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
         {
           field: 'Person_Natural_Customer_ID',
@@ -84,6 +85,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Customer_ID',
           name: 'customer-id',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
       ],
     };
@@ -266,6 +269,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Full_Name',
           name: 'full-name',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
         {
           field: 'customer-id',
@@ -274,6 +279,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Customer_ID',
           name: 'customer-id',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
       ],
     };
@@ -370,6 +377,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Full_Name',
           name: 'full-name',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
         {
           field: 'Person_Natural_Customer_ID',
@@ -378,6 +387,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Customer_ID',
           name: 'customer-id',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
       ],
     };
@@ -519,6 +530,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Full_Name',
           name: 'full-name',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
         {
           field: 'customer-id',
@@ -527,6 +540,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Customer_ID',
           name: 'customer-id',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
       ],
     };

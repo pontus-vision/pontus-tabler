@@ -10,25 +10,16 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
+import { DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
-
-console.log('STEP 0')
-console.log({dbSource : process.env.DB_SOURCE})
+import { authenticateToken } from './service/AuthUserService';
 
 export const app = express();
-
-console.log('STEP 1')
 
 const port = 8080;
 
 app.use(cors());
-// export function jdbcMiddleware(req, res, next) {
-//   next();
-// }
-// app.use(jdbcMiddleware);
 
-console.log('STEP 2')
 const authMiddleware = async (
   req: Request,
   res: Response,
@@ -40,68 +31,69 @@ const authMiddleware = async (
   const path = replaceSlashes(req.path);
 
   if (
-    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
+    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout')
   ) {
     return next();
   }
 
-  console.log(process.env.DB_SOURCE)
-  // try {
-  //   const authorization = await authenticateToken(req, res);
-  //   const userId = authorization['userId'];
+  try {
 
-  //   const arr = req.path.split('/');
+    const authorization = await authenticateToken(req, res);
 
-  //   const crudAction = arr[arr.length - 1];
+    const userId = authorization?.['userId'];
 
-  //   const entity = arr[arr.length - 2];
+    const arr = req.path.split('/');
 
-  //   const tableName = entity === 'dashboard' ? GROUPS_DASHBOARDS : GROUPS_USERS;
+    const crudAction = arr[arr.length - 1];
 
-  //   let targetId = '';
+    const entity = arr[arr.length - 2];
 
-  //   if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
-  //     return next();
-  //   }
+    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : GROUPS_USERS;
 
-  //   if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
-  //     targetId = req.body?.['id'];
-  //   }
+    let targetId = '';
 
-  //   const permissions = await checkPermissions('', '', '');
-  //   if (permissions[crudAction]) {
-  //   // if (permissions['']) {
-  //     // next();
-  //   } else {
-  //     throw { code: 401, message: 'You do not have this permission' };
-  //   }
-  // } catch (error) {
-  //   res.status(error?.code).json(error?.message);
-  // }
+    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
+      return next();
+    }
+
+    if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
+      targetId = req.body?.['id'];
+    }
+
+    const permissions = await checkPermissions(userId, targetId, tableName);
+    if (
+      path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
+      path === replaceSlashes('/PontusTest/1.0.0//tables/read')
+    ) {
+      return next();
+    }
+
+    if (permissions[crudAction]) {
+      // if (permissions['']) {
+      next();
+    } else {
+      throw { code: 401, message: 'You do not have this permission' };
+    }
+  } catch (error) {
+    console.log({ error })
+    res.status(error?.code).json(error?.message);
+  }
 };
 
 app.use(express.json());
 
-console.log('STEP 3')
-// app.use(authMiddleware);
-console.log('STEP 4')
+app.use(authMiddleware);
+
 register(app, { pontus });
 
-console.log('STEP 5')
-// app.listen(port, () => {
-//   console.log(`listening on port ${port}`);
-// });
-
-console.log('STEP 6')
 const validate = (_request, _scopes, _schema) => {
   return true;
 };
 
-console.log('STEP 7')
-export const srv = http.createServer(app).listen(port, function () {
+export const srv = http.createServer(app).listen(port, function() {
   console.log(
     'Your server is listening on port %d (http://localhost:%d)',
     port,
@@ -109,12 +101,11 @@ export const srv = http.createServer(app).listen(port, function () {
   );
 });
 
-console.log('STEP 8')
 const httpTrigger = async (
   request: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> => {
-  
+
   context.log(`Http function processed request for url "${request.url}"`);
 
   srv.closeIdleConnections();
@@ -168,8 +159,8 @@ const httpTrigger = async (
   srv.closeIdleConnections();
 
   return resp;
-    
-  
+
+
 };
 
 azureApp.http('httpTrigger', {
@@ -179,3 +170,4 @@ azureApp.http('httpTrigger', {
 });
 
 export default httpTrigger;
+

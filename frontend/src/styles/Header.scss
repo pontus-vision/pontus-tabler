@@ -8,6 +8,9 @@
   --background: white;
   --animation-timing: 100ms ease-in-out;
   --hamburguer-height: calc(var(--bar-height) * 3 + var(--hamburguer-gap) * 2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: fixed;
   z-index: 3;
   &__logo {
@@ -80,7 +83,7 @@
   }
   &__language-selector {
     right: 2rem;
-    position: absolute;
+    position: relative;
   }
 
   display: flex;

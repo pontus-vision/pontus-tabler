@@ -298,8 +298,8 @@ export const deleteAuthGroup = async (
                   snakeTableName === AUTH_GROUPS || snakeTableName === TABLES
                     ? 'name'
                     : snakeTableName === AUTH_USERS
-                    ? 'username'
-                    : '',
+                      ? 'username'
+                      : '',
               },
               rowId: data.id,
               tableName: AUTH_GROUPS,
@@ -806,7 +806,7 @@ export const updateAuthGroupTable = async (
 export const checkPermissions = async (
   userId: string,
   targetId: string,
-  containerId:string ,
+  containerId: string,
 ): Promise<CrudDocumentRef> => {
   const res = (await readEdge({
     direction: 'from',
@@ -841,10 +841,10 @@ export const checkPermissions = async (
         containerId === DASHBOARDS
           ? GROUPS_DASHBOARDS
           : containerId === TABLES
-          ? GROUPS_TABLES
-          : containerId === AUTH_USERS
-          ? GROUPS_TABLES
-          : '',
+            ? GROUPS_TABLES
+            : containerId === AUTH_USERS
+              ? GROUPS_TABLES
+              : '',
       containerId: AUTH_GROUPS,
       edgeContainer: containerId,
       filters: {

@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DashboardView from '../DashboardView';
 import { createDashboard, createMenu } from '../../client';
 import { DashboardRef } from '../../pontus-api/typescript-fetch-client-generated';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import MenuTree from '../../components/MenuTree';
 import { MenuItemTreeRef } from '../../typescript/api';
 import NotificationManager, {
@@ -14,60 +14,47 @@ const CreateDashboard = () => {
   const [newDashboardName, setNewDashboardName] = useState<string>();
   const [dashboardMenuItem, setDashboardMenuItem] = useState<MenuItemTreeRef>();
   const location = useLocation();
+  const { id } = useParams()
   const [openTree, setOpenTree] = useState(false);
   const notificationManagerRef = useRef<MessageRefs>();
+  const [menuState, setMenuState] = useState<MenuItemTreeRef>()
+
+  useEffect(() => {
+    const state = location.state
+
+    setMenuState(state)
+  }, [])
 
   const dashboardCreate = async (body: DashboardRef) => {
-    console.log({ body, dashboardMenuItem });
     const folder = location?.state;
     try {
-      if (!folder?.id) {
-        if (!dashboardMenuItem) {
-          notificationManagerRef?.current?.addMessage(
-            'info',
-            '',
-            'Please, select a path!',
-          );
+      if (!menuState && !dashboardMenuItem?.path) {
+        notificationManagerRef?.current?.addMessage(
+          'info',
+          '',
+          'Please, select a path!',
+        );
 
-          return;
-        }
-        const res = await createDashboard({
-          menuItem: {
-            ...dashboardMenuItem,
-            children: [{ kind: 'file', name: newDashboardName }],
-          },
-          name: newDashboardName,
-          folder: dashboardMenuItem.path?.endsWith('/')
-            ? dashboardMenuItem.path + newDashboardName
-            : dashboardMenuItem.path + '/' + newDashboardName,
-          state: body.state,
-        });
-        if (res?.status !== 200) {
-          console.log({ res });
-          throw res;
-        }
-      } else {
+        return;
+      }
+      const obj = {
+        id,
+        name: menuState?.name || newDashboardName,
+        folder: menuState?.path || dashboardMenuItem?.path,
+        state: body.state,
+      }
+
+      const res = await createDashboard(obj);
+      if (res?.status !== 200) {
+        throw res;
+      }
+      if (!menuState) {
         const res2 = await createMenu({
-          path: folder.path,
-          id: folder.id,
-          dashboard: {
-            folder: folder.path,
-            name: newDashboardName,
-            state: body.state,
-            owner: body.owner,
-          },
-          children: [
-            {
-              kind: 'file',
-              path: folder.path + newDashboardName,
-              name: newDashboardName,
-            },
-          ],
-        });
-
-        if (res2?.status !== 200) {
-          throw new Error();
-        }
+          path: dashboardMenuItem?.path,
+          name: menuState?.name || newDashboardName,
+          id: dashboardMenuItem.id,
+          kind: 'file',
+        })
       }
       notificationManagerRef?.current?.addMessage(
         'success',
@@ -83,33 +70,73 @@ const CreateDashboard = () => {
       );
     }
   };
+
   const handleCreate = async (folder: MenuItemTreeRef) => {
-    setDashboardMenuItem(folder);
+    if (folder.kind === 'folder') {
+      setDashboardMenuItem(folder);
+    }
   };
+
   return (
     <>
-      <label htmlFor="">Dashboard Name: </label>
-      <input
-        type="text"
-        onChange={(e) => setNewDashboardName(e.target.value)}
-      />
-      {!location.state?.id && !openTree && (
-        <IoIosFolderOpen onClick={() => setOpenTree(true)} />
-      )}
-      {!location.state?.id && openTree && (
-        <div
-          style={{
-            width: '14rem',
-            position: 'absolute',
-            backgroundColor: 'white',
-            zIndex: '2',
-            boxShadow: '0px 0 2px  black',
-          }}
-        >
-          <MenuTree onSelect={handleCreate} />
-        </div>
-      )}
-      <DashboardView createMode={true} onDashboardCreate={dashboardCreate}  />
+      {!menuState ? <div>
+        <label htmlFor="">Dashboard Name: </label>
+        <input
+          data-cy="dashboard-view-name-input"
+          type="text"
+          onChange={(e) => setNewDashboardName(e.target.value)}
+        />
+      </div> :
+        <label className='dashboard__name'>{menuState?.name}</label>
+      }
+      {!openTree && dashboardMenuItem && menuState?.path && <label>Location Path: '{dashboardMenuItem?.path}'</label>}
+      {
+        !location.state?.id && !openTree && (
+          <IoIosFolderOpen data-cy="dashboard-view-open-directory" onClick={() => setOpenTree(true)} />
+        )
+      }
+      {
+        !location.state?.id && openTree && (
+          <div
+            data-cy="dashboard-view-close-tree"
+            onClick={() => setOpenTree(false)}
+            style={{
+              width: '100%',
+              position: 'absolute',
+              backgroundColor: '#00000099',
+              zIndex: '3',
+              height: '100%',
+              top: '-50%',
+              left: '-50%',
+              transform: 'translate(50%,50%)'
+            }}
+          >
+          </div>
+        )
+      }
+      {
+        !location.state?.id && openTree && (
+          <div
+            style={{
+              width: '30%',
+              height: '50%',
+              position: 'absolute',
+              backgroundColor: 'white',
+              zIndex: '3',
+              boxShadow: '0px 0 2px  black',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%,-50%)'
+            }}
+          >
+            <MenuTree onSelect={handleCreate} selectionOnly={true} />
+            {dashboardMenuItem && <div>
+              <label>Folder selected: {dashboardMenuItem.name}</label>
+            </div>}
+          </div>
+        )
+      }
+      <DashboardView createMode={true} onDashboardCreate={dashboardCreate} />
       <NotificationManager ref={notificationManagerRef} />
     </>
   );

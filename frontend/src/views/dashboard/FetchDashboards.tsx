@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import PVGridWebiny2 from '../../pv-react/PVGridWebiny2';
-import { Dashboard, ReadPaginationFilterFilters } from '../../typescript/api';
+import { Dashboard, ReadPaginationFilterFilters, DashboardsReadReq } from '../../typescript/api';
 import { IGetRowsParams } from '@ag-grid-community/core';
 import { useNavigate } from 'react-router-dom';
 import { deleteDashboard, getAllDashboards } from '../../client';
 import { MessageRefs } from '../../components/NotificationManager';
 import { ColDef, IRowNode, RowEvent } from 'ag-grid-community';
 import useApiAndNavigate from '../../hooks/useApi';
-import { DashboardsReadReq } from '../../typescript/serialization';
 
 type Props = {
   onRowClicked?: (row: RowEvent<any, any>) => void;
@@ -24,6 +23,7 @@ type Props = {
   dashboardsToFilterOutById?: Dashboard[];
   onRowsSelected?: (e: IRowNode<any>[]) => void;
   onRowsStateChange?: (data: Record<string, any>[]) => void;
+  addRowOnEditMode: boolean
 };
 
 const FetchDashboards = ({
@@ -36,6 +36,7 @@ const FetchDashboards = ({
   onRowsSelected,
   onRowsStateChange,
   dashboardsToFilterOutById,
+  addRowOnEditMode = true
 }: Props) => {
   const [dashboards, setDashboards] = useState<Dashboard[]>();
 
@@ -74,53 +75,51 @@ const FetchDashboards = ({
   const notificationManagerRef = useRef<MessageRefs>();
   const [isLoading1, setIsLoading1] = useState(false);
   const navigate = useNavigate();
-  const {fetchDataAndNavigate} = useApiAndNavigate()
+  const { fetchDataAndNavigate } = useApiAndNavigate()
 
 
   const fetchDashboards = async () => {
     setIsLoading1(true);
-    
-    const req: DashboardsReadReq = {
-      from, to, filters
+
+    try {
+      const req: DashboardsReadReq = {
+        from, to, filters
+      }
+
+      const res = await fetchDataAndNavigate(getAllDashboards, req)
+
+      if (dashboardsToFilterOutById) {
+        const filtered = res?.data.dashboards?.filter(
+          (dash1) =>
+            !dashboardsToFilterOutById.some((dash2) => dash1.id === dash2.id),
+        );
+
+        setDashboards(filtered);
+        setTotalDashboards(filtered?.length);
+      } else {
+        setDashboards(res?.data.dashboards);
+        setTotalDashboards(res?.data.totalDashboards);
+      }
+
+    } catch (error) {
+
+      if (error?.status === 404) {
+        setDashboards([]);
+        setTotalDashboards(0);
+      } else if (error?.status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          'error',
+          'Error',
+          'Something went wrong. Could not fetch Dashboard(s)!',
+        );
+      }
     }
-
-
-    const res = await fetchDataAndNavigate(getAllDashboards, req)
-
-
-    
-
-    console.log({ res });
-    if (res?.status === 404) {
-      setDashboards([]);
-      setTotalDashboards(0);
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        'Error',
-        'Something went wrong. Could not fetch Dashboard(s)!',
-      );
-    }
-
-    if (dashboardsToFilterOutById) {
-      const filtered = res?.data.dashboards?.filter(
-        (dash1) =>
-          !dashboardsToFilterOutById.some((dash2) => dash1.id === dash2.id),
-      );
-
-      setDashboards(filtered);
-      setTotalDashboards(filtered?.length);
-    } else {
-      setDashboards(res?.data.dashboards);
-      setTotalDashboards(res?.data.totalDashboards);
-    }
-
     setIsLoading1(false);
   };
 
   useEffect(() => {
     fetchDashboards();
-  }, []);
+  }, [filters, from, to]);
 
   const handleParamsChange = (params: IGetRowsParams) => {
     setFilters(params.filterModel);
@@ -135,7 +134,6 @@ const FetchDashboards = ({
     arr.forEach(async (item) => {
       if (!item?.id) return;
       const res = await deleteDashboard(item.id);
-      console.log(res);
     });
     fetchDashboards();
   };
@@ -151,6 +149,7 @@ const FetchDashboards = ({
       cypressAtt="dashboards-grid"
       isLoading={isLoading1}
       add={() => (onAdd ? onAdd() : handleAddition())}
+      addRowOnEditMode={addRowOnEditMode}
       permissions={actions}
       onParamsChange={handleParamsChange}
       totalCount={totalDashboards}

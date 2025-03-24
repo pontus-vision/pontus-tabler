@@ -81,6 +81,7 @@ describe('dashboardCreatePOST', () => {
   });
 
   it('should create a user', async () => {
+
     const createBody: AuthUserCreateReq = {
       username: 'user2',
       password: 'pontusvision',
@@ -505,9 +506,17 @@ describe('dashboardCreatePOST', () => {
 
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
+    const newAuthUser: AuthUserCreateReq = {
+      username: 'User 1',
+      password: '1234567',
+      passwordConfirmation: '1234567'
+    }
+
+    const authUserCreateRes = await postAdmin('/auth/user/create', newAuthUser) as AxiosResponse<AuthUserCreateRes>
+
     const createUserGroupBody: AuthUserGroupsCreateReq = {
-      id: admin.id,
-      username: admin.username,
+      id: authUserCreateRes.data.id,
+      username: authUserCreateRes.data.username,
       authGroups: [
         { id: authGroupCreateRes.data.id, name: authGroupCreateRes.data.name },
       ],
@@ -528,8 +537,8 @@ describe('dashboardCreatePOST', () => {
     const readGroup2 = await postAdmin('auth/group/read', readGroupsBody2);
 
     const deleteGroupBody: AuthUserDeleteReq = {
-      id: admin.id,
-      username: admin.username,
+      id: authUserCreateRes.data.id,
+      username: authUserCreateRes.data.username,
     };
 
     const authGroupDeleteRes = (await postAdmin(
@@ -691,6 +700,7 @@ describe('dashboardCreatePOST', () => {
     )) as AxiosResponse<DashboardCreateRes>;
 
     expect(createDash.status).toBe(200);
+
     const createGroupDashBody: AuthGroupDashboardCreateReq = {
       id: createGroup.data.id,
       name: createGroup.data.name,
@@ -723,12 +733,22 @@ describe('dashboardCreatePOST', () => {
       '/register/user',
       createUserBody,
     )) as AxiosResponse<RegisterAdminRes>;
+
     expect(userCreateRes.status).toBe(200);
 
+    const authUserRead: AuthUserReadReq = {
+      username: createUserBody.username,
+      id: userCreateRes.data.id
+    }
+
+    const userReadRes = await postAdmin('/auth/user/read', authUserRead) as AxiosResponse<AuthUserReadRes>
+
+    expect(userReadRes.status).toBe(200)
+
     admin = userCreateRes.data;
+
     const loginUserBody: LoginReq = {
       username: 'user1',
-
       password: 'pontusvision',
     };
 
@@ -750,6 +770,7 @@ describe('dashboardCreatePOST', () => {
     const logoutBody: LogoutReq = {
       token: adminToken,
     };
+
     const LogoutRes = (await postAdmin(
       'logout',
       logoutBody,

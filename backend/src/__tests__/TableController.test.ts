@@ -28,10 +28,8 @@ import { AxiosResponse } from 'axios';
 // }));
 jest.setTimeout(1000000);
 
-import * as db from './../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
 import { AUTH_GROUPS, AUTH_USERS, TABLES, DELTA_DB, GROUPS_USERS } from '../consts';
-const conn: db.Connection = db.createConnection();
 describe('tableControllerTest', () => {
   const OLD_ENV = process.env;
 
@@ -69,6 +67,9 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Full_Name',
           name: 'full-name',
           sortable: true,
+          kind: 'text',
+          pivotIndex: 1,
+
         },
         {
           field: 'Person_Natural_Customer_ID',
@@ -77,6 +78,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Customer_ID',
           name: 'customer-id',
           sortable: true,
+          kind: 'text',
+          pivotIndex: 2,
         },
       ],
     };
@@ -100,10 +103,6 @@ describe('tableControllerTest', () => {
 
     let resPayload2: TableReadRes = readRetVal.data;
 
-    // console.log(`res2: ${JSON.stringify(resPayload2)}`);
-
-    // expect(isSubset(body, readRetVal.data)).toBe(true);
-
     expect(readRetVal.status).toBe(200);
     expect(readRetVal.data.name).toBe(snakeCase(body.name));
     expect(readRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name));
@@ -121,6 +120,8 @@ describe('tableControllerTest', () => {
           name: 'name',
           id: 'id',
           sortable: true,
+          kind: 'text',
+          pivotIndex: 1,
         },
         {
           filter: true,
@@ -129,6 +130,8 @@ describe('tableControllerTest', () => {
           name: 'name',
           id: 'id',
           sortable: true,
+          kind: 'text',
+          pivotIndex: 2,
         },
       ],
     };
@@ -186,6 +189,7 @@ describe('tableControllerTest', () => {
           headerName: 'column 1',
           name: 'column1',
           kind: 'checkboxes',
+          pivotIndex: 1,
         },
       ],
     };
@@ -208,6 +212,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Full_Name',
           name: 'full-name',
           sortable: true,
+          kind: 'checkboxes',
+          pivotIndex: 1,
         },
         {
           field: 'Person_Natural_Customer_ID',
@@ -216,6 +222,8 @@ describe('tableControllerTest', () => {
           id: 'Person_Natural_Customer_ID',
           name: 'customer-id',
           sortable: true,
+          kind: 'checkboxes',
+          pivotIndex: 2,
         },
       ],
     };

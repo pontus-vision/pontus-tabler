@@ -445,6 +445,9 @@ service:
                 headerName: Full Name
                 filter: true
                 kind: checkboxes
+                description: ipsum lorem
+                regex: ([A-Z])\w+
+                pivotIndex: 1
               - id: Person_Natural_Customer_ID
                 name: Customer ID
                 field: Person_Natural_Customer_ID
@@ -452,6 +455,9 @@ service:
                 headerName: Customer ID
                 filter: true
                 kind: checkboxes
+                description: ipsum lorem
+                regex: ([A-Z])\w+
+                pivotIndex: 2
           response:
             body:
               id: string
@@ -485,7 +491,8 @@ service:
       request:
         name: TableUpdateReq
         body:
-          properties: {}
+          properties: 
+            tableColsCrud: optional<TableColumnCRUD>
           extends:
             - BaseModelRef
             - TableRef
@@ -508,6 +515,9 @@ service:
                 headerName: Full Name
                 filter: true
                 kind: checkboxes
+                description: ipsum lorem
+                regex: ([A-Z])\w+
+                pivotIndex: 1
               - id: ds67a8gasiyudhsay78dgasiuhdsa897h
                 name: full-name
                 field: full-name
@@ -515,6 +525,9 @@ service:
                 headerName: Full Name
                 filter: true
                 kind: checkboxes
+                description: ipsum lorem
+                regex: ([A-Z])\w+
+                pivotIndex: 2
             id: id
           response:
             body:
@@ -528,6 +541,9 @@ service:
                   headerName: Full Name
                   filter: true
                   kind: checkboxes
+                  description: ipsum lorem
+                  regex: ([A-Z])\w+
+                  pivotIndex: 2
                 - id: ds67a8gasiyudhsay78dgasiuhdsa897h
                   name: full-name-2
                   field: full-name-2
@@ -535,6 +551,9 @@ service:
                   headerName: Full Name 2
                   filter: true
                   kind: text
+                  description: ipsum lorem
+                  regex: ([A-Z])\w+
+                  pivotIndex: 2
               id: id
     tableDeletePOST:
       path: /table/delete
@@ -599,6 +618,9 @@ service:
                       headerName: headerName
                       filter: true
                       kind: checkboxes
+                      description: ipsum lorem
+                      regex: ([A-Z])\w+
+                      pivotIndex: 2
                     - id: id
                       name: name
                       field: field
@@ -606,6 +628,9 @@ service:
                       headerName: headerName
                       filter: true
                       kind: checkboxes
+                      description: ipsum lorem
+                      regex: ([A-Z])\w+
+                      pivotIndex: 1
                   id: tableId
                 - name: name
                   cols:
@@ -616,6 +641,9 @@ service:
                       headerName: headerName
                       filter: true
                       kind: checkboxes
+                      description: ipsum lorem
+                      regex: ([A-Z])\w+
+                      pivotIndex: 2
                     - id: id
                       name: name
                       field: field
@@ -623,6 +651,9 @@ service:
                       headerName: headerName
                       filter: true
                       kind: checkboxes
+                      description: ipsum lorem
+                      regex: ([A-Z])\w+
+                      pivotIndex: 1
                   id: tableId
     tableDataCreatePOST:
       path: /table/data/create
@@ -766,13 +797,6 @@ service:
             name: name
             folder: folder
             owner: owner
-            menuItem:
-              id: 42332h4b23ijnkj2n34
-              path: /
-              children:
-                - id: 978hh3hujh3438hr29
-                  name: dashboard1
-                  kind: file
           response:
             body:
               id: string
@@ -2030,6 +2054,7 @@ types:
       - checkboxes
       - selectbox
       - text
+      - number
       - integer
       - phone
       - zipcode
@@ -2042,7 +2067,7 @@ types:
         type: optional<string>
       name:
         docs: Name of the table column
-        type: optional<string>
+        type: string
       field:
         docs: Field name of the table column
         type: optional<string>
@@ -2057,7 +2082,20 @@ types:
         type: optional<boolean>
       kind:
         docs: Indicates the kind of column input
-        type: optional<TableColumnRefKind>
+        type: TableColumnRefKind
+      pivotIndex: 
+        docs: Indicates pivotIndex number of the column
+        type: integer
+      regex:
+        type: optional<string>
+      description:
+        type: optional<string>
+  TableColumnCRUD:
+    properties:
+      tableName: string
+      renameColumns: optional<map<string, string>> 
+      addColumns: optional<map<string,TableColumnRefKind>>
+      dropColumns: optional<list<string>>
   TableRef:
     properties:
       edges: optional<TableEdgeRef>
@@ -2143,7 +2181,6 @@ types:
   DashboardCreateReq:
     properties:
       id: optional<string>
-      menuItem: optional<MenuItemTreeRef>
     extends:
       - DashboardRef
   DashboardCreateRes:
@@ -2191,6 +2228,15 @@ types:
       from: optional<integer>
       to: optional<integer>
       filters: optional<map<string, ReadPaginationFilterFilters>>
+      sortModel: optional<list<SortModel>>
+  SortModel:
+    properties:
+      colId: string
+      sort: SortAscDescEnum
+  SortAscDescEnum:
+    enum:
+      - asc
+      - desc
   TableDataDeleteRes: string
   TableDataReadRes:
     properties:

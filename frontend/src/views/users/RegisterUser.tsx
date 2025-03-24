@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import useApiAndNavigate from '../hooks/useApi';
-import useLogin from '../hooks/useLogin';
+import useApiAndNavigate from '../../hooks/useApi';
+import useLogin from '../../hooks/useLogin';
+import { registerUser } from '../../client';
 
-const LoginPage = () => {
+const RegisterUser = () => {
   const { login, isAuthenticated } = useAuth();
   const [role, setRole] = useState('Admin');
   const [apiKeys, setApiKeys] = useState();
   const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
   const [username, setUsername] = useState('');
   const dispatch = useDispatch();
 
@@ -18,16 +20,21 @@ const LoginPage = () => {
 
   const { fetchDataAndNavigate } = useApiAndNavigate();
 
-  const { handleLogin, loading, error } = useLogin();
+  const { handleLogin, loading } = useLogin();
 
   useEffect(() => {
     if (isAuthenticated) {
+      console.log({ isAuthenticated })
       navigate('/tables/read')
     }
   }, [])
 
   const loginUser = async (e) => {
     e.preventDefault();
+    if (password2 !== password) return
+    const res = await registerUser({ password, passwordConfirmation: password2, username })
+
+    console.log({ res })
 
     handleLogin(username, password);
   }
@@ -47,7 +54,7 @@ const LoginPage = () => {
         </section>
         <section className="form">
           <form onSubmit={loginUser}>
-            <h3>Sign In</h3>
+            <h3>Register</h3>
             <div className="mb-3">
               <label>Username</label>
               <input
@@ -61,14 +68,23 @@ const LoginPage = () => {
             <div className="mb-3">
               <label>Password</label>
               <input
-                data-cy="password-login-input"
+                data-cy="register-user-password-input"
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 className="form-control"
                 placeholder="Enter password"
               />
             </div>
-            {error && <p>{error}</p>}
+            <div className="mb-3">
+              <label>Password Confirmation</label>
+              <input
+                data-cy="register-user-password-confirmation-input"
+                onChange={(e) => setPassword2(e.target.value)}
+                type="password"
+                className="form-control"
+                placeholder="Enter password"
+              />
+            </div>
             <div className="mb-3">
               <div className="custom-control custom-checkbox">
                 <input
@@ -96,4 +112,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterUser;

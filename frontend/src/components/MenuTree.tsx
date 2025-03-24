@@ -2,22 +2,24 @@ import { useEffect, useState } from 'react';
 import { readMenu, createMenu, updateMenu } from '../client';
 import {
   MenuItemTreeRef,
-  MenuUpdateReq,
 } from '../pontus-api/typescript-fetch-client-generated';
 import TreeView from './Tree/TreeView';
-import { IoMdClose } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 type Props = {
   onUpdate?: (data: MenuItemTreeRef) => void;
   onCreate?: (data: MenuItemTreeRef) => void;
   onSelect?: (data: MenuItemTreeRef) => void;
+  selectionOnly?: boolean
 };
 
-const MenuTree = ({ onCreate, onSelect, onUpdate }: Props) => {
+const MenuTree = ({ onCreate, onSelect, onUpdate, selectionOnly }: Props) => {
   const [data, setData] = useState<MenuItemTreeRef>();
   const [selectedItem, setSelectedItem] = useState<MenuItemTreeRef>();
+  const [message, setMessage] = useState()
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchMenu = async (path: string) => {
@@ -36,7 +38,6 @@ const MenuTree = ({ onCreate, onSelect, onUpdate }: Props) => {
 
   const createMessage = (message: string) => {
     setMessage(message);
-    console.log({ message });
 
     // setTimeout(() => {
     //   setMessage('');
@@ -75,7 +76,9 @@ const MenuTree = ({ onCreate, onSelect, onUpdate }: Props) => {
             updateNodeByPath(prevState, res.data?.path, res.data),
           // }
         );
-        navigate('/dashboard/update/' + res?.data.id, { state: folder });
+        if (folder.kind === 'file') {
+          navigate('/dashboard/create/', { state: { ...folder, id: res?.data.id } });
+        }
         createMessage(`${folder?.kind} created.`);
       }
       if (res?.status === 409) {
@@ -91,7 +94,6 @@ const MenuTree = ({ onCreate, onSelect, onUpdate }: Props) => {
   const handleUpdate = async (data: MenuItemTreeRef) => {
     const res = await updateMenu(data);
 
-    console.log({ res, data });
     if (res?.status === 200) {
       setData(
         (prevState) =>
@@ -107,15 +109,13 @@ const MenuTree = ({ onCreate, onSelect, onUpdate }: Props) => {
     if (!selection.path) return;
     setSelectedItem(selection);
     const res = await readMenu({ path: selection?.path });
-    console.log({ selection, res });
 
     res?.status === 200 &&
       setData((prevState) =>
         updateNodeByPath(prevState, selection?.path, {
           ...res.data,
-          children: res.data.children?.toSorted((a, b) =>
-            a?.name?.localeCompare(b?.name),
-          ),
+          children: res.data.children
+
         }),
       );
   };
@@ -123,8 +123,8 @@ const MenuTree = ({ onCreate, onSelect, onUpdate }: Props) => {
   return (
     <>
       {data && (
-        <TreeView
-          data={data}
+        <TreeView data={data}
+          selectionOnly={selectionOnly}
           actionsMode={true}
           onSelect={onSelect || handleSelect}
           onCreate={onCreate || handleCreate}

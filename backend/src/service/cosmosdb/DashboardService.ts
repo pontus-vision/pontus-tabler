@@ -46,32 +46,6 @@ export const createDashboard = async (
     authGroups: [],
   });
 
-  if (data?.menuItem) {
-    const menuItem = data.menuItem;
-    const child = menuItem.children[0];
-
-    const path = `${menuItem?.path}${menuItem?.path?.endsWith('/') ? '' : '/'}${
-      child.name
-    }`;
-
-    const res = await menuContainer.items.create({
-      ...child,
-      path: path,
-      id: menuItem.id,
-    });
-
-    try {
-      const res2 = await menuContainer
-        .item(menuItem.id, menuItem.path)
-        .patch([{ op: 'add', path: `/children/-`, value: res.resource }]);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError(
-          `Parent folder at path '${menuItem.path}, at id '${menuItem.id} not found.'`,
-        );
-      }
-    }
-  }
   const { _rid, _self, _etag, _attachments, _ts, ...rest } =
     res.resource as any;
 
@@ -124,7 +98,7 @@ export const updateDashboard = async (
       .item(data.id, data.id)
       .patch(patchArr);
     return res3.resource;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const readDashboardById = async (dashboardId: string) => {

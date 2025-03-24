@@ -8,7 +8,7 @@ import {
 } from 'react';
 import Button from 'react-bootstrap/esm/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { RootState } from '../store/store';
 import { useTranslation } from 'react-i18next';
@@ -35,13 +35,17 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [models, setModels] = useState() as any[];
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [openAdminOptions, setOpenAdminOptions] = useState(false);
+  const [openDashboards, setOpenDashboards] = useState(false);
+  const [openAuthGroups, setOpenAuthGroups] = useState(false);
+  const [openAuthUsers, setOpenAuthUsers] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation()
   const { value: dashboards } = useSelector((state: RootState) => {
     return state.dashboards;
   });
   const { t, i18n } = useTranslation();
+
 
   const {
     isAuthenticated,
@@ -55,9 +59,9 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
     children: [],
   });
 
+
   useEffect(() => {
-    console.log({ data });
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     console.log({ tree });
@@ -122,9 +126,9 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
 
   if (!isAuthenticated) return;
 
+  if (location.pathname.endsWith('login') || location.pathname.endsWith('register/admin')) return
   return (
     <div className={`${openedSidebar ? 'active' : ''}` + ' sidebar'}>
-      <MenuTree />
       <ul className="sidebar__items-list">
         {deviceSize === 'sm' && (
           <li>
@@ -138,38 +142,61 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
             </Form.Select>
           </li>
         )}
-        <li>
+        <li className="sidebar__admin-options">
           <button
-            className="px-4 py-2 bg-white text-blue-500 border border-blue-500 rounded transition-colors"
-            onClick={() => logout()}
+            className={`sidebar__btn`}
+            type="button"
+            onClick={() => {
+              setOpenAuthGroups(!openAuthGroups)
+              navigate('/auth/groups')
+            }}
           >
-            Logout
+            Auth Groups
           </button>
         </li>
         <li className="sidebar__admin-options">
           <button
+            className={`sidebar__btn`}
             type="button"
-            onClick={() => setOpenAdminOptions(!openAdminOptions)}
+            onClick={() => {
+              setOpenAuthGroups(!openAuthGroups)
+              navigate('/tables/read')
+            }}
           >
-            {t('admin-panel')}
+            Tables
           </button>
-          {openAdminOptions && (
-            <ul>
-              <li onClick={() => navigate('/dashboards')}>Dashboards</li>
-              <li onClick={() => navigate('/auth/groups')}>Auth Groups</li>
-              <li onClick={() => navigate('/auth/users')}>Auth Users</li>
-              <li onClick={() => navigate('/tables/read')}>Tables</li>
-            </ul>
-          )}
         </li>
-        <li>
-          <Link to="/table/create">
-            <button className="">Nova Entrada</button>
-          </Link>
+        <li className="sidebar__admin-options">
+          <button
+            className={`sidebar__btn `}
+            type="button"
+            onClick={() => {
+              setOpenAuthUsers(!openAuthUsers)
+              navigate('/auth/users')
+            }}
+          >
+            Auth Users
+          </button>
+        </li>
+        <li className="sidebar__admin-options">
+          <button
+            className={`sidebar__btn ${openDashboards ? 'opened' : ''}`}
+            type="button"
+            onClick={() => {
+              setOpenDashboards(true)
+              navigate('/dashboards')
+            }}
+          >
+            Dashboards
+          </button>
+          <div style={{ visibility: openDashboards ? 'visible' : 'hidden' }}>
+            <MenuTree selectionOnly={false} />
+          </div>
         </li>
       </ul>
 
-      {dashboards &&
+      {
+        dashboards &&
         dashboards.map((dashboard: Dashboard) => (
           <label
             onClick={() => {
@@ -180,8 +207,9 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           >
             {dashboard.name}
           </label>
-        ))}
-    </div>
+        ))
+      }
+    </div >
   );
 };
 

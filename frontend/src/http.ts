@@ -166,6 +166,7 @@ export const sendHttpRequest = async (
     throw new Error('MUST SET THE URL; CANNOT FUNCTION WITH AN EMPTY URL');
   }
 
+  console.log({ reqUrl, data })
   const maxRetries = parseInt(import.meta.env.PV_NUM_RETRIES || '5');
 
   const queryString = new URLSearchParams(queryParams).toString();
@@ -179,8 +180,7 @@ export const sendHttpRequest = async (
   let errorResponse;
   for (let i = 0; i < maxRetries; i++) {
     console.log(
-      `############ Retry ${i}; Creating connection to URL ${fullUrl}; payload size = ${
-        data.length
+      `############ Retry ${i}; Creating connection to URL ${fullUrl}; payload size = ${data.length
       } eventHeaders = ${JSON.stringify(headers)}`,
     );
 
@@ -214,11 +214,12 @@ export const sendHttpRequest = async (
       await new Promise((resolve) => setTimeout(resolve, 200 * i + 1));
     }
   }
+  console.log({ errorResponse })
   if (
     errorResponse?.status !== 404 &&
     errorResponse?.status !== 409 &&
     errorResponse?.status !== 400 &&
-    errorResponse?.status !== 422 && 
+    errorResponse?.status !== 422 &&
     errorResponse?.status !== 307
   ) {
     throw {

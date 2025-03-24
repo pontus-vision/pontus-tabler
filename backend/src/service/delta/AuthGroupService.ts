@@ -57,7 +57,7 @@ import {
 } from './EdgeService';
 import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, TABLES } from '../../consts';
 
- const authUserGroupsRead = async (
+const authUserGroupsRead = async (
   data: AuthUserGroupsReadReq,
 ): Promise<AuthUserGroupsReadRes> => {
   const filtersRefactor = {};
@@ -140,11 +140,11 @@ export const createAuthGroup = async (data: AuthGroupCreateReq) => {
 
   const res = await runQuery(
     `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-    
+
   );
   const res4 = await runQuery(
     `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
-    
+
   );
   if (+res4[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
@@ -152,14 +152,13 @@ export const createAuthGroup = async (data: AuthGroupCreateReq) => {
 
   const res2 = await runQuery(
     `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
-    
+
   );
 
   const res3 = await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
-      typeof id === 'string' ? `'${id}'` : id
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
     }`,
-    
+
   );
 
   return {
@@ -198,7 +197,7 @@ export const updateAuthGroup = async (
       { ['table_from__name']: data.name },
       `WHERE table_from__id = '${data.id}'`,
     );
-  } catch (error) {}
+  } catch (error) { }
 
   return sql[0];
 };
@@ -209,10 +208,9 @@ export const readAuthGroup = async (
   const id = data.id;
 
   const res = (await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${
-      typeof id === 'string' ? `'${id}'` : id
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
     }`,
-    
+
   )) as AuthGroupRef[];
 
   if (res.length === 0) {
@@ -223,18 +221,22 @@ export const readAuthGroup = async (
 };
 
 export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
+  if (data.name === ADMIN_GROUP_NAME) {
+    throw new BadRequestError('Cannot delete admin group')
+  }
+
   const deleteQuery = await runQuery(
     `DELETE FROM ${AUTH_GROUPS} WHERE id = '${data.id}'`,
-    
   );
+
   const affectedRows = +deleteQuery[0]['num_affected_rows'];
+
   const deleteGroupUsersQuery = await runQuery(
     `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
-    
   );
+
   const deleteGroupDashQuery = await runQuery(
     `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
-    
   );
 
   if (affectedRows === 1) {
@@ -268,7 +270,6 @@ export const readAuthGroups = async (
   const countGroups = await runQuery(
     `SELECT COUNT(*) FROM auth_groups
       ${whereClause2};`,
-    
   );
   const groupCount = +countGroups[0]['count(1)'];
   if (groupCount === 0) {
@@ -386,34 +387,38 @@ export const readAuthGroupDashboards = async (
 export const updateAuthGroupDashboards = async (
   data: AuthGroupDashboardUpdateReq,
 ): Promise<AuthGroupDashboardUpdateRes> => {
-  const sql = await updateSql(
-    GROUPS_DASHBOARDS,
-    data.dashboards.map((dash) => {
-      return {
-        table_from__create: dash.create,
-        table_from__read: dash.read,
-        table_from__update: dash.update,
-        table_from__delete: dash.delete,
-        table_to__id: dash.id,
-        table_to__name: dash.name,
-      };
-    }),
-    `WHERE table_from__id = '${data.id}'`,
-  );
+  const dashboards = []
+  for (const dashboard of data.dashboards) {
 
-  const dashboards: AuthGroupDashboardRef[] = sql.map((el) => {
-    return {
-      name: el['table_to__name'],
-      id: el['table_to__id'],
-      create: el['table_from__create'] === 'true' ? true : false,
-      read: el['table_from__read'] === 'true' ? true : false,
-      update: el['table_from__update'] === 'true' ? true : false,
-      delete: el['table_from__delete'] === 'true' ? true : false,
-    };
-  });
+    const sql = await updateSql(
+      GROUPS_DASHBOARDS,
+      {
+        table_from__create: dashboard.create,
+        table_from__read: dashboard.read,
+        table_from__update: dashboard.update,
+        table_from__delete: dashboard.delete,
+        table_from__id: data.id,
+        table_from__name: data.name,
+      },
+
+      `WHERE table_to__id = '${dashboard.id}'`,
+    );
+    dashboards.push(sql.map((el) => {
+      return {
+        name: el['table_to__name'],
+        id: el['table_to__id'],
+        create: el['table_from__create'] === 'true' ? true : false,
+        read: el['table_from__read'] === 'true' ? true : false,
+        update: el['table_from__update'] === 'true' ? true : false,
+        delete: el['table_from__delete'] === 'true' ? true : false,
+      };
+    }));
+  }
+
+
 
   return {
-    dashboards,
+    dashboards: dashboards[0],
     id: data.id,
     name: data.name,
   };
@@ -426,12 +431,11 @@ export const deleteAuthGroupDashboards = async (
     throw new BadRequestError('No dashboardId mentioned.');
   }
   const sql = await runQuery(
-    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${
-      data.id
+    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id
     }' AND ${data.dashboardIds
       .map((dashboardId) => `table_to__id = '${dashboardId}'`)
       .join(' OR ')}`,
-    
+
   );
 
   if (+sql[0]['num_affected_rows'] === 0) {
@@ -782,22 +786,25 @@ export const checkTableMetadataPermissions = async (
   };
 };
 
+
 export const checkPermissions = async (
   userId: string,
   targetId: string,
-  containerId:string ,
+  containerId: string,
 ): Promise<CrudDocumentRef> => {
-  const res = (await readEdge({
-    direction: 'from',
-    edgeTable: 'groups-users',
-    tableFromName: AUTH_USERS,
-    tableToName: AUTH_GROUPS,
-    filters: {},
-    rowId: userId,
-  })) as AuthGroupRef[];
+  const res = (await readEdge(
+    {
+      direction: 'from',
+      edgeTable: GROUPS_USERS,
+      tableToName: AUTH_USERS,
+      tableFromName: AUTH_GROUPS,
+      filters: {},
+      rowId: userId,
+    },
+  )) as AuthGroupRef[];
 
   if (res.length === 0) {
-    throw new NotFoundError('There is no group associated with user');
+    throw { code: 404, message: 'There is no group associated with user' };
   }
 
   let create = false;
@@ -806,7 +813,7 @@ export const checkPermissions = async (
   let del = false;
 
   for (const group of res) {
-    if (group.name === ADMIN_GROUP_NAME) {
+    if (group['table_from__name'] === ADMIN_GROUP_NAME) {
       return {
         create: true,
         read: true,
@@ -814,43 +821,45 @@ export const checkPermissions = async (
         delete: true,
       };
     }
-    const res = await readEdge({
-      direction: 'to',
-      edgeTable:
-        containerId === DASHBOARDS
-          ? GROUPS_DASHBOARDS
-          : containerId === TABLES
-          ? GROUPS_TABLES
-          : containerId === AUTH_USERS
-          ? GROUPS_TABLES
-          : '',
-      tableFromName: AUTH_GROUPS,
-      tableToName: containerId,
-      filters: {
+    const res = (await readEdge(
+      {
+        direction: 'to',
+        edgeTable:
+          containerId === DASHBOARDS
+            ? GROUPS_DASHBOARDS
+            : containerId === TABLES
+              ? GROUPS_TABLES
+              : containerId === AUTH_USERS
+                ? GROUPS_TABLES
+                : '',
+        tableToName: AUTH_GROUPS,
+        tableFromName: containerId,
         filters: {
-          id: {
-            filter: targetId,
-            filterType: 'text',
-            type: 'equals',
+          filters: {
+            table_to__id: {
+              filter: targetId,
+              filterType: 'text',
+              type: 'equals',
+            },
           },
         },
+        rowId: group['table_from__id'],
       },
-      rowId: group.id,
-    });
+    )) as any[];
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
-        if (dashboard?.create) {
-          create = dashboard?.create;
+        if (dashboard?.['table_from__create']) {
+          create = dashboard?.['table_from__create'] === 'true';
         }
-        if (dashboard?.read) {
-          read = dashboard?.read;
+        if (dashboard?.['table_from__read']) {
+          read = dashboard?.['table_from__read'] === 'true';
         }
-        if (dashboard?.update) {
-          update = dashboard?.update;
+        if (dashboard?.['table_from__update']) {
+          update = dashboard?.['table_from__update'] === 'true';
         }
-        if (dashboard?.delete) {
-          del = dashboard?.delete;
+        if (dashboard?.['table_from__delete']) {
+          del = dashboard?.['table_from__delete'] === 'true';
         }
       }
     }

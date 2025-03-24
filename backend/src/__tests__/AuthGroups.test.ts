@@ -45,6 +45,7 @@ import { srv } from '../server';
 import { prepareDbAndAuth } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS } from '../consts';
+import { runQuery } from '../db-utils';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -63,12 +64,11 @@ describe('dashboardCreatePOST', () => {
 
   let postAdmin;
   let admin;
+  let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
+  if (process.env.DB_SOURCE === DELTA_DB) {
+    tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS];
+  }
   beforeEach(async () => {
-    console.log(process.env.DB_SOURCE)
-    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS];
-    }
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
@@ -77,6 +77,9 @@ describe('dashboardCreatePOST', () => {
   });
 
   afterAll(async () => {
+    for (const table of tables) {
+      runQuery(`DELETE FROM ${table};`)
+    }
     process.env = OLD_ENV; // Restore old environment
     srv.close();
   });
@@ -1149,6 +1152,8 @@ describe('dashboardCreatePOST', () => {
           id: 'Person_Natural_Full_Name',
           name: 'full-name',
           sortable: true,
+          pivotIndex: 1,
+          kind: 'text'
         },
         {
           field: 'Person_Natural_Customer_ID',
@@ -1157,6 +1162,8 @@ describe('dashboardCreatePOST', () => {
           id: 'Person_Natural_Customer_ID',
           name: 'customer-id',
           sortable: true,
+          pivotIndex: 2,
+          kind: 'text'
         },
       ],
     };

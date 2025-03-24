@@ -24,7 +24,9 @@ const RegisterView = ({ adminRoute }: Props) => {
 
   const { fetchDataAndNavigate } = useApiAndNavigate();
   const navigate = useNavigate();
-  const { handleLogin } = useLogin();
+  const { handleLogin, loading } = useLogin();
+
+  const [isRegistered, setIsRegistered] = useState(false)
 
   const register = async () => {
     const obj: RegisterUserReq | RegisterAdminReq = {
@@ -37,23 +39,33 @@ const RegisterView = ({ adminRoute }: Props) => {
       const res = await registerAdmin(obj);
 
       if (res.status === 200) {
-        console.log({ res });
         handleLogin(username, passwd);
-        navigate('/auth/users');
+        setIsRegistered(true)
+
+        //       navigate('/tables/read');
       }
     } else {
       const res = (await fetchDataAndNavigate(
         registerUser,
         obj,
       )) as AxiosResponse<RegisterUserRes>;
-      if (res.status === 200) {
-        console.log({ res });
-        handleLogin(username, passwd);
-        navigate('/auth/users');
-      }
+
+      // if (res.status === 200) {
+      //   handleLogin(username, passwd);
+      //   navigate('/auth/users');
+      // }
     }
+
+
   };
 
+  useEffect(() => {
+    if (!isRegistered) return
+
+    if (!loading) {
+      navigate('/tables/read');
+    }
+  }, [loading])
   return (
     <div className="container">
       <h2>{adminRoute ? 'Admin' : 'User'} Registration</h2>
@@ -68,6 +80,7 @@ const RegisterView = ({ adminRoute }: Props) => {
           <label for="username">Username:</label>
           <input
             type="text"
+            data-cy="username-input"
             onChange={(e) => setUsername(e.target.value)}
             id="username"
             name="username"
@@ -78,6 +91,7 @@ const RegisterView = ({ adminRoute }: Props) => {
           <label for="password">Password:</label>
           <input
             onChange={(e) => setPasswd(e.target.value as string)}
+            data-cy="password-input"
             type="password"
             id="password"
             name="password"
@@ -89,6 +103,7 @@ const RegisterView = ({ adminRoute }: Props) => {
           <input
             onChange={(e) => setPasswdConfirmation(e.target.value)}
             type="password"
+            data-cy="password-confirmation-input"
             id="password_confirm"
             name="password_confirm"
             required

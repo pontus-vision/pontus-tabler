@@ -3,5 +3,8 @@
     "@minoru/react-dnd-treeview": "^3.4.4",
     "node-gyp-build": "^4.8.1",
     "react-dnd": "^16.0.1"
+  },
+  "devDependencies": {
+    "cypress": "^14.0.1"
   }
 }

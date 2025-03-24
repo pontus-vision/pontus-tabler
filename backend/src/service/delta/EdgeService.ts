@@ -248,7 +248,7 @@ export const updateConnection = async (
   direction: EdgeDirectionEnum,
   edgeType: 'oneToOne' | 'oneToMany',
 ): Promise<TableDataEdgeCreateRef[]> => {
-  return 
+  return
   // const container = await fetchContainer(table1.containerName);
 
   // const path = `edges/${snakeToCamel(
@@ -445,20 +445,19 @@ export const readEdge = async (
     },
     '',
   );
-  const fromTo = ` ${
-    data.filters.to ? 'LIMIT ' + (data.filters.to - data.filters.from) : ''
-  } ${data.filters.from ? ' OFFSET ' + (data.filters.from - 1) : ''}`;
+  const fromTo = ` ${data.filters.to ? 'LIMIT ' + (data.filters.to - data.filters.from) : ''
+    } ${data.filters.from ? ' OFFSET ' + (data.filters.from - 1) : ''}`;
   const filtersOn = Object.keys(data.filters).length > 0;
 
-  const sql = (await runQuery(
-    `SELECT * FROM ${data.edgeTable} ${
-      filtersOn ? whereClause + ' AND ' : 'WHERE'
-    } ${
-      data.direction === 'from'
-        ? `table_to__id = '${data.rowId}'`
-        : `table_from__id = '${data.rowId}'`
-    }` + fromTo,
-  )) as Record<string, any>[];
+  const queryStr = `SELECT * FROM ${data.edgeTable} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
+    } ${data.direction === 'from'
+      ? `table_to__id = '${data.rowId}'`
+      : `table_from__id = '${data.rowId}'`
+    }` + fromTo
+
+  console.log({ queryStr, data })
+
+  const sql = (await runQuery(queryStr)) as Record<string, any>[];
 
   return sql;
 };
@@ -470,30 +469,25 @@ export const readTableDataEdge = async (
   const whereClause = filterToQuery({
     filters: data.filters,
   });
-  const fromTo = ` ${data.to ? 'LIMIT ' + (data.to - data.from) : ''} ${
-    data.from ? ' OFFSET ' + (data.from - 1) : ''
-  }`;
+  const fromTo = ` ${data.to ? 'LIMIT ' + (data.to - data.from) : ''} ${data.from ? ' OFFSET ' + (data.from - 1) : ''
+    }`;
   const filtersOn = Object.keys(data?.filters || {}).length > 0;
 
   const sql = (await runQuery(
-    `SELECT * FROM ${data?.jointTableName || edgeTableName} ${
-      filtersOn ? whereClause + ' AND ' : 'WHERE'
-    } ${
-      direction === 'from'
-        ? `table_to__id = '${data.rowId}'`
-        : `table_from__id = '${data.rowId}'`
+    `SELECT * FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
+    } ${direction === 'from'
+      ? `table_to__id = '${data.rowId}'`
+      : `table_from__id = '${data.rowId}'`
     }` +
-      `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` +
-      fromTo,
+    `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` +
+    fromTo,
   )) as Record<string, any>;
 
   const sqlCount = await runQuery(
-    `SELECT COUNT(*) FROM ${data?.jointTableName || edgeTableName} ${
-      filtersOn ? whereClause + ' AND ' : 'WHERE'
-    } ${
-      direction === 'from'
-        ? `table_to__id = '${data.rowId}'`
-        : `table_from__id = '${data.rowId}'`
+    `SELECT COUNT(*) FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
+    } ${direction === 'from'
+      ? `table_to__id = '${data.rowId}'`
+      : `table_from__id = '${data.rowId}'`
     }` + `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}`,
   );
 
@@ -626,7 +620,7 @@ export const createTableEdge = async (
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
 ): Promise<TableEdgeReadRes> => {
-  return 
+  return
   // const querySpec = {
   //   query: 'select c.edges, c.id, c.name from c where c.id=@tableId',
   //   parameters: [

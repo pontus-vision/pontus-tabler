@@ -87,8 +87,6 @@ import {
 export default new PontusService({
   registerUserPost: async (req, res) => {
     // await setup();
-    console.log({admin:req})
-
     const response = await registerUser(req.body);
     res.send(response);
   },
@@ -197,7 +195,6 @@ export default new PontusService({
   },
   dashboardGroupAuthReadPost: async (req, res) => {
     const response = await readDashboardGroupAuth(req.body);
-
     res.send(response);
   },
   dashboardGroupAuthUpdatePost: async (req, res) => {
@@ -246,28 +243,30 @@ export default new PontusService({
     res.send(response);
   },
   dashboardCreatePost: async (req, res) => {
-    if(Object.keys(req.body).length === 0) {
+    const username = req['user']['username']
+    if (Object.keys(req.body).length === 0) {
       throw new BadRequestError('Body is empty.')
     }
 
-    const response = await createDashboard(req.body);
+    const response = await createDashboard({ ...req.body, owner: username });
 
     res.send(response);
   },
   dashboardDeletePost: async (req, res) => {
- 
+
     const response = await deleteDashboard(req.body);
 
     res.send(response);
   },
   dashboardReadPost: async (req, res) => {
-   
+
     const response = await readDashboardById(req.body.id);
 
     res.send(response);
   },
   dashboardsReadPost: async (req, res) => {
-    const response = await readDashboards(req.body);
+    const userId = req['user']['userId']
+    const response = await readDashboards(req.body, userId);
 
     res.send(response);
   },
@@ -281,48 +280,24 @@ export default new PontusService({
     res.send(response);
   },
   menuDeletePost: async (req, res) => {
-    try {
-      const response = await deleteMenuItem(req.body);
-      res.send(response);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError('Menu item not found');
-      }
-    }
+    const response = await deleteMenuItem(req.body);
+
+
+    res.send(response);
   },
   menuReadPost: async (req, res) => {
-    try {
-      if (req.body === undefined) {
-        throw new BadRequestError('Please, insert request body');
-      }
-      const response = (await readMenuItemByPath(req.body.path)) as any;
 
-      res.send(response);
-    } catch (error) {
-      if (error?.code === 404) {
-        console.error({ error });
-        throw new NotFoundError(error?.message);
-      }
+    if (req.body === undefined) {
+      throw new BadRequestError('Please, insert request body');
     }
+    const response = (await readMenuItemByPath(req.body.path)) as any;
+
+    res.send(response);
   },
   menuUpdatePost: async (req, res) => {
-    try {
-      const response = await updateMenuItem(req.body);
+    const response = await updateMenuItem(req.body);
 
-      if (response.statusCode === 404) {
-        throw new NotFoundError('Not found');
-      }
-
-      res.send({ ...response.resource, path: response.resource?.path || '' });
-    } catch (error) {
-      if (error?.code === 400) {
-        throw new BadRequestError(error?.message);
-      } else if (error?.code === 404) {
-        throw new NotFoundError('Menu item not found.');
-      }
-
-      throw new InternalServerError(error);
-    }
+    res.send(response)
   },
   authGroupsTablesCreatePost: async (req, res) => {
     const response = await createAuthGroupTables(req.body);
@@ -339,8 +314,8 @@ export default new PontusService({
 
     res.send(response);
   },
-  authGroupTableCreatePost: async (req, res) => {},
-  authGroupTableDeletePost(req, res) {},
+  authGroupTableCreatePost: async (req, res) => { },
+  authGroupTableDeletePost(req, res) { },
   authGroupTablesReadPost: async (req, res) => {
     const response = await readAuthGroupTable(req.body);
 
@@ -363,7 +338,7 @@ export default new PontusService({
     res.send(response);
   },
   tableReadPost: async (req, res) => {
-    const perms = await checkTableMetadataPermissions(req['userId']);
+    const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.read) {
       throw new UnauthorizedError(
@@ -375,7 +350,7 @@ export default new PontusService({
     res.send(response);
   },
   tableUpdatePost: async (req, res) => {
-    const perms = await checkTableMetadataPermissions(req['userId']);
+    const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.update) {
       throw new UnauthorizedError(
@@ -388,7 +363,7 @@ export default new PontusService({
     res.send(response);
   },
   tableDeletePost: async (req, res) => {
-    const perms = await checkTableMetadataPermissions(req['userId']);
+    const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.delete) {
       throw new UnauthorizedError(
@@ -430,26 +405,15 @@ export default new PontusService({
     }
   },
   tableDataDeletePost: async (req, res) => {
-    try {
-      const response = await deleteTableData(req.body);
+    const response = await deleteTableData(req.body);
 
-      res.send(response);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError(error?.message);
-      }
-    }
+    res.send(response);
+
   },
   tableDataReadPost: async (req, res) => {
-    try {
-      const response = await readTableData(req.body);
+    const response = await readTableData(req.body);
 
-      res.send(response);
-    } catch (error) {
-      if (error?.code === 404) {
-        throw new NotFoundError(error?.message);
-      }
-    }
+    res.send(response);
   },
   tableDataUpdatePost: async (req, res) => {
     try {
@@ -486,12 +450,12 @@ export default new PontusService({
       const response = await createTableDataEdge(req.body);
 
       res.send(response);
-    } catch (error) {}
+    } catch (error) { }
   },
   tableDataEdgeReadPost: async (req, res) => {
     const response = await readTableDataEdge(req.body);
 
     res.send(response);
   },
-  tableDataEdgeDeletePost(req, res) {},
+  tableDataEdgeDeletePost(req, res) { },
 });
