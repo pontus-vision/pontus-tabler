@@ -239,7 +239,6 @@ export async function runQuery(query: string): Promise<Record<string, any>[]> {
     const resultSet = await preparedStatement.executeQuery();
     const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
-
     // Remember to release the connection after you are done
     // await pool.release(connection)
 
@@ -267,7 +266,6 @@ export const filterToQuery = (
   if (process.env.DB_SOURCE && alias) {
     alias = `${alias}.`
   }
-  console.log({ alias })
 
   for (let col in cols) {
     if (cols.hasOwnProperty(col)) {
@@ -292,6 +290,7 @@ export const filterToQuery = (
       const operator = cols[col]?.operator;
 
       const colQuery = [];
+
       if (filterType === 'text') {
         const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
         if (conditions?.length > 0) {
@@ -301,15 +300,15 @@ export const filterToQuery = (
                 colQuery.push(` ${alias}${colName} LIKE '%${filter}%'`);
               }
 
-              if (type === 'not contains') {
+              if (type === 'notcontains') {
                 colQuery.push(` ${alias}${colName} NOT LIKE '%${filter}%'`);
               }
 
-              if (type === 'starts with') {
+              if (type === 'startswith') {
                 colQuery.push(` ${alias}${colName} LIKE '${filter}%'`);
               }
 
-              if (type === 'ends with') {
+              if (type === 'endswith') {
                 colQuery.push(` ${alias}${colName} LIKE '%${filter}'`);
               }
 
@@ -317,7 +316,7 @@ export const filterToQuery = (
                 colQuery.push(` ${alias}${alias}${colName} = '${filter}'`);
               }
 
-              if (type === 'not equals') {
+              if (type === 'notequals') {
                 colQuery.push(` NOT ${alias}${colName} = '${filter}'`);
               }
             } else {
@@ -325,15 +324,15 @@ export const filterToQuery = (
                 colQuery.push(` CONTAINS(${alias}${colName}, '${filter}')`);
               }
 
-              if (type === 'not contains') {
+              if (type === 'notcontains') {
                 colQuery.push(` NOT CONTAINS(${alias}${colName}, '${filter}')`);
               }
 
-              if (type === 'starts with') {
+              if (type === 'startswith') {
                 colQuery.push(` STARTSWITH(${alias}${colName}, '${filter}')`);
               }
 
-              if (type === 'ends with') {
+              if (type === 'endswith') {
                 colQuery.push(` ENDSWITH(${alias}${colName}, '${filter}')`);
               }
 
@@ -341,7 +340,7 @@ export const filterToQuery = (
                 colQuery.push(` ${alias}${colName} = '${filter}'`);
               }
 
-              if (type === 'not equals') {
+              if (type === 'notequals') {
                 colQuery.push(` NOT ${alias}${colName} = '${filter}'`);
               }
             }
@@ -358,7 +357,7 @@ export const filterToQuery = (
               colQuery.push(` ${alias}${colName} NOT LIKE '%${filter}%'`);
             }
 
-            if (type === 'starts with') {
+            if (type === 'startswith') {
               colQuery.push(` ${alias}${colName} LIKE '${filter}%'`);
             }
 
