@@ -23,8 +23,12 @@ const useApiAndNavigate = () => {
         navigate('/register/admin');
       }
 
+
       return res;
     } catch (error) {
+      if (error?.status === 401) {
+        navigate('/login')
+      }
       throw error
       console.log({ error });
 
