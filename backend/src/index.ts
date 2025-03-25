@@ -1,8 +1,7 @@
-import { InternalServerError } from 'express-openapi-validator/dist/openapi.validator';
 import {
   BadRequestError,
+  ForbiddenError,
   NotFoundError,
-  UnauthorizedError,
 } from './generated/api';
 import { PontusService } from './generated/api/resources/pontus/service/PontusService';
 import {
@@ -138,7 +137,6 @@ export default new PontusService({
   },
   authUserCreatePost: async (req, res) => {
     // await setup();
-    console.log({req})
 
     const response = await authUserCreate(req.body);
 
@@ -330,7 +328,7 @@ export default new PontusService({
     const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.create) {
-      throw new UnauthorizedError(
+      throw new ForbiddenError(
         'This user does not have any groups with such authorization',
       );
     }
@@ -341,7 +339,7 @@ export default new PontusService({
     const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.read) {
-      throw new UnauthorizedError(
+      throw new ForbiddenError(
         'This user does not have any groups with such authorization',
       );
     }
@@ -353,7 +351,7 @@ export default new PontusService({
     const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.update) {
-      throw new UnauthorizedError(
+      throw new ForbiddenError(
         'This user does not have any groups with such authorization',
       );
     }
@@ -366,7 +364,7 @@ export default new PontusService({
     const perms = await checkTableMetadataPermissions(req['user']['userId']);
 
     if (!perms.delete) {
-      throw new UnauthorizedError(
+      throw new ForbiddenError(
         'This user does not have any groups with such authorization',
       );
     }
