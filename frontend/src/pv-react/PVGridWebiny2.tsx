@@ -162,6 +162,7 @@ const PVGridWebiny2 = ({
   >([]);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const gridContainerRef = useRef<AgGridReact>(null);
+  const [valueChanged, setValueChanged] = useState(false)
 
   useEffect(() => {
     if (!columnState || !onValueChange || !id) return;
@@ -184,7 +185,6 @@ const PVGridWebiny2 = ({
       setRowsStateHasChanged(false)
       onRowsStateChange && rowsAlterations && onRowsStateChange(alterations);
     }
-    console.log({ alterations })
   }
 
   useEffect(() => {
@@ -364,7 +364,7 @@ const PVGridWebiny2 = ({
               //  }
               const kind = colDef?.kind
               if (kind === 'checkboxes') {
-                return { ...colDef, checkboxSelection: true }
+                return { ...colDef, cellEditor: "agCheckboxCellEditor", cellRenderer: 'agCheckboxCellRenderer', }
 
               }
               return colDef
@@ -693,9 +693,12 @@ const PVGridWebiny2 = ({
 
 
   const onCellValueChanged = (cell: CellValueChangedEvent) => {
+
     onCellValueChange && onCellValueChange(cell);
 
     setCellsChanged([...cellsChanged, cell]);
+
+    setValueChanged(true)
 
     setRowsAlterations((prevState) => [...new Set([...prevState, cell.data])]);
   };
@@ -782,7 +785,7 @@ const PVGridWebiny2 = ({
 
           onRefresh={onRefresh}
           updateModeOnRows={updateModeOnRows}
-          changesMade={rowStateHasChanged}
+          changesMade={valueChanged}
           onUpdate={handleOnUpdate}
           updateMode={updateMode}
           setDeleteMode={setDeleteMode}
