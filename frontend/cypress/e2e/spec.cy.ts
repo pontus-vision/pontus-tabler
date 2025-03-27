@@ -281,7 +281,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').type('Foo')
 
-      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_2"]').type('Bar{enter}')
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_2"]').click().type('Bar{enter}')
 
       cy.contains('Table row created.').should('exist')
 
@@ -320,13 +320,15 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.contains('Table 1').click()
 
+      cy.get('span.ag-header-cell-text').eq(0).should('have.text', 'column 1')
+
       cy.get("[data-cy='edit-on-grid-toggle']").click()
 
       cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').dblclick()
 
-      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').type('Foo2')
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').click().type('Foo2')
 
-      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').type('Bar2{enter}')
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').click().type('Bar2{enter}')
 
       cy.visit(`${url}/tables/read`)
 
@@ -360,12 +362,27 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').first().contains('Foo2')
 
-
       cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').eq(1).contains('Foo2')
+
       cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').first().contains('Foo2')
 
-
       cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').eq(1).contains('Foo')
+
+      cy.get('[data-cy="table-relationship-preview-col"]').eq(2).find('td').first().contains('Foo')
+
+      cy.get('[data-cy="table-relationship-preview-col"]').eq(2).find('td').eq(1).contains('Foo2')
+
+      cy.get('[data-cy="table-relationship-preview-col"]').eq(3).find('td').first().contains('Foo')
+
+      cy.get('[data-cy="table-relationship-preview-col"]').eq(3).find('td').eq(1).contains('Foo')
+
+      cy.get('[data-cy="select-tables-edge-label-dropdown"]').find('input').click().type('edge 1').type('{enter}')
+
+      cy.get('[data-cy="select-tables-edge-label-dropdown"]').find('[role="option"][aria-selected="false"]').contains('edge 1').click()
+
+      cy.contains('Create').click()
+
+      cy.contains('Edge(s) created!').should('exist')
     }),
     it.skip('should get unauthorized page', () => {
       cy.task('log', 'This will be output to the terminal');
