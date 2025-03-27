@@ -4,6 +4,7 @@ import EdgeGridView from '../components/EdgeGridView';
 import {
   AuthGroupTablesReadReq,
   ReadPaginationFilter,
+  TableDataEdgeCreateReq,
   TableReadRes,
   TablesReadRes,
 } from '../typescript/api';
@@ -37,6 +38,7 @@ const EdgesView = () => {
   useEffect(() => {
     fetchTables();
   }, []);
+
   const fetchTables = async () => {
     const req: ReadPaginationFilter = {
       from: 1,
@@ -65,12 +67,14 @@ const EdgesView = () => {
 
   const createEdges = async () => {
     if (!tableFrom || !tableTo || !selectedEdge) return;
-    const res = await tableDataEdgeCreate({
+    const obj: TableDataEdgeCreateReq = {
       edge: selectedEdge,
       edgeType: selectedEdgeType,
-      tableFrom: { rowIds: rows1.map((row) => row.id), tableName: tableFrom },
-      tableTo: { rowIds: rows2.map((row) => row.id), tableName: tableTo },
-    });
+      tableFrom: { rows: rows1, tableName: tableFrom },
+      tableTo: { rows: rows2, tableName: tableTo },
+    }
+
+    const res = await tableDataEdgeCreate(obj);
 
     notificationManagerRef?.current?.addMessage(
       'success',
@@ -83,13 +87,17 @@ const EdgesView = () => {
     <div className="edges-view">
       <div className="edges-view__panel">
         <div className="select-tables-container">
-          <div className="select-tables-container__col">
+          <div className="select-tables-container__col" data-cy="select-tables-container-1">
             from:
             <EdgeGridView
-              onFirstColId={(e) => setTableFromColId(e)}
-              onLoadedRows={(e) => setRows1(e)}
+              onFirstColId={(e) => { setTableFromColId(e) }}
+              onLoadedRows={(e) => {
+                setRows1(e)
+              }}
               options={tableOptions}
-              onTableSelect={(e) => setTableFrom(e)}
+              onTableSelect={(e) => {
+                setTableFrom(e)
+              }}
               onEdges={handleEdgesList}
             />
           </div>
@@ -109,10 +117,12 @@ const EdgesView = () => {
               array2={rows2.map((el, index) => el?.[tableToColId])}
             />
           </div>
-          <div className="select-tables-container__col">
+          <div className="select-tables-container__col" data-cy="select-tables-container-2">
             to:
             <EdgeGridView
-              onFirstColId={(e) => setTableToColId(e)}
+              onFirstColId={(e) => {
+                setTableToColId(e)
+              }}
               options={tableOptions}
               onLoadedRows={(e) => setRows2(e)}
               onTableSelect={(e) => setTableTo(e)}
