@@ -505,7 +505,7 @@ export const authenticateToken = async (
 
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
     console.log({ tokenErr: err });
-    if (err) throw new BadRequestError(`token needed.`);
+    if (err) throw { code: 401, message: `token needed.` }
     req.user = user;
     return true;
   });
