@@ -273,9 +273,11 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.wait(3000)
 
+      cy.contains('Loading...').should('not.exist')
+
       cy.get("[data-cy='edit-on-grid-toggle']").click()
 
-      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').dblclick()
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').click()
 
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').type('Foo')
 
@@ -286,6 +288,84 @@ describe('Test Table (meta-data and data) CRUD', () => {
       cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').should('have.text', 'Foo')
+
+      cy.visit(`${url}/tables/read`)
+
+      cy.contains('Table 2').click()
+
+      cy.contains('Table 2').should('be.visible')
+
+      cy.contains('column 1').should('exist')
+
+      cy.wait(3000)
+
+      cy.get("[data-cy='edit-on-grid-toggle']").click()
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').dblclick()
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"] input').click()
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_2"] input').click()
+
+      cy.get(`[data-cy="grid-action-panel-save-btn"]`).click()
+
+      cy.contains('Table row created.').should('exist')
+
+      cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
+
+      cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"] input').should('be.checked')
+    }),
+    it('should create edges between table rows', () => {
+      cy.visit(`${url}/tables/read`)
+
+      cy.contains('Table 1').click()
+
+      cy.get("[data-cy='edit-on-grid-toggle']").click()
+
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').dblclick()
+
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').type('Foo2')
+
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').type('Bar2{enter}')
+
+      cy.visit(`${url}/tables/read`)
+
+      cy.contains('Table 1').click()
+
+      cy.get("[data-cy='edit-on-grid-toggle']").click()
+
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').dblclick()
+
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').type('Foo2')
+
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').type('Bar2{enter}')
+
+      cy.contains('Table row created.').should('exist')
+
+      cy.get("[data-cy='burguer-menu-input']").click()
+
+      cy.contains('Tables').click()
+
+      cy.get("[data-cy='burguer-menu-input']").click()
+
+      cy.contains('Create Edges').click()
+
+      cy.get('[data-cy="select-tables-container-1"] select').select('Table 1')
+
+      cy.get('[data-cy="select-tables-container-1"]').contains('Loading...').should('not.exist')
+
+      cy.get('[data-cy="select-tables-container-2"] select').select('Table 1')
+
+      cy.get('[data-cy="select-tables-container-2"]').contains('Loading...').should('not.exist')
+
+      cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').first().contains('Foo2')
+
+
+      cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').eq(1).contains('Foo2')
+      cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').first().contains('Foo2')
+
+
+      cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').eq(1).contains('Foo')
     }),
     it.skip('should get unauthorized page', () => {
       cy.task('log', 'This will be output to the terminal');

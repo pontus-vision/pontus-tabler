@@ -130,7 +130,7 @@ export const createTableDataEdge = async (
   }
 
   const res = (await createSql(
-    data.jointTableName || data.edge || `${tableNameFrom}_${tableNameTo}`,
+    snakeCase(data.jointTableName) || snakeCase(data.edge) || `${tableNameFrom}_${tableNameTo}`,
     sqlFields + ', ' + sqlFields2 + ', edge_label STRING',
     insertFields.map((field) => {
       if (data?.edge) {
