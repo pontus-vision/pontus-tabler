@@ -45,7 +45,7 @@ const EdgeGridView = ({
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(8);
   const [selectedRows, setSelectedRows] = useState<IRowNode<any>[]>();
-
+  const [isLoading, setIsLoading] = useState(false)
   const { fetchDataAndNavigate } = useApiAndNavigate();
 
   const fetchTableRows = async () => {
@@ -57,12 +57,14 @@ const EdgeGridView = ({
       to,
       filters,
     };
+    setIsLoading(true)
 
     const res = (await fetchDataAndNavigate(
       tableDataRead,
       req,
     )) as AxiosResponse<TableDataReadRes>;
-    console.log({ res });
+
+    setIsLoading(false)
 
     if (res?.status !== 200) {
       setList([]);
@@ -79,13 +81,9 @@ const EdgeGridView = ({
         return [...new Set(arr)];
       })[0] as string[];
 
-      console.log(edges);
-
       rows && setList(rows);
 
       onEdges && edges && onEdges(edges);
-
-      console.log({ edges });
     }
   };
   useEffect(() => {
@@ -103,7 +101,6 @@ const EdgeGridView = ({
     setDropdownValue(undefined);
     setTimeout(() => {
       const edges = val?.edges;
-      console.log({ edges });
       setDropdownValue(val);
       val?.name && onTableSelect && onTableSelect(val?.name);
     }, 1);
@@ -132,15 +129,6 @@ const EdgeGridView = ({
     setSelectedRows(e);
   };
 
-  useEffect(() => {
-    console.log({ dropdownValue });
-  }, [dropdownValue]);
-
-  useEffect(() => {
-    console.log({ list });
-    onLoadedRows && onLoadedRows(list);
-  }, [list]);
-
   return (
     <div className="list-with-dropdown">
       <select onChange={handleDropdownChange}>
@@ -167,14 +155,20 @@ const EdgeGridView = ({
         //     </div>
         <PVGridWebiny2
           onColumnState={(cols) => {
-            const colId = cols.at(3)?.colId;
+            console.log({ cols })
+            const colId = cols.at(4)?.colId;
             console.log({ colId });
             colId && onFirstColId && onFirstColId(colId);
           }}
-          onRowClicked={(e) => addToSelectedItemsArr(e.data)}
+          isLoading={isLoading}
+          onRowClicked={(e) => {
+            console.log({ e })
+            addToSelectedItemsArr(e.data)
+          }}
           onRefresh={() => fetchTableRows()}
           rows={list}
           onParamsChange={handleParamsChange}
+
           onRowsSelected={handleRowsSelected}
           rowsSelected={selectedRows}
           cols={dropdownValue.cols}
