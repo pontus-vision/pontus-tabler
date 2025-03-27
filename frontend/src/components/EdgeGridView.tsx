@@ -83,6 +83,8 @@ const EdgeGridView = ({
 
       rows && setList(rows);
 
+      onLoadedRows(rows)
+
       onEdges && edges && onEdges(edges);
     }
   };
