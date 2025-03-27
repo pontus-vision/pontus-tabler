@@ -24,17 +24,15 @@ const TableRelationshipsPreview = ({ array1, array2, onSelect }: Props) => {
     <>
       <div className={styles.tabs}>
         <button
-          className={`${styles.tab} ${
-            activeTab === 'oneToMany' ? styles.activeTab : ''
-          }`}
+          className={`${styles.tab} ${activeTab === 'oneToMany' ? styles.activeTab : ''
+            }`}
           onClick={() => setActiveTab('oneToMany')}
         >
           One to Many
         </button>
         <button
-          className={`${styles.tab} ${
-            activeTab === 'oneToOne' ? styles.activeTab : ''
-          }`}
+          className={`${styles.tab} ${activeTab === 'oneToOne' ? styles.activeTab : ''
+            }`}
           onClick={() => setActiveTab('oneToOne')}
         >
           One to One
@@ -45,8 +43,8 @@ const TableRelationshipsPreview = ({ array1, array2, onSelect }: Props) => {
           <table className={styles.table}>
             <tbody>
               {array1.flatMap((item, index) =>
-                array2.map((subItem) => (
-                  <tr key={uuidv4()} className={styles.tableRow}>
+                array2.map((subItem, index2) => (
+                  <tr data-cy={`table-relationship-preview-col`} key={uuidv4()} className={styles.tableRow}>
                     <td className={styles.tableCell}>{item}</td>
                     <td className={styles.tableCell}>{subItem}</td>
                   </tr>
