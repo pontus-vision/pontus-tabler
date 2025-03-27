@@ -26,11 +26,13 @@ const useApiAndNavigate = () => {
 
       return res;
     } catch (error) {
-      if (error?.status === 401) {
+      if (error?.response?.status === 401) {
+        navigate('/unauthorized')
+      }
+      if (error?.response?.status === 403) {
         navigate('/login')
       }
       throw error
-      console.log({ error });
 
     } finally {
       setLoading(false);
