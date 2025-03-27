@@ -224,6 +224,7 @@ const GridActionsPanel = ({
     );
   }
 
+
   return (
     <div className="grid-actions-panel">
       {deleteMode ||
@@ -292,19 +293,19 @@ const GridActionsPanel = ({
             Delete Mode
           </button>
         ))}
-      {updateMode ||
+      {/*updateMode ||
         deleteMode ||
         (permissions?.updateAction &&
-          (changesMade && (
-            <div
-              data-cy="grid-action-panel-save-btn"
-              onClick={() => {
-                onUpdate && onUpdate();
-              }}
-            >
-              <IoIosSave style={{ fontSize: '1.3rem' }} />
-            </div>
-          )))}
+          changesMade) && (
+          <div
+            data-cy="grid-action-panel-save-btn"
+            onClick={() => {
+              onUpdate && onUpdate();
+            }}
+          >
+            <IoIosSave style={{ fontSize: '1.3rem' }} />
+          </div>
+        )*/}
       {(!deleteMode && permissions?.updateAction && !updateMode) && (
         (
           <button
@@ -332,6 +333,19 @@ const GridActionsPanel = ({
         </label>
       </div>)}
 
+      {updateMode ||
+        deleteMode ||
+        (permissions?.updateAction &&
+          (changesMade && (
+            <div
+              data-cy="grid-action-panel-save-btn"
+              onClick={() => {
+                onUpdate && onUpdate();
+              }}
+            >
+              <IoIosSave style={{ fontSize: '1.3rem' }} />
+            </div>
+          )))}
       {deleteMode && (
         <div
           style={{
