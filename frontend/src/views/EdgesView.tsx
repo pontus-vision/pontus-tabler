@@ -101,7 +101,7 @@ const EdgesView = () => {
               onEdges={handleEdgesList}
             />
           </div>
-          <div className="select-tables-container__select">
+          <div className="select-tables-container__select" data-cy="select-tables-edge-label-dropdown">
             <Select
               placeholder={'Select Edge'}
               onChange={(e) => setSelectedEdge(e?.value)}
