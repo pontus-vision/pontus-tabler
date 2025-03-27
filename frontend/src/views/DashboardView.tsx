@@ -183,7 +183,6 @@ const DashboardView = ({
     if (!id) return;
     const fetchDashboard = async () => {
       try {
-
         const obj: DashboardReadReq = { id }
         const res = await fetchDataAndNavigate(readDashboard, obj)
 

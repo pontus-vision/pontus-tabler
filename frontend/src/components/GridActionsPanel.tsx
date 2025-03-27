@@ -293,19 +293,6 @@ const GridActionsPanel = ({
             Delete Mode
           </button>
         ))}
-      {/*updateMode ||
-        deleteMode ||
-        (permissions?.updateAction &&
-          changesMade) && (
-          <div
-            data-cy="grid-action-panel-save-btn"
-            onClick={() => {
-              onUpdate && onUpdate();
-            }}
-          >
-            <IoIosSave style={{ fontSize: '1.3rem' }} />
-          </div>
-        )*/}
       {(!deleteMode && permissions?.updateAction && !updateMode) && (
         (
           <button

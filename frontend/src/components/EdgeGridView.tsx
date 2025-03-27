@@ -157,14 +157,11 @@ const EdgeGridView = ({
         //     </div>
         <PVGridWebiny2
           onColumnState={(cols) => {
-            console.log({ cols })
             const colId = cols.at(4)?.colId;
-            console.log({ colId });
             colId && onFirstColId && onFirstColId(colId);
           }}
           isLoading={isLoading}
           onRowClicked={(e) => {
-            console.log({ e })
             addToSelectedItemsArr(e.data)
           }}
           onRefresh={() => fetchTableRows()}
