@@ -21,6 +21,7 @@ import NotificationManager, {
   MessageRefs,
 } from '../../../components/NotificationManager';
 import useApiAndNavigate from '../../../hooks/useApi';
+import { TableReadReq } from '../../../typescript/api';
 
 const TableDataReadView = () => {
   const [cols, setCols] = useState<TableColumnRef[]>([]);

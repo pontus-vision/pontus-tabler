@@ -169,7 +169,6 @@ const TablesReadView = ({ rowsTested }: Props) => {
           onRefresh={handleOnRefresh}
           onCreateRow={e => handleCreateRow(e)}
           onUpdateRow={e => handleUpdateRow(e)}
-
           cols={cols}
           onDelete={handleDelete}
           onRowClicked={handleRowClicked}

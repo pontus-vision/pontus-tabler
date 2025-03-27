@@ -290,7 +290,6 @@ export const filterToQuery = (
       const operator = cols[col]?.operator;
 
       const colQuery = [];
-
       if (filterType === 'text') {
         const filter = cols[col]?.filter; // When we received a object from just one colName, the property is on a higher level
         if (conditions?.length > 0) {
