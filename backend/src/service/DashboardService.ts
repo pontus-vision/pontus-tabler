@@ -42,11 +42,11 @@ export const updateDashboard = async (
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
 
-export const readDashboardById = async (dashboardId: string) => {
+export const readDashboardById = async (dashboardId: string, userId: string) => {
   if (dbSource === COSMOS_DB) {
     return cdb.readDashboardById(dashboardId);
   } else if (dbSource === DELTA_DB) {
-    return deltadb.readDashboardById(dashboardId);
+    return deltadb.readDashboardById(dashboardId, userId);
   }
   throw new InternalServerError(`invalid data source. ${dbSource}`);
 };
