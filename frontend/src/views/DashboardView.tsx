@@ -22,6 +22,8 @@ import {
   DashboardRef,
 } from '../pontus-api/typescript-fetch-client-generated';
 import Alert from 'react-bootstrap/esm/Alert';
+import useApiAndNavigate from '../hooks/useApi';
+import { DashboardReadReq } from '../typescript/api';
 
 type Props = {
   dashboardId?: string;
@@ -62,6 +64,7 @@ const DashboardView = ({
   const [deletion, setDeletion] = useState();
   const [initialState, setInitialState] = useState<IJsonModel>();
   const { id } = useParams();
+  const { fetchDataAndNavigate } = useApiAndNavigate()
 
   const { userGroups: userRole } = useAuth();
 
@@ -180,7 +183,9 @@ const DashboardView = ({
     if (!id) return;
     const fetchDashboard = async () => {
       try {
-        const res = await readDashboard(id);
+
+        const obj: DashboardReadReq = { id }
+        const res = await fetchDataAndNavigate(readDashboard, obj)
 
         if (res?.status !== 200) {
           setName(res?.data.name || '');
@@ -293,7 +298,7 @@ const DashboardView = ({
     <div className="dashboard-view">
       <h1 className="title">{dashboard?.name}</h1>
 
-      {userRole.some(role => role.name === 'Admin') && (
+      {(
         <div className="actions-panel">
           {/* {addCmp && <div className="shadow-mobile"></div>} */}
           {updateAction && (
