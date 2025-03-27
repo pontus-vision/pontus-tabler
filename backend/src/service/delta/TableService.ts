@@ -270,9 +270,11 @@ export const deleteTable = async (data: TableDeleteReq) => {
     //     `DELETE FROM ${snakeCase(data.name)}`,
 
     //   )) as any;
+    const sql2 = (await runQuery(
+      `DELETE FROM ${snakeCase(data.name)}`,
+    )) as any;
     const sql3 = (await runQuery(
       `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
-
     )) as any;
 
     const affectedRows = +sql[0]['num_affected_rows'];
