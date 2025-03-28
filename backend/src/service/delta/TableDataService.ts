@@ -46,7 +46,6 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
 export const createTableData = async (
   data: TableDataCreateReq,
 ): Promise<TableDataCreateRes> => {
-  console.log({data})
   const tableName = snakeCase(data.tableName);
 
   const cols = {};

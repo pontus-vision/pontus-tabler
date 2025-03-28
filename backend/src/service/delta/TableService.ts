@@ -82,9 +82,8 @@ export const createTable = async (
 
   const table_name = snakeCase(data.name)
 
-  "CREATE TABLE IF NOT EXISTS table_2 (id STRING ) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2', 'delta.minWriterVersion' = '5')"
-
   const queryCreate = `CREATE TABLE IF NOT EXISTS ${table_name} (id STRING ${arr2.length > 0 ? `, ${arr2.join(", ")})` : ')'} USING DELTA LOCATION '/data/pv/${table_name}' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5')`
+
   const res = await runQuery(queryCreate)
   return { ...sql3[0], cols: JSON.parse(sql3[0].cols as any) };
 };
@@ -271,9 +270,11 @@ export const deleteTable = async (data: TableDeleteReq) => {
     //     `DELETE FROM ${snakeCase(data.name)}`,
 
     //   )) as any;
+    const sql2 = (await runQuery(
+      `DELETE FROM ${snakeCase(data.name)}`,
+    )) as any;
     const sql3 = (await runQuery(
       `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
-
     )) as any;
 
     const affectedRows = +sql[0]['num_affected_rows'];
@@ -298,7 +299,6 @@ export const readTables = async (
     sortModel: body.sortModel
   }, "");
   const whereClause2 = filterToQuery({ filters: filtersSnakeCase }, "");
-
   const sql = (await runQuery(
     `SELECT * FROM ${TABLES} ${whereClause}`,
   )) as TablesReadResTablesItem[];

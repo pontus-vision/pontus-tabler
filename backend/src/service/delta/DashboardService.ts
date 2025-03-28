@@ -18,6 +18,8 @@ import {
   DashboardAuthGroups,
   Dashboard,
   DashboardsReadReq,
+  DashboardReadReq,
+  DashboardReadRes
 } from '../../typescript/api';
 import { createSql, filterToQuery, generateUUIDv6, isJSONParsable, runQuery, updateSql } from '../../db-utils';
 import { NotFoundError } from '../../generated/api';
@@ -118,7 +120,21 @@ export const updateDashboard = async (
   };
 };
 
-export const readDashboardById = async (dashboardId: string) => {
+export const readDashboardById = async (dashboardId: string, userId: string) => {
+  if (userId) {
+    const isAdminCheck = await runQuery(`
+SELECT EXISTS (
+    SELECT 1
+    FROM groups_users
+    WHERE table_to__id = '${userId}' and table_from__name = 'Admin'
+) AS record_exists;
+`)
+    console.log({ RECORD_EXISTS: typeof isAdminCheck[0]['record_exists'], isAdminCheck: isAdminCheck[0] })
+    if (isAdminCheck[0]['record_exists'] === false) {
+      return readDashboardById2(dashboardId, userId)
+
+    }
+  }
   const sql = await runQuery(
     `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
   );
@@ -131,6 +147,30 @@ export const readDashboardById = async (dashboardId: string) => {
   return { ...sql[0], state: JSON.parse(sql[0]['state']) };
 };
 
+const readDashboardById2 = async (
+  dashboardId: string,
+  userId: string
+): Promise<DashboardReadRes> => {
+  const selectQuery = `SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = '${userId}' AND B.table_from__read = TRUE `
+
+  const query1 = `${selectQuery}`
+
+  console.log({ query1 })
+  const sql = await runQuery(
+    query1,
+  );
+  if (sql.length === 0) {
+    throw new NotFoundError('Dashboard not found at id ' + dashboardId);
+  }
+
+  return {
+    id: sql[0]?.id,
+    name: sql[0]?.name,
+    owner: sql[0]?.owner,
+    folder: sql[0]?.folder,
+    state: JSON.parse(sql[0]['state'])
+  };
+};
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   const sql = await runQuery(
     `DELETE FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
@@ -194,7 +234,7 @@ SELECT EXISTS (
   };
 };
 
-export const readDashboards2 = async (
+const readDashboards2 = async (
   body: DashboardsReadReq,
   userId: string
 ): Promise<DashboardsReadRes> => {

@@ -183,6 +183,7 @@ const TablesReadView = ({ rowsTested }: Props) => {
         />
         <NotificationManager ref={notificationManagerRef} />
       </div>
+      <button style={{ marginTop: '2rem', transform: 'translateX(-50%)', position: 'relative', left: '50%' }} type='button' onClick={e => navigate('/table/edges')}>Create Edges</button>
     </>
   );
 };

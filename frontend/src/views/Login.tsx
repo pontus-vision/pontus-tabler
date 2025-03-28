@@ -76,7 +76,7 @@ const LoginPage = () => {
                   className="custom-control-input"
                   id="customCheck1"
                 />
-                <label className="custom-control-label" htmlFor="customCheck1">
+                <label className="custom-control-label" htmlFor="customCheck1" style={{ marginLeft: '.3rem' }}>
                   Remember me
                 </label>
               </div>

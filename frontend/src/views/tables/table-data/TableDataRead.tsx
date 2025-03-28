@@ -2,14 +2,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import PVGridWebiny2 from '../../../pv-react/PVGridWebiny2';
 import { useEffect, useRef, useState } from 'react';
 import {
-  deleteTable,
   tableDataCreate,
   tableDataDelete,
   tableDataRead,
   tableRead,
 } from '../../../client';
 import {
-  ReadPaginationFilter,
   ReadPaginationFilterFilters,
   TableColumnRef,
   TableDataCreateReq,
@@ -41,14 +39,13 @@ const TableDataReadView = () => {
   const [to, setTo] = useState<number>(8);
   const [isLoading, setIsLoading] = useState(false)
   const notificationManagerRef = useRef<MessageRefs>();
-  const { fetchDataAndNavigate, loading } = useApiAndNavigate()
+  const { fetchDataAndNavigate } = useApiAndNavigate()
 
   useEffect(() => {
     if (!tableId) return;
 
     const fetchTable = async (tableId: string) => {
       try {
-
         const res = await fetchDataAndNavigate(tableRead, { id: tableId });
 
         const colsRes = res?.data.cols?.map((col) => {
@@ -96,8 +93,9 @@ const TableDataReadView = () => {
 
       setRows(dataRows);
       setRowCount(res?.data.rowsCount);
-      console.log({ res: dataRows });
     } catch (error: any) {
+      setRows([])
+      setRowCount(1)
       if (error?.code === 500) {
         notificationManagerRef?.current?.addMessage(
           'error',
@@ -203,7 +201,9 @@ const TableDataReadView = () => {
             cols={cols}
             add={goToCreateTableDataView}
             onDelete={handleDelete}
-            permissions={{ createAction: true, deleteAction: true }}
+            updateModeOnRows={true}
+            onUpdate={e => createTableDataRow(e?.[0])}
+            permissions={{ createAction: true, deleteAction: true, updateAction: true }}
             totalCount={rowCount}
             onRefresh={fetchTableData}
             onCreateRow={createTableDataRow}

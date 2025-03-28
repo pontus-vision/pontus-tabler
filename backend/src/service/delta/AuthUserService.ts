@@ -185,7 +185,6 @@ export const registerAdmin = async (
   data: RegisterAdminReq,
 ): Promise<RegisterAdminRes> => {
 
-    console.log({admin:data})
   if (data.password !== data.passwordConfirmation) {
     throw new BadRequestError('Password fields does not match.');
   }
@@ -494,12 +493,12 @@ export const authenticateToken = async (
 
   const token = tokenArr[1]
 
-  if (tokenArr.length !== 2) {
-    throw { code: 400, message: 'wrong format of token' };
+  if (!token) {
+    throw { code: 401, message: 'No token was detected in the input.' };
   }
 
-  if (!token) {
-    throw { code: 400, message: 'No token was detected in the input.' };
+  if (tokenArr.length !== 2) {
+    throw { code: 401, message: 'wrong format of token' };
   }
 
   const claims = getJwtClaims(token);
