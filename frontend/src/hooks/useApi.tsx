@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const useApiAndNavigate = () => {
+  const { t, i18n } = useTranslation()
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -26,10 +28,10 @@ const useApiAndNavigate = () => {
 
       return res;
     } catch (error) {
-      if (error?.response?.status === 401) {
+      if (error?.response?.status === 403) {
         navigate('/unauthorized')
       }
-      if (error?.response?.status === 403) {
+      if (error?.response?.status === 401) {
         navigate('/login')
       }
       throw error

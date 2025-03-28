@@ -26,9 +26,7 @@ const CreateUser = () => {
         name: userName,
         authGroups: selectedGroups,
       });
-
-      console.log(data?.data);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {

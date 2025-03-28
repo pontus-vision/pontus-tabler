@@ -17,6 +17,17 @@
     width: 100%;
     border-radius: 0;
     background-color: #4593a3;
+    &.settings-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 90.5vh;
+      svg {
+        position: absolute;
+        left: 2rem;
+      }
+    }
    &.opened {
     background-color: #356d79
  }

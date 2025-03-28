@@ -30,6 +30,8 @@ import AuthUsersView from './views/AuthUsersView';
 import RegisterView from './views/Register';
 import RegisterUser from './views/users/RegisterUser'
 import NotificationManager, { MessageRefs } from './components/NotificationManager';
+import SettingsView from './views/SettingsView';
+import { useTranslation } from 'react-i18next';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -39,6 +41,14 @@ function App() {
   const [dashboardId, setDashboardId] = useState<string>();
 
   const [openedSidebar, setOpenedSidebar] = useState(false);
+
+  const { i18n, t } = useTranslation();
+
+  useEffect(() => {
+    const language = localStorage.getItem('language')
+    i18n.changeLanguage(language)
+  }, [])
+
 
   return (
     <AuthProvider>
@@ -62,6 +72,7 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/dashboard" element={<DashboardView />} />
           <Route path="/admin" element={<AdminView />} />
+          <Route path="/settings" element={<SettingsView />} />
           <Route path="/tables/read" element={<TablesReadView />} />
           <Route
             path="/table/data/read/:id"

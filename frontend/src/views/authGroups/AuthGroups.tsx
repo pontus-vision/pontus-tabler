@@ -16,6 +16,7 @@ import {
   IGetRowsParams,
   IRowNode,
 } from 'ag-grid-community';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   onCellClicked?: (e: CellClickedEvent<any, any>) => void;
@@ -57,6 +58,7 @@ const AuthGroups = ({
   groupsToFilterOutById,
   paginationPageSize
 }: Props) => {
+  const { t } = useTranslation()
   const [totalGroups, setTotalGroups] = useState<number>();
   const [isLoading1, setIsLoading1] = useState(false);
   const [authGroups, setAuthGroups] = useState<AuthGroupRef[]>([]);
@@ -86,8 +88,8 @@ const AuthGroups = ({
     } else if (res?.status === 500) {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not fetch Auth Group(s)!',
+        t('Error'),
+        `${t('Something went wrong. Could not fetch')} ${t('Auth Group(s)')}!`,
       );
       setAuthGroups([]);
       setTotalGroups(0);
@@ -118,15 +120,15 @@ const AuthGroups = ({
         if (res?.status === 200) {
           notificationManagerRef?.current?.addMessage(
             'success',
-            'Success',
-            'Auth Group(s) deleted!',
+            t('Success'),
+            t(`Auth Group(s) deleted`),
           );
           await fetchAuthGroups();
         } else {
           notificationManagerRef?.current?.addMessage(
             'error',
-            'Error',
-            'Something wrong happened! Could not delete.',
+            t('Error'),
+            t(`Something wrong happened! Could not delete`),
           );
         }
       }
@@ -141,26 +143,20 @@ const AuthGroups = ({
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        `AuthGroup(s) created!`,
+        t('Success'),
+        t(`AuthGroup(s) created`),
       );
 
       await fetchAuthGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not create Auth Group(s)!',
+        t('Error'),
+        `${t('Something went wrong. Could not create')} ${t('Auth Group(s)')}!`,
       );
     }
 
     return
-    setGroupsToBeAdded(null);
-    // setGroupsChanged(groupsChanged.filter((group) => !!group.id));
-    // console.log({ groupsChanged });
-    resetRowsState();
-    setGroupsChanged([]);
-    setAddMode(false);
   };
 
   const resetRowsState = () => {
@@ -171,7 +167,6 @@ const AuthGroups = ({
   };
 
   const updateGroups = async () => {
-    console.log({ groupsChanged });
     if (groupsChanged.length === 0) return;
     const fails = [];
 
@@ -182,8 +177,8 @@ const AuthGroups = ({
       if (res.status !== 200) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          `Something went wrong. Could not update Auth Group to ${group.name}.`,
+          t('Error'),
+          `${t('Something went wrong. Could not update')} Auth Group to ${group.name}.`,
         );
         fails.push(res.status);
       }
@@ -191,8 +186,8 @@ const AuthGroups = ({
       if (index === groupsToBeUpdated.length - 1 && fails.length === 0) {
         notificationManagerRef?.current?.addMessage(
           'success',
-          'Success',
-          `Auth Group(s) updated.`,
+          t('Success'),
+          t(`Auth Group(s) updated.`),
         );
       }
     }
@@ -283,7 +278,7 @@ const AuthGroups = ({
         onRowsStateChange={(e) => handleRowsStateChange(e)}
         cols={[
           {
-            headerName: 'Name',
+            headerName: t('Name'),
             field: 'name',
             sortable: true,
 

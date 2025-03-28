@@ -31,8 +31,10 @@ import FetchDashboards from '../dashboard/FetchDashboards';
 import AuthGroups from '../authGroups/AuthGroups';
 import MenuTree from '../../components/MenuTree';
 import useApiAndNavigate from '../../hooks/useApi';
+import { useTranslation } from 'react-i18next';
 
 const Dashboards = () => {
+  const { t } = useTranslation()
   const [groupsChanged, setGroupsChanged] = useState<DashboardAuthGroups[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
   const [from, setFrom] = useState<number>();
@@ -68,8 +70,8 @@ const Dashboards = () => {
       } else if (error?.status === 500) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          'Something went wrong. Could not fetch Auth Group(s)!',
+          t('Error'),
+          `${t('Something went wrong. Could not fetch')} Auth Group(s)!`,
         );
       }
 
@@ -94,16 +96,16 @@ const Dashboards = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        'Auth group(s) updated!',
+        t('Success'),
+        t('Auth group(s) updated!'),
       );
 
       await fetchDashboardAuthGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not update Auth Group(s)!',
+        t('Error'),
+        `${t('Something went wrong. Could not update')} Auth Group(s)!`,
       );
     }
   };
@@ -131,34 +133,33 @@ const Dashboards = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        'Auth group created!',
+        t('Success'),
+        `${t('Auth group created')}!`,
       );
 
       await fetchDashboardAuthGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not create Auth Group!',
+        t('Error'),
+        `${t('Something went wrong. Could not create')} ${t('Auth Group')}(s)!`,
       );
     }
   };
 
   const deleteDashboardsAuthGroup = async (data: DashboardAuthGroups[]) => {
     if (!selectedDashboard?.id) return;
-    const ids = data.map((el) => el.id);
 
     const res = await deleteDashboardGroupAuth({
-      authGroups: ids,
+      authGroups: data.map(el => { return { name: el.name, id: el.id } }),
       id: selectedDashboard?.id,
     });
 
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        'Auth Group(s) deleted!',
+        t('Success'),
+        t('Auth Group(s) deleted!'),
       );
       await fetchDashboardAuthGroups();
     } else {
@@ -227,39 +228,39 @@ const Dashboards = () => {
               isLoading={isLoading2}
               cols={[
                 {
-                  headerName: 'Group',
+                  headerName: t('Group'),
                   field: 'name',
                   editable: true,
                 },
                 {
-                  headerName: 'Group Id',
+                  headerName: `${t('Group')} Id`,
                   field: 'id',
                   // hide: true,
                   editable: true,
                 },
                 {
-                  headerName: 'Create',
+                  headerName: t('Create'),
                   field: 'create',
                   editable: true,
                   cellEditor: 'agCheckboxCellEditor',
                   cellRenderer: 'agCheckboxCellRenderer',
                 },
                 {
-                  headerName: 'Read',
+                  headerName: t('Read'),
                   field: 'read',
                   editable: true,
                   cellEditor: 'agCheckboxCellEditor',
                   cellRenderer: 'agCheckboxCellRenderer',
                 },
                 {
-                  headerName: 'Update',
+                  headerName: t('Update'),
                   field: 'update',
                   editable: true,
                   cellEditor: 'agCheckboxCellEditor',
                   cellRenderer: 'agCheckboxCellRenderer',
                 },
                 {
-                  headerName: 'Delete',
+                  headerName: t('Delete'),
                   field: 'delete',
                   editable: true,
                   cellEditor: 'agCheckboxCellEditor',
@@ -286,7 +287,7 @@ const Dashboards = () => {
                 }}
               />
               <button onClick={() => addDashboardAuthGroups()}>
-                Add Group(s)
+                {t('Add Group(s)')}
               </button>
             </div>
           </>

@@ -1,6 +1,7 @@
 import { ColDef, ColumnApi, ColumnState } from 'ag-grid-community';
 import { set } from 'immer/dist/internal';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ColumnSelectorProps {
   columns: Array<ColDef>;
@@ -17,6 +18,7 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
   setShowColumnSelector,
   columnState,
 }) => {
+  const { t } = useTranslation()
   const [selectedColumns, setSelectedColumns] = useState<
     Array<string | undefined>
   >([]);
@@ -107,8 +109,8 @@ const PVAggridColumnSelector: React.FC<ColumnSelectorProps> = ({
         })}
       </div>
       <div>
-        <button onClick={handleApply}>Apply</button>
-        <button onClick={handleCancel}>Cancel</button>
+        <button onClick={handleApply}>{t('Apply')}</button>
+        <button onClick={handleCancel}>{t('Cancel')}</button>
       </div>
     </div>
   );

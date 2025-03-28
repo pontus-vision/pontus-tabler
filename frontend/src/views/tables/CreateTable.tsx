@@ -50,7 +50,7 @@ const CreateTableView = ({ testId }: Props) => {
     try {
       console.log({ name, colsEmpty })
       if (!name || colsEmpty) {
-        throw `Please, there are some empty fields.`;
+        throw t("Please, fill the empty fields.");
       }
 
 
@@ -71,29 +71,29 @@ const CreateTableView = ({ testId }: Props) => {
       if (createRes?.status === 400) {
         throw new Error();
       } else if (createRes?.status === 409) {
-        throw 'There is already a table with that Name';
+        throw t('There is already a table with that Name');
       }
 
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        'Table created!',
+        t('Success'),
+        t('Table created'),
       );
     } catch (error: any) {
       console.log({ error })
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        typeof error === 'string' ? error : 'Could not create table',
+        t('Error'),
+        typeof error === 'string' ? error : t('Could not create table'),
       );
     }
   };
 
   const checkValidationError = (message: string) => {
     if (message.startsWith('required')) {
-      return 'This field is required';
+      return t('This field is required');
     } else if (message.startsWith('pattern')) {
-      return 'Special characters are not allowed';
+      return t('Special characters are not allowed');
     }
   };
 
