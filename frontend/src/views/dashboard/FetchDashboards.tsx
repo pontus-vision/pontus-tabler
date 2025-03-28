@@ -7,6 +7,7 @@ import { deleteDashboard, getAllDashboards } from '../../client';
 import { MessageRefs } from '../../components/NotificationManager';
 import { ColDef, IRowNode, RowEvent } from 'ag-grid-community';
 import useApiAndNavigate from '../../hooks/useApi';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   onRowClicked?: (row: RowEvent<any, any>) => void;
@@ -38,8 +39,8 @@ const FetchDashboards = ({
   dashboardsToFilterOutById,
   addRowOnEditMode = true
 }: Props) => {
+  const { t } = useTranslation()
   const [dashboards, setDashboards] = useState<Dashboard[]>();
-
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(100);
   const [filters, setFilters] = useState<{
@@ -47,13 +48,13 @@ const FetchDashboards = ({
   }>({});
   const [cols, setCols] = useState<ColDef[]>([
     {
-      headerName: 'Name',
+      headerName: t('Name'),
       field: 'name',
       filter: true,
       sortable: true,
     },
     {
-      headerName: 'Owner',
+      headerName: t('Owner'),
       field: 'owner',
       filter: true,
       sortable: true,
@@ -65,7 +66,7 @@ const FetchDashboards = ({
       sortable: true,
     },
     {
-      headerName: 'Folder',
+      headerName: t('Folder'),
       field: 'folder',
       filter: true,
       sortable: true,

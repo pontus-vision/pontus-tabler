@@ -9,8 +9,10 @@ import NotificationManager, {
   MessageRefs,
 } from '../../components/NotificationManager';
 import { IoIosFolderOpen } from 'react-icons/io';
+import { useTranslation } from 'react-i18next';
 
 const CreateDashboard = () => {
+  const { t } = useTranslation()
   const [newDashboardName, setNewDashboardName] = useState<string>();
   const [dashboardMenuItem, setDashboardMenuItem] = useState<MenuItemTreeRef>();
   const location = useLocation();
@@ -32,7 +34,7 @@ const CreateDashboard = () => {
         notificationManagerRef?.current?.addMessage(
           'info',
           '',
-          'Please, select a path!',
+          t("Please, select a path!"),
         );
 
         return;
@@ -58,15 +60,15 @@ const CreateDashboard = () => {
       }
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        'Dashboard Created!',
+        t('Success'),
+        t('Dashboard Created'),
       );
     } catch (error) {
       console.error({ error });
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Dashboard Could not created!',
+        t('Error'),
+        t("Something went wrong. Could not create") + " Dashboard",
       );
     }
   };
@@ -80,7 +82,7 @@ const CreateDashboard = () => {
   return (
     <>
       {!menuState ? <div>
-        <label htmlFor="">Dashboard Name: </label>
+        <label htmlFor="">{t('Dashboard Name')}: </label>
         <input
           data-cy="dashboard-view-name-input"
           type="text"
@@ -89,7 +91,7 @@ const CreateDashboard = () => {
       </div> :
         <label className='dashboard__name'>{menuState?.name}</label>
       }
-      {!openTree && dashboardMenuItem && menuState?.path && <label>Location Path: '{dashboardMenuItem?.path}'</label>}
+      {!openTree && dashboardMenuItem && menuState?.path && <label>{t('Location Path')}: '{dashboardMenuItem?.path}'</label>}
       {
         !location.state?.id && !openTree && (
           <IoIosFolderOpen data-cy="dashboard-view-open-directory" onClick={() => setOpenTree(true)} />
@@ -131,7 +133,7 @@ const CreateDashboard = () => {
           >
             <MenuTree onSelect={handleCreate} selectionOnly={true} />
             {dashboardMenuItem && <div>
-              <label>Folder selected: {dashboardMenuItem.name}</label>
+              <label>{t('Folder selected')}: {dashboardMenuItem.name}</label>
             </div>}
           </div>
         )

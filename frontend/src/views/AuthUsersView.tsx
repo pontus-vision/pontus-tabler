@@ -1,23 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  createAuthGroup,
-  createAuthGroupDashboards,
-  createDashboard,
-  createDashboardGroupAuth,
   createUserGroups,
-  deleteAuthGroupDashboards,
-  deleteDashboard,
-  deleteDashboardGroupAuth,
   deleteUser,
   deleteUserGroups,
-  getAllDashboards,
   readAuthGroupsDashboards as readAuthUserGroups,
-  readDashboardGroupAuth,
   readUserGroups,
   readUsers,
-  updateAuthGroupDashboards,
-  updateAuthGroups,
-  updateDashboardGroupAuth,
   updateUser,
 } from '../client';
 import {
@@ -26,34 +14,29 @@ import {
   AuthUserAndGroupsRef,
   AuthUserCreateReq,
   Dashboard,
-  DashboardAuthGroups,
   ReadPaginationFilterFilters,
 } from '../typescript/api';
 import PVGridWebiny2 from '../pv-react/PVGridWebiny2';
 import {
   CellClickedEvent,
-  CellValueChangedEvent,
   ColDef,
   IGetRowsParams,
-  RowEvent,
 } from 'ag-grid-community';
 import styles from './DashboardAuthGroupsView.module.scss';
 import NotificationManager, {
   MessageRefs,
 } from '../components/NotificationManager';
-import { deepEqual } from '../../utils';
 import { useNavigate } from 'react-router-dom';
-import SimpleTextEditor from '../pv-react/simpleTextEditor';
-import FetchDashboards from './dashboard/FetchDashboards';
-import { slice } from 'cypress/types/lodash';
 import AuthGroups from './authGroups/AuthGroups';
 import { AuthUserGroupRef } from '../typescript/api/resources/pontus/types/AuthUserGroupRef';
 import AuthUsersGrid from '../components/AuthUsersGrid';
 import { AuthUserRef } from '../typescript/api/resources/pontus/types/AuthUserRef';
 import useApiAndNavigate from '../hooks/useApi';
 import { createUser } from '../../src/client';
+import { useTranslation } from 'react-i18next';
 
 const AuthUsersView = () => {
+  const { t } = useTranslation()
   const [users, setAuthUsers] = useState<AuthGroupRef[]>([]);
   const [from, setFrom] = useState<number>();
   const [to, setTo] = useState<number>();
@@ -64,7 +47,7 @@ const AuthUsersView = () => {
   });
   const [cols, setCols] = useState<ColDef[]>([
     {
-      headerName: 'Name',
+      headerName: t('Name'),
       field: 'name',
       filter: true,
       sortable: true,
@@ -111,7 +94,7 @@ const AuthUsersView = () => {
       notificationManagerRef?.current?.addMessage(
         'error',
         'Error',
-        'Something went wrong. Could not fetch Auth Group(s)!',
+        `${t('Something went wrong. Could not fetch')} ${t('Auth Group(s)')}!`,
       );
       setAuthUsers([]);
       setTotalGroups(0);
@@ -134,8 +117,8 @@ const AuthUsersView = () => {
       if (res.status !== 200) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          `Something went wrong. Could not update Auth Group to ${group.name}.`,
+          t('Error'),
+          `${t('Something went wrong. Could not update Auth Group to')} ${group.name}.`,
         );
         fails.push(res.status);
       }
@@ -143,8 +126,8 @@ const AuthUsersView = () => {
       if (index === groupsChanged.length - 1 && fails.length === 0) {
         notificationManagerRef?.current?.addMessage(
           'success',
-          'Success',
-          `Auth Group(s) updated.`,
+          t('Success'),
+          t(`Auth Group(s) updated.`),
         );
       }
     }
@@ -176,8 +159,8 @@ const AuthUsersView = () => {
       } else if (error?.status === 500) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          'Something went wrong. Could not fetch Group(s)!',
+          t('Error'),
+          `${t('Something went wrong. Could not fetch')} Group(s)!`,
         );
       }
     }
@@ -190,14 +173,14 @@ const AuthUsersView = () => {
 
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Saved',
-        'User saved successfully.',
+        t('Saved'),
+        t('User saved successfully'),
       );
     } catch (error) {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not fetch Dashboard(s)!',
+        t('Error'),
+        `${t('Something went wrong. Could not fetch')} Dashboard(s)!`,
       );
     }
 
@@ -229,16 +212,16 @@ const AuthUsersView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        `AuthGroup(s) added to ${selectedUser.username}`,
+        t('Success'),
+        `${t('AuthGroup(s) added to')} ${selectedUser.username}`,
       );
 
       await fetchAuthUserGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not add Dashboard!',
+        t('Error'),
+        `${t("Something went wrong. Could not add")} Dashboard!`,
       );
     }
   };
@@ -255,15 +238,15 @@ const AuthUsersView = () => {
         if (res?.status === 200) {
           notificationManagerRef?.current?.addMessage(
             'success',
-            'Success',
-            'Auth Group(s) deleted!',
+            t('Success'),
+            t('Auth Group(s) deleted'),
           );
           await fetchAuthUserGroups();
         } else {
           notificationManagerRef?.current?.addMessage(
             'error',
-            'Error',
-            'Something wrong happened! Could not delete.',
+            t('Error'),
+            t("Something went wrong. Could not delete"),
           );
         }
       }
@@ -280,15 +263,15 @@ const AuthUsersView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        `Dashboards disassociated to ${selectedUser?.name}!`,
+        t('Success'),
+        `${t('Dashboards disassociated to')} ${selectedUser?.name}!`,
       );
       await fetchAuthUserGroups();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        `Could not disassociate dashboard(s) from ${selectedUser?.name}!`,
+        t('Error'),
+        `${t('Could not disassociate dashboard(s) from ')} ${selectedUser?.name}!`,
       );
     }
 

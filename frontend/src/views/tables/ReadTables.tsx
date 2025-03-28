@@ -15,14 +15,16 @@ import NotificationManager, {
 } from '../../components/NotificationManager';
 import useApiAndNavigate from '../../hooks/useApi';
 import { formatToCosmosDBPattern } from './CreateTable';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   rowsTested?: any[];
 };
 
 const TablesReadView = ({ rowsTested }: Props) => {
+  const { t } = useTranslation()
   const [cols, setCols] = useState<ColDef[]>([
-    { headerName: 'Name', field: 'label', filter: true },
+    { headerName: t('Name'), field: 'label', filter: true },
     { field: 'id', hide: true }
   ]);
   const [rows, setRows] = useState<TableRef[]>();
@@ -53,7 +55,6 @@ const TablesReadView = ({ rowsTested }: Props) => {
       setIsLoading(true)
 
       const data = await fetchDataAndNavigate(getTables, req)
-
 
       const entries = data?.data?.tables; // setCols([...cols, ...data?.data.tables?.map()])
 
@@ -99,21 +100,18 @@ const TablesReadView = ({ rowsTested }: Props) => {
       try {
         const res = await deleteTable({ id: el.id, name: el.name });
         if (index === arr.length - 1 && res?.status === 200) {
-          const message = `Table${arr.length > 1 ? 's' : ''
-            } deleted successfully.`;
-
           notificationManagerRef?.current?.addMessage(
             'success',
-            'Success',
-            message,
+            t('Success'),
+            t('Table(s) deleted successfully'),
           );
         }
       } catch (error: any) {
         if (error?.code === 500) {
           notificationManagerRef?.current?.addMessage(
             'error',
-            'Error',
-            'Could not delete',
+            t('Error'),
+            t('Could not delete'),
           );
         }
       }
@@ -127,14 +125,14 @@ const TablesReadView = ({ rowsTested }: Props) => {
       const res = await fetchDataAndNavigate(createTable, { name: formatToCosmosDBPattern(state['label']), label: state['label'], cols: [] })
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Saved',
-        'Table saved.',
+        t('Saved'),
+        t('Table saved') + ".",
       );
     } catch (error) {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Could not create table',
+        t('Error'),
+        t('Could not create table'),
       );
     }
   }
@@ -144,15 +142,15 @@ const TablesReadView = ({ rowsTested }: Props) => {
       const res = await fetchDataAndNavigate(updateTable, { name: formatToCosmosDBPattern(state['label']), label: state['label'], cols: state['cols'], id: state['id'] })
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Saved',
-        'Table updated.',
+        t('Saved'),
+        t('Table updated'),
       );
     } catch (error) {
       console.log({ error })
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Could not delete',
+        t('Error'),
+        t('Could not delete'),
       );
     }
   }
@@ -183,7 +181,7 @@ const TablesReadView = ({ rowsTested }: Props) => {
         />
         <NotificationManager ref={notificationManagerRef} />
       </div>
-      <button style={{ marginTop: '2rem', transform: 'translateX(-50%)', position: 'relative', left: '50%' }} type='button' onClick={e => navigate('/table/edges')}>Create Edges</button>
+      <button style={{ marginTop: '2rem', transform: 'translateX(-50%)', position: 'relative', left: '50%' }} type='button' onClick={e => navigate('/table/edges')}>{t('Create Edges')}</button>
     </>
   );
 };

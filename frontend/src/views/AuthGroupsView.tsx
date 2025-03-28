@@ -65,8 +65,10 @@ import AuthGroups from './authGroups/AuthGroups';
 import AuthUsersGrid from '../components/AuthUsersGrid';
 import useApiAndNavigate from '../hooks/useApi';
 import { AxiosResponse } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const DashboardAuthGroupsView = () => {
+  const { t } = useTranslation()
   const [groups, setAuthGroups] = useState<AuthGroupRef[]>([]);
   const [from, setFrom] = useState<number>(1);
   const [to, setTo] = useState<number>(100);
@@ -94,41 +96,41 @@ const DashboardAuthGroupsView = () => {
 
   const [cols, setCols] = useState<ColDef[]>([
     {
-      headerName: 'Name',
+      headerName: t('Name'),
       field: 'name',
       filter: true,
       sortable: true,
     },
     {
-      headerName: 'Create',
+      headerName: t('Create'),
       field: 'create',
       editable: true,
       cellEditor: 'agCheckboxCellEditor',
       cellRenderer: 'agCheckboxCellRenderer',
     },
     {
-      headerName: 'Read',
+      headerName: t('Read'),
       field: 'read',
       editable: true,
       cellEditor: 'agCheckboxCellEditor',
       cellRenderer: 'agCheckboxCellRenderer',
     },
     {
-      headerName: 'Update',
+      headerName: t('Update'),
       field: 'update',
       editable: true,
       cellEditor: 'agCheckboxCellEditor',
       cellRenderer: 'agCheckboxCellRenderer',
     },
     {
-      headerName: 'Delete',
+      headerName: t('Delete'),
       field: 'delete',
       editable: true,
       cellEditor: 'agCheckboxCellEditor',
       cellRenderer: 'agCheckboxCellRenderer',
     },
     {
-      headerName: 'Owner',
+      headerName: t('Owner'),
       field: 'owner',
       filter: true,
       sortable: true,
@@ -140,7 +142,7 @@ const DashboardAuthGroupsView = () => {
       sortable: true,
     },
     {
-      headerName: 'Folder',
+      headerName: t('Folder'),
       field: 'folder',
       filter: true,
       sortable: true,
@@ -193,8 +195,8 @@ const DashboardAuthGroupsView = () => {
     } else if (res?.status === 500) {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not fetch Auth Group(s)!',
+        t('Error'),
+        `${t('Something went wrong. Could not fetch')} Auth Group(s)!`,
       );
       setAuthGroups([]);
       setTotalGroups(0);
@@ -220,8 +222,8 @@ const DashboardAuthGroupsView = () => {
       if (res.status !== 200) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          `Something went wrong. Could not update Auth Group to ${group.name}.`,
+          t('Error'),
+          `${t('Something went wrong. Could not update Auth Group to ')}${group.name}.`,
         );
         fails.push(res.status);
       }
@@ -229,8 +231,8 @@ const DashboardAuthGroupsView = () => {
       if (index === groupsChanged.length - 1 && fails.length === 0) {
         notificationManagerRef?.current?.addMessage(
           'success',
-          'Success',
-          `Auth Group(s) updated.`,
+          t('Success'),
+          t(`Auth Group(s) updated.`),
         );
       }
     }
@@ -265,8 +267,8 @@ const DashboardAuthGroupsView = () => {
       } else if (error?.status === 500) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          'Something went wrong. Could not fetch Dashboard(s)!',
+          t('Error'),
+          `${t('Something went wrong. Could not fetch')} Dashboard(s)!`,
         );
       }
     }
@@ -302,8 +304,8 @@ const DashboardAuthGroupsView = () => {
       } else if (error?.status === 500) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          'Something went wrong. Could not fetch Dashboard(s)!',
+          t('Error'),
+          `${t('Something went wrong. Could not fetch')} Dashboard(s)!`,
         );
       }
     }
@@ -334,16 +336,16 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        'Dashboard(s) updated!',
+        t('Success'),
+        t('Dashboard(s) updated!'),
       );
 
       await fetchAuthGroupDashboards();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not update Dashboard(s)!',
+        t('Error'),
+        `${t('Something went wrong. Could not update')} Dashboard(s)!`,
       );
     }
   };
@@ -391,16 +393,16 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        `Dashboard(s) added to ${selectedGroup.name}`,
+        t('Success'),
+        `${t('Dashboard(s) added to ')} ${selectedGroup.name}`,
       );
 
       await fetchAuthGroupDashboards();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not add Dashboard!',
+        t('Error'),
+        `${t('Something went wrong. Could not add')} Dashboard!`,
       );
     }
   };
@@ -427,16 +429,16 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        `User(s) added to ${selectedGroup.name}`,
+        t('Success'),
+        `${t('User(s) added to ')} ${selectedGroup.name}`,
       );
 
       await fetchAuthGroupUsers();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something went wrong. Could not add User!',
+        t('Error'),
+        `${t('Something went wrong. Could not add')} User!`,
       );
     }
   };
@@ -459,15 +461,15 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        'Auth Group(s) deleted!',
+        t('Success'),
+        t('Auth Group(s) deleted!'),
       );
       await fetchAuthGroupDashboards();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        'Something wrong happened! Could not delete.',
+        t('Error'),
+        t('Something wrong happened! Could not delete'),
       );
     }
   };
@@ -486,15 +488,15 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        `Dashboards disassociated to ${selectedGroup?.name}!`,
+        t('Success'),
+        `${t('Dashboards disassociated to ')} ${selectedGroup?.name}!`,
       );
       await fetchAuthGroupDashboards();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        `Could not disassociate dashboard(s) from ${selectedGroup?.name}!`,
+        t('Error'),
+        `${t('Could not disassociate dashboard(s) from ')} ${selectedGroup?.name}!`,
       );
     }
 
@@ -515,15 +517,15 @@ const DashboardAuthGroupsView = () => {
     if (res?.status === 200) {
       notificationManagerRef?.current?.addMessage(
         'success',
-        'Success',
-        `User(s) disassociated to ${selectedGroup?.name}!`,
+        t('Success'),
+        `${t('User(s) disassociated to ')}${selectedGroup?.name}!`,
       );
       await fetchAuthGroupUsers();
     } else {
       notificationManagerRef?.current?.addMessage(
         'error',
-        'Error',
-        `Could not disassociate user(s) from ${selectedGroup?.name}!`,
+        t('Error'),
+        `${t('Could not disassociate user(s) from ')}${selectedGroup?.name}!`,
       );
     }
 
@@ -585,7 +587,7 @@ const DashboardAuthGroupsView = () => {
             />
             {groupsChanged.length > 0 && !addMode && (
               <button onClick={() => updateGroups()}>
-                Update AuthGroup(s)
+                {t('Update Auth Group(s)')}
               </button>
             )}
           </div>
@@ -627,7 +629,7 @@ const DashboardAuthGroupsView = () => {
               add={() => setAddUsers(true)}
               cols={[
                 {
-                  headerName: 'Username',
+                  headerName: t('Username'),
                   field: 'username',
                   sortable: true,
 
@@ -673,7 +675,7 @@ const DashboardAuthGroupsView = () => {
             />
             {newDashboards.length > 0 && (
               <button onClick={() => addAuthGroupDashboard()}>
-                Add Group(s)
+                {t('Add Group(s)')}
               </button>
             )}
           </div>
@@ -686,7 +688,7 @@ const DashboardAuthGroupsView = () => {
               onRowsSelected={(e) => setNewUsers(e.map((el) => el.data))}
             />
             {newUsers.length > 0 && (
-              <button onClick={() => addAuthGroupUser()}>Add User(s)</button>
+              <button onClick={() => addAuthGroupUser()}>{t('Add User(s)')}</button>
             )}
           </div>
         )}

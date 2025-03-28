@@ -33,6 +33,7 @@ import { AuthUserRef } from '../typescript/api/resources/pontus/types/AuthUserRe
 import { readUsers } from '../client';
 import useApiAndNavigate from '../hooks/useApi';
 import { AxiosResponse } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   onCellClicked?: (e: CellClickedEvent<any, any>) => void;
@@ -72,6 +73,7 @@ const AuthUsersGrid = ({
   onRowsSelected,
   usersToFilterOutById,
 }: Props) => {
+  const { t } = useTranslation()
   const [totalUsers, setTotalUsers] = useState<number>();
   const [isLoading1, setIsLoading1] = useState(false);
   const [users, setUsers] = useState<AuthUserIdAndUsername[]>([]);
@@ -125,8 +127,8 @@ const AuthUsersGrid = ({
       } else if (error?.status === 500) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          'Something went wrong. Could not fetch Auth User(s)!',
+          t('Error'),
+          `${t('Something went wrong. Could not fetch')} ${t('Auth User(s)')}!`,
         );
         setUsers([]);
         setTotalUsers(0);
@@ -149,15 +151,15 @@ const AuthUsersGrid = ({
         if (res?.status === 200) {
           notificationManagerRef?.current?.addMessage(
             'success',
-            'Success',
-            'Auth User(s) deleted!',
+            t('Success'),
+            t('Auth User(s) deleted!'),
           );
           await fetchAuthUsers();
         } else {
           notificationManagerRef?.current?.addMessage(
             'error',
-            'Error',
-            'Something wrong happened! Could not delete.',
+            t('Error'),
+            t("Something went wrong. Could not delete"),
           );
         }
       }
@@ -188,8 +190,8 @@ const AuthUsersGrid = ({
       if (res.status !== 200) {
         notificationManagerRef?.current?.addMessage(
           'error',
-          'Error',
-          `Something went wrong. Could not update Auth User to ${user.name}.`,
+          t('Error'),
+          `${t("Something went wrong. Could not update Auth User to ")}${user.name}.`,
         );
         fails.push(res.status);
       }
@@ -197,8 +199,8 @@ const AuthUsersGrid = ({
       if (index === usersToBeUpdated.length - 1 && fails.length === 0) {
         notificationManagerRef?.current?.addMessage(
           'success',
-          'Success',
-          `Auth User(s) updated.`,
+          t('Success'),
+          t(`Auth User(s) updated`),
         );
       }
     }
@@ -291,7 +293,7 @@ const AuthUsersGrid = ({
         onRowsStateChange={(e) => handleRowsStateChange(e)}
         cols={[
           {
-            headerName: 'Username',
+            headerName: t('Username'),
             field: 'username',
             sortable: true,
 

@@ -24,6 +24,7 @@ import {
   MenuItemTreeRef,
   MenuReadRes,
 } from '../pontus-api/typescript-fetch-client-generated';
+import { IoMdSettings } from "react-icons/io";
 import MenuTree from './MenuTree';
 
 type Props = {
@@ -151,7 +152,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
               navigate('/auth/groups')
             }}
           >
-            Auth Groups
+            {t('Auth Groups')}
           </button>
         </li>
         <li className="sidebar__admin-options">
@@ -163,7 +164,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
               navigate('/tables/read')
             }}
           >
-            Tables
+            {t('Tables')}
           </button>
         </li>
         <li className="sidebar__admin-options">
@@ -175,7 +176,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
               navigate('/auth/users')
             }}
           >
-            Auth Users
+            {t('Auth Users')}
           </button>
         </li>
         <li className="sidebar__admin-options">
@@ -192,6 +193,18 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           <div style={{ visibility: openDashboards ? 'visible' : 'hidden' }}>
             <MenuTree selectionOnly={false} />
           </div>
+        </li>
+        <li className="sidebar__admin-options">
+          <button
+            className={`sidebar__btn settings-btn`}
+            type="button"
+            onClick={() => {
+              navigate('/settings')
+            }}
+          >
+            <IoMdSettings />
+            {t('Settings')}
+          </button>
         </li>
       </ul>
 

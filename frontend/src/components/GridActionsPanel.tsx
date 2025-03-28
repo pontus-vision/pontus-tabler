@@ -5,6 +5,7 @@ import { GrUpdate } from 'react-icons/gr';
 import { FaPlusCircle } from 'react-icons/fa';
 import { IRowNode } from 'ag-grid-community';
 import { IoIosSave } from 'react-icons/io';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   deleteMode?: boolean;
@@ -65,6 +66,7 @@ const GridActionsPanel = ({
   const [cmpWidth, setCmpWidth] = useState<number>();
   const [openActionsPanel, setOpenActionsPanel] = useState(false);
 
+  const { t } = useTranslation()
   var windowWidth = window.innerWidth;
 
   const burguerMenu = useRef<any>();
@@ -216,7 +218,7 @@ const GridActionsPanel = ({
                 setUpdateMode && setUpdateMode(!updateMode);
               }}
             >
-              Update Mode
+              {t('Update Mode')}
             </Button>
           )}
         </div>
@@ -275,7 +277,7 @@ const GridActionsPanel = ({
             setShowColumnSelector && setShowColumnSelector(true);
           }}
         >
-          Select Columns
+          {t('Select Columns')}
         </button>
       )}
 
@@ -290,7 +292,7 @@ const GridActionsPanel = ({
               setDeleteMode && setDeleteMode(true);
             }}
           >
-            Delete Mode
+            {t('Delete Mode')}
           </button>
         ))}
       {(!deleteMode && permissions?.updateAction && !updateMode) && (
@@ -302,13 +304,13 @@ const GridActionsPanel = ({
               setUpdateMode && setUpdateMode(!updateMode);
             }}
           >
-            Update Mode
+            {t('Update Mode')}
           </button>
         )
       )}
 
       {(<div style={{ height: "2.2rem", border: '2px solid black', borderRadius: '.5rem', padding: '.2em', display: 'flex', alignItems: 'center', gap: '3px' }}>
-        <label style={{ fontSize: '100%' }}>Edit on Grid</label>
+        <label style={{ fontSize: '100%' }}>{t('Edit on Grid')}</label>
         <label class="switch" data-cy="edit-on-grid-toggle">
 
           <input type="checkbox"
