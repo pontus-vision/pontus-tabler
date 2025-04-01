@@ -24,10 +24,13 @@ jobs:
 
       - name: Build and Run Services with Docker Compose
         run: |
-          echo 'LS'
-          ls
           docker-compose up --build --abort-on-container-exit --exit-code-from app
-
+      - name: Start node app
+        run: |
+          docker-compose exec frontend sh -c "
+            export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )";
+            npm run build && node dist/src/server.js;
+          "
       - name: Tear Down
         if: always()
         run: |
