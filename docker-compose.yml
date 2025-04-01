@@ -53,14 +53,12 @@ services:
         npm run build
         ./run-docker.sh 
         # npm run jest || true
-        cd /usr/src/app
-        npm run build && node dist/src/server.js
+        #   cd /usr/src/app
+        #   npm run build && node dist/src/server.js
         sleep 1000000
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
-
     container_name: node-pontus-jdbc-db-setup
-
     volumes:
       - ./backend/delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
       - ./backend/delta-table/data:/data 
