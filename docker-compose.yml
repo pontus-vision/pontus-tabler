@@ -87,6 +87,6 @@ services:
       - -c
       - |
         timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' app 8080
-        npm run dev
         sass src/sass/style.scss src/style.css
+        npm run dev
         #sleep 100000
