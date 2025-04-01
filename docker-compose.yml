@@ -1,0 +1,94 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: node-app
+    ports:
+      - "8080:8080"
+      - "3001:3001"
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      COSMOSDB_NAME: pv_db
+      AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE: 127.0.0.1
+      PORT: 5000
+      JWT_SECRET_KEY: 2d49959562a7d8718d0370b09fd96d6f13b00af81fdf7d353aa96b1d975ba687
+      REFRESH_JWT_SECRET_KEY: 5875bb587efd0b6aa7d00b6b37ec210941e0c05034afcd4e8d8680137c53d2dd
+      ADMIN_PASSWORD: admin
+      USER_PASSWORD: user
+      DB_SOURCE: deltadb
+      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
+      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000 
+      FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
+    volumes:
+      - ./backend:/usr/src/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    depends_on:
+      - delta-db 
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        # npx fern generate 
+        echo "Checking if service is up on port 10080..."
+        timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
+        if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
+        #cd delta-table
+        #npm i -g java --unsafe-perm
+        #cd ..
+        cd pontus-node-jdbc
+        npm install
+        cd ..
+        export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
+        cd delta-table/node/node-jdbc
+        npm i
+        cd ..
+        npm install
+        # npm run jest
+        cd ../..
+
+        cd pontus-node-jdbc
+        npm run build
+        ./run-docker.sh 
+        # npm run jest || true
+        cd /usr/src/app
+        npm run build && node dist/src/server.js
+        sleep 1000000
+  delta-db:
+    image: pontusvisiongdpr/pv-deltadb:latest
+
+    container_name: node-pontus-jdbc-db-setup
+
+    volumes:
+      - ./backend/delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
+      - ./backend/delta-table/data:/data 
+      - ./backend/delta-table/work-dir:/opt/spark/work-dir
+    ports:
+      - "10000:10000"
+      - "8888:8888"
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "4173:4173"
+      - "5173:5173"
+    environment:
+       VITE_BACKEND_URL: http://node-app:8080 # pointing to the backend
+       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib 
+    volumes:
+      - ./frontend:/usr/src/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.cache/Cypress:/root/.cache/Cypress
+    depends_on:
+      - delta-db 
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' app 8080
+        npm run dev
+        sass src/sass/style.scss src/style.css
+        #sleep 100000
