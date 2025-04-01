@@ -90,4 +90,6 @@ services:
         npm install
         sass src/sass/style.scss src/style.css
         npm run dev
+        npx cypress install
+        npx cypress run -b chrome
         #sleep 100000
