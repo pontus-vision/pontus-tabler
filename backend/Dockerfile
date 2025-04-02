@@ -10,4 +10,3 @@ RUN chmod +x /usr/local/lib/node_modules/java && \
     npm rebuild
 
 WORKDIR /usr/src/app
-RUN npm i --save-dev @types/node

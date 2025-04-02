@@ -38,6 +38,7 @@ services:
         #cd delta-table
         #npm i -g java --unsafe-perm
         #cd ..
+        npm install
         cd pontus-node-jdbc
         npm install
         cd ..
