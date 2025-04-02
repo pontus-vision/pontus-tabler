@@ -55,7 +55,9 @@ services:
         ./run-docker.sh 
         # npm run jest || true
         cd /usr/src/app
-        npm run jest src/__tests__/AuthGroups.test.ts
+        echo "CLASSPATH VARIABLE"
+        echo $CLASSPATH
+        #npm run jest src/__tests__/AuthGroups.test.ts
         #npm run build && node dist/src/server.js
         sleep 1000000
   delta-db:
