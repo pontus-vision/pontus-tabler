@@ -1,0 +1,3 @@
+#!/bin/bash
+
+export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/* | xargs | sed -e 's/ /,/g')"

@@ -52,7 +52,7 @@ services:
 
         cd pontus-node-jdbc
         npm run build
-        #./run-docker.sh 
+        ./run-docker.sh 
         # npm run jest || true
         cd /usr/src/app
         npm run jest src/__tests__/AuthGroups.test.ts
