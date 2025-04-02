@@ -57,6 +57,8 @@ services:
         cd /usr/src/app
         echo "CLASSPATH VARIABLE"
         echo $CLASSPATH
+        echo 'LS'
+        ls
         #npm run jest src/__tests__/AuthGroups.test.ts
         #npm run build && node dist/src/server.js
         sleep 1000000
