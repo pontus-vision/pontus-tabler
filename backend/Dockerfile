@@ -6,8 +6,8 @@ RUN apt install make g++
 RUN npm i -g java --unsafe-perm
 RUN npm install -g ts-node typescript jest nodemon
 RUN npm install -g fern-api
-RUN npm i --save-dev @types/node
 RUN chmod +x /usr/local/lib/node_modules/java && \
     npm rebuild
 
 WORKDIR /usr/src/app
+RUN npm i --save-dev @types/node
