@@ -39,6 +39,7 @@ jobs:
             CLASSPATH=\$(ls /usr/src/app/delta-table/node/jars/* | xargs | sed -e 's/ /,/g');
             export CLASSPATH;
             echo 'CLASSPATH:' \$CLASSPATH;
+            fern generate
             npm install
             npm run build && node dist/src/server.js;
           "
