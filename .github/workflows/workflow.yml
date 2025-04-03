@@ -33,7 +33,10 @@ jobs:
           fern generate;
           cd delta-table/node/node-jdbc;
           npm install;
+          cd ..;
+          npm install;
           cd ../pontus-node-jdbc;
+          npm run build;
           npm install;
           cd /usr/src/app;
           echo "Waiting for database...";
