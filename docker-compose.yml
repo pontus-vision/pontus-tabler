@@ -64,6 +64,7 @@ services:
         npm run jest src/__tests__/AuthGroups.test.ts
         #npm run build && node dist/src/server.js
         sleep 1000000
+
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
     container_name: node-pontus-jdbc-db-setup
@@ -74,6 +75,14 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        apt install -y netcat-traditional
+        echo "Checking port 1000"
+        netstat -anp | grep 1000
+
   frontend:
     build:
       context: .
