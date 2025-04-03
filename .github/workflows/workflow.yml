@@ -24,13 +24,28 @@ jobs:
 
       - name: Build and Run Services with Docker Compose
         run: |
-          docker-compose up --build --abort-on-container-exit --exit-code-from app
+          docker-compose up --build -d
+
+      - name: Wait for Services
+        run: |
+          echo "Waiting for database..."
+          timeout 30s sh -c 'until nc -z delta-db 10000; do sleep 2; done'
+
       - name: Start node app
         run: |
           docker-compose exec frontend sh -c "
-            export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )";
+            CLASSPATH=\$(ls /usr/src/app/delta-table/node/jars/* | xargs | sed -e 's/ /,/g');
+            export CLASSPATH;
+            echo 'CLASSPATH:' \$CLASSPATH;
             npm run build && node dist/src/server.js;
           "
+
+      - name: Run Jest Tests with Debugging
+        run: |
+          docker-compose exec frontend sh -c "
+            npm run jest -- --verbose --detectOpenHandles
+          "
+
       - name: Tear Down
         if: always()
         run: |
