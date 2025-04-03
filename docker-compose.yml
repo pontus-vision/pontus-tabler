@@ -54,7 +54,9 @@ services:
         npm run build
         # npm run jest || true
         cd /usr/src/app
+        chmod +x /usr/src/app/run-docker.sh
         ./run-docker.sh 
+        source /usr/src/app/run-docker.sh
         echo "CLASSPATH VARIABLE"
         echo $CLASSPATH
         echo 'LS'
