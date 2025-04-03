@@ -26,6 +26,15 @@ jobs:
         run: |
           docker-compose up --build -d
 
+      - name: Netstat from delta-db
+        run: |
+          docker-compose exec delta-db sh -c "
+            apt update
+            apt install net-tools
+            echo "checking port 10000"
+            netstat -anp | grep 10000
+          "
+
       - name: Wait for Services
         run: |
           docker-compose exec app sh -c "
