@@ -75,13 +75,14 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
+    user: root
     entrypoint:
       - /usr/bin/bash
       - -c
       - |
         apt install -y netcat-traditional
-        echo "Checking port 1000"
-        netstat -anp | grep 1000
+    command: >
+        sh -c "netstat -anp | grep 10000 || echo 'Port 10000 not in use'"
 
   frontend:
     build:
