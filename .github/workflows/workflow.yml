@@ -29,8 +29,6 @@ jobs:
       - name: Netstat from delta-db
         run: |
           docker-compose exec delta-db sh -c "
-            apt update
-            apt install net-tools
             echo "checking port 10000"
             netstat -anp | grep 10000
           "
