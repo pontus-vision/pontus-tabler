@@ -10,6 +10,7 @@ services:
     environment:
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       COSMOSDB_NAME: pv_db
+      CLASSPATH: "/usr/src/app/delta-table/node/jars/*"
       AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE: 127.0.0.1
       PORT: 5000
       JWT_SECRET_KEY: 2d49959562a7d8718d0370b09fd96d6f13b00af81fdf7d353aa96b1d975ba687
