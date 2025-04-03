@@ -31,6 +31,11 @@ jobs:
           docker-compose exec app sh -c "
           npm install;
           fern generate;
+          cd delta-table/node/node-jdbc;
+          npm install;
+          cd ../pontus-node-jdbc;
+          npm install;
+          cd /usr/src/app;
           echo "Waiting for database...";
           timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
           "
