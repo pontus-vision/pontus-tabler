@@ -5,7 +5,7 @@ WORKDIR usr/src/app
 
 RUN npm i -g sass
 RUN apt update && \
-    apt install -y openjdk-17-jdk openjdk-17-source 
+    apt install -y openjdk-17-jdk openjdk-17-source netcat-traditional 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y make g++ && apt-get clean
 RUN npm i -g java --unsafe-perm
 RUN npm install ts-node typescript jest nodemon
