@@ -24,47 +24,13 @@ jobs:
 
       - name: Build and Run Services with Docker Compose
         run: |
-          docker-compose up --build -d
-
-      - name: Netstat from delta-db
-        run: |
-          docker-compose exec delta-db sh -c "
-            echo "checking port 10000"
-            netstat -anp | grep 10000
-          "
-
-      - name: Wait for Services
-        run: |
-          docker-compose exec app sh -c "
-          npm install;
-          fern generate;
-          cd delta-table/node/node-jdbc;
-          npm install;
-          cd ..;
-          npm install;
-          cd ../pontus-node-jdbc;
-          npm run build;
-          npm install;
-          cd /usr/src/app;
-          echo "Waiting for database...";
-          timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
-          "
-
+          docker-compose up --build --abort-on-container-exit --exit-code-from app
       - name: Start node app
         run: |
-          docker-compose exec app sh -c "
-            CLASSPATH=\$(ls /usr/src/app/delta-table/node/jars/* | xargs | sed -e 's/ /,/g');
-            export CLASSPATH;
-            echo 'CLASSPATH:' \$CLASSPATH;
+          docker-compose exec frontend sh -c "
+            export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )";
             npm run build && node dist/src/server.js;
           "
-
-      - name: Run Jest Tests with Debugging
-        run: |
-          docker-compose exec app sh -c "
-            npm run jest -- --verbose --detectOpenHandles
-          "
-
       - name: Tear Down
         if: always()
         run: |
