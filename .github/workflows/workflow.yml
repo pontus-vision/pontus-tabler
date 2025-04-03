@@ -28,8 +28,10 @@ jobs:
 
       - name: Wait for Services
         run: |
+          docker-compose exec app sh -c "
           echo "Waiting for database..."
           timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
+          "
 
       - name: Start node app
         run: |
