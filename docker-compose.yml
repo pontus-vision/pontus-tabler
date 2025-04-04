@@ -32,8 +32,7 @@ services:
       - -c
       - |
         echo "Checking if service is up on port 10000..."
-        sleep 300
-        #timeout 700 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
+        timeout 700 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
         #cd delta-table
         #npm i -g java --unsafe-perm
@@ -96,10 +95,10 @@ services:
       - -c
       - |
         # timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' app 8080
-        # npm install
+         npm install
         # sass src/sass/style.scss src/style.css
         # rm -Rf dist && npx tsc
-        # npm run dev
+         npm run dev
         # npx cypress install
         # npx cypress run -b chrome
-        sleep 10000
+        #sleep 10000
