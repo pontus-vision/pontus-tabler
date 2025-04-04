@@ -27,6 +27,42 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     depends_on:
       - delta-db 
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        fern generate 
+        echo "Checking if service is up on port 10080..."
+        timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
+        if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
+        #cd delta-table
+        #npm i -g java --unsafe-perm
+        #cd ..
+        npm install
+        cd pontus-node-jdbc
+        npm install
+        cd ..
+        export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
+        cd delta-table/node/node-jdbc
+        npm i
+        cd ..
+        npm install
+        # npm run jest
+        cd ../..
+        cd pontus-node-jdbc
+        npm run build
+        # npm run jest || true
+        cd /usr/src/app
+        chmod +x /usr/src/app/run-docker.sh
+        ./run-docker.sh 
+        source /usr/src/app/run-docker.sh
+        echo "CLASSPATH VARIABLE"
+        echo $CLASSPATH
+        echo 'LS'
+        ls
+        npm run jest src/__tests__/AuthGroups.test.ts
+        #npm run build && node dist/src/server.js
+        #sleep 1000000
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest

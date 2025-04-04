@@ -25,10 +25,6 @@ jobs:
       - name: Build and Run Services with Docker Compose
         run: |
           docker-compose up --build --abort-on-container-exit --exit-code-from app
-          docker-compose exec delta-db sh -c "
-            apt install -y netcat-traditional
-            netstat -anp | grep 10000
-          "
 
       - name: Tear Down
         if: always()
