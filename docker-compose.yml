@@ -75,6 +75,11 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
+    entrypoint: >
+      bash -c "
+        apt-get update && apt-get install -y net-tools &&
+        /usr/local/bin/db-init.sh
+      "
 
   frontend:
     build:
