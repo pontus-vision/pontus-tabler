@@ -1,4 +1,5 @@
 services:
+
   app:
     build:
       context: .
@@ -90,7 +91,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.cache/Cypress:/root/.cache/Cypress
     depends_on:
-      - delta-db 
+      - app
     entrypoint:
       - /usr/bin/bash
       - -c
