@@ -77,7 +77,7 @@ services:
       - "8888:8888"
     user: root
     entrypoint: >
-      bash -c "apt-get update && apt-get install -y net-tools && exec /usr/local/bin/db-init.sh"
+      bash -c "apt-get update && apt-get install -y net-tools"
     healthcheck:
       test: ["CMD", "bash", "-c", "netstat -anp 2>/dev/null | grep 10000 || exit 1"]
       interval: 3s
