@@ -80,8 +80,10 @@ services:
       bash -c "apt-get update && apt-get install -y net-tools &&
       timeout 60 bash -c '
         until netstat -anp 2>/dev/null | grep 10000; do
+          echo Waiting for port 10000...
           sleep 1
         done
+        echo Port 10000 is active!
       '"
 
   frontend:
