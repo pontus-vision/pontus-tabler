@@ -16,6 +16,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Setting Docker
+        run:
+          nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2&
+          timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+          export DOCKER_HOST=tcp://127.0.0.1:2375/
+          export DOCKER_DRIVER=overlay2
+          cp -a $(pwd) /tmp/prysm
+          ls -altr /tmp/prysm
+          cd /tmp/prysm/docker
+
       - name: Install Docker Compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
