@@ -77,13 +77,12 @@ services:
       - "8888:8888"
     user: root
     entrypoint: >
-      bash -c "
-        apt-get update && apt-get install -y net-tools 
-        timeout 60 bash -c '
+      bash -c "apt-get update && apt-get install -y net-tools &&
+      timeout 60 bash -c '
         until netstat -anp 2>/dev/null | grep 10000; do
           sleep 1
         done
-      "
+      '"
 
   frontend:
     build:
