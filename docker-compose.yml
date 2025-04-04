@@ -91,3 +91,15 @@ services:
       - /root/.cache/Cypress:/root/.cache/Cypress
     depends_on:
       - delta-db 
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        # timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' app 8080
+        # npm install
+        # sass src/sass/style.scss src/style.css
+        # rm -Rf dist && npx tsc
+        # npm run dev
+        # npx cypress install
+        # npx cypress run -b chrome
+        sleep 10000
