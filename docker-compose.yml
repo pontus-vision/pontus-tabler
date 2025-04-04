@@ -98,7 +98,7 @@ services:
          npm install
         # sass src/sass/style.scss src/style.css
         # rm -Rf dist && npx tsc
-         npm run dev
+        # npm run dev
         # npx cypress install
         # npx cypress run -b chrome
         #sleep 10000
