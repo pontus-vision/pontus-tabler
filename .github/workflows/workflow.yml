@@ -22,18 +22,13 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
-
       - name: Build and Run Services with Docker Compose
         run: |
           docker-compose up --build --abort-on-container-exit --exit-code-from app
-
-      - name: Checking port 10000 from delta-db container
-        run: |
           docker-compose exec delta-db sh -c "
             apt install -y netcat-traditional
             netstat -anp | grep 10000
           "
-
 
       - name: Tear Down
         if: always()
