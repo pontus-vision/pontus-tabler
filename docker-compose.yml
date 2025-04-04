@@ -102,4 +102,4 @@ services:
         # npm run dev
         # npx cypress install
         # npx cypress run -b chrome
-        #sleep 10000
+        sleep 10000
