@@ -32,7 +32,8 @@ services:
       - -c
       - |
         echo "Checking if service is up on port 10000..."
-        timeout 700 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
+        sleep 300
+        #timeout 700 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
         #cd delta-table
         #npm i -g java --unsafe-perm
@@ -59,7 +60,6 @@ services:
         echo $CLASSPATH
         echo 'LS'
         ls
-        sleep 300
         npm run jest src/__tests__/AuthGroups.test.ts
         #npm run build && node dist/src/server.js
         #sleep 1000000
