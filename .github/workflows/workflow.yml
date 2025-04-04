@@ -18,6 +18,10 @@ jobs:
 
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v1
+        with:
+          cache-binary: true
+          version: latest
+
 
       - name: Build and Run Services with Docker Compose
         run: |
