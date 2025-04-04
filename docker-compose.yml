@@ -33,7 +33,8 @@ services:
       - -c
       - |
         echo "Checking if service is up on port 10000..."
-        timeout 700 sh -c 'until nc -z $0 $1; do sleep 1; done' delta-db 10000
+        timeout 700 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+
         
         #  if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
         #  #cd delta-table
@@ -77,13 +78,14 @@ services:
       - "8888:8888"
     user: root
     entrypoint: >
-      bash -c "apt-get update && apt-get install -y net-tools"
-    healthcheck:
-      test: ["CMD", "bash", "-c", "netstat -anp 2>/dev/null | grep 10000 || exit 1"]
-      interval: 3s
-      timeout: 2s
-      retries: 200
-
+      bash -c "apt-get update && apt-get install -y net-tools &&
+      timeout 60 bash -c '
+        until netstat -anp 2>/dev/null | grep 10000; do
+          echo Waiting for port 10000...
+          sleep 1
+        done
+        echo Port 10000 is active!
+      '"
 
   frontend:
     build:
