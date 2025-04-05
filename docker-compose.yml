@@ -84,6 +84,8 @@ services:
         done
         echo Port 10000 is active!
       '"
+      echo "NETSTAT 100 PORT v"
+      netstat -anp | grep 10000
 
   frontend:
     build:
