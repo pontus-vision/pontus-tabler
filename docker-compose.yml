@@ -8,6 +8,8 @@ services:
     ports:
       - "8080:8080"
       - "3001:3001"
+    depends_on:
+      - delta-db
     environment:
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       COSMOSDB_NAME: pv_db
@@ -77,7 +79,7 @@ services:
     user: root
     entrypoint: >
       bash -c "apt-get update && apt-get install -y net-tools &&
-      timeout 300 bash -c '
+      timeout 700 bash -c '
         until netstat -anp 2>/dev/null | grep 10000; do
           echo Waiting for port 10000...
           sleep 1
