@@ -35,7 +35,7 @@ services:
       - -c
       - |
         echo "Checking if service is up on port 10000..."
-        timeout 700 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+        timeout 7000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
         cd delta-table
         npm i -g java --unsafe-perm
@@ -79,7 +79,7 @@ services:
     user: root
     entrypoint: >
       bash -c "apt-get update && apt-get install -y net-tools &&
-      timeout 700 bash -c '
+      timeout 7000 bash -c '
         until netstat -anp 2>/dev/null | grep 10000; do
           echo Waiting for port 10000...
           sleep 1
