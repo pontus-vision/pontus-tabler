@@ -80,14 +80,12 @@ services:
     entrypoint: >
       bash -c "apt-get update && apt-get install -y net-tools &&
       timeout 7000 bash -c '
-        until netstat -anp 2>/dev/null | grep 10000; do
+        until netstat -anp | grep 10000; do
           echo Waiting for port 10000...
           sleep 1
         done
         echo Port 10000 is active!
       '"
-      echo "NETSTAT 100 PORT v"
-      netstat -anp | grep 10000
 
   frontend:
     build:
