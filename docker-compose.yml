@@ -65,6 +65,8 @@ services:
         npm run jest src/__tests__/AuthGroups.test.ts
         #  #npm run build && node dist/src/server.js
         #  #sleep 1000000
+    extra_hosts:
+      - "delta-db:127.0.0.1"
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
@@ -105,3 +107,6 @@ services:
       #       # npx cypress install
       #       # npx cypress run -b chrome
       #       sleep 10000
+      #       networks:
+  shared:
+    driver: bridge
