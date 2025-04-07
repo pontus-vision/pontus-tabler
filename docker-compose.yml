@@ -70,8 +70,9 @@ services:
 
   delta-db:
     #image: pontusvisiongdpr/pv-deltadb:latest
-    context: ./backend/delta-table/docker/
-    dockerfile: Dockerfile
+    build:
+      context: ./backend/delta-table/docker/
+      dockerfile: Dockerfile
     container_name: node-pontus-jdbc-db-setup
     volumes:
       - ./backend/delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
