@@ -67,6 +67,8 @@ services:
         #  #sleep 1000000
     extra_hosts:
       - "delta-db:127.0.0.1"
+    networks:
+      - shared
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
@@ -78,7 +80,8 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
-
+    networks:
+      - shared
       # frontend:
       #   build:
       #     context: .
