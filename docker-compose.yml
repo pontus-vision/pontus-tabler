@@ -65,6 +65,8 @@ services:
         npm run jest src/__tests__/AuthGroups.test.ts
         #  #npm run build && node dist/src/server.js
         #  #sleep 1000000
+    networks:
+      - app-network
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
@@ -86,7 +88,8 @@ services:
         done
         echo Port 10000 is active!
       '"
-
+    networks:
+      - app-network
   frontend:
     build:
       context: .
@@ -115,3 +118,8 @@ services:
         # npx cypress install
         # npx cypress run -b chrome
         sleep 10000
+    networks:
+      - app-networ
+networks:
+  app-network:
+    driver: bridge
