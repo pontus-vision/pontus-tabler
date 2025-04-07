@@ -109,7 +109,7 @@ services:
       #       npm run dev
       #       # npx cypress install
       #       # npx cypress run -b chrome
-      #       sleep 10000
-      #       networks:
+      #       sleep 1000000
+networks:
   shared:
     driver: bridge
