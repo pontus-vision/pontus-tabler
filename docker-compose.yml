@@ -119,7 +119,7 @@ services:
         # npx cypress run -b chrome
         sleep 10000
     networks:
-      - app-networ
+      - app-network
 networks:
   app-network:
     driver: bridge
