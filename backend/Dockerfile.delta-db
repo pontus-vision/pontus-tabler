@@ -1,6 +1,6 @@
 FROM pontusvisiongdpr/pv-deltadb:latest
 
 COPY delta-table/run-delta-jupyterlab.sh /usr/local/bin/db-init.sh
-RUN chmod +x /usr/local/bin/db-init.sh
+#RUN chmod +x /usr/local/bin/db-init.sh
 
 CMD ["/usr/local/bin/db-init.sh"]
