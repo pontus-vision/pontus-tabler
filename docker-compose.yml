@@ -34,6 +34,8 @@ services:
       - /usr/bin/bash
       - -c
       - |
+        echo "NETSTAT VERSION"
+        netstat --version
         echo "Checking if service is up on port 10000..."
         timeout 150 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
@@ -65,10 +67,6 @@ services:
         npm run jest src/__tests__/AuthGroups.test.ts
         #  #npm run build && node dist/src/server.js
         #  #sleep 1000000
-    extra_hosts:
-      - "delta-db:127.0.0.1"
-    networks:
-      - shared
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
@@ -80,8 +78,7 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
-    networks:
-      - shared
+
       # frontend:
       #   build:
       #     context: .
@@ -109,7 +106,4 @@ services:
       #       npm run dev
       #       # npx cypress install
       #       # npx cypress run -b chrome
-      #       sleep 1000000
-networks:
-  shared:
-    driver: bridge
+      #       sleep 10000
