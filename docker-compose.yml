@@ -37,7 +37,7 @@ services:
         echo "NETSTAT VERSION"
         netstat --version
         echo "Checking if service is up on port 10000..."
-        timeout 150 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+        timeout 300 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
         cd delta-table
         npm i -g java --unsafe-perm
