@@ -35,7 +35,7 @@ services:
       - -c
       - |
         echo "Checking if service is up on port 10000..."
-        timeout 7000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+        timeout 150 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
         cd delta-table
         npm i -g java --unsafe-perm
@@ -65,8 +65,6 @@ services:
         npm run jest src/__tests__/AuthGroups.test.ts
         #  #npm run build && node dist/src/server.js
         #  #sleep 1000000
-    networks:
-      - app-network
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
@@ -78,18 +76,6 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
-    user: root
-    entrypoint: >
-      bash -c "apt-get update && apt-get install -y net-tools &&
-      timeout 7000 bash -c '
-        until netstat -anp | grep 10000; do
-          echo Waiting for port 10000...
-          sleep 1
-        done
-        echo Port 10000 is active!
-      '"
-    networks:
-      - app-network
   frontend:
     build:
       context: .
@@ -118,8 +104,3 @@ services:
         # npx cypress install
         # npx cypress run -b chrome
         sleep 10000
-    networks:
-      - app-network
-networks:
-  app-network:
-    driver: bridge
