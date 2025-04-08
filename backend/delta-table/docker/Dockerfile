@@ -114,4 +114,4 @@ ENV SPARK_SUBMIT_OPTIONS="--conf spark.ssl.enabled=true --conf spark.ssl.protoco
 
 WORKDIR ${WORKDIR}
 
-ENTRYPOINT ["bash", "/opt/spark/work-dir/startup.sh"]
+ENTRYPOINT ["bash", "startup.sh"]
