@@ -25,6 +25,10 @@ jobs:
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v1
 
+      - name: List items
+        run: |
+          ls
+
       - name: Build and Run Services with Docker Compose
         run: |
           docker-compose up --build --abort-on-container-exit --exit-code-from app
