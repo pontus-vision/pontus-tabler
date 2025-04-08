@@ -3,6 +3,6 @@ FROM pontusvisiongdpr/pv-deltadb:latest
 COPY backend/delta-table/run-delta-jupyterlab.sh /usr/local/bin/db-init.sh
 COPY backend/delta-table/data /data
 COPY backend/delta-table/work-dir /opt/spark/work-dir
-#RUN chmod +x /usr/local/bin/db-init.sh
+RUN chmod +x /usr/local/bin/db-init.sh
 
 CMD ["/usr/local/bin/db-init.sh"]
