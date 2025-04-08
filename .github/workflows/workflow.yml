@@ -11,6 +11,7 @@ on:
 jobs:
   test-with-docker-compose:
     runs-on: ubuntu-latest
+    services:
 
 
     steps:
@@ -26,24 +27,15 @@ jobs:
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v1
 
-      - name: Start containers
-        run: docker-compose up -d
-
-      - name: Wait and debug delta-db
+      - name: List items
         run: |
-          echo "Containers running:"
-          docker ps -a
+          ls
 
-          echo "Checking logs for delta-db:"
-          docker logs node-pontus-jdbc-db-setup
+      - name: Build and Run Services with Docker Compose
+        run: |
+          docker-compose up --build --abort-on-container-exit --exit-code-from app
 
-          echo "List files in data and work-dir:"
-          ls -al ./backend/delta-table/data
-          ls -al ./backend/delta-table/work-dir
-
-          echo "Checking open ports inside container:"
-          docker exec node-pontus-jdbc-db-setup netstat -anp || true
-          
-          echo "Checking Hive port 10000..."
-          timeout 60 bash -c 'until nc -z delta-db 10000; do echo "Waiting..."; sleep 2; done; echo "Port is up!"'
-
+      - name: Tear Down
+        if: always()
+        run: |
+          docker-compose down
