@@ -34,7 +34,6 @@ services:
       - /usr/bin/bash
       - -c
       - |
-        pwd
         ls ./delta-table/
         cat ./delta-table/run-delta-jupyterlab.sh
         echo "NETSTAT VERSION"
@@ -72,7 +71,10 @@ services:
         #  #sleep 1000000
 
   delta-db:
-    image: pontusvisiongdpr/pv-deltadb:latest
+    #image: pontusvisiongdpr/pv-deltadb:latest
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile.delta-db
     container_name: node-pontus-jdbc-db-setup
     volumes:
       - ./backend/delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
