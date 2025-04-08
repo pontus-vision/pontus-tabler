@@ -67,10 +67,10 @@ services:
         #  #sleep 1000000
 
   delta-db:
-    image: pontusvisiongdpr/pv-deltadb:latest
-    #    build:
-    #      context: ./backend/delta-table/docker/
-    #      dockerfile: Dockerfile
+    #image: pontusvisiongdpr/pv-deltadb:latest
+    build:
+      context: ./backend/delta-table/docker/
+      dockerfile: Dockerfile
     #    volumes:
     #      - ./backend/delta-table/data:/data 
     #      - ./backend/delta-table/work-dir:/opt/spark/work-dir
