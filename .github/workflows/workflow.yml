@@ -11,8 +11,6 @@ on:
 jobs:
   test-with-docker-compose:
     runs-on: ubuntu-latest
-    services:
-
 
     steps:
       - name: Checkout Code
