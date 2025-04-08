@@ -13,27 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Install Docker Compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose version
+      - run: docker compose up -d delta-db
 
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
+      - run: docker compose logs delta-db
 
-      - name: List items
-        run: |
-          ls
-
-      - name: Build and Run Services with Docker Compose
-        run: |
-          docker-compose up --build --abort-on-container-exit --exit-code-from app
-
-      - name: Tear Down
-        if: always()
-        run: |
-          docker-compose down
+      - run: |
+          echo "Checking if delta-db port is open..."
+          docker run --network container:$(docker ps -qf name=delta-db) busybox \
+            sh -c 'nc -z localhost 10000 && echo "Port is open" || echo "Port is closed"'
