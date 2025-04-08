@@ -1,9 +1,13 @@
 FROM pontusvisiongdpr/pv-deltadb:latest
 
-# Copy init script
-COPY backend/delta-table/run-delta-jupyterlab.sh /usr/local/bin/db-init.sh
+# Switch to root to perform privileged operations
+USER root
+
+COPY delta-table/run-delta-jupyterlab.sh /usr/local/bin/db-init.sh
 RUN chmod +x /usr/local/bin/db-init.sh
 
-# Copy data and work directories
-COPY backend/delta-table/data /data
-COPY backend/delta-table/work-dir /opt/spark/work-dir
+COPY delta-table/data /data
+COPY delta-table/work-dir /opt/spark/work-dir
+
+
+CMD ["/usr/local/bin/db-init.sh"]
