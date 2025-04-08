@@ -34,6 +34,8 @@ services:
       - /usr/bin/bash
       - -c
       - |
+        pwd
+        ls
         ls ./backend/delta-table/
         cat ./backend/delta-table/run-delta-jupyterlab.sh
         echo "NETSTAT VERSION"
