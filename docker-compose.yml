@@ -34,39 +34,35 @@ services:
       - /usr/bin/bash
       - -c
       - |
-        ls ./delta-table/
-        cat ./delta-table/run-delta-jupyterlab.sh
-        echo "NETSTAT VERSION"
-        netstat --version
         echo "Checking if service is up on port 10000..."
         timeout 300 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
-        if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
-        cd delta-table
-        npm i -g java --unsafe-perm
-        cd ..
-        npm install
-        cd pontus-node-jdbc
-        npm install
-        cd ..
-        export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
-        cd delta-table/node/node-jdbc
-        npm i
-        cd ..
-        npm install
-        # npm run jest
-        cd ../..
-        cd pontus-node-jdbc
-        npm run build
-        # npm run jest || true
-        cd /usr/src/app
-        chmod +x /usr/src/app/run-docker.sh
-        ./run-docker.sh 
-        source /usr/src/app/run-docker.sh
-        echo "CLASSPATH VARIABLE"
-        echo $CLASSPATH
-        echo 'LS'
-        ls
-        npm run jest src/__tests__/AuthGroups.test.ts
+        # if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
+        # cd delta-table
+        # npm i -g java --unsafe-perm
+        # cd ..
+        # npm install
+        # cd pontus-node-jdbc
+        # npm install
+        # cd ..
+        # export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
+        # cd delta-table/node/node-jdbc
+        # npm i
+        # cd ..
+        # npm install
+        # # npm run jest
+        # cd ../..
+        # cd pontus-node-jdbc
+        # npm run build
+        # # npm run jest || true
+        # cd /usr/src/app
+        # chmod +x /usr/src/app/run-docker.sh
+        # ./run-docker.sh 
+        # source /usr/src/app/run-docker.sh
+        # echo "CLASSPATH VARIABLE"
+        # echo $CLASSPATH
+        # echo 'LS'
+        # ls
+        # npm run jest src/__tests__/AuthGroups.test.ts
         #  #npm run build && node dist/src/server.js
         #  #sleep 1000000
 
@@ -75,7 +71,6 @@ services:
     #    build:
     #      context: ./backend/delta-table/docker/
     #      dockerfile: Dockerfile
-    container_name: node-pontus-jdbc-db-setup
     volumes:
       # - ./backend/delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
       - ./backend/delta-table/data:/data 
