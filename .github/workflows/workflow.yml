@@ -15,11 +15,27 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - run: docker compose up -d delta-db
+      - name: Start delta-db container
+        run: docker compose up -d delta-db
 
-      - run: docker compose logs delta-db
+      - name: Show delta-db logs
+        run: docker compose logs delta-db
 
-      - run: |
-          echo "Checking if delta-db port is open..."
+      - name: List Spark logs inside delta-db container
+        run: |
+          docker compose exec delta-db ls -l /opt/spark/logs || true
+
+      - name: Tail HiveThriftServer2 log (if it exists)
+        run: |
+          LOG_FILE=$(docker compose exec delta-db sh -c 'ls /opt/spark/logs | grep HiveThriftServer2' || true)
+          if [ -n "$LOG_FILE" ]; then
+            docker compose exec delta-db tail -n 50 /opt/spark/logs/$LOG_FILE || true
+          else
+            echo "HiveThriftServer2 log file not found"
+          fi
+
+      - name: Check if delta-db port 10000 is open
+        run: |
+          echo "Checking if delta-db port 10000 is open..."
           docker run --network container:$(docker ps -qf name=delta-db) busybox \
             sh -c 'nc -z localhost 10000 && echo "Port is open" || echo "Port is closed"'
