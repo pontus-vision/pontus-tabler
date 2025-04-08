@@ -72,13 +72,18 @@ services:
     #      context: ./backend/delta-table/docker/
     #      dockerfile: Dockerfile
     volumes:
-      - ./backend/delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
       - ./backend/delta-table/data:/data 
       - ./backend/delta-table/work-dir:/opt/spark/work-dir
+    environment:
+      - CLASSPATH=/opt/spark/jars/*
     ports:
       - "10000:10000"
       - "8888:8888"
-
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
       # frontend:
       #   build:
       #     context: .
