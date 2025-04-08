@@ -70,7 +70,7 @@ services:
     #image: pontusvisiongdpr/pv-deltadb:latest
     build:
       context: ./backend/
-      dockerfile: Dockerfile.deltadb
+      dockerfile: Dockerfile.delta-db
     volumes:
       - ./backend/delta-table/data:/data 
       - ./backend/delta-table/work-dir:/opt/spark/work-dir
