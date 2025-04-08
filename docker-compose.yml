@@ -35,7 +35,6 @@ services:
       - -c
       - |
         pwd
-        ls
         ls ./delta-table/
         cat ./delta-table/run-delta-jupyterlab.sh
         echo "NETSTAT VERSION"
