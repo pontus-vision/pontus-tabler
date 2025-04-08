@@ -71,10 +71,10 @@ services:
         #  #sleep 1000000
 
   delta-db:
-    #image: pontusvisiongdpr/pv-deltadb:latest
-    build:
-      context: ./backend/delta-table/docker/
-      dockerfile: Dockerfile
+    image: pontusvisiongdpr/pv-deltadb:latest
+    #    build:
+    #      context: ./backend/delta-table/docker/
+    #      dockerfile: Dockerfile
     container_name: node-pontus-jdbc-db-setup
     volumes:
       # - ./backend/delta-table/run-delta-jupyterlab.sh:/usr/local/bin/db-init.sh
