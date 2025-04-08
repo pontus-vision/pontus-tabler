@@ -42,7 +42,7 @@ jobs:
           ls -al ./backend/delta-table/work-dir
 
           echo "Checking open ports inside container:"
-          docker exec node-pontus-jdbc-db-setup netstat -tulnp || true
+          docker exec node-pontus-jdbc-db-setup netstat -anp || true
           
           echo "Checking Hive port 10000..."
           timeout 60 bash -c 'until nc -z delta-db 10000; do echo "Waiting..."; sleep 2; done; echo "Port is up!"'
