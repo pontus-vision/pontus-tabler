@@ -36,8 +36,8 @@ services:
       - |
         pwd
         ls
-        ls ./backend/delta-table/
-        cat ./backend/delta-table/run-delta-jupyterlab.sh
+        ls ./delta-table/
+        cat ./delta-table/run-delta-jupyterlab.sh
         echo "NETSTAT VERSION"
         netstat --version
         echo "Checking if service is up on port 10000..."
