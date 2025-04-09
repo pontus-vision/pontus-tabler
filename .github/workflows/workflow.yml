@@ -22,19 +22,38 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
-      - name: Build and Run Services with Docker Compose
+      - name: Clean up stale metastore files
         run: |
           rm -rf ./backend/delta-table/work-dir/metastore_db
           rm -f ./backend/delta-table/work-dir/derby.log
-          docker-compose up --build --abort-on-container-exit --exit-code-from app
 
-      - name: Debug delta-db
+      - name: Start containers in detached mode
         run: |
+          docker-compose up --build -d
+
+      - name: Wait for delta-db to open port 10000
+        run: |
+          echo "Waiting for delta-db to open port 10000..."
+          timeout 120 bash -c 'until docker exec $(docker ps -qf "name=delta-db") bash -c "nc -z localhost 10000"; do echo "Still waiting..."; sleep 2; done'
+          echo "Port 10000 is open!"
+
+      - name: Run tests
+        run: |
+          docker-compose exec app npm run test # or your app's entry command
+
+      - name: Debug delta-db if needed
+        if: failure()
+        run: |
+          echo "Logs from delta-db:"
           docker-compose logs delta-db
-          docker-compose exec delta-db ps aux
-          docker-compose exec delta-db netstat -an | grep 10000
+          echo "Running processes in delta-db:"
+          docker-compose exec delta-db ps aux || true
+          echo "Network status:"
+          docker-compose exec delta-db netstat -an || true
+          echo "Check port 10000:"
+          docker-compose exec delta-db bash -c "nc -zv localhost 10000 || echo 'Port 10000 is NOT open'" || true
 
       - name: Tear Down
         if: always()
-        run: |
-          docker-compose down
+        run: docker-compose down -v
+
