@@ -16,6 +16,7 @@ jobs:
       - name: Checking UID
         run: |
           whoami
+          id -u
 
       - name: Checkout Code
         uses: actions/checkout@v3
