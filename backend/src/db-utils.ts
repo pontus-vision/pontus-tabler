@@ -16,7 +16,7 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:8888', // Update the connection URL according to your setup
+  url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
   drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
   properties: {
     user: 'NBuser',
@@ -25,7 +25,7 @@ export const config = {
 };
 
 const pool = new Pool({
-  url: 'jdbc:hive2://delta-db:8888',   // Replace with your JDBC URL
+  url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
   properties: {
     user: 'admin',           // Database username
     password: 'user'        // Database password
