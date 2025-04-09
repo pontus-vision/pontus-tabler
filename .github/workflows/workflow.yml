@@ -33,8 +33,10 @@ jobs:
           sudo rm -rf ./backend/delta-table/work-dir/metastore_db
           sudo rm -f ./backend/delta-table/work-dir/derby.log    
 
-      - name: Fix permissions for delta-table/data
+      - name: Fix permissions for delta-table/data and delta-table/work-dir/metastore_db 
         run: |
+          mkdir -p ./backend/delta-table/data
+          chmod -R 777 ./backend/delta-table/data
           mkdir -p ./backend/delta-table/work-dir/metastore_db
           chmod -R 777 ./backend/delta-table/work-dir/metastore_db
 
