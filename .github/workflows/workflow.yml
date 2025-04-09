@@ -37,8 +37,7 @@ jobs:
         run: |
           mkdir -p ./backend/delta-table/data
           chmod -R 777 ./backend/delta-table/data
-          mkdir -p ./backend/delta-table/work-dir/metastore_db
-          chmod -R 777 ./backend/delta-table/work-dir/metastore_db
+          chmod -R 777 ./backend/delta-table/work-dir/
 
       - name: Start Services in Background
         run: |
