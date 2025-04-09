@@ -28,6 +28,12 @@ jobs:
           rm -f ./backend/delta-table/work-dir/derby.log
           docker-compose up --build --abort-on-container-exit --exit-code-from app
 
+      - name: Debug delta-db
+        run: |
+          docker-compose logs delta-db
+          docker-compose exec delta-db ps aux
+          docker-compose exec delta-db netstat -an | grep 10000
+
       - name: Tear Down
         if: always()
         run: |
