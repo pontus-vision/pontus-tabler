@@ -42,7 +42,7 @@ jobs:
 
       - name: Start Services in Background
         run: |
-          docker-compose up --build -d
+          docker-compose up --build
 
       - name: Checking UID
         run: |
