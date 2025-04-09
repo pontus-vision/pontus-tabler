@@ -46,6 +46,7 @@ import { prepareDbAndAuth } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS } from '../consts';
 import { runQuery } from '../db-utils';
+import { exit } from 'process';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -82,6 +83,7 @@ describe('dashboardCreatePOST', () => {
     }
     process.env = OLD_ENV; // Restore old environment
     srv.close();
+    exit()
   });
 
   it('should create a group', async () => {
