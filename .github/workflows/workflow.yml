@@ -22,6 +22,17 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
+      - name: Clean Docker Volumes and Cache
+        run: |
+          docker volume prune -f
+          sudo rm -rf ./backend/delta-table/work-dir/metastore_db
+          sudo rm -f ./backend/delta-table/work-dir/derby.log    
+
+      - name: Fix permissions for delta-table/data
+        run: |
+          mkdir -p ./backend/delta-table/data
+          chmod -R 777 ./backend/delta-table/data
+
       - name: Start Services in Background
         run: |
           docker-compose up --build -d
