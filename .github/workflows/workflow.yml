@@ -35,6 +35,7 @@ jobs:
 
       - name: Fix permissions for delta-table/data and delta-table/work-dir/metastore_db 
         run: |
+          ls -latr ./backend/delta-table/workdir
           mkdir -p ./backend/delta-table/data
           chmod -R 777 ./backend/delta-table/data
           chmod -R 777 ./backend/delta-table/work-dir/
