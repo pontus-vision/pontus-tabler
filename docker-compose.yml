@@ -74,8 +74,8 @@ services:
     #user: "1001:1001"
     volumes:
       - ./backend/delta-table/data:/data 
-      #- ./backend/delta-table/work-dir:/opt/spark/work-dir
-      - spark-workdir:/opt/spark/work-dir
+      - ./backend/delta-table/work-dir:/opt/spark/work-dir
+      # - spark-workdir:/opt/spark/work-dir
     environment:
       - CLASSPATH=/opt/spark/jars/*
     ports:
