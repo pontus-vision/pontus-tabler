@@ -79,13 +79,6 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
-    command: >
-      bash -c "/opt/spark/sbin/start-thriftserver.sh
-        --master local[*]
-        --conf spark.sql.catalogImplementation=hive
-        --conf spark.hadoop.javax.jdo.option.ConnectionURL=jdbc:derby:memory:metastore_db;create=true
-        --conf spark.sql.warehouse.dir=/opt/spark/warehouse
-        && tail -f /dev/null"
       # frontend:
       #   build:
       #     context: .
