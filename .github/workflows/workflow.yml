@@ -22,38 +22,18 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
-      - name: Clean up stale metastore files
+      - name: Build and Run Services with Docker Compose
         run: |
-          rm -rf ./backend/delta-table/work-dir/metastore_db
-          rm -f ./backend/delta-table/work-dir/derby.log
+          docker-compose up --build --abort-on-container-exit --exit-code-from app
 
-      - name: Start containers in detached mode
+      - name: Show Spark Logs from delta-db
+        if: always()
         run: |
-          docker-compose up --build -d
-
-      - name: Wait for delta-db to open port 10000
-        run: |
-          echo "Waiting for delta-db to open port 10000..."
-          timeout 120 bash -c 'until docker exec $(docker ps -qf "name=delta-db") bash -c "curl -s telnet://localhost:10000" > /dev/null; do echo "Still waiting..."; sleep 2; done'
-          echo "Port 10000 is open!"
-
-      - name: Run tests
-        run: |
-          docker-compose exec app npm run test # or your app's entry command
-
-      - name: Debug delta-db if needed
-        if: failure()
-        run: |
-          echo "Logs from delta-db:"
-          docker-compose logs delta-db
-          echo "Running processes in delta-db:"
-          docker-compose exec delta-db ps aux || true
-          echo "Network status:"
-          docker-compose exec delta-db netstat -an || true
-          echo "Check port 10000:"
-          docker-compose exec delta-db bash -c "nc -zv localhost 10000 || echo 'Port 10000 is NOT open'" || true
+          echo "🔍 Showing logs from /opt/spark/logs in delta-db container..."
+          docker-compose exec delta-db bash -c 'ls -l /opt/spark/logs && echo && cat /opt/spark/logs/* || echo "⚠️ No logs found"'
 
       - name: Tear Down
         if: always()
-        run: docker-compose down -v
+        run: |
+          docker-compose down
 
