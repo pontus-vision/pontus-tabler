@@ -35,7 +35,7 @@ jobs:
 
       - name: Fix permissions for delta-table/data and delta-table/work-dir/metastore_db 
         run: |
-          ls -latr ./backend/delta-table/workdir
+          ls -latr ./backend/delta-table/work-dir
           mkdir -p ./backend/delta-table/data
           chmod -R 777 ./backend/delta-table/data
           chmod -R 777 ./backend/delta-table/work-dir/
@@ -51,7 +51,7 @@ jobs:
       - name: Wait for Services and Run Tests
         run: |
           echo "Waiting for delta-db to open port 10000..."
-          timeout 60 bash -c 'until docker exec delta-db bash -c "ls /opt/spark/logs" > /dev/null 2>&1; do echo "Still waiting..."; sleep 2; done'
+          timeout 200 bash -c 'until docker exec delta-db bash -c "ls /opt/spark/logs" > /dev/null 2>&1; do echo "Still waiting..."; sleep 2; done'
           echo "Service seems ready. Running tests..."
 
           docker-compose exec app bash -c 'npm run test || exit 1'
