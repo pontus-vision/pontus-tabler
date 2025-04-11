@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          docker-compose exec app bash -c "
+          docker-compose exec frontend bash -c "
             npx cypress install
             npx cypress run -b chrome
           "
