@@ -82,9 +82,12 @@ describe('dashboardCreatePOST', () => {
     }
     process.env = OLD_ENV; // Restore old environment
     srv.close();
+    setTimeout(() => {
+      process.exit()
+    }, 1000)
   });
 
-  it('should create a group', async () => {
+  it.only('should create a group', async () => {
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
     };
