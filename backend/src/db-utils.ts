@@ -42,7 +42,6 @@ const pool = new Pool({
     level: 'info'
   }
 });
-const jdbc = new JDBC(config);
 
 // Initialize pool
 async function initializePool() {
@@ -54,9 +53,6 @@ async function initializePool() {
   }
 }
 
-(async () => {
-  await initializePool();
-})();
 
 export const convertToSqlFields = (data: any[]): string => {
   const fields = [];
@@ -226,14 +222,15 @@ export const createSql = async (
   return res3;
 };
 
-export const createConnection = async (): Promise<IConnection> => {
-  const reservedConn = await jdbc.reserve()
-  return reservedConn.conn
-};
+//export const createConnection = async (): Promise<IConnection> => {
+//};
 
 export async function runQuery(query: string): Promise<Record<string, any>[]> {
   try {
-    const connection = await createConnection();
+    const jdbc = new JDBC(config);
+    const reservedConn = await jdbc.reserve()
+    const connection = reservedConn.conn
+    //const connection = await createConnection();
     const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
     const resultSet = await preparedStatement.executeQuery();
@@ -243,6 +240,8 @@ export async function runQuery(query: string): Promise<Record<string, any>[]> {
     // await pool.release(connection)
 
     await connection.close()
+    await jdbc.release(connection)
+
 
     return results
   } catch (error) {
