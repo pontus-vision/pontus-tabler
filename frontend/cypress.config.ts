@@ -3,6 +3,9 @@ import { runQuery } from './dist/db-utils.js';
 
 export default defineConfig({
   e2e: {
+    env: {
+      nodeAppUrl: 'http://node-app:8080',
+    },
     defaultCommandTimeout: 10000,
     video: false,
     setupNodeEvents(on, config) {

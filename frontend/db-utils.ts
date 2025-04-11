@@ -1,7 +1,5 @@
 import { Jinst, Pool } from './node-jdbc/index';
 import { JDBC } from './node-jdbc/index';
-import { v4 as uuidv4 } from 'uuid';
-
 export const DELTA_DB = 'deltadb'
 
 export const classPath = process.env['CLASSPATH']?.split(',');
@@ -12,7 +10,7 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: 'jdbc:hive2://172.19.0.2:10000',   // Replace with your JDBC URL
+  url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
   drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
   properties: {
     user: 'NBuser',
@@ -21,7 +19,7 @@ export const config = {
 };
 
 const pool = new Pool({
-  url: 'jdbc:hive2://172.19.0.2:10000',   // Replace with your JDBC URL
+  url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
   properties: {
     user: 'admin',           // Database username
     password: 'user'        // Database password

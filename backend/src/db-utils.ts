@@ -242,6 +242,7 @@ export async function runQuery(query: string): Promise<Record<string, any>[]> {
     await connection.close()
     await jdbc.release(connection)
 
+    //console.log({ JDBCStatus: await jdbc.status() })
 
     return results
   } catch (error) {

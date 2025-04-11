@@ -189,21 +189,21 @@ class Pool {
   }
 
   private async connStatus(acc: ConnStatus[], pool: PoolConnStatus[]): Promise<ConnStatus[]> {
-    return pool.reduce((conns, connobj) => {
+    for (const connobj of pool) {
       const conn = connobj.conn;
-      const closed = conn.isClosedSync() as boolean;
+      const closed = await conn.isClosed() as boolean;
       const readonly = conn.isReadOnlySync();
       const valid = conn.isValidSync(1000);
 
-      conns.push({
+      acc.push({
         uuid: connobj.uuid,
         closed,
         readonly,
         valid,
       });
+    }
 
-      return conns;
-    }, acc);
+    return acc;
   }
 
   private async _addConnectionsOnInitialize(): Promise<void> {

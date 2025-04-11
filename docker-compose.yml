@@ -60,9 +60,9 @@ services:
         echo $CLASSPATH
         echo 'LS'
         ls
-        npm run jest src/__tests__/AuthGroups.test.ts --forceExit
-         #npm run build && node dist/src/server.js
-         #sleep 1000000
+        # npm run jest src/__tests__/AuthGroups.test.ts --forceExit
+        npm run build && node dist/src/server.js
+        sleep 1000000
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
@@ -79,31 +79,37 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
-      # frontend:
-      #   build:
-      #     context: .
-      #     dockerfile: frontend/Dockerfile
-      #   ports:
-      #     - "4173:4173"
-      #     - "5173:5173"
-      #   environment:
-      #      VITE_BACKEND_URL: http://node-app:8080 # pointing to the backend
-      #      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib 
-      #   volumes:
-      #     - ./frontend:/usr/src/app
-      #     - /var/run/docker.sock:/var/run/docker.sock
-      #     - /root/.cache/Cypress:/root/.cache/Cypress
-      #     #  depends_on:
-      #     #    - app
-      #   entrypoint:
-      #     - /usr/bin/bash
-      #     - -c
-      #     - |
-      #       # timeout 22 sh -c 'until nc -z $0 $1; do sleep 1; done' app 8080
-      #       # npm install
-      #       # sass src/sass/style.scss src/style.css
-      #       # rm -Rf dist && npx tsc
-      #       npm run dev
-      #       # npx cypress install
-      #       # npx cypress run -b chrome
-      #       sleep 10000
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "4173:4173"
+      - "5173:5173"
+    environment:
+       VITE_BACKEND_URL: http://node-app:8080 # pointing to the backend
+       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib 
+    volumes:
+      - ./frontend:/usr/src/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.cache/Cypress:/root/.cache/Cypress
+      #  depends_on:
+      #    - app
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080..."; sleep 1; done; echo "Port 8080 is open!"'
+        echo "Checking if service is up on port 10000..."
+        timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+        npm install
+        sass src/sass/style.scss src/style.css
+        rm -Rf dist && npx tsc
+        #npm run dev
+        echo $VITE_BACKEND_URL
+        export CLASSPATH="$(ls /usr/src/app/node-jdbc/node/jars/* | xargs | sed -e 's/ /,/g')"
+        export VITE_BACKEND_URL="http://node-app:8080"
+        ./run-docker.sh 
+        # npx cypress install
+        # npx cypress run -b chrome
+        sleep 10000

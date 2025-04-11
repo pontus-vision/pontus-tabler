@@ -1,5 +1,6 @@
 describe('Test auth user views', () => {
-  const url = 'http://172.19.0.4:5173'
+  const nodeAppUrl = Cypress.env('nodeAppUrl');
+  const url = `${nodeAppUrl || 'http://172.19.0.3:5173'}`
   before(() => {
     cy.task('resetDatabaseUsers').then((result) => {
       cy.log('Database reset result:', JSON.stringify(result));

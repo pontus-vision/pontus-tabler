@@ -31,38 +31,33 @@ jobs:
         run: |
           docker volume prune -f
           sudo rm -rf ./backend/delta-table/work-dir/metastore_db
-          sudo rm -f ./backend/delta-table/work-dir/derby.log    
+          sudo rm -f ./backend/delta-table/work-dir/derby.log
 
-      - name: Fix permissions for delta-table/data and delta-table/work-dir/metastore_db 
+      - name: Fix permissions for delta-table/data and delta-table/work-dir/metastore_db
         run: |
-          ls -latr ./backend/delta-table/work-dir
           mkdir -p ./backend/delta-table/data
           chmod -R 777 ./backend/delta-table/data
           chmod -R 777 ./backend/delta-table/work-dir/
 
       - name: Start Services in Background
         run: |
-          docker-compose up --build --abort-on-container-exit --exit-code-from app
+          docker-compose up -d --build
 
-          #      - name: Checking UID
-          #        run: |
-          #          docker-compose exec delta-db bash -c "id -u"
-          #
-          #      - name: Wait for Services and Run Tests
-          #        run: |
-          #          echo "Waiting for delta-db to open port 10000..."
-          #          timeout 200 bash -c 'until docker exec delta-db bash -c "ls /opt/spark/logs" > /dev/null 2>&1; do echo "Still waiting..."; sleep 2; done'
-          #          echo "Service seems ready. Running tests..."
-          #
-          #          docker-compose exec app bash -c 'npm run test || exit 1'
-          #
-          #      - name: Show Spark Logs from delta-db
-          #        if: always()
-          #        run: |
-          #          echo "Showing logs from /opt/spark/logs in delta-db..."
-          #          docker-compose exec delta-db bash -c 'ls -l /opt/spark/logs && echo && cat /opt/spark/logs/* || echo "⚠️ No logs found"'
+      - name: Run Tests
+        run: |
+          docker-compose exec app bash -c "
+            npx cypress install
+            npx cypress run -b chrome
+          "
+
+      - name: Show Spark Logs from delta-db (Optional Debug)
+        if: always()
+        run: |
+          echo "Showing logs from /opt/spark/logs in delta-db..."
+          docker-compose exec delta-db bash -c 'ls -l /opt/spark/logs && echo && cat /opt/spark/logs/* || echo "⚠ No logs found"'
 
       - name: Tear Down
         if: always()
         run: |
-          docker-compose down
+          docker-compose down --volumes
+
