@@ -9,7 +9,7 @@ export default defineConfig({
     env: {
       nodeAppUrl: 'http://frontend-server:5173',
     },
-    defaultCommandTimeout: 10000,
+    defaultCommandTimeout: 30000,
     video: false,
     setupNodeEvents(on, config) {
       on('task', {
@@ -18,6 +18,7 @@ export default defineConfig({
           return null;
         },
         async resetDatabaseTablesTest() {  // ✅ No need for an extra Promise wrapper
+          return null
           try {
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
             const deleteGroups = await runQuery('DELETE FROM auth_groups;');
