@@ -1,10 +1,19 @@
 import { defineConfig } from 'cypress';
 import { runQuery } from './dist/db-utils.js';
+import * as dotenv from 'dotenv'
+
+dotenv.config()
 
 export default defineConfig({
+
   e2e: {
-    defaultCommandTimeout: 10000,
+    baseUrl: 'http://frontend-server:5173',
+    env: {
+      nodeAppUrl: 'http://frontend-server:5173',
+    },
+    defaultCommandTimeout: 30000,
     video: false,
+
     setupNodeEvents(on, config) {
       on('task', {
         log(message) {
