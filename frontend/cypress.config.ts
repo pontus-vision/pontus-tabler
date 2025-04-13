@@ -1,10 +1,13 @@
 import { defineConfig } from 'cypress';
 import { runQuery } from './dist/db-utils.js';
+import * as dotenv from 'dotenv'
+
+dotenv.config()
 
 export default defineConfig({
   e2e: {
     env: {
-      nodeAppUrl: 'http://node-app:8080',
+      nodeAppUrl: process.env.FRONTEND_URL || 'http://172.18.0.2:5173',
     },
     defaultCommandTimeout: 10000,
     video: false,

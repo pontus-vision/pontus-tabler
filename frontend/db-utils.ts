@@ -3,6 +3,7 @@ import { JDBC } from './node-jdbc/index';
 export const DELTA_DB = 'deltadb'
 
 export const classPath = process.env['CLASSPATH']?.split(',');
+const deltaDb = process.env.DELTA_DB
 
 if (!Jinst.getInstance().isJvmCreated()) {
   Jinst.getInstance().addOption('-Xrs');
@@ -10,16 +11,16 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
-  drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
+  url: `jdbc:hive2://${deltaDb || '172.18.0.4:10000'}`,   // Replace with your JDBC URL
+  drivername: `org.apache.hive.jdbc.HiveDriver`, // Driver class name
   properties: {
-    user: 'NBuser',
-    password: '',
+    user: `NBuser`,
+    password: ``,
   },
 };
 
 const pool = new Pool({
-  url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
+  url: `jdbc:hive2://${deltaDb || '172.18.0.4:10000'}`,   // Replace with your JDBC URL
   properties: {
     user: 'admin',           // Database username
     password: 'user'        // Database password
@@ -55,6 +56,7 @@ export const createConnection = async () => {
 
 export async function runQuery(query: string) {
   try {
+    console.log({ config, env: process.env })
     const connection = await createConnection();
     const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 

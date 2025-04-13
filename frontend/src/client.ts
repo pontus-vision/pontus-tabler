@@ -102,8 +102,7 @@ import { AuthGroupUsersCreateRes } from './typescript/api/resources/pontus/types
 import { Table } from 'semantic-ui-react';
 import { AuthGroupUsersDeleteReq } from './typescript/api/resources/pontus/client/requests/AuthGroupUsersDeleteReq';
 import { AuthGroupUsersReadReq } from './typescript/api/resources/pontus/client/requests/AuthGroupUsersReadReq';
-import { AuthGroupUsersDeleteRes } from './typescript/api/resources/pontus/types/AuthGroupUsersDeleteRes';
-import { AuthGroupUsersReadRes } from './typescript/api/resources/pontus/types/AuthGroupUsersReadRes';
+import { AuthGroupUsersDeleteRes } from './typescript/api/resources/pontus/types/AuthGroupUsersDeleteRes'; import { AuthGroupUsersReadRes } from './typescript/api/resources/pontus/types/AuthGroupUsersReadRes';
 import { } from './typescript/serialization';
 
 export const getModelData = async (
@@ -137,7 +136,7 @@ export const getModelData = async (
 };
 
 const api = axios.create({
-  baseURL: 'http://:172.18.0.4:8080/PontusTest/1.0.0/',
+  baseURL: (import.meta.env['VITE_BACKEND_URL'] || 'http://172.18.0.5:8080') + '/PontusTest/1.0.0',
   headers: {
     Authorization: 'Bearer 123456',
     Accept: 'application/json',
@@ -151,7 +150,7 @@ const api = axios.create({
 const post = async (url: string, data?: any) => {
   const accessToken = localStorage.getItem('accessToken') || '';
   const refreshToken = localStorage.getItem('refreshToken') || '';
-  const baseURL = 'http://172.18.0.4:8080/PontusTest/1.0.0';
+  const baseURL = (import.meta.env['VITE_BACKEND_URL'] || 'http://172.18.0.5:8080') + '/PontusTest/1.0.0';
   const headers = {
     Authorization: `${accessToken}`,
     Accept: 'application/json',

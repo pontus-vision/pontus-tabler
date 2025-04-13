@@ -4,10 +4,9 @@ describe('Test Table (meta-data and data) CRUD', () => {
   // beforeEach(() => {
   //   cy.task('resetDatabase'); // Custom task to clear the DB
   // });
-  const nodeAppUrl = Cypress.env('nodeAppUrl');
-  const url = `${nodeAppUrl || 'http://172.19.0.3:5173'}`
-  console.log({ backend_url: process.env.VITE_BACKEND_URL, nodeAppUrl })
+  const url = Cypress.env('nodeAppUrl');
   before(() => {
+    cy.log('Url', { url })
     cy.task('resetDatabaseAuthGroups').then((result) => {
       cy.log('Database reset result:', JSON.stringify(result));
     });
