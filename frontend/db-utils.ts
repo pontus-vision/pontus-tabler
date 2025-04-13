@@ -11,7 +11,7 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: `jdbc:hive2://delta-db:10000`,   // Replace with your JDBC URL
+  url: `jdbc:hive2://${deltaDb || '172.18.0.4:10000'}`,   // Replace with your JDBC URL
   drivername: `org.apache.hive.jdbc.HiveDriver`, // Driver class name
   properties: {
     user: `NBuser`,
@@ -20,7 +20,7 @@ export const config = {
 };
 
 const pool = new Pool({
-  url: `jdbc:hive2://delta-db:10000`,   // Replace with your JDBC URL
+  url: `jdbc:hive2://${deltaDb || '172.18.0.4:10000'}`,   // Replace with your JDBC URL
   properties: {
     user: 'admin',           // Database username
     password: 'user'        // Database password
