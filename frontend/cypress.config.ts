@@ -18,23 +18,23 @@ export default defineConfig({
           return null;
         },
         async resetDatabaseTablesTest() {  // ✅ No need for an extra Promise wrapper
-          try {
-            const deleteUsers = await runQuery('DELETE FROM auth_users;');
-            const deleteGroups = await runQuery('DELETE FROM auth_groups;');
-            const deleteTables = await runQuery('DELETE FROM tables;');
-            const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
-            const deleteMenu = await runQuery('DELETE FROM menu;');
-            const deleteDashboards = await runQuery('DELETE FROM dashboards;');
-            const deleteTable1 = await runQuery('DELETE FROM table_1')
-            const deleteTable2 = await runQuery('DELETE FROM table_2')
-            const dropTable1 = await runQuery('DROP TABLE IF EXISTS table_1;');
-            const dropTable2 = await runQuery('DROP TABLE IF EXISTS table_2;');
+          //    try {
+          //      const deleteUsers = await runQuery('DELETE FROM auth_users;');
+          //      const deleteGroups = await runQuery('DELETE FROM auth_groups;');
+          //      const deleteTables = await runQuery('DELETE FROM tables;');
+          //      const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
+          //      const deleteMenu = await runQuery('DELETE FROM menu;');
+          //      const deleteDashboards = await runQuery('DELETE FROM dashboards;');
+          //      const deleteTable1 = await runQuery('DELETE FROM table_1')
+          //      const deleteTable2 = await runQuery('DELETE FROM table_2')
+          //      const dropTable1 = await runQuery('DROP TABLE IF EXISTS table_1;');
+          //      const dropTable2 = await runQuery('DROP TABLE IF EXISTS table_2;');
 
-            return { deleteGroups, deleteUsers };  // ✅ Directly return result
-          } catch (error) {
-            console.error('Database reset failed:', error);
-            throw new Error(error);  // ✅ Ensure Cypress receives the error
-          }
+          //      return { deleteGroups, deleteUsers };  // ✅ Directly return result
+          //    } catch (error) {
+          //      console.error('Database reset failed:', error);
+          //      throw new Error(error);  // ✅ Ensure Cypress receives the error
+          //    }
         },
         async resetDatabaseUsers() {  // ✅ No need for an extra Promise wrapper
           try {
