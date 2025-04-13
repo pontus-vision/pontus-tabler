@@ -62,7 +62,7 @@ services:
         ls
         # npm run jest src/__tests__/AuthGroups.test.ts --forceExit
         npm run build && node dist/src/server.js
-        sleep 1000000
+        #       sleep 1000000
 
   delta-db:
     image: pontusvisiongdpr/pv-deltadb:latest
