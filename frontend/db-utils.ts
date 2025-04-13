@@ -56,11 +56,10 @@ export const createConnection = async () => {
 
 export async function runQuery(query: string) {
   try {
-    console.log({ config, env: process.env })
+    console.log({ NODE_URL: process.env.FRONTEND_URL })
     const connection = await createConnection();
     const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
 
-    console.log({ query })
     const resultSet = await preparedStatement.executeQuery();
     const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 

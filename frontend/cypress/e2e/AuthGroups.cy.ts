@@ -5,8 +5,9 @@ describe('Test Table (meta-data and data) CRUD', () => {
   //   cy.task('resetDatabase'); // Custom task to clear the DB
   // });
   const url = Cypress.env('nodeAppUrl');
+
   before(() => {
-    cy.log('Url', { url })
+    cy.log('FRONTEND_URL', { url })
     cy.task('resetDatabaseAuthGroups').then((result) => {
       cy.log('Database reset result:', JSON.stringify(result));
     });
