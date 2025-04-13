@@ -16,7 +16,7 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: process.env['P_DELTA_TABLE_HIVE_SERVER'] || 'jdbc:hive2://localhost:10000', // Update the connection URL according to your setup
+  url: 'jdbc:hive2://delta-db:10000', // Update the connection URL according to your setup
   drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
   properties: {
     user: 'NBuser',
