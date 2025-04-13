@@ -38,6 +38,7 @@ export default defineConfig({
           }
         },
         async resetDatabaseUsers() {  // ✅ No need for an extra Promise wrapper
+          return null
           try {
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
             const deleteGroups = await runQuery('DELETE FROM auth_groups;');
@@ -51,6 +52,7 @@ export default defineConfig({
         },
         async resetDatabaseAuthGroups() {  // ✅ No need for an extra Promise wrapper
           try {
+            return null
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
             const deleteGroups = await runQuery('DELETE FROM auth_groups;');
             const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
