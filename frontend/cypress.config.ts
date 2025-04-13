@@ -18,16 +18,23 @@ export default defineConfig({
           return null;
         },
         async resetDatabaseTablesTest() {  // ✅ No need for an extra Promise wrapper
-          return null
+
+          const deleteTable = async (table: string) => {
+            try {
+              await runQuery(`DELETE FROM ${table}`)
+            } catch (error) {
+            }
+
+          }
           try {
-            const deleteUsers = await runQuery('DELETE FROM auth_users;');
-            const deleteGroups = await runQuery('DELETE FROM auth_groups;');
-            const deleteTables = await runQuery('DELETE FROM tables;');
-            const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
-            const deleteMenu = await runQuery('DELETE FROM menu;');
-            const deleteDashboards = await runQuery('DELETE FROM dashboards;');
-            const deleteTable1 = await runQuery('DELETE FROM table_1')
-            const deleteTable2 = await runQuery('DELETE FROM table_2')
+            const deleteUsers = await runQuery('DROP TABLE IF EXISTS auth_users;');
+            const deleteGroups = await runQuery('DROP TABLE IF EXISTS auth_groups;');
+            const deleteTables = await runQuery('DROP TABLE IF EXISTS tables;');
+            const deleteGroupsUsers = await runQuery('DROP TABLE IF EXISTS groups_users;');
+            const deleteMenu = await runQuery('DROP TABLE IF EXISTS menu;');
+            const deleteDashboards = await runQuery('DROP TABLE IF EXISTS dashboards;');
+            const deleteTable1 = await runQuery('DROP TABLE IF EXISTS table_1')
+            const deleteTable2 = await runQuery('DROP TABLE IF EXISTS table_2')
             const dropTable1 = await runQuery('DROP TABLE IF EXISTS table_1;');
             const dropTable2 = await runQuery('DROP TABLE IF EXISTS table_2;');
 
@@ -38,11 +45,10 @@ export default defineConfig({
           }
         },
         async resetDatabaseUsers() {  // ✅ No need for an extra Promise wrapper
-          return null
           try {
-            const deleteUsers = await runQuery('DELETE FROM auth_users;');
-            const deleteGroups = await runQuery('DELETE FROM auth_groups;');
-            const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
+            const deleteUsers = await runQuery('DROP TABLE IF EXISTS auth_users;');
+            const deleteGroups = await runQuery('DROP TABLE IF EXISTS auth_groups;');
+            const deleteGroupsUsers = await runQuery('DROP TABLE IF EXISTS groups_users;');
 
             return { deleteGroups, deleteUsers };  // ✅ Directly return result
           } catch (error) {
@@ -52,13 +58,12 @@ export default defineConfig({
         },
         async resetDatabaseAuthGroups() {  // ✅ No need for an extra Promise wrapper
           try {
-            return null
-            const deleteUsers = await runQuery('DELETE FROM auth_users;');
-            const deleteGroups = await runQuery('DELETE FROM auth_groups;');
-            const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
-            const deleteGroupsDashboards = await runQuery('DELETE FROM groups_dashboards;');
-            const deleteDashboards = await runQuery('DELETE FROM dashboards;');
-            const deleteTables = await runQuery('DELETE FROM tables;');
+            const deleteUsers = await runQuery('DROP TABLE IF EXISTS auth_users;');
+            const deleteGroups = await runQuery('DROP TABLE IF EXISTS auth_groups;');
+            const deleteGroupsUsers = await runQuery('DROP TABLE IF EXISTS groups_users;');
+            const deleteGroupsDashboards = await runQuery('DROP TABLE IF EXISTS groups_dashboards;');
+            const deleteDashboards = await runQuery('DROP TABLE IF EXISTS dashboards;');
+            const deleteTables = await runQuery('DROP TABLE IF EXISTS tables;');
             const insertTable = await runQuery('INSERT INTO tables (id, name, label, cols) VALUES ("0195a1fc391343e58793727991e8ca40", "table_1", "Table 1", array(struct("0195a1fc3a154a08a140a4c361b49c44", "column_1", "column_1", false, "column 1", false, "checkboxes", "1", null, null), struct("0195a1fc3a154a47a800e7fde129c5d3", "column_2", "column_2", false, "column 2", false, "checkboxes", "2", null, null)));')
             const insertDash = await runQuery("INSERT INTO dashboards (id, name, folder, state, owner) VALUES (" +
               "'0195a4c3adc640b0a54020f8594ec153', " +
