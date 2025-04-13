@@ -9,7 +9,7 @@ export default defineConfig({
     env: {
       nodeAppUrl: 'http://frontend-server:5173',
     },
-    defaultCommandTimeout: 30000,
+    defaultCommandTimeout: 10000,
     video: false,
     setupNodeEvents(on, config) {
       on('task', {
