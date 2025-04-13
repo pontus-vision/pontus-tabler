@@ -5,12 +5,15 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 export default defineConfig({
+
   e2e: {
+    baseUrl: 'http://frontend-server:5173',
     env: {
       nodeAppUrl: 'http://frontend-server:5173',
     },
     defaultCommandTimeout: 30000,
     video: false,
+
     setupNodeEvents(on, config) {
       on('task', {
         log(message) {

@@ -1,10 +1,9 @@
 describe('Test auth user views', () => {
-  const url = Cypress.env('nodeAppUrl');
   before(() => {
     cy.task('resetDatabaseUsers').then((result) => {
       cy.log('Database reset result:', JSON.stringify(result));
     });
-    cy.visit(`${url}/register/admin`);
+    cy.visit(`/register/admin`);
     cy.get("[data-cy='username-input']").type("Admin 1");
     cy.get("[data-cy='password-input']").type("1234567");
     cy.get("[data-cy='password-confirmation-input']").type("1234567");
@@ -17,7 +16,7 @@ describe('Test auth user views', () => {
     cy.contains('Logout').click()
   }),
     beforeEach(() => {
-      cy.visit(`${url}/login`);
+      cy.visit(`/login`);
       cy.get("[data-cy='username-login-input']").type("Admin 1");
       cy.get("[data-cy='password-login-input']").type("1234567");
 
