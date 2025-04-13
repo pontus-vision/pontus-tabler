@@ -100,7 +100,7 @@ services:
       - /usr/bin/bash
       - -c
       - |
-        VITE_BACKEND_URL=http://node-app:8080 
+        #       VITE_BACKEND_URL=http://node-app:8080 
         timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080..."; sleep 1; done; echo "Port 8080 is open!"'
         echo "Checking if service is up on port 10000..."
         npm install
