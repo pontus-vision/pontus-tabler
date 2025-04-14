@@ -105,7 +105,8 @@ services:
         echo "Checking if service is up on port 10000..."
         npm install
         sass src/sass/style.scss src/style.css
-        npm run dev
+        #npm run dev
+        sleep 100000
 
   frontend-tests:
     build:
