@@ -22,7 +22,7 @@ services:
       USER_PASSWORD: user
       DB_SOURCE: deltadb
       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
-      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000 
+      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
       FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
     volumes:
       - ./backend:/usr/src/app
@@ -54,7 +54,7 @@ services:
         # npm run jest || true
         cd /usr/src/app
         chmod +x /usr/src/app/run-docker.sh
-        ./run-docker.sh 
+        ./run-docker.sh
         source /usr/src/app/run-docker.sh
         echo "CLASSPATH VARIABLE"
         echo $CLASSPATH
@@ -71,7 +71,7 @@ services:
     #      dockerfile: Dockerfile
     #user: "1001:1001"
     volumes:
-      - ./backend/delta-table/data:/data 
+      - ./backend/delta-table/data:/data
       - ./backend/delta-table/work-dir:/opt/spark/work-dir
       # - spark-workdir:/opt/spark/work-dir
     environment:
@@ -89,7 +89,7 @@ services:
       - "5173:5173"
     environment:
       VITE_BACKEND_URL: http://node-app:8080 # pointing to the backend
-      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib 
+      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
     volumes:
       - ./frontend:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -100,13 +100,12 @@ services:
       - /usr/bin/bash
       - -c
       - |
-        VITE_BACKEND_URL=http://node-app:8080 
+        VITE_BACKEND_URL=http://node-app:8080
         timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080..."; sleep 1; done; echo "Port 8080 is open!"'
         echo "Checking if service is up on port 10000..."
         npm install
         sass src/sass/style.scss src/style.css
-        #npm run dev
-        sleep 100000
+        npm run dev
 
   frontend-tests:
     build:
@@ -114,7 +113,7 @@ services:
       dockerfile: frontend/Dockerfile
     environment:
       FRONTEND_URL: http://frontend-server:5173 # pointing to the backend
-      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib 
+      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
       DELTA_DB: delta-db:10000 # pointing to the backend
     volumes:
       - ./frontend:/usr/src/app
@@ -133,7 +132,7 @@ services:
         rm -Rf dist && npx tsc
         export CLASSPATH="$(ls /usr/src/app/node-jdbc/node/jars/* | xargs | sed -e 's/ /,/g')"
         # export DELTA_DB=delta-db:10000
-        export FRONTEND_URL=http://frontend-server:5173        
+        export FRONTEND_URL=http://frontend-server:5173
         npx cypress install
         npx cypress run -b chrome
-        sleep 10000
+        #sleep 10000
