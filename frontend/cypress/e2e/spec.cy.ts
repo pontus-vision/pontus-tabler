@@ -2,12 +2,11 @@ describe('Test Table (meta-data and data) CRUD', () => {
   // beforeEach(() => {
   //   cy.task('resetDatabase'); // Custom task to clear the DB
   // });
-  const url = 'http://172.19.0.4:5173'
   before(() => {
     cy.task('resetDatabaseTablesTest').then((result) => {
       cy.log('Database reset result:', JSON.stringify(result));
     });
-    cy.visit(`${url}/register/admin`);
+    cy.visit(`/register/admin`);
     cy.get("[data-cy='username-input']").type("Admin 1");
     cy.get("[data-cy='password-input']").type("1234567");
     cy.get("[data-cy='password-confirmation-input']").type("1234567");
@@ -18,7 +17,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
     cy.contains('Logout').click()
   }),
     beforeEach(() => {
-      cy.visit(`${url}/login`);
+      cy.visit(`/login`);
       cy.get("[data-cy='username-login-input']").type("Admin 1");
       cy.get("[data-cy='password-login-input']").type("1234567");
 
@@ -82,7 +81,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
     }),
     it.skip('update table', () => {
 
-      cy.visit(`${url}/tables/read`);
+      cy.visit(`/tables/read`);
 
       cy.contains('Update Mode').click()
       cy.contains('Table 1').next().get('.ag-cell[col-id="update-mode"]').click()
@@ -235,9 +234,9 @@ describe('Test Table (meta-data and data) CRUD', () => {
       cy.get('[role="row"][row-index="1"]', { timeout: 15000 }).find('[role="gridcell"]', { timeout: 20000 }).should('contain.text', "Table 1")
     }),
     it("should create a table-data row", () => {
-      //     cy.visit(`${url}/login`);
+      //     cy.visit(`/login`);
       //cy.get("[data-cy='edit-on-grid-toggle']").click()
-      cy.visit(`${url}/tables/read`)
+      cy.visit(`/tables/read`)
       cy.contains('Table 1').should('be.visible')
       cy.wait(6000)
       cy.contains('Update Mode').click()
@@ -263,7 +262,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.contains('Table updated successfully').should('exist')
 
-      cy.visit(`${url}/tables/read`)
+      cy.visit(`/tables/read`)
 
       cy.contains('Table 1').click()
 
@@ -289,7 +288,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"]').should('have.text', 'Foo')
 
-      cy.visit(`${url}/tables/read`)
+      cy.visit(`/tables/read`)
 
       cy.contains('Table 2').click()
 
@@ -316,7 +315,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"] input').should('be.checked')
     }),
     it('should create edges between table rows', () => {
-      cy.visit(`${url}/tables/read`)
+      cy.visit(`/tables/read`)
 
       cy.contains('Table 1').click()
 
@@ -330,7 +329,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').click().type('Bar2{enter}')
 
-      cy.visit(`${url}/tables/read`)
+      cy.visit(`/tables/read`)
 
       cy.contains('Table 1').click()
 
@@ -387,13 +386,13 @@ describe('Test Table (meta-data and data) CRUD', () => {
     it.skip('should get unauthorized page', () => {
       cy.task('log', 'This will be output to the terminal');
 
-      cy.visit(`${url}/login`);
+      cy.visit(`/login`);
 
       cy.task('log', 'foobar2');
 
       cy.contains('Submit').click();
 
-      cy.visit(`${url}/tables/read`);
+      cy.visit(`/tables/read`);
 
       cy.get("[data-cy='grid-add-btn']").click();
 
@@ -421,7 +420,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.contains('Error').should('exist');
 
-      cy.visit(`${url}/tables/read`);
+      cy.visit(`/tables/read`);
 
       cy.contains('Table 1').should('exist');
 
@@ -453,7 +452,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.contains('Row deleted successfully').should('exist');
 
-      cy.visit(`${url}/tables/read`);
+      cy.visit(`/tables/read`);
 
       cy.contains('Table 1').should('exist');
       cy.contains('Delete Mode').click();
