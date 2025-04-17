@@ -6,6 +6,7 @@ dotenv.config()
 
 export default defineConfig({
   e2e: {
+    baseUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
     env: {
       nodeAppUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
     },
