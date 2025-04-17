@@ -85,7 +85,7 @@ describe('dashboardCreatePOST', () => {
     srv.close();
   });
 
-  it.only('should create a group', async () => {
+  it('should create a group', async () => {
     const createBody: AuthGroupCreateReq = {
       name: 'group1',
     };
