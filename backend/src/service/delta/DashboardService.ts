@@ -200,7 +200,6 @@ SELECT EXISTS (
     WHERE table_to__id = '${userId}' and table_from__name = 'Admin'
 ) AS record_exists;
 `)
-    console.log({ RECORD_EXISTS: typeof isAdminCheck[0]['record_exists'], isAdminCheck: isAdminCheck[0] })
     if (isAdminCheck[0]['record_exists'] === false) {
       return readDashboards2(body, userId)
 
@@ -216,11 +215,9 @@ SELECT EXISTS (
     `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
   );
   const count = +sqlCount[0]['count(1)'];
-  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
   if (count === 0) {
     throw new NotFoundError('No dashboards found');
   }
-  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
 
   return {
     dashboards: sql.map((dash) => {
