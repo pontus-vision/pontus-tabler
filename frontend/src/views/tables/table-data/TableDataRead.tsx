@@ -201,7 +201,7 @@ const TableDataReadView = () => {
             cols={cols}
             add={goToCreateTableDataView}
             onDelete={handleDelete}
-            updateModeOnRows={true}
+            updateModeOnRows={cols.some(col => col.kind === 'checkboxes') ? false : true}
             onUpdate={e => createTableDataRow(e?.[0])}
             permissions={{ createAction: true, deleteAction: true, updateAction: true }}
             totalCount={rowCount}
