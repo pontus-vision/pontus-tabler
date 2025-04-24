@@ -54,15 +54,17 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
-    cy.contains('Loading...', { timeout: 15000 }).should('not.exist')
+    cy.contains('Loading...').should('not.exist')
 
     cy.get("[row-index='1'] [col-id='name']").dblclick({ force: true });
 
     cy.get("[row-index='1'] [col-id='name']").type('Regular User{enter}');
 
-    cy.contains('AuthGroup(s) created!', { timeout: 15000 }).should('exist')
+    cy.contains('AuthGroup(s) created!').should('exist')
 
     cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
+
+    cy.contains('Loading...').should('not.exist')
 
     cy.get("[data-cy='edit-on-grid-toggle']").click()
 
@@ -70,7 +72,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.contains('Regular User Dashboards:').next().find("[data-cy='grid-add-btn']").click();
 
-    cy.contains('Dash 1', { timeout: 15000 }).siblings('[col-id="selection-mode"]').find('input').click()
+    cy.contains('Dash 1').siblings('[col-id="selection-mode"]').find('input').click()
 
     cy.contains('Add Group(s)').click()
 
