@@ -224,7 +224,6 @@ SELECT EXISTS (
 
   return {
     dashboards: sql.map((dash) => {
-      console.log({ dash })
       return {
         ...dash,
         state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",
@@ -265,7 +264,6 @@ const readDashboards2 = async (
 
   return {
     dashboards: sql.map((dash) => {
-      console.log({ dash })
       return {
         ...dash,
         state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",

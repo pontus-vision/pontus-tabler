@@ -246,7 +246,7 @@ export async function runQuery(query: string): Promise<Record<string, any>[]> {
 
     return results
   } catch (error) {
-    console.error('Error executing query:', error);
+    console.error('Error executing query:', { query, error });
   }
 }
 

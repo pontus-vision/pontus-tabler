@@ -62,8 +62,6 @@ export async function runQuery(query: string) {
     const resultSet = await preparedStatement.executeQuery();
     const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
 
-    console.log({ query, 'Query Results:': results, Qtd: results.length });
-
     // Remember to release the connection after you are done
     // await pool.release(connection)
 
@@ -71,7 +69,7 @@ export async function runQuery(query: string) {
 
     return results
   } catch (error) {
-    console.error('Error executing query:', error);
+    console.error('Error executing query:', { query, error });
   }
 }
 
