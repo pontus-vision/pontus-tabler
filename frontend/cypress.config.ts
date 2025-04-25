@@ -18,7 +18,7 @@ export default defineConfig({
           console.log(message);
           return null;
         },
-        async selecTables(table) {
+        async selectTables(table) {
           try {
             console.log(await runQuery(`SELECT * FROM ${table}`))
           } catch (error) {
