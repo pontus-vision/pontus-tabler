@@ -1,6 +1,6 @@
 
 it('should associate user to group and group to dashboards', () => {
-  cy.visit(`${url}/dashboards`)
+  cy.visit(`/dashboards`)
 
   cy.get("[data-cy='grid-add-btn']").click();
 
@@ -23,3 +23,5 @@ it('should associate user to group and group to dashboards', () => {
   cy.wait(1500)
 
   cy.contains("Save State").click()
+})
+
