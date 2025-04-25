@@ -22,6 +22,7 @@ export default defineConfig({
           try {
             const selectTable = await runQuery(`SELECT * FROM ${table}`)
             console.log({ selectTable })
+            return null
           } catch (error) {
             console.error('Error Selecting table ' + table, { error })
 
