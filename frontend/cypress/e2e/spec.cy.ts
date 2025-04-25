@@ -318,6 +318,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"] input').should('exist')
 
+      cy.task('selectTables', 'table_2')
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"] input').should('be.checked')
     }),
     it('should create edges between table rows', () => {

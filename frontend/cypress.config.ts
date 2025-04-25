@@ -18,9 +18,18 @@ export default defineConfig({
           console.log(message);
           return null;
         },
+        async selecTables(table) {
+          try {
+            console.log(await runQuery(`SELECT * FROM ${table}`))
+          } catch (error) {
+            console.error('Error Selecting table ' + table, { error })
+
+          }
+        },
         async resetDatabaseTablesTest() {  // ✅ No need for an extra Promise wrapper
 
           try {
+            const showTables1 = await runQuery('SHOW TABLES;');
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
             const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION "/data/pv/auth_groups";');
@@ -37,6 +46,9 @@ export default defineConfig({
             const deleteTable1 = await runQuery('DELETE FROM table_1')
             const createTable2 = await runQuery("CREATE TABLE IF NOT EXISTS table_2 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
             const deleteTable2 = await runQuery('DELETE FROM table_2')
+            const showTables2 = await runQuery('SHOW TABLES;');
+
+            console.log({ showTables1, showTables2 })
 
             return { deleteGroups, deleteUsers };  // ✅ Directly return result
           } catch (error) {
