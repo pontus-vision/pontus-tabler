@@ -42,7 +42,7 @@ jobs:
 
       - name: Start Services in Background
         run: |
-          docker-compose up --abort-on-container-exit --exit-code-from frontend
+          docker-compose up --build --abort-on-container-exit --exit-code-from frontend
 
           #      - name: Checking UID
           #        run: |
