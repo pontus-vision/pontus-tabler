@@ -37,7 +37,6 @@ export const createDashboard = async (
   data: DashboardCreateReq,
 ): Promise<DashboardCreateRes> => {
 
-  console.log({ data })
   const sql = (await createSql(
     DASHBOARDS,
     'name STRING, owner STRING, state STRING, folder STRING',
@@ -129,7 +128,6 @@ SELECT EXISTS (
     WHERE table_to__id = '${userId}' and table_from__name = 'Admin'
 ) AS record_exists;
 `)
-    console.log({ RECORD_EXISTS: typeof isAdminCheck[0]['record_exists'], isAdminCheck: isAdminCheck[0] })
     if (isAdminCheck[0]['record_exists'] === false) {
       return readDashboardById2(dashboardId, userId)
 
@@ -139,7 +137,6 @@ SELECT EXISTS (
     `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
   );
 
-  console.log({ sqlQuery: `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'` })
   if (sql.length === 0) {
     throw new NotFoundError('Dashboard not found at id ' + dashboardId);
   }
@@ -155,7 +152,6 @@ const readDashboardById2 = async (
 
   const query1 = `${selectQuery}`
 
-  console.log({ query1 })
   const sql = await runQuery(
     query1,
   );
@@ -190,7 +186,6 @@ export const readDashboards = async (
   userId?: string
 ): Promise<DashboardsReadRes> => {
 
-  console.log('READ DASHBOARDS', { body, userId })
 
   if (userId) {
     const isAdminCheck = await runQuery(`
@@ -200,7 +195,6 @@ SELECT EXISTS (
     WHERE table_to__id = '${userId}' and table_from__name = 'Admin'
 ) AS record_exists;
 `)
-    console.log({ RECORD_EXISTS: typeof isAdminCheck[0]['record_exists'], isAdminCheck: isAdminCheck[0] })
     if (isAdminCheck[0]['record_exists'] === false) {
       return readDashboards2(body, userId)
 
@@ -216,15 +210,12 @@ SELECT EXISTS (
     `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
   );
   const count = +sqlCount[0]['count(1)'];
-  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
   if (count === 0) {
     throw new NotFoundError('No dashboards found');
   }
-  console.log({ sql, sqlCount, sqlQuery: `SELECT * FROM ${DASHBOARDS} ${whereClause}`, sqlCountQuery: `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}` })
 
   return {
     dashboards: sql.map((dash) => {
-      console.log({ dash })
       return {
         ...dash,
         state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",
@@ -240,7 +231,6 @@ const readDashboards2 = async (
 ): Promise<DashboardsReadRes> => {
   const whereClause = filterToQuery(body, "A", undefined, true);
   const whereClause2 = filterToQuery({ filters: body.filters }, "A", undefined, true);
-  console.log({ whereClause, whereClause2 })
   const selectQuery = `SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = '${userId}' AND B.table_from__read = TRUE ${Object.keys(body.filters).length > 0 ? `AND ${whereClause}` : whereClause}`
   const countQuery = `SELECT COUNT(*) AS total_count FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE  GU.table_to__id = '${userId}' AND B.table_from__read = TRUE ${whereClause2 ? `AND ${whereClause2}` : ''}`
 
@@ -255,7 +245,6 @@ const readDashboards2 = async (
     `${query2}`,
   );
 
-  console.log({ query1, sql, query2, sqlCount })
 
 
   const count = +sqlCount[0]['count(1)'];
@@ -265,7 +254,6 @@ const readDashboards2 = async (
 
   return {
     dashboards: sql.map((dash) => {
-      console.log({ dash })
       return {
         ...dash,
         state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",

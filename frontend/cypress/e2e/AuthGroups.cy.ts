@@ -4,12 +4,12 @@ describe('Test Table (meta-data and data) CRUD', () => {
   // beforeEach(() => {
   //   cy.task('resetDatabase'); // Custom task to clear the DB
   // });
-  const url = 'http://172.19.0.4:5173'
+
   before(() => {
     cy.task('resetDatabaseAuthGroups').then((result) => {
       cy.log('Database reset result:', JSON.stringify(result));
     });
-    cy.visit(`${url}/register/user`)
+    cy.visit(`/register/user`)
 
     cy.contains('Username').siblings('input').click().type('User 1')
 
@@ -26,7 +26,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
     cy.contains('Logout').click()
 
 
-    cy.visit(`${url}/register/admin`);
+    cy.visit(`/register/admin`);
     cy.get("[data-cy='username-input']").type("Admin 1");
     cy.get("[data-cy='password-input']").type("1234567");
     cy.get("[data-cy='password-confirmation-input']").type("1234567");
@@ -38,7 +38,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
     cy.contains('Logout').click()
   }),
     beforeEach(() => {
-      cy.visit(`${url}/login`);
+      cy.visit(`/login`);
       cy.get("[data-cy='username-login-input']").type("Admin 1");
       cy.get("[data-cy='password-login-input']").type("1234567");
 
@@ -48,21 +48,23 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     })
   it('should associate user to group and group to dashboards', () => {
-    cy.visit(`${url}/auth/groups`)
+    cy.visit(`/auth/groups`)
 
     cy.get("[data-cy='edit-on-grid-toggle']").click()
 
     cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
-    cy.contains('Loading...', { timeout: 15000 }).should('not.exist')
+    cy.contains('Loading...').should('not.exist')
 
     cy.get("[row-index='1'] [col-id='name']").dblclick({ force: true });
 
     cy.get("[row-index='1'] [col-id='name']").type('Regular User{enter}');
 
-    cy.contains('AuthGroup(s) created!', { timeout: 15000 }).should('exist')
+    cy.contains('AuthGroup(s) created!').should('exist')
 
     cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
+
+    cy.contains('Loading...').should('not.exist')
 
     cy.get("[data-cy='edit-on-grid-toggle']").click()
 
@@ -70,7 +72,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.contains('Regular User Dashboards:').next().find("[data-cy='grid-add-btn']").click();
 
-    cy.contains('Dash 1', { timeout: 15000 }).siblings('[col-id="selection-mode"]').find('input').click()
+    cy.contains('Dash 1').siblings('[col-id="selection-mode"]').find('input').click()
 
     cy.contains('Add Group(s)').click()
 
@@ -119,7 +121,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
     cy.contains('Logout').click()
 
     cy.wait(1000)
-    cy.visit(`${url}/login`)
+    cy.visit(`/login`)
 
     cy.contains('Username').siblings('input').click().type('User 1')
 
@@ -129,7 +131,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.wait(11000)
 
-    cy.visit(`${url}/dashboards`)
+    cy.visit(`/dashboards`)
 
     cy.get('[data-cy="read-tables-aggrid"]').contains('Dash 2').should('be.visible')
 
