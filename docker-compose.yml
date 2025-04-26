@@ -116,21 +116,24 @@ services:
       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
       DELTA_DB: delta-db:10000 # pointing to the backend
     volumes:
-      - ./frontend:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.cache/Cypress:/root/.cache/Cypress
+      - .:/usr/src/app
       #  depends_on:
       #    - app
     entrypoint:
       - /usr/bin/bash
       - -c
       - |
+        cd frontend
         timeout 1000 bash -c 'until nc -z frontend-server 5173; do echo "Waiting for port 5173..."; sleep 1; done; echo "Port 5173 is open!"'
         echo "Checking if service is up on port 10000..."
         timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+        echo "LS DIST"
+        ls dist/
         npm install
-        rm -Rf dist && npx tsc
-        export CLASSPATH="$(ls /usr/src/app/node-jdbc/node/jars/* | xargs | sed -e 's/ /,/g')"
+        #rm -Rf dist && npx tsc
+        export CLASSPATH="$(ls /usr/src/app/backend/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
         # export DELTA_DB=delta-db:10000
         export FRONTEND_URL=http://frontend-server:5173
         npx cypress install
