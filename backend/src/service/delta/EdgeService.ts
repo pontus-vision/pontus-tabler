@@ -455,8 +455,6 @@ export const readEdge = async (
       : `table_from__id = '${data.rowId}'`
     }` + fromTo
 
-  console.log({ queryStr, data })
-
   const sql = (await runQuery(queryStr)) as Record<string, any>[];
 
   return sql;
