@@ -80,10 +80,17 @@ import {
   registerUser,
   setup,
 } from './service/AuthUserService';
+import { createWebhook } from './service/WebhookService';
 
 
 
 export default new PontusService({
+  sendWebhookPost: async (req, res)=> {
+    console.log("CREATING THE WEBHOOK")
+    const response = await createWebhook(req.body)
+
+    res.send(response)
+  },
   registerUserPost: async (req, res) => {
     // await setup();
     const response = await registerUser(req.body);
