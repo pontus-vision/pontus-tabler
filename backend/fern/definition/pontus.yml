@@ -1164,7 +1164,9 @@ service:
       request:
         name: AuthGroupUpdateReq
         body:
-          properties: {}
+          properties:
+            tableDataCRUD: optional<CrudDocumentRef>
+            dashboardCRUD: optional<CrudDocumentRef>
           extends:
             - AuthGroupBaseRef
       response:
