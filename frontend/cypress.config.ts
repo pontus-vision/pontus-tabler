@@ -4,6 +4,28 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
+const createWebhookTable = async () => {
+  try {
+
+    const createTable = await runQuery(`
+              CREATE TABLE IF NOT EXISTS webhook_subscriptions (
+                  id STRING,
+                  user_id STRING NOT NULL,
+                  context STRING NOT NULL,
+                  table_filter STRING NOT NULL,
+                  operation STRING NOT NULL,
+                  endpoint STRING NOT NULL,
+                  secret_token_link STRING NOT NULL
+              ) -- Correctly placed closing parenthesis
+              USING DELTA
+              LOCATION "/data/pv/webhook_subscriptions";`)
+    const deleteWebhookRecords = await runQuery('DELETE FROM auth_users;');
+
+    return null
+  } catch (error) {
+    console.error('Error creating table/deleting rows', { error })
+  }
+}
 export default defineConfig({
   e2e: {
     baseUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
@@ -18,28 +40,6 @@ export default defineConfig({
           console.log(message);
           return null;
         },
-        async createWebhookTable() {
-          try {
-
-            const createTable = await runQuery(`
-              CREATE TABLE IF NOT EXISTS webhook_subscriptions (
-                  id STRING,
-                  user_id STRING NOT NULL,
-                  context STRING NOT NULL,
-                  table_filter STRING NOT NULL,
-                  operation STRING NOT NULL,
-                  endpoint STRING NOT NULL,
-                  secret_token_link STRING NOT NULL
-              ) -- Correctly placed closing parenthesis
-              USING DELTA
-              LOCATION "/data/pv/webhook_subscriptions";`)
-            const deleteWebhookRecords = await runQuery('DELETE FROM auth_users;');
-
-            return { createTable, deleteWebhookRecords }
-          } catch (error) {
-            console.error('Error creating table/deleting rows', { error })
-          }
-        },
         async selectTables(table) {
           try {
             const selectTable = await runQuery(`SELECT * FROM ${table}`)
@@ -51,8 +51,8 @@ export default defineConfig({
           }
         },
         async resetDatabaseTablesTest() {  // ✅ No need for an extra Promise wrapper
-          await this.createWebhookTable()
           try {
+            await createWebhookTable()
             const showTables1 = await runQuery('SHOW TABLES;');
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
@@ -66,9 +66,9 @@ export default defineConfig({
             const deleteMenu = await runQuery('DELETE FROM menu;');
             const createDashboards = await runQuery('CREATE TABLE IF NOT EXISTS dashboards (id STRING, name STRING, owner STRING, state STRING, folder STRING) USING DELTA LOCATION "/data/pv/dashboards";');
             const deleteDashboards = await runQuery('DELETE FROM dashboards;');
-            //          const createTable1 = await runQuery("CREATE TABLE IF NOT EXISTS table_1 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_1' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
+            //const createTable1 = await runQuery("CREATE TABLE IF NOT EXISTS table_1 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_1' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
             const deleteTable1 = await runQuery('DELETE FROM table_1')
-            //   //     const createTable2 = await runQuery("CREATE TABLE IF NOT EXISTS table_2 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
+            //const createTable2 = await runQuery("CREATE TABLE IF NOT EXISTS table_2 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
             const deleteTable2 = await runQuery('DELETE FROM table_2')
             const showTables2 = await runQuery('SHOW TABLES;');
 
@@ -81,8 +81,8 @@ export default defineConfig({
           }
         },
         async resetDatabaseUsers() {  // ✅ No need for an extra Promise wrapper
-          await this.createWebhookTable()
           try {
+            await createWebhookTable()
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
             const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION "/data/pv/auth_groups";');
@@ -97,9 +97,8 @@ export default defineConfig({
           }
         },
         async resetDatabaseAuthGroups() {  // ✅ No need for an extra Promise wrapper
-          await this.createWebhookTable()
           try {
-
+            await createWebhookTable()
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
             const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION "/data/pv/auth_groups";');
