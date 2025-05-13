@@ -18,6 +18,28 @@ export default defineConfig({
           console.log(message);
           return null;
         },
+        async createWebhookTable() {
+          try {
+
+            const createTable = await runQuery(`
+              CREATE TABLE IF NOT EXISTS webhook_subscriptions (
+                  id STRING,
+                  user_id STRING NOT NULL,
+                  context STRING NOT NULL,
+                  table_filter STRING NOT NULL,
+                  operation STRING NOT NULL,
+                  endpoint STRING NOT NULL,
+                  secret_token_link STRING NOT NULL
+              ) -- Correctly placed closing parenthesis
+              USING DELTA
+              LOCATION "/data/pv/webhook_subscriptions";`)
+            const deleteWebhookRecords = await runQuery('DELETE FROM auth_users;');
+
+            return { createTable, deleteWebhookRecords }
+          } catch (error) {
+            console.error('Error creating table/deleting rows', { error })
+          }
+        },
         async selectTables(table) {
           try {
             const selectTable = await runQuery(`SELECT * FROM ${table}`)
@@ -29,7 +51,7 @@ export default defineConfig({
           }
         },
         async resetDatabaseTablesTest() {  // ✅ No need for an extra Promise wrapper
-
+          await this.createWebhookTable()
           try {
             const showTables1 = await runQuery('SHOW TABLES;');
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
@@ -59,6 +81,7 @@ export default defineConfig({
           }
         },
         async resetDatabaseUsers() {  // ✅ No need for an extra Promise wrapper
+          await this.createWebhookTable()
           try {
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
@@ -74,6 +97,7 @@ export default defineConfig({
           }
         },
         async resetDatabaseAuthGroups() {  // ✅ No need for an extra Promise wrapper
+          await this.createWebhookTable()
           try {
 
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
