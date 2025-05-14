@@ -66,10 +66,11 @@ export default defineConfig({
             const deleteMenu = await runQuery('DELETE FROM menu;');
             const createDashboards = await runQuery('CREATE TABLE IF NOT EXISTS dashboards (id STRING, name STRING, owner STRING, state STRING, folder STRING) USING DELTA LOCATION "/data/pv/dashboards";');
             const deleteDashboards = await runQuery('DELETE FROM dashboards;');
-            //const createTable1 = await runQuery("CREATE TABLE IF NOT EXISTS table_1 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_1' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
-            const deleteTable1 = await runQuery('DELETE FROM table_1')
-            //const createTable2 = await runQuery("CREATE TABLE IF NOT EXISTS table_2 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
-            const deleteTable2 = await runQuery('DELETE FROM table_2')
+            // const createTable1 = await runQuery("CREATE TABLE IF NOT EXISTS table_1 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_1' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
+            const checkTable1 = await runQuery('SHOW TABLES LIKE "table_1"')
+            checkTable1.length > 0 && await runQuery('DELETE FROM table_1')
+            // const createTable2 = await runQuery("CREATE TABLE IF NOT EXISTS table_2 (id STRING) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
+            // const deleteTable2 = await runQuery('DELETE FROM table_2')
             const showTables2 = await runQuery('SHOW TABLES;');
 
             console.log({ showTables1, showTables2 })
