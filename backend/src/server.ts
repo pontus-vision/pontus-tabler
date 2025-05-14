@@ -89,23 +89,23 @@ const authMiddleware = async (
 };
 
 
-const webhookMiddleware = async(
+const webhookMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-// VERIFICAR AUTH PRA VER OS DADOS DE CAPTURA DO WEBHOOK. 
+  // VERIFICAR AUTH PRA VER OS DADOS DE CAPTURA DO WEBHOOK. 
   const replaceSlashes = (str: string) => str.replace(/\//g, '');
   const path = replaceSlashes(req.path);
 
- if (
+  if (
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
-    console.log({WEBHOOK_REQ: req, })
+    console.log({ WEBHOOK_REQ: req, })
     return next();
   }
 
- if (
+  if (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
@@ -120,14 +120,14 @@ const webhookMiddleware = async(
 
 
 
-    const entityAndOperation = parsePath(req.path)
+  const entityAndOperation = parsePath(req.path)
 
-    const operation = entityAndOperation.operation
+  const operation = entityAndOperation.operation
 
 
-    const entity = entityAndOperation.entity
+  const entity = entityAndOperation.entity
 
-    const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
+  const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
 
   const subscriptions = await runQuery(`
     SELECT
@@ -142,8 +142,7 @@ const webhookMiddleware = async(
         ${WEBHOOKS_SUBSCRIPTIONS} ws
     INNER JOIN
         ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
-    INNER JOIN
-        ${joinTable} jt ON gu.table_from__id = jt.table_from__id
+    ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
     WHERE
         ws.operation = '${operation}'
         -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
@@ -159,8 +158,8 @@ const webhookMiddleware = async(
       continue;
     }
 
-    const payload =  req.body
-       try {
+    const payload = req.body
+    try {
       const response = await axios.post(subscription.endpoint, payload, {
         headers: {
           'Authorization': `Bearer ${subscription.secretTokenRef}`,
@@ -171,7 +170,7 @@ const webhookMiddleware = async(
       console.error(`Error sending webhook: ${error.message}`);
     }
   }
-  
+
 
 
 }
@@ -180,7 +179,7 @@ export function parsePath(path: string): { entity: string, operation: string } {
   const prefix = "/PontusTest/1.0.0/";
 
   if (path.startsWith(prefix)) {
-      path = path.slice(prefix.length);
+    path = path.slice(prefix.length);
   }
 
   const parts = path.split('/').filter(part => part !== '');
@@ -203,13 +202,13 @@ export function parsePath(path: string): { entity: string, operation: string } {
     throw new Error(`Invalid operation: ${operation}`);
   }
 
-  return { entity:entity[0], operation };
+  return { entity: entity[0], operation };
 
 }
 
 
 
-function isMatchingFilter(target:string, filter:string) {
+function isMatchingFilter(target: string, filter: string) {
   const regex = new RegExp(filter);
   return regex.test(target);
 }
@@ -221,7 +220,7 @@ app.use(express.json());
 
 app.use(authMiddleware);
 
-app.use(webhookMiddleware)
+//app.use(webhookMiddleware)
 register(app, { pontus });
 
 const validate = (_request, _scopes, _schema) => {

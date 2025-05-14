@@ -244,7 +244,7 @@ export async function runQuery(query: string): Promise<Record<string, any>[]> {
 
     //console.log({ JDBCStatus: await jdbc.status() })
 
-    console.log({query, results})
+    //console.log({query, results})
     return results
   } catch (error) {
     console.error('Error executing query:', { query, error });
