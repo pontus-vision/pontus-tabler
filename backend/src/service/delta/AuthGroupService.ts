@@ -445,6 +445,10 @@ export const deleteAuthGroupDashboards = async (
   return '';
 };
 
+export const createAuthGroupUsers = async() => {
+
+}
+
 export const createAuthUserGroup = async (
   data: AuthGroupUsersCreateReq,
 ): Promise<AuthGroupUsersCreateRes> => {
@@ -488,48 +492,6 @@ export const createAuthUserGroup = async (
     name: data.name,
     authUsers: authUsersRes,
     // authUsers: res.map((el) => el.to) as UsernameAndIdRef[],
-  };
-};
-
-export const readAuthGroupTables = async (
-  data: AuthGroupTablesReadReq,
-): Promise<AuthGroupTablesReadRes> => {
-  const filtersAdapted = {};
-
-  for (const prop in data.filters) {
-    if (prop === 'name') {
-      filtersAdapted['table_to__name'] = data.filters[prop];
-    }
-    if (prop === 'id') {
-      filtersAdapted['table_to__id'] = data.filters[prop];
-    }
-  }
-  const res = (await readTableDataEdge({
-    edge: {
-      direction: 'to',
-      tableName: TABLES,
-    },
-    rowId: data.id,
-    jointTableName: GROUPS_TABLES,
-    tableName: AUTH_GROUPS,
-    filters: filtersAdapted,
-    from: data.from,
-    to: data.to,
-  })) as any;
-
-  if (res.count === 0) {
-    throw new NotFoundError(
-      `No table was found in the group edge object at id "${data.id}" and name "${data.name}"`,
-    );
-  }
-
-  const tables = res.edges.map((edge) => {
-    return { ...edge.from, name: edge['to']['name'], id: edge['to']['id'] };
-  }) as NameAndIdRef[];
-
-  return {
-    tables,
-    count: res.count,
   };
 };
 
@@ -623,6 +585,7 @@ export const createAuthGroupTables = async (
       tableName: AUTH_GROUPS,
       partitionKeyProp: 'name',
     },
+  
     tableTo: {
       rows: data.tables as any,
       tableName: TABLES,
@@ -639,6 +602,48 @@ export const createAuthGroupTables = async (
         name: el['to']['table_to__name'] as string,
       };
     }),
+  };
+};
+
+export const readAuthGroupTables = async (
+  data: AuthGroupTablesReadReq,
+): Promise<AuthGroupTablesReadRes> => {
+  const filtersAdapted = {};
+
+  for (const prop in data.filters) {
+    if (prop === 'name') {
+      filtersAdapted['table_to__name'] = data.filters[prop];
+    }
+    if (prop === 'id') {
+      filtersAdapted['table_to__id'] = data.filters[prop];
+    }
+  }
+  const res = (await readTableDataEdge({
+    edge: {
+      direction: 'to',
+      tableName: TABLES,
+    },
+    rowId: data.id,
+    jointTableName: GROUPS_TABLES,
+    tableName: AUTH_GROUPS,
+    filters: filtersAdapted,
+    from: data.from,
+    to: data.to,
+  })) as any;
+
+  if (res.count === 0) {
+    throw new NotFoundError(
+      `No table was found in the group edge object at id "${data.id}" and name "${data.name}"`,
+    );
+  }
+
+  const tables = res.edges.map((edge) => {
+    return { ...edge.from, name: edge['to']['name'], id: edge['to']['id'] };
+  }) as NameAndIdRef[];
+
+  return {
+    tables,
+    count: res.count,
   };
 };
 
@@ -831,7 +836,7 @@ export const checkPermissions = async (
               ? GROUPS_TABLES
               : containerId === AUTH_USERS
                 ? GROUPS_TABLES
-                : '',
+                : GROUPS_USERS,
         tableToName: AUTH_GROUPS,
         tableFromName: containerId,
         filters: {

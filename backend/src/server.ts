@@ -10,9 +10,12 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_USERS } from './consts';
+import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
+import { AuthUserRef } from './typescript/api';
+import { runQuery } from './db-utils';
+import axios from 'axios';
 
 export const app = express();
 
@@ -34,7 +37,8 @@ const authMiddleware = async (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
-    path === replaceSlashes('/PontusTest/1.0.0/logout')
+    path === replaceSlashes('/PontusTest/1.0.0/logout') ||
+    path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
     return next();
   }
@@ -51,7 +55,7 @@ const authMiddleware = async (
 
     const entity = arr[arr.length - 2];
 
-    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : GROUPS_USERS;
+    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : entity;
 
     let targetId = '';
 
@@ -73,6 +77,7 @@ const authMiddleware = async (
 
     if (permissions[crudAction]) {
       // if (permissions['']) {
+      // await webhookMiddleware(req, res, next)
       next();
     } else {
       throw { code: 401, message: 'You do not have this permission' };
@@ -83,10 +88,139 @@ const authMiddleware = async (
   }
 };
 
+
+const webhookMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  // VERIFICAR AUTH PRA VER OS DADOS DE CAPTURA DO WEBHOOK. 
+  const replaceSlashes = (str: string) => str.replace(/\//g, '');
+  const path = replaceSlashes(req.path);
+
+  if (
+    path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
+  ) {
+    console.log({ WEBHOOK_REQ: req, })
+    return next();
+  }
+
+  if (
+    path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
+    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
+    path === replaceSlashes('/PontusTest/1.0.0//login') ||
+    path === replaceSlashes('/PontusTest/1.0.0/logout') ||
+    path === replaceSlashes('/PontusTest/1.0.0/table/create') ||
+    path === replaceSlashes('/PontusTest/1.0.0/auth/group/tables/create') ||
+    path === replaceSlashes('/PontusTest/1.0.0/auth/groups/read') ||
+    path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
+  ) {
+    return next();
+  }
+
+
+
+  const entityAndOperation = parsePath(req.path)
+
+  const operation = entityAndOperation.operation
+
+
+  const entity = entityAndOperation.entity
+
+  const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
+
+  const subscriptions = await runQuery(`
+    SELECT
+        ws.id AS subscription_id,
+        ws.context,
+        ws.operation,
+        ws.user_id,
+        ws.table_filter,
+        gu.id AS group_user_id,
+        gu.table_to__id
+    FROM
+        ${WEBHOOKS_SUBSCRIPTIONS} ws
+    INNER JOIN
+        ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
+    ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
+    WHERE
+        ws.operation = '${operation}'
+        -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
+`);
+  // const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
+
+  for (const subscription of subscriptions) {
+    const tableFilter = subscription?.['ws.table_filter']
+
+
+    if (!isMatchingFilter(entity, tableFilter)) {
+      console.log('Filter criteria not met, skipping webhook.');
+      continue;
+    }
+
+    const payload = req.body
+    try {
+      const response = await axios.post(subscription.endpoint, payload, {
+        headers: {
+          'Authorization': `Bearer ${subscription.secretTokenRef}`,
+        }
+      });
+      console.log(`Webhook sent to ${subscription.endpoint}: ${response.status}`);
+    } catch (error) {
+      console.error(`Error sending webhook: ${error.message}`);
+    }
+  }
+
+
+
+}
+
+export function parsePath(path: string): { entity: string, operation: string } {
+  const prefix = "/PontusTest/1.0.0/";
+
+  if (path.startsWith(prefix)) {
+    path = path.slice(prefix.length);
+  }
+
+  const parts = path.split('/').filter(part => part !== '');
+
+  const operation = parts.pop() || '';
+
+  let entity = parts;
+
+  if (entity.join('/').includes('auth/group')) {
+    entity = [AUTH_GROUPS];
+  } else if (entity.join('/').includes('dashboard')) {
+    entity = [DASHBOARDS];
+  } else if (entity.join('/').includes('table')) {
+    entity = [TABLES];
+  }
+
+  const validOperations = ['create', 'read', 'update', 'delete'];
+
+  if (!validOperations.includes(operation)) {
+    throw new Error(`Invalid operation: ${operation}`);
+  }
+
+  return { entity: entity[0], operation };
+
+}
+
+
+
+function isMatchingFilter(target: string, filter: string) {
+  const regex = new RegExp(filter);
+  return regex.test(target);
+}
+
+
+
 app.use(express.json());
+
 
 app.use(authMiddleware);
 
+//app.use(webhookMiddleware)
 register(app, { pontus });
 
 const validate = (_request, _scopes, _schema) => {

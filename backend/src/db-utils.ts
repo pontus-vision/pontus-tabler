@@ -244,9 +244,11 @@ export async function runQuery(query: string): Promise<Record<string, any>[]> {
 
     //console.log({ JDBCStatus: await jdbc.status() })
 
+    //console.log({query, results})
     return results
   } catch (error) {
     console.error('Error executing query:', { query, error });
+    throw error
   }
 }
 
@@ -874,6 +876,15 @@ export const filterToQuery = (
 
   return finalQuery;
 };
+
+export function validateRegex(regexString) {
+  try {
+    new RegExp(regexString);  // Attempt to create a regex object
+    return true;               // If no error, it's a valid regex
+  } catch (e) {
+    return false;              // If there's an error, it's an invalid regex
+  }
+}
 
 const convertToISOString = (dateString) => {
   const parts = dateString.split(' ');
