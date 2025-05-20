@@ -82,7 +82,7 @@ describe('dashboardCreatePOST', () => {
 
   afterAll(async () => {
     for (const table of tables) {
-      runQuery(`DELETE FROM ${table};`)
+      await runQuery(`DELETE FROM ${table};`)
     }
 
     process.env = OLD_ENV;
