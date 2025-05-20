@@ -32,6 +32,7 @@ const authMiddleware = async (
     return str.replace(/\//g, '');
   };
   const path = replaceSlashes(req.path);
+  console.log({AUTH_PATH: req.path})
 
   if (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
@@ -98,27 +99,29 @@ const webhookMiddleware = async (
   const replaceSlashes = (str: string) => str.replace(/\//g, '');
   const path = replaceSlashes(req.path);
 
+    console.log({ PATH: req.path, })
   if (
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
-    console.log({ WEBHOOK_REQ: req, })
     return next();
   }
 
+    console.log({ PATH2: req.path, })
   if (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout') ||
-    path === replaceSlashes('/PontusTest/1.0.0/table/create') ||
-    path === replaceSlashes('/PontusTest/1.0.0/auth/group/tables/create') ||
-    path === replaceSlashes('/PontusTest/1.0.0/auth/groups/read') ||
+    // path === replaceSlashes('/PontusTest/1.0.0/table/create') ||
+    // path === replaceSlashes('/PontusTest/1.0.0/auth/group/tables/create') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
+    console.log({ PATH25: req.path, })
     return next();
   }
 
-
+    console.log({ PATH3: req.path, })
+console.log('POINT 1')
 
   const entityAndOperation = parsePath(req.path)
 
@@ -129,29 +132,32 @@ const webhookMiddleware = async (
 
   const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
 
-  const subscriptions = await runQuery(`
-    SELECT
-        ws.id AS subscription_id,
-        ws.context,
-        ws.operation,
-        ws.user_id,
-        ws.table_filter,
-        gu.id AS group_user_id,
-        gu.table_to__id
-    FROM
-        ${WEBHOOKS_SUBSCRIPTIONS} ws
-    INNER JOIN
-        ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
-    ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
-    WHERE
-        ws.operation = '${operation}'
-        -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
-`);
-  // const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
+//   const subscriptions = await runQuery(`
+//     SELECT
+//         ws.id AS subscription_id,
+//         ws.context,
+//         ws.operation,
+//         ws.user_id,
+//         ws.table_filter,
+//         gu.id AS group_user_id,
+//         gu.table_to__id
+//     FROM
+//         ${WEBHOOKS_SUBSCRIPTIONS} ws
+//     INNER JOIN
+//         ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
+//     ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
+//     WHERE
+//         ws.operation = '${operation}'
+//         -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
+// `);
 
+ const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
+
+  console.log({subscriptions})
   for (const subscription of subscriptions) {
     const tableFilter = subscription?.['ws.table_filter']
 
+    const sub = toCamelCase(subscription)
 
     if (!isMatchingFilter(entity, tableFilter)) {
       console.log('Filter criteria not met, skipping webhook.');
@@ -159,20 +165,21 @@ const webhookMiddleware = async (
     }
 
     const payload = req.body
+      const {id, ...rest} = sub 
     try {
-      const response = await axios.post(subscription.endpoint, payload, {
+      const response = await axios.post(subscription.endpoint, rest, {
         headers: {
-          'Authorization': `Bearer ${subscription.secretTokenRef}`,
+          'Authorization': `Bearer ${sub.secretTokenRef}`,
         }
       });
-      console.log(`Webhook sent to ${subscription.endpoint}: ${response.status}`);
+      console.log(`Webhook sent to ${sub.endpoint}: ${response.status}`);
     } catch (error) {
-      console.error(`Error sending webhook: ${error.message}`);
+      console.error(`Error sending webhook:`, `subscription: ${JSON.stringify(rest)}`);
     }
   }
 
 
-
+  return next()
 }
 
 export function parsePath(path: string): { entity: string, operation: string } {
@@ -220,7 +227,7 @@ app.use(express.json());
 
 app.use(authMiddleware);
 
-//app.use(webhookMiddleware)
+app.use(webhookMiddleware)
 register(app, { pontus });
 
 const validate = (_request, _scopes, _schema) => {
@@ -302,6 +309,23 @@ const httpTrigger = async (
 //  authLevel: 'function',
 //  handler: httpTrigger,
 //});
+
+function camelCase(str: string): string {
+  return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
+}
+
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(toCamelCase);
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc, key) => {
+      const camelKey = camelCase(key);
+      acc[camelKey] = toCamelCase(obj[key]);
+      return acc;
+    }, {} as any);
+  }
+  return obj;
+}
 
 export default httpTrigger;
 
