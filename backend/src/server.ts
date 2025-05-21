@@ -157,7 +157,6 @@ console.log('POINT 1')
   for (const subscription of subscriptions) {
     const tableFilter = subscription?.['ws.table_filter']
 
-    const sub = toCamelCase(subscription)
 
     if (!isMatchingFilter(entity, tableFilter)) {
       console.log('Filter criteria not met, skipping webhook.');
@@ -165,14 +164,14 @@ console.log('POINT 1')
     }
 
     const payload = req.body
-      const {id, ...rest} = sub 
+      const {id, ...rest} = subscription
     try {
       const response = await axios.post(subscription.endpoint, rest, {
         headers: {
-          'Authorization': `Bearer ${sub.secretTokenRef}`,
+          'Authorization': `Bearer ${subscription.secretTokenRef}`,
         }
       });
-      console.log(`Webhook sent to ${sub.endpoint}: ${response.status}`);
+      console.log(`Webhook sent to ${subscription.endpoint}: ${response.status}`);
     } catch (error) {
       console.error(`Error sending webhook:`, `subscription: ${JSON.stringify(rest)}`);
     }
