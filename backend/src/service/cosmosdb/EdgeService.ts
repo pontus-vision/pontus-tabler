@@ -23,7 +23,7 @@ import {
   BadRequestError,
   ConflictEntityError,
   NotFoundError,
-} from '../../generated/api';
+} from '../../generated/api/resources';
 import { initiateAuthGroupContainer } from './AuthGroupService';
 import { AUTH_GROUPS, TABLES } from '../../consts';
 
