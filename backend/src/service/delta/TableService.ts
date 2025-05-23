@@ -12,7 +12,7 @@ import {
   TablesReadResTablesItem,
 } from '../../typescript/api';
 import { filtersToSnakeCase, filterToQuery, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
-import { ConflictEntityError, NotFoundError } from '../../generated/api';
+import { ConflictEntityError, NotFoundError } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
 import { TABLES } from '../../consts';
 

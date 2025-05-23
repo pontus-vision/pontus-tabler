@@ -8,7 +8,7 @@ import {
 } from '../../typescript/api/index';
 import { DASHBOARDS, MENU } from '../../consts';
 import { generateUUIDv6, runQuery } from '../../db-utils';
-import { NotFoundError } from '../../generated/api';
+import { NotFoundError } from '../../generated/api/resources';
 
 const updateAndRetrieveTree = (path: string, obj: any, modifyCallback: (node) => void) => {
   if (path === obj.path) {

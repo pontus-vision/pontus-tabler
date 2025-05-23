@@ -45,7 +45,7 @@ import {
   NotFoundError,
   TemporaryRedirect,
   UnauthorizedError,
-} from '../../generated/api';
+} from '../../generated/api/resources';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import {

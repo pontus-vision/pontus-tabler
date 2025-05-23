@@ -8,7 +8,7 @@ import {
   TableDataUpdateReq,
 } from '../../typescript/api';
 import { snakeCase } from 'lodash';
-import { NotFoundError } from '../../generated/api';
+import { NotFoundError } from '../../generated/api/resources';
 import { createSql, filterToQuery, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from '../../db-utils';
 import { TABLES } from '../../consts';
 
