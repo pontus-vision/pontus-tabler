@@ -22,7 +22,7 @@ import {
   DashboardReadRes
 } from '../../typescript/api';
 import { createSql, filterToQuery, generateUUIDv6, isJSONParsable, runQuery, updateSql } from '../../db-utils';
-import { NotFoundError } from '../../generated/api';
+import { NotFoundError } from '../../generated/api/resources';
 import {
   createTableDataEdge,
   deleteTableDataEdge,
@@ -46,14 +46,14 @@ export const createDashboard = async (
     },
   )) as any;
 
-  await runQuery(
-    `CREATE OR REPLACE TEMP VIEW source_table AS
-     SELECT '${data?.id ? data.id : generateUUIDv6()}' AS id, 
-     ${data.name} AS name,
-     ${data.owner} AS owner, 
-     ${data.state} AS state, 
-     ${data.folder} AS folder`
-  )
+  // await runQuery(
+  //   `CREATE OR REPLACE TEMP VIEW source_table AS
+  //    SELECT '${data?.id ? data.id : generateUUIDv6()}' AS id, 
+  //    ${data.name} AS name,
+  //    ${data.owner} AS owner, 
+  //    ${data.state} AS state, 
+  //    ${data.folder} AS folder`
+  // )
 
 
   // const dashboardContainer = await fetchContainer(DASHBOARDS);
