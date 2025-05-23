@@ -17,7 +17,6 @@ import nock from 'nock'
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import { srv } from '../server';
 import http from 'http';
 
 import { prepareDbAndAuth } from './test-utils';
@@ -86,7 +85,6 @@ describe('dashboardCreatePOST', () => {
     }
 
     process.env = OLD_ENV;
-    srv.close();
   });
 
   it('should create a webhook', async () => {
