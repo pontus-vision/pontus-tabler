@@ -1,6 +1,6 @@
 import { fetchContainer, fetchData } from '../../cosmos-utils';
 import { filterToQuery } from '../../db-utils';
-import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api';
+import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api/resources';
 import {
   AuthGroupCreateReq,
   AuthGroupCreateRes,
@@ -57,7 +57,7 @@ import {
   ConflictEntityError,
   NotFoundError,
   BadRequestError,
-} from '../../generated/api';
+} from '../../generated/api/resources';
 
 import {
   Container,
@@ -94,7 +94,7 @@ const uniqueKeyPolicy: UniqueKeyPolicy = {
   uniqueKeys: [{ paths: ['/name'] }],
 };
 
-const initialDocs: AuthGroupCreateReq[] = [
+const initialDocs = [
   {
     name: ADMIN_GROUP_NAME,
   },
@@ -143,7 +143,7 @@ export const initiateAuthGroupContainer = async (): Promise<Container> => {
   return authGroupContainer;
 };
 
-export const createAuthGroup = async (data: AuthGroupCreateReq) => {
+export const createAuthGroup = async (data) => {
   const authGroupContainer = await initiateAuthGroupContainer();
 
   try {
@@ -157,8 +157,8 @@ export const createAuthGroup = async (data: AuthGroupCreateReq) => {
       },
     })) as ItemResponse<AuthGroupRef>;
 
-    const { name, id, tableMetadata } = res.resource;
-    return { name, id, tableMetadata };
+    const { name, id } = res.resource;
+    return { name, id };
   } catch (error) {
     if (error?.code === 409) {
       throw new ConflictEntityError(`group name: ${data.name} already taken.`);
@@ -743,7 +743,7 @@ export const readAuthGroupTable = async (
     );
   }
 
-  const table = res.resource.tableMetadata;
+  const table = res.resource['tableMetadataCrud'];
 
   const permissions: CrudDocumentRef = {
     create: table.create,
@@ -771,16 +771,16 @@ export const updateAuthGroupTable = async (
 
     switch (perm) {
       case 'create':
-        patchArr.push({ op: 'set', path: `/tableMetadata/create`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadataCrud/create`, value });
         break;
       case 'read':
-        patchArr.push({ op: 'set', path: `/tableMetadata/read`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadataCrud/read`, value });
         break;
       case 'update':
-        patchArr.push({ op: 'set', path: `/tableMetadata/update`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadataCrud/update`, value });
         break;
       case 'delete':
-        patchArr.push({ op: 'set', path: `/tableMetadata/delete`, value });
+        patchArr.push({ op: 'set', path: `/tableMetadataCrud/delete`, value });
         break;
     }
   }
@@ -792,7 +792,7 @@ export const updateAuthGroupTable = async (
     return {
       id: res.resource.id,
       name: res.resource.name,
-      table: res.resource.tableMetadata,
+      table: res.resource['tableMetadataCrud'],
     };
   } catch (error) {
     if (error?.code === 404) {
@@ -896,17 +896,17 @@ export const checkTableMetadataPermissions = async (
   for (const group of res.authGroups) {
     const res2 = await readAuthGroup(group);
 
-    if (res2.tableMetadata?.create) {
-      create = res2.tableMetadata?.create;
+    if (res2.tableMetadataCrud?.create) {
+      create = res2.tableMetadataCrud?.create;
     }
-    if (res2.tableMetadata?.read) {
-      read = res2.tableMetadata?.read;
+    if (res2.tableMetadataCrud?.read) {
+      read = res2.tableMetadataCrud?.read;
     }
-    if (res2.tableMetadata?.update) {
-      update = res2.tableMetadata?.update;
+    if (res2.tableMetadataCrud?.update) {
+      update = res2.tableMetadataCrud?.update;
     }
-    if (res2.tableMetadata?.delete) {
-      del = res2.tableMetadata?.delete;
+    if (res2.tableMetadataCrud?.delete) {
+      del = res2.tableMetadataCrud?.delete;
     }
   }
 
