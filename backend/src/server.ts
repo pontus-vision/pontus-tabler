@@ -32,13 +32,13 @@ const authMiddleware = async (
     return str.replace(/\//g, '');
   };
   const path = replaceSlashes(req.path);
-  console.log({AUTH_PATH: req.path})
 
   if (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout') ||
+    path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
     return next();
@@ -99,15 +99,14 @@ const webhookMiddleware = async (
   const replaceSlashes = (str: string) => str.replace(/\//g, '');
   const path = replaceSlashes(req.path);
 
-    console.log({ PATH: req.path, })
   if (
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
     return next();
   }
 
-    console.log({ PATH2: req.path, })
   if (
+    path === replaceSlashes('/PontusTest/1.0.0//auth/group/create') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
@@ -116,12 +115,8 @@ const webhookMiddleware = async (
     // path === replaceSlashes('/PontusTest/1.0.0/auth/group/tables/create') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
-    console.log({ PATH25: req.path, })
     return next();
   }
-
-    console.log({ PATH3: req.path, })
-console.log('POINT 1')
 
   const entityAndOperation = parsePath(req.path)
 
@@ -152,8 +147,6 @@ console.log('POINT 1')
 // `);
 
  const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
-
-  console.log({subscriptions})
   for (const subscription of subscriptions) {
     const tableFilter = subscription?.['ws.table_filter']
 
@@ -227,87 +220,20 @@ app.use(express.json());
 app.use(authMiddleware);
 
 app.use(webhookMiddleware)
+
+app.listen(port, () => {
+
+   console.log(
+     'Your server is listening on port %d (http://localhost:%d)',
+     port,
+     port,
+   );
+})
 register(app, { pontus });
 
 const validate = (_request, _scopes, _schema) => {
   return true;
 };
-
-export const srv = http.createServer(app).listen(port, function() {
-  console.log(
-    'Your server is listening on port %d (http://localhost:%d)',
-    port,
-    port,
-  );
-});
-
-const httpTrigger = async (
-  request: HttpRequest,
-  context: InvocationContext,
-): Promise<HttpResponseInit> => {
-
-  context.log(`Http function processed request for url "${request.url}"`);
-
-  srv.closeIdleConnections();
-
-  const data = await request.text();
-  const url = new URL(request.url);
-
-  const headers: HeadersInit = {};
-  // const headers: http.OutgoingHttpHeaders = {};
-
-  request.headers.forEach((value: string, key: string) => {
-    headers[key] = value;
-  });
-
-  const reqOpts: http.RequestOptions = {
-    hostname: url.hostname,
-    port: url.port,
-    path: url.pathname,
-    method: request.method,
-    headers: headers,
-  };
-
-  const ret = await fetch(
-    // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
-    'http://localhost:8080' + url.pathname,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: headers['authorization'] || 'Bearer 123456',
-      },
-      body: data,
-    },
-  );
-
-  const respHeaders: HeadersInit = {};
-
-  ret.headers.forEach((value: string, key: string) => {
-    respHeaders[key] = value;
-  });
-
-  const resp: HttpResponseInit = {
-    body: await ret.text(),
-    cookies: undefined,
-    enableContentNegotiation: undefined,
-    headers: respHeaders,
-    // jsonBody: await ret.json(),
-    status: ret.status,
-  };
-
-  //  srv.closeIdleConnections();
-
-  return resp;
-
-
-};
-
-//azureApp.http('httpTrigger', {
-//  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//  authLevel: 'function',
-//  handler: httpTrigger,
-//});
 
 function camelCase(str: string): string {
   return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
@@ -325,6 +251,4 @@ function toCamelCase(obj: any): any {
   }
   return obj;
 }
-
-export default httpTrigger;
 
