@@ -16,7 +16,7 @@ import {
 import { convertToSqlFields, createSql, filterToQuery, runQuery } from '../../db-utils';
 import {
   NotFoundError,
-} from '../../generated/api';
+} from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
 
 const ensureNestedPathExists = (obj, path) => {
@@ -464,11 +464,14 @@ export const readTableDataEdge = async (
   data: TableDataEdgeReadReq,
 ): Promise<TableDataEdgeReadRes> => {
   const { direction, edgeLabel, tableName: edgeTableName } = data.edge;
+
   const whereClause = filterToQuery({
     filters: data.filters,
-  });
+  }, "");
+
   const fromTo = ` ${data.to ? 'LIMIT ' + (data.to - data.from) : ''} ${data.from ? ' OFFSET ' + (data.from - 1) : ''
     }`;
+
   const filtersOn = Object.keys(data?.filters || {}).length > 0;
 
   const sql = (await runQuery(
