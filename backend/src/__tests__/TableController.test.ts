@@ -43,39 +43,18 @@ describe('tableControllerTest', () => {
   let postAdmin;
   let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
   const removeDeltaTables = async() => {
+    if(process.env.DB_SOURCE !== DELTA_DB) return
     const tables = ['person_natural', 'person_natural_2']
       for(const table of tables) {
         const deltaPath ='delta-table/data/pv/' + table 
-      //    const query:ExecuteQueryReq = {
-      //      query: `DROP TABLE ${table}`
-      //    }
-      //  const dropTables = await axios.post("http://node-app:8080/PontusTest/1.0.0/test/execute", query)
         if (fs.existsSync(deltaPath)) {
           fs.rmSync(deltaPath, { recursive: true, force: true });
         }
       }
-
-        
-      // }
-    // } catch (err) {
-    //   console.warn('Could not delete Delta table directory:', err);
-    // }
-    // try {
-    // } catch (error) {
-      
-    // }
   }
+
   beforeAll(async() => {
     await removeDeltaTables()
-//     const body:ExecuteQueryReq = {
-//       query: `ALTER TABLE person_natural SET TBLPROPERTIES (
-//   'delta.minReaderVersion' = '2',
-//   'delta.minWriterVersion' = '5',
-//   'delta.columnMapping.mode' = 'name'
-// )`
-//     }
-//     const dropPersonNaturalRes = await axios.post('http://node-app:8080/PontusTest/1.0.0/test/execute', body) as AxiosResponse<ExecuteQueryRes>
-//     expect(dropPersonNaturalRes.status).toBe(200)
   })
 
   beforeEach(async () => {
