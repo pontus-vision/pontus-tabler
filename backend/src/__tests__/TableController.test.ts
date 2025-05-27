@@ -12,7 +12,7 @@ import {
   ExecuteQueryReq,
   ExecuteQueryRes,
 } from '../typescript/api';
-import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
+import { prepareDbAndAuth, isSubset, post, cleanTables, removeDeltaTables } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app } from '../server';
 import axios, { AxiosResponse } from 'axios';
@@ -42,19 +42,13 @@ describe('tableControllerTest', () => {
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
   let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
-  const removeDeltaTables = async() => {
-    if(process.env.DB_SOURCE !== DELTA_DB) return
-    const tables = ['person_natural', 'person_natural_2']
-      for(const table of tables) {
-        const deltaPath ='delta-table/data/pv/' + table 
-        if (fs.existsSync(deltaPath)) {
-          fs.rmSync(deltaPath, { recursive: true, force: true });
-        }
-      }
-  }
 
+  const removeTables = async() => {
+    await removeDeltaTables(['person_natural', 'person_natural_2'])
+  }
   beforeAll(async() => {
-    await removeDeltaTables()
+    
+    await removeTables()
   })
 
   beforeEach(async () => {
@@ -75,7 +69,7 @@ describe('tableControllerTest', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
-    await removeDeltaTables()
+    await removeTables()
     const body: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
@@ -225,7 +219,7 @@ describe('tableControllerTest', () => {
     expect(createRetVal2.status).toBe(409);
   });
   it('should read tables', async () => {
-    await removeDeltaTables()
+    await removeTables()
 
     const body: TableCreateReq = {
       name: 'person-natural',
