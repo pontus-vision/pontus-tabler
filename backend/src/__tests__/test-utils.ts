@@ -1,8 +1,7 @@
-import { HttpRequest, InvocationContext } from '@azure/functions';
-import httpTrigger from '../server';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { deleteContainer } from '../cosmos-utils';
-
+import { execSync } from 'child_process';
+import fs from 'fs';
 import {
   RegisterAdminRes,
   AuthUserCreateRes,
@@ -11,8 +10,10 @@ import {
   LoginReq,
   RegisterAdminReq,
   LoginRes,
+  ExecuteQueryReq,
+  ExecuteQueryRes,
 } from '../typescript/api';
-import { runQuery } from '../db-utils';
+import { isJSONParsable } from '../db-utils';
 import { dbSource, DELTA_DB } from '../consts';
 
 export const post = async (
@@ -30,49 +31,50 @@ export const post = async (
   //   JSON.stringify(body),
   // );
 
-  //   const res = await axios.post(
-  //     'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-  //     body,
-  //     {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: 'Bearer 123456',
-  //       },
+    // const res = await axios.post(
+    //   'http://app:8080/PontusTest/1.0.0/' + endpoint,
+    //   body,
+    //   {
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: 'Bearer 123456',
+    //     },
+    //   },
+    // );
+    // return res;
+  // console.log({ endpoint, headers })
+
+   const res = await fetch(
+     'http://node-app:8080/PontusTest/1.0.0/' + endpoint,
+     {
+       method: 'POST',
+       headers: {
+         'Content-Type': 'application/json',
+         Authorization:  headers['Authorization'] || 'Bearer 123456',
+       },
+       body: JSON.stringify(body),
+     },
+   )
+   const json = await res.json()
+   console.log({ endpoint,json})
+
+  // const res = await httpTrigger(
+  //   new HttpRequest({
+  //     body: { string: JSON.stringify(body) },
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       ...headers,
   //     },
-  //   );
-  //   return res;
-  console.log({ endpoint, headers })
-
-  //  const res = await fetch(
-  //    'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-  //    {
-  //      method: 'POST',
-  //      headers: {
-  //        'Content-Type': 'application/json',
-  //        Authorization:  headers['Authorization'] || 'Bearer 123456',
-  //      },
-  //      body: JSON.stringify(body),
-  //    },
-  //  )
-  //  const json = await res.json()
-  //  console.log({json})
-
-  const res = await httpTrigger(
-    new HttpRequest({
-      body: { string: JSON.stringify(body) },
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-      url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
-    }),
-    new InvocationContext(),
-  );
+  //     url: 'http://localhost:8080/PontusTest/1.0.0/' + endpoint,
+  //   }),
+  //   new InvocationContext(),
+  // );
 
   const retVal = {
     status: res.status,
-    data: typeof res.body === 'string' ? JSON.parse(res.body) : res.body,
+    data: json
+    // data: typeof res.body === 'string' ? JSON.parse(res.body) : res.body,
   };
   return retVal;
 };
@@ -205,6 +207,42 @@ export const stateObj = {
   },
 };
 
+
+ export  const removeDeltaTables = async(tables: string[]) => {
+    if(process.env.DB_SOURCE !== DELTA_DB) return
+      for(const table of tables) {
+        const deltaPath ='delta-table/data/pv/' + table 
+        if (fs.existsSync(deltaPath)) {
+          fs.rmSync(deltaPath, { recursive: true, force: true });
+        }
+      }
+  }
+
+  export const cleanTables = async(tables: string[], postAdmin: (endpoint:string, body: any)=> any) => {
+    for (const table of tables) {
+      if (process.env.DB_SOURCE === DELTA_DB) {
+        const check:ExecuteQueryReq = {
+          query: `SHOW TABLES LIKE "${table}"`
+        }
+
+
+        const sqlCheck = await postAdmin('test/execute', check) as AxiosResponse<ExecuteQueryRes>
+        
+        expect(sqlCheck.status).toBe(200)
+        if(sqlCheck.data.results.length > 0) {
+          const sqlQuery:ExecuteQueryReq = {
+              query: `DELETE FROM ${table}`
+          }
+          const sql2 = await postAdmin('test/execute', sqlQuery) as AxiosResponse<ExecuteQueryRes>
+          expect(sql2.status).toBe(200)
+        }
+        
+      } else {
+        // await deleteContainer(table);
+      }
+    }
+  }
+
 export const prepareDbAndAuth = async (
   tables: string[],
 ): Promise<{
@@ -221,6 +259,7 @@ export const prepareDbAndAuth = async (
     endpoint: string,
     body: Record<string, any>,
   ): Promise<AxiosResponse> => {
+    // console.log({adminToken})
     const res = (await post(endpoint, body, {
       Authorization: 'Bearer ' + adminToken,
     })) as AxiosResponse<any, any>;
@@ -279,15 +318,12 @@ export const prepareDbAndAuth = async (
 
     expect(res.status).toBe(200);
   };
+
   const OLD_ENV = process.env;
 
-  for (const table of tables) {
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      const sql = await runQuery(`DELETE FROM ${table};`);
-    } else {
-      await deleteContainer(table);
-    }
-  }
+console.log({postAdmin})
+    await cleanTables(tables, postAdmin)
+
 
   const createAdminBody: RegisterAdminReq = {
     username: 'admin',
@@ -300,11 +336,10 @@ export const prepareDbAndAuth = async (
     createAdminBody,
   )) as AxiosResponse<RegisterAdminRes>;
 
-  console.log({ adminCreateRes })
-
   expect(adminCreateRes.status).toBe(200);
 
   admin = adminCreateRes.data;
+
   const loginBody: LoginReq = {
     username: 'admin',
 
@@ -312,8 +347,10 @@ export const prepareDbAndAuth = async (
   };
 
   const LoginRes = (await post('/login', loginBody)) as AxiosResponse<LoginRes>;
-  expect(LoginRes.status).toBe(200);
 
+  console.log({LoginResData: JSON.stringify(LoginRes.data)})
+
+  expect(LoginRes.status).toBe(200);
 
   adminToken = LoginRes.data.accessToken;
 
