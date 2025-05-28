@@ -30,7 +30,9 @@ services:
       - /usr/bin/bash
       - -c
       - |
-        timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080..."; sleep 1; done; echo "Port 8080 is open!"'
+        timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080 from app-tests..."; sleep 1; done; echo "app-tests: Port 8080 is open!"'
+        echo "RUNNING INTEGRATION TESTS"
+        npm run jest --forceExit
         sleep 1000000
   app:
     build:
@@ -92,8 +94,6 @@ services:
         echo $CLASSPATH
         echo 'LS'
         ls
-        echo "RUNNING INTEGRATION TESTS"
-        npm run jest --forceExit
         npm run build && node dist/src/server.js
         #       sleep 1000000
 
