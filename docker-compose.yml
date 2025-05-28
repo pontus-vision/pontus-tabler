@@ -1,5 +1,37 @@
 services:
 
+  app-tests:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - delta-db
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      COSMOSDB_NAME: pv_db
+      CLASSPATH: "/usr/src/app/delta-table/node/jars/*"
+      AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE: 127.0.0.1
+      PORT: 5000
+      JWT_SECRET_KEY: 2d49959562a7d8718d0370b09fd96d6f13b00af81fdf7d353aa96b1d975ba687
+      REFRESH_JWT_SECRET_KEY: 5875bb587efd0b6aa7d00b6b37ec210941e0c05034afcd4e8d8680137c53d2dd
+      ADMIN_PASSWORD: admin
+      USER_PASSWORD: user
+      DB_SOURCE: deltadb
+      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
+      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
+      FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
+    volumes:
+      - ./backend:/usr/src/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080..."; sleep 1; done; echo "Port 8080 is open!"'
+        sleep 1000000
   app:
     build:
       context: .
@@ -60,6 +92,7 @@ services:
         echo $CLASSPATH
         echo 'LS'
         ls
+        echo "RUNNING INTEGRATION TESTS"
         npm run jest --forceExit
         npm run build && node dist/src/server.js
         #       sleep 1000000
@@ -139,3 +172,37 @@ services:
         npx cypress install
         npx cypress run -b chrome
         #sleep 10000
+
+  webhook-receiver:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - app
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      COSMOSDB_NAME: pv_db
+      CLASSPATH: "/usr/src/app/delta-table/node/jars/*"
+      AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE: 127.0.0.1
+      PORT: 5000
+      JWT_SECRET_KEY: 2d49959562a7d8718d0370b09fd96d6f13b00af81fdf7d353aa96b1d975ba687
+      REFRESH_JWT_SECRET_KEY: 5875bb587efd0b6aa7d00b6b37ec210941e0c05034afcd4e8d8680137c53d2dd
+      ADMIN_PASSWORD: admin
+      USER_PASSWORD: user
+      DB_SOURCE: deltadb
+      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
+      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
+      FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
+    volumes:
+      - ./backend:/usr/src/app
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        cd webhook
+        fern generate
+        npm run build
+        ls
+        node dist/server.js
