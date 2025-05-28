@@ -16,7 +16,7 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: 'jdbc:hive2://delta-db:10000', // Update the connection URL according to your setup
+  url: 'jdbc:hive2://172.18.0.4:10000', // Update the connection URL according to your setup
   drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
   properties: {
     user: 'NBuser',
@@ -24,35 +24,52 @@ export const config = {
   },
 };
 
-const pool = new Pool({
-  url: 'jdbc:hive2://delta-db:10000',   // Replace with your JDBC URL
-  properties: {
-    user: 'admin',           // Database username
-    password: 'user'        // Database password
-  },
-  drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
-  minpoolsize: 2,
-  maxpoolsize: 10,
-  keepalive: {
-    interval: 60000,
-    query: 'SELECT 1',
-    enabled: true
-  },
-  logging: {
-    level: 'info'
-  }
-});
+let instance: JDBC | null = null;
 
-// Initialize pool
-async function initializePool() {
-  try {
-    await pool.initialize();
-    console.log('Pool initialized successfully.');
-  } catch (error) {
-    console.error('Error initializing the pool:', error);
+export const getJDBCInstance = (): JDBC => {
+  if (!instance) {
+    instance = new JDBC(config);
   }
-}
+  return instance;
+};
 
+// export const pool = new Pool({
+//   url: 'jdbc:hive2://172.18.0.4:10000',  // 🔧 key fix here!
+//   drivername: 'org.apache.hive.jdbc.HiveDriver',
+//   minpoolsize: 2,
+//   maxpoolsize: 10,
+//   keepalive: {
+//     interval: 60000,
+//     query: 'SELECT 1',
+//     enabled: true
+//   },
+//   logging: {
+//     level: 'info'
+//   }
+// });
+
+
+// // Initialize pool
+// async function initializePool() {
+//   try {
+//     await pool.initialize();
+//     console.log('Pool initialized successfully.');
+//   } catch (error) {
+//     console.error('Error initializing the pool:', error);
+//   }
+// }
+// let initialized = false;
+
+// export async function ensurePoolInitialized() {
+//   if (!initialized) {
+//     console.log('🔄 Initializing JDBC pool...');
+//     await pool.initialize();
+//     initialized = true;
+//     console.log('✅ JDBC pool initialized');
+//   } else {
+//     console.log('⏩ JDBC pool already initialized');
+//   }
+// }
 
 export const convertToSqlFields = (data: any[]): string => {
   const fields = [];
@@ -70,6 +87,32 @@ export const convertToSqlFields = (data: any[]): string => {
 
   return fields.join(', ');
 };
+
+export async function runQuery(query: string): Promise<Record<string, any>[]> {
+  try {
+    const jdbc = new JDBC(config);
+    const reservedConn = await jdbc.reserve()
+    const connection = reservedConn.conn
+    //const connection = await createConnection();
+    const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
+
+    const resultSet = await preparedStatement.executeQuery();
+    const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
+
+    // Remember to release the connection after you are done
+    // await pool.release(connection)
+
+    await connection.close()
+    await jdbc.release(connection)
+
+    //console.log({ query, results })
+
+    return results
+  } catch (error) {
+    console.error('Error executing query:', { query, error });
+    throw error
+  }
+}
 
 
 export const updateSql = async (
@@ -171,10 +214,6 @@ export const createSql = async (
 
   const keys = entries.keysStr;
   let values = entries.valuesStr;
-  // const resss = await runQuery(
-  //   `DROP TABLE  ${table} `,
-  //   conn,
-  // );
 
   const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
     } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
@@ -210,6 +249,7 @@ export const createSql = async (
 
   const res2 = await runQuery(insert);
 
+
   const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id
     ? `id = '${data?.id}'`
     : ids.length > 0
@@ -225,32 +265,6 @@ export const createSql = async (
 //export const createConnection = async (): Promise<IConnection> => {
 //};
 
-export async function runQuery(query: string): Promise<Record<string, any>[]> {
-  try {
-    const jdbc = new JDBC(config);
-    const reservedConn = await jdbc.reserve()
-    const connection = reservedConn.conn
-    //const connection = await createConnection();
-    const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
-
-    const resultSet = await preparedStatement.executeQuery();
-    const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
-
-    // Remember to release the connection after you are done
-    // await pool.release(connection)
-
-    await connection.close()
-    await jdbc.release(connection)
-
-    //console.log({ JDBCStatus: await jdbc.status() })
-
-    //console.log({query, results})
-    return results
-  } catch (error) {
-    console.error('Error executing query:', { query, error });
-    throw error
-  }
-}
 
 export const filterToQuery = (
   body: ReadPaginationFilter,
@@ -837,11 +851,7 @@ export const filterToQuery = (
       }
       const colQueryStr = colQuery.join('').trim();
 
-      if (process.env.DB_SOURCE === DELTA_DB) {
-        query.push(`${colQueryStr}`);
-      } else {
-        query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
-      }
+      query.push(colQuery.length > 1 ? `(${colQueryStr})` : `${colQueryStr}`);
     }
   }
 
@@ -957,6 +967,7 @@ export function isEmpty(obj) {
       return false;
     }
   }
+  //
 
   return true
 }
