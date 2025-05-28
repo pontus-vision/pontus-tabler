@@ -44,7 +44,7 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml \
             up --build --abort-on-container-exit --exit-code-from app-tests \
-            delta-db app node-app frontend-server app-tests
+            delta-db app frontend-server app-tests
 
       - name: Run Frontend Tests
         if: success()  # Only runs if previous step (App Tests) succeeded
