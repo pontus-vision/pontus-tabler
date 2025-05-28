@@ -58,6 +58,7 @@ services:
       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
       P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
       FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
+      ENVIRONMENT_MODE: test
     volumes:
       - ./backend:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -158,6 +159,11 @@ services:
       - /usr/bin/bash
       - -c
       - |
+        echo "Waiting for app-tests to finish..."
+        while [ "$(docker inspect -f '{{.State.Running}}' app-tests)" == "true" ]; do
+          sleep 2
+        done
+        echo "app-tests has exited. Running frontend tests..."
         cd frontend
         timeout 1000 bash -c 'until nc -z frontend-server 5173; do echo "Waiting for port 5173..."; sleep 1; done; echo "Port 5173 is open!"'
         echo "Checking if service is up on port 10000..."
