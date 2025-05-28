@@ -630,11 +630,6 @@ export const createAuthGroupTables = async (
       tableName: AUTH_GROUPS,
       partitionKeyProp: 'name',
     },
-<<<<<<< HEAD
-
-=======
-  
->>>>>>> 2551e69a51aed2f35b05988a5c4abb8dbfcc3d27
     tableTo: {
       rows: data.tables as any,
       tableName: TABLES,
