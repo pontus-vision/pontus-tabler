@@ -19,10 +19,9 @@ import nock from 'nock'
 // import axios from 'axios';
 import http from 'http';
 
-import { prepareDbAndAuth } from './test-utils';
+import { cleanTables, prepareDbAndAuth, removeDeltaTables } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
-import { runQuery } from '../db-utils';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -56,6 +55,8 @@ describe('dashboardCreatePOST', () => {
     adminToken = dbUtils.adminToken
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
+
+    await removeDeltaTables([WEBHOOKS_SUBSCRIPTIONS, 'table_foo'])
   });
 
   let server: http.Server;
@@ -80,9 +81,9 @@ describe('dashboardCreatePOST', () => {
   // });
 
   afterAll(async () => {
-    for (const table of tables) {
-      await runQuery(`DELETE FROM ${table};`)
-    }
+   
+    await cleanTables(tables, postAdmin)
+
 
     process.env = OLD_ENV;
   });

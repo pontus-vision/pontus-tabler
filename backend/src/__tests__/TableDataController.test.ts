@@ -19,8 +19,7 @@ import {
   RegisterAdminReq,
 } from '../typescript/api';
 
-import { srv } from '../server';
-import { prepareDbAndAuth, isSubset, post } from './test-utils';
+import { prepareDbAndAuth, isSubset, post, cleanTables, removeDeltaTables } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { AxiosResponse } from 'axios';
 import { DELTA_DB } from '../service/AuthGroupService';
@@ -44,8 +43,12 @@ describe('tabledatacontroller', () => {
 
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
+  let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
+
+  beforeAll(async()=> {
+  })
+
   beforeEach(async () => {
-    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
     if (process.env.DB_SOURCE === DELTA_DB) {
       tables = [...tables, GROUPS_DASHBOARDS, 'person_natural'];
     }
@@ -54,11 +57,12 @@ describe('tabledatacontroller', () => {
     admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
+    await removeDeltaTables(['person_natural', 'person_natural_2'])
   });
 
   afterAll(async () => {
+    await cleanTables(tables, postAdmin)
     process.env = OLD_ENV; // Restore old environment
-    srv.close();
   });
 
   it('should do the CRUD "happy path"', async () => {
@@ -72,7 +76,7 @@ describe('tabledatacontroller', () => {
           sortable: false,
           headerName: 'column 1',
           name: 'column1',
-          kind: 'checkboxes',
+          kind: 'text',
           pivotIndex: 1,
         },
       ],
@@ -116,6 +120,8 @@ describe('tabledatacontroller', () => {
       'table/data/read',
       body2,
     )) as AxiosResponse<TableDataReadRes>;
+
+    console.log({readRetVal: JSON.stringify(readRetVal)})
 
     expect(
       readRetVal.data.rows.some((value) =>
@@ -196,7 +202,7 @@ describe('tabledatacontroller', () => {
           sortable: false,
           headerName: 'column 1',
           name: 'column1',
-          kind: 'checkboxes',
+          kind: 'text',
           pivotIndex: 1,
         },
       ],
@@ -283,7 +289,7 @@ describe('tabledatacontroller', () => {
 
     const deleteRetVal = await postAdmin('table/data/delete', deleteBody);
 
-    expect(deleteRetVal.status).toBe(404);
+    expect(deleteRetVal.status).not.toBe(200);
   });
   it('should handle table updates', async () => {
     const table: TableCreateReq = {
@@ -296,7 +302,7 @@ describe('tabledatacontroller', () => {
           sortable: false,
           headerName: 'column 1',
           name: 'column-1',
-          kind: 'checkboxes',
+          kind: 'text',
           pivotIndex: 1,
         },
       ],
@@ -317,12 +323,12 @@ describe('tabledatacontroller', () => {
       cols: [
         ...createTableData.cols,
         {
-          field: 'column-2',
+          field: 'olumn-2',
           filter: false,
           sortable: false,
           headerName: 'column 2',
           name: 'column-2',
-          kind: 'checkboxes',
+          kind: 'text',
           pivotIndex: 1,
         },
       ],

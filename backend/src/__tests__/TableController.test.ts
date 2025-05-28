@@ -69,7 +69,7 @@ describe('tableControllerTest', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
-    await removeTables()
+    // await removeTables()
     const body: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',

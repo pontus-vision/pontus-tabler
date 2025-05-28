@@ -56,7 +56,7 @@ export const post = async (
      },
    )
    const json = await res.json()
-   console.log({ endpoint,json})
+  //  console.log({ endpoint,json})
 
   // const res = await httpTrigger(
   //   new HttpRequest({
@@ -211,10 +211,25 @@ export const stateObj = {
  export  const removeDeltaTables = async(tables: string[]) => {
     if(process.env.DB_SOURCE !== DELTA_DB) return
       for(const table of tables) {
-        const deltaPath ='delta-table/data/pv/' + table 
-        if (fs.existsSync(deltaPath)) {
-          fs.rmSync(deltaPath, { recursive: true, force: true });
+        const check1:ExecuteQueryReq = {
+          query: `SHOW TABLES LIKE "${table}"`
         }
+
+        const sqlCheck = await axios.post('http://node-app:8080/PontusTest/1.0.0/test/execute', check1) as AxiosResponse<ExecuteQueryRes>
+
+        if(sqlCheck.data.results.length > 0 ) {
+          const check:ExecuteQueryReq = {
+            query: `DROP TABLE IF EXISTS ${table}`
+          }
+
+          const sqlCheck2 = await axios.post('http://node-app:8080/PontusTest/1.0.0/test/execute', check) as AxiosResponse<ExecuteQueryRes>
+        }                   
+          const deltaPath ='delta-table/data/pv/' + table 
+          if (fs.existsSync(deltaPath)) {
+            fs.rmSync(deltaPath, { recursive: true, force: true });
+          }else{
+            console.warn(`delta lake path not found: "${deltaPath}"`)
+          }
       }
   }
 
@@ -227,7 +242,6 @@ export const stateObj = {
 
 
         const sqlCheck = await postAdmin('test/execute', check) as AxiosResponse<ExecuteQueryRes>
-        
         expect(sqlCheck.status).toBe(200)
         if(sqlCheck.data.results.length > 0) {
           const sqlQuery:ExecuteQueryReq = {
@@ -321,7 +335,6 @@ export const prepareDbAndAuth = async (
 
   const OLD_ENV = process.env;
 
-console.log({postAdmin})
     await cleanTables(tables, postAdmin)
 
 
@@ -348,7 +361,6 @@ console.log({postAdmin})
 
   const LoginRes = (await post('/login', loginBody)) as AxiosResponse<LoginRes>;
 
-  console.log({LoginResData: JSON.stringify(LoginRes.data)})
 
   expect(LoginRes.status).toBe(200);
 
