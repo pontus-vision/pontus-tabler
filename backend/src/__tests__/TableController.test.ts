@@ -12,7 +12,7 @@ import {
   ExecuteQueryReq,
   ExecuteQueryRes,
 } from '../typescript/api';
-import { prepareDbAndAuth, isSubset, post, cleanTables, removeDeltaTables } from './test-utils';
+import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app } from '../server';
 import axios, { AxiosResponse } from 'axios';
@@ -44,7 +44,12 @@ describe('tableControllerTest', () => {
   let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
 
   const removeTables = async() => {
-    await removeDeltaTables(['person_natural', 'person_natural_2'])
+    // await removeDeltaTables(['person_natural', 'person_natural_2'])
+    
+    const dropColPersonNatural: ExecuteQueryReq = {
+      query: `ALTER TABLE person_natural DROP COLUMN full-name`
+    }
+    // const dropColPersonNaturalRes = await post()
   }
   beforeAll(async() => {
     

@@ -209,6 +209,7 @@ export const stateObj = {
 
 
  export  const removeDeltaTables = async(tables: string[]) => {
+  return
     if(process.env.DB_SOURCE !== DELTA_DB) return
       for(const table of tables) {
         const check1:ExecuteQueryReq = {
