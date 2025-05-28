@@ -202,7 +202,7 @@ services:
       - -c
       - |
         cd webhook
-        npm install express
+        npm install express cors
         fern generate
         npm run build
         ls
