@@ -111,6 +111,7 @@ const webhookMiddleware = async (
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout') ||
+    path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
     // path === replaceSlashes('/PontusTest/1.0.0/table/create') ||
     // path === replaceSlashes('/PontusTest/1.0.0/auth/group/tables/create') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
@@ -146,6 +147,8 @@ const webhookMiddleware = async (
 //         -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
 // `);
 
+try {
+  
  const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
   for (const subscription of subscriptions) {
     const tableFilter = subscription?.['ws.table_filter']
@@ -166,9 +169,12 @@ const webhookMiddleware = async (
       });
       console.log(`Webhook sent to ${subscription.endpoint}: ${response.status}`);
     } catch (error) {
-      console.error(`Error sending webhook:`, `subscription: ${JSON.stringify(rest)}`);
+      throw `Error sending webhook subscription: ${JSON.stringify(rest)}`;
     }
   }
+} catch (error) {
+  console.error({error})
+}
 
 
   return next()
