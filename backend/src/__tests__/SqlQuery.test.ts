@@ -1,5 +1,5 @@
 import { DELTA_DB } from '../consts';
-import { filterToQuery } from '../db-utils';
+import { filterToQuery } from '../utils';
 
 jest.setTimeout(1000000);
 
