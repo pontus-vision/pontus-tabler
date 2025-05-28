@@ -17,7 +17,7 @@ import {
   ReadPaginationFilter,
 } from '../../typescript/api';
 import { fetchContainer } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
 import {
   BadRequestError,

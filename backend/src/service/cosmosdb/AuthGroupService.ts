@@ -1,5 +1,5 @@
 import { fetchContainer, fetchData } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import { AuthGroupsReadReq, AuthUserIdAndUsername } from '../../generated/api/resources';
 import {
   AuthGroupCreateReq,
