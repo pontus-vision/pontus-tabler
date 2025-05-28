@@ -60,7 +60,7 @@ services:
         echo $CLASSPATH
         echo 'LS'
         ls
-        # npm run jest src/__tests__/AuthGroups.test.ts --forceExit
+        npm run jest --forceExit
         npm run build && node dist/src/server.js
         #       sleep 1000000
 
