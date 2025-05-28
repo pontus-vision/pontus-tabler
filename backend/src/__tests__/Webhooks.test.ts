@@ -125,7 +125,6 @@ describe('dashboardCreatePOST', () => {
     const readAuthGroupReq = await postAdmin('/auth/groups/read', readAuthGroupBody) as AxiosResponse<AuthGroupsReadRes>
 
 
-
     const groupTablesReq: AuthGroupTablesCreateReq = {
       id: readAuthGroupReq.data.authGroups[0].id,
       name: readAuthGroupReq.data.authGroups[0].name,

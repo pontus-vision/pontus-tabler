@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { InternalServerError, BadRequestError } from "../../generated/api/resources"
+=======
+import { InternalServerError, BadRequestError } from "../../generated/api"
+>>>>>>> 2551e69a51aed2f35b05988a5c4abb8dbfcc3d27
 import { WEBHOOKS_SUBSCRIPTIONS } from "../../consts";
 import { generateUUIDv6, runQuery, validateRegex } from "../../db-utils"
 import { WebhookSubscriptionReq, WebhookSubscriptionRes } from "../../typescript/api"

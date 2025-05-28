@@ -207,7 +207,7 @@ export const stateObj = {
   },
 };
 
-
+  
  export  const removeDeltaTables = async(tables: string[]) => {
   return
     if(process.env.DB_SOURCE !== DELTA_DB) return
