@@ -11,7 +11,8 @@ import {
   TablesReadRes,
   TablesReadResTablesItem,
 } from '../../typescript/api';
-import { filtersToSnakeCase, filterToQuery, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
+import { filtersToSnakeCase, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import { ConflictEntityError, NotFoundError } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
 import { TABLES } from '../../consts';
@@ -20,6 +21,13 @@ export const createTable = async (
   data: TableCreateReq,
 ): Promise<TableCreateRes> => {
   const uuid = generateUUIDv6();
+
+
+  const createQuery = `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, 
+      cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, 
+      header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`
+
+  const sql = (await runQuery(createQuery)) as TableCreateRes[];
 
   const sqlCheck = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
@@ -32,11 +40,6 @@ export const createTable = async (
     );
   }
 
-  const createQuery = `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, 
-      cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, 
-      header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`
-
-  const sql = (await runQuery(createQuery)) as TableCreateRes[];
 
 
   // const sql5 = (await runQuery(
@@ -270,12 +273,17 @@ export const deleteTable = async (data: TableDeleteReq) => {
     //     `DELETE FROM ${snakeCase(data.name)}`,
 
     //   )) as any;
-    const sql2 = (await runQuery(
-      `DELETE FROM ${snakeCase(data.name)}`,
-    )) as any;
-    const sql3 = (await runQuery(
-      `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
-    )) as any;
+    const sql1 = await runQuery(`SHOW TABLES LIKE "${snakeCase(data.name)}"`)
+
+    console.log({sql1})
+    if(sql1.length > 0) {
+      const sql2 = (await runQuery(
+        `DELETE FROM ${snakeCase(data.name)}`,
+      )) as any;
+      const sql3 = (await runQuery(
+        `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
+      )) as any;
+    }
 
     const affectedRows = +sql[0]['num_affected_rows'];
     if (affectedRows === 0) {

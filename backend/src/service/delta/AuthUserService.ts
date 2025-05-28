@@ -32,13 +32,14 @@ import {
   AuthGroupUsersCreateReq,
   AuthGroupUsersCreateRes,
 } from '../../typescript/api';
+import { filterToQuery } from '../../utils';
 // import {
 //   cosmosDbName,
 //   fetchContainer,
 //   fetchData,
 //   fetchDatabase,
 // } from '../../cosmos-utils';
-import { createSql, filtersToSnakeCase, filterToQuery, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
+import { createSql, filtersToSnakeCase, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
 
 import {
   BadRequestError,
@@ -63,9 +64,9 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
   }
 
   const res = await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-
+    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN, create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
   );
+  
   const res4 = await runQuery(
     `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
 
@@ -494,7 +495,7 @@ export const authenticateToken = async (
   const token = tokenArr[1]
 
   if (!token) {
-    throw { code: 401, message: 'No token was detected in the input.' };
+    throw { code: 400, message: 'No token was detected in the input.' };
   }
 
   if (tokenArr.length !== 2) {

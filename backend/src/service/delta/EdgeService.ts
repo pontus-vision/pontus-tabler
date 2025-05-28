@@ -12,9 +12,12 @@ import {
   EdgeDirectionEnum,
   ReadPaginationFilter,
   TableEdgeCreateRes,
+  Edge,
 } from '../../typescript/api';
-import { convertToSqlFields, createSql, filterToQuery, runQuery } from '../../db-utils';
+import { convertToSqlFields, createSql, runQuery } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import {
+  ConflictEntityError,
   NotFoundError,
 } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
@@ -474,6 +477,7 @@ export const readTableDataEdge = async (
 
   const filtersOn = Object.keys(data?.filters || {}).length > 0;
 
+  console.log({data: JSON.stringify(data), sql: await runQuery('SHOW TABLES')})
   const sql = (await runQuery(
     `SELECT * FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
     } ${direction === 'from'
@@ -550,10 +554,68 @@ export const createTableEdge = async (
   data: TableEdgeCreateReq,
 ): Promise<TableEdgeCreateRes> => {
   const values = [];
+
+
   for (const prop in data.edges) {
     const obj = {};
+
+    try {
+      const edges = data.edges[prop] 
+
+      const edgesFrom = edges.filter(edge=> edge?.from?.id).map(edge=> `table_from__id = '${edge.from.id}'`).join(" OR ")
+
+      const edgesTo = edges.filter(edge=> edge?.to?.id).map(edge=> `table_to__id = '${edge.to.id}'`).join(" OR ")
+
+      const edgesStr = edgesFrom && edgesFrom ? `${edgesFrom} OR ${edgesTo}` : edgesFrom ? edgesFrom : edgesTo ? edgesTo : '' 
+
+      const edgesRes = await runQuery(`SELECT * FROM tables_edges WHERE ${edgesStr}`)
+
+      console.log({edges: JSON.stringify(edgesRes), dataEdges: JSON.stringify(data.edges), edgesStr, tables_edges: await runQuery('SELECT * FROM tables_edges')})
+
+      const duplicates = data.edges[prop].filter((edge) =>
+        edgesRes.some((existingEdge) => {
+          if (!!edge?.from) {
+            return (
+              existingEdge?.['table_from__id'] === edge?.from?.id &&
+              existingEdge?.['table_from__name'] === edge?.from?.tableName
+            );
+          } else if (!!edge?.to) {
+            return (
+              existingEdge['table_to__id'] === edge?.to?.id &&
+              existingEdge['table_to__name'] === edge?.to?.tableName
+            );
+          }
+        }),
+      );
+
+      if (duplicates.length > 0) {
+        throw {code: 409, message:`Duplicate edge(s) detected for property '${prop}': ${JSON.stringify(
+            duplicates,
+          )}` }
+      }
+    } catch (error) {
+    
+    if(error?.code === 409)
+        throw new ConflictEntityError(error?.message);
+        console.log(await runQuery(`SHOW TABLES`))
+        console.error({error})
+    }
+
     for (const edge of data.edges[prop]) {
       obj['edge_label'] = prop;
+      if(edge?.from?.id) {
+        const sql2 = await runQuery(`SELECT 1 FROM tables WHERE id = '${edge.from.id}' LIMIT 1;`)
+        if(sql2.length === 0) {
+          throw new NotFoundError(`No table found at id: ${edge?.from?.id}`)
+        }
+      }
+      if(edge?.to?.id) {
+        const sql1 = await runQuery(`SELECT 1 FROM tables WHERE id = '${edge.to.id}' LIMIT 1;`)
+        if(sql1.length === 0) {
+          throw new NotFoundError(`No table found at id: ${edge?.to?.id}`)
+        }
+      }
+      
 
       if (edge?.from?.id && edge?.from?.tableName) {
         obj['table_from__id'] = edge?.from.id;
@@ -573,11 +635,14 @@ export const createTableEdge = async (
     values.push(obj);
   }
 
+  console.log({values})
+
   const sql = await createSql(
     'tables_edges',
     'table_from__name STRING, table_from__id STRING, table_to__name STRING, table_to__id STRING, edge_label STRING',
     values,
   );
+
 
   return data;
 };
@@ -621,27 +686,28 @@ export const createTableEdge = async (
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
 ): Promise<TableEdgeReadRes> => {
-  return
-  // const querySpec = {
-  //   query: 'select c.edges, c.id, c.name from c where c.id=@tableId',
-  //   parameters: [
-  //     {
-  //       name: '@tableId',
-  //       value: data.tableId,
-  //     },
-  //   ],
-  // };
+  const sql = await runQuery(`SELECT te.*, t.name FROM tables_edges te INNER JOIN tables t ON t.id = '${data.tableId}' WHERE table_from__id = '${data.tableId}'`)
 
-  // const tableContainer = await fetchContainer(TABLES);
+  if(sql.length === 0) {
+    throw new NotFoundError(`Could not find any Edge attached to table at id ${data.tableId}`)
+  }
+  const results:Record<string, Edge[]> = sql.reduce((acc:any, cur)=> {
+    if(acc?.[cur['edge_label']]) {
+      console.log('HAS ENTRY', acc?.[cur['table_to__name']])
+      acc[cur['edge_label']] = [...acc[cur['edge_label']], {to: {id: cur['table_to__id'], tableName: cur['table_to__name']}}]
+    } else {
+      console.log('NO ENTRY', acc?.[cur['table_to__name']])
+      acc[cur['edge_label']] = [ {to: {id: cur['table_to__id'], tableName: cur['table_to__name']}}]
+    }
 
-  // const { resources } = await tableContainer.items.query(querySpec).fetchAll();
-  // const resource = resources[0];
+    return acc
+  },{})
 
-  // if (resources.length === 1) {
-  //   return resource;
-  // } else if (resources.length === 0) {
-  //   throw new NotFoundError(`No table found at id: ${data.tableId}`);
-  // }
+  console.log({results: JSON.stringify(results)})
+  return {edges: results, id: data.tableId, name: sql[0]['name'] }
+
+  // return {edges: {foo: [{from: {id: '', tableName: ''}}]}}
+
 };
 
 const deleteRelatedDocumentEdges = async (relatedData: TableEdgeDeleteReq) => {

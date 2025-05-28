@@ -1,4 +1,5 @@
-import { filterToQuery, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
+import { generateUUIDv6, runQuery, updateSql } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import { AuthGroupsReadReq } from '../../generated/api/resources';
 import {
   AuthGroupCreateReq,

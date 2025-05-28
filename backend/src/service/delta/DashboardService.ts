@@ -21,7 +21,8 @@ import {
   DashboardReadReq,
   DashboardReadRes
 } from '../../typescript/api';
-import { createSql, filterToQuery, generateUUIDv6, isJSONParsable, runQuery, updateSql } from '../../db-utils';
+import { createSql, generateUUIDv6, isJSONParsable, runQuery, updateSql } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import { NotFoundError } from '../../generated/api/resources';
 import {
   createTableDataEdge,
