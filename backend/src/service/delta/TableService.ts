@@ -85,7 +85,7 @@ export const createTable = async (
 
   const table_name = snakeCase(data.name)
 
-  const queryCreate = `CREATE TABLE IF NOT EXISTS ${table_name} (id STRING ${arr2.length > 0 ? `, ${arr2.join(", ")})` : ')'} USING DELTA LOCATION '/data/pv/${table_name}' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5')`
+  const queryCreate = `CREATE OR REPLACE TABLE ${table_name} (id STRING ${arr2.length > 0 ? `, ${arr2.join(", ")})` : ')'} USING DELTA TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5')`
 
   const res = await runQuery(queryCreate)
   return { ...sql3[0], cols: JSON.parse(sql3[0].cols as any) };
@@ -277,12 +277,14 @@ export const deleteTable = async (data: TableDeleteReq) => {
 
     console.log({sql1})
     if(sql1.length > 0) {
-      const sql2 = (await runQuery(
-        `DELETE FROM ${snakeCase(data.name)}`,
-      )) as any;
-      const sql3 = (await runQuery(
-        `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
-      )) as any;
+      const timestamp = Date.now();
+      await runQuery(`ALTER TABLE ${snakeCase(data.name)} RENAME TO deleted_${timestamp}_${snakeCase(data.name)}`)
+      // const sql2 = (await runQuery(
+      //   `DELETE FROM ${snakeCase(data.name)}`,
+      // )) as any;
+      // const sql3 = (await runQuery(
+      //   `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
+      // )) as any;
     }
 
     const affectedRows = +sql[0]['num_affected_rows'];
