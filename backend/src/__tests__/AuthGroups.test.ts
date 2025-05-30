@@ -209,6 +209,88 @@ describe('dashboardCreatePOST', () => {
        ),
      ).toBeTruthy();
    });
+   it('should create dashboards subdocuments', async () => {
+     const body: DashboardCreateReq = {
+       owner: 'Joe',
+       name: 'PontusVision',
+       folder: 'folder 1',
+       state: {},
+     };
+
+     const createRetVal = (await postAdmin(
+       'dashboard/create',
+       body,
+     )) as AxiosResponse<DashboardCreateRes>;
+
+     const createGroupBody: AuthGroupCreateReq = {
+       name: 'group1',
+     };
+
+     const authGroupCreateRes = (await postAdmin(
+       'auth/group/create',
+       createGroupBody,
+     )) as AxiosResponse<AuthGroupCreateRes>;
+
+     const authGroupId = authGroupCreateRes.data.id;
+
+     const createBody: AuthGroupDashboardCreateReq = {
+       dashboards: [
+         {
+           name: createRetVal.data.name,
+           id: createRetVal.data.id,
+           create: false,
+           delete: true,
+           read: false,
+           update: true,
+         },
+       ],
+       id: authGroupId,
+       name: authGroupCreateRes.data.name,
+     };
+
+     const groupDashCreateRes = (await postAdmin(
+       'auth/group/dashboard/create',
+       createBody,
+     )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+
+     expect(groupDashCreateRes.status).toBe(200);
+
+     expect(groupDashCreateRes.data.dashboards).toMatchObject(
+       createBody.dashboards,
+     );
+
+     expect(groupDashCreateRes.data.dashboards).toMatchObject(
+       createBody.dashboards,
+     );
+
+     const readBody: DashboardGroupAuthReadReq = {
+       id: createRetVal.data.id,
+       filters: {
+         // name: {
+         //   condition1: {
+         //     filter: 'group1',
+         //     filterType: 'text',
+         //     type: 'contains',
+         //   },
+         //   filterType: 'text',
+         // },
+       },
+     };
+
+     const readRetVal = (await postAdmin(
+       'dashboard/group/auth/read',
+       readBody,
+     )) as AxiosResponse<DashboardGroupAuthReadRes>;
+
+     expect(readRetVal.data.authGroups[0]).toMatchObject({
+       name: authGroupCreateRes.data.name,
+       id: authGroupCreateRes.data.id,
+       create: false,
+       delete: true,
+       read: false,
+       update: true,
+     });
+   });
    it('should do the sad path', async () => {
      const readBody: AuthGroupReadReq = {
        id: 'foo',
@@ -319,89 +401,7 @@ describe('dashboardCreatePOST', () => {
        deleteBody2,
      )) as AxiosResponse<AuthGroupDashboardDeleteRes>;
      expect(delete2RetVal.status).toBe(404);
-   });
-   it('should create dashboards subdocuments', async () => {
-     const body: DashboardCreateReq = {
-       owner: 'Joe',
-       name: 'PontusVision',
-       folder: 'folder 1',
-       state: {},
-     };
-
-     const createRetVal = (await postAdmin(
-       'dashboard/create',
-       body,
-     )) as AxiosResponse<DashboardCreateRes>;
-
-     const createGroupBody: AuthGroupCreateReq = {
-       name: 'group1',
-     };
-
-     const authGroupCreateRes = (await postAdmin(
-       'auth/group/create',
-       createGroupBody,
-     )) as AxiosResponse<AuthGroupCreateRes>;
-
-     const authGroupId = authGroupCreateRes.data.id;
-
-     const createBody: AuthGroupDashboardCreateReq = {
-       dashboards: [
-         {
-           name: createRetVal.data.name,
-           id: createRetVal.data.id,
-           create: false,
-           delete: true,
-           read: false,
-           update: true,
-         },
-       ],
-       id: authGroupId,
-       name: authGroupCreateRes.data.name,
-     };
-
-     const groupDashCreateRes = (await postAdmin(
-       'auth/group/dashboard/create',
-       createBody,
-     )) as AxiosResponse<AuthGroupDashboardCreateRes>;
-
-     expect(groupDashCreateRes.status).toBe(200);
-
-     expect(groupDashCreateRes.data.dashboards).toMatchObject(
-       createBody.dashboards,
-     );
-
-     expect(groupDashCreateRes.data.dashboards).toMatchObject(
-       createBody.dashboards,
-     );
-
-     const readBody: DashboardGroupAuthReadReq = {
-       id: createRetVal.data.id,
-       filters: {
-         // name: {
-         //   condition1: {
-         //     filter: 'group1',
-         //     filterType: 'text',
-         //     type: 'contains',
-         //   },
-         //   filterType: 'text',
-         // },
-       },
-     };
-
-     const readRetVal = (await postAdmin(
-       'dashboard/group/auth/read',
-       readBody,
-     )) as AxiosResponse<DashboardGroupAuthReadRes>;
-
-     expect(readRetVal.data.authGroups[0]).toMatchObject({
-       name: authGroupCreateRes.data.name,
-       id: authGroupCreateRes.data.id,
-       create: false,
-       delete: true,
-       read: false,
-       update: true,
-     });
-   });
+   });   
    it('should update dashboards subdocuments', async () => {
      const body: DashboardCreateReq = {
        owner: 'Joe',
