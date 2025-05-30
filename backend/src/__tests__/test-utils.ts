@@ -14,7 +14,7 @@ import {
   ExecuteQueryRes,
 } from '../typescript/api';
 import { isJSONParsable } from '../db-utils';
-import { dbSource, DELTA_DB } from '../consts';
+import { dbSource, DELTA_DB, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
 
 export const post = async (
   endpoint: string,
@@ -338,7 +338,7 @@ export const prepareDbAndAuth = async (
 
     await cleanTables(tables, postAdmin)
 
-
+  await createInitialTables(postAdmin)
   const createAdminBody: RegisterAdminReq = {
     username: 'admin',
     password: 'pontusvision',
@@ -369,3 +369,30 @@ export const prepareDbAndAuth = async (
 
   return { postAdmin, admin, adminToken };
 };
+
+
+const createInitialTables = async( postAdmin: (endpoint:string, body: any)=> any) => {
+  
+    const createTable: ExecuteQueryReq = {
+      query: `
+        CREATE TABLE IF NOT EXISTS webhook_subscriptions (
+            id STRING,
+            user_id STRING NOT NULL,
+            context STRING NOT NULL,
+            table_filter STRING NOT NULL,
+            operation STRING NOT NULL,
+            endpoint STRING NOT NULL,
+            secret_token_link STRING NOT NULL
+        ) -- Correctly placed closing parenthesis
+        USING DELTA
+        LOCATION "/data/pv/${WEBHOOKS_SUBSCRIPTIONS}";
+        `
+    }
+    try {
+      
+    const res = await postAdmin('/test/execute', createTable) as AxiosResponse<ExecuteQueryRes>
+    } catch (error) {
+     console.error('Error creating initial tables', {query: createTable.query}) 
+    }
+
+}
