@@ -14,7 +14,7 @@ import {
   PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
-import { NotFoundError } from '../../generated/api';
+import { NotFoundError } from '../../generated/api/resources';
 import { TABLES } from '../../consts';
 
 

@@ -1,5 +1,4 @@
-import { prepareDbAndAuth, isSubset, post } from './test-utils';
-import { srv } from '../server';
+import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
 import { AxiosResponse } from 'axios';
 import {
   MenuItemTreeRef,
@@ -34,8 +33,8 @@ describe('testing Menu', () => {
 
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
+  let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
   beforeEach(async () => {
-    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
     if (process.env.DB_SOURCE === DELTA_DB) {
       tables = [...tables, GROUPS_USERS, GROUPS_DASHBOARDS, 'person_natural', MENU];
     }
@@ -47,8 +46,8 @@ describe('testing Menu', () => {
   });
 
   afterAll(async () => {
+    await cleanTables(tables, postAdmin)
     process.env = OLD_ENV; // Restore old environment
-    srv.close();
   });
   it('should test algo', () => {
 

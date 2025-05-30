@@ -9,7 +9,7 @@ import {
 } from '@azure/cosmos';
 import { ReadPaginationFilter } from './typescript/api';
 import { authGroupContainerProps } from './service/cosmosdb';
-import { filterToQuery } from './db-utils';
+import { filterToQuery } from './utils';
 import { AUTH_GROUPS } from './consts';
 
 export interface FetchData {

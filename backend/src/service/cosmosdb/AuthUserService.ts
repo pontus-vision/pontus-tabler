@@ -38,6 +38,7 @@ import {
   RegisterUserReq,
   TokenReq,
   TokenRes,
+  AuthGroupReadRes,
 } from '../../typescript/api';
 import {
   cosmosDbName,
@@ -45,7 +46,7 @@ import {
   fetchData,
   fetchDatabase,
 } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import {
   Container,
   Item,
@@ -60,7 +61,7 @@ import {
   NotFoundError,
   TemporaryRedirect,
   UnauthorizedError,
-} from '../../generated/api';
+} from '../../generated/api/resources';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
@@ -450,8 +451,8 @@ export const checkUserPermissions = async (data: {
   for (const group of userGroups) {
     const res = (await authGroupContainer
       .item(group.id, group.name)
-      .read()) as ItemResponse<AuthGroupRef>;
-    const permissions = res.resource.tableMetadata;
+      .read()) as ItemResponse<AuthGroupReadRes>;
+    const permissions = res.resource.tableMetadataCrud;
 
     if (permissions.create) {
       create = true;
@@ -496,6 +497,9 @@ export const checkAdmin = async (userId) => {
     },
     rowId: userId,
   });
+
+  console.log({resCount: res})
+
   if (res.length === 0) {
     throw new UnauthorizedError('User does not belong to the admin group.');
   } else {

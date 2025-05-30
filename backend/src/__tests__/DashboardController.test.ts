@@ -20,15 +20,14 @@ import {
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import { srv } from '../server';
 
-import { prepareDbAndAuth, post } from './test-utils';
+import { prepareDbAndAuth, post, cleanTables, removeDeltaTables } from './test-utils';
 import {
   AuthGroupUsersCreateReq,
   DashboardGroupAuthCreateReq,
-} from '../generated/api';
+} from '../generated/api/resources';
 import { AxiosResponse } from 'axios';
-import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS } from '../consts';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),
@@ -46,11 +45,15 @@ describe('dashboardCreatePOST', () => {
 
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
+  let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, WEBHOOKS_SUBSCRIPTIONS];
+  if (process.env.DB_SOURCE === DELTA_DB) {
+    tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS, 'person_natural'];
+  }
+
+  beforeAll(async()=> {
+    await removeDeltaTables(['person_natural'])
+  })
   beforeEach(async () => {
-    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS, 'person_natural'];
-    }
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
@@ -58,7 +61,8 @@ describe('dashboardCreatePOST', () => {
     process.env = { ...OLD_ENV }; // Make a copy
   });
 
-  afterAll(() => {
+  afterAll(async() => {
+    await cleanTables(tables, postAdmin)
     process.env = OLD_ENV; // Restore old environment
     // srv.close();
   });
@@ -71,7 +75,7 @@ describe('dashboardCreatePOST', () => {
       state: {},
     };
 
-    const createBody: AuthGroupCreateReq = {
+    const createBody = {
       name: 'group1',
     };
 
@@ -169,7 +173,7 @@ describe('dashboardCreatePOST', () => {
       state: {},
     };
 
-    const createBody: AuthGroupCreateReq = {
+    const createBody = {
       name: 'group1',
     };
 

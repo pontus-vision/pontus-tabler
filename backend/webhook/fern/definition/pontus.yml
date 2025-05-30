@@ -1,0 +1,118 @@
+service:
+  auth: false
+  base-path: '/PontusTest/1.0.0'
+  endpoints:
+    webhookPOST:
+      path: /webhook
+      method: POST
+      request:
+        name: WebhookSubscriptionReq
+        body:
+          extends:
+            - WebhookSubscription
+      response:
+        docs: User logged in successfully
+        type: WebhookSubscriptionRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-subscription-001
+          request:
+            user_id: "paulo"
+            context: "user-defined-table"
+            table_filter: "^auth.*"
+            endpoint: "https://hooks.example.com/webhook"
+            secret_token_link: "aws:secretsmanager:webhook-tokens/paulo"
+            operation: "create"
+          response:
+            body:
+              id: "sub_9a1bc3e"
+              user_id: "paulo"
+              context: "user-defined-table"
+              table_filter: "^auth.*"
+              endpoint: "https://hooks.example.com/webhook"
+              secret_token_link: "aws:secretsmanager:webhook-tokens/paulo"
+              operation: "create"
+
+    webhookGetPOST:
+      path: /webhook/get
+      method: POST
+      request:
+        name: GetWebhookSubscriptionReq
+        body:
+          properties: {}
+      response:
+        docs: User logged in successfully
+        type: WebhookSubscriptionRes
+      errors:
+        - BadRequestError
+        - InternalServerError
+
+types:
+  WebhookSubscriptionRes: 
+    properties:
+      id: string
+    extends:
+      - WebhookSubscription
+  WebhookSubscription:
+    docs: A subscription to receive webhooks for specific operations on filtered tables.
+    properties:
+      user_id: 
+        type: string
+        docs: The ID of the user who owns this webhook subscription.
+        # example: "paulo"
+      context:
+        type: string
+        docs: The logical context of the webhook, such as 'user-defined-table' or 'auth'.
+        # example: "user-defined-table"
+      table_filter: 
+        type: string
+        docs: A regex pattern used to match table names this webhook applies to.
+        # example: "^auth.*"
+      endpoint: 
+        type: string
+        docs: The URL that will receive the webhook payload.
+        # example: "https://hooks.example.com/webhook"
+      secret_token_link: 
+        type: string
+        docs: A reference (not the actual value) to a secret stored securely in a system such as AWS Secrets Manager or Parameter Store. This secret is used to authenticate webhook requests.
+        # example: "aws:secretsmanager:webhook-tokens/paulo"
+      operation: 
+        type: CrudEnum
+        docs: Which CRUD operation this subscription is interested in.
+        # example: "create"
+  CrudEnum:
+    enum:
+      - create
+      - read
+      - update
+      - delete
+#  SendWebhookBody:
+#    properties:
+#      table: AuthGroups
+#      metaData: 
+#      operation: CREATE | READ | UPDATE | DELETE 
+#      context: table
+errors:
+  BadRequestError:
+    status-code: 400
+    type: string
+  UnauthorizedError:
+    status-code: 401
+    type: unknown
+  ForbiddenError:
+    status-code: 403
+    type: unknown
+  NotFoundError:
+    status-code: 404
+    type: unknown
+  InternalServerError:
+    status-code: 500
+    type: unknown
+  ConflictEntityError:
+    status-code: 409
+    type: string
+  TemporaryRedirect:
+    status-code: 307
+    type: string

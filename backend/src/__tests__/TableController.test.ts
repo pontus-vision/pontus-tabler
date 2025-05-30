@@ -9,11 +9,15 @@ import {
   RegisterAdminReq,
   LoginReq,
   LoginRes,
+  ExecuteQueryReq,
+  ExecuteQueryRes,
 } from '../typescript/api';
-import { prepareDbAndAuth, isSubset, post } from './test-utils';
+import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
-import { app, srv } from '../server';
-import { AxiosResponse } from 'axios';
+import { app } from '../server';
+import axios, { AxiosResponse } from 'axios';
+import { execSync } from 'child_process';
+import fs from 'fs';
 
 
 // // Mock the utils.writeJson function
@@ -37,11 +41,12 @@ describe('tableControllerTest', () => {
 
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
+  let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
+  if (process.env.DB_SOURCE === DELTA_DB) {
+    tables = [...tables, GROUPS_USERS];
+  }
+
   beforeEach(async () => {
-    let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      tables = [...tables, GROUPS_USERS];
-    }
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
@@ -50,12 +55,13 @@ describe('tableControllerTest', () => {
     process.env = { ...OLD_ENV }; // Make a copy
   });
 
-  afterAll(() => {
+  afterAll(async() => {
+    await cleanTables(tables, postAdmin)
     process.env = OLD_ENV; // Restore old environment
-    srv.close();
   });
 
   it('should do the CRUD "happy path"', async () => {
+
     const body: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
@@ -147,7 +153,11 @@ describe('tableControllerTest', () => {
       name: resPayload3.name,
     };
 
+    console.log({updateRetVal: JSON.stringify(updateRetVal), body3})
+
     const deleteRetVal = await postAdmin('table/delete', body3);
+
+    console.log({deleteRetVal: JSON.stringify(deleteRetVal)})
 
     let resPayload4 = deleteRetVal.data;
 
@@ -179,8 +189,8 @@ describe('tableControllerTest', () => {
     expect(deleteRetVal.status).toBe(422);
 
     const table: TableCreateReq = {
-      name: 'person-natural',
-      label: 'Person Natural',
+      name: 'mapeamento-de-processos',
+      label: 'Mapeamento de Processos',
       cols: [
         {
           field: 'column 1',
@@ -254,10 +264,14 @@ describe('tableControllerTest', () => {
 
     expect(readRetVal.data.totalTables).toBe(2);
 
+    console.log({createRetVal: JSON.stringify(createRetVal.data)})
+
+    console.log({createRetVal2: JSON.stringify(createRetVal2.data)})
     const deleteVal = await postAdmin('table/delete', {
       id: createRetVal.data.id,
       name: createRetVal.data.name,
     });
+    console.log({deleteVal: JSON.stringify(deleteVal.data)})
 
     expect(deleteVal.status).toBe(200);
     const deleteVal2 = await postAdmin('table/delete', {

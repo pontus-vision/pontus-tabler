@@ -13,7 +13,7 @@ import {
   PartitionKeyDefinition,
   UniqueKeyPolicy,
 } from '@azure/cosmos';
-import { BadRequestError, NotFoundError } from '../../generated/api';
+import { BadRequestError, NotFoundError } from '../../generated/api/resources';
 import { updateDashboard, createDashboard } from './DashboardService';
 import { DASHBOARDS, MENU } from '../../consts';
 

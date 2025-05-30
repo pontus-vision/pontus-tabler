@@ -11,8 +11,9 @@ import {
   TablesReadRes,
   TablesReadResTablesItem,
 } from '../../typescript/api';
-import { filtersToSnakeCase, filterToQuery, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
-import { ConflictEntityError, NotFoundError } from '../../generated/api';
+import { filtersToSnakeCase, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
+import { filterToQuery } from '../../utils';
+import { ConflictEntityError, NotFoundError } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
 import { TABLES } from '../../consts';
 
@@ -20,6 +21,13 @@ export const createTable = async (
   data: TableCreateReq,
 ): Promise<TableCreateRes> => {
   const uuid = generateUUIDv6();
+
+
+  const createQuery = `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, 
+      cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, 
+      header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`
+
+  const sql = (await runQuery(createQuery)) as TableCreateRes[];
 
   const sqlCheck = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = '${snakeCase(data.name)}'`,
@@ -32,11 +40,6 @@ export const createTable = async (
     );
   }
 
-  const createQuery = `CREATE TABLE IF NOT EXISTS ${TABLES} (id STRING, name STRING, label STRING, 
-      cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, 
-      header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION '/data/pv/${TABLES}';`
-
-  const sql = (await runQuery(createQuery)) as TableCreateRes[];
 
 
   // const sql5 = (await runQuery(
@@ -82,7 +85,7 @@ export const createTable = async (
 
   const table_name = snakeCase(data.name)
 
-  const queryCreate = `CREATE TABLE IF NOT EXISTS ${table_name} (id STRING ${arr2.length > 0 ? `, ${arr2.join(", ")})` : ')'} USING DELTA LOCATION '/data/pv/${table_name}' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5')`
+  const queryCreate = `CREATE OR REPLACE TABLE ${table_name} (id STRING ${arr2.length > 0 ? `, ${arr2.join(", ")})` : ')'} USING DELTA TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5')`
 
   const res = await runQuery(queryCreate)
   return { ...sql3[0], cols: JSON.parse(sql3[0].cols as any) };
@@ -270,12 +273,19 @@ export const deleteTable = async (data: TableDeleteReq) => {
     //     `DELETE FROM ${snakeCase(data.name)}`,
 
     //   )) as any;
-    const sql2 = (await runQuery(
-      `DELETE FROM ${snakeCase(data.name)}`,
-    )) as any;
-    const sql3 = (await runQuery(
-      `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
-    )) as any;
+    const sql1 = await runQuery(`SHOW TABLES LIKE "${snakeCase(data.name)}"`)
+
+    console.log({sql1})
+    if(sql1.length > 0) {
+      const timestamp = Date.now();
+      await runQuery(`ALTER TABLE ${snakeCase(data.name)} RENAME TO deleted_${timestamp}_${snakeCase(data.name)}`)
+      // const sql2 = (await runQuery(
+      //   `DELETE FROM ${snakeCase(data.name)}`,
+      // )) as any;
+      // const sql3 = (await runQuery(
+      //   `DROP TABLE IF EXISTS ${snakeCase(data.name)}`,
+      // )) as any;
+    }
 
     const affectedRows = +sql[0]['num_affected_rows'];
     if (affectedRows === 0) {
