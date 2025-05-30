@@ -269,25 +269,29 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
     throw new BadRequestError('Cannot delete admin group')
   }
 
-  const deleteQuery = await runQuery(
-    `DELETE FROM ${AUTH_GROUPS} WHERE id = '${data.id}'`,
-  );
+  try {
+    const deleteQuery = await runQuery(
+      `DELETE FROM ${AUTH_GROUPS} WHERE id = '${data.id}'`,
+    );
 
-  const affectedRows = +deleteQuery[0]['num_affected_rows'];
+    const affectedRows = +deleteQuery[0]['num_affected_rows'];
 
-  const deleteGroupUsersQuery = await runQuery(
-    `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
-  );
+    const deleteGroupUsersQuery = await runQuery(
+      `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
+    );
 
-  const deleteGroupDashQuery = await runQuery(
-    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
-  );
-
+    const deleteGroupDashQuery = await runQuery(
+      `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
+    );
   if (affectedRows === 1) {
     return `AuthGroup deleted.`;
   } else if (!affectedRows) {
     throw new NotFoundError(`No group found at ${data.id}`);
   }
+  } catch (error) {
+    console.error({error})
+  }
+
 };
 
 export const readAuthGroups = async (
