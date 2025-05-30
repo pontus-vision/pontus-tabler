@@ -26,10 +26,9 @@ import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { app } from '../server';
 import { AxiosResponse } from 'axios';
 import { TableEdgeCreateReq } from '../generated/api';
-import { DELTA_DB } from '../service/AuthGroupService';
 import * as db from './../../delta-table/node/index-jdbc';
 import { snakeCase } from 'lodash';
-import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '../consts';
+import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES, DELTA_DB } from '../consts';
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
 //   writeJson: jest.fn(),

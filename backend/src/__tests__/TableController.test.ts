@@ -42,24 +42,11 @@ describe('tableControllerTest', () => {
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
   let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
-
-  const removeTables = async() => {
-    // await removeDeltaTables(['person_natural', 'person_natural_2'])
-    
-    const dropColPersonNatural: ExecuteQueryReq = {
-      query: `ALTER TABLE person_natural DROP COLUMN full-name`
-    }
-    // const dropColPersonNaturalRes = await post()
+  if (process.env.DB_SOURCE === DELTA_DB) {
+    tables = [...tables, GROUPS_USERS];
   }
-  beforeAll(async() => {
-    
-    await removeTables()
-  })
 
   beforeEach(async () => {
-   if (process.env.DB_SOURCE === DELTA_DB) {
-      tables = [...tables, GROUPS_USERS];
-    }
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
@@ -74,7 +61,7 @@ describe('tableControllerTest', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
-    // await removeTables()
+
     const body: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
@@ -202,8 +189,8 @@ describe('tableControllerTest', () => {
     expect(deleteRetVal.status).toBe(422);
 
     const table: TableCreateReq = {
-      name: 'person-natural',
-      label: 'Person Natural',
+      name: 'mapeamento-de-processos',
+      label: 'Mapeamento de Processos',
       cols: [
         {
           field: 'column 1',
@@ -224,8 +211,6 @@ describe('tableControllerTest', () => {
     expect(createRetVal2.status).toBe(409);
   });
   it('should read tables', async () => {
-    await removeTables()
-
     const body: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',

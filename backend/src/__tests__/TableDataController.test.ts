@@ -20,10 +20,8 @@ import {
 } from '../typescript/api';
 
 import { prepareDbAndAuth, isSubset, post, cleanTables, removeDeltaTables } from './test-utils';
-import { deleteContainer, deleteDatabase } from '../cosmos-utils';
 import { AxiosResponse } from 'axios';
-import { DELTA_DB } from '../service/AuthGroupService';
-import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '../consts';
+import { DELTA_DB, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '../consts';
 
 
 // // Mock the utils.writeJson function
@@ -57,7 +55,7 @@ describe('tabledatacontroller', () => {
     admin = dbUtils.admin;
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
-    await removeDeltaTables(['person_natural', 'person_natural_2'])
+    // await removeDeltaTables(['person_natural', 'person_natural_2'])
   });
 
   afterAll(async () => {
