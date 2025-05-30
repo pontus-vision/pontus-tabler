@@ -87,7 +87,7 @@ export default defineConfig({
 
             console.log({ showTables1, showTables2 })
 
-            return { deleteGroups, deleteUsers };  // ✅ Directly return result
+            return { deleteGroups };  // ✅ Directly return result
           } catch (error) {
             console.error('Database reset failed:', error);
             throw new Error(error);  // ✅ Ensure Cypress receives the error
