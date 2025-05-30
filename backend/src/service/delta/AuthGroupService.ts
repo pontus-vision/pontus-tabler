@@ -276,13 +276,19 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
 
     const affectedRows = +deleteQuery[0]['num_affected_rows'];
 
-    const deleteGroupUsersQuery = await runQuery(
-      `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
-    );
+    const checkGroupsUsers = await runQuery(`SHOW TABLES LIKE "${GROUPS_USERS}"`)
+    if(checkGroupsUsers.length > 0) {
+      const deleteGroupUsersQuery = await runQuery(
+        `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
+      );
+    }
 
-    const deleteGroupDashQuery = await runQuery(
-      `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
-    );
+    const checkGroupsDashboards = await runQuery(`SHOW TABLES LIKE "${GROUPS_DASHBOARDS}"`)
+    if(checkGroupsDashboards.length > 0) {
+      const deleteGroupDashQuery = await runQuery(
+        `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
+      );
+    }
   if (affectedRows === 1) {
     return `AuthGroup deleted.`;
   } else if (!affectedRows) {
