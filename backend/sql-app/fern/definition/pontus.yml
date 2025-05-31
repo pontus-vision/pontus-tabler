@@ -1,0 +1,45 @@
+service:
+  auth: false
+  base-path: '/PontusTest/1.0.0'
+  endpoints:
+    executeQueryPOST:
+      path: /test/execute
+      method: POST
+      request:
+        name: ExecuteQueryReq
+        body:
+          properties:
+            query: string
+      response:
+        docs: User logged in successfully
+        type: ExecuteQueryRes 
+      errors:
+        - BadRequestError
+        - InternalServerError
+        - ForbiddenError
+types:
+  ExecuteQueryRes:
+    properties:
+      results: list<map<string,unknown>>
+errors:
+  BadRequestError:
+    status-code: 400
+    type: string
+  UnauthorizedError:
+    status-code: 401
+    type: unknown
+  ForbiddenError:
+    status-code: 403
+    type: unknown
+  NotFoundError:
+    status-code: 404
+    type: unknown
+  InternalServerError:
+    status-code: 500
+    type: unknown
+  ConflictEntityError:
+    status-code: 409
+    type: string
+  TemporaryRedirect:
+    status-code: 307
+    type: string
