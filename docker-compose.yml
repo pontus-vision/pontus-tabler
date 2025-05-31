@@ -31,7 +31,7 @@ services:
         cd sql-app
         npm install express cors
         fern generate
-        timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080..."; sleep 1; done; echo "Port 8080 is open!"'
+        timeout 1000 bash -c 'until nc -z delta-db 8080; do echo "Waiting for port 8080..."; sleep 1; done; echo "Port 8080 is open!"'
         npm run build
         ls
         node dist/sql-app/src/server.js
