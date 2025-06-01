@@ -44,7 +44,7 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml \
             up --build --abort-on-container-exit --exit-code-from app-tests \
-            delta-db app app-tests webhook-receiver
+            delta-db app app-tests webhook-receiver sql-app
 
       - name: Run Frontend Tests
         if: success()  # Only runs if previous step (App Tests) succeeded
