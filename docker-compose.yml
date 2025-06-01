@@ -71,7 +71,7 @@ services:
         echo "Checking if service is up on port 3001..."
         timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
         echo "RUNNING INTEGRATION TESTS"
-        npm run jest src/__tests__/DashboardController.test.ts --forceExit
+        npm run jest --forceExit
   app:
     build:
       context: .
