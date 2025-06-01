@@ -59,7 +59,7 @@ describe('tableControllerTest', () => {
     await removeDeltaTables(['person_natural', 'person_natural_2'])
   })
   afterAll(async () => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 

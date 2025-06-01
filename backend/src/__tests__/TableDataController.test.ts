@@ -59,7 +59,7 @@ describe('tabledatacontroller', () => {
   });
 
   afterAll(async () => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 

@@ -40,8 +40,6 @@ import {
   RegisterAdminReq,
   LoginRes,
   RegisterAdminRes,
-ExecuteQueryReq,
-ExecuteQueryRes
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -102,7 +100,7 @@ describe('dashboardCreatePOST', () => {
   })
 
   afterAll(async () => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 

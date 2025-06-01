@@ -75,7 +75,7 @@ describe('dashboardCreatePOST', () => {
     process.env = { ...OLD_ENV }; // Make a copy
   });
   afterAll(async () => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 

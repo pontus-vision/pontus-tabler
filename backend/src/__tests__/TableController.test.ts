@@ -9,8 +9,6 @@ import {
   RegisterAdminReq,
   LoginReq,
   LoginRes,
-  ExecuteQueryReq,
-  ExecuteQueryRes,
 } from '../typescript/api';
 import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
 import { deleteContainer, deleteDatabase } from '../cosmos-utils';
@@ -56,7 +54,7 @@ describe('tableControllerTest', () => {
   });
 
   afterAll(async() => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 
