@@ -51,7 +51,7 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml \
             up --build --abort-on-container-exit --exit-code-from frontend-tests \
-            delta-db app frontend-server frontend-tests webhook-receiver
+            delta-db app frontend-server frontend-tests webhook-receiver sql-app
           #      - name: Checking UID
           #        run: |
           #          docker-compose exec delta-db bash -c "id -u"
