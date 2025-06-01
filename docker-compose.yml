@@ -28,7 +28,7 @@ services:
       - -c
       - |
         export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
-        npm install --unsafe-perm
+        npm install 
         cd sql-app
         npm install express cors
         fern generate
