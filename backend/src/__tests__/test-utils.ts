@@ -1,6 +1,4 @@
 import axios, { AxiosResponse } from 'axios';
-import { deleteContainer } from '../cosmos-utils';
-import { execSync } from 'child_process';
 import fs from 'fs';
 import {
   RegisterAdminRes,
@@ -10,11 +8,9 @@ import {
   LoginReq,
   RegisterAdminReq,
   LoginRes,
-  ExecuteQueryReq,
-  ExecuteQueryRes,
 } from '../typescript/api';
-import { isJSONParsable } from '../db-utils';
-import { dbSource, DELTA_DB, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
+import { DELTA_DB, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
+import { ExecuteQueryReq, ExecuteQueryRes } from '../../sql-app/src/typescript/api'
 
 export const post = async (
   endpoint: string,
@@ -208,55 +204,57 @@ export const stateObj = {
 };
 
   
- export  const removeDeltaTables = async(tables: string[]) => {
-  return
-    if(process.env.DB_SOURCE !== DELTA_DB) return
-      for(const table of tables) {
-        const check1:ExecuteQueryReq = {
-          query: `SHOW TABLES LIKE "${table}"`
-        }
+export  const removeDeltaTables = async(tables: string[]) => {
+return
+  // if(process.env.DB_SOURCE !== DELTA_DB) return
+  //   for(const table of tables) {
+  //     const check1:ExecuteQueryReq = {
+  //       query: `SHOW TABLES LIKE "${table}"`
+  //     }
 
-        const sqlCheck = await axios.post('http://node-app:8080/PontusTest/1.0.0/test/execute', check1) as AxiosResponse<ExecuteQueryRes>
+  //     const sqlCheck = await axios.post('http://node-app:8080/PontusTest/1.0.0/test/execute', check1) as AxiosResponse<ExecuteQueryRes>
 
-        if(sqlCheck.data.results.length > 0 ) {
-          const check:ExecuteQueryReq = {
-            query: `DROP TABLE IF EXISTS ${table}`
-          }
+  //     if(sqlCheck.data.results.length > 0 ) {
+  //       const check:ExecuteQueryReq = {
+  //         query: `DROP TABLE IF EXISTS ${table}`
+  //       }
 
-          const sqlCheck2 = await axios.post('http://node-app:8080/PontusTest/1.0.0/test/execute', check) as AxiosResponse<ExecuteQueryRes>
-        }                   
-          const deltaPath ='delta-table/data/pv/' + table 
-          if (fs.existsSync(deltaPath)) {
-            fs.rmSync(deltaPath, { recursive: true, force: true });
-          }else{
-            console.warn(`delta lake path not found: "${deltaPath}"`)
-          }
+  //       const sqlCheck2 = await axios.post('http://node-app:8080/PontusTest/1.0.0/test/execute', check) as AxiosResponse<ExecuteQueryRes>
+  //     }                   
+  //       const deltaPath ='delta-table/data/pv/' + table 
+  //       if (fs.existsSync(deltaPath)) {
+  //         fs.rmSync(deltaPath, { recursive: true, force: true });
+  //       }else{
+  //         console.warn(`delta lake path not found: "${deltaPath}"`)
+  //       }
+  //   }
+}
+
+export const cleanTables = async(tables: string[]) => {
+    
+  for (const table of tables) {
+    if (process.env.DB_SOURCE === DELTA_DB) {
+      const check:ExecuteQueryReq = {
+        query: `SHOW TABLES LIKE '${table}'`
       }
-  }
-
-  export const cleanTables = async(tables: string[], postAdmin: (endpoint:string, body: any)=> any) => {
-    for (const table of tables) {
-      if (process.env.DB_SOURCE === DELTA_DB) {
-        const check:ExecuteQueryReq = {
-          query: `SHOW TABLES LIKE "${table}"`
-        }
 
 
-        const sqlCheck = await postAdmin('test/execute', check) as AxiosResponse<ExecuteQueryRes>
-        expect(sqlCheck.status).toBe(200)
-        if(sqlCheck.data.results.length > 0) {
-          const sqlQuery:ExecuteQueryReq = {
-              query: `DELETE FROM ${table}`
-          }
-          const sql2 = await postAdmin('test/execute', sqlQuery) as AxiosResponse<ExecuteQueryRes>
-          expect(sql2.status).toBe(200)
-        }
-        
-      } else {
-        // await deleteContainer(table);
+      const sqlCheck = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', check) as AxiosResponse<ExecuteQueryRes>
+      expect(sqlCheck.status).toBe(200)
+
+      const sqlQuery:ExecuteQueryReq = {
+          query: `DELETE FROM ${table}`
       }
+      if(Array.isArray(sqlCheck.data.results) && sqlCheck.data.results?.length > 0) {
+        const sql2 = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', sqlQuery) as AxiosResponse<ExecuteQueryRes>
+        expect(sql2.status).toBe(200)
+      }
+      
+    } else {
+      // await deleteContainer(table);
     }
   }
+}
 
 export const prepareDbAndAuth = async (
   tables: string[],
@@ -274,7 +272,7 @@ export const prepareDbAndAuth = async (
     endpoint: string,
     body: Record<string, any>,
   ): Promise<AxiosResponse> => {
-    // console.log({adminToken})
+    console.log({endpoint})
     const res = (await post(endpoint, body, {
       Authorization: 'Bearer ' + adminToken,
     })) as AxiosResponse<any, any>;
@@ -335,10 +333,11 @@ export const prepareDbAndAuth = async (
   };
 
   const OLD_ENV = process.env;
+  console.log('CREATING INITIAL TABLES')
+  await createInitialTables()
+  await cleanTables(tables)
 
-    await cleanTables(tables, postAdmin)
 
-  await createInitialTables(postAdmin)
   const createAdminBody: RegisterAdminReq = {
     username: 'admin',
     password: 'pontusvision',
@@ -371,28 +370,55 @@ export const prepareDbAndAuth = async (
 };
 
 
-const createInitialTables = async( postAdmin: (endpoint:string, body: any)=> any) => {
-  
-    const createTable: ExecuteQueryReq = {
-      query: `
-        CREATE TABLE IF NOT EXISTS webhook_subscriptions (
-            id STRING,
-            user_id STRING NOT NULL,
-            context STRING NOT NULL,
-            table_filter STRING NOT NULL,
-            operation STRING NOT NULL,
-            endpoint STRING NOT NULL,
-            secret_token_link STRING NOT NULL
-        ) -- Correctly placed closing parenthesis
-        USING DELTA
-        LOCATION "/data/pv/${WEBHOOKS_SUBSCRIPTIONS}";
-        `
-    }
-    try {
-      
-    const res = await postAdmin('/test/execute', createTable) as AxiosResponse<ExecuteQueryRes>
-    } catch (error) {
-     console.error('Error creating initial tables', {query: createTable.query}) 
-    }
+const createInitialTables = async() => {
+  const createTable: ExecuteQueryReq = {
+    query: `
+      CREATE TABLE IF NOT EXISTS webhook_subscriptions (
+          id STRING,
+          user_id STRING NOT NULL,
+          context STRING NOT NULL,
+          table_filter STRING NOT NULL,
+          operation STRING NOT NULL,
+          endpoint STRING NOT NULL,
+          secret_token_link STRING NOT NULL
+      ) -- Correctly placed closing parenthesis
+      USING DELTA
+      LOCATION "/data/pv/${WEBHOOKS_SUBSCRIPTIONS}";
+      `
+  }
 
+  const checkTableQuery: ExecuteQueryReq = {
+    query: `SHOW TABLES LIKE 'webhook_subscriptions'`
+  }
+
+  // const checkTable = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', checkTableQuery) as AxiosResponse<ExecuteQueryRes>
+
+  // if(checkTable.data.results.length === 0) {
+    try {
+      const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createTable) as AxiosResponse<ExecuteQueryRes>
+      console.log({res: JSON.stringify(res.status)})
+    } catch (error) {
+      console.error('Error creating initial tables', {query: createTable.query, error}) 
+    }
+  // }
+
+  const createGroupsDashboards: ExecuteQueryReq = {
+    query: 'CREATE TABLE IF NOT EXISTS groups_dashboards (id STRING,  table_from__id STRING, table_from__name STRING, table_from__create STRING, table_from__delete STRING, table_from__read STRING, table_from__update STRING, table_to__id STRING, table_to__name STRING, table_to__create STRING, table_to__read STRING, table_to__update STRING, table_to__delete STRING, edge_label STRING) USING DELTA LOCATION "/data/pv/groups_dashboards"'
+  }
+
+
+  const checkTableQuery2: ExecuteQueryReq = {
+    query: `SHOW TABLES LIKE 'groups_dashboards'`
+  }
+
+  // const checkTable2 = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', checkTableQuery2) as AxiosResponse<ExecuteQueryRes>
+
+  // if(checkTable2.data.results.length > 0) return
+  try {
+    const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createGroupsDashboards) as AxiosResponse<ExecuteQueryRes>
+    console.log({res: JSON.stringify(res.status)})
+  } catch (error) {
+    console.error('Error creating initial tables', {query: createTable.query, error}) 
+  }
+  
 }
