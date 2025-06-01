@@ -32,8 +32,7 @@ services:
         npm install express cors
         fern generate
         timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
-        npm i java --unsafe-perm
-        npm i uuid
+        npm i 
         npm run build
         ls
         node dist/sql-app/src/server.js
