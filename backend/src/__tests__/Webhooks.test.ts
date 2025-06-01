@@ -17,13 +17,11 @@ import nock from 'nock'
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import { srv } from '../server';
 import http from 'http';
 
-import { prepareDbAndAuth } from './test-utils';
+import { cleanTables, prepareDbAndAuth, removeDeltaTables } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
-import { runQuery } from '../db-utils';
 
 // // Mock the utils.writeJson function
 // jest.mock('../utils/writer', () => ({
@@ -44,19 +42,21 @@ describe('dashboardCreatePOST', () => {
   let admin;
   let adminToken
   let tables = [AUTH_GROUPS, AUTH_USERS,  TABLES, 
-    // WEBHOOKS_SUBSCRIPTIONS
+    WEBHOOKS_SUBSCRIPTIONS
   ] ;
   if (process.env.DB_SOURCE === DELTA_DB) {
     tables = [...tables,  GROUPS_USERS];
   }
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
     adminToken = dbUtils.adminToken
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
+
+    await removeDeltaTables([WEBHOOKS_SUBSCRIPTIONS, 'table_foo'])
   });
 
   let server: http.Server;
@@ -81,25 +81,23 @@ describe('dashboardCreatePOST', () => {
   // });
 
   afterAll(async () => {
-    for (const table of tables) {
-      runQuery(`DELETE FROM ${table};`)
-    }
+   
+    await cleanTables(tables, postAdmin)
+
 
     process.env = OLD_ENV;
-    srv.close();
-    server.close()
   });
 
   it('should create a webhook', async () => {
+
     const webhookBody: WebhookSubscriptionReq = {
         userId: admin.id,
         context: 'table-defined',
-        endpoint: 'http://localhost:4001/webhook',
+        endpoint: 'http://webhook-receiver:8000/PontusTest/1.0.0/webhook',
         operation: 'create',
         secretTokenLink: '/authtoken',
         tableFilter: "^table.*",
     }
-
     const webhookCreateRes = await postAdmin('/webhook/create', webhookBody) as AxiosResponse<WebhookSubscriptionRes>
 
     expect(webhookCreateRes.status).toBe(200)
@@ -139,14 +137,16 @@ describe('dashboardCreatePOST', () => {
       id: tableCreateRes.data.id,
       name: 'table bar'
     }
+    
+    const getWebhook = await fetch('http://webhook-receiver:8000/PontusTest/1.0.0/webhook/get', {method: 'POST', headers: {
+      'Content-Type': 'application/json',
+      // Add other headers as needed
+    }, })
 
+    const webhook = await getWebhook.json()
 
-    nock('http://localhost:4001')
-      .post('/webhook', (body) => {
-        console.log({body})
-        expect(body['context']).toBe('table-defined')
-          return true
-      }, )
+    console.log({webhook})
 
+    expect(webhook['context']).toBe('table-defined')
   })
 });

@@ -81,27 +81,36 @@ import {
   setup,
 } from './service/AuthUserService';
 import { createWebhook } from './service/WebhookService';
+import { runQuery } from './db-utils';
 
 
 
 export default new PontusService({
+  executeQueryPost: async(req, res)=> {
+    if(process.env.ENVIRONMENT_MODE !== 'test') {
+      throw new ForbiddenError('You cannot execute this action since this is not a testing environment')
+    }
+
+    const response = await runQuery(req.body.query) as Record<string,any>[]
+
+    res.send({results: response})
+  },
   sendWebhookPost: async (req, res)=> {
-    console.log("CREATING THE WEBHOOK")
     const response = await createWebhook(req.body)
 
     res.send(response)
   },
   registerUserPost: async (req, res) => {
-    // await setup();
     const response = await registerUser(req.body);
+
     res.send(response);
   },
   registerAdminPost: async (req, res) => {
     const response = await registerAdmin(req.body);
+
     res.send(response);
   },
   loginPost: async (req, res) => {
-    // await setup();
     const response = await loginUser(req.body);
 
     res.send(response);
@@ -118,6 +127,7 @@ export default new PontusService({
     // res.send(response);
   },
   authGroupCreatePost: async (req, res) => {
+
     const response = await createAuthGroup(req.body);
 
     res.send(response);

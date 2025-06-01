@@ -38,6 +38,7 @@ const authMiddleware = async (
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout') ||
+    path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
     return next();
@@ -101,24 +102,22 @@ const webhookMiddleware = async (
   if (
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
-    console.log({ WEBHOOK_REQ: req, })
     return next();
   }
 
   if (
+    path === replaceSlashes('/PontusTest/1.0.0//auth/group/create') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
     path === replaceSlashes('/PontusTest/1.0.0//login') ||
     path === replaceSlashes('/PontusTest/1.0.0/logout') ||
-    path === replaceSlashes('/PontusTest/1.0.0/table/create') ||
-    path === replaceSlashes('/PontusTest/1.0.0/auth/group/tables/create') ||
-    path === replaceSlashes('/PontusTest/1.0.0/auth/groups/read') ||
+    path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
+    // path === replaceSlashes('/PontusTest/1.0.0/table/create') ||
+    // path === replaceSlashes('/PontusTest/1.0.0/auth/group/tables/create') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
     return next();
   }
-
-
 
   const entityAndOperation = parsePath(req.path)
 
@@ -129,26 +128,28 @@ const webhookMiddleware = async (
 
   const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
 
-  const subscriptions = await runQuery(`
-    SELECT
-        ws.id AS subscription_id,
-        ws.context,
-        ws.operation,
-        ws.user_id,
-        ws.table_filter,
-        gu.id AS group_user_id,
-        gu.table_to__id
-    FROM
-        ${WEBHOOKS_SUBSCRIPTIONS} ws
-    INNER JOIN
-        ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
-    ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
-    WHERE
-        ws.operation = '${operation}'
-        -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
-`);
-  // const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
+//   const subscriptions = await runQuery(`
+//     SELECT
+//         ws.id AS subscription_id,
+//         ws.context,
+//         ws.operation,
+//         ws.user_id,
+//         ws.table_filter,
+//         gu.id AS group_user_id,
+//         gu.table_to__id
+//     FROM
+//         ${WEBHOOKS_SUBSCRIPTIONS} ws
+//     INNER JOIN
+//         ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
+//     ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
+//     WHERE
+//         ws.operation = '${operation}'
+//         -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
+// `);
 
+try {
+  
+ const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
   for (const subscription of subscriptions) {
     const tableFilter = subscription?.['ws.table_filter']
 
@@ -159,20 +160,24 @@ const webhookMiddleware = async (
     }
 
     const payload = req.body
+      const {id, ...rest} = subscription
     try {
-      const response = await axios.post(subscription.endpoint, payload, {
+      const response = await axios.post(subscription.endpoint, rest, {
         headers: {
           'Authorization': `Bearer ${subscription.secretTokenRef}`,
         }
       });
       console.log(`Webhook sent to ${subscription.endpoint}: ${response.status}`);
     } catch (error) {
-      console.error(`Error sending webhook: ${error.message}`);
+      throw `Error sending webhook subscription: ${JSON.stringify(rest)}`;
     }
   }
+} catch (error) {
+  console.error({error})
+}
 
 
-
+  return next()
 }
 
 export function parsePath(path: string): { entity: string, operation: string } {
@@ -220,88 +225,36 @@ app.use(express.json());
 
 app.use(authMiddleware);
 
-//app.use(webhookMiddleware)
+app.use(webhookMiddleware)
+
+app.listen(port, () => {
+
+   console.log(
+     'Your server is listening on port %d (http://localhost:%d)',
+     port,
+     port,
+   );
+})
 register(app, { pontus });
 
 const validate = (_request, _scopes, _schema) => {
   return true;
 };
 
-export const srv = http.createServer(app).listen(port, function() {
-  console.log(
-    'Your server is listening on port %d (http://localhost:%d)',
-    port,
-    port,
-  );
-});
+function camelCase(str: string): string {
+  return str.replace(/[_-](\w)/g, (_, c) => c.toUpperCase());
+}
 
-const httpTrigger = async (
-  request: HttpRequest,
-  context: InvocationContext,
-): Promise<HttpResponseInit> => {
-
-  context.log(`Http function processed request for url "${request.url}"`);
-
-  srv.closeIdleConnections();
-
-  const data = await request.text();
-  const url = new URL(request.url);
-
-  const headers: HeadersInit = {};
-  // const headers: http.OutgoingHttpHeaders = {};
-
-  request.headers.forEach((value: string, key: string) => {
-    headers[key] = value;
-  });
-
-  const reqOpts: http.RequestOptions = {
-    hostname: url.hostname,
-    port: url.port,
-    path: url.pathname,
-    method: request.method,
-    headers: headers,
-  };
-
-  const ret = await fetch(
-    // 'http://localhost:8080/PontusTest/1.0.0' + url.pathname,
-    'http://localhost:8080' + url.pathname,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: headers['authorization'] || 'Bearer 123456',
-      },
-      body: data,
-    },
-  );
-
-  const respHeaders: HeadersInit = {};
-
-  ret.headers.forEach((value: string, key: string) => {
-    respHeaders[key] = value;
-  });
-
-  const resp: HttpResponseInit = {
-    body: await ret.text(),
-    cookies: undefined,
-    enableContentNegotiation: undefined,
-    headers: respHeaders,
-    // jsonBody: await ret.json(),
-    status: ret.status,
-  };
-
-  //  srv.closeIdleConnections();
-
-  return resp;
-
-
-};
-
-//azureApp.http('httpTrigger', {
-//  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//  authLevel: 'function',
-//  handler: httpTrigger,
-//});
-
-export default httpTrigger;
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(toCamelCase);
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc, key) => {
+      const camelKey = camelCase(key);
+      acc[camelKey] = toCamelCase(obj[key]);
+      return acc;
+    }, {} as any);
+  }
+  return obj;
+}
 

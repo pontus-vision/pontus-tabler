@@ -34,7 +34,20 @@ service:
               endpoint: "https://hooks.example.com/webhook"
               secretTokenLink: "aws:secretsmanager:webhook-tokens/paulo"
               operation: "create"
-
+    executeQueryPOST:
+      path: /test/execute
+      method: POST
+      request:
+        name: ExecuteQueryReq
+        body:
+          properties:
+            query: string
+      response:
+        docs: User logged in successfully
+        type: ExecuteQueryRes 
+      errors:
+        - BadRequestError
+        - InternalServerError
     registerUserPOST:
       path: /register/user
       method: POST
@@ -1112,6 +1125,8 @@ service:
         name: AuthGroupCreateReq
         body:
           properties:
+            tableMetadataCrud: optional<CrudDocumentRef>
+            dashboardCrud: optional<CrudDocumentRef>
             id:
               docs: id of the group
               type: optional<string>
@@ -1140,7 +1155,9 @@ service:
       request:
         name: AuthGroupReadReq
         body:
-          properties: {}
+          properties: 
+            tableMetadataCrud: optional<CrudDocumentRef>
+            dashboardCrud: optional<CrudDocumentRef>
           extends:
             - AuthGroupBaseRef
       response:
@@ -1164,7 +1181,9 @@ service:
       request:
         name: AuthGroupUpdateReq
         body:
-          properties: {}
+          properties:
+            tableMetadataCrud: optional<CrudDocumentRef>
+            dashboardCrud: optional<CrudDocumentRef>
           extends:
             - AuthGroupBaseRef
       response:
@@ -1855,6 +1874,9 @@ service:
         - InternalServerError
         - NotFoundError
 types:
+  ExecuteQueryRes:
+    properties:
+      results: list<map<string,unknown>>
   InitiateRes: string
   RegisterUserRes:
     properties: {}
@@ -1947,11 +1969,15 @@ types:
       name: string
       authUsers: list<AuthUserIdAndUsername>
   AuthGroupCreateRes:
-    properties: {}
+    properties: 
+      tableMetadataCrud: optional<CrudDocumentRef>
+      dashboardCrud: optional<CrudDocumentRef>
     extends:
       - AuthGroupRef
   AuthGroupUpdateRes:
-    properties: {}
+    properties:
+      tableMetadataCrud: optional<CrudDocumentRef>
+      dashboardCrud: optional<CrudDocumentRef>
     extends:
       - AuthGroupRef
   AuthGroupDashboardCreateRes:
@@ -2002,7 +2028,6 @@ types:
       name:
         docs: Name of the group
         type: string
-      tableMetadata: optional<CrudDocumentRef>
       parents:
         docs: Parent groups of the group (optional)
         type: optional<list<string>>
@@ -2396,7 +2421,9 @@ types:
       totalGroups: optional<integer>
       authGroups: optional<list<AuthGroupRef>>
   AuthGroupReadRes:
-    properties: {}
+    properties:  
+      tableMetadataCrud: optional<CrudDocumentRef>
+      dashboardCrud: optional<CrudDocumentRef>
     extends:
       - AuthGroupRef
   AuthGroupBaseRef:

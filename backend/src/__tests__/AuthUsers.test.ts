@@ -40,9 +40,8 @@ import {
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
 // import axios from 'axios';
-import { srv } from '../server';
 
-import { prepareDbAndAuth, post } from './test-utils';
+import { prepareDbAndAuth, post, cleanTables } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS } from '../consts';
 
@@ -63,25 +62,24 @@ describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
+  let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
+  if (process.env.DB_SOURCE === DELTA_DB) {
+    tables = [...tables, GROUPS_DASHBOARDS, 'person_natural', GROUPS_USERS];
+  }
   beforeEach(async () => {
-    let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
-    if (process.env.DB_SOURCE === DELTA_DB) {
-      tables = [...tables, GROUPS_DASHBOARDS, 'person_natural', GROUPS_USERS];
-    }
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
-    adminToken = dbUtils.adminToken;
+    adminToken = dbUtils.adminToken
     jest.resetModules(); // Most important - it clears the cache
     process.env = { ...OLD_ENV }; // Make a copy
   });
   afterAll(async () => {
+    await cleanTables(tables, postAdmin)
     process.env = OLD_ENV; // Restore old environment
-    srv.close();
   });
 
   it('should create a user', async () => {
-
     const createBody: AuthUserCreateReq = {
       username: 'user2',
       password: 'pontusvision',
@@ -574,10 +572,12 @@ describe('dashboardCreatePOST', () => {
     const createGroup = await postAdmin('auth/group/create', createGroupBody);
 
     expect(createGroup.status).toBe(200);
+
     const LogoutRes = (await postAdmin(
       'logout',
       logoutBody,
     )) as AxiosResponse<LoginRes>;
+
     expect(LogoutRes.status).toBe(200);
   });
   it('should login incorrectly', async () => {

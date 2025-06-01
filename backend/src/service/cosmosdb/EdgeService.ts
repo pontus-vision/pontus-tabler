@@ -17,13 +17,13 @@ import {
   ReadPaginationFilter,
 } from '../../typescript/api';
 import { fetchContainer } from '../../cosmos-utils';
-import { filterToQuery } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import { ItemResponse, PatchOperation, ResourceResponse } from '@azure/cosmos';
 import {
   BadRequestError,
   ConflictEntityError,
   NotFoundError,
-} from '../../generated/api';
+} from '../../generated/api/resources';
 import { initiateAuthGroupContainer } from './AuthGroupService';
 import { AUTH_GROUPS, TABLES } from '../../consts';
 

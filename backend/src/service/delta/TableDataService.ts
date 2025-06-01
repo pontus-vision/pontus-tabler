@@ -8,8 +8,9 @@ import {
   TableDataUpdateReq,
 } from '../../typescript/api';
 import { snakeCase } from 'lodash';
-import { NotFoundError } from '../../generated/api';
-import { createSql, filterToQuery, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from '../../db-utils';
+import { NotFoundError } from '../../generated/api/resources';
+import { createSql, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from '../../db-utils';
+import { filterToQuery } from '../../utils';
 import { TABLES } from '../../consts';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
@@ -127,19 +128,26 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
 // };
 
 export const deleteTableData = async (data: TableDataDeleteReq) => {
-  const sql = await runQuery(
+
+  // const sql = await runQuery(`SELECT 1 FROM ${data.tableName} WHERE id = '${data.rowId}' LIMIT 1`)
+
+  // if(sql.length === 0) {
+  //   throw new NotFoundError(`Did not find any row at id "${data.rowId}"`);
+  // }
+
+  const sql2 = await runQuery(
     `DELETE FROM ${snakeCase(data.tableName)} WHERE id = '${data.rowId}'`,
 
   );
 
-  if (+sql?.[0]?.['num_affected_rows'] === 0) {
+  if (+sql2?.[0]?.['num_affected_rows'] === 0) {
     // throw new NotFoundError();
 
     throw new NotFoundError(`Did not find any row at id "${data.rowId}"`);
 
   }
 
-  if (!sql) {
+  if (!sql2) {
 
     throw new NotFoundError(`Did not find table "${data.tableName}"`);
   }
@@ -158,12 +166,12 @@ export const readTableData = async (
 
   const res1 = await checkTableCols(tableName, filtersSnakeCase);
 
-  const filters = filterToQuery(filtersSnakeCase);
+  const filters = filterToQuery(filtersSnakeCase, "");
   const filtersCount = filterToQuery({
     filters: filtersSnakeCase,
     to: body.to,
     from: body.from,
-  });
+  }, "");
 
   const res2 = (await runQuery(
     `SELECT * FROM ${tableName} ${filters}`,

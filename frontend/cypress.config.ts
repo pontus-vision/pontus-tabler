@@ -53,10 +53,19 @@ export default defineConfig({
         async resetDatabaseTablesTest() {  // ✅ No need for an extra Promise wrapper
           try {
             await createWebhookTable()
+
+          
             const showTables1 = await runQuery('SHOW TABLES;');
-            const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
+        
+
+
+            const groupsCheck = await runQuery('SHOW TABLES LIKE "auth_users"')
+            if(groupsCheck.length > 0) {
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
-            const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION "/data/pv/auth_groups";');
+            }else {
+            const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
+            }
+            const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN, create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN ) USING DELTA LOCATION "/data/pv/auth_groups";');
             const deleteGroups = await runQuery('DELETE FROM auth_groups;');
             const createTables = await runQuery('CREATE TABLE IF NOT EXISTS tables (id STRING, name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION "/data/pv/tables";');
             const deleteTables = await runQuery('DELETE FROM tables;');
@@ -66,16 +75,19 @@ export default defineConfig({
             const deleteMenu = await runQuery('DELETE FROM menu;');
             const createDashboards = await runQuery('CREATE TABLE IF NOT EXISTS dashboards (id STRING, name STRING, owner STRING, state STRING, folder STRING) USING DELTA LOCATION "/data/pv/dashboards";');
             const deleteDashboards = await runQuery('DELETE FROM dashboards;');
-            // const createTable1 = await runQuery("CREATE TABLE IF NOT EXISTS table_1 (id STRING, column_1 STRING, column_2 STRING) USING DELTA LOCATION '/data/pv/table_1' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
             const checkTable1 = await runQuery('SHOW TABLES LIKE "table_1"')
-            checkTable1.length > 0 && await runQuery('DELETE FROM table_1')
-            // const createTable2 = await runQuery("CREATE TABLE IF NOT EXISTS table_2 (id STRING) USING DELTA LOCATION '/data/pv/table_2' TBLPROPERTIES ('delta.columnMapping.mode' = 'name', 'delta.minReaderVersion' = '2','delta.minWriterVersion' = '5');");
-            // const deleteTable2 = await runQuery('DELETE FROM table_2')
+            const checkTable2 = await runQuery('SHOW TABLES LIKE "table_2"')
+            if(checkTable1.length > 0) {
+             const dropTable1 = await runQuery("DROP TABLE table_1");
+            }
+            if(checkTable2.length > 0) {
+             const dropTable1 = await runQuery("DROP TABLE table_2");
+            }
             const showTables2 = await runQuery('SHOW TABLES;');
 
             console.log({ showTables1, showTables2 })
 
-            return { deleteGroups, deleteUsers };  // ✅ Directly return result
+            return { deleteGroups };  // ✅ Directly return result
           } catch (error) {
             console.error('Database reset failed:', error);
             throw new Error(error);  // ✅ Ensure Cypress receives the error
@@ -86,7 +98,7 @@ export default defineConfig({
             await createWebhookTable()
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
-            const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION "/data/pv/auth_groups";');
+            const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN , create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN) USING DELTA LOCATION "/data/pv/auth_groups";');
             const deleteGroups = await runQuery('DELETE FROM auth_groups;');
             const createGroupsUsers = await runQuery('CREATE TABLE IF NOT EXISTS groups_users (id STRING, table_from__id STRING, table_from__name STRING, table_to__id STRING, table_to__username STRING, edge_label STRING) USING DELTA LOCATION "/data/pv/groups_users";');
             const deleteGroupsUsers = await runQuery('DELETE FROM groups_users;');
@@ -102,7 +114,7 @@ export default defineConfig({
             await createWebhookTable()
             const createUsers = await runQuery('CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";');
             const deleteUsers = await runQuery('DELETE FROM auth_users;');
-            const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN ) USING DELTA LOCATION "/data/pv/auth_groups";');
+            const createGroups = await runQuery('CREATE TABLE IF NOT EXISTS auth_groups (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN , create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN) USING DELTA LOCATION "/data/pv/auth_groups";');
             const deleteGroups = await runQuery('DELETE FROM auth_groups;');
             const createTables = await runQuery('CREATE TABLE IF NOT EXISTS tables (id STRING, name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION "/data/pv/tables";');
             const deleteTables = await runQuery('DELETE FROM tables;');
