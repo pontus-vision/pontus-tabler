@@ -36,13 +36,13 @@ import {
   AuthGroupsReadRes,
   InternalServerError,
 } from '../generated/api';
-import { CrudDocumentRef } from '../typescript/api';
+import { AuthGroupCreateRes, CrudDocumentRef } from '../typescript/api';
 import { COSMOS_DB, dbSource, DELTA_DB } from '../consts';
 
 import * as cdb from './cosmosdb/index';
 import * as deltadb from './delta/index';
 
-export const createAuthGroup = async (data: AuthGroupCreateReq) => {
+export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGroupCreateRes> => {
   console.log({dbSource})
   if (dbSource === COSMOS_DB) {
     return cdb.createAuthGroup(data);
