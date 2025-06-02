@@ -209,6 +209,22 @@ class PreparedStatement extends Statement {
     });
   }
 
+  async setObject(index: number, val: any, targetSqlType?: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        if (targetSqlType !== undefined) {
+          this._ps.setObjectSync(index, val, targetSqlType);
+        } else {
+          this._ps.setObjectSync(index, val);
+        }
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  
+
   async setString(index: number, val: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {

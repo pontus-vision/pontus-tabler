@@ -10,6 +10,7 @@ service:
         body:
           properties:
             query: string
+            params: optional<list<string>>
       response:
         docs: User logged in successfully
         type: ExecuteQueryRes 

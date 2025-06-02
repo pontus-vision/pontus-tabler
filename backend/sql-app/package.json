@@ -4,7 +4,7 @@
   "description": "Swagger-UI and API Rest Routing for Open API v3.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf dist/ && tsc && cp -r src/generated dist/src/ && cp -r src/typescript dist/src/"
+    "build": "rm -rf dist/ && tsc && cp -r src/generated dist/sql-app/src/ && cp -r src/typescript dist/sql-app/src/ && cp -r ../src/generated dist/src && cp -r ../src/typescript dist/src"
   },
   "exports": {},
   "author": {
