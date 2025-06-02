@@ -21,7 +21,7 @@ describe('Filter to SQL', () => {
     };
     const query = filterToQuery(readBody2);
 
-    expect(query.toLocaleLowerCase() === "where c.name like '%pontusvision%' and c.folder like '%folder 1%'" || query.toLocaleLowerCase() === "where c.name like '%pontusvision%' and c.folder like '%folder 1%'").toBeTruthy();
+    expect(query.queryStr.toLocaleLowerCase() === "where c.name like '%pontusvision%' and c.folder like '%folder 1%'" || query.queryStr.toLocaleLowerCase() === "where c.name like '%pontusvision%' and c.folder like '%folder 1%'").toBeTruthy();
 
     const query2 = filterToQuery({
       filters: {
@@ -38,8 +38,8 @@ describe('Filter to SQL', () => {
       },
     });
 
-    console.log({query2: query2.toLocaleLowerCase()})
-    expect(query2.toLocaleLowerCase() === "where c.name = 'pontusvision' and c.folder = 'folder 1'" || query2.toLocaleLowerCase() ===  "where c.name = \"pontusvision\" and c.folder = \"folder 1\"").toBeTruthy();
+    console.log({query2: query2.queryStr.toLocaleLowerCase()})
+    expect(query2.queryStr.toLocaleLowerCase() === "where c.name = 'pontusvision' and c.folder = 'folder 1'" || query2.queryStr.toLocaleLowerCase() ===  "where c.name = \"pontusvision\" and c.folder = \"folder 1\"").toBeTruthy();
 
     const query3 = filterToQuery({
       filters: {
@@ -56,7 +56,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query3.toLocaleLowerCase() === 'where not contains(c.name, "pontusvision") and not contains(c.folder, "folder 1")' || query3.toLocaleLowerCase() === "where c.name not like '%pontusvision%' and c.folder not like '%folder 1%'").toBeTruthy()
+    expect(query3.queryStr.toLocaleLowerCase() === 'where not contains(c.name, "pontusvision") and not contains(c.folder, "folder 1")' || query3.queryStr.toLocaleLowerCase() === "where c.name not like '%pontusvision%' and c.folder not like '%folder 1%'").toBeTruthy()
 
     const query4 = filterToQuery({
       filters: {
@@ -73,7 +73,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query4.toLocaleLowerCase()).toBe(
+    expect(query4.queryStr.toLocaleLowerCase()).toBe(
             "where not c.name = 'pontusvision' and not c.folder = 'folder 1'",
           );
 
@@ -112,7 +112,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query5.toLocaleLowerCase()).toBe(
+    expect(query5.queryStr.toLocaleLowerCase()).toBe(
       `where (c.name > '2023-10-19T00:00:00Z' and c.name > '2023-10-19T00:00:00Z') and (c.folder < '2023-10-19T00:00:00Z' and c.folder < '2023-10-19T00:00:00Z')`.toLocaleLowerCase(),
     );
 
@@ -149,7 +149,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query6.toLocaleLowerCase()).toBe(
+    expect(query6.queryStr.toLocaleLowerCase()).toBe(
       `where (c.name > '2023-10-19T00:00:00Z' or c.name > '2023-10-19T00:00:00Z') and (c.folder < '2023-10-19T00:00:00Z' or c.folder < '2023-10-19T00:00:00Z')`.toLocaleLowerCase(),
     );
 
@@ -165,7 +165,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query7.toLocaleLowerCase()).toBe(
+    expect(query7.queryStr.toLocaleLowerCase()).toBe(
       `where c.name > '2023-10-19T00:00:00Z'`.toLocaleLowerCase(),
     );
 
@@ -182,7 +182,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query8.toLocaleLowerCase()).toBe(
+    expect(query8.queryStr.toLocaleLowerCase()).toBe(
       `where c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z'`.toLocaleLowerCase(),
     );
 
@@ -207,7 +207,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query9.toLocaleLowerCase()).toBe(
+    expect(query9.queryStr.toLocaleLowerCase()).toBe(
       `where (c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z') OR (c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z')`.toLocaleLowerCase(),
     );
 
@@ -248,7 +248,7 @@ describe('Filter to SQL', () => {
       },
     });
 
-    expect(query10.toLocaleLowerCase()).toBe(
+    expect(query10.queryStr.toLocaleLowerCase()).toBe(
       `where ((c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z') OR (c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z')) and ((c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z') OR (c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z'))`.toLocaleLowerCase(),
     );
 
@@ -292,11 +292,11 @@ describe('Filter to SQL', () => {
     });
 
     if(process.env.DB_SOURCE === DELTA_DB) {
-      expect(query11.toLocaleLowerCase()).toBe(
+      expect(query11.queryStr.toLocaleLowerCase()).toBe(
         `where ((c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z') OR (c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z')) and ((c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z') OR (c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z')) LIMIT 100  OFFSET 999`.toLocaleLowerCase(),
       );
     }else {
-      expect(query11.toLocaleLowerCase()).toBe(
+      expect(query11.queryStr.toLocaleLowerCase()).toBe(
         `where ((c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z') OR (c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z')) and ((c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z') OR (c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z')) OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
       );
     }
@@ -343,11 +343,11 @@ describe('Filter to SQL', () => {
     });
 
     if(process.env.DB_SOURCE === DELTA_DB) {
-      expect(query12.toLocaleLowerCase()).toBe(
+      expect(query12.queryStr.toLocaleLowerCase()).toBe(
         `where ((c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z') OR (c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z')) and ((c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z') OR (c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z')) ORDER BY c.folder asc LIMIT 100  OFFSET 999`.toLocaleLowerCase(),
       );
     }else{
-      expect(query12.toLocaleLowerCase()).toBe(
+      expect(query12.queryStr.toLocaleLowerCase()).toBe(
         `where ((c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z') OR (c.name >= '2023-10-19T00:00:00Z' AND c.name <= '2023-10-19T00:00:00Z')) and ((c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z') OR (c.folder >= '2023-10-19T00:00:00Z' AND c.folder <= '2023-10-19T00:00:00Z')) ORDER BY c.folder asc OFFSET 999 LIMIT 100`.toLocaleLowerCase(),
       );
     }
