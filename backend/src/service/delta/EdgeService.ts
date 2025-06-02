@@ -64,105 +64,96 @@ export const createTableDataEdge = async (
   data: TableDataEdgeCreateReq,
 ): Promise<TableDataEdgeCreateRes> => {
   const tableNameFrom = snakeCase(data.tableFrom.tableName);
+  const fromIds = data.tableFrom.rows.map((row) => row.id);
+  const fromPlaceholders = fromIds.map(() => '?').join(', ');
+
+  // Check existence of from IDs
   const sql = await runQuery(
-    `SELECT COUNT(*) FROM ${tableNameFrom} WHERE id IN (
-      ${data.tableFrom.rows.map((table) => `'${table.id}'`).join(', ')});
-     `,
+    `SELECT COUNT(*) FROM ${tableNameFrom} WHERE id IN (${fromPlaceholders});`,
+    fromIds,
   );
 
-  if (+sql[0]['count(1)'] !== data.tableFrom.rows.length) {
-    throw new NotFoundError(`A record at ${data.tableFrom} does not exist`);
+  if (+sql[0]['count(1)'] !== fromIds.length) {
+    throw new NotFoundError(`One or more records in table ${data.tableFrom.tableName} do not exist`);
   }
+
   const tableNameTo = snakeCase(data.tableTo.tableName);
+  const toIds = data.tableTo.rows.map((row) => row.id);
+  const toPlaceholders = toIds.map(() => '?').join(', ');
 
+  // Check existence of to IDs
   const sql2 = await runQuery(
-    `SELECT COUNT(*) FROM ${tableNameTo} WHERE id IN (${data.tableTo.rows
-      .map((table) => `'${table.id}'`)
-      .join(', ')});`,
+    `SELECT COUNT(*) FROM ${tableNameTo} WHERE id IN (${toPlaceholders});`,
+    toIds,
   );
 
-  if (+sql2[0]['count(1)'] !== data.tableTo.rows.length) {
-    throw new NotFoundError(`A record at ${data.tableTo} does not exist`);
+  if (+sql2[0]['count(1)'] !== toIds.length) {
+    throw new NotFoundError(`One or more records in table ${data.tableTo.tableName} do not exist`);
   }
 
+  // Prepare SQL field strings
   const sqlFields = convertToSqlFields(
-    Object.keys(data.tableFrom.rows[0]).map(
-      (el) => `table_from__${snakeCase(el)}`,
-    ),
+    Object.keys(data.tableFrom.rows[0]).map((el) => `table_from__${snakeCase(el)}`),
   );
   const sqlFields2 = convertToSqlFields(
     Object.keys(data.tableTo.rows[0]).map((el) => `table_to__${snakeCase(el)}`),
   );
 
-  let tableFrom = data.tableFrom.rows.map((row) =>
+  const tableFrom = data.tableFrom.rows.map((row) =>
     prependToKeys(row, 'table_from__'),
   );
-  let tableTo = data.tableTo.rows.map((row) =>
+  const tableTo = data.tableTo.rows.map((row) =>
     prependToKeys(row, 'table_to__'),
   );
 
-  const insertFields = [];
-
+  // Pair up insert fields based on edge type
+  const insertFields: Record<string, any>[] = [];
   const maxLength = Math.max(tableFrom.length, tableTo.length);
+
   if (data.edgeType === 'oneToOne') {
     for (let i = 0; i < maxLength; i++) {
-      if (tableFrom[i] && tableTo[i]) {
-        insertFields.push({ ...tableFrom[i], ...tableTo[i] });
-      } else if (tableFrom[i]) {
-        insertFields.push(tableFrom[i]);
-      } else if (tableTo[i]) {
-        insertFields.push(tableTo[i]);
-      }
+      insertFields.push({ ...tableFrom[i], ...tableTo[i] });
     }
   } else {
     for (let i = 0; i < maxLength; i++) {
-      if (tableFrom[i] && tableTo[i]) {
-        insertFields.push({ ...tableFrom[i], ...tableTo[i] });
-      } else if (!tableFrom[i]) {
-        insertFields.push({
-          ...tableFrom[tableFrom.length - 1],
-          ...tableTo[i],
-        });
-      } else if (!tableTo[i]) {
-        insertFields.push({
-          ...tableFrom[i],
-          ...tableTo[tableFrom.length - 1],
-        });
-      }
+      const from = tableFrom[i] ?? tableFrom[tableFrom.length - 1];
+      const to = tableTo[i] ?? tableTo[tableTo.length - 1];
+      insertFields.push({ ...from, ...to });
     }
   }
 
+  const rowsToInsert = insertFields.map((field) => ({
+    ...field,
+    edge_label: data.edge || null,
+  }));
+
+  const jointTableName =
+    snakeCase(data.jointTableName) ||
+    snakeCase(data.edge) ||
+    `${tableNameFrom}_${tableNameTo}`;
+
   const res = (await createSql(
-    snakeCase(data.jointTableName) || snakeCase(data.edge) || `${tableNameFrom}_${tableNameTo}`,
-    sqlFields + ', ' + sqlFields2 + ', edge_label STRING',
-    insertFields.map((field) => {
-      if (data?.edge) {
-        return { ...field, ['edge_label']: data?.edge };
-      } else {
-        return field;
-      }
-    }),
+    jointTableName,
+    `${sqlFields}, ${sqlFields2}, edge_label STRING`,
+    rowsToInsert,
   )) as TableDataEdgeCreateRes;
 
   const retVal = res.map((el) => {
-    const obj = { from: {}, to: {} };
+    const obj: TableDataEdgeCreateRef = { from: {}, to: {} };
     for (const prop in el) {
       if (prop.startsWith('table_from')) {
-        obj['from'][prop] = el[prop];
+        obj.from[prop] = el[prop];
       }
       if (prop.startsWith('table_to')) {
-        obj['to'][prop] = el[prop];
+        obj.to[prop] = el[prop];
       }
-      // if (prop === 'id') {
-      //   obj['id'] = el[prop];
-      // }
     }
-
-    return obj as TableDataEdgeCreateRef;
+    return obj;
   });
 
   return retVal;
 };
+
 
 export const createConnection = (
   table1: {
@@ -432,98 +423,136 @@ export const deleteTableDataEdge = async (data: TableDataEdgeDeleteReq) => {
   // });
 };
 
-export const readEdge = async (
-  data: {
-    tableToName: string;
-    tableFromName: string;
-    direction: EdgeDirectionEnum;
-    edgeTable: string;
-    filters: ReadPaginationFilter;
-    rowId: string;
-  },
-) => {
-  const whereClause = filterToQuery(
-    {
-      filters: data.filters.filters,
-    },
+export const readEdge = async (data: {
+  tableToName: string;
+  tableFromName: string;
+  direction: EdgeDirectionEnum;
+  edgeTable: string;
+  filters: ReadPaginationFilter;
+  rowId: string;
+}) => {
+  const { queryStr: whereClause, params: filterParams } = filterToQuery(
+    { filters: data.filters.filters },
     '',
   );
-  const fromTo = ` ${data.filters.to ? 'LIMIT ' + (data.filters.to - data.filters.from) : ''
-    } ${data.filters.from ? ' OFFSET ' + (data.filters.from - 1) : ''}`;
-  const filtersOn = Object.keys(data.filters).length > 0;
 
-  const queryStr = `SELECT * FROM ${data.edgeTable} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
-    } ${data.direction === 'from'
-      ? `table_to__id = '${data.rowId}'`
-      : `table_from__id = '${data.rowId}'`
-    }` + fromTo
+  const conditions: string[] = [];
 
-  const sql = (await runQuery(queryStr)) as Record<string, any>[];
+  if (whereClause) {
+    conditions.push(whereClause.replace(/^WHERE\s+/i, ''));
+  }
 
-  return sql;
+  const directionCondition =
+    data.direction === 'from' ? 'table_to__id = ?' : 'table_from__id = ?';
+  conditions.push(directionCondition);
+
+  const fullWhereClause = `WHERE ${conditions.join(' AND ')}`;
+
+  const paginationClause: string[] = [];
+  const values: (string | number)[] = [...filterParams, data.rowId];
+
+  if (data.filters.to != null && data.filters.from != null) {
+    paginationClause.push('LIMIT ?');
+    paginationClause.push('OFFSET ?');
+    values.push(data.filters.to - data.filters.from);
+    values.push(data.filters.from - 1);
+  }
+
+  const queryStr = `
+    SELECT * FROM ${data.edgeTable}
+    ${fullWhereClause}
+    ${paginationClause.join(' ')}
+  `.trim();
+
+  return await runQuery(queryStr, values);
 };
+
+
 
 export const readTableDataEdge = async (
   data: TableDataEdgeReadReq,
 ): Promise<TableDataEdgeReadRes> => {
   const { direction, edgeLabel, tableName: edgeTableName } = data.edge;
+  const table = data.jointTableName || edgeTableName;
 
-  const whereClause = filterToQuery({
-    filters: data.filters,
-  }, "");
-
-  const fromTo = ` ${data.to ? 'LIMIT ' + (data.to - data.from) : ''} ${data.from ? ' OFFSET ' + (data.from - 1) : ''
-    }`;
-
-  const filtersOn = Object.keys(data?.filters || {}).length > 0;
-
-  console.log({data: JSON.stringify(data), sql: await runQuery('SHOW TABLES')})
-  const sql = (await runQuery(
-    `SELECT * FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
-    } ${direction === 'from'
-      ? `table_to__id = '${data.rowId}'`
-      : `table_from__id = '${data.rowId}'`
-    }` +
-    `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}` +
-    fromTo,
-  )) as Record<string, any>;
-
-  const sqlCount = await runQuery(
-    `SELECT COUNT(*) FROM ${data?.jointTableName || edgeTableName} ${filtersOn ? whereClause + ' AND ' : 'WHERE'
-    } ${direction === 'from'
-      ? `table_to__id = '${data.rowId}'`
-      : `table_from__id = '${data.rowId}'`
-    }` + `${edgeLabel ? ` AND edge_label = '${edgeLabel}' ` : ''}`,
+  const filters = data.filters || {};
+  const { queryStr: filterClause, params: filterParams } = filterToQuery(
+    { filters },
+    '', 
   );
 
-  const edges = sql.map((edge) => {
-    return {
-      ['to']: {
-        create: edge?.['table_to__create'] === 'true' ? true : false,
-        read: edge?.['table_to__read'] === 'true' ? true : false,
-        update: edge?.['table_to__update'] === 'true' ? true : false,
-        delete: edge?.['table_to__delete'] === 'true' ? true : false,
-        id: edge?.['table_to__id'],
-        name: edge?.['table_to__name'] || edge?.['table_to__username'],
-        ['tableName']: data.tableName,
-      },
-      ['from']: {
-        create: edge?.['table_from__create'] === 'true' ? true : false,
-        read: edge?.['table_from__read'] === 'true' ? true : false,
-        update: edge?.['table_from__update'] === 'true' ? true : false,
-        delete: edge?.['table_from__delete'] === 'true' ? true : false,
-        name: edge?.['table_from__name'],
-        id: edge?.['table_from__id'],
-      },
-    };
-  });
+  const conditions: string[] = [];
+  const params: (string | number)[] = [...filterParams];
+
+  if (filterClause) {
+    conditions.push(filterClause.replace(/^WHERE\s+/i, ''));
+  }
+
+  const directionCondition =
+    direction === 'from' ? 'table_from__id = ?' : 'table_to__id = ?';
+  conditions.push(directionCondition);
+  params.push(data.rowId);
+
+  if (edgeLabel) {
+    conditions.push('edge_label = ?');
+    params.push(edgeLabel);
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  const limitOffsetClause: string[] = [];
+  if (data.to != null && data.from != null) {
+    limitOffsetClause.push('LIMIT ?');
+    limitOffsetClause.push('OFFSET ?');
+    params.push(data.to - data.from);
+    params.push(data.from - 1);
+  }
+
+  const queryStr = `
+    SELECT * FROM ${table}
+    ${whereClause}
+    ${limitOffsetClause.join(' ')}
+  `.trim();
+
+  const rows = await runQuery(queryStr, params);
+
+  const countQuery = `
+    SELECT COUNT(*) FROM ${table}
+    ${whereClause}
+  `.trim();
+  const countParams = params.slice(0, filterParams.length + 1 + (edgeLabel ? 1 : 0)); 
+
+  const countRows = await runQuery(countQuery, countParams);
+
+  const edges = rows.map((edge) => ({
+    to: {
+      create: edge?.['table_to__create'] === 'true',
+      read: edge?.['table_to__read'] === 'true',
+      update: edge?.['table_to__update'] === 'true',
+      delete: edge?.['table_to__delete'] === 'true',
+      id: edge?.['table_to__id'],
+      name: edge?.['table_to__name'] || edge?.['table_to__username'],
+      tableName: data.tableName,
+    },
+    from: {
+      create: edge?.['table_from__create'] === 'true',
+      read: edge?.['table_from__read'] === 'true',
+      update: edge?.['table_from__update'] === 'true',
+      delete: edge?.['table_from__delete'] === 'true',
+      name: edge?.['table_from__name'],
+      id: edge?.['table_from__id'],
+    }
+  }));
+
   return {
     edges,
-    count: +sqlCount[0]['count(1)'],
-    rowId: sql[0]?.['table_to__id'],
+    count: +countRows[0]['count'],
+    rowId: rows[0]?.['table_to__id'],
     tableName: edgeTableName,
   };
 };
+
+
 
 const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
   // const tableContainer = await fetchContainer(TABLES);
@@ -553,96 +582,97 @@ const updateRelatedDocumentEdges = async (relatedData: TableEdgeCreateReq) => {
 export const createTableEdge = async (
   data: TableEdgeCreateReq,
 ): Promise<TableEdgeCreateRes> => {
-  const values = [];
-
+  const values: Record<string, any>[] = [];
 
   for (const prop in data.edges) {
-    const obj = {};
+    const edges = data.edges[prop];
+
+    const fromEdges = edges.filter(edge => edge?.from?.id);
+    const toEdges = edges.filter(edge => edge?.to?.id);
+
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    fromEdges.forEach(edge => {
+      conditions.push(`table_from__id = ?`);
+      params.push(edge.from.id);
+    });
+
+    toEdges.forEach(edge => {
+      conditions.push(`table_to__id = ?`);
+      params.push(edge.to.id);
+    });
+
+    const edgesStr = conditions.length > 0 ? conditions.join(' OR ') : '';
+    const query = `SELECT * FROM tables_edges ${edgesStr ? `WHERE ${edgesStr}` : ''}`;
 
     try {
-      const edges = data.edges[prop] 
+      const existingEdges = await runQuery(query, params);
 
-      const edgesFrom = edges.filter(edge=> edge?.from?.id).map(edge=> `table_from__id = '${edge.from.id}'`).join(" OR ")
-
-      const edgesTo = edges.filter(edge=> edge?.to?.id).map(edge=> `table_to__id = '${edge.to.id}'`).join(" OR ")
-
-      const edgesStr = edgesFrom && edgesFrom ? `${edgesFrom} OR ${edgesTo}` : edgesFrom ? edgesFrom : edgesTo ? edgesTo : '' 
-
-      const edgesRes = await runQuery(`SELECT * FROM tables_edges WHERE ${edgesStr}`)
-
-      console.log({edges: JSON.stringify(edgesRes), dataEdges: JSON.stringify(data.edges), edgesStr, tables_edges: await runQuery('SELECT * FROM tables_edges')})
-
-      const duplicates = data.edges[prop].filter((edge) =>
-        edgesRes.some((existingEdge) => {
-          if (!!edge?.from) {
+      const duplicates = edges.filter(edge =>
+        existingEdges.some(existing => {
+          if (edge?.from) {
             return (
-              existingEdge?.['table_from__id'] === edge?.from?.id &&
-              existingEdge?.['table_from__name'] === edge?.from?.tableName
+              existing['table_from__id'] === edge.from.id &&
+              existing['table_from__name'] === edge.from.tableName
             );
-          } else if (!!edge?.to) {
+          } else if (edge?.to) {
             return (
-              existingEdge['table_to__id'] === edge?.to?.id &&
-              existingEdge['table_to__name'] === edge?.to?.tableName
+              existing['table_to__id'] === edge.to.id &&
+              existing['table_to__name'] === edge.to.tableName
             );
           }
-        }),
+          return false;
+        })
       );
 
       if (duplicates.length > 0) {
-        throw {code: 409, message:`Duplicate edge(s) detected for property '${prop}': ${JSON.stringify(
-            duplicates,
-          )}` }
+        throw {
+          code: 409,
+          message: `Duplicate edge(s) detected for property '${prop}': ${JSON.stringify(duplicates)}`,
+        };
       }
     } catch (error) {
-    
-    if(error?.code === 409)
-        throw new ConflictEntityError(error?.message);
-        console.log(await runQuery(`SHOW TABLES`))
-        console.error({error})
+      if (error?.code === 409) throw new ConflictEntityError(error.message);
+      console.error({ error });
     }
 
-    for (const edge of data.edges[prop]) {
-      obj['edge_label'] = prop;
-      if(edge?.from?.id) {
-        const sql2 = await runQuery(`SELECT 1 FROM tables WHERE id = '${edge.from.id}' LIMIT 1;`)
-        if(sql2.length === 0) {
-          throw new NotFoundError(`No table found at id: ${edge?.from?.id}`)
-        }
-      }
-      if(edge?.to?.id) {
-        const sql1 = await runQuery(`SELECT 1 FROM tables WHERE id = '${edge.to.id}' LIMIT 1;`)
-        if(sql1.length === 0) {
-          throw new NotFoundError(`No table found at id: ${edge?.to?.id}`)
-        }
-      }
-      
+    for (const edge of edges) {
+      const obj: Record<string, any> = { edge_label: prop };
 
-      if (edge?.from?.id && edge?.from?.tableName) {
-        obj['table_from__id'] = edge?.from.id;
-        obj['table_from__name'] = edge?.from.tableName;
-      } else {
-        obj['table_from__id'] = data.id;
-        obj['table_from__name'] = data.name;
+      const fromId = edge?.from?.id ?? data.id;
+      const fromName = edge?.from?.tableName ?? data.name;
+      const toId = edge?.to?.id ?? data.id;
+      const toName = edge?.to?.tableName ?? data.name;
+
+      // Validate existence of table_from__id
+      const checkFrom = await runQuery(`SELECT 1 FROM tables WHERE id = ? LIMIT 1`, [fromId]);
+      if (checkFrom.length === 0) {
+        throw new NotFoundError(`No table found at id: ${fromId}`);
       }
-      if (edge?.to?.id && edge?.to?.tableName) {
-        obj['table_to__id'] = edge?.to.id;
-        obj['table_to__name'] = edge?.to.tableName;
-      } else {
-        obj['table_to__id'] = data.id;
-        obj['table_to__name'] = data.name;
+
+      // Validate existence of table_to__id
+      const checkTo = await runQuery(`SELECT 1 FROM tables WHERE id = ? LIMIT 1`, [toId]);
+      if (checkTo.length === 0) {
+        throw new NotFoundError(`No table found at id: ${toId}`);
       }
+
+      obj['table_from__id'] = fromId;
+      obj['table_from__name'] = fromName;
+      obj['table_to__id'] = toId;
+      obj['table_to__name'] = toName;
+
+      values.push(obj);
     }
-    values.push(obj);
   }
 
-  console.log({values})
+  console.log({ values });
 
   const sql = await createSql(
     'tables_edges',
     'table_from__name STRING, table_from__id STRING, table_to__name STRING, table_to__id STRING, edge_label STRING',
-    values,
+    values
   );
-
 
   return data;
 };
@@ -686,29 +716,41 @@ export const createTableEdge = async (
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
 ): Promise<TableEdgeReadRes> => {
-  const sql = await runQuery(`SELECT te.*, t.name FROM tables_edges te INNER JOIN tables t ON t.id = '${data.tableId}' WHERE table_from__id = '${data.tableId}'`)
+  // Proper join between edges and tables on table id (assuming edges refer to table_from__id or table_to__id)
+  // Here assuming you want to get edges where the table_from__id = data.tableId
+  // and join with the 'to' table info
 
-  if(sql.length === 0) {
-    throw new NotFoundError(`Could not find any Edge attached to table at id ${data.tableId}`)
+  const sql = await runQuery(
+    `
+      SELECT te.*, t.name 
+      FROM tables_edges te 
+      INNER JOIN tables t ON te.table_to__id = t.id
+      WHERE te.table_from__id = ?
+    `,
+    [data.tableId]
+  );
+
+  if (sql.length === 0) {
+    throw new NotFoundError(`Could not find any Edge attached to table at id ${data.tableId}`);
   }
-  const results:Record<string, Edge[]> = sql.reduce((acc:any, cur)=> {
-    if(acc?.[cur['edge_label']]) {
-      console.log('HAS ENTRY', acc?.[cur['table_to__name']])
-      acc[cur['edge_label']] = [...acc[cur['edge_label']], {to: {id: cur['table_to__id'], tableName: cur['table_to__name']}}]
+
+  const results: Record<string, Edge[]> = sql.reduce((acc: any, cur) => {
+    if (acc?.[cur['edge_label']]) {
+      acc[cur['edge_label']] = [
+        ...acc[cur['edge_label']], 
+        { to: { id: cur['table_to__id'], tableName: cur['table_to__name'] || cur['name'] } }
+      ];
     } else {
-      console.log('NO ENTRY', acc?.[cur['table_to__name']])
-      acc[cur['edge_label']] = [ {to: {id: cur['table_to__id'], tableName: cur['table_to__name']}}]
+      acc[cur['edge_label']] = [
+        { to: { id: cur['table_to__id'], tableName: cur['table_to__name'] || cur['name'] } }
+      ];
     }
+    return acc;
+  }, {});
 
-    return acc
-  },{})
-
-  console.log({results: JSON.stringify(results)})
-  return {edges: results, id: data.tableId, name: sql[0]['name'] }
-
-  // return {edges: {foo: [{from: {id: '', tableName: ''}}]}}
-
+  return { edges: results, id: data.tableId, name: sql[0]['name'] };
 };
+
 
 const deleteRelatedDocumentEdges = async (relatedData: TableEdgeDeleteReq) => {
   return

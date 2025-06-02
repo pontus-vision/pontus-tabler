@@ -40,60 +40,66 @@ const findNestedObject = (path: string, obj: any) => {
 }
 
 const createTree = async (item: MenuItemTreeRef, path: string) => {
-
-  const res = await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`,
+  // CREATE TABLE does not take parameters
+  await runQuery(
+    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`
   );
 
-  let res2 = await runQuery(`SELECT * FROM ${MENU}`)
+  let res2 = await runQuery(`SELECT * FROM ${MENU}`);
 
   if (res2.length === 0) {
-    const obj: MenuItemTreeRef = {
+    const rootObj: MenuItemTreeRef = {
       children: [],
       id: generateUUIDv6(),
       kind: 'folder',
       name: 'root',
       path: '/'
-    }
-    const resInsert = await runQuery(`INSERT INTO ${MENU} (id, tree_obj_str) VALUES ('${generateUUIDv6()}','${JSON.stringify(obj)}')`)
-
-    res2 = await runQuery(`SELECT * FROM ${MENU}`)
+    };
+    await runQuery(
+      `INSERT INTO ${MENU} (id, tree_obj_str) VALUES (?, ?)`,
+      [generateUUIDv6(), JSON.stringify(rootObj)]
+    );
+    res2 = await runQuery(`SELECT * FROM ${MENU}`);
   }
 
-  const treeObjStr = res2[0]['tree_obj_str'] as string
+  const treeObjStr = res2[0]['tree_obj_str'] as string;
+  const treeObjId = res2[0]['id'];
+  const treeObj = JSON.parse(treeObjStr);
 
-  const treeObjId = res2[0]['id']
+  const obj = item.kind === 'folder' ? { ...item, children: [] } : item;
 
-  const treeObj = JSON.parse(treeObjStr)
+  console.log({ objOnCreate: obj });
 
-  let obj
-
-  if (item.kind === 'folder') {
-    obj = { ...item, children: [] }
-  } else {
-    obj = item
-  }
-
-  console.log({ objOnCreate: obj })
-
-  const treeObjModified = updateAndRetrieveTree(path, treeObj, (node) => { node.children.push({ ...obj, id: generateUUIDv6(), path: item.path + item.name }) })
+  const treeObjModified = updateAndRetrieveTree(path, treeObj, (node) => {
+    node.children.push({
+      ...obj,
+      id: generateUUIDv6(),
+      path: item.path + item.name,
+    });
+  });
 
   if (!treeObjModified) {
-    throw new NotFoundError(`No menu item found at path "${path}"`)
+    throw new NotFoundError(`No menu item found at path "${path}"`);
   }
 
-  const treeObjStr2 = JSON.stringify(treeObjModified)
+  const treeObjStr2 = JSON.stringify(treeObjModified);
 
-  const res3 = await runQuery(`UPDATE ${MENU} SET tree_obj_str = '${treeObjStr2}' WHERE id = '${treeObjId}'`)
+  await runQuery(
+    `UPDATE ${MENU} SET tree_obj_str = ? WHERE id = ?`,
+    [treeObjStr2, treeObjId]
+  );
 
-  const res4 = await runQuery(`SELECT * FROM ${MENU}`)
+  const res4 = await runQuery(`SELECT * FROM ${MENU}`);
 
-  console.log({ res4, treeObjModified, obj, item })
+  console.log({ res4, treeObjModified, obj, item });
 
-  const treeObjFinal = JSON.parse(res4[0]['tree_obj_str'])
-  console.log({ item, treeObjFinal: JSON.stringify(treeObjFinal) })
-  return findNestedObject(item.path + item.name, treeObjFinal)
-}
+  const treeObjFinal = JSON.parse(res4[0]['tree_obj_str']);
+
+  console.log({ item, treeObjFinal: JSON.stringify(treeObjFinal) });
+
+  return findNestedObject(item.path + item.name, treeObjFinal);
+};
+
 
 export const createMenuItem = async (
   data: MenuCreateReq,
@@ -104,103 +110,115 @@ export const createMenuItem = async (
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
 ): Promise<MenuCreateRes> => {
-  const treeObjStr = JSON.stringify(data)
-
-  const res = await runQuery(`SELECT * FROM ${MENU}`)
-
-  const treeObj = JSON.parse(res[0]['tree_obj_str'])
-
-  const treeUpdated = updateAndRetrieveTree(data.path, treeObj, (node) => { node.name = data.name })
-
-  if (!treeUpdated) {
-    throw new NotFoundError(`No menu item found at path "${data.path}"`)
+  const res = await runQuery(`SELECT * FROM ${MENU}`);
+  if (res.length === 0) {
+    throw new NotFoundError("No menu data found");
   }
 
-  const treeObjStr2 = JSON.stringify(treeUpdated)
+  const treeObj = JSON.parse(res[0]['tree_obj_str']);
 
-  const treeObjId = res[0]['id']
+  const treeUpdated = updateAndRetrieveTree(data.path, treeObj, (node) => {
+    node.name = data.name;
+  });
 
+  if (!treeUpdated) {
+    throw new NotFoundError(`No menu item found at path "${data.path}"`);
+  }
 
-  const res3 = await runQuery(`UPDATE ${MENU} SET tree_obj_str = '${treeObjStr2}' WHERE id = '${treeObjId}'`)
+  const treeObjStr2 = JSON.stringify(treeUpdated);
+  const treeObjId = res[0]['id'];
 
-  const res2 = await runQuery(`SELECT * FROM ${MENU}`)
+  await runQuery(
+    `UPDATE ${MENU} SET tree_obj_str = ? WHERE id = ?`,
+    [treeObjStr2, treeObjId]
+  );
 
+  const res2 = await runQuery(`SELECT * FROM ${MENU}`);
+  const treeObj2 = JSON.parse(res2[0]['tree_obj_str']);
+  const retObj = findNestedObject(data.path, treeObj2);
 
-  const treeObj2 = JSON.parse(res2[0]['tree_obj_str'])
+  console.log({ retObj });
 
-  const retObj = findNestedObject(data.path, treeObj2)
-
-  console.log({ retObj })
-
-  return retObj
+  return retObj;
 };
+
 
 export const readMenuTree = async (
   path: string,
 ): Promise<MenuReadRes> => {
-
-  const res = await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`,
+  // Step 1: Ensure table exists (no params needed)
+  await runQuery(
+    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`
   );
 
-  let res2 = await runQuery(`SELECT * FROM ${MENU}`)
+  // Step 2: Query current contents
+  let res2 = await runQuery(`SELECT * FROM ${MENU}`);
 
+  // Step 3: If empty, insert default root menu
   if (res2.length === 0) {
+    const rootId = generateUUIDv6();
     const obj: MenuItemTreeRef = {
       children: [],
-      id: generateUUIDv6(),
+      id: rootId,
       kind: 'folder',
       name: 'root',
       path: '/'
-    }
-    const resInsert = await runQuery(`INSERT INTO ${MENU} (id, tree_obj_str) VALUES ('${generateUUIDv6()}','${JSON.stringify(obj)}')`)
+    };
 
-    res2 = await runQuery(`SELECT * FROM ${MENU}`)
+    await runQuery(
+      `INSERT INTO ${MENU} (id, tree_obj_str) VALUES (?, ?)`,
+      [generateUUIDv6(), JSON.stringify(obj)]
+    );
+
+    res2 = await runQuery(`SELECT * FROM ${MENU}`);
   }
 
-  const treeObj = JSON.parse(res2[0]['tree_obj_str'])
-
-  const tree = findNestedObject(path, treeObj)
+  // Step 4: Parse and find path
+  const treeObj = JSON.parse(res2[0]['tree_obj_str']);
+  const tree = findNestedObject(path, treeObj);
 
   if (!tree) {
-    throw new NotFoundError(`No menu item found at path "${path}"`)
+    throw new NotFoundError(`No menu item found at path "${path}"`);
   }
 
-  return tree
+  return tree;
 };
+
 
 export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
-  const res = await runQuery(`SELECT * FROM ${MENU}`)
+  const res = await runQuery(`SELECT * FROM ${MENU}`);
 
-  const treeObj = JSON.parse(res[0]['tree_obj_str'])
+  const treeObj = JSON.parse(res[0]['tree_obj_str']);
 
-  let parentPath
+  let parentPath;
   const parentSplit = data.path.split(/(\/)/);
   if (parentSplit.length < 2) {
-    const parentSplice = parentSplit.splice(0, -2)
-    parentPath = parentSplice.join()
+    const parentSplice = parentSplit.splice(0, -2);
+    parentPath = parentSplice.join();
   } else {
-    parentPath = "/"
+    parentPath = "/";
   }
 
-  console.log({ path: data.path, parentPath })
-
+  console.log({ path: data.path, parentPath });
 
   const updatedTree = updateAndRetrieveTree(parentPath, treeObj, (node) => {
-    node.children = node.children.filter(el => el.path !== data.path)
-  })
+    node.children = node.children.filter(el => el.path !== data.path);
+  });
+
   if (!updatedTree) {
-    throw new NotFoundError(`No menu item found at path "${data.path}"`)
+    throw new NotFoundError(`No menu item found at path "${data.path}"`);
   }
 
-  console.log({ updatedTree })
+  console.log({ updatedTree });
 
+  const treeObjId = res[0]['id'];
+  const updatedTreeStr = JSON.stringify(updatedTree);
 
-  const treeObjId = res[0]['id']
+  await runQuery(
+    `UPDATE ${MENU} SET tree_obj_str = ? WHERE id = ?`,
+    [updatedTreeStr, treeObjId]
+  );
 
-  const updatedTreeStr = JSON.stringify(updatedTree)
-
-  const res3 = await runQuery(`UPDATE ${MENU} SET tree_obj_str = '${updatedTreeStr}' WHERE id = '${treeObjId}'`)
-
-  return 'deleted'
+  return 'deleted';
 };
+

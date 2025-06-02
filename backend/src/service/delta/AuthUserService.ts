@@ -56,36 +56,43 @@ import {
 import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, GROUPS_USERS } from '../../consts';
 
 const createAuthGroup = async (data: AuthGroupCreateReq) => {
-  let id;
-  if (!data.id) {
-    id = generateUUIDv6();
-  } else {
-    id = data.id;
-  }
+  const id = data.id || generateUUIDv6();
 
-  const res = await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN, create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
+  // Step 1: Ensure table exists (DDL — no params)
+  await runQuery(
+    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (
+      id STRING,
+      name STRING,
+      create_table BOOLEAN,
+      read_table BOOLEAN,
+      update_table BOOLEAN,
+      delete_table BOOLEAN,
+      create_dashboard BOOLEAN,
+      read_dashboard BOOLEAN,
+      update_dashboard BOOLEAN,
+      delete_dashboard BOOLEAN
+    ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`
   );
-  
-  const res4 = await runQuery(
-    `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
 
-  );
+  // Step 2: Check for existing name
+  const checkQuery = `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = ?`;
+  const res4 = await runQuery(checkQuery, [data.name]);
 
   if (+res4[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
   }
 
-  const res2 = await runQuery(
-    `INSERT INTO ${AUTH_GROUPS} (id, name, create_table , read_table , update_table , delete_table ) VALUES ("${id}", "${data.name}", false, false, false, false)`,
+  // Step 3: Insert
+  const insertQuery = `
+    INSERT INTO ${AUTH_GROUPS} (
+      id, name, create_table, read_table, update_table, delete_table
+    ) VALUES (?, ?, false, false, false, false)
+  `;
+  await runQuery(insertQuery, [id, data.name]);
 
-  );
-
-  const res3 = await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
-    }`,
-
-  );
+  // Step 4: Fetch inserted row
+  const selectQuery = `SELECT * FROM ${AUTH_GROUPS} WHERE id = ?`;
+  const res3 = await runQuery(selectQuery, [id]);
 
   return {
     name: res3[0]['name'],
@@ -98,6 +105,7 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
     },
   };
 };
+
 
 const createAuthUserGroup = async (
   data: AuthGroupUsersCreateReq,
@@ -250,8 +258,10 @@ export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
   const res = (await runQuery(
-    `SELECT * FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    `SELECT * FROM ${AUTH_USERS} WHERE id = ?`,
+    [data.id]
   )) as { username: string; id: string }[];
+
   if (res.length === 0) {
     throw new NotFoundError(`User not found at id: ${data.id}`);
   }
@@ -264,13 +274,15 @@ export const authUserRead = async (
   };
 };
 
+
 export const authUserUpdate = async (
   data: AuthUserUpdateReq,
 ): Promise<AuthUserUpdateRes> => {
   const sql = await updateSql(
     AUTH_USERS,
     { username: data.username },
-    `WHERE id = '${data.id}'`,
+    `WHERE id = ?`,
+    [data.id]
   );
   if (sql.length === 0) {
     throw new NotFoundError(`No user found at id: ${data.id}`);
@@ -286,36 +298,52 @@ export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
   const sql = await runQuery(
-    `DELETE FROM ${AUTH_USERS} WHERE id = '${data.id}'`,
+    `DELETE FROM ${AUTH_USERS} WHERE id = ?`,
+    [data.id]
   );
-  const affectedRows = +sql[0]['num_affected_rows'];
-  if (affectedRows === 0) {
+
+  if (sql.length === 0) {
     throw new NotFoundError(`No user found at id: ${data.id}`);
   }
 
   try {
-    const sql = await runQuery(
-      `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id}'`,
+    await runQuery(
+      `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = ?`,
+      [data.id]
     );
-  } catch (error) { }
+  } catch (error) {
+
+  }
+
   return `User at id "${data.id}" deleted!`;
 };
+
 
 export const authUsersRead = async (
   data: AuthUsersReadReq,
 ): Promise<AuthUsersReadRes> => {
-  const dataSnake = data.filters //filtersToSnakeCase(data)
+  const dataSnake = data.filters; // optionally apply filtersToSnakeCase here
 
-  const whereClause = filterToQuery({ filters: dataSnake, to: data.to, from: data.from }, "");
+  // Main query with pagination
+  const { queryStr: whereClause, params } = filterToQuery(
+    { filters: dataSnake, to: data.to, from: data.from },
+    ''
+  );
 
   const sql = await runQuery(
     `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
+    params
   );
 
-  const whereClause2 = filterToQuery({ filters: dataSnake }, "");
+  // Count query without pagination
+  const { queryStr: whereClause2, params: countParams } = filterToQuery(
+    { filters: dataSnake },
+    ''
+  );
 
   const sqlCount = await runQuery(
     `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
+    countParams
   );
 
   if (+sqlCount[0]['count(1)'] === 0) {
@@ -323,12 +351,14 @@ export const authUsersRead = async (
   }
 
   return {
-    authUsers: sql.map((el) => {
-      return { id: el['id'], username: el['username'] };
-    }),
+    authUsers: sql.map((el) => ({
+      id: el['id'],
+      username: el['username'],
+    })),
     count: +sqlCount[0]['count(1)'],
   };
 };
+
 
 export const authUserGroupsCreate = async (
   data: AuthUserGroupsCreateReq,
@@ -397,17 +427,28 @@ export const authUserGroupsRead = async (
 export const authUserGroupsDelete = async (
   data: AuthUserGroupsDeleteReq,
 ): Promise<AuthUserGroupsDeleteRes> => {
-  const sqlStr = `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = '${data.id
-    }' AND ${data.authGroups
-      .map((group) => `table_from__id = '${group.id}'`)
-      .join(' OR ')}`;
+  if (!data.authGroups.length) throw new Error('No groups provided');
 
-  const sql = await runQuery(sqlStr);
-  const affectedRows = +sql[0]['num_affected_rows'];
+  const conditions = data.authGroups.map(() => `table_from__id = ?`).join(' OR ');
+  const sqlStr = `
+    DELETE FROM ${GROUPS_USERS}
+    WHERE table_to__id = ?
+    AND (${conditions})
+    RETURNING 1 AS num_affected_rows
+  `;
+
+  const params = [
+    data.id,
+    ...data.authGroups.map((group) => group.id),
+  ];
+
+  const sql = await runQuery(sqlStr, params);
+  const affectedRows = sql.length;
 
   if (affectedRows === 0) {
     throw new NotFoundError('no rows deleted.');
   }
+
   return '';
 };
 
@@ -415,26 +456,29 @@ interface IAuthUser extends AuthUserAndGroupsRef {
   password: string;
 }
 
-export const checkAdmin = async (userId) => {
+export const checkAdmin = async (userId: string | number) => {
   const res = await runQuery(
-    `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = '${userId}'`,
+    `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = ?`,
+    [userId]
   );
 
-  if (res.length === 0) {
+  if (res.length === 0 || parseInt(res[0]['count']) === 0) {
     throw new UnauthorizedError('User does not belong to the admin group.');
   } else {
     return true;
   }
 };
 
-export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
-  const query = `SELECT * from auth_users WHERE username = "${data.username}"`;
 
-  const res = await runQuery(query);
+export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
+  const query = `SELECT * FROM auth_users WHERE username = ?`;
+
+  const res = await runQuery(query, [data.username]);
 
   if (res.length === 0) {
     throw new NotFoundError(`${data.username} not found.`);
   }
+
   const user = res[0] as IAuthUser;
   const password = user.password;
   const username = user.username;
@@ -452,6 +496,7 @@ export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
     process.env.REFRESH_JWT_SECRET_KEY,
   );
 
+  // Insert refresh token
   const res212 = await createSql(
     'refresh_token',
     'user_id STRING, refresh_token STRING',
@@ -461,13 +506,14 @@ export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
   return { accessToken, refreshToken: res212[0]['refresh_token'] };
 };
 
+
 export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
   const claims = getJwtClaims(data.token);
-  const username = claims.username;
   const userId = claims.userId;
 
   const sql = await runQuery(
-    `DELETE FROM refresh_token WHERE user_id = '${userId}'`,
+    `DELETE FROM refresh_token WHERE user_id = ?`,
+    [userId]
   );
 
   const affectedRows = +sql[0]['num_affected_rows'];
@@ -479,6 +525,7 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
 
   return 'Token deleted.';
 };
+
 
 
 

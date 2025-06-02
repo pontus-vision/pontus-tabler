@@ -15,7 +15,8 @@ import { TABLES } from '../../consts';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
   const res = (await runQuery(
-    `SELECT * FROM ${TABLES} WHERE name = '${tableName}'`,
+    `SELECT * FROM ${TABLES} WHERE name = ?`,
+    [tableName]
   )) as any;
 
   const resTable = res.map((el) => {
@@ -93,17 +94,25 @@ export const createTableData = async (
 export const updateTableData = async (data: TableDataUpdateReq) => {
   const tableName = snakeCase(data.tableName);
 
-  const cols = {};
-
+  // Convert cols keys to snake_case
+  const cols: Record<string, any> = {};
   for (const prop in data.cols) {
     cols[snakeCase(prop)] = data.cols[prop];
   }
+
+  // Check columns exist in table
   await checkTableCols(tableName, cols);
 
-  const sql = await updateSql(tableName, cols, `WHERE id = '${data.rowId}'`);
+  // Parameterized WHERE clause, with ? placeholder and parameter array
+  const whereClause = `WHERE id = ?`;
+  const whereParams = [data.rowId];
+
+  // Call updateSql with all arguments
+  const sql = await updateSql(tableName, cols, whereClause, whereParams);
 
   return { ...sql[0] };
 };
+
 
 // export const readTableById = async (data: TableDataReadReq) => {
 //   const querySpec = {
@@ -128,63 +137,62 @@ export const updateTableData = async (data: TableDataUpdateReq) => {
 // };
 
 export const deleteTableData = async (data: TableDataDeleteReq) => {
-
-  // const sql = await runQuery(`SELECT 1 FROM ${data.tableName} WHERE id = '${data.rowId}' LIMIT 1`)
-
-  // if(sql.length === 0) {
-  //   throw new NotFoundError(`Did not find any row at id "${data.rowId}"`);
-  // }
+  const tableName = snakeCase(data.tableName);
 
   const sql2 = await runQuery(
-    `DELETE FROM ${snakeCase(data.tableName)} WHERE id = '${data.rowId}'`,
-
+    `DELETE FROM ${tableName} WHERE id = ?`,
+    [data.rowId]
   );
 
   if (+sql2?.[0]?.['num_affected_rows'] === 0) {
-    // throw new NotFoundError();
-
     throw new NotFoundError(`Did not find any row at id "${data.rowId}"`);
-
   }
 
   if (!sql2) {
-
     throw new NotFoundError(`Did not find table "${data.tableName}"`);
   }
+
   return 'Row deleted!';
 };
+
 
 export const readTableData = async (
   body: TableDataReadReq,
 ): Promise<TableDataReadRes> => {
   const tableName = snakeCase(body.tableName);
-  const filtersSnakeCase = {};
 
+  // Convert filter keys to snake_case
+  const filtersSnakeCase: Record<string, any> = {};
   for (const prop in body.filters) {
     filtersSnakeCase[snakeCase(prop)] = body.filters[prop];
   }
 
-  const res1 = await checkTableCols(tableName, filtersSnakeCase);
+  // Validate filters
+  await checkTableCols(tableName, filtersSnakeCase);
 
-  const filters = filterToQuery(filtersSnakeCase, "");
-  const filtersCount = filterToQuery({
-    filters: filtersSnakeCase,
-    to: body.to,
-    from: body.from,
-  }, "");
+  // Build WHERE clause and parameters
+  const { queryStr: whereClause, params: whereParams } = filterToQuery(filtersSnakeCase, '');
 
-  const res2 = (await runQuery(
-    `SELECT * FROM ${tableName} ${filters}`,
-  )) as Record<string, any>[];
+  const sqlQuery = `SELECT * FROM ${tableName} ${whereClause}`;
+  const rows = await runQuery(sqlQuery, whereParams);
 
-  if (res2.length === 0) {
-    // throw new NotFoundError(`Could not find any row`);
+  if (rows.length === 0) {
     throw new NotFoundError(`no data found at table ${tableName}`);
   }
 
-  const res = await runQuery(
-    `SELECT COUNT(*) FROM ${tableName} ${filtersCount}`,
-  );
+  // Count query (reuse filters, optionally add to/from if needed)
+  const { queryStr: countClause, params: countParams } = filterToQuery({
+    filters: filtersSnakeCase,
+    to: body.to,
+    from: body.from,
+  }, '');
 
-  return { rowsCount: +res[0]['count(1)'], rows: res2 };
+  const countQuery = `SELECT COUNT(*) FROM ${tableName} ${countClause}`;
+  const countRows = await runQuery(countQuery, countParams);
+
+  return {
+    rowsCount: +countRows[0]['count(1)'],
+    rows,
+  };
 };
+
