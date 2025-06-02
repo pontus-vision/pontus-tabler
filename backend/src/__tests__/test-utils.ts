@@ -235,7 +235,7 @@ export const cleanTables = async(tables: string[]) => {
   for (const table of tables) {
     if (process.env.DB_SOURCE === DELTA_DB) {
       const check:ExecuteQueryReq = {
-        query: `SHOW TABLES LIKE '${table}'`
+        query: `SHOW TABLES LIKE '${table}'`,
       }
 
 
@@ -387,20 +387,12 @@ const createInitialTables = async() => {
       `
   }
 
-  const checkTableQuery: ExecuteQueryReq = {
-    query: `SHOW TABLES LIKE 'webhook_subscriptions'`
-  }
-
-  // const checkTable = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', checkTableQuery) as AxiosResponse<ExecuteQueryRes>
-
-  // if(checkTable.data.results.length === 0) {
     try {
       const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createTable) as AxiosResponse<ExecuteQueryRes>
       console.log({res: JSON.stringify(res.status)})
     } catch (error) {
       console.error('Error creating initial tables', {query: createTable.query, error}) 
     }
-  // }
 
   const createGroupsDashboards: ExecuteQueryReq = {
     query: 'CREATE TABLE IF NOT EXISTS groups_dashboards (id STRING,  table_from__id STRING, table_from__name STRING, table_from__create STRING, table_from__delete STRING, table_from__read STRING, table_from__update STRING, table_to__id STRING, table_to__name STRING, table_to__create STRING, table_to__read STRING, table_to__update STRING, table_to__delete STRING, edge_label STRING) USING DELTA LOCATION "/data/pv/groups_dashboards"'
@@ -411,9 +403,6 @@ const createInitialTables = async() => {
     query: `SHOW TABLES LIKE 'groups_dashboards'`
   }
 
-  // const checkTable2 = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', checkTableQuery2) as AxiosResponse<ExecuteQueryRes>
-
-  // if(checkTable2.data.results.length > 0) return
   try {
     const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createGroupsDashboards) as AxiosResponse<ExecuteQueryRes>
     console.log({res: JSON.stringify(res.status)})
