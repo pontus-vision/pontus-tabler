@@ -38,6 +38,7 @@ import {
   UsernameAndIdRef,
   AuthUserGroupsReadReq,
   AuthUserGroupsReadRes,
+  AuthGroupCreateRes,
 } from '../../typescript/api';
 import {
   ConflictEntityError,
@@ -133,7 +134,7 @@ const authUserGroupsRead = async (
 //   };
 
 
-export const createAuthGroup = async (data: AuthGroupCreateReq) => {
+export const createAuthGroup = async (data: AuthGroupCreateReq):Promise<AuthGroupCreateRes> => {
   const id = data.id || generateUUIDv6();
   const tableMetadata = data.tableMetadataCrud;
 
