@@ -88,67 +88,65 @@ export const convertToSqlFields = (data: any[]): string => {
   return fields.join(', ');
 };
 
-export async function runQuery(query: string): Promise<Record<string, any>[]> {
+export async function runQuery(
+  query: string,
+  params: any[] = []
+): Promise<Record<string, any>[]> {
   try {
     const jdbc = new JDBC(config);
-    const reservedConn = await jdbc.reserve()
-    const connection = reservedConn.conn
-    //const connection = await createConnection();
-    const preparedStatement = await connection.prepareStatement(query); // Replace `your_table` with your actual table name
+    const reservedConn = await jdbc.reserve();
+    const connection = reservedConn.conn;
+
+    const preparedStatement = await connection.prepareStatement(query);
+
+    // Safely bind parameters to the query
+    for (let i = 0; i < params.length; i++) {
+      preparedStatement.setObject(i + 1, params[i]); // JDBC uses 1-based index
+    }
 
     const resultSet = await preparedStatement.executeQuery();
-    const results = await resultSet.toObjArray(); // Assuming you have a method to convert ResultSet to an array
+    const results = await resultSet.toObjArray();
 
-    // Remember to release the connection after you are done
-    // await pool.release(connection)
+    await connection.close();
+    await jdbc.release(connection);
 
-    await connection.close()
-    await jdbc.release(connection)
-
-    //console.log({ query, results })
-
-    return results
+    return results;
   } catch (error) {
-    console.error('Error executing query:', { query, error });
-    throw error
+    console.error('Error executing query:', { query, params, error });
+    throw error;
   }
 }
 
 export const updateSql = async (
   table: string,
   data: Record<string, any>,
-  whereClause: string,
+  whereClause: string, // e.g., "WHERE id = ?"
+  whereParams: any[],   // e.g., [5]
 ): Promise<Record<string, any>[]> => {
-  const insertValues = [];
 
-  if (Array.isArray(data)) {
-    for (const el of data) {
-      for (const [key, value] of Object.entries(el)) {
-        const val = typeof value === 'string' ? `'${value}'` : value;
-        insertValues.push(`${key} = ${val}`);
-      }
-    }
-  } else {
-    for (const [key, value] of Object.entries(data)) {
-      const val = typeof value === 'string' ? `'${value}'` : value;
-      insertValues.push(`${key} = ${val}`);
-    }
+
+  const keys = Object.keys(data);
+  if (keys.length === 0) {
+    throw new Error("No data to update");
   }
 
-  const insert = `UPDATE ${table} SET ${insertValues.join(
-    ', ',
-  )} ${whereClause}`;
+  const setClause = keys.map(key => {
+    return `${key} = ?`;
+  }).join(', ');
 
-  const res2 = await runQuery(insert);
-  if (+res2[0]['num_affected_rows'] === 0) {
+  const values = Object.values(data);
+  const query = `UPDATE ${table} SET ${setClause} ${whereClause}`;
+
+  const res2 = await runQuery(query, [...values, ...whereParams]);
+
+  if (+res2[0]?.['num_affected_rows'] === 0) {
     throw new NotFoundError(
       `did not find any record at table '${table}' (${whereClause})`,
     );
   }
 
-  const res3 = await runQuery(
-    `SELECT * FROM ${table} ${whereClause}`,
-  );
+  const selectQuery = `SELECT * FROM ${table} ${whereClause}`;
+  const res3 = await runQuery(selectQuery, whereParams);
 
   if (res3.length === 0) {
     throw new NotFoundError(
@@ -196,70 +194,61 @@ export const generateUUIDv6 = () => {
 
   return uuidV6;
 };
+
 export const createSql = async (
   table: string,
   fields: string,
-  data: Record<string, any>,
+  data: Record<string, any> | Record<string, any>[],
 ): Promise<Record<string, any>[]> => {
-  const uuid = generateUUIDv6();
+  const isArray = Array.isArray(data);
+  const rows = isArray ? data : [data];
+  const needsId = !('id' in rows[0]);
 
-  let entries
-  if (data?.id) {
-    const { id, ...rest } = data
-    entries = objEntriesToStr(rest);
-  } else {
-    entries = objEntriesToStr(data);
-  }
+  // Create table query
+  const createQuery = `
+    CREATE TABLE IF NOT EXISTS ${table} (${needsId ? 'id STRING, ' : ''}${fields})
+    USING DELTA LOCATION '/data/pv/${table}';
+  `;
+  await runQuery(createQuery);
 
-  const keys = entries.keysStr;
-  let values = entries.valuesStr;
+  // Build insert query
+  const insertFields = needsId ? ['id', ...Object.keys(rows[0])] : Object.keys(rows[0]);
+  const placeholders: string[] = [];
+  const values: any[] = [];
+  const ids: string[] = [];
 
-  const createQuery = `CREATE TABLE IF NOT EXISTS ${table} (${data?.id ? '' : 'id STRING, '
-    } ${fields}) USING DELTA LOCATION '/data/pv/${table}';`;
+  rows.forEach((row, rowIndex) => {
+    const valueList: string[] = [];
 
-  const res = await runQuery(createQuery);
-
-
-  const insertFields = Array.isArray(data)
-    ? Object.keys(data[0]).join(', ')
-    : Object.keys(data).join(', ');
-
-  const insertValues = [];
-  if (Array.isArray(data)) {
-    for (const el of data) {
-      const entries = objEntriesToStr(el);
-      insertValues.push(`${entries.valuesStr}`);
+    if (needsId) {
+      const uuid = generateUUIDv6();
+      ids.push(uuid);
+      values.push(uuid);
+      valueList.push(`$${values.length}`); // placeholder for id
+    } else {
+      ids.push(row.id);
     }
-  }
 
-  const ids = [];
+    for (const key of Object.keys(row)) {
+      values.push(row[key]);
+      valueList.push(`$${values.length}`);
+    }
 
-  const insert = `INSERT INTO ${table} (${data?.id ? '' : 'id, '
-    } ${insertFields}) VALUES ${Array.isArray(data)
-      ? insertValues
-        .map((el) => {
-          const uuid = generateUUIDv6();
-          ids.push(uuid);
-          return `('${uuid}', ${el})`;
-        })
-        .join(', ')
-      : `('${data?.id ? data?.id : uuid}',` + values + ')'
-    }`;
+    placeholders.push(`(${valueList.join(', ')})`);
+  });
 
-  const res2 = await runQuery(insert);
+  const insertQuery = `INSERT INTO ${table} (${insertFields.join(', ')}) VALUES ${placeholders.join(', ')}`;
+  await runQuery(insertQuery, values);
 
+  // Build select query
+  const selectIds = ids.map((id, i) => `$${i + 1}`).join(', ');
+  const selectQuery = `SELECT * FROM ${table} WHERE id IN (${selectIds})`;
+  const result = await runQuery(selectQuery, ids);
 
-  const selectQuery = `SELECT * FROM ${table} WHERE ${data?.id
-    ? `id = '${data?.id}'`
-    : ids.length > 0
-      ? ids.map((id) => `id = '${id}'`).join(' OR ')
-      : `id = '${uuid}'`
-    }`;
-
-  const res3 = await runQuery(selectQuery);
-
-  return res3;
+  return result;
 };
+
+
 
 //export const createConnection = async (): Promise<IConnection> => {
 //};
