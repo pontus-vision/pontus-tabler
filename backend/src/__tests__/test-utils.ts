@@ -272,7 +272,7 @@ export const prepareDbAndAuth = async (
     endpoint: string,
     body: Record<string, any>,
   ): Promise<AxiosResponse> => {
-    console.log({endpoint})
+    // console.log({adminToken})
     const res = (await post(endpoint, body, {
       Authorization: 'Bearer ' + adminToken,
     })) as AxiosResponse<any, any>;
@@ -338,6 +338,7 @@ export const prepareDbAndAuth = async (
   await cleanTables(tables)
 
 
+  await createInitialTables()
   const createAdminBody: RegisterAdminReq = {
     username: 'admin',
     password: 'pontusvision',

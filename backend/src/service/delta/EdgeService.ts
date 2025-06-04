@@ -673,6 +673,7 @@ export const createTableEdge = async (
     values
   );
 
+
   return data;
 };
 

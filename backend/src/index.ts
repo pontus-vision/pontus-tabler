@@ -86,7 +86,6 @@ import { runQuery } from './db-utils';
 
 
 export default new PontusService({
-
   sendWebhookPost: async (req, res)=> {
     const response = await createWebhook(req.body)
 

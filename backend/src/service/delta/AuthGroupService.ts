@@ -321,11 +321,17 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
     );
   }
 
+    if(checkGroupsDashboards.length > 0) {
+      const deleteGroupDashQuery = await runQuery(
+        `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
+      );
+    }
   if (affectedRows === 1) {
     return `AuthGroup deleted.`;
   } else {
     throw new NotFoundError(`No group found at ${data.id}`);
   }
+
 };
 
 
@@ -528,7 +534,6 @@ export const deleteAuthGroupDashboards = async (
 
   return 'Dashboard removed from group.';
 };
-
 
 export const createAuthGroupUsers = async () => {
 
