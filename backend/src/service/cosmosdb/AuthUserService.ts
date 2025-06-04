@@ -498,8 +498,6 @@ export const checkAdmin = async (userId) => {
     rowId: userId,
   });
 
-  console.log({resCount: res})
-
   if (res.length === 0) {
     throw new UnauthorizedError('User does not belong to the admin group.');
   } else {

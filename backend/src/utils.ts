@@ -702,7 +702,6 @@ export const removeFalsyValues =<T extends Record<string, any>>(obj: T): Record<
   
 
 function convertToISOString(dateString)  {
-  console.log(dateString)
   const parts = dateString.split(' ');
   const dateParts = parts[0].split('-');
   const timeParts = parts[1].split(':');
