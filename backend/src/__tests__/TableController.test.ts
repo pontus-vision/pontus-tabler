@@ -143,11 +143,7 @@ describe('tableControllerTest', () => {
       name: resPayload3.name,
     };
 
-    console.log({updateRetVal: JSON.stringify(updateRetVal), body3})
-
     const deleteRetVal = await postAdmin('table/delete', body3);
-
-    console.log({deleteRetVal: JSON.stringify(deleteRetVal)})
 
     let resPayload4 = deleteRetVal.data;
 
@@ -258,14 +254,10 @@ describe('tableControllerTest', () => {
 
     expect(readRetVal.data.totalTables).toBe(2);
 
-    console.log({createRetVal: JSON.stringify(createRetVal.data)})
-
-    console.log({createRetVal2: JSON.stringify(createRetVal2.data)})
     const deleteVal = await postAdmin('table/delete', {
       id: createRetVal.data.id,
       name: createRetVal.data.name,
     });
-    console.log({deleteVal: JSON.stringify(deleteVal.data)})
 
     expect(deleteVal.status).toBe(200);
     const deleteVal2 = await postAdmin('table/delete', {

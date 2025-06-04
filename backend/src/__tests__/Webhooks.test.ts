@@ -145,8 +145,6 @@ describe('dashboardCreatePOST', () => {
 
     const webhook = await getWebhook.json()
 
-    console.log({webhook})
-
     expect(webhook['context']).toBe('table-defined')
   })
 });

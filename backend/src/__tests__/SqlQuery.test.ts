@@ -379,7 +379,5 @@ describe('Filter to SQL', () => {
     };
 
     const query = filterToQuery(readBody2);
-
-    console.log({ query });
   });
 });

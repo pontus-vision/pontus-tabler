@@ -390,7 +390,6 @@ const createInitialTables = async() => {
 
     try {
       const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createTable) as AxiosResponse<ExecuteQueryRes>
-      console.log({res: JSON.stringify(res.status)})
     } catch (error) {
       console.error('Error creating initial tables', {query: createTable.query, error}) 
     }
@@ -406,7 +405,6 @@ const createInitialTables = async() => {
 
   try {
     const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createGroupsDashboards) as AxiosResponse<ExecuteQueryRes>
-    console.log({res: JSON.stringify(res.status)})
   } catch (error) {
     console.error('Error creating initial tables', {query: createTable.query, error}) 
   }

@@ -119,8 +119,6 @@ describe('tabledatacontroller', () => {
       body2,
     )) as AxiosResponse<TableDataReadRes>;
 
-    console.log({readRetVal: JSON.stringify(readRetVal)})
-
     expect(
       readRetVal.data.rows.some((value) =>
         isSubset({ ['column_1']: body.cols.column1 }, value),
