@@ -31,7 +31,9 @@ services:
         npm install 
         cd sql-app
         npm install express cors
+        cd fern
         fern generate
+        cd ..
         timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
         npm run build
         ls src
