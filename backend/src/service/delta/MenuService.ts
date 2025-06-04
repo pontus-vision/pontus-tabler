@@ -29,7 +29,6 @@ const findNestedObject = (path: string, obj: any) => {
     return obj
   }
 
-  console.log({ obj: JSON.stringify(obj) })
   if (obj.kind === 'file') {
     return obj
   }
@@ -68,8 +67,6 @@ const createTree = async (item: MenuItemTreeRef, path: string) => {
 
   const obj = item.kind === 'folder' ? { ...item, children: [] } : item;
 
-  console.log({ objOnCreate: obj });
-
   const treeObjModified = updateAndRetrieveTree(path, treeObj, (node) => {
     node.children.push({
       ...obj,
@@ -91,11 +88,7 @@ const createTree = async (item: MenuItemTreeRef, path: string) => {
 
   const res4 = await runQuery(`SELECT * FROM ${MENU}`);
 
-  console.log({ res4, treeObjModified, obj, item });
-
   const treeObjFinal = JSON.parse(res4[0]['tree_obj_str']);
-
-  console.log({ item, treeObjFinal: JSON.stringify(treeObjFinal) });
 
   return findNestedObject(item.path + item.name, treeObjFinal);
 };
@@ -136,8 +129,6 @@ export const updateMenuItem = async (
   const res2 = await runQuery(`SELECT * FROM ${MENU}`);
   const treeObj2 = JSON.parse(res2[0]['tree_obj_str']);
   const retObj = findNestedObject(data.path, treeObj2);
-
-  console.log({ retObj });
 
   return retObj;
 };
@@ -199,8 +190,6 @@ export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
     parentPath = "/";
   }
 
-  console.log({ path: data.path, parentPath });
-
   const updatedTree = updateAndRetrieveTree(parentPath, treeObj, (node) => {
     node.children = node.children.filter(el => el.path !== data.path);
   });
@@ -208,8 +197,6 @@ export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
   if (!updatedTree) {
     throw new NotFoundError(`No menu item found at path "${data.path}"`);
   }
-
-  console.log({ updatedTree });
 
   const treeObjId = res[0]['id'];
   const updatedTreeStr = JSON.stringify(updatedTree);

@@ -51,8 +51,6 @@ export const createWebhook = async (
         throw new InternalServerError('Webhook creation failed: not found after insert');
       }
   
-      console.log({ WEBHOOK_CREATION: res3 });
-  
       return {
         userId: res3[0]?.['user_id'],
         context: res3[0]?.['context'],
