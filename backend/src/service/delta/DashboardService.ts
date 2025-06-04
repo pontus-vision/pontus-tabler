@@ -240,7 +240,7 @@ export const readDashboards = async (
     countParams
   );
 
-  const count = +countSql[0]['count'] || +countSql[0]['count(1)'] || 0;
+  const count = +countSql[0]['count(1)'] || +countSql[0]['count(1)'] || 0;
 
   if (count === 0) {
     throw new NotFoundError('No dashboards found');
@@ -260,8 +260,8 @@ const readDashboards2 = async (
   body: DashboardsReadReq,
   userId: string
 ): Promise<DashboardsReadRes> => {
-  const { queryStr: filterQuery, params: filterParams } = filterToQuery(body, "A", undefined, true);
-  const { queryStr: countFilterQuery, params: countFilterParams } = filterToQuery({ filters: body.filters }, "A", undefined, true);
+  const { queryStr: filterQuery, params: filterParams } = filterToQuery(body, "A", undefined);
+  const { queryStr: countFilterQuery, params: countFilterParams } = filterToQuery({ filters: body.filters }, "A", undefined);
 
   const baseSelect = `
     FROM dashboards A
