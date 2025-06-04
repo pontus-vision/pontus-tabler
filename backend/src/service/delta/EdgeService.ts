@@ -673,7 +673,6 @@ export const createTableEdge = async (
     values
   );
 
-
   return data;
 };
 
@@ -716,34 +715,25 @@ export const createTableEdge = async (
 export const readTableEdgesByTableId = async (
   data: TableEdgeReadReq,
 ): Promise<TableEdgeReadRes> => {
-  // Proper join between edges and tables on table id (assuming edges refer to table_from__id or table_to__id)
-  // Here assuming you want to get edges where the table_from__id = data.tableId
-  // and join with the 'to' table info
-
   const sql = await runQuery(
     `
       SELECT te.*, t.name 
       FROM tables_edges te 
-      INNER JOIN tables t ON te.table_to__id = t.id
+      INNER JOIN tables t ON t.id = ?
       WHERE te.table_from__id = ?
     `,
-    [data.tableId]
+    [data.tableId, data.tableId]
   );
 
   if (sql.length === 0) {
     throw new NotFoundError(`Could not find any Edge attached to table at id ${data.tableId}`);
   }
 
-  const results: Record<string, Edge[]> = sql.reduce((acc: any, cur) => {
-    if (acc?.[cur['edge_label']]) {
-      acc[cur['edge_label']] = [
-        ...acc[cur['edge_label']],
-        { to: { id: cur['table_to__id'], tableName: cur['table_to__name'] || cur['name'] } }
-      ];
+  const results:Record<string, Edge[]> = sql.reduce((acc:any, cur)=> {
+    if(acc?.[cur['edge_label']]) {
+      acc[cur['edge_label']] = [...acc[cur['edge_label']], {to: {id: cur['table_to__id'], tableName: cur['table_to__name']}}]
     } else {
-      acc[cur['edge_label']] = [
-        { to: { id: cur['table_to__id'], tableName: cur['table_to__name'] || cur['name'] } }
-      ];
+      acc[cur['edge_label']] = [ {to: {id: cur['table_to__id'], tableName: cur['table_to__name']}}]
     }
     return acc;
   }, {});
