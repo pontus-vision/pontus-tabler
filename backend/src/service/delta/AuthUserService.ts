@@ -302,7 +302,7 @@ export const authUserDelete = async (
     [data.id]
   );
 
-  if (sql.length === 0) {
+  if (+sql[0]['num_affected_rows'] === 0) {
     throw new NotFoundError(`No user found at id: ${data.id}`);
   }
 
@@ -442,7 +442,7 @@ export const authUserGroupsDelete = async (
   ];
 
   const sql = await runQuery(sqlStr, params);
-  const affectedRows = sql.length;
+  const affectedRows = +sql[0]['num_affected_rows'];
 
   if (affectedRows === 0) {
     throw new NotFoundError('no rows deleted.');
