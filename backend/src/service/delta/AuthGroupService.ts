@@ -134,7 +134,7 @@ const authUserGroupsRead = async (
 //   };
 
 
-export const createAuthGroup = async (data: AuthGroupCreateReq):Promise<AuthGroupCreateRes> => {
+export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGroupCreateRes> => {
   const id = data.id || generateUUIDv6();
   const tableMetadata = data.tableMetadataCrud;
 
@@ -170,7 +170,7 @@ export const createAuthGroup = async (data: AuthGroupCreateReq):Promise<AuthGrou
       create_table, read_table, update_table, delete_table,
       create_dashboard, read_dashboard, update_dashboard, delete_dashboard
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    
+
   const insertParams = [
     id,
     data.name,
@@ -191,7 +191,22 @@ export const createAuthGroup = async (data: AuthGroupCreateReq):Promise<AuthGrou
   const selectParams = [id];
   const result = await runQuery(selectQuery, selectParams);
 
-  return result[0];
+  return {
+    name: result?.[0]['name'],
+    id,
+    tableMetadataCrud: {
+      create: result?.[0]['create_table'],
+      read: result?.[0]['read_table'],
+      update: result?.[0]['update_table'],
+      delete: result?.[0]['delete_table'],
+    },
+    dashboardCrud: {
+      create: result?.[0]['create_dashboard'],
+      read: result?.[0]['read_dashboard'],
+      update: result?.[0]['update_dashboard'],
+      delete: result?.[0]['delete_dashboard'],
+    }
+  };
 };
 
 export const updateAuthGroup = async (
@@ -336,7 +351,7 @@ export const readAuthGroups = async (
 
   const countGroups = await runQuery(countQuery, params);
 
-  const groupCount = +countGroups[0]['count'];
+  const groupCount = +countGroups[0]['count(1)'];
 
   if (groupCount === 0) {
     throw new NotFoundError(`No group found.`);
