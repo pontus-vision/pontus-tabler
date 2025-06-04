@@ -1,21 +1,13 @@
 import {
   TablesReadRes,
-  TableRef,
   TableCreateRes,
   TableReadRes,
   TableUpdateReq,
   TableCreateReq,
   AuthUserCreateRes,
-  RegisterAdminReq,
-  LoginReq,
-  LoginRes,
 } from '../typescript/api';
-import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
-import { deleteContainer, deleteDatabase } from '../cosmos-utils';
-import { app } from '../server';
-import axios, { AxiosResponse } from 'axios';
-import { execSync } from 'child_process';
-import fs from 'fs';
+import { prepareDbAndAuth, isSubset, cleanTables } from './test-utils';
+import { AxiosResponse } from 'axios';
 
 
 // // Mock the utils.writeJson function
@@ -236,12 +228,16 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createRetVal = await postAdmin('table/create', body);
+    const createRetVal = await postAdmin('table/create', body) as AxiosResponse<TableCreateRes>;
+
+    expect(createRetVal.status).toBe(200)
 
     const createRetVal2 = await postAdmin('table/create', {
       ...body,
       name: 'person-natural2',
-    });
+    }) as AxiosResponse<TableCreateRes>;;
+
+    expect(createRetVal2.status).toBe(200)
 
     const readBody = {
       from: 1,

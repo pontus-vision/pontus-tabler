@@ -50,7 +50,7 @@ describe('dashboardCreatePOST', () => {
     tables = [...tables, GROUPS_DASHBOARDS, GROUPS_USERS, 'person_natural'];
   }
 
-  beforeAll(async()=> {
+  beforeAll(async () => {
     await removeDeltaTables(['person_natural'])
   })
   beforeEach(async () => {
@@ -61,7 +61,7 @@ describe('dashboardCreatePOST', () => {
     process.env = { ...OLD_ENV }; // Make a copy
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
     // srv.close();
@@ -131,8 +131,6 @@ describe('dashboardCreatePOST', () => {
       id,
     });
     let resPayload2: DashboardReadRes = readRetVal.data;
-
-    console.log(`res2: ${JSON.stringify(resPayload2)}`);
 
     expect(readRetVal.status).toBe(200);
     expect(readRetVal.data.name).toBe(body.name);
@@ -565,6 +563,7 @@ describe('dashboardCreatePOST', () => {
       'dashboard/group/auth/read',
       readGroupAuthBody2,
     )) as AxiosResponse<DashboardGroupAuthUpdateRes>;
+
 
     expect(readDashboardGroupAuthResponse2.status).toBe(404);
   });
