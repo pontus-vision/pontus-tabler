@@ -462,7 +462,7 @@ export const checkAdmin = async (userId: string | number) => {
     [userId]
   );
 
-  if (res.length === 0 || parseInt(res[0]['count']) === 0) {
+  if (res.length === 0 || parseInt(res[0]['count(1)']) === 0) {
     throw new UnauthorizedError('User does not belong to the admin group.');
   } else {
     return true;
