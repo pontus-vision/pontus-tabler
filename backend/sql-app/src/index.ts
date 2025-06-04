@@ -1,9 +1,4 @@
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-} from '../src/generated/api';
-import { PontusService } from '../src/generated/api/resources/pontus/service/PontusService';
+import { PontusService } from './generated/api/resources/pontus/service/PontusService';
 import {runQuery} from '../../src/db-utils'
 
 

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import pontus from './index'
-import { register } from '../src/generated';
+import { register } from './generated';
 
 export const app = express();
 
