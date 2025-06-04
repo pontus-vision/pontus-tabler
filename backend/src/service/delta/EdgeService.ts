@@ -439,14 +439,14 @@ export const readEdge = async (data: {
   const conditions: string[] = [];
 
   if (whereClause) {
-    conditions.push(whereClause.replace(/^WHERE\s+/i, ''));
+    conditions.push(whereClause);
   }
 
   const directionCondition =
     data.direction === 'from' ? 'table_to__id = ?' : 'table_from__id = ?';
   conditions.push(directionCondition);
 
-  const fullWhereClause = `WHERE ${conditions.join(' AND ')}`;
+  const fullWhereClause = `${whereClause ? '' : 'WHERE '}${conditions.join(' AND ')}`;
 
   const paginationClause: string[] = [];
   const values: (string | number)[] = [...filterParams, data.rowId];
@@ -478,18 +478,18 @@ export const readTableDataEdge = async (
   const filters = data.filters || {};
   const { queryStr: filterClause, params: filterParams } = filterToQuery(
     { filters },
-    '', 
+    '',
   );
 
   const conditions: string[] = [];
   const params: (string | number)[] = [...filterParams];
 
   if (filterClause) {
-    conditions.push(filterClause.replace(/^WHERE\s+/i, ''));
+    conditions.push(filterClause);
   }
 
   const directionCondition =
-    direction === 'from' ? 'table_from__id = ?' : 'table_to__id = ?';
+    direction === 'to' ? 'table_from__id = ?' : 'table_to__id = ?';
   conditions.push(directionCondition);
   params.push(data.rowId);
 
@@ -498,7 +498,7 @@ export const readTableDataEdge = async (
     params.push(edgeLabel);
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const whereClause = conditions.length > 0 ? `${filterClause ? '' : 'WHERE '}${conditions.join(' AND ')}` : '';
 
   const limitOffsetClause: string[] = [];
   if (data.to != null && data.from != null) {
@@ -520,7 +520,7 @@ export const readTableDataEdge = async (
     SELECT COUNT(*) FROM ${table}
     ${whereClause}
   `.trim();
-  const countParams = params.slice(0, filterParams.length + 1 + (edgeLabel ? 1 : 0)); 
+  const countParams = params.slice(0, filterParams.length + 1 + (edgeLabel ? 1 : 0));
 
   const countRows = await runQuery(countQuery, countParams);
 
@@ -546,7 +546,7 @@ export const readTableDataEdge = async (
 
   return {
     edges,
-    count: +countRows[0]['count'],
+    count: +countRows[0]['count(1)'],
     rowId: rows[0]?.['table_to__id'],
     tableName: edgeTableName,
   };
@@ -666,7 +666,6 @@ export const createTableEdge = async (
     }
   }
 
-  console.log({ values });
 
   const sql = await createSql(
     'tables_edges',
@@ -737,7 +736,7 @@ export const readTableEdgesByTableId = async (
   const results: Record<string, Edge[]> = sql.reduce((acc: any, cur) => {
     if (acc?.[cur['edge_label']]) {
       acc[cur['edge_label']] = [
-        ...acc[cur['edge_label']], 
+        ...acc[cur['edge_label']],
         { to: { id: cur['table_to__id'], tableName: cur['table_to__name'] || cur['name'] } }
       ];
     } else {
