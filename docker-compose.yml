@@ -34,7 +34,7 @@ services:
         fern generate
         timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
         npm run build
-        ls
+        ls src
         node dist/sql-app/src/server.js
 
   app-tests:
