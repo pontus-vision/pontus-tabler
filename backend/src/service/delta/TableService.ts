@@ -303,7 +303,7 @@ export const deleteTable = async (data: TableDeleteReq) => {
 
     return 'Table deleted!';
   } catch (error) {
-    throw error;
+    throw {code: 404}
   }
 };
 
