@@ -434,7 +434,6 @@ export const authUserGroupsDelete = async (
     DELETE FROM ${GROUPS_USERS}
     WHERE table_to__id = ?
     AND (${conditions})
-    RETURNING 1 AS num_affected_rows
   `;
 
   const params = [
