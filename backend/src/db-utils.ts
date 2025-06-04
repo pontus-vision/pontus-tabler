@@ -204,34 +204,32 @@ export const createSql = async (
   const rows = isArray ? data : [data];
   const needsId = !('id' in rows[0]);
 
-  // Create table query
   const createQuery = `
     CREATE TABLE IF NOT EXISTS ${table} (${needsId ? 'id STRING, ' : ''}${fields})
     USING DELTA LOCATION '/data/pv/${table}';
   `;
   await runQuery(createQuery);
 
-  // Build insert query
   const insertFields = needsId ? ['id', ...Object.keys(rows[0])] : Object.keys(rows[0]);
   const placeholders: string[] = [];
   const values: any[] = [];
   const ids: string[] = [];
 
-  rows.forEach((row, rowIndex) => {
+  rows.forEach((row) => {
     const valueList: string[] = [];
 
     if (needsId) {
       const uuid = generateUUIDv6();
       ids.push(uuid);
       values.push(uuid);
-      valueList.push(`$${values.length}`); // placeholder for id
+      valueList.push('?');
     } else {
       ids.push(row.id);
     }
 
     for (const key of Object.keys(row)) {
       values.push(row[key]);
-      valueList.push(`$${values.length}`);
+      valueList.push('?');
     }
 
     placeholders.push(`(${valueList.join(', ')})`);
@@ -240,20 +238,12 @@ export const createSql = async (
   const insertQuery = `INSERT INTO ${table} (${insertFields.join(', ')}) VALUES ${placeholders.join(', ')}`;
   await runQuery(insertQuery, values);
 
-  // Build select query
-  const selectIds = ids.map((id, i) => `$${i + 1}`).join(', ');
-  const selectQuery = `SELECT * FROM ${table} WHERE id IN (${selectIds})`;
+  const selectPlaceholders = ids.map(() => '?').join(', ');
+  const selectQuery = `SELECT * FROM ${table} WHERE id IN (${selectPlaceholders})`;
   const result = await runQuery(selectQuery, ids);
 
   return result;
 };
-
-
-
-//export const createConnection = async (): Promise<IConnection> => {
-//};
-
-
 
 export function validateRegex(regexString) {
   try {
@@ -263,8 +253,6 @@ export function validateRegex(regexString) {
     return false;              // If there's an error, it's an invalid regex
   }
 }
-
-
 
 export const filtersToSnakeCase = (data: ReadPaginationFilter): Record<string, ReadPaginationFilterFilters> => {
   const filtersSnakeCase: Record<string, ReadPaginationFilterFilters> = {};
