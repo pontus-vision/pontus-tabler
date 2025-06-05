@@ -86,15 +86,6 @@ import { runQuery } from './db-utils';
 
 
 export default new PontusService({
-  executeQueryPost: async(req, res)=> {
-    if(process.env.ENVIRONMENT_MODE !== 'test') {
-      throw new ForbiddenError('You cannot execute this action since this is not a testing environment')
-    }
-
-    const response = await runQuery(req.body.query) as Record<string,any>[]
-
-    res.send({results: response})
-  },
   sendWebhookPost: async (req, res)=> {
     const response = await createWebhook(req.body)
 

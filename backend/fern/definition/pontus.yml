@@ -34,20 +34,6 @@ service:
               endpoint: "https://hooks.example.com/webhook"
               secretTokenLink: "aws:secretsmanager:webhook-tokens/paulo"
               operation: "create"
-    executeQueryPOST:
-      path: /test/execute
-      method: POST
-      request:
-        name: ExecuteQueryReq
-        body:
-          properties:
-            query: string
-      response:
-        docs: User logged in successfully
-        type: ExecuteQueryRes 
-      errors:
-        - BadRequestError
-        - InternalServerError
     registerUserPOST:
       path: /register/user
       method: POST

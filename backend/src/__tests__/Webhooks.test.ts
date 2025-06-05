@@ -82,7 +82,7 @@ describe('dashboardCreatePOST', () => {
 
   afterAll(async () => {
    
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
 
 
     process.env = OLD_ENV;
@@ -144,8 +144,6 @@ describe('dashboardCreatePOST', () => {
     }, })
 
     const webhook = await getWebhook.json()
-
-    console.log({webhook})
 
     expect(webhook['context']).toBe('table-defined')
   })

@@ -46,7 +46,7 @@ describe('testing Menu', () => {
   });
 
   afterAll(async () => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
   it('should test algo', () => {
@@ -104,7 +104,6 @@ describe('testing Menu', () => {
     };
     const readRes = await postAdmin('menu/read', data);
 
-    console.log({ readRes: JSON.stringify(readRes) })
     expect(readRes.status).toBe(200);
   });
   it('should create a folder under root', async () => {
@@ -121,8 +120,6 @@ describe('testing Menu', () => {
 
     const createRes = await postAdmin('menu/create', data2);
 
-    console.log({ createRes })
-
     const readRes2 = await postAdmin('menu/read', {
       path: '/',
     });
@@ -134,10 +131,6 @@ describe('testing Menu', () => {
     const obj1 = data2;
 
     const obj2 = readRes3.data;
-
-
-
-    console.log({ obj1: JSON.stringify(obj1), obj2: JSON.stringify(obj2) })
 
     // expect(isSubset(obj1, obj2)).toBe(true);
     expect(obj1.path + obj1.name).toBe(obj2.children[0].path)
@@ -191,8 +184,6 @@ describe('testing Menu', () => {
     const updateRetVal = await postAdmin('menu/update', body2);
 
     let resPayload3: MenuUpdateRes = updateRetVal.data;
-
-    console.log({ res: updateRetVal.data, req: body2 })
 
     expect(updateRetVal.data.name).toBe(body2.name);
     expect(updateRetVal.data.path).toBe(body2.path);

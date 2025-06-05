@@ -6,7 +6,6 @@ let webhook:WebhookSubscriptionRes | null = null
 export default new PontusService({
     
     webhookGetPost:async (req, res)=> {
-        console.log({reqBody:req.body, webhook})
         if (!webhook) {
             throw new NotFoundError('there is no webhook')
         }else{
@@ -14,10 +13,8 @@ export default new PontusService({
         }
     },
     webhookPost: async(req, res) => {
-        console.log({reqBody:req.body, webhook})
         webhook = {id: '1', ...req.body}
         res.send(webhook)
-        console.log({webhook})
     },
 
 })

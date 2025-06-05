@@ -1,23 +1,13 @@
 import {
   TablesReadRes,
-  TableRef,
   TableCreateRes,
   TableReadRes,
   TableUpdateReq,
   TableCreateReq,
   AuthUserCreateRes,
-  RegisterAdminReq,
-  LoginReq,
-  LoginRes,
-  ExecuteQueryReq,
-  ExecuteQueryRes,
 } from '../typescript/api';
-import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
-import { deleteContainer, deleteDatabase } from '../cosmos-utils';
-import { app } from '../server';
-import axios, { AxiosResponse } from 'axios';
-import { execSync } from 'child_process';
-import fs from 'fs';
+import { prepareDbAndAuth, isSubset, cleanTables } from './test-utils';
+import { AxiosResponse } from 'axios';
 
 
 // // Mock the utils.writeJson function
@@ -56,7 +46,7 @@ describe('tableControllerTest', () => {
   });
 
   afterAll(async() => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 
@@ -153,11 +143,7 @@ describe('tableControllerTest', () => {
       name: resPayload3.name,
     };
 
-    console.log({updateRetVal: JSON.stringify(updateRetVal), body3})
-
     const deleteRetVal = await postAdmin('table/delete', body3);
-
-    console.log({deleteRetVal: JSON.stringify(deleteRetVal)})
 
     let resPayload4 = deleteRetVal.data;
 
@@ -238,12 +224,16 @@ describe('tableControllerTest', () => {
       ],
     };
 
-    const createRetVal = await postAdmin('table/create', body);
+    const createRetVal = await postAdmin('table/create', body) as AxiosResponse<TableCreateRes>;
+
+    expect(createRetVal.status).toBe(200)
 
     const createRetVal2 = await postAdmin('table/create', {
       ...body,
       name: 'person-natural2',
-    });
+    }) as AxiosResponse<TableCreateRes>;;
+
+    expect(createRetVal2.status).toBe(200)
 
     const readBody = {
       from: 1,
@@ -264,14 +254,10 @@ describe('tableControllerTest', () => {
 
     expect(readRetVal.data.totalTables).toBe(2);
 
-    console.log({createRetVal: JSON.stringify(createRetVal.data)})
-
-    console.log({createRetVal2: JSON.stringify(createRetVal2.data)})
     const deleteVal = await postAdmin('table/delete', {
       id: createRetVal.data.id,
       name: createRetVal.data.name,
     });
-    console.log({deleteVal: JSON.stringify(deleteVal.data)})
 
     expect(deleteVal.status).toBe(200);
     const deleteVal2 = await postAdmin('table/delete', {

@@ -38,6 +38,7 @@ import {
   UsernameAndIdRef,
   AuthUserGroupsReadReq,
   AuthUserGroupsReadRes,
+  AuthGroupCreateRes,
 } from '../../typescript/api';
 import {
   ConflictEntityError,
@@ -133,75 +134,94 @@ const authUserGroupsRead = async (
 //   };
 
 
-export const createAuthGroup = async (data: AuthGroupCreateReq) => {
-  let id;
-  if (!data.id) {
-    id = generateUUIDv6();
-  } else {
-    id = data.id;
-  }
+export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGroupCreateRes> => {
+  const id = data.id || generateUUIDv6();
+  const tableMetadata = data.tableMetadataCrud;
 
-  const tableMetadata = data.tableMetadataCrud
-
-  const res = await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN, create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`,
-
+  // Create table if not exists — still safe to inline (DDL)
+  await runQuery(
+    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (
+      id STRING,
+      name STRING,
+      create_table BOOLEAN,
+      read_table BOOLEAN,
+      update_table BOOLEAN,
+      delete_table BOOLEAN,
+      create_dashboard BOOLEAN,
+      read_dashboard BOOLEAN,
+      update_dashboard BOOLEAN,
+      delete_dashboard BOOLEAN
+    ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`
   );
-  const res4 = await runQuery(
-    `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = '${data.name}'`,
 
-  );
-  if (+res4[0]['count(1)'] > 0) {
+  // Check if group name already exists
+  const checkNameQuery = `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = ?`;
+  const checkNameParams = [data.name];
+  const existing = await runQuery(checkNameQuery, checkNameParams);
+
+  if (+existing[0]['count(1)'] > 0) {
     throw new ConflictEntityError(`group name: ${data.name} already taken.`);
   }
 
-  const res2 = await runQuery(
-    `INSERT INTO ${AUTH_GROUPS} (id, name, create_table, read_table, update_table, delete_table, create_dashboard, read_dashboard, update_dashboard, delete_dashboard ) VALUES (
-    "${id}", 
-    "${data.name}", 
-    ${(tableMetadata?.create ? 'true' : 'false') + ', '} 
-    ${(tableMetadata?.read ? 'true' : 'false') + ', '} 
-    ${(tableMetadata?.update ? 'true' : 'false') + ', '} 
-    ${(tableMetadata?.delete ? 'true' : 'false') + ', '} 
-    ${(tableMetadata?.create ? 'true' : 'false') + ', '} 
-    ${(tableMetadata?.read ? 'true' : 'false') + ', '} 
-    ${(tableMetadata?.update ? 'true' : 'false') + ', '} 
-    ${(tableMetadata?.delete ? 'true' : 'false')} 
-    )`,
+  // Insert new group
+  const insertQuery = `
+    INSERT INTO ${AUTH_GROUPS} (
+      id, name,
+      create_table, read_table, update_table, delete_table,
+      create_dashboard, read_dashboard, update_dashboard, delete_dashboard
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-  );
+  const insertParams = [
+    id,
+    data.name,
+    !!tableMetadata?.create,
+    !!tableMetadata?.read,
+    !!tableMetadata?.update,
+    !!tableMetadata?.delete,
+    !!tableMetadata?.create,
+    !!tableMetadata?.read,
+    !!tableMetadata?.update,
+    !!tableMetadata?.delete,
+  ];
 
-  const res3 = await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
-    }`,
+  await runQuery(insertQuery, insertParams);
 
-  );
+  // Fetch the newly created group
+  const selectQuery = `SELECT * FROM ${AUTH_GROUPS} WHERE id = ?`;
+  const selectParams = [id];
+  const result = await runQuery(selectQuery, selectParams);
 
   return {
-    name: res3[0]['name'],
+    name: result?.[0]['name'],
     id,
-    tableMetadata: {
-      create: res3[0]['create_table'],
-      read: res3[0]['read_table'],
-      update: res3[0]['update_table'],
-      delete: res3[0]['delete_table'],
+    tableMetadataCrud: {
+      create: result?.[0]['create_table'],
+      read: result?.[0]['read_table'],
+      update: result?.[0]['update_table'],
+      delete: result?.[0]['delete_table'],
     },
+    dashboardCrud: {
+      create: result?.[0]['create_dashboard'],
+      read: result?.[0]['read_dashboard'],
+      update: result?.[0]['update_dashboard'],
+      delete: result?.[0]['delete_dashboard'],
+    }
   };
 };
 
 export const updateAuthGroup = async (
   data: AuthGroupUpdateReq,
 ): Promise<AuthGroupUpdateRes> => {
-
-  const objWithoutFalsyValues = removeFalsyValues(data)
+  const objWithoutFalsyValues = removeFalsyValues(data);
 
   const sql = (await updateSql(
     AUTH_GROUPS,
     {
       name: data.name,
-      ...objWithoutFalsyValues
+      ...objWithoutFalsyValues,
     },
-    `WHERE id = '${data.id}'`,
+    `WHERE id = ?`,
+    [data.id]
   )) as AuthGroupUpdateRes[];
 
   const affectedRows = +sql[0]['num_affected_rows'];
@@ -211,21 +231,26 @@ export const updateAuthGroup = async (
   }
 
   try {
-    const sql2 = await updateSql(
+    await updateSql(
       GROUPS_DASHBOARDS,
       { ['table_from__name']: data.name },
-      `WHERE table_from__id = '${data.id}'`,
+      `WHERE table_from__id = ?`,
+      [data.id]
     );
 
-    const sql3 = await updateSql(
+    await updateSql(
       GROUPS_USERS,
       { ['table_from__name']: data.name },
-      `WHERE table_from__id = '${data.id}'`,
+      `WHERE table_from__id = ?`,
+      [data.id]
     );
-  } catch (error) { }
+  } catch (error) {
+
+  }
 
   return sql[0];
 };
+
 
 export const readAuthGroup = async (
   data: AuthGroupReadReq,
@@ -233,18 +258,15 @@ export const readAuthGroup = async (
   const id = data.id;
 
   const res = (await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ${typeof id === 'string' ? `'${id}'` : id
-    }`,
-
+    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ?`,
+    [id]
   )) as AuthGroupRef[];
 
   if (res.length === 0) {
     throw new NotFoundError(`No Auth Group found at id: ${data.id}`);
   }
 
-
-  const result = res[0]
-
+  const result = res[0];
 
   return {
     id: result['id'],
@@ -253,36 +275,52 @@ export const readAuthGroup = async (
       create: result['create_dashboard'],
       read: result['read_dashboard'],
       update: result['update_dashboard'],
-      delete: result['delete_dashboard']
+      delete: result['delete_dashboard'],
     },
     tableMetadataCrud: {
       create: result['create_table'],
       read: result['read_table'],
       update: result['update_table'],
-      delete: result['delete_table']
-    }
-  }
+      delete: result['delete_table'],
+    },
+  };
 };
+
 
 export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
   if (data.name === ADMIN_GROUP_NAME) {
-    throw new BadRequestError('Cannot delete admin group')
+    throw new BadRequestError('Cannot delete admin group');
   }
 
-    const deleteQuery = await runQuery(
-      `DELETE FROM ${AUTH_GROUPS} WHERE id = '${data.id}'`,
+  const deleteQuery = await runQuery(
+    `DELETE FROM ${AUTH_GROUPS} WHERE id = ?`,
+    [data.id]
+  );
+
+  const affectedRows = +deleteQuery[0]?.['num_affected_rows'] || 0;
+
+  const checkGroupsUsers = await runQuery(
+    `SHOW TABLES LIKE ?`,
+    [GROUPS_USERS]
+  );
+  if (checkGroupsUsers.length > 0) {
+    await runQuery(
+      `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = ?`,
+      [data.id]
     );
+  }
 
-    const affectedRows = +deleteQuery[0]['num_affected_rows'];
+  const checkGroupsDashboards = await runQuery(
+    `SHOW TABLES LIKE ?`,
+    [GROUPS_DASHBOARDS]
+  );
+  if (checkGroupsDashboards.length > 0) {
+    await runQuery(
+      `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = ?`,
+      [data.id]
+    );
+  }
 
-    const checkGroupsUsers = await runQuery(`SHOW TABLES LIKE "${GROUPS_USERS}"`)
-    if(checkGroupsUsers.length > 0) {
-      const deleteGroupUsersQuery = await runQuery(
-        `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = '${data.id}'`,
-      );
-    }
-
-    const checkGroupsDashboards = await runQuery(`SHOW TABLES LIKE "${GROUPS_DASHBOARDS}"`)
     if(checkGroupsDashboards.length > 0) {
       const deleteGroupDashQuery = await runQuery(
         `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
@@ -290,47 +328,47 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
     }
   if (affectedRows === 1) {
     return `AuthGroup deleted.`;
-  } else if (!affectedRows) {
+  } else {
     throw new NotFoundError(`No group found at ${data.id}`);
   }
 
 };
 
+
 export const readAuthGroups = async (
   data: AuthGroupsReadReq,
 ): Promise<AuthGroupsReadRes> => {
-  const whereClause = filterToQuery(data, '');
+  const { queryStr, params } = filterToQuery(data, '');
 
-  const clauses = [];
-  for (const prop in data.filters) {
-    for (const prop2 in data.filters[prop]) {
-      if (data.filters[prop][prop2]) {
-        clauses.push(`\`${prop}\` LIKE '%${data.filters[prop][prop2]}%'`);
-      }
-    }
-  }
+  const selectGroupsQuery = `
+    SELECT * FROM auth_groups
+    ${queryStr};
+  `;
 
-  const selectGroups = (await runQuery(
-    `SELECT * FROM auth_groups
-      ${whereClause};`,
-  )) as AuthGroupRef[];
+  const selectGroups = await runQuery(
+    selectGroupsQuery,
+    params
+  ) as AuthGroupRef[];
 
-  const whereClause2 = filterToQuery({ filters: data.filters }, '');
+  const countQuery = `
+    SELECT COUNT(*) FROM auth_groups
+    ${queryStr};
+  `;
 
-  const countGroups = await runQuery(
-    `SELECT COUNT(*) FROM auth_groups
-      ${whereClause2};`,
-  );
+  const countGroups = await runQuery(countQuery, params);
+
   const groupCount = +countGroups[0]['count(1)'];
+
   if (groupCount === 0) {
     throw new NotFoundError(`No group found.`);
   }
 
   return {
     authGroups: selectGroups,
-    totalGroups: +countGroups[0]['count(1)'],
+    totalGroups: groupCount,
   };
 };
+
 
 export const createAuthGroupDashboards = async (
   data: AuthGroupDashboardCreateReq,
@@ -437,9 +475,9 @@ export const readAuthGroupDashboards = async (
 export const updateAuthGroupDashboards = async (
   data: AuthGroupDashboardUpdateReq,
 ): Promise<AuthGroupDashboardUpdateRes> => {
-  const dashboards = []
-  for (const dashboard of data.dashboards) {
+  const dashboards = [];
 
+  for (const dashboard of data.dashboards) {
     const sql = await updateSql(
       GROUPS_DASHBOARDS,
       {
@@ -450,22 +488,19 @@ export const updateAuthGroupDashboards = async (
         table_from__id: data.id,
         table_from__name: data.name,
       },
-
-      `WHERE table_to__id = '${dashboard.id}'`,
+      `WHERE table_to__id = ?`,
+      [dashboard.id]
     );
-    dashboards.push(sql.map((el) => {
-      return {
-        name: el['table_to__name'],
-        id: el['table_to__id'],
-        create: el['table_from__create'] === 'true' ? true : false,
-        read: el['table_from__read'] === 'true' ? true : false,
-        update: el['table_from__update'] === 'true' ? true : false,
-        delete: el['table_from__delete'] === 'true' ? true : false,
-      };
-    }));
+
+    dashboards.push(sql.map((el) => ({
+      name: el['table_to__name'],
+      id: el['table_to__id'],
+      create: el['table_from__create'] === 'true',
+      read: el['table_from__read'] === 'true',
+      update: el['table_from__update'] === 'true',
+      delete: el['table_from__delete'] === 'true',
+    })));
   }
-
-
 
   return {
     dashboards: dashboards[0],
@@ -474,25 +509,30 @@ export const updateAuthGroupDashboards = async (
   };
 };
 
+
 export const deleteAuthGroupDashboards = async (
   data: AuthGroupDashboardDeleteReq,
 ): Promise<AuthGroupDashboardDeleteRes> => {
   if (data.dashboardIds.length === 0) {
     throw new BadRequestError('No dashboardId mentioned.');
   }
-  const sql = await runQuery(
-    `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id
-    }' AND ${data.dashboardIds
-      .map((dashboardId) => `table_to__id = '${dashboardId}'`)
-      .join(' OR ')}`,
 
-  );
+  const conditions = data.dashboardIds.map(() => `table_to__id = ?`).join(' OR ');
+  const queryStr = `
+    DELETE FROM ${GROUPS_DASHBOARDS}
+    WHERE table_from__id = ?
+    AND (${conditions})
+  `.trim();
+
+  const params = [data.id, ...data.dashboardIds];
+
+  const sql = await runQuery(queryStr, params);
 
   if (+sql[0]['num_affected_rows'] === 0) {
     throw new NotFoundError('Could not found a group at id ' + data.id);
   }
 
-  return '';
+  return 'Dashboard removed from group.';
 };
 
 export const createAuthGroupUsers = async () => {
@@ -615,14 +655,26 @@ export const updateAuthGroupUsers = async (
 export const deleteAuthGroupUsers = async (
   data: AuthGroupUsersDeleteReq,
 ): Promise<AuthGroupUsersDeleteRes> => {
-  const sql = await runQuery(
-    `DELETE FROM ${GROUPS_USERS} WHERE ${data.authUsers
-      .map((user) => `table_to__id = '${user.id}'`)
-      .join(' AND ')} AND table_from__id = '${data.id}'`,
-  );
+  const conditions: string[] = [];
+  const values: any[] = [];
+
+  for (const user of data.authUsers) {
+    conditions.push(`table_to__id = ?`);
+    values.push(user.id);
+  }
+
+  // Append the group ID for `table_from__id`
+  conditions.push(`table_from__id = ?`);
+  values.push(data.id);
+
+  const whereClause = conditions.join(' AND ');
+  const query = `DELETE FROM ${GROUPS_USERS} WHERE ${whereClause}`;
+
+  await runQuery(query, values);
 
   return '';
 };
+
 
 export const createAuthGroupTables = async (
   data: AuthGroupTablesCreateReq,
@@ -701,15 +753,17 @@ export const deleteAuthGroupTables = async (
   data: AuthGroupTablesDeleteReq,
 ): Promise<AuthGroupTablesDeleteRes> => {
   const sql = await runQuery(
-    `DELETE FROM ${GROUPS_TABLES} WHERE table_from__id = '${data.id}'`,
+    `DELETE FROM ${GROUPS_TABLES} WHERE table_from__id = ?`,
+    [data.id]
   );
 
-  if (+sql[0]['num_affected_rows'] === 0) {
-    throw new NotFoundError('Could not found a group at id ' + data.id);
+  if (+sql[0]?.['num_affected_rows'] === 0) {
+    throw new NotFoundError('Could not find a group at id ' + data.id);
   }
 
   return '';
 };
+
 
 export const deleteSubdoc = async (data: {
   id: string;

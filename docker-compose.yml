@@ -1,5 +1,47 @@
 services:
 
+  sql-app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "3001:3001"
+    depends_on:
+      - delta-db
+    environment:
+      CLASSPATH: "/usr/src/app/delta-table/node/jars/*"
+      JWT_SECRET_KEY: 2d49959562a7d8718d0370b09fd96d6f13b00af81fdf7d353aa96b1d975ba687
+      REFRESH_JWT_SECRET_KEY: 5875bb587efd0b6aa7d00b6b37ec210941e0c05034afcd4e8d8680137c53d2dd
+      ADMIN_PASSWORD: admin
+      USER_PASSWORD: user
+      DB_SOURCE: deltadb
+      LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
+      P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
+      FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
+      ENVIRONMENT_MODE: test
+    volumes:
+      - ./backend:/usr/src/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    entrypoint:
+      - /usr/bin/bash
+      - -c
+      - |
+        export CLASSPATH="$(ls /usr/src/app/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
+        npm install 
+        cd fern
+        fern generate
+        cd ..
+        cd sql-app
+        npm install express cors
+        cd fern
+        fern generate
+        cd ..
+        timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+        npm run build
+        ls src
+        node dist/sql-app/src/server.js
+
   app-tests:
     build:
       context: .
@@ -22,6 +64,7 @@ services:
       LD_LIBRARY_PATH: /usr/lib/jvm/java-1.17.0-openjdk-amd64/lib/server:/usr/lib/jvm/java-1.17.0-openjdk-amd64/lib
       P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
       FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
+      ENVIRONMENT_MODE: test
     volumes:
       - ./backend:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -31,8 +74,11 @@ services:
       - -c
       - |
         timeout 1000 bash -c 'until nc -z node-app 8080; do echo "Waiting for port 8080 from app-tests..."; sleep 1; done; echo "app-tests: Port 8080 is open!"'
+        echo "Checking if service is up on port 3001..."
+        timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
         echo "RUNNING INTEGRATION TESTS"
         npm run jest --forceExit
+
   app:
     build:
       context: .
@@ -40,7 +86,6 @@ services:
     container_name: node-app
     ports:
       - "8080:8080"
-      - "3001:3001"
     depends_on:
       - delta-db
     environment:
@@ -94,6 +139,7 @@ services:
         echo $CLASSPATH
         echo 'LS'
         ls
+        timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
         npm run build && node dist/src/server.js
         #       sleep 1000000
 

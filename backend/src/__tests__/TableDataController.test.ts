@@ -59,7 +59,7 @@ describe('tabledatacontroller', () => {
   });
 
   afterAll(async () => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 
@@ -118,8 +118,6 @@ describe('tabledatacontroller', () => {
       'table/data/read',
       body2,
     )) as AxiosResponse<TableDataReadRes>;
-
-    console.log({readRetVal: JSON.stringify(readRetVal)})
 
     expect(
       readRetVal.data.rows.some((value) =>

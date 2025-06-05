@@ -105,11 +105,17 @@ export const updateDashboard = async (
   data: DashboardUpdateReq,
 ): Promise<DashboardUpdateRes> => {
   const state = data?.state || {};
+
   const sql = await updateSql(
     DASHBOARDS,
     { ...data, state: JSON.stringify(state) },
-    `WHERE id = '${data.id}'`,
+    `WHERE id = ?`,
+    [data.id]
   );
+
+  if (sql.length === 0) {
+    throw new Error(`Dashboard with id ${data.id} not found or not updated`);
+  }
 
   return {
     id: sql[0]['id'],
@@ -120,22 +126,26 @@ export const updateDashboard = async (
   };
 };
 
+
 export const readDashboardById = async (dashboardId: string, userId: string) => {
   if (userId) {
-    const isAdminCheck = await runQuery(`
-SELECT EXISTS (
-    SELECT 1
-    FROM groups_users
-    WHERE table_to__id = '${userId}' and table_from__name = 'Admin'
-) AS record_exists;
-`)
-    if (isAdminCheck[0]['record_exists'] === false) {
-      return readDashboardById2(dashboardId, userId)
+    const isAdminCheck = await runQuery(
+      `SELECT EXISTS (
+        SELECT 1
+        FROM groups_users
+        WHERE table_to__id = ? AND table_from__name = 'Admin'
+      ) AS record_exists;`,
+      [userId]
+    );
 
+    if (isAdminCheck[0]['record_exists'] === false) {
+      return readDashboardById2(dashboardId, userId);
     }
   }
+
   const sql = await runQuery(
-    `SELECT * FROM ${DASHBOARDS} WHERE id = '${dashboardId}'`,
+    `SELECT * FROM ${DASHBOARDS} WHERE id = ?`,
+    [dashboardId]
   );
 
   if (sql.length === 0) {
@@ -145,17 +155,23 @@ SELECT EXISTS (
   return { ...sql[0], state: JSON.parse(sql[0]['state']) };
 };
 
+
 const readDashboardById2 = async (
   dashboardId: string,
   userId: string
 ): Promise<DashboardReadRes> => {
-  const selectQuery = `SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = '${userId}' AND B.table_from__read = TRUE `
+  const selectQuery = `
+    SELECT A.* 
+    FROM dashboards A 
+    JOIN groups_dashboards B ON A.id = B.table_to__id 
+    JOIN groups_users GU ON B.table_from__id = GU.table_from__id 
+    WHERE GU.table_to__id = ? 
+      AND B.table_from__read = TRUE 
+      AND A.id = ?
+  `;
 
-  const query1 = `${selectQuery}`
+  const sql = await runQuery(selectQuery, [userId, dashboardId]);
 
-  const sql = await runQuery(
-    query1,
-  );
   if (sql.length === 0) {
     throw new NotFoundError('Dashboard not found at id ' + dashboardId);
   }
@@ -165,12 +181,15 @@ const readDashboardById2 = async (
     name: sql[0]?.name,
     owner: sql[0]?.owner,
     folder: sql[0]?.folder,
-    state: JSON.parse(sql[0]['state'])
+    state: JSON.parse(sql[0]['state']),
   };
 };
+
+
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   const sql = await runQuery(
-    `DELETE FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
+    `DELETE FROM ${DASHBOARDS} WHERE id = ?`,
+    [data.id]
   );
 
   const affectedRows = +sql[0]['num_affected_rows'];
@@ -182,84 +201,97 @@ export const deleteDashboard = async (data: DashboardDeleteReq) => {
   return 'Dashboard deleted!';
 };
 
+
 export const readDashboards = async (
   body: DashboardsReadReq,
   userId?: string
 ): Promise<DashboardsReadRes> => {
-
-
+  // Admin check (if userId is provided)
   if (userId) {
-    const isAdminCheck = await runQuery(`
-SELECT EXISTS (
-    SELECT 1
-    FROM groups_users
-    WHERE table_to__id = '${userId}' and table_from__name = 'Admin'
-) AS record_exists;
-`)
-    if (isAdminCheck[0]['record_exists'] === false) {
-      return readDashboards2(body, userId)
+    const isAdminCheck = await runQuery(
+      `
+      SELECT EXISTS (
+        SELECT 1
+        FROM groups_users
+        WHERE table_to__id = ? AND table_from__name = 'Admin'
+      ) AS record_exists;
+      `,
+      [userId]
+    );
 
+    if (!isAdminCheck[0]['record_exists']) {
+      return readDashboards2(body, userId);
     }
   }
 
-  const whereClause = filterToQuery(body, "");
-  const whereClause2 = filterToQuery({ filters: body.filters }, "");
-  const sql = await runQuery(
+  // Filter clauses and params
+  const { queryStr: whereClause, params: whereParams } = filterToQuery(body, '');
+  const { queryStr: countWhereClause, params: countParams } = filterToQuery({ filters: body.filters }, '');
+
+  // Main query
+  const dashboardsSql = await runQuery(
     `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
+    whereParams
   );
-  const sqlCount = await runQuery(
-    `SELECT COUNT(*) FROM ${DASHBOARDS} ${whereClause2}`,
+
+  // Count query
+  const countSql = await runQuery(
+    `SELECT COUNT(*) FROM ${DASHBOARDS} ${countWhereClause}`,
+    countParams
   );
-  const count = +sqlCount[0]['count(1)'];
+
+  const count = +countSql[0]['count(1)'] || +countSql[0]['count(1)'] || 0;
+
   if (count === 0) {
     throw new NotFoundError('No dashboards found');
   }
 
   return {
-    dashboards: sql.map((dash) => {
-      return {
-        ...dash,
-        state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",
-      };
-    }) as Dashboard[],
+    dashboards: dashboardsSql.map((dash) => ({
+      ...dash,
+      state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : '',
+    })) as Dashboard[],
     totalDashboards: count,
   };
 };
+
 
 const readDashboards2 = async (
   body: DashboardsReadReq,
   userId: string
 ): Promise<DashboardsReadRes> => {
-  const whereClause = filterToQuery(body, "A", undefined, true);
-  const whereClause2 = filterToQuery({ filters: body.filters }, "A", undefined, true);
-  const selectQuery = `SELECT A.* FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE GU.table_to__id = '${userId}' AND B.table_from__read = TRUE ${Object.keys(body.filters).length > 0 ? `AND ${whereClause}` : whereClause}`
-  const countQuery = `SELECT COUNT(*) AS total_count FROM dashboards A JOIN groups_dashboards B ON A.id = B.table_to__id JOIN groups_users GU ON B.table_from__id = GU.table_from__id WHERE  GU.table_to__id = '${userId}' AND B.table_from__read = TRUE ${whereClause2 ? `AND ${whereClause2}` : ''}`
+  const { queryStr: filterQuery, params: filterParams } = filterToQuery(body, "A", undefined);
+  const { queryStr: countFilterQuery, params: countFilterParams } = filterToQuery({ filters: body.filters }, "A", undefined);
 
-  const query1 = `${selectQuery}`
+  const baseSelect = `
+    FROM dashboards A
+    JOIN groups_dashboards B ON A.id = B.table_to__id
+    JOIN groups_users GU ON B.table_from__id = GU.table_from__id
+    WHERE GU.table_to__id = ? AND B.table_from__read = TRUE
+  `;
 
-  const query2 = `${countQuery}`
+  const whereSelect = filterQuery ? ` ${filterQuery}` : '';
+  const whereCount = countFilterQuery ? `AND${countFilterQuery}` : '';
 
-  const sql = await runQuery(
-    query1,
-  );
-  const sqlCount = await runQuery(
-    `${query2}`,
-  );
+  const selectQuery = `SELECT A.* ${baseSelect} ${whereSelect}`;
+  const countQuery = `SELECT COUNT(*) AS total_count ${baseSelect} ${whereCount}`;
 
+  const selectParams = [userId, ...filterParams];
+  const countParams = [userId, ...countFilterParams];
+  
+  const sql = await runQuery(selectQuery, selectParams);
+  const sqlCount = await runQuery(countQuery, countParams);
 
-
-  const count = +sqlCount[0]['count(1)'];
+  const count = +sqlCount[0]['total_count'];
   if (count === 0) {
     throw new NotFoundError('No dashboards found');
   }
 
   return {
-    dashboards: sql.map((dash) => {
-      return {
-        ...dash,
-        state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",
-      };
-    }) as Dashboard[],
+    dashboards: sql.map((dash) => ({
+      ...dash,
+      state: isJSONParsable(dash['state']) ? JSON.parse(dash['state']) : "",
+    })) as Dashboard[],
     totalDashboards: count,
   };
 };
@@ -373,34 +405,43 @@ export const deleteDashboardGroupAuth = async (
 export const updateDashboardGroupAuth = async (
   data: DashboardGroupAuthUpdateReq,
 ): Promise<DashboardGroupAuthUpdateRes> => {
-  const sql = await updateSql(
-    GROUPS_DASHBOARDS,
-    data.authGroups.map((group) => {
-      return {
-        ['table_to__read']: group.read,
-        ['table_to__create']: group.create,
-        ['table_to__update']: group.update,
-        ['table_to__delete']: group.delete,
-        ['table_from__id']: group.id,
-        ['table_from__name']: group.id,
-      };
-    }),
-    `WHERE table_to__id = '${data.id}'`,
-  );
+  // Since updateSql expects one record per call,
+  // we perform update for each authGroup individually and collect results
+  const results = [];
+
+  for (const group of data.authGroups) {
+    const updateData = {
+      ['table_to__read']: group.read,
+      ['table_to__create']: group.create,
+      ['table_to__update']: group.update,
+      ['table_to__delete']: group.delete,
+      ['table_from__id']: group.id,
+      ['table_from__name']: group.id,
+    };
+
+    // Use parameterized WHERE clause:
+    // "WHERE table_to__id = ?" and params [data.id]
+    const sql = await updateSql(
+      GROUPS_DASHBOARDS,
+      updateData,
+      'WHERE table_to__id = ?',
+      [data.id]
+    );
+
+    results.push(...sql);  // assuming sql returns an array of updated rows
+  }
 
   return {
-    authGroups: sql.map((el) => {
-      return {
-        id: el['table_from__id'],
-        name: el['table_from__name'],
-
-        create: el['table_to__create'] === 'true',
-        read: el['table_to__read'] === 'true',
-        update: el['table_to__update'] === 'true',
-        delete: el['table_to__delete'] === 'true',
-      };
-    }) as DashboardAuthGroups[],
+    authGroups: results.map((el) => ({
+      id: el['table_from__id'],
+      name: el['table_from__name'],
+      create: el['table_to__create'] === 'true',
+      read: el['table_to__read'] === 'true',
+      update: el['table_to__update'] === 'true',
+      delete: el['table_to__delete'] === 'true',
+    })) as DashboardAuthGroups[],
     id: data.id,
     name: '',
   };
 };
+

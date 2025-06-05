@@ -40,8 +40,6 @@ import {
   RegisterAdminReq,
   LoginRes,
   RegisterAdminRes,
-ExecuteQueryReq,
-ExecuteQueryRes
 } from '../typescript/api';
 // import { sendHttpRequest } from '../http';
 // import { method } from 'lodash';
@@ -102,7 +100,7 @@ describe('dashboardCreatePOST', () => {
   })
 
   afterAll(async () => {
-    await cleanTables(tables, postAdmin)
+    await cleanTables(tables)
     process.env = OLD_ENV; // Restore old environment
   });
 
@@ -117,7 +115,6 @@ describe('dashboardCreatePOST', () => {
        '/auth/group/create',
        createBody,
      )) as AxiosResponse<AuthGroupCreateRes>;
-     console.log({authGroupCreateRes: JSON.stringify(authGroupCreateRes.data)})
      expect(authGroupCreateRes.status).toBe(200);
 
      expect(authGroupCreateRes.data).toMatchObject(createBody);
@@ -968,7 +965,6 @@ describe('dashboardCreatePOST', () => {
        createBody,
      )) as AxiosResponse<AuthGroupUsersCreateRes>;
 
-     console.log({groupUserCreateRes: JSON.stringify(groupUserCreateRes), admin})
      expect(groupUserCreateRes.status).toBe(200);
 
      const readBody: AuthGroupUsersReadReq = {
@@ -1289,7 +1285,6 @@ describe('dashboardCreatePOST', () => {
        '/auth/group/read',
        readGroup,
      )) as AxiosResponse<AuthGroupReadRes>;
-     console.log({authGroupCreateRes: JSON.stringify(authGroupCreateRes), authGroupReadRes: JSON.stringify(authGroupReadRes)})
 
      expect(authGroupReadRes.data.tableMetadataCrud).toMatchObject(createAuthGroup.tableMetadataCrud)
    })

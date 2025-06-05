@@ -44,14 +44,14 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml \
             up --build --abort-on-container-exit --exit-code-from app-tests \
-            delta-db app app-tests webhook-receiver
+            delta-db app app-tests webhook-receiver sql-app
 
       - name: Run Frontend Tests
         if: success()  # Only runs if previous step (App Tests) succeeded
         run: |
           docker-compose -f docker-compose.yml \
             up --build --abort-on-container-exit --exit-code-from frontend-tests \
-            delta-db app frontend-server frontend-tests webhook-receiver
+            delta-db app frontend-server frontend-tests webhook-receiver sql-app
           #      - name: Checking UID
           #        run: |
           #          docker-compose exec delta-db bash -c "id -u"

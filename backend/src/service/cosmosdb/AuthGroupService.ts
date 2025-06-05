@@ -286,7 +286,6 @@ export const deleteAuthGroup = async (
         for (const prop3 in edges[prop][prop2]) {
           const direction = prop3;
           for (const value of edges[prop][prop2][prop3]) {
-            console.log({ value });
             const snakeTableName = snakeCase(tableName);
             const res2 = await deleteTableDataEdge({
               edge: {
@@ -610,8 +609,6 @@ export const createAuthGroupTables = async (
       partitionKeyProp: 'name',
     },
   });
-
-  console.log({ res });
 
   return {
     name: data.name,
