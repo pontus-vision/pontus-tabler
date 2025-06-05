@@ -270,15 +270,15 @@ const readDashboards2 = async (
     WHERE GU.table_to__id = ? AND B.table_from__read = TRUE
   `;
 
-  const whereSelect = filterQuery ? `AND ${filterQuery}` : '';
-  const whereCount = countFilterQuery ? `AND ${countFilterQuery}` : '';
+  const whereSelect = filterQuery ? ` ${filterQuery}` : '';
+  const whereCount = countFilterQuery ? `AND${countFilterQuery}` : '';
 
   const selectQuery = `SELECT A.* ${baseSelect} ${whereSelect}`;
   const countQuery = `SELECT COUNT(*) AS total_count ${baseSelect} ${whereCount}`;
 
   const selectParams = [userId, ...filterParams];
   const countParams = [userId, ...countFilterParams];
-
+  
   const sql = await runQuery(selectQuery, selectParams);
   const sqlCount = await runQuery(countQuery, countParams);
 
