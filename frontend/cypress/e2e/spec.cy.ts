@@ -321,75 +321,109 @@ describe('Test Table (meta-data and data) CRUD', () => {
       cy.task('selectTables', 'table_2')
       cy.get(`[role="row"][row-index="0"]`).find('[col-id="column_1"] input').should('be.checked')
     }),
-    it('should create edges between table rows', () => {
+    it('should create another row with checkboxes', () => {
       cy.visit(`/tables/read`)
 
-      cy.contains('Table 1').click()
+      cy.contains('Table 2').click()
 
-      cy.get('span.ag-header-cell-text').eq(0).should('have.text', 'column 1')
+      cy.contains('Table 2').should('be.visible')
+
+      cy.contains('column 1').should('exist')
+
+      cy.wait(3000)
 
       cy.get("[data-cy='edit-on-grid-toggle']").click()
 
       cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').dblclick()
 
-      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').click().type('Foo2')
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"] input').click()
 
-      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').click().type('Bar2{enter}')
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"] input').click()
 
-      cy.visit(`/tables/read`)
-
-      cy.contains('Table 1').click()
-
-      cy.get("[data-cy='edit-on-grid-toggle']").click()
-
-      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').dblclick()
-
-      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').type('Foo2')
-
-      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').type('Bar2{enter}')
+      cy.get(`[data-cy="grid-action-panel-save-btn"]`).click()
 
       cy.contains('Table row created.').should('exist')
 
-      cy.get("[data-cy='burguer-menu-input']").click()
+      cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
-      cy.contains('Tables').click()
+      cy.contains('Loading...').should('not.exist')
 
-      cy.get("[data-cy='burguer-menu-input']").click()
+      cy.get(`[role="row"][row-index="1"]`).should('exist')
 
-      cy.contains('Create Edges').click()
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"] input').should('exist')
 
-      cy.get('[data-cy="select-tables-container-1"] select').select('Table 1')
+      cy.task('selectTables', 'table_2')
+      cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"] input').should('be.checked')
+    })
+  it('should create edges between table rows', () => {
+    cy.visit(`/tables/read`)
 
-      cy.get('[data-cy="select-tables-container-1"]').contains('Loading...').should('not.exist')
+    cy.contains('Table 1').click()
 
-      cy.get('[data-cy="select-tables-container-2"] select').select('Table 1')
+    cy.get('span.ag-header-cell-text').eq(0).should('have.text', 'column 1')
 
-      cy.get('[data-cy="select-tables-container-2"]').contains('Loading...').should('not.exist')
+    cy.get("[data-cy='edit-on-grid-toggle']").click()
 
-      cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').first().contains('Foo2')
+    cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').dblclick()
 
-      cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').eq(1).contains('Foo2')
+    cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').click().type('Foo2')
 
-      cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').first().contains('Foo2')
+    cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').click().type('Bar2{enter}')
 
-      cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').eq(1).contains('Foo')
+    cy.visit(`/tables/read`)
 
-      cy.get('[data-cy="table-relationship-preview-col"]').eq(2).find('td').first().contains('Foo')
+    cy.contains('Table 1').click()
 
-      cy.get('[data-cy="table-relationship-preview-col"]').eq(2).find('td').eq(1).contains('Foo2')
+    cy.get("[data-cy='edit-on-grid-toggle']").click()
 
-      cy.get('[data-cy="table-relationship-preview-col"]').eq(3).find('td').first().contains('Foo')
+    cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').dblclick()
 
-      cy.get('[data-cy="table-relationship-preview-col"]').eq(3).find('td').eq(1).contains('Foo')
+    cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_1"]').type('Foo2')
 
-      cy.get('[data-cy="select-tables-edge-label-dropdown"]').find('input').click().type('edge 1').type('{enter}')
+    cy.get(`[role="row"][row-index="1"]`).find('[col-id="column_2"]').type('Bar2{enter}')
 
-      cy.get('[data-cy="select-tables-edge-label-dropdown"]').find('[role="option"][aria-selected="false"]').contains('edge 1').click()
+    cy.contains('Table row created.').should('exist')
 
-      cy.contains('Create').click()
+    cy.get("[data-cy='burguer-menu-input']").click()
 
-      cy.contains('Edge(s) created!').should('exist')
-    }),
+    cy.contains('Tables').click()
+
+    cy.get("[data-cy='burguer-menu-input']").click()
+
+    cy.contains('Create Edges').click()
+
+    cy.get('[data-cy="select-tables-container-1"] select').select('Table 1')
+
+    cy.get('[data-cy="select-tables-container-1"]').contains('Loading...').should('not.exist')
+
+    cy.get('[data-cy="select-tables-container-2"] select').select('Table 1')
+
+    cy.get('[data-cy="select-tables-container-2"]').contains('Loading...').should('not.exist')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').first().contains('Foo2')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').eq(1).contains('Foo2')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').first().contains('Foo2')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').eq(1).find('td').eq(1).contains('Foo')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').eq(2).find('td').first().contains('Foo')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').eq(2).find('td').eq(1).contains('Foo2')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').eq(3).find('td').first().contains('Foo')
+
+    cy.get('[data-cy="table-relationship-preview-col"]').eq(3).find('td').eq(1).contains('Foo')
+
+    cy.get('[data-cy="select-tables-edge-label-dropdown"]').find('input').click().type('edge 1').type('{enter}')
+
+    cy.get('[data-cy="select-tables-edge-label-dropdown"]').find('[role="option"][aria-selected="false"]').contains('edge 1').click()
+
+    cy.contains('Create').click()
+
+    cy.contains('Edge(s) created!').should('exist')
+  }),
     it.skip('should get unauthorized page', () => {
       cy.task('log', 'This will be output to the terminal');
 
