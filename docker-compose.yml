@@ -143,7 +143,6 @@ services:
         echo 'LS'
         ls
         timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
-        sleep 100000
         npm run build && node dist/src/server.js
         #       sleep 1000000
 
@@ -230,7 +229,6 @@ services:
         export CLASSPATH="$(ls /usr/src/app/backend/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
         # export DELTA_DB=delta-db:10000
         export FRONTEND_URL=http://frontend-server:5173
-        sleep 100000
         npx cypress install
         npx cypress run -b chrome
         #sleep 10000
