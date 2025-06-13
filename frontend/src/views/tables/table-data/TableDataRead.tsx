@@ -143,14 +143,12 @@ const TableDataReadView = () => {
 
 
       for (const prop in obj.cols) {
-        const col = table.cols?.find(col => col.name === prop) 
+        const col = table.cols?.find(col => col.name === prop)
 
-        if(col?.kind === 'checkboxes' && !obj.cols[prop]) {
+        if (col?.kind === 'checkboxes' && !obj.cols[prop]) {
           obj.cols[prop] = false
         }
       }
-
-      console.log({obj})
 
       const res = await tableDataCreate(obj);
 
