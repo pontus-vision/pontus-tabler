@@ -154,7 +154,6 @@ services:
     volumes:
       - ./backend/delta-table/data:/data
       - ./backend/delta-table/work-dir:/opt/spark/work-dir
-      - ./backend/database-management:/opt/spark/work-dir/database-management
       # - spark-workdir:/opt/spark/work-dir
     environment:
       - CLASSPATH=/opt/spark/jars/*

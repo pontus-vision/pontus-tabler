@@ -5,6 +5,15 @@ set -e
 BEELINE_URL="jdbc:hive2://delta-db:10000/default"
 CHANGELOG_DIR="migrations"
 INDEX_FILE="migrations/changelog_index.txt"
+echo "[DEBUG] Listing migrations directory:"
+ls -l "$CHANGELOG_DIR"
+
+echo "[DEBUG] Listing index file:"
+cat "$INDEX_FILE"
+if [ ! -f "$INDEX_FILE" ]; then
+  echo "[ERROR] changelog index file not found at $INDEX_FILE"
+  exit 1
+fi
 
 echo "[INFO] Connecting to Hive at: $BEELINE_URL"
 
@@ -76,4 +85,3 @@ while read -r file; do
 done <"$INDEX_FILE"
 
 echo "[INFO] All migrations processed."
-
