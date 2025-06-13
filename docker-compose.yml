@@ -112,6 +112,7 @@ services:
       - -c
       - |
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
+        ./database-management/apply.sh
         echo "Checking if service is up on port 10000..."
         timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
         cd delta-table
@@ -140,6 +141,7 @@ services:
         echo 'LS'
         ls
         timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
+        sleep 100000
         npm run build && node dist/src/server.js
         #       sleep 1000000
 
@@ -152,12 +154,19 @@ services:
     volumes:
       - ./backend/delta-table/data:/data
       - ./backend/delta-table/work-dir:/opt/spark/work-dir
+      - ./backend/database-management:/opt/spark/work-dir/database-management
       # - spark-workdir:/opt/spark/work-dir
     environment:
       - CLASSPATH=/opt/spark/jars/*
     ports:
       - "10000:10000"
       - "8888:8888"
+    command:
+      - sh
+      - -c
+      - |
+        echo "MIGRATIONS"
+
 
   frontend-server:
     build:
@@ -220,6 +229,7 @@ services:
         export CLASSPATH="$(ls /usr/src/app/backend/delta-table/node/jars/*|xargs|sed -e 's/ /,/g' )"
         # export DELTA_DB=delta-db:10000
         export FRONTEND_URL=http://frontend-server:5173
+        sleep 100000
         npx cypress install
         npx cypress run -b chrome
         #sleep 10000
