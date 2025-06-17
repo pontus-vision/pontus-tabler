@@ -1,7 +1,7 @@
 FROM node:22
 
 RUN apt update && \
-    apt install -y openjdk-17-jdk make g++ netcat-traditional net-tools curl tar unzip
+    apt install -y openjdk-17-jdk make g++ netcat-traditional net-tools curl tar unzip gettext
 
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV HIVE_VERSION=3.1.3
