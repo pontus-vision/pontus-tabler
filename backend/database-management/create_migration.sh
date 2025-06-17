@@ -1,35 +1,21 @@
 #!/bin/bash
-
 set -e
 
-CHANGELOG_DIR="migrations"
-INDEX_FILE="$CHANGELOG_DIR/changelog_index.txt"
+read -p "Enter migration name (e.g., create-users): " name
+INDEX_FILE="migrations/changelog_index.txt"
+TIMESTAMP=$(date +"%s")
+FILENAME=$(printf "%03d-%s.sql" "$(($(wc -l < $INDEX_FILE)+1))" "$name")
+FULL_PATH="migrations/$FILENAME"
 
-# Ask for the migration name
-read -p "Enter migration name (e.g., create-auth-groups): " NAME
+echo "[INFO] Creating $FULL_PATH"
+cat <<EOF > "$FULL_PATH"
+-- changeset you:$(basename "$FILENAME" .sql)
+-- description: $name
+-- checksum: will-be-calculated
 
-# Get next ID based on number of existing migrations
-ID=$(printf "%03d" $(($(ls "$CHANGELOG_DIR"/*.sql 2>/dev/null | wc -l) + 1)))
-
-FILENAME="${ID}-${NAME}.sql"
-FILEPATH="${CHANGELOG_DIR}/${FILENAME}"
-
-# Ask for author name
-read -p "Enter author name (e.g., alice): " AUTHOR
-
-# Get timestamp
-TIMESTAMP=$(date -u "+%a %b %d %T UTC %Y")
-
-# Create the SQL file with the changeset header
-cat <<EOF > "$FILEPATH"
--- changeset $AUTHOR:$ID
--- Migration: $NAME
--- Created: $TIMESTAMP
-
--- Write your SQL commands below this line
+CREATE TABLE IF NOT EXISTS \$SCHEMA_NAME.your_table_name (
+    id STRING
+) USING DELTA LOCATION "/data/\$SCHEMA_NAME/your_table_name";
 EOF
 
-# Add filename to changelog index
 echo "$FILENAME" >> "$INDEX_FILE"
-
-echo "[SUCCESS] Created $FILEPATH and registered in $INDEX_FILE"

@@ -1,24 +1,17 @@
 #!/bin/bash
-
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BEELINE_URL="jdbc:hive2://delta-db:10000/default"
-CHANGELOG_DIR="migrations"
-INDEX_FILE="migrations/changelog_index.txt"
-echo "[DEBUG] Listing migrations directory:"
-ls -l "$CHANGELOG_DIR"
+CHANGELOG_DIR="$SCRIPT_DIR/migrations"
+INDEX_FILE="$CHANGELOG_DIR/changelog_index.txt"
+SCHEMA_NAME="pv_${ENVIRONMENT_MODE:-dev}"
+export SCHEMA_NAME
 
-echo "[DEBUG] Listing index file:"
-cat "$INDEX_FILE"
-if [ ! -f "$INDEX_FILE" ]; then
-  echo "[ERROR] changelog index file not found at $INDEX_FILE"
-  exit 1
-fi
-
-echo "[INFO] Connecting to Hive at: $BEELINE_URL"
-
-# Create DATABASECHANGELOG table if it does not exist
+echo "[INFO] Using schema: $SCHEMA_NAME"
 echo "[INFO] Ensuring DATABASECHANGELOG table exists..."
+
+# Create changelog table
 beeline -u "$BEELINE_URL" -e "
 CREATE TABLE IF NOT EXISTS DATABASECHANGELOG (
     id STRING,
@@ -26,62 +19,43 @@ CREATE TABLE IF NOT EXISTS DATABASECHANGELOG (
     filename STRING,
     dateexecuted STRING,
     orderexecuted INT,
-    status STRING
-)
-USING DELTA LOCATION '/data/pv/database_changelog';
+    status STRING,
+    checksum STRING
+) USING DELTA LOCATION '/data/$SCHEMA_NAME/database_changelog';
 "
 
-# Fetch applied changeset IDs from DATABASECHANGELOG
-echo "[INFO] Fetching already applied changelog IDs..."
-APPLIED_IDS=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e "SELECT id FROM DATABASECHANGELOG;" 2>/dev/null)
-echo "[INFO] Fetched applied IDs:"
-echo "$APPLIED_IDS"
+# Get list of applied migrations
+APPLIED_IDS=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e "SELECT id FROM DATABASECHANGELOG;" 2>/dev/null || true)
 
 order=1
 while read -r file; do
   filepath="$CHANGELOG_DIR/$file"
-  echo "[INFO] Processing file: $filepath"
+  echo "[INFO] Processing $file..."
 
-  if [ ! -f "$filepath" ]; then
-    echo "[ERROR] File not found: $filepath"
-    exit 1
-  fi
-
-  changeline=$(grep -i '^-- changeset' "$filepath" || true)
-  if [ -z "$changeline" ]; then
-    echo "[ERROR] No changeset header found in $filepath"
-    exit 1
-  fi
-
+  # Extract author and id
+  changeline=$(grep -i '^-- changeset' "$filepath")
   author=$(echo "$changeline" | sed 's/-- changeset //' | cut -d ':' -f1)
   id=$(echo "$changeline" | sed 's/-- changeset //' | cut -d ':' -f2)
 
   if echo "$APPLIED_IDS" | grep -q "^$id$"; then
     echo "[INFO] Skipping already applied: $file"
   else
-    echo "[INFO] Applying: $file (id=$id, author=$author)"
-    echo "[INFO] Executing SQL..."
+    # Compute checksum
+    checksum=$(sha256sum "$filepath" | awk '{ print $1 }')
+    echo "[INFO] Applying $file (id=$id, checksum=$checksum)"
 
-    migration_output=$(beeline -u "$BEELINE_URL" -f "$filepath" 2>&1)
-    migration_exit=$?
+    # Run migration with envsubst
+    envsubst < "$filepath" > /tmp/_temp_migration.sql
+    beeline -u "$BEELINE_URL" -f /tmp/_temp_migration.sql
 
-    echo "$migration_output"
-
-    if [ $migration_exit -ne 0 ]; then
-      echo "[ERROR] Migration failed for $file"
-      exit 1
-    fi
-
+    # Insert changelog row
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-
-    echo "[INFO] Logging migration to DATABASECHANGELOG"
     beeline -u "$BEELINE_URL" -e "
-      INSERT INTO DATABASECHANGELOG
-      VALUES ('$id', '$author', '$file', '$timestamp', $order, 'EXECUTED');
+      INSERT INTO DATABASECHANGELOG VALUES (
+        '$id', '$author', '$file', '$timestamp', $order, 'EXECUTED', '$checksum'
+      );
     "
   fi
 
   ((order++))
 done <"$INDEX_FILE"
-
-echo "[INFO] All migrations processed."
