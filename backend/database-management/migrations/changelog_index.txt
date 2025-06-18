@@ -1,0 +1,6 @@
+001-create-auth-groups.sql
+002-create-auth-users.sql
+003-create-groups-users.sql
+004-create-tables.sql
+005-create-dashboards.sql
+006-create-menu.sql

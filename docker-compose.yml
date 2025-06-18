@@ -114,6 +114,9 @@ services:
         if [[ ! -f "src/generated/index.js" ]] ; then  fern generate ; fi
         echo "Checking if service is up on port 10000..."
         timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
+        cd database-management
+        ./apply.sh
+        cd ..
         cd delta-table
         npm i -g java --unsafe-perm
         cd ..
@@ -158,6 +161,12 @@ services:
     ports:
       - "10000:10000"
       - "8888:8888"
+    command:
+      - sh
+      - -c
+      - |
+        echo "MIGRATIONS"
+
 
   frontend-server:
     build:

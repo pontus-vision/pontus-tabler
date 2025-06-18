@@ -135,10 +135,20 @@ const TableDataReadView = () => {
       if (!table?.name) return;
 
       delete data.id
+      const { click, update, select, delete: deleteFn, ...rest } = data
       const obj: TableDataCreateReq = {
         tableName: table?.name,
-        cols: data,
+        cols: rest,
       };
+
+
+      for (const prop in obj.cols) {
+        const col = table.cols?.find(col => col.name === prop)
+
+        if (col?.kind === 'checkboxes' && !obj.cols[prop]) {
+          obj.cols[prop] = false
+        }
+      }
 
       const res = await tableDataCreate(obj);
 
@@ -152,6 +162,7 @@ const TableDataReadView = () => {
         closeNewEntryView();
       }
     } catch (error) {
+      console.log({ error })
       notificationManagerRef?.current?.addMessage(
         'error',
         'Error',
