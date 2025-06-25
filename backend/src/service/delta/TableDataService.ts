@@ -6,6 +6,7 @@ import {
   TableDataReadRes,
   TableDataRowRef,
   TableDataUpdateReq,
+  TableReadRes
 } from '../../typescript/api';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from '../../generated/api/resources';
@@ -13,7 +14,7 @@ import { createSql, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from 
 import { filterToQuery } from '../../utils';
 import { TABLES } from '../../consts';
 
-const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
+const checkTableCols = async (tableName: string, cols: TableDataRowRef): Promise<TableReadRes> => {
   const res = (await runQuery(
     `SELECT * FROM ${TABLES} WHERE name = ?`,
     [tableName]
@@ -22,6 +23,7 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
   const resTable = res.map((el) => {
     return { ...el, cols: JSON.parse(res[0].cols) };
   });
+  console.log({ resTable })
 
   const colsChecked = [];
 
@@ -44,7 +46,10 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
       message: `Cols are not defined in table: ${colsChecked.join(', ')}`,
     };
   }
+
+  return resTable
 };
+
 export const createTableData = async (
   data: TableDataCreateReq,
 ): Promise<TableDataCreateRes> => {

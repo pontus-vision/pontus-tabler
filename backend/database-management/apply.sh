@@ -11,6 +11,9 @@ export SCHEMA_NAME
 echo "[INFO] Using schema: $SCHEMA_NAME"
 echo "[INFO] Ensuring DATABASECHANGELOG table exists..."
 
+echo "[INFO] Ensuring schema $SCHEMA_NAME exists..."
+beeline -u "$BEELINE_URL" -e "CREATE SCHEMA IF NOT EXISTS $SCHEMA_NAME;"
+
 # Create changelog table if it doesn't exist
 beeline -u "$BEELINE_URL" -e "
 CREATE TABLE IF NOT EXISTS DATABASECHANGELOG (

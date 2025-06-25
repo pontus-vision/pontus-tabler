@@ -128,53 +128,53 @@ const webhookMiddleware = async (
 
   const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
 
-//   const subscriptions = await runQuery(`
-//     SELECT
-//         ws.id AS subscription_id,
-//         ws.context,
-//         ws.operation,
-//         ws.user_id,
-//         ws.table_filter,
-//         gu.id AS group_user_id,
-//         gu.table_to__id
-//     FROM
-//         ${WEBHOOKS_SUBSCRIPTIONS} ws
-//     INNER JOIN
-//         ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
-//     ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
-//     WHERE
-//         ws.operation = '${operation}'
-//         -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
-// `);
+  //   const subscriptions = await runQuery(`
+  //     SELECT
+  //         ws.id AS subscription_id,
+  //         ws.context,
+  //         ws.operation,
+  //         ws.user_id,
+  //         ws.table_filter,
+  //         gu.id AS group_user_id,
+  //         gu.table_to__id
+  //     FROM
+  //         ${WEBHOOKS_SUBSCRIPTIONS} ws
+  //     INNER JOIN
+  //         ${GROUPS_USERS} gu ON ws.user_id = gu.table_to__id
+  //     ${joinTable ? `INNER JOIN ${joinTable} jt ON gu.table_from__id = jt.table_from__id` : ''}
+  //     WHERE
+  //         ws.operation = '${operation}'
+  //         -- AND jt.table_to__${operation} = true; -- Assuming there's a permission column in GROUPS_DASHBOARDS
+  // `);
 
-try {
-  
- const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
-  for (const subscription of subscriptions) {
-    const tableFilter = subscription?.['ws.table_filter']
+  try {
+
+    const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
+    for (const subscription of subscriptions) {
+      const tableFilter = subscription?.['ws.table_filter']
 
 
-    if (!isMatchingFilter(entity, tableFilter)) {
-      console.log('Filter criteria not met, skipping webhook.');
-      continue;
+      if (!isMatchingFilter(entity, tableFilter)) {
+        console.log('Filter criteria not met, skipping webhook.');
+        continue;
+      }
+
+      const payload = req.body
+      const { id, ...rest } = subscription
+      try {
+        const response = await axios.post(subscription.endpoint, rest, {
+          headers: {
+            'Authorization': `Bearer ${subscription.secretTokenRef}`,
+          }
+        });
+        console.log(`Webhook sent to ${subscription.endpoint}: ${response.status}`);
+      } catch (error) {
+        throw `Error sending webhook subscription: ${JSON.stringify(rest)}`;
+      }
     }
-
-    const payload = req.body
-      const {id, ...rest} = subscription
-    try {
-      const response = await axios.post(subscription.endpoint, rest, {
-        headers: {
-          'Authorization': `Bearer ${subscription.secretTokenRef}`,
-        }
-      });
-      console.log(`Webhook sent to ${subscription.endpoint}: ${response.status}`);
-    } catch (error) {
-      throw `Error sending webhook subscription: ${JSON.stringify(rest)}`;
-    }
+  } catch (error) {
+    console.error({ error })
   }
-} catch (error) {
-  console.error({error})
-}
 
 
   return next()
@@ -227,13 +227,13 @@ app.use(authMiddleware);
 
 app.use(webhookMiddleware)
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
 
-   console.log(
-     'Your server is listening on port %d (http://localhost:%d)',
-     port,
-     port,
-   );
+  console.log(
+    'Your server is listening on port %d (http://localhost:%d)',
+    port,
+    port,
+  );
 })
 register(app, { pontus });
 
