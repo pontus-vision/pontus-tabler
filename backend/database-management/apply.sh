@@ -14,69 +14,58 @@ echo "[INFO] Ensuring DATABASECHANGELOG table exists..."
 # Create changelog table if it doesn't exist
 beeline -u "$BEELINE_URL" -e "
 CREATE TABLE IF NOT EXISTS DATABASECHANGELOG (
+    filename STRING,
+    checksum STRING,
     id STRING,
     author STRING,
-    filename STRING,
     dateexecuted STRING,
     orderexecuted INT,
-    status STRING,
-    checksum STRING
+    status STRING
 )
 USING DELTA LOCATION '/data/$SCHEMA_NAME/database_changelog';
 "
 
-order=1
-while read -r file; do
-  filepath="$CHANGELOG_DIR/$file"
-  echo "[INFO] Processing $file..."
+echo "[INFO] Fetching applied migrations..."
+APPLIED=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e "SELECT filename, checksum FROM DATABASECHANGELOG;" 2>/dev/null || true)
 
-  if [ ! -f "$filepath" ]; then
-    echo "[WARN] File not found: $filepath. Skipping."
+order=1
+
+while read -r filename; do
+  filepath="$CHANGELOG_DIR/$filename"
+
+  if [[ ! -f "$filepath" ]]; then
+    echo "[WARN] Skipping missing file: $filepath"
     continue
   fi
 
-  # Extract changeset header
-  changeline=$(grep -i '^-- changeset' "$filepath" || true)
-  if [ -z "$changeline" ]; then
-    echo "[ERROR] No changeset header found in $file"
+  checksum=$(sha256sum "$filepath" | awk '{print $1}')
+  already_applied=$(echo "$APPLIED" | grep -F "$filename" | awk '{print $2}')
+  run_on_change=$(grep -i "^-- runOnChange" "$filepath" || true)
+
+  if [[ "$already_applied" == "$checksum" ]]; then
+    echo "[SKIP] $filename already applied with matching checksum."
+    continue
+  elif [[ -n "$already_applied" && -z "$run_on_change" ]]; then
+    echo "[ERROR] $filename was already applied but checksum changed and no '-- runOnChange' flag found."
     exit 1
   fi
 
+  echo "[APPLY] $filename (checksum: $checksum)"
+  changeline=$(grep -i '^-- changeset' "$filepath")
   author=$(echo "$changeline" | sed 's/-- changeset //' | cut -d ':' -f1)
   id=$(echo "$changeline" | sed 's/-- changeset //' | cut -d ':' -f2)
+  timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
-  # Compute checksum
-  checksum=$(sha256sum "$filepath" | awk '{ print $1 }')
+  envsubst <"$filepath" >/tmp/_temp_migration.sql
+  beeline -u "$BEELINE_URL" -f /tmp/_temp_migration.sql
 
-  # Check if already applied
-  stored_checksum=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e "
-    SELECT checksum FROM DATABASECHANGELOG WHERE id = '$id';
-  " 2>/dev/null | tail -n +2 | tr -d '\r')
-
-  if [ -n "$stored_checksum" ]; then
-    if [ "$stored_checksum" == "$checksum" ]; then
-      echo "[INFO] Skipping already applied: $file"
-    else
-      echo "[ERROR] Migration '$file' has been modified after it was applied!"
-      echo "[ERROR] Stored checksum: $stored_checksum"
-      echo "[ERROR] Current checksum: $checksum"
-      exit 1
-    fi
-  else
-    echo "[INFO] Applying $file (id=$id, checksum=$checksum)"
-
-    # Apply migration with env substitution
-    envsubst < "$filepath" > /tmp/_temp_migration.sql
-    beeline -u "$BEELINE_URL" -f /tmp/_temp_migration.sql
-
-    # Log into changelog table
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    beeline -u "$BEELINE_URL" -e "
-      INSERT INTO DATABASECHANGELOG VALUES (
-        '$id', '$author', '$file', '$timestamp', $order, 'EXECUTED', '$checksum'
-      );
-    "
-  fi
+  beeline -u "$BEELINE_URL" -e "
+    INSERT INTO DATABASECHANGELOG VALUES (
+      '$filename', '$checksum', '$id', '$author', '$timestamp', $order, 'EXECUTED'
+    );
+  "
 
   ((order++))
 done <"$INDEX_FILE"
+
+echo "[INFO] All migrations applied successfully."

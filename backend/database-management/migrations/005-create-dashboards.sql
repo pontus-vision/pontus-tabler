@@ -2,5 +2,9 @@
 -- description: create-dashboards
 
 CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.dashboards (
-    id STRING
+    id STRING, 
+    name STRING, 
+    owner STRING, 
+    state STRING, 
+    folder STRING
 ) USING DELTA LOCATION "/data/$SCHEMA_NAME/dashboards";
