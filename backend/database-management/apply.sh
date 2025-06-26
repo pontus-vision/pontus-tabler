@@ -9,14 +9,15 @@ SCHEMA_NAME="pv_${ENVIRONMENT_MODE:-dev}"
 export SCHEMA_NAME
 
 echo "[INFO] Using schema: $SCHEMA_NAME"
-echo "[INFO] Ensuring DATABASECHANGELOG table exists..."
 
+# Ensure the schema exists
 echo "[INFO] Ensuring schema $SCHEMA_NAME exists..."
 beeline -u "$BEELINE_URL" -e "CREATE SCHEMA IF NOT EXISTS $SCHEMA_NAME;"
 
-# Create changelog table if it doesn't exist
+# Ensure the changelog table exists
+echo "[INFO] Ensuring DATABASECHANGELOG table exists..."
 beeline -u "$BEELINE_URL" -e "
-CREATE TABLE IF NOT EXISTS DATABASECHANGELOG (
+CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.DATABASECHANGELOG (
     filename STRING,
     checksum STRING,
     id STRING,
@@ -27,9 +28,6 @@ CREATE TABLE IF NOT EXISTS DATABASECHANGELOG (
 )
 USING DELTA LOCATION '/data/$SCHEMA_NAME/database_changelog';
 "
-
-echo "[INFO] Fetching applied migrations..."
-APPLIED=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e "SELECT filename, checksum FROM DATABASECHANGELOG;" 2>/dev/null || true)
 
 order=1
 
@@ -42,13 +40,16 @@ while read -r filename; do
   fi
 
   checksum=$(sha256sum "$filepath" | awk '{print $1}')
-  already_applied=$(echo "$APPLIED" | grep -F "$filename" | awk '{print $2}')
   run_on_change=$(grep -i "^-- runOnChange" "$filepath" || true)
 
-  if [[ "$already_applied" == "$checksum" ]]; then
+  # Fetch current checksum from the DB for this filename
+  db_checksum=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e \
+    "SELECT checksum FROM $SCHEMA_NAME.DATABASECHANGELOG WHERE filename = '$filename';" 2>/dev/null | tail -n 1)
+
+  if [[ "$db_checksum" == "$checksum" ]]; then
     echo "[SKIP] $filename already applied with matching checksum."
     continue
-  elif [[ -n "$already_applied" && -z "$run_on_change" ]]; then
+  elif [[ -n "$db_checksum" && -z "$run_on_change" ]]; then
     echo "[ERROR] $filename was already applied but checksum changed and no '-- runOnChange' flag found."
     exit 1
   fi
@@ -63,7 +64,7 @@ while read -r filename; do
   beeline -u "$BEELINE_URL" -f /tmp/_temp_migration.sql
 
   beeline -u "$BEELINE_URL" -e "
-    INSERT INTO DATABASECHANGELOG VALUES (
+    INSERT INTO $SCHEMA_NAME.DATABASECHANGELOG VALUES (
       '$filename', '$checksum', '$id', '$author', '$timestamp', $order, 'EXECUTED'
     );
   "
