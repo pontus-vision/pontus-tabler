@@ -11,6 +11,7 @@ import {
 } from '../typescript/api';
 import { DELTA_DB, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
 import { ExecuteQueryReq, ExecuteQueryRes } from '../../sql-app/src/typescript/api'
+import { schema, schemaSql } from '../db-utils';
 
 export const post = async (
   endpoint: string,
@@ -235,7 +236,7 @@ export const cleanTables = async(tables: string[]) => {
   for (const table of tables) {
     if (process.env.DB_SOURCE === DELTA_DB) {
       const check:ExecuteQueryReq = {
-        query: `SHOW TABLES LIKE '${table}'`,
+        query: `SHOW TABLES FROM ${schema} LIKE '${table}'`,
       }
 
 
@@ -243,7 +244,7 @@ export const cleanTables = async(tables: string[]) => {
       expect(sqlCheck.status).toBe(200)
 
       const sqlQuery:ExecuteQueryReq = {
-          query: `DELETE FROM ${table}`
+          query: `DELETE FROM ${schemaSql}${table}`
       }
       if(Array.isArray(sqlCheck.data.results) && sqlCheck.data.results?.length > 0) {
         const sql2 = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', sqlQuery) as AxiosResponse<ExecuteQueryRes>
@@ -332,13 +333,8 @@ export const prepareDbAndAuth = async (
     expect(res.status).toBe(200);
   };
 
-  const OLD_ENV = process.env;
-  console.log('CREATING INITIAL TABLES')
-  await createInitialTables()
   await cleanTables(tables)
 
-
-  await createInitialTables()
   const createAdminBody: RegisterAdminReq = {
     username: 'admin',
     password: 'pontusvision',
@@ -370,43 +366,3 @@ export const prepareDbAndAuth = async (
   return { postAdmin, admin, adminToken };
 };
 
-
-const createInitialTables = async() => {
-  const createTable: ExecuteQueryReq = {
-    query: `
-      CREATE TABLE IF NOT EXISTS webhook_subscriptions (
-          id STRING,
-          user_id STRING NOT NULL,
-          context STRING NOT NULL,
-          table_filter STRING NOT NULL,
-          operation STRING NOT NULL,
-          endpoint STRING NOT NULL,
-          secret_token_link STRING NOT NULL
-      ) -- Correctly placed closing parenthesis
-      USING DELTA
-      LOCATION "/data/pv/${WEBHOOKS_SUBSCRIPTIONS}";
-      `
-  }
-
-    try {
-      const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createTable) as AxiosResponse<ExecuteQueryRes>
-    } catch (error) {
-      console.error('Error creating initial tables', {query: createTable.query, error}) 
-    }
-
-  const createGroupsDashboards: ExecuteQueryReq = {
-    query: 'CREATE TABLE IF NOT EXISTS groups_dashboards (id STRING,  table_from__id STRING, table_from__name STRING, table_from__create STRING, table_from__delete STRING, table_from__read STRING, table_from__update STRING, table_to__id STRING, table_to__name STRING, table_to__create STRING, table_to__read STRING, table_to__update STRING, table_to__delete STRING, edge_label STRING) USING DELTA LOCATION "/data/pv/groups_dashboards"'
-  }
-
-
-  const checkTableQuery2: ExecuteQueryReq = {
-    query: `SHOW TABLES LIKE 'groups_dashboards'`
-  }
-
-  try {
-    const res = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', createGroupsDashboards) as AxiosResponse<ExecuteQueryRes>
-  } catch (error) {
-    console.error('Error creating initial tables', {query: createTable.query, error}) 
-  }
-  
-}

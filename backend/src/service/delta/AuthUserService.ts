@@ -298,7 +298,7 @@ export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
   const sql = await runQuery(
-    `DELETE FROM ${AUTH_USERS} WHERE id = ?`,
+    `DELETE FROM ${schemaSql}${AUTH_USERS} WHERE id = ?`,
     [data.id]
   );
 
@@ -308,7 +308,7 @@ export const authUserDelete = async (
 
   try {
     await runQuery(
-      `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = ?`,
+      `DELETE FROM ${schemaSql}${GROUPS_USERS} WHERE table_to__id = ?`,
       [data.id]
     );
   } catch (error) {
@@ -431,7 +431,7 @@ export const authUserGroupsDelete = async (
 
   const conditions = data.authGroups.map(() => `table_from__id = ?`).join(' OR ');
   const sqlStr = `
-    DELETE FROM ${GROUPS_USERS}
+    DELETE FROM ${schemaSql}${GROUPS_USERS}
     WHERE table_to__id = ?
     AND (${conditions})
   `;
@@ -511,7 +511,7 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
   const userId = claims.userId;
 
   const sql = await runQuery(
-    `DELETE FROM refresh_token WHERE user_id = ?`,
+    `DELETE FROM ${schemaSql}refresh_token WHERE user_id = ?`,
     [userId]
   );
 

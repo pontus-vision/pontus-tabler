@@ -14,7 +14,7 @@ import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
 import { AuthUserRef } from './typescript/api';
-import { runQuery } from './db-utils';
+import { runQuery, schema, schemaSql } from './db-utils';
 import axios from 'axios';
 
 export const app = express();
@@ -48,7 +48,7 @@ const authMiddleware = async (
 
     const authorization = await authenticateToken(req, res);
 
-    const userId = authorization?.['userId'];
+    const userId = authorization?.['userId']
 
     const arr = req.path.split('/');
 
@@ -96,6 +96,8 @@ const webhookMiddleware = async (
   next: NextFunction,
 ) => {
   // VERIFICAR AUTH PRA VER OS DADOS DE CAPTURA DO WEBHOOK. 
+  console.log('WEBHOOK MIDDLEWARE')
+    console.log({schemaSql, schema})
   const replaceSlashes = (str: string) => str.replace(/\//g, '');
   const path = replaceSlashes(req.path);
 
@@ -149,7 +151,7 @@ const webhookMiddleware = async (
 
   try {
 
-    const subscriptions = await runQuery(`SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
+    const subscriptions = await runQuery(`SELECT * FROM ${schemaSql}${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
     for (const subscription of subscriptions) {
       const tableFilter = subscription?.['ws.table_filter']
 

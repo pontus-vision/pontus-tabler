@@ -125,7 +125,7 @@ export const updateMenuItem = async (
     [treeObjStr2, treeObjId]
   );
 
-  const res2 = await runQuery(`SELECT * FROM ${MENU}`);
+  const res2 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
   const treeObj2 = JSON.parse(res2[0]['tree_obj_str']);
   const retObj = findNestedObject(data.path, treeObj2);
 
@@ -159,7 +159,7 @@ export const readMenuTree = async (
       [generateUUIDv6(), JSON.stringify(obj)]
     );
 
-    res2 = await runQuery(`SELECT * FROM ${MENU}`);
+    res2 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
   }
 
   // Step 4: Parse and find path
@@ -175,7 +175,7 @@ export const readMenuTree = async (
 
 
 export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
-  const res = await runQuery(`SELECT * FROM ${MENU}`);
+  const res = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
 
   const treeObj = JSON.parse(res[0]['tree_obj_str']);
 
@@ -200,7 +200,7 @@ export const deleteMenuItem = async (data: MenuDeleteReq): Promise<string> => {
   const updatedTreeStr = JSON.stringify(updatedTree);
 
   await runQuery(
-    `UPDATE ${MENU} SET tree_obj_str = ? WHERE id = ?`,
+    `UPDATE ${schemaSql}${MENU} SET tree_obj_str = ? WHERE id = ?`,
     [updatedTreeStr, treeObjId]
   );
 

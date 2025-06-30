@@ -301,7 +301,7 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
   const affectedRows = +deleteQuery[0]?.['num_affected_rows'] || 0;
 
   const checkGroupsUsers = await runQuery(
-    `SHOW TABLES LIKE ?`,
+    `SHOW TABLES ${schema ? `FROM ${schema}` : ''} LIKE ?`,
     [GROUPS_USERS]
   );
   if (checkGroupsUsers.length > 0) {
@@ -312,7 +312,7 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
   }
 
   const checkGroupsDashboards = await runQuery(
-    `SHOW TABLES LIKE ?`,
+    `SHOW TABLES ${schema ? `FROM ${schema}` : ''} LIKE ?`,
     [GROUPS_DASHBOARDS]
   );
   if (checkGroupsDashboards.length > 0) {
@@ -669,7 +669,7 @@ export const deleteAuthGroupUsers = async (
   values.push(data.id);
 
   const whereClause = conditions.join(' AND ');
-  const query = `DELETE FROM ${GROUPS_USERS} WHERE ${whereClause}`;
+  const query = `DELETE FROM ${schemaSql}${GROUPS_USERS} WHERE ${whereClause}`;
 
   await runQuery(query, values);
 
@@ -754,7 +754,7 @@ export const deleteAuthGroupTables = async (
   data: AuthGroupTablesDeleteReq,
 ): Promise<AuthGroupTablesDeleteRes> => {
   const sql = await runQuery(
-    `DELETE FROM ${GROUPS_TABLES} WHERE table_from__id = ?`,
+    `DELETE FROM ${schemaSql}${GROUPS_TABLES} WHERE table_from__id = ?`,
     [data.id]
   );
 

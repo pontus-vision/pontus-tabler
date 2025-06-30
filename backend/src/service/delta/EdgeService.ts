@@ -646,13 +646,13 @@ export const createTableEdge = async (
       const toName = edge?.to?.tableName ?? data.name;
 
       // Validate existence of table_from__id
-      const checkFrom = await runQuery(`SELECT 1 FROM tables WHERE id = ? LIMIT 1`, [fromId]);
+      const checkFrom = await runQuery(`SELECT 1 FROM ${schemaSql}tables WHERE id = ? LIMIT 1`, [fromId]);
       if (checkFrom.length === 0) {
         throw new NotFoundError(`No table found at id: ${fromId}`);
       }
 
       // Validate existence of table_to__id
-      const checkTo = await runQuery(`SELECT 1 FROM tables WHERE id = ? LIMIT 1`, [toId]);
+      const checkTo = await runQuery(`SELECT 1 FROM ${schemaSql}tables WHERE id = ? LIMIT 1`, [toId]);
       if (checkTo.length === 0) {
         throw new NotFoundError(`No table found at id: ${toId}`);
       }

@@ -188,7 +188,7 @@ const readDashboardById2 = async (
 
 export const deleteDashboard = async (data: DashboardDeleteReq) => {
   const sql = await runQuery(
-    `DELETE FROM ${DASHBOARDS} WHERE id = ?`,
+    `DELETE FROM ${schemaSql}${DASHBOARDS} WHERE id = ?`,
     [data.id]
   );
 
