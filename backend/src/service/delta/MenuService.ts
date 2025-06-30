@@ -121,7 +121,7 @@ export const updateMenuItem = async (
   const treeObjId = res[0]['id'];
 
   await runQuery(
-    `UPDATE ${schema}${MENU} SET tree_obj_str = ? WHERE id = ?`,
+    `UPDATE ${schemaSql}${MENU} SET tree_obj_str = ? WHERE id = ?`,
     [treeObjStr2, treeObjId]
   );
 
