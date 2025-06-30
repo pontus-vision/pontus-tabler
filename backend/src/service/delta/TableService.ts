@@ -11,7 +11,7 @@ import {
   TablesReadRes,
   TablesReadResTablesItem,
 } from '../../typescript/api';
-import { filtersToSnakeCase, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
+import { filtersToSnakeCase, generateUUIDv6, isEmpty, isJSONParsable, runQuery, schema, schemaSql } from '../../db-utils';
 import { filterToQuery } from '../../utils';
 import { ConflictEntityError, NotFoundError } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
@@ -23,7 +23,7 @@ export const createTable = async (
   const uuid = generateUUIDv6();
 
   const createQuery = `
-    CREATE TABLE IF NOT EXISTS ${TABLES} (
+    CREATE TABLE IF NOT EXISTS ${schemaSql}${TABLES} (
       id STRING,
       name STRING,
       label STRING,
@@ -38,7 +38,7 @@ export const createTable = async (
         pivotIndex INTEGER,
         description STRING,
         regex STRING>>
-    ) USING DELTA LOCATION '/data/pv/${TABLES}';
+    ) USING DELTA LOCATION '/data/${schema}/${TABLES}';
   `;
 
   await runQuery(createQuery);
@@ -89,7 +89,7 @@ export const createTable = async (
   }
 
   const insertQuery = `
-    INSERT INTO ${TABLES} (id, name, label, cols)
+    INSERT INTO ${schemaSql}${TABLES} (id, name, label, cols)
     VALUES (?, ?, ?, array(${cols.join(', ')}))
   `;
   await runQuery(insertQuery, [uuid, snakeCase(data.name), data.label]);
@@ -102,7 +102,7 @@ export const createTable = async (
   const tableName = snakeCase(data.name);
 
   const createTableQuery = `
-    CREATE OR REPLACE TABLE ${tableName} (
+    CREATE OR REPLACE TABLE ${schemaSql}${tableName} (
       id STRING
       ${arr2.length > 0 ? `, ${arr2.join(', ')}` : ''}
     ) USING DELTA

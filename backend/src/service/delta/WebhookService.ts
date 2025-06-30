@@ -1,6 +1,6 @@
 import { InternalServerError, BadRequestError } from "../../generated/api/resources"
 import { WEBHOOKS_SUBSCRIPTIONS } from "../../consts";
-import { generateUUIDv6, runQuery, validateRegex } from "../../db-utils"
+import { generateUUIDv6, runQuery, schema, schemaSql, validateRegex } from "../../db-utils"
 import { WebhookSubscriptionReq, WebhookSubscriptionRes } from "../../typescript/api"
 
 export const createWebhook = async (
@@ -12,7 +12,7 @@ export const createWebhook = async (
       }
   
       await runQuery(`
-        CREATE TABLE IF NOT EXISTS webhook_subscriptions (
+        CREATE TABLE IF NOT EXISTS ${schemaSql}webhook_subscriptions (
           id STRING,
           user_id STRING NOT NULL,
           context STRING NOT NULL,
@@ -22,13 +22,13 @@ export const createWebhook = async (
           secret_token_link STRING NOT NULL
         )
         USING DELTA
-        LOCATION "/data/pv/${WEBHOOKS_SUBSCRIPTIONS}";
+        LOCATION "/data/${schema}/${WEBHOOKS_SUBSCRIPTIONS}";
       `);
   
       const uuid = generateUUIDv6();
   
       await runQuery(
-        `INSERT INTO ${WEBHOOKS_SUBSCRIPTIONS} 
+        `INSERT INTO ${schemaSql}${WEBHOOKS_SUBSCRIPTIONS} 
           (id, user_id, context, table_filter, endpoint, secret_token_link, operation) 
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
@@ -43,7 +43,7 @@ export const createWebhook = async (
       );
   
       const res3 = (await runQuery(
-        `SELECT * FROM ${WEBHOOKS_SUBSCRIPTIONS} WHERE id = ?`,
+        `SELECT * FROM ${schemaSql}${WEBHOOKS_SUBSCRIPTIONS} WHERE id = ?`,
         [uuid]
       )) as WebhookSubscriptionRes[];
   

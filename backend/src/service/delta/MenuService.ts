@@ -7,7 +7,7 @@ import {
   MenuItemTreeRef,
 } from '../../typescript/api/index';
 import { DASHBOARDS, MENU } from '../../consts';
-import { generateUUIDv6, runQuery } from '../../db-utils';
+import { generateUUIDv6, runQuery, schema, schemaSql } from '../../db-utils';
 import { NotFoundError } from '../../generated/api/resources';
 
 const updateAndRetrieveTree = (path: string, obj: any, modifyCallback: (node) => void) => {
@@ -39,12 +39,11 @@ const findNestedObject = (path: string, obj: any) => {
 }
 
 const createTree = async (item: MenuItemTreeRef, path: string) => {
-  // CREATE TABLE does not take parameters
   await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`
+    `CREATE TABLE IF NOT EXISTS ${schemaSql}${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/${schema}/${MENU}';`
   );
 
-  let res2 = await runQuery(`SELECT * FROM ${MENU}`);
+  let res2 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
 
   if (res2.length === 0) {
     const rootObj: MenuItemTreeRef = {
@@ -55,10 +54,10 @@ const createTree = async (item: MenuItemTreeRef, path: string) => {
       path: '/'
     };
     await runQuery(
-      `INSERT INTO ${MENU} (id, tree_obj_str) VALUES (?, ?)`,
+      `INSERT INTO ${schemaSql}${MENU} (id, tree_obj_str) VALUES (?, ?)`,
       [generateUUIDv6(), JSON.stringify(rootObj)]
     );
-    res2 = await runQuery(`SELECT * FROM ${MENU}`);
+    res2 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
   }
 
   const treeObjStr = res2[0]['tree_obj_str'] as string;
@@ -82,11 +81,11 @@ const createTree = async (item: MenuItemTreeRef, path: string) => {
   const treeObjStr2 = JSON.stringify(treeObjModified);
 
   await runQuery(
-    `UPDATE ${MENU} SET tree_obj_str = ? WHERE id = ?`,
+    `UPDATE ${schemaSql}${MENU} SET tree_obj_str = ? WHERE id = ?`,
     [treeObjStr2, treeObjId]
   );
 
-  const res4 = await runQuery(`SELECT * FROM ${MENU}`);
+  const res4 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
 
   const treeObjFinal = JSON.parse(res4[0]['tree_obj_str']);
 
@@ -103,7 +102,7 @@ export const createMenuItem = async (
 export const updateMenuItem = async (
   data: MenuCreateReq | MenuUpdateReq,
 ): Promise<MenuCreateRes> => {
-  const res = await runQuery(`SELECT * FROM ${MENU}`);
+  const res = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
   if (res.length === 0) {
     throw new NotFoundError("No menu data found");
   }
@@ -122,7 +121,7 @@ export const updateMenuItem = async (
   const treeObjId = res[0]['id'];
 
   await runQuery(
-    `UPDATE ${MENU} SET tree_obj_str = ? WHERE id = ?`,
+    `UPDATE ${schema}${MENU} SET tree_obj_str = ? WHERE id = ?`,
     [treeObjStr2, treeObjId]
   );
 
@@ -137,13 +136,12 @@ export const updateMenuItem = async (
 export const readMenuTree = async (
   path: string,
 ): Promise<MenuReadRes> => {
-  // Step 1: Ensure table exists (no params needed)
   await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/pv/${MENU}';`
+    `CREATE TABLE IF NOT EXISTS ${schemaSql}${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/${schema}/${MENU}';`
   );
 
   // Step 2: Query current contents
-  let res2 = await runQuery(`SELECT * FROM ${MENU}`);
+  let res2 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
 
   // Step 3: If empty, insert default root menu
   if (res2.length === 0) {
@@ -157,7 +155,7 @@ export const readMenuTree = async (
     };
 
     await runQuery(
-      `INSERT INTO ${MENU} (id, tree_obj_str) VALUES (?, ?)`,
+      `INSERT INTO ${schemaSql}${MENU} (id, tree_obj_str) VALUES (?, ?)`,
       [generateUUIDv6(), JSON.stringify(obj)]
     );
 

@@ -21,7 +21,7 @@ import {
   DashboardReadReq,
   DashboardReadRes
 } from '../../typescript/api';
-import { createSql, generateUUIDv6, isJSONParsable, runQuery, updateSql } from '../../db-utils';
+import { createSql, generateUUIDv6, isJSONParsable, runQuery, schemaSql, updateSql } from '../../db-utils';
 import { filterToQuery } from '../../utils';
 import { NotFoundError } from '../../generated/api/resources';
 import {
@@ -132,7 +132,7 @@ export const readDashboardById = async (dashboardId: string, userId: string) => 
     const isAdminCheck = await runQuery(
       `SELECT EXISTS (
         SELECT 1
-        FROM groups_users
+        FROM ${schemaSql}groups_users
         WHERE table_to__id = ? AND table_from__name = 'Admin'
       ) AS record_exists;`,
       [userId]
@@ -144,7 +144,7 @@ export const readDashboardById = async (dashboardId: string, userId: string) => 
   }
 
   const sql = await runQuery(
-    `SELECT * FROM ${DASHBOARDS} WHERE id = ?`,
+    `SELECT * FROM ${schemaSql}${DASHBOARDS} WHERE id = ?`,
     [dashboardId]
   );
 
@@ -162,9 +162,9 @@ const readDashboardById2 = async (
 ): Promise<DashboardReadRes> => {
   const selectQuery = `
     SELECT A.* 
-    FROM dashboards A 
-    JOIN groups_dashboards B ON A.id = B.table_to__id 
-    JOIN groups_users GU ON B.table_from__id = GU.table_from__id 
+    FROM ${schemaSql}dashboards A 
+    JOIN ${schemaSql}groups_dashboards B ON A.id = B.table_to__id 
+    JOIN ${schemaSql}groups_users GU ON B.table_from__id = GU.table_from__id 
     WHERE GU.table_to__id = ? 
       AND B.table_from__read = TRUE 
       AND A.id = ?
@@ -212,7 +212,7 @@ export const readDashboards = async (
       `
       SELECT EXISTS (
         SELECT 1
-        FROM groups_users
+        FROM ${schemaSql}groups_users
         WHERE table_to__id = ? AND table_from__name = 'Admin'
       ) AS record_exists;
       `,
@@ -230,13 +230,13 @@ export const readDashboards = async (
 
   // Main query
   const dashboardsSql = await runQuery(
-    `SELECT * FROM ${DASHBOARDS} ${whereClause}`,
+    `SELECT * FROM ${schemaSql}${DASHBOARDS} ${whereClause}`,
     whereParams
   );
 
   // Count query
   const countSql = await runQuery(
-    `SELECT COUNT(*) FROM ${DASHBOARDS} ${countWhereClause}`,
+    `SELECT COUNT(*) FROM ${schemaSql}${DASHBOARDS} ${countWhereClause}`,
     countParams
   );
 
@@ -264,9 +264,9 @@ const readDashboards2 = async (
   const { queryStr: countFilterQuery, params: countFilterParams } = filterToQuery({ filters: body.filters }, "A", undefined);
 
   const baseSelect = `
-    FROM dashboards A
-    JOIN groups_dashboards B ON A.id = B.table_to__id
-    JOIN groups_users GU ON B.table_from__id = GU.table_from__id
+    FROM ${schemaSql}dashboards A
+    JOIN ${schemaSql}groups_dashboards B ON A.id = B.table_to__id
+    JOIN ${schemaSql}groups_users GU ON B.table_from__id = GU.table_from__id
     WHERE GU.table_to__id = ? AND B.table_from__read = TRUE
   `;
 
@@ -300,7 +300,7 @@ export const createDashboardAuthGroup = async (
   data: DashboardGroupAuthCreateReq,
 ): Promise<DashboardGroupAuthCreateRes> => {
   const sql = await runQuery(
-    `SELECT name FROM ${DASHBOARDS} WHERE id = '${data.id}'`,
+    `SELECT name FROM ${schemaSql}${DASHBOARDS} WHERE id = '${data.id}'`,
   );
 
   const res = (await createTableDataEdge({

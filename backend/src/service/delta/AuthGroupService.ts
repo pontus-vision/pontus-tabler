@@ -1,4 +1,4 @@
-import { generateUUIDv6, runQuery, updateSql } from '../../db-utils';
+import { generateUUIDv6, runQuery, schema, schemaSql, updateSql } from '../../db-utils';
 import { filterToQuery } from '../../utils';
 import { AuthGroupsReadReq } from '../../generated/api/resources';
 import {
@@ -60,6 +60,7 @@ import {
 } from './EdgeService';
 import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, TABLES } from '../../consts';
 import { removeFalsyValues } from '../../utils';
+
 
 const authUserGroupsRead = async (
   data: AuthUserGroupsReadReq,
@@ -140,7 +141,7 @@ export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGro
 
   // Create table if not exists — still safe to inline (DDL)
   await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (
+    `CREATE TABLE IF NOT EXISTS ${schemaSql}${AUTH_GROUPS} (
       id STRING,
       name STRING,
       create_table BOOLEAN,
@@ -151,11 +152,11 @@ export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGro
       read_dashboard BOOLEAN,
       update_dashboard BOOLEAN,
       delete_dashboard BOOLEAN
-    ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`
+    ) USING DELTA LOCATION '/data/${schema}/${AUTH_GROUPS}';`
   );
 
   // Check if group name already exists
-  const checkNameQuery = `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = ?`;
+  const checkNameQuery = `SELECT COUNT(*) FROM ${schemaSql}${AUTH_GROUPS} WHERE name = ?`;
   const checkNameParams = [data.name];
   const existing = await runQuery(checkNameQuery, checkNameParams);
 
@@ -165,7 +166,7 @@ export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGro
 
   // Insert new group
   const insertQuery = `
-    INSERT INTO ${AUTH_GROUPS} (
+    INSERT INTO ${schemaSql}${AUTH_GROUPS} (
       id, name,
       create_table, read_table, update_table, delete_table,
       create_dashboard, read_dashboard, update_dashboard, delete_dashboard
@@ -187,7 +188,7 @@ export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGro
   await runQuery(insertQuery, insertParams);
 
   // Fetch the newly created group
-  const selectQuery = `SELECT * FROM ${AUTH_GROUPS} WHERE id = ?`;
+  const selectQuery = `SELECT * FROM ${schemaSql}${AUTH_GROUPS} WHERE id = ?`;
   const selectParams = [id];
   const result = await runQuery(selectQuery, selectParams);
 
@@ -258,7 +259,7 @@ export const readAuthGroup = async (
   const id = data.id;
 
   const res = (await runQuery(
-    `SELECT * FROM ${AUTH_GROUPS} WHERE id = ?`,
+    `SELECT * FROM ${schemaSql}${AUTH_GROUPS} WHERE id = ?`,
     [id]
   )) as AuthGroupRef[];
 
@@ -293,7 +294,7 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
   }
 
   const deleteQuery = await runQuery(
-    `DELETE FROM ${AUTH_GROUPS} WHERE id = ?`,
+    `DELETE FROM ${schemaSql}${AUTH_GROUPS} WHERE id = ?`,
     [data.id]
   );
 
@@ -305,7 +306,7 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
   );
   if (checkGroupsUsers.length > 0) {
     await runQuery(
-      `DELETE FROM ${GROUPS_USERS} WHERE table_from__id = ?`,
+      `DELETE FROM ${schemaSql}${GROUPS_USERS} WHERE table_from__id = ?`,
       [data.id]
     );
   }
@@ -316,14 +317,14 @@ export const deleteAuthGroup = async (data: AuthGroupDeleteReq) => {
   );
   if (checkGroupsDashboards.length > 0) {
     await runQuery(
-      `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = ?`,
+      `DELETE FROM ${schemaSql}${GROUPS_DASHBOARDS} WHERE table_from__id = ?`,
       [data.id]
     );
   }
 
     if(checkGroupsDashboards.length > 0) {
       const deleteGroupDashQuery = await runQuery(
-        `DELETE FROM ${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
+        `DELETE FROM ${schemaSql}${GROUPS_DASHBOARDS} WHERE table_from__id = '${data.id}'`,
       );
     }
   if (affectedRows === 1) {
@@ -341,7 +342,7 @@ export const readAuthGroups = async (
   const { queryStr, params } = filterToQuery(data, '');
 
   const selectGroupsQuery = `
-    SELECT * FROM auth_groups
+    SELECT * FROM ${schemaSql}auth_groups
     ${queryStr};
   `;
 
@@ -351,7 +352,7 @@ export const readAuthGroups = async (
   ) as AuthGroupRef[];
 
   const countQuery = `
-    SELECT COUNT(*) FROM auth_groups
+    SELECT COUNT(*) FROM ${schemaSql}auth_groups
     ${queryStr};
   `;
 
@@ -519,7 +520,7 @@ export const deleteAuthGroupDashboards = async (
 
   const conditions = data.dashboardIds.map(() => `table_to__id = ?`).join(' OR ');
   const queryStr = `
-    DELETE FROM ${GROUPS_DASHBOARDS}
+    DELETE FROM ${schemaSql}${GROUPS_DASHBOARDS}
     WHERE table_from__id = ?
     AND (${conditions})
   `.trim();
