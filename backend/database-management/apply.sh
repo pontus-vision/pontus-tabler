@@ -5,7 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BEELINE_URL="jdbc:hive2://delta-db:10000/default"
 CHANGELOG_DIR="$SCRIPT_DIR/migrations"
 INDEX_FILE="$CHANGELOG_DIR/changelog_index.txt"
-SCHEMA_NAME="pv"
+SCHEMA_NAME="pv_${ENVIRONMENT_MODE}"
+
 export SCHEMA_NAME
 
 echo "[INFO] Using schema: $SCHEMA_NAME"
@@ -30,7 +31,7 @@ USING DELTA LOCATION '/data/$SCHEMA_NAME/database_changelog';
 "
 
 beeline -u "jdbc:hive2://delta-db:10000/default" -e "SHOW TABLES IN $SCHEMA_NAME;"
-beeline -u "$BEELINE_URL" -e "SELECT * FROM pv.DATABASECHANGELOG;"
+beeline -u "$BEELINE_URL" -e "SELECT * FROM $SCHEMA_NAME.DATABASECHANGELOG;"
 
 order=1
 
