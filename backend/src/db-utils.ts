@@ -5,14 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from './generated/api';
 import { IConnection } from '../pontus-node-jdbc/src/pool';
+import { schemaSql, schema } from './consts';
 
 export const DELTA_DB = 'deltadb'
 
 export const classPath = process.env['CLASSPATH']?.split(',');
 
-export const    schema = process.env.SCHEMA_NAME
-
-export const schemaSql = schema ? `${schema}.` : ''
 
 if (!Jinst.getInstance().isJvmCreated()) {
   Jinst.getInstance().addOption('-Xrs');

@@ -10,9 +10,9 @@ import {
 } from '../../typescript/api';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from '../../generated/api/resources';
-import { createSql, generateUUIDv6, objEntriesToStr, runQuery, schemaSql, updateSql } from '../../db-utils';
+import { createSql, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from '../../db-utils';
 import { filterToQuery } from '../../utils';
-import { TABLES } from '../../consts';
+import { schemaSql, TABLES } from '../../consts';
 
 const checkTableCols = async (tableName: string, cols: TableDataRowRef): Promise<TableReadRes> => {
   const res = (await runQuery(

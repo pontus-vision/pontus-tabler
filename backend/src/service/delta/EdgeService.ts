@@ -14,13 +14,14 @@ import {
   TableEdgeCreateRes,
   Edge,
 } from '../../typescript/api';
-import { convertToSqlFields, createSql, runQuery, schema, schemaSql } from '../../db-utils';
+import { convertToSqlFields, createSql, runQuery } from '../../db-utils';
 import { filterToQuery } from '../../utils';
 import {
   ConflictEntityError,
   NotFoundError,
 } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
+import { schemaSql } from '../../consts';
 
 const ensureNestedPathExists = (obj, path) => {
   const parts = path.split('/');

@@ -39,7 +39,7 @@ import { filterToQuery } from '../../utils';
 //   fetchData,
 //   fetchDatabase,
 // } from '../../cosmos-utils';
-import { createSql, filtersToSnakeCase, generateUUIDv6, runQuery, schema, schemaSql, updateSql } from '../../db-utils';
+import { createSql, filtersToSnakeCase, generateUUIDv6, runQuery, updateSql } from '../../db-utils';
 
 import {
   BadRequestError,
@@ -53,7 +53,7 @@ import {
   createTableDataEdge,
   readTableDataEdge,
 } from './EdgeService';
-import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, GROUPS_USERS } from '../../consts';
+import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, GROUPS_USERS, schema, schemaSql } from '../../consts';
 
 const createAuthGroup = async (data: AuthGroupCreateReq) => {
   const id = data.id || generateUUIDv6();

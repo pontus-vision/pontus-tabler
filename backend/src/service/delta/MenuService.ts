@@ -6,8 +6,8 @@ import {
   MenuReadRes,
   MenuItemTreeRef,
 } from '../../typescript/api/index';
-import { DASHBOARDS, MENU } from '../../consts';
-import { generateUUIDv6, runQuery, schema, schemaSql } from '../../db-utils';
+import { DASHBOARDS, MENU, schema, schemaSql } from '../../consts';
+import { generateUUIDv6, runQuery } from '../../db-utils';
 import { NotFoundError } from '../../generated/api/resources';
 
 const updateAndRetrieveTree = (path: string, obj: any, modifyCallback: (node) => void) => {

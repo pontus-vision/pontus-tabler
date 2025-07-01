@@ -21,7 +21,7 @@ import {
   DashboardReadReq,
   DashboardReadRes
 } from '../../typescript/api';
-import { createSql, generateUUIDv6, isJSONParsable, runQuery, schemaSql, updateSql } from '../../db-utils';
+import { createSql, generateUUIDv6, isJSONParsable, runQuery,  updateSql } from '../../db-utils';
 import { filterToQuery } from '../../utils';
 import { NotFoundError } from '../../generated/api/resources';
 import {
@@ -31,7 +31,7 @@ import {
 } from './EdgeService';
 
 import * as db from './../../../delta-table/node/index-jdbc';
-import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS } from '../../consts';
+import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, schemaSql } from '../../consts';
 
 
 export const createDashboard = async (

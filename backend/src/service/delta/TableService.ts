@@ -11,11 +11,11 @@ import {
   TablesReadRes,
   TablesReadResTablesItem,
 } from '../../typescript/api';
-import { filtersToSnakeCase, generateUUIDv6, isEmpty, isJSONParsable, runQuery, schema, schemaSql } from '../../db-utils';
+import { filtersToSnakeCase, generateUUIDv6, isEmpty, isJSONParsable, runQuery } from '../../db-utils';
 import { filterToQuery } from '../../utils';
 import { ConflictEntityError, NotFoundError } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
-import { TABLES } from '../../consts';
+import { schema, schemaSql, TABLES } from '../../consts';
 
 export const createTable = async (
   data: TableCreateReq,

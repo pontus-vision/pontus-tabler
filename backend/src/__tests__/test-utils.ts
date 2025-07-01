@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios';
-import fs from 'fs';
 import {
   RegisterAdminRes,
   AuthUserCreateRes,
@@ -9,9 +8,8 @@ import {
   RegisterAdminReq,
   LoginRes,
 } from '../typescript/api';
-import { DELTA_DB, WEBHOOKS_SUBSCRIPTIONS } from '../consts';
+import { DELTA_DB, schema, schemaSql } from '../consts';
 import { ExecuteQueryReq, ExecuteQueryRes } from '../../sql-app/src/typescript/api'
-import { schema, schemaSql } from '../db-utils';
 
 export const post = async (
   endpoint: string,

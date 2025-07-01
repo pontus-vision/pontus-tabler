@@ -1,4 +1,4 @@
-import { generateUUIDv6, runQuery, schema, schemaSql, updateSql } from '../../db-utils';
+import { generateUUIDv6, runQuery, updateSql } from '../../db-utils';
 import { filterToQuery } from '../../utils';
 import { AuthGroupsReadReq } from '../../generated/api/resources';
 import {
@@ -58,7 +58,7 @@ import {
   readTableDataEdge,
   updateTableDataEdge,
 } from './EdgeService';
-import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, TABLES } from '../../consts';
+import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES } from '../../consts';
 import { removeFalsyValues } from '../../utils';
 
 

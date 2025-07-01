@@ -1,6 +1,6 @@
 import { InternalServerError, BadRequestError } from "../../generated/api/resources"
-import { WEBHOOKS_SUBSCRIPTIONS } from "../../consts";
-import { generateUUIDv6, runQuery, schema, schemaSql, validateRegex } from "../../db-utils"
+import { schema, schemaSql, WEBHOOKS_SUBSCRIPTIONS } from "../../consts";
+import { generateUUIDv6, runQuery, validateRegex } from "../../db-utils"
 import { WebhookSubscriptionReq, WebhookSubscriptionRes } from "../../typescript/api"
 
 export const createWebhook = async (

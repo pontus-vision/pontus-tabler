@@ -10,11 +10,11 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
+import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
 import { AuthUserRef } from './typescript/api';
-import { runQuery, schema, schemaSql } from './db-utils';
+import { runQuery } from './db-utils';
 import axios from 'axios';
 
 export const app = express();
