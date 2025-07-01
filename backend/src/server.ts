@@ -96,8 +96,6 @@ const webhookMiddleware = async (
   next: NextFunction,
 ) => {
   // VERIFICAR AUTH PRA VER OS DADOS DE CAPTURA DO WEBHOOK. 
-  console.log('WEBHOOK MIDDLEWARE')
-    console.log({schemaSql, schema})
   const replaceSlashes = (str: string) => str.replace(/\//g, '');
   const path = replaceSlashes(req.path);
 
