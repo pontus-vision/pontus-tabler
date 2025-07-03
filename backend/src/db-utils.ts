@@ -5,10 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from './generated/api';
 import { IConnection } from '../pontus-node-jdbc/src/pool';
+import { schemaSql, schema } from './consts';
 
 export const DELTA_DB = 'deltadb'
 
 export const classPath = process.env['CLASSPATH']?.split(',');
+
 
 if (!Jinst.getInstance().isJvmCreated()) {
   Jinst.getInstance().addOption('-Xrs');
@@ -135,7 +137,7 @@ export const updateSql = async (
   }).join(', ');
 
   const values = Object.values(data);
-  const query = `UPDATE ${table} SET ${setClause} ${whereClause}`;
+  const query = `UPDATE ${schemaSql}${table} SET ${setClause} ${whereClause}`;
 
   const res2 = await runQuery(query, [...values, ...whereParams]);
 
@@ -145,7 +147,7 @@ export const updateSql = async (
     );
   }
 
-  const selectQuery = `SELECT * FROM ${table} ${whereClause}`;
+  const selectQuery = `SELECT * FROM ${schemaSql}${table} ${whereClause}`;
   const res3 = await runQuery(selectQuery, whereParams);
 
   if (res3.length === 0) {
@@ -205,8 +207,8 @@ export const createSql = async (
   const needsId = !('id' in rows[0]);
 
   const createQuery = `
-    CREATE TABLE IF NOT EXISTS ${table} (${needsId ? 'id STRING, ' : ''}${fields})
-    USING DELTA LOCATION '/data/pv/${table}';
+    CREATE TABLE IF NOT EXISTS ${schemaSql}${table} (${needsId ? 'id STRING, ' : ''}${fields})
+    USING DELTA LOCATION '/data/${schema}/${table}';
   `;
   await runQuery(createQuery);
 
@@ -235,11 +237,11 @@ export const createSql = async (
     placeholders.push(`(${valueList.join(', ')})`);
   });
 
-  const insertQuery = `INSERT INTO ${table} (${insertFields.join(', ')}) VALUES ${placeholders.join(', ')}`;
+  const insertQuery = `INSERT INTO ${schemaSql}${table} (${insertFields.join(', ')}) VALUES ${placeholders.join(', ')}`;
   await runQuery(insertQuery, values);
 
   const selectPlaceholders = ids.map(() => '?').join(', ');
-  const selectQuery = `SELECT * FROM ${table} WHERE id IN (${selectPlaceholders})`;
+  const selectQuery = `SELECT * FROM ${schemaSql}${table} WHERE id IN (${selectPlaceholders})`;
   const result = await runQuery(selectQuery, ids);
 
   return result;

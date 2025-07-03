@@ -15,3 +15,6 @@ export const TABLES = 'tables';
 export const TABLE_DATA = 'table_data';
 export const DASHBOARDS = 'dashboards';
 export const AUTH_GROUPS = 'auth_groups';
+export const schema = process.env.SCHEMA_NAME
+
+export const schemaSql = schema ? `${schema}.` : ''

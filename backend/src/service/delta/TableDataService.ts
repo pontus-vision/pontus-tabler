@@ -6,22 +6,24 @@ import {
   TableDataReadRes,
   TableDataRowRef,
   TableDataUpdateReq,
+  TableReadRes
 } from '../../typescript/api';
 import { snakeCase } from 'lodash';
 import { NotFoundError } from '../../generated/api/resources';
 import { createSql, generateUUIDv6, objEntriesToStr, runQuery, updateSql } from '../../db-utils';
 import { filterToQuery } from '../../utils';
-import { TABLES } from '../../consts';
+import { schemaSql, TABLES } from '../../consts';
 
-const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
+const checkTableCols = async (tableName: string, cols: TableDataRowRef): Promise<TableReadRes> => {
   const res = (await runQuery(
-    `SELECT * FROM ${TABLES} WHERE name = ?`,
+    `SELECT * FROM ${schemaSql}${TABLES} WHERE name = ?`,
     [tableName]
   )) as any;
 
   const resTable = res.map((el) => {
     return { ...el, cols: JSON.parse(res[0].cols) };
   });
+  console.log({ resTable })
 
   const colsChecked = [];
 
@@ -44,7 +46,10 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef) => {
       message: `Cols are not defined in table: ${colsChecked.join(', ')}`,
     };
   }
+
+  return resTable
 };
+
 export const createTableData = async (
   data: TableDataCreateReq,
 ): Promise<TableDataCreateRes> => {
@@ -140,7 +145,7 @@ export const deleteTableData = async (data: TableDataDeleteReq) => {
   const tableName = snakeCase(data.tableName);
 
   const sql2 = await runQuery(
-    `DELETE FROM ${tableName} WHERE id = ?`,
+    `DELETE FROM ${schemaSql}${tableName} WHERE id = ?`,
     [data.rowId]
   );
 
@@ -173,7 +178,7 @@ export const readTableData = async (
   // Build WHERE clause and parameters
   const { queryStr: whereClause, params: whereParams } = filterToQuery(filtersSnakeCase, '');
 
-  const sqlQuery = `SELECT * FROM ${tableName} ${whereClause}`;
+  const sqlQuery = `SELECT * FROM ${schemaSql}${tableName} ${whereClause}`;
   const rows = await runQuery(sqlQuery, whereParams);
 
   if (rows.length === 0) {
@@ -187,7 +192,7 @@ export const readTableData = async (
     from: body.from,
   }, '');
 
-  const countQuery = `SELECT COUNT(*) FROM ${tableName} ${countClause}`;
+  const countQuery = `SELECT COUNT(*) FROM ${schemaSql}${tableName} ${countClause}`;
   const countRows = await runQuery(countQuery, countParams);
 
   return {

@@ -3,6 +3,23 @@ describe('Test auth user views', () => {
     cy.task('resetDatabaseUsers').then((result) => {
       cy.log('Database reset result:', JSON.stringify(result));
     });
+    cy.visit(`/register/user`)
+
+    cy.contains('Username').siblings('input').click().type('User 1')
+
+    cy.contains('Password').siblings('input').click().type('1234567')
+
+    cy.contains('Password Confirmation').siblings('input').click().type('1234567')
+
+    cy.contains('Submit').click()
+
+    //cy.wait(8000)
+
+    cy.get("[data-cy='header']").should('exist')
+
+    cy.contains('Logout').click()
+
+
     cy.visit(`/register/admin`);
     cy.get("[data-cy='username-input']").type("Admin 1");
     cy.get("[data-cy='password-input']").type("1234567");
@@ -10,7 +27,6 @@ describe('Test auth user views', () => {
 
     cy.contains('Register').click();
 
-    cy.wait(8000)
 
     cy.get("[data-cy='header']").should('exist')
     cy.contains('Logout').click()
@@ -22,9 +38,10 @@ describe('Test auth user views', () => {
 
       cy.contains('Submit').click();
 
-      cy.wait(5000)
-    }),
-    it('should create an user', () => {
-      cy.visit('https://example.cypress.io')
+      cy.contains('Logout')
+
     })
+  it('should create an user', () => {
+    cy.visit('https://example.cypress.io')
+  })
 })

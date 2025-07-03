@@ -5,57 +5,80 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BEELINE_URL="jdbc:hive2://delta-db:10000/default"
 CHANGELOG_DIR="$SCRIPT_DIR/migrations"
 INDEX_FILE="$CHANGELOG_DIR/changelog_index.txt"
-SCHEMA_NAME="pv_${ENVIRONMENT_MODE:-dev}"
+SCHEMA_NAME="pv_${ENVIRONMENT_MODE}"
+
 export SCHEMA_NAME
 
 echo "[INFO] Using schema: $SCHEMA_NAME"
-echo "[INFO] Ensuring DATABASECHANGELOG table exists..."
 
-# Create changelog table
+# Ensure the schema exists
+echo "[INFO] Ensuring schema $SCHEMA_NAME exists..."
+beeline -u "$BEELINE_URL" -e "CREATE SCHEMA IF NOT EXISTS $SCHEMA_NAME;"
+
+# Ensure the changelog table exists
+echo "[INFO] Ensuring $SCHEMA_NAME.DATABASECHANGELOG table exists..."
 beeline -u "$BEELINE_URL" -e "
-CREATE TABLE IF NOT EXISTS DATABASECHANGELOG (
+CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.DATABASECHANGELOG (
+    filename STRING,
+    checksum STRING,
     id STRING,
     author STRING,
-    filename STRING,
     dateexecuted STRING,
     orderexecuted INT,
-    status STRING,
-    checksum STRING
-) USING DELTA LOCATION '/data/$SCHEMA_NAME/database_changelog';
+    status STRING
+)
+USING DELTA LOCATION '/data/$SCHEMA_NAME/database_changelog';
 "
 
-# Get list of applied migrations
-APPLIED_IDS=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e "SELECT id FROM DATABASECHANGELOG;" 2>/dev/null || true)
+beeline -u "jdbc:hive2://delta-db:10000/default" -e "SHOW TABLES IN $SCHEMA_NAME;"
+beeline -u "$BEELINE_URL" -e "SELECT * FROM $SCHEMA_NAME.DATABASECHANGELOG;"
 
 order=1
-while read -r file; do
-  filepath="$CHANGELOG_DIR/$file"
-  echo "[INFO] Processing $file..."
 
-  # Extract author and id
-  changeline=$(grep -i '^-- changeset' "$filepath")
+while read -r filename; do
+  filepath="$CHANGELOG_DIR/$filename"
+  echo "[INFO] Processing $filename"
+
+  if [[ ! -f "$filepath" ]]; then
+    echo "[WARN] Skipping missing file: $filepath"
+    continue
+  fi
+
+  checksum=$(sha256sum "$filepath" | awk '{print $1}')
+  echo "[DEBUG] Local checksum for $filename: $checksum"
+
+  run_on_change=$(grep -i "^-- runOnChange" "$filepath" || true)
+  changeline=$(grep -i '^-- changeset' "$filepath" || true)
   author=$(echo "$changeline" | sed 's/-- changeset //' | cut -d ':' -f1)
   id=$(echo "$changeline" | sed 's/-- changeset //' | cut -d ':' -f2)
+  timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
-  if echo "$APPLIED_IDS" | grep -q "^$id$"; then
-    echo "[INFO] Skipping already applied: $file"
-  else
-    # Compute checksum
-    checksum=$(sha256sum "$filepath" | awk '{ print $1 }')
-    echo "[INFO] Applying $file (id=$id, checksum=$checksum)"
+  # Fetch checksum from DB for this filename
+  db_checksum=$(beeline -u "$BEELINE_URL" --silent=true --outputformat=tsv2 -e \
+    "SELECT checksum FROM $SCHEMA_NAME.DATABASECHANGELOG WHERE filename = '$filename';" 2>/dev/null | grep -v '^checksum' | tail -n 1)
 
-    # Run migration with envsubst
-    envsubst < "$filepath" > /tmp/_temp_migration.sql
-    beeline -u "$BEELINE_URL" -f /tmp/_temp_migration.sql
+  echo "[DEBUG] DB checksum for $filename: $db_checksum"
+  echo "[DEBUG] runOnChange present? ${run_on_change:+yes}"
 
-    # Insert changelog row
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    beeline -u "$BEELINE_URL" -e "
-      INSERT INTO DATABASECHANGELOG VALUES (
-        '$id', '$author', '$file', '$timestamp', $order, 'EXECUTED', '$checksum'
-      );
-    "
+  if [[ "$db_checksum" == "$checksum" ]]; then
+    echo "[SKIP] $filename already applied with matching checksum."
+    continue
+  elif [[ -n "$db_checksum" && -z "$run_on_change" ]]; then
+    echo "[ERROR] $filename was already applied but checksum changed and no '-- runOnChange' flag found."
+    exit 1
   fi
+
+  echo "[APPLY] $filename (id=$id, author=$author, checksum=$checksum)"
+  envsubst <"$filepath" >/tmp/_temp_migration.sql
+  beeline -u "$BEELINE_URL" -f /tmp/_temp_migration.sql
+
+  beeline -u "$BEELINE_URL" -e "
+    INSERT INTO $SCHEMA_NAME.DATABASECHANGELOG VALUES (
+      '$filename', '$checksum', '$id', '$author', '$timestamp', $order, 'EXECUTED'
+    );
+  "
 
   ((order++))
 done <"$INDEX_FILE"
+
+echo "[INFO] All migrations applied successfully."

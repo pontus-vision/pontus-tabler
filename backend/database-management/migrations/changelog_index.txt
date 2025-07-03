@@ -4,3 +4,4 @@
 004-create-tables.sql
 005-create-dashboards.sql
 006-create-menu.sql
+007-webhook_subscriptions.sql

@@ -1,6 +1,15 @@
--- changeset paulo:001
--- Migration: create-auth-groups
--- Created: Thu Jun 12 23:50:19 UTC 2025
+-- changeset you:001-create-auth-groups
+-- description: create-auth-groups
 
--- Write your SQL commands below this line
-CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";
+CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.auth_groups (
+    id STRING, 
+    name STRING, 
+    create_table BOOLEAN, 
+    read_table BOOLEAN, 
+    update_table BOOLEAN, 
+    delete_table BOOLEAN, 
+    create_dashboard BOOLEAN, 
+    read_dashboard BOOLEAN, 
+    update_dashboard BOOLEAN, 
+    delete_dashboard BOOLEAN
+) USING DELTA LOCATION "/data/$SCHEMA_NAME/auth_groups";

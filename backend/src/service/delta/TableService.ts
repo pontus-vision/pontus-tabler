@@ -15,7 +15,7 @@ import { filtersToSnakeCase, generateUUIDv6, isEmpty, isJSONParsable, runQuery }
 import { filterToQuery } from '../../utils';
 import { ConflictEntityError, NotFoundError } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
-import { TABLES } from '../../consts';
+import { schema, schemaSql, TABLES } from '../../consts';
 
 export const createTable = async (
   data: TableCreateReq,
@@ -23,7 +23,7 @@ export const createTable = async (
   const uuid = generateUUIDv6();
 
   const createQuery = `
-    CREATE TABLE IF NOT EXISTS ${TABLES} (
+    CREATE TABLE IF NOT EXISTS ${schemaSql}${TABLES} (
       id STRING,
       name STRING,
       label STRING,
@@ -38,13 +38,13 @@ export const createTable = async (
         pivotIndex INTEGER,
         description STRING,
         regex STRING>>
-    ) USING DELTA LOCATION '/data/pv/${TABLES}';
+    ) USING DELTA LOCATION '/data/${schema}/${TABLES}';
   `;
 
   await runQuery(createQuery);
 
   const sqlCheck = (await runQuery(
-    `SELECT * FROM ${TABLES} WHERE name = ?`,
+    `SELECT * FROM ${schemaSql}${TABLES} WHERE name = ?`,
     [snakeCase(data.name)]
   )) as TableCreateRes[];
 
@@ -89,20 +89,20 @@ export const createTable = async (
   }
 
   const insertQuery = `
-    INSERT INTO ${TABLES} (id, name, label, cols)
+    INSERT INTO ${schemaSql}${TABLES} (id, name, label, cols)
     VALUES (?, ?, ?, array(${cols.join(', ')}))
   `;
   await runQuery(insertQuery, [uuid, snakeCase(data.name), data.label]);
 
   const sql3 = (await runQuery(
-    `SELECT * FROM ${TABLES} WHERE id = ?`,
+    `SELECT * FROM ${schemaSql}${TABLES} WHERE id = ?`,
     [uuid]
   )) as TableCreateRes[];
 
   const tableName = snakeCase(data.name);
 
   const createTableQuery = `
-    CREATE OR REPLACE TABLE ${tableName} (
+    CREATE OR REPLACE TABLE ${schemaSql}${tableName} (
       id STRING
       ${arr2.length > 0 ? `, ${arr2.join(', ')}` : ''}
     ) USING DELTA
@@ -180,7 +180,7 @@ export const updateTable = async (data: TableUpdateReq) => {
 
   params.push(data.id); // for WHERE clause
 
-  const query = `UPDATE ${TABLES} SET ${fields.join(', ')} WHERE id = ?;`;
+  const query = `UPDATE ${schemaSql}${TABLES} SET ${fields.join(', ')} WHERE id = ?;`;
 
   const sql = await runQuery(query, params);
 
@@ -209,19 +209,19 @@ async function updateTableSchema(tableName: string, renameColumns: Record<string
 
   if (Array.isArray(dropColumns) && dropColumns.length > 0) {
     for (const col of dropColumns) {
-      alterStatements.push(`ALTER TABLE ${tableName} DROP COLUMN ${snakeCase(col)}`);
+      alterStatements.push(`ALTER TABLE ${schemaSql}${tableName} DROP COLUMN ${snakeCase(col)}`);
     }
   }
   if (!isEmpty(renameColumns)) {
     for (const [oldCol, newCol] of Object.entries(renameColumns)) {
-      alterStatements.push(`ALTER TABLE ${tableName} RENAME COLUMN ${snakeCase(oldCol)} TO ${snakeCase(newCol)}`);
+      alterStatements.push(`ALTER TABLE ${schemaSql}${tableName} RENAME COLUMN ${snakeCase(oldCol)} TO ${snakeCase(newCol)}`);
     }
   }
 
   if (!isEmpty(addColumns)) {
     for (const [col, type] of Object.entries(addColumns)) {
       const typeCol = type === 'integer' ? 'INTEGER' : type === 'checkboxes' ? 'BOOLEAN' : 'STRING'
-      alterStatements.push(`ALTER TABLE ${tableName} ADD COLUMN ${snakeCase(col)} ${snakeCase(typeCol)}`);
+      alterStatements.push(`ALTER TABLE ${schemaSql}${tableName} ADD COLUMN ${snakeCase(col)} ${snakeCase(typeCol)}`);
     }
   }
 
@@ -242,7 +242,7 @@ export const readTableById = async (
   data: TableReadReq,
 ): Promise<TableReadRes> => {
   const sql = await runQuery(
-    `SELECT * FROM ${TABLES} WHERE id = ?`,
+    `SELECT * FROM ${schemaSql}${TABLES} WHERE id = ?`,
     [data.id]
   ) as {id: string, [key:string]: any}[]
 
@@ -264,7 +264,7 @@ export const readTableById = async (
 
 export const readTableByName = async (name: string): Promise<TableReadRes> => {
   const sql = await runQuery(
-    `SELECT * FROM ${TABLES} WHERE name = ?`,
+    `SELECT * FROM ${schemaSql}${TABLES} WHERE name = ?`,
     [name]
   ) as any;
 
@@ -279,19 +279,19 @@ export const readTableByName = async (name: string): Promise<TableReadRes> => {
 export const deleteTable = async (data: TableDeleteReq) => {
   try {
     const sql = await runQuery(
-      `DELETE FROM ${TABLES} WHERE id = ?`,
+      `DELETE FROM ${schemaSql}${TABLES} WHERE id = ?`,
       [data.id]
     );
 
     const sql1 = await runQuery(
-      `SHOW TABLES LIKE ?`,
+      `SHOW TABLES ${schema ? `FROM ${schema}` : ''} LIKE ?`,
       [snakeCase(data.name)]
     );
 
     if (sql1.length > 0) {
       const timestamp = Date.now();
       await runQuery(
-        `ALTER TABLE ${snakeCase(data.name)} RENAME TO deleted_${timestamp}_${snakeCase(data.name)}`
+        `ALTER TABLE ${schemaSql}${snakeCase(data.name)} RENAME TO deleted_${timestamp}_${snakeCase(data.name)}`
       );
     }
 
@@ -331,7 +331,7 @@ export const readTables = async (
   );
 
   const sql = (await runQuery(
-    `SELECT * FROM ${TABLES} ${whereClause}`,
+    `SELECT * FROM ${schemaSql}${TABLES} ${whereClause}`,
     whereParams
   )) as TablesReadResTablesItem[];
 
@@ -340,7 +340,7 @@ export const readTables = async (
   }
 
   const sql2 = await runQuery(
-    `SELECT COUNT(*) FROM ${TABLES} ${countWhereClause}`,
+    `SELECT COUNT(*) FROM ${schemaSql}${TABLES} ${countWhereClause}`,
     countParams
   );
 

@@ -38,9 +38,8 @@ services:
         fern generate
         cd ..
         timeout 1000 bash -c 'until nc -z delta-db 10000; do echo "Waiting for port 10000..."; sleep 1; done; echo "Port 10000 is open!"'
-        npm run build
-        ls src
-        node dist/sql-app/src/server.js
+        ENVIRONMENT_MODE=test SCHEMA_NAME="pv_test" npm run build
+        ENVIRONMENT_MODE=test SCHEMA_NAME="pv_test" node dist/sql-app/src/server.js
 
   app-tests:
     build:
@@ -77,7 +76,7 @@ services:
         echo "Checking if service is up on port 3001..."
         timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
         echo "RUNNING INTEGRATION TESTS"
-        npm run jest --forceExit
+        ENVIRONMENT_MODE=test SCHEMA_NAME="pv_test" npm run jest --forceExit
 
   app:
     build:
@@ -143,7 +142,9 @@ services:
         echo 'LS'
         ls
         timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
-        npm run build && node dist/src/server.js
+        ENVIRONMENT_MODE=test SCHEMA_NAME="pv_test" npm run build && \
+        ENVIRONMENT_MODE=test SCHEMA_NAME="pv_test" node dist/src/server.js
+
         #       sleep 1000000
 
   delta-db:
@@ -230,7 +231,7 @@ services:
         # export DELTA_DB=delta-db:10000
         export FRONTEND_URL=http://frontend-server:5173
         npx cypress install
-        npx cypress run -b chrome
+        ENVIRONMENT_MODE=test SCHEMA_NAME="pv_test" npx cypress run -b chrome
         #sleep 10000
 
   webhook-receiver:

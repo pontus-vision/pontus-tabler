@@ -1,7 +1,8 @@
--- changeset :002
--- Migration: create-auth-users
--- Created: Fri Jun 13 15:57:08 UTC 2025
+-- changeset you:002-create-auth-users
+-- description: create-auth-users
 
--- Write your SQL commands below this line
-
-CREATE TABLE IF NOT EXISTS auth_users (id STRING, username STRING, password STRING) USING DELTA LOCATION "/data/pv/auth_users";
+CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.auth_users (
+    id STRING,
+    username STRING, 
+    password STRING
+) USING DELTA LOCATION "/data/$SCHEMA_NAME/auth_users";

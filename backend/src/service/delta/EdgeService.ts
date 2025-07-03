@@ -21,6 +21,7 @@ import {
   NotFoundError,
 } from '../../generated/api/resources';
 import { snakeCase } from 'lodash';
+import { schemaSql } from '../../consts';
 
 const ensureNestedPathExists = (obj, path) => {
   const parts = path.split('/');
@@ -69,7 +70,7 @@ export const createTableDataEdge = async (
 
   // Check existence of from IDs
   const sql = await runQuery(
-    `SELECT COUNT(*) FROM ${tableNameFrom} WHERE id IN (${fromPlaceholders});`,
+    `SELECT COUNT(*) FROM ${schemaSql}${tableNameFrom} WHERE id IN (${fromPlaceholders});`,
     fromIds,
   );
 
@@ -83,7 +84,7 @@ export const createTableDataEdge = async (
 
   // Check existence of to IDs
   const sql2 = await runQuery(
-    `SELECT COUNT(*) FROM ${tableNameTo} WHERE id IN (${toPlaceholders});`,
+    `SELECT COUNT(*) FROM ${schemaSql}${tableNameTo} WHERE id IN (${toPlaceholders});`,
     toIds,
   );
 
@@ -459,7 +460,7 @@ export const readEdge = async (data: {
   }
 
   const queryStr = `
-    SELECT * FROM ${data.edgeTable}
+    SELECT * FROM ${schemaSql}${data.edgeTable}
     ${fullWhereClause}
     ${paginationClause.join(' ')}
   `.trim();
@@ -509,7 +510,7 @@ export const readTableDataEdge = async (
   }
 
   const queryStr = `
-    SELECT * FROM ${table}
+    SELECT * FROM ${schemaSql}${table}
     ${whereClause}
     ${limitOffsetClause.join(' ')}
   `.trim();
@@ -517,7 +518,7 @@ export const readTableDataEdge = async (
   const rows = await runQuery(queryStr, params);
 
   const countQuery = `
-    SELECT COUNT(*) FROM ${table}
+    SELECT COUNT(*) FROM ${schemaSql}${table}
     ${whereClause}
   `.trim();
   const countParams = params.slice(0, filterParams.length + 1 + (edgeLabel ? 1 : 0));
@@ -604,7 +605,7 @@ export const createTableEdge = async (
     });
 
     const edgesStr = conditions.length > 0 ? conditions.join(' OR ') : '';
-    const query = `SELECT * FROM tables_edges ${edgesStr ? `WHERE ${edgesStr}` : ''}`;
+    const query = `SELECT * FROM ${schemaSql}tables_edges ${edgesStr ? `WHERE ${edgesStr}` : ''}`;
 
     try {
       const existingEdges = await runQuery(query, params);
@@ -646,13 +647,13 @@ export const createTableEdge = async (
       const toName = edge?.to?.tableName ?? data.name;
 
       // Validate existence of table_from__id
-      const checkFrom = await runQuery(`SELECT 1 FROM tables WHERE id = ? LIMIT 1`, [fromId]);
+      const checkFrom = await runQuery(`SELECT 1 FROM ${schemaSql}tables WHERE id = ? LIMIT 1`, [fromId]);
       if (checkFrom.length === 0) {
         throw new NotFoundError(`No table found at id: ${fromId}`);
       }
 
       // Validate existence of table_to__id
-      const checkTo = await runQuery(`SELECT 1 FROM tables WHERE id = ? LIMIT 1`, [toId]);
+      const checkTo = await runQuery(`SELECT 1 FROM ${schemaSql}tables WHERE id = ? LIMIT 1`, [toId]);
       if (checkTo.length === 0) {
         throw new NotFoundError(`No table found at id: ${toId}`);
       }
@@ -718,8 +719,8 @@ export const readTableEdgesByTableId = async (
   const sql = await runQuery(
     `
       SELECT te.*, t.name 
-      FROM tables_edges te 
-      INNER JOIN tables t ON t.id = ?
+      FROM ${schemaSql}tables_edges te 
+      INNER JOIN ${schemaSql}tables t ON t.id = ?
       WHERE te.table_from__id = ?
     `,
     [data.tableId, data.tableId]

@@ -53,14 +53,14 @@ import {
   createTableDataEdge,
   readTableDataEdge,
 } from './EdgeService';
-import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, GROUPS_USERS } from '../../consts';
+import { ADMIN_GROUP_NAME, AUTH_GROUPS, AUTH_USERS, GROUPS_USERS, schema, schemaSql } from '../../consts';
 
 const createAuthGroup = async (data: AuthGroupCreateReq) => {
   const id = data.id || generateUUIDv6();
 
   // Step 1: Ensure table exists (DDL — no params)
   await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${AUTH_GROUPS} (
+    `CREATE TABLE IF NOT EXISTS ${schemaSql}${AUTH_GROUPS} (
       id STRING,
       name STRING,
       create_table BOOLEAN,
@@ -71,11 +71,11 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
       read_dashboard BOOLEAN,
       update_dashboard BOOLEAN,
       delete_dashboard BOOLEAN
-    ) USING DELTA LOCATION '/data/pv/${AUTH_GROUPS}';`
+    ) USING DELTA LOCATION '/data/${schema}/${AUTH_GROUPS}';`
   );
 
   // Step 2: Check for existing name
-  const checkQuery = `SELECT COUNT(*) FROM ${AUTH_GROUPS} WHERE name = ?`;
+  const checkQuery = `SELECT COUNT(*) FROM ${schemaSql}${AUTH_GROUPS} WHERE name = ?`;
   const res4 = await runQuery(checkQuery, [data.name]);
 
   if (+res4[0]['count(1)'] > 0) {
@@ -84,14 +84,14 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
 
   // Step 3: Insert
   const insertQuery = `
-    INSERT INTO ${AUTH_GROUPS} (
+    INSERT INTO ${schemaSql}${AUTH_GROUPS} (
       id, name, create_table, read_table, update_table, delete_table
     ) VALUES (?, ?, false, false, false, false)
   `;
   await runQuery(insertQuery, [id, data.name]);
 
   // Step 4: Fetch inserted row
-  const selectQuery = `SELECT * FROM ${AUTH_GROUPS} WHERE id = ?`;
+  const selectQuery = `SELECT * FROM ${schemaSql}${AUTH_GROUPS} WHERE id = ?`;
   const res3 = await runQuery(selectQuery, [id]);
 
   return {
@@ -155,7 +155,7 @@ const createAuthUserGroup = async (
 
 export const setup = async (): Promise<InitiateRes> => {
   try {
-    const query = `SELECT * from auth_users`;
+    const query = `SELECT * from ${schemaSql}auth_users`;
 
     const res = await runQuery(query);
     if (res.length === 0) {
@@ -224,7 +224,7 @@ export const getRowCount = async (
   table: string,
 ): Promise<string> => {
   const count = await runQuery(
-    `SELECT count(1) FROM delta.\`/data/${table}\``,
+    `SELECT count(1) FROM ${schemaSql}${table}`,
   );
 
   return count[0]['count(1)'];
@@ -258,7 +258,7 @@ export const authUserRead = async (
   data: AuthUserReadReq,
 ): Promise<AuthUserReadRes> => {
   const res = (await runQuery(
-    `SELECT * FROM ${AUTH_USERS} WHERE id = ?`,
+    `SELECT * FROM ${schemaSql}${AUTH_USERS} WHERE id = ?`,
     [data.id]
   )) as { username: string; id: string }[];
 
@@ -298,7 +298,7 @@ export const authUserDelete = async (
   data: AuthUserDeleteReq,
 ): Promise<AuthUserDeleteRes> => {
   const sql = await runQuery(
-    `DELETE FROM ${AUTH_USERS} WHERE id = ?`,
+    `DELETE FROM ${schemaSql}${AUTH_USERS} WHERE id = ?`,
     [data.id]
   );
 
@@ -308,7 +308,7 @@ export const authUserDelete = async (
 
   try {
     await runQuery(
-      `DELETE FROM ${GROUPS_USERS} WHERE table_to__id = ?`,
+      `DELETE FROM ${schemaSql}${GROUPS_USERS} WHERE table_to__id = ?`,
       [data.id]
     );
   } catch (error) {
@@ -331,7 +331,7 @@ export const authUsersRead = async (
   );
 
   const sql = await runQuery(
-    `SELECT * FROM ${AUTH_USERS} ${whereClause}`,
+    `SELECT * FROM ${schemaSql}${AUTH_USERS} ${whereClause}`,
     params
   );
 
@@ -342,7 +342,7 @@ export const authUsersRead = async (
   );
 
   const sqlCount = await runQuery(
-    `SELECT COUNT(*) FROM ${AUTH_USERS} ${whereClause2}`,
+    `SELECT COUNT(*) FROM ${schemaSql}${AUTH_USERS} ${whereClause2}`,
     countParams
   );
 
@@ -431,7 +431,7 @@ export const authUserGroupsDelete = async (
 
   const conditions = data.authGroups.map(() => `table_from__id = ?`).join(' OR ');
   const sqlStr = `
-    DELETE FROM ${GROUPS_USERS}
+    DELETE FROM ${schemaSql}${GROUPS_USERS}
     WHERE table_to__id = ?
     AND (${conditions})
   `;
@@ -457,7 +457,7 @@ interface IAuthUser extends AuthUserAndGroupsRef {
 
 export const checkAdmin = async (userId: string | number) => {
   const res = await runQuery(
-    `SELECT COUNT(*) FROM ${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = ?`,
+    `SELECT COUNT(*) FROM ${schemaSql}${GROUPS_USERS} WHERE table_from__name = 'Admin' AND table_to__id = ?`,
     [userId]
   );
 
@@ -470,7 +470,7 @@ export const checkAdmin = async (userId: string | number) => {
 
 
 export const loginUser = async (data: LoginReq): Promise<LoginRes> => {
-  const query = `SELECT * FROM auth_users WHERE username = ?`;
+  const query = `SELECT * FROM ${schemaSql}auth_users WHERE username = ?`;
 
   const res = await runQuery(query, [data.username]);
 
@@ -511,7 +511,7 @@ export const logout = async (data: LogoutReq): Promise<LogoutRes> => {
   const userId = claims.userId;
 
   const sql = await runQuery(
-    `DELETE FROM refresh_token WHERE user_id = ?`,
+    `DELETE FROM ${schemaSql}refresh_token WHERE user_id = ?`,
     [userId]
   );
 
