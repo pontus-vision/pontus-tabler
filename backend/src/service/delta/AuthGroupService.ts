@@ -895,12 +895,15 @@ export const checkTableMetadataPermissions = async (
   };
 };
 
+export interface CrudDocumentRefAndGroups extends CrudDocumentRef {
+  groups?: Record<string,any>[]
+}
 
 export const checkPermissions = async (
   userId: string,
   targetId: string,
   containerId: string,
-): Promise<CrudDocumentRef> => {
+): Promise<CrudDocumentRefAndGroups> => {
   const res = (await readEdge(
     {
       direction: 'from',
@@ -912,6 +915,7 @@ export const checkPermissions = async (
     },
   )) as AuthGroupRef[];
 
+
   if (res.length === 0) {
     throw { code: 404, message: 'There is no group associated with user' };
   }
@@ -920,6 +924,8 @@ export const checkPermissions = async (
   let read = false;
   let update = false;
   let del = false;
+  
+  let groups
 
   for (const group of res) {
     if (group['table_from__name'] === ADMIN_GROUP_NAME) {
@@ -928,6 +934,7 @@ export const checkPermissions = async (
         read: true,
         update: true,
         delete: true,
+        groups
       };
     }
     const res = (await readEdge(
@@ -955,6 +962,7 @@ export const checkPermissions = async (
         rowId: group['table_from__id'],
       },
     )) as any[];
+  groups = res
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
@@ -978,5 +986,6 @@ export const checkPermissions = async (
     read,
     update,
     delete: del,
+    groups 
   };
 };
