@@ -10,11 +10,11 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
+import { AUDIT, AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
 import { AuthUserRef } from './typescript/api';
-import { runQuery } from './db-utils';
+import { isJSONParsable, isJSONStringable, runQuery } from './db-utils';
 import axios from 'axios';
 
 export const app = express();
@@ -23,72 +23,87 @@ const port = 8080;
 
 app.use(cors());
 
-const authMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  const replaceSlashes = (str: string) => {
-    return str.replace(/\//g, '');
-  };
-  const path = replaceSlashes(req.path);
+const authMiddleware = async (req, res, next) => {
+  console.log('[authMiddleware] started');
+  const path = req.path.replace(/\//g, '');
 
-  if (
-    path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
-    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
-    path === replaceSlashes('/PontusTest/1.0.0//login') ||
-    path === replaceSlashes('/PontusTest/1.0.0/logout') ||
-    path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
-    path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
-  ) {
+  const isPublic = [
+    '/PontusTest/1.0.0/register/admin',
+    '/PontusTest/1.0.0/register/user',
+    '/PontusTest/1.0.0/login',
+    '/PontusTest/1.0.0/logout',
+    '/PontusTest/1.0.0/test/execute',
+    '/PontusTest/1.0.0/webhook/create',
+  ].map(p => p.replace(/\//g, '')).includes(path);
+
+  if (isPublic) {
+    req['user'] = { userId: null, groupIds: [] };
     return next();
   }
 
   try {
+    const auth = await authenticateToken(req, res);
+    const userId = auth?.userId;
+    req['user'] = { userId };
 
-    const authorization = await authenticateToken(req, res);
-
-    const userId = authorization?.['userId']
-
-    const arr = req.path.split('/');
-
-    const crudAction = arr[arr.length - 1];
-
-    const entity = arr[arr.length - 2];
-
-    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : entity;
-
-    let targetId = '';
-
-    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
-      return next();
-    }
-
-    if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
-      targetId = req.body?.['id'];
-    }
+    const crudAction = req.path.split('/').pop();
+    const entity = req.path.split('/').slice(-2, -1)[0];
+    const tableName = (entity === 'dashboard' || entity === 'dashboards') ? DASHBOARDS : entity;
+    const targetId = req.body?.id || '';
 
     const permissions = await checkPermissions(userId, targetId, tableName);
+
+    req['user']['groupIds'] = permissions.groups
+      ?.filter(g => g[`table_from__${crudAction}`])
+      ?.map(g => g['table_from__name']) || [];
+
+    console.log('[AUTH] groupIds:', req['user']['groupIds']);
+
     if (
-      path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
-      path === replaceSlashes('/PontusTest/1.0.0//tables/read')
+      path === '/PontusTest/1.0.0//dashboards/read'.replace(/\//g, '') ||
+      path === '/PontusTest/1.0.0//tables/read'.replace(/\//g, '')
     ) {
       return next();
     }
 
     if (permissions[crudAction]) {
-      // if (permissions['']) {
-      // await webhookMiddleware(req, res, next)
-      next();
+      return next();
     } else {
-      throw { code: 401, message: 'You do not have this permission' };
+      throw { code: 401, message: 'No permission' };
     }
-  } catch (error) {
-    console.log({ error })
-    res.status(error?.code).json(error?.message);
+  } catch (err) {
+    req['authError'] = err;
+    return res.status(err.code || 401).json({ message: err.message || 'Unauthorized' });
   }
 };
 
+const auditMiddleware = async(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  console.log('[auditMiddleware] started');
+
+  const token = req.headers['authorization']
+
+  const error = req?.['authError'] || null
+
+  const userId = req?.['user']?.['userId'] || null
+
+  const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || ''
+
+  const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null
+
+  console.log({groupIds, body: req.body})
+      // console.log(req['user']['groupIds'])
+  try {
+    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, body, error, userId, groupIds, new Date()])
+  } catch (error) {
+    console.error({error})
+  }
+
+  next()
+}
 
 const webhookMiddleware = async (
   req: Request,
@@ -222,8 +237,9 @@ function isMatchingFilter(target: string, filter: string) {
 
 app.use(express.json());
 
-
 app.use(authMiddleware);
+
+app.use(auditMiddleware)
 
 app.use(webhookMiddleware)
 
