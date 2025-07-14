@@ -23,59 +23,72 @@ const port = 8080;
 
 app.use(cors());
 
-const authMiddleware = async (req, res, next) => {
-  console.log('[authMiddleware] started');
-  const path = req.path.replace(/\//g, '');
+const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const replaceSlashes = (str: string) => {
+    return str.replace(/\//g, '');
+  };
+  const path = replaceSlashes(req.path);
 
-  const isPublic = [
-    '/PontusTest/1.0.0/register/admin',
-    '/PontusTest/1.0.0/register/user',
-    '/PontusTest/1.0.0/login',
-    '/PontusTest/1.0.0/logout',
-    '/PontusTest/1.0.0/test/execute',
-    '/PontusTest/1.0.0/webhook/create',
-  ].map(p => p.replace(/\//g, '')).includes(path);
-
-  if (isPublic) {
-    req['user'] = { userId: null, groupIds: [] };
+  if (
+    path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
+    path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
+    path === replaceSlashes('/PontusTest/1.0.0//login') ||
+    path === replaceSlashes('/PontusTest/1.0.0/logout') ||
+    path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
+    path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
+  ) {
     return next();
   }
 
   try {
-    const auth = await authenticateToken(req, res);
-    const userId = auth?.userId;
-    req['user'] = { userId };
 
-    const crudAction = req.path.split('/').pop();
-    const entity = req.path.split('/').slice(-2, -1)[0];
-    const tableName = (entity === 'dashboard' || entity === 'dashboards') ? DASHBOARDS : entity;
-    const targetId = req.body?.id || '';
+    const authorization = await authenticateToken(req, res);
+
+    const userId = authorization?.['userId']
+
+    const arr = req.path.split('/');
+
+    const crudAction = arr[arr.length - 1];
+
+    const entity = arr[arr.length - 2];
+
+    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : entity;
+
+    let targetId = '';
+
+    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
+      return next();
+    }
+
+    if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
+      targetId = req.body?.['id'];
+    }
 
     const permissions = await checkPermissions(userId, targetId, tableName);
-
-    req['user']['groupIds'] = permissions.groups
-      ?.filter(g => g[`table_from__${crudAction}`])
-      ?.map(g => g['table_from__name']) || [];
-
-    console.log('[AUTH] groupIds:', req['user']['groupIds']);
-
     if (
-      path === '/PontusTest/1.0.0//dashboards/read'.replace(/\//g, '') ||
-      path === '/PontusTest/1.0.0//tables/read'.replace(/\//g, '')
+      path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
+      path === replaceSlashes('/PontusTest/1.0.0//tables/read')
     ) {
       return next();
     }
 
     if (permissions[crudAction]) {
-      return next();
+      // if (permissions['']) {
+      // await webhookMiddleware(req, res, next)
+      next();
     } else {
-      throw { code: 401, message: 'No permission' };
+      throw { code: 401, message: 'You do not have this permission' };
     }
-  } catch (err) {
-    req['authError'] = err;
-    return res.status(err.code || 401).json({ message: err.message || 'Unauthorized' });
+  } catch (error) {
+    console.log({ error })
+    res.status(error?.code).json(error?.message);
   }
 };
+
 
 const auditMiddleware = async(
   req: Request,
