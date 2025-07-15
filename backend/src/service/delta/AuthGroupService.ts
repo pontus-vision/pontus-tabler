@@ -925,7 +925,7 @@ export const checkPermissions = async (
   let update = false;
   let del = false;
   
-  let groups
+  const groups = []
 
   for (const group of res) {
     if (group['table_from__name'] === ADMIN_GROUP_NAME) {
@@ -962,7 +962,8 @@ export const checkPermissions = async (
         rowId: group['table_from__id'],
       },
     )) as any[];
-  groups = res
+    
+    res?.[0] && groups.push(res?.[0])
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
