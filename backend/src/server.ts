@@ -69,6 +69,7 @@ const authMiddleware = async (
     }
 
     const permissions = await checkPermissions(userId, targetId, tableName);
+      console.log({groups: permissions.groups, path})
     req['user']['groupIds'] = permissions.groups
       ?.filter(g => g[`table_from__${crudAction}`])
       ?.map(g => g['table_from__name']) || [];
