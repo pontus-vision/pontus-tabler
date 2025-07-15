@@ -69,6 +69,9 @@ const authMiddleware = async (
     }
 
     const permissions = await checkPermissions(userId, targetId, tableName);
+    req['user']['groupIds'] = permissions.groups
+      ?.filter(g => g[`table_from__${crudAction}`])
+      ?.map(g => g['table_from__name']) || [];
     if (
       path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
       path === replaceSlashes('/PontusTest/1.0.0//tables/read')
@@ -85,9 +88,11 @@ const authMiddleware = async (
     }
   } catch (error) {
     console.log({ error })
+    req['authError'] = error;
     res.status(error?.code).json(error?.message);
   }
 };
+
 
 
 const auditMiddleware = async(
