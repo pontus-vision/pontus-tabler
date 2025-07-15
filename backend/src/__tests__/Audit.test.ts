@@ -187,7 +187,7 @@ describe('dashboardCreatePOST', () => {
     const createGroupDashboardPermissions2: AuthGroupDashboardCreateReq = {
       id: createGroup2.data.id,
       name: createGroup2.data.name, 
-      dashboards: [{id: dashboard.id, name: dashboard.name, create: true, read: true, update: true, delete: true}]
+      dashboards: [{id: dashboard.id, name: dashboard.name, create: true, read: true, update: true, delete: false}]
     } 
     const logoutBody: LogoutReq = {
       token: adminToken,
