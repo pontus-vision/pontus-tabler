@@ -50,13 +50,15 @@ const authMiddleware = async (
 
     const userId = authorization?.['userId']
 
+    req['user'] = { userId };
+
     const arr = req.path.split('/');
 
     const crudAction = arr[arr.length - 1];
 
     const entity = arr[arr.length - 2];
 
-    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : entity;
+    const tableName = (entity === 'dashboard' || entity === 'dashboards') ? DASHBOARDS : entity;
 
     let targetId = '';
 
