@@ -10,11 +10,11 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
+import { AUDIT, AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
 import { AuthUserRef } from './typescript/api';
-import { runQuery } from './db-utils';
+import { isJSONParsable, isJSONStringable, runQuery } from './db-utils';
 import axios from 'axios';
 
 export const app = express();
@@ -50,13 +50,15 @@ const authMiddleware = async (
 
     const userId = authorization?.['userId']
 
+    req['user'] = { userId };
+
     const arr = req.path.split('/');
 
     const crudAction = arr[arr.length - 1];
 
     const entity = arr[arr.length - 2];
 
-    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : entity;
+    const tableName = (entity === 'dashboard' || entity === 'dashboards') ? DASHBOARDS : entity;
 
     let targetId = '';
 
@@ -69,6 +71,9 @@ const authMiddleware = async (
     }
 
     const permissions = await checkPermissions(userId, targetId, tableName);
+    req['user']['groupIds'] = permissions.groups
+      ?.filter(g => g[`table_from__${crudAction}`])
+      ?.map(g => g['table_from__name']) || [];
     if (
       path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
       path === replaceSlashes('/PontusTest/1.0.0//tables/read')
@@ -85,10 +90,40 @@ const authMiddleware = async (
     }
   } catch (error) {
     console.log({ error })
+    req['authError'] = error;
     res.status(error?.code).json(error?.message);
   }
 };
 
+
+
+const auditMiddleware = async(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  console.log('[auditMiddleware] started');
+
+  const token = req.headers['authorization']
+
+  const error = req?.['authError'] || null
+
+  const userId = req?.['user']?.['userId'] || null
+
+  const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || ''
+
+  const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null
+
+  console.log({groupIds, body: req.body})
+      // console.log(req['user']['groupIds'])
+  try {
+    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, body, error, userId, groupIds, new Date()])
+  } catch (error) {
+    console.error({error})
+  }
+
+  next()
+}
 
 const webhookMiddleware = async (
   req: Request,
@@ -222,8 +257,9 @@ function isMatchingFilter(target: string, filter: string) {
 
 app.use(express.json());
 
-
 app.use(authMiddleware);
+
+app.use(auditMiddleware)
 
 app.use(webhookMiddleware)
 

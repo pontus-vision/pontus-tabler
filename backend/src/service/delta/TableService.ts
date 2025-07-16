@@ -71,15 +71,20 @@ export const createTable = async (
         }`
       );
     }
+    for (const prop in col) {
+      !col[prop] ? col[prop] = '' : '' 
+    }
+
+    console.log({col})
 
     cols.push(
       `struct(
         '${colUuid}',
-        '${snakeCase(col.name)}',
-        '${snakeCase(col.field)}',
-        ${col.sortable},
-        '${col.headerName}',
-        ${col.filter},
+        '${snakeCase(col.name || "")}',
+        '${snakeCase(col.field || "")}',
+        ${col.sortable || false},
+        '${col.headerName || ""}',
+        ${col.filter || false},
         ${col.kind ? `'${col.kind}'` : null},
         ${col.pivotIndex !== undefined && col.pivotIndex !== null ? col.pivotIndex : 'null'},
         ${col.description ? `'${col.description}'` : 'null'},

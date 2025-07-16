@@ -112,6 +112,7 @@ export async function runQuery(
     await connection.close();
     await jdbc.release(connection);
 
+    console.log({query})
     return results;
   } catch (error) {
     console.error('Error executing query:', { query, params, error });
@@ -281,6 +282,16 @@ export const isJSONParsable = (str: string): boolean => {
     return false;
   }
 };
+
+export const isJSONStringable = (str: string): boolean => {
+  try {
+    JSON.stringify(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 export function isEmpty(obj) {
   for (var prop in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, prop)) {
