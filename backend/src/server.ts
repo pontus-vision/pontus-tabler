@@ -10,7 +10,7 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { AUDIT, AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
+import { ADMIN_GROUP_NAME, AUDIT, AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
 import { AuthUserRef } from './typescript/api';
@@ -62,22 +62,28 @@ const authMiddleware = async (
 
     let targetId = '';
 
-    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
-      return next();
-    }
-
     if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
       targetId = req.body?.['id'];
     }
 
     const permissions = await checkPermissions(userId, targetId, tableName);
-    req['user']['groupIds'] = permissions.groups
-      ?.filter(g => g[`table_from__${crudAction}`])
+
+    const permissionsGroups = permissions.groups
+      ?.filter(g => {
+        if(g['table_from__name'] === ADMIN_GROUP_NAME) return true
+        return  g[`table_from__${crudAction}`] === 'true'
+      })
       ?.map(g => g['table_from__name']) || [];
+
+    req['user']['groupIds'] = permissionsGroups
+
     if (
       path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
       path === replaceSlashes('/PontusTest/1.0.0//tables/read')
     ) {
+      return next();
+    }
+    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create') && permissions.dashboardCrud?.create) {
       return next();
     }
 
@@ -86,12 +92,13 @@ const authMiddleware = async (
       // await webhookMiddleware(req, res, next)
       next();
     } else {
-      throw { code: 401, message: 'You do not have this permission' };
+      console.log({permissionsGroups2: permissionsGroups})
+      throw { code: 401, message: 'You do not have this permission', permissionsGroups };
     }
   } catch (error) {
     console.log({ error })
     req['authError'] = error;
-    res.status(error?.code).json(error?.message);
+    next(error)
   }
 };
 
@@ -102,9 +109,9 @@ const auditMiddleware = async(
   res: Response,
   next: NextFunction,
 ) => {
-  console.log('[auditMiddleware] started');
+  console.log('[auditMiddleware] started', req.path);
 
-  const token = req.headers['authorization']
+  const token = req.headers?.['authorization']
 
   const error = req?.['authError'] || null
 
@@ -114,8 +121,6 @@ const auditMiddleware = async(
 
   const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null
 
-  console.log({groupIds, body: req.body})
-      // console.log(req['user']['groupIds'])
   try {
     await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, body, error, userId, groupIds, new Date()])
   } catch (error) {
@@ -246,14 +251,10 @@ export function parsePath(path: string): { entity: string, operation: string } {
 
 }
 
-
-
 function isMatchingFilter(target: string, filter: string) {
   const regex = new RegExp(filter);
   return regex.test(target);
 }
-
-
 
 app.use(express.json());
 
@@ -261,7 +262,32 @@ app.use(authMiddleware);
 
 app.use(auditMiddleware)
 
+app.use(async (err, req, res, next) => {
+  if(!err) return next()
+  req['authError'] = err;
+
+  // Reuse your audit logic or move it to a helper
+  try {
+    const token = req.headers['authorization']
+    const userId = req?.['user']?.['userId'] || null;
+    const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || '';
+    const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
+    
+
+    await runQuery(
+      `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [token, req.path, body, JSON.stringify(req['authError']), userId, groupIds, new Date()]
+    );
+  } catch (logErr) {
+    console.error('Error writing to audit log:', logErr);
+  }
+
+  res.status(err?.code || 500).json({ error: err?.message || 'Internal Server Error' });
+});
+
 app.use(webhookMiddleware)
+
 
 app.listen(port, '0.0.0.0', () => {
 
