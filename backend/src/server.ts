@@ -45,7 +45,6 @@ const authMiddleware = async (
   }
 
   try {
-
     const authorization = await authenticateToken(req, res);
 
     const userId = authorization?.['userId']
@@ -109,8 +108,6 @@ const auditMiddleware = async(
   res: Response,
   next: NextFunction,
 ) => {
-  console.log('[auditMiddleware] started', req.path);
-
   const token = req.headers?.['authorization']
 
   const error = req?.['authError'] || null
@@ -163,7 +160,6 @@ const webhookMiddleware = async (
 
   const operation = entityAndOperation.operation
 
-
   const entity = entityAndOperation.entity
 
   const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
@@ -188,7 +184,6 @@ const webhookMiddleware = async (
   // `);
 
   try {
-
     const subscriptions = await runQuery(`SELECT * FROM ${schemaSql}${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
     for (const subscription of subscriptions) {
       const tableFilter = subscription?.['ws.table_filter']

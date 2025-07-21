@@ -112,7 +112,6 @@ export async function runQuery(
     await connection.close();
     await jdbc.release(connection);
 
-    console.log({query})
     return results;
   } catch (error) {
     console.error('Error executing query:', { query, params, error });
