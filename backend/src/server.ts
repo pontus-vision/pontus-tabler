@@ -91,7 +91,6 @@ const authMiddleware = async (
       // await webhookMiddleware(req, res, next)
       next();
     } else {
-      console.log({permissionsGroups2: permissionsGroups})
       throw { code: 401, message: 'You do not have this permission', permissionsGroups };
     }
   } catch (error) {
