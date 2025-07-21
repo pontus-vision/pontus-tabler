@@ -270,7 +270,7 @@ export const checkPermissions = async (
   targetId: string,
   containerId: string,
 
-): Promise<deltadb.CrudDocumentRefAndGroups> => {
+): Promise<deltadb.CheckPermissionsRes> => {
   if (dbSource === COSMOS_DB) {
     return cdb.checkPermissions(userId, targetId, containerId);
   } else if (dbSource === DELTA_DB) {
