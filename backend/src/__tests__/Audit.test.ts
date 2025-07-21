@@ -43,226 +43,195 @@ jest.setTimeout(1000000);
 describe('dashboardCreatePOST', () => {
   const OLD_ENV = process.env;
 
+  const expectAudit = async (
+    apiCall: () => Promise<AxiosResponse | {data: any, status: number}>,
+    expectedPathEndsWith: string,
+    expectedGroups: string[] = ['Admin'],
+    errorCode?:number 
+  ): Promise<AxiosResponse| {data: any, status: number}> => {
+   
+    const response = await apiCall();
+
+    const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', {
+      query: `SELECT * FROM ${schemaSql}${AUDIT}`
+    });
+
+    const audit = getAudits.data['results'].findLast(a => a['api_path']?.endsWith(expectedPathEndsWith));
+
+    expect(audit).toBeTruthy();
+
+    if(errorCode) {
+      console.log({audit})
+      const error = JSON.parse(audit['error'])
+      expect(error['code']).toBe(errorCode)
+    }
+
+    const groupIds = JSON.parse(audit['group_ids'] || '[]');
+
+    console.log({expectedGroups, groupIds, expectedPathEndsWith})
+    // console.log({expectedPathEndsWith})
+    expectedGroups.forEach(group => {
+      expect(groupIds).toContain(group);
+    });
+
+    return response;
+  };
+
+  const createGroupsAndUsers = async () => {
+    const groupRes = await expectAudit(
+      () => postAdmin('auth/group/create', { name: 'bar' }),
+      'auth/group/create'
+    );
+    group1 = groupRes.data;
+
+    const userRes = await post('/register/user', {
+      username: 'user1',
+      password: 'pontusvision',
+      passwordConfirmation: 'pontusvision',
+    }) as AxiosResponse<RegisterAdminRes>;
+
+    expect(userRes.status).toBe(200);
+    user = userRes.data;
+
+    await expectAudit(
+      () => postAdmin('auth/group/users/create', {
+        id: group1.id,
+        authUsers: [{ id: user.id, username: user.username }],
+        name: group1.name
+      }),
+      'auth/group/users/create'
+    );
+
+    const group2Res = await expectAudit(
+      () => postAdmin('auth/group/create', { name: 'foo' }),
+      'auth/group/create'
+    );
+    group2 = group2Res.data;
+
+    await expectAudit(
+      () => postAdmin('auth/group/users/create', {
+        id: group2.id,
+        authUsers: [{ id: user.id, username: user.username }],
+        name: group2.name
+      }),
+      'auth/group/users/create'
+    );
+  };
+
   let postAdmin;
   let admin;
-  let adminToken
-  let tables = [AUTH_GROUPS, AUTH_USERS, 
-    WEBHOOKS_SUBSCRIPTIONS, AUDIT, DASHBOARDS
-  ] ;
-  let group1: AuthGroupRef
-  let group2: AuthGroupRef
-  if (process.env.DB_SOURCE === DELTA_DB) {
-    tables = [...tables,  GROUPS_USERS, GROUPS_DASHBOARDS];
-  }
-  let user1Session: LoginRes
+  let adminToken;
+  let tables = [AUTH_GROUPS, AUTH_USERS, WEBHOOKS_SUBSCRIPTIONS, AUDIT, DASHBOARDS];
+  let group1: AuthGroupRef;
+  let group2: AuthGroupRef;
+  let user;
+  let user1Session: LoginRes;
+  let dashboard: DashboardCreateRes;
 
-  let dashboard: DashboardCreateRes
+  if (process.env.DB_SOURCE === DELTA_DB) {
+    tables = [...tables, GROUPS_USERS, GROUPS_DASHBOARDS];
+  }
 
   beforeAll(async () => {
     const dbUtils = await prepareDbAndAuth(tables);
     postAdmin = dbUtils.postAdmin;
     admin = dbUtils.admin;
-    adminToken = dbUtils.adminToken
-    jest.resetModules(); // Most important - it clears the cache
-    process.env = { ...OLD_ENV }; // Make a copy
+    adminToken = dbUtils.adminToken;
 
-    await removeDeltaTables([WEBHOOKS_SUBSCRIPTIONS, 'table_foo'])
+    jest.resetModules();
+    process.env = { ...OLD_ENV };
+
+    await removeDeltaTables([WEBHOOKS_SUBSCRIPTIONS, 'table_foo']);
   });
 
   afterAll(async () => {
-    await cleanTables(tables)
-
+    await cleanTables(tables);
     process.env = OLD_ENV;
   });
 
   it('should create an audit record', async () => {
-    const tableCreate: DashboardCreateReq = {
-      name: 'dash1',
-    }
-    const dashboardCreateRes = await postAdmin('/dashboard/create', tableCreate) as AxiosResponse<DashboardCreateRes>
+    const tableCreate: DashboardCreateReq = { name: 'dash1' };
+    const dashboardCreateRes = await expectAudit(
+      () => postAdmin('/dashboard/create', tableCreate),
+      'dashboard/create'
+    );
+    expect(dashboardCreateRes.status).toBe(200);
+    dashboard = dashboardCreateRes.data;
+  });
 
-    expect(dashboardCreateRes.status).toBe(200)
-
-    dashboard = dashboardCreateRes.data
-
-    const readAudit:ExecuteQueryReq = {
-      query: `SELECT * FROM ${schemaSql}${AUDIT}`
-    }
-
-    const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', readAudit)
-
-    expect(getAudits.status).toBe(200)
-
-    expect(getAudits.data['results'][0]['api_path']?.endsWith('dashboard/create')).toBe(true)
-  }),
-  it('should check groups', async() => {
-    const createGroupBody: AuthGroupCreateReq = {
-      name: 'bar',
-    };
-    const createGroup = (await postAdmin(
-      'auth/group/create',
-      createGroupBody,
-    )) as AxiosResponse<AuthGroupCreateRes>;
-
-    group1 = createGroup.data
-
-    const createUserBody: RegisterUserReq = {
-      username: 'user1',
-      password: 'pontusvision',
-      passwordConfirmation: 'pontusvision',
-    };
-
-    const userCreateRes = (await post(
-      '/register/user',
-      createUserBody,
-    )) as AxiosResponse<RegisterAdminRes>;
-
-    expect(userCreateRes.status).toBe(200);
-
-    const authUserRead: AuthUserReadReq = {
-      username: createUserBody.username,
-      id: userCreateRes.data.id
-    }
-
-    const userReadRes = await postAdmin('/auth/user/read', authUserRead) as AxiosResponse<AuthUserReadRes>
-
-    expect(userReadRes.status).toBe(200)
-
-    admin = userCreateRes.data;
-
-    const loginUserBody: LoginReq = {
-      username: 'user1',
-      password: 'pontusvision',
-    };
-
-    const user = userCreateRes.data;
-
-    const createGroupUserBody: AuthGroupUsersCreateReq = {
-      id: createGroup.data.id,
-      authUsers: [{ id: user.id, username: user.username }],
-      name: createGroup.data.name,
-    };
-
-
-    const createGroupUser = (await postAdmin(
-      'auth/group/users/create',
-      createGroupUserBody,
-    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
-
-    expect(createGroupUser.status).toBe(200);
-    
+  it('should check groups', async () => {
+    await createGroupsAndUsers();
 
     const createGroupDashPermissions: AuthGroupDashboardCreateReq = {
-      id: createGroup.data.id,
-      name: createGroup.data.name, 
-      dashboards: [{id: dashboard.id, name: dashboard.name, create: true, read: true, update: true, delete: false}]
-    } 
-
-    const createGroupDashboardPermissionsRes = await postAdmin('auth/group/dashboard/create', createGroupDashPermissions) as AxiosResponse<AuthGroupDashboardCreateRes>  
-
-    expect(createGroupDashboardPermissionsRes.status).toBe(200)
-
-    const createGroupBody2: AuthGroupCreateReq = {
-      name: 'foo',
-    };
-    const createGroup2 = (await postAdmin(
-      'auth/group/create',
-      createGroupBody2,
-    )) as AxiosResponse<AuthGroupCreateRes>;
-
-    group2 = createGroup2.data
-
-    const createGroupUserBody2: AuthGroupUsersCreateReq = {
-      id: createGroup2.data.id,
-      authUsers: [{ id: user.id, username: user.username }],
-      name: createGroup2.data.name,
+      id: group1.id,
+      name: group1.name,
+      dashboards: [{ id: dashboard.id, name: dashboard.name, create: true, read: true, update: true, delete: false }]
     };
 
-    const createGroupUser2 = (await postAdmin(
-      'auth/group/users/create',
-      createGroupUserBody2,
-    )) as AxiosResponse<AuthGroupDashboardCreateRes>;
+    const createGroupDashboardPermissionsRes = await expectAudit(
+      () => postAdmin('auth/group/dashboard/create', createGroupDashPermissions),
+      'auth/group/dashboard/create'
+    );
+    expect(createGroupDashboardPermissionsRes.status).toBe(200);
 
-    expect(createGroupUser2.status).toBe(200);
-    const createGroupDashboardPermissions2: AuthGroupDashboardCreateReq = {
-      id: createGroup2.data.id,
-      name: createGroup2.data.name, 
-      dashboards: [{id: dashboard.id, name: dashboard.name, create: true, read: true, update: true, delete: false}]
-    } 
-    const logoutBody: LogoutReq = {
-      token: adminToken,
+    const createGroupDashboardPermissions2Body: AuthGroupDashboardCreateReq = {
+      id: group2.id,
+      name: group2.name,
+      dashboards: [{ id: dashboard.id, name: dashboard.name, create: true, read: true, update: true, delete: false }]
     };
 
-    const createGroupDashboardPermissionsRes2 = await postAdmin('auth/group/dashboard/create', createGroupDashboardPermissions2) as AxiosResponse<AuthGroupDashboardCreateRes>  
+    const createGroupDashboardPermissionsRes2 = await expectAudit(
+      () => postAdmin('auth/group/dashboard/create', createGroupDashboardPermissions2Body),
+      'auth/group/dashboard/create'
+    );
+    expect(createGroupDashboardPermissionsRes2.status).toBe(200);
 
-    expect(createGroupDashboardPermissionsRes2.status).toBe(200)
-
-    const LogoutRes = (await postAdmin(
-      'logout',
-      logoutBody,
-    )) as AxiosResponse<LoginRes>;
-
+    const LogoutRes = await expectAudit(
+      () => postAdmin('logout', { token: adminToken }),
+      'logout', []
+    );
     expect(LogoutRes.status).toBe(200);
 
-    const LoginUserRes = (await post(
-      '/login',
-      loginUserBody,
-    )) as AxiosResponse<LoginRes>;
-
+    const loginUserBody: LoginReq = { username: 'user1', password: 'pontusvision' };
+    const LoginUserRes = await post('/login', loginUserBody) as AxiosResponse<LoginRes>;
     expect(LoginUserRes.status).toBe(200);
+    user1Session = LoginUserRes.data;
 
-    user1Session = LoginUserRes.data
+    const dashboardRes: DashboardReadReq = { id: dashboard.id };
+    const dashReadFromGroup1Res = await expectAudit(
+      () => post('dashboard/read', dashboardRes, {
+        Authorization: `Bearer ${LoginUserRes.data.accessToken}`
+      }),
+      'dashboard/read',
+      ['bar', 'foo']
+    );
+    expect(dashReadFromGroup1Res.status).toBe(200);
+  });
 
-    const dashboardRes: DashboardReadReq = {
-      id: dashboard.id
-    }
-
-    const dashReadFromGroup1Res = await post('dashboard/read', dashboardRes, {Authorization:`Bearer ${LoginUserRes.data.accessToken}`}) 
-
-    expect(dashReadFromGroup1Res.status).toBe(200)
-
-    const readAudit: ExecuteQueryReq = {
-      query: `SELECT * FROM ${schemaSql}${AUDIT}`
-    }
-
-    const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', readAudit)
-
-    const dashboardReadAudit = getAudits.data?.['results']?.find(audit=> audit['api_path']?.endsWith('dashboard/read'))
-
-    expect(JSON.parse(dashboardReadAudit?.['group_ids'])).toContain('bar')
-    expect(JSON.parse(dashboardReadAudit?.['group_ids'])).toContain('foo')
-  }),
   it('should fail to delete without delete permission, then succeed after updating permissions', async () => {
-    const dashboardDelete: DashboardDeleteReq = {
-      id: dashboard.id
-    };
-  
-    const deleteAttempt = await post(
+    const dashboardDelete: DashboardDeleteReq = { id: dashboard.id };
+
+    // 1. Attempt delete (unauthorized, no audit expected)
+    const deleteAttempt = await expectAudit(()=> post(
       'dashboard/delete',
       dashboardDelete,
       { Authorization: `Bearer ${user1Session.accessToken}` }
-    );
-  
+    ), 'dashboard/delete', [], 401);
     expect(deleteAttempt.status).not.toBe(200);
-  
-    let readAudit: ExecuteQueryReq = {
+
+    // 2. Confirm audit does not contain group1 yet
+    const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', {
       query: `SELECT * FROM ${schemaSql}${AUDIT}`
-    };
-  
-    let getAudits = await axios.post(
-      'http://sql-app:3001/PontusTest/1.0.0/test/execute',
-      readAudit
-    );
-  
+    });
     const deleteAuditBeforeUpdate = getAudits.data?.['results']?.find(audit =>
       audit['api_path']?.endsWith('dashboard/delete')
     );
-  
     if (deleteAuditBeforeUpdate) {
       const groupIdsBefore = JSON.parse(deleteAuditBeforeUpdate?.['group_ids']);
       expect(groupIdsBefore).not.toContain(group1.name);
     }
-  
+
+    // 3. Update group with delete permission
     const updateGroupDash: AuthGroupDashboardUpdateReq = {
       name: group1.name,
       id: group1.id,
@@ -275,34 +244,23 @@ describe('dashboardCreatePOST', () => {
         delete: true
       }]
     };
-  
-    const updateRes = await postAdmin(
-      'auth/group/dashboard/update',
-      updateGroupDash
-    ) as AxiosResponse<AuthGroupDashboardCreateRes>;
-  
+
+    const updateRes = await expectAudit(
+      () => postAdmin('auth/group/dashboard/update', updateGroupDash),
+      'auth/group/dashboard/update'
+    );
     expect(updateRes.status).toBe(200);
-  
-    const deleteAfterUpdate = await post(
+
+    // 4. Try delete again, expect audit
+    console.log('TRYING TO DELETE FOR REAL')
+    const deleteAfterUpdate = await expectAudit(
+      () => post('dashboard/delete', dashboardDelete, {
+        Authorization: `Bearer ${user1Session.accessToken}`
+      }),
       'dashboard/delete',
-      dashboardDelete,
-      { Authorization: `Bearer ${user1Session.accessToken}` }
+      [group1.name]
     );
-  
     expect(deleteAfterUpdate.status).toBe(200);
-  
-    getAudits = await axios.post(
-      'http://sql-app:3001/PontusTest/1.0.0/test/execute',
-      readAudit
-    );
-  
-    const deleteAuditAfterUpdate = getAudits.data?.['results']?.findLast(audit =>
-      audit['api_path']?.endsWith('dashboard/delete')
-    );
-  
-    expect(deleteAuditAfterUpdate).toBeDefined();
-    const groupIdsAfter = JSON.parse(deleteAuditAfterUpdate?.['group_ids']);
-    expect(groupIdsAfter).toContain(group1.name);
   });
-  
 });
+
