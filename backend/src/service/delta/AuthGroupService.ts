@@ -138,22 +138,7 @@ const authUserGroupsRead = async (
 export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGroupCreateRes> => {
   const id = data.id || generateUUIDv6();
   const tableMetadata = data.tableMetadataCrud;
-
-  // Create table if not exists — still safe to inline (DDL)
-  await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${schemaSql}${AUTH_GROUPS} (
-      id STRING,
-      name STRING,
-      create_table BOOLEAN,
-      read_table BOOLEAN,
-      update_table BOOLEAN,
-      delete_table BOOLEAN,
-      create_dashboard BOOLEAN,
-      read_dashboard BOOLEAN,
-      update_dashboard BOOLEAN,
-      delete_dashboard BOOLEAN
-    ) USING DELTA LOCATION '/data/${schema}/${AUTH_GROUPS}';`
-  );
+  const dashboardCrud = data.dashboardCrud
 
   // Check if group name already exists
   const checkNameQuery = `SELECT COUNT(*) FROM ${schemaSql}${AUTH_GROUPS} WHERE name = ?`;
@@ -179,12 +164,13 @@ export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGro
     !!tableMetadata?.read,
     !!tableMetadata?.update,
     !!tableMetadata?.delete,
-    !!tableMetadata?.create,
-    !!tableMetadata?.read,
-    !!tableMetadata?.update,
-    !!tableMetadata?.delete,
+    !!dashboardCrud?.create,
+    !!dashboardCrud?.read,
+    !!dashboardCrud?.update,
+    !!dashboardCrud?.delete,
   ];
 
+  console.log({insertQuery, insertParams})
   await runQuery(insertQuery, insertParams);
 
   // Fetch the newly created group
@@ -895,26 +881,29 @@ export const checkTableMetadataPermissions = async (
   };
 };
 
-export interface CrudDocumentRefAndGroups extends CrudDocumentRef {
-  groups?: Record<string,any>[]
+export interface CheckPermissionsRes extends CrudDocumentRef {
+  groups?: Record<string,any>[],
+  dashboardCrud?: CrudDocumentRef,
+  tableCrud?: CrudDocumentRef
 }
 
 export const checkPermissions = async (
   userId: string,
   targetId: string,
   containerId: string,
-): Promise<CrudDocumentRefAndGroups> => {
-  const res = (await readEdge(
-    {
-      direction: 'from',
-      edgeTable: GROUPS_USERS,
-      tableToName: AUTH_USERS,
-      tableFromName: AUTH_GROUPS,
-      filters: {},
-      rowId: userId,
-    },
-  )) as AuthGroupRef[];
+): Promise<CheckPermissionsRes> => {
+  // const res = (await readEdge(
+  //   {
+  //     direction: 'from',
+  //     edgeTable: GROUPS_USERS,
+  //     tableToName: AUTH_USERS,
+  //     tableFromName: AUTH_GROUPS,
+  //     filters: {},
+  //     rowId: userId,
+  //   },
+  // )) as AuthGroupRef[];
 
+  const res = await runQuery(`SELECT * FROM ${schemaSql}${GROUPS_USERS} gu JOIN ${schemaSql}${AUTH_GROUPS} g ON gu.table_from__id = g.id WHERE table_to__id = ?`, [userId])
 
   if (res.length === 0) {
     throw { code: 404, message: 'There is no group associated with user' };
@@ -928,13 +917,31 @@ export const checkPermissions = async (
   const groups = []
 
   for (const group of res) {
+    console.log({group})
     if (group['table_from__name'] === ADMIN_GROUP_NAME) {
       return {
         create: true,
         read: true,
         update: true,
         delete: true,
-        groups
+        groups: [{...group,
+          table_from__create: true,
+          table_from__read: true,
+          table_from__update: true,
+          table_from__delete: true
+        }],
+        dashboardCrud: {
+          create: true,
+          update: true,
+          read: true,
+          delete: true
+        },
+        tableCrud: {
+          create: true,
+          update: true,
+          read: true,
+          delete: true
+        }
       };
     }
     const res = (await readEdge(
@@ -987,6 +994,18 @@ export const checkPermissions = async (
     read,
     update,
     delete: del,
+    dashboardCrud: {
+      create: res?.[0]?.['create_dashboard'],
+      read: res?.[0]?.['read_dashboard'],
+      update: res?.[0]?.['update_dashboard'],
+      delete: res?.[0]?.['delete_dashboard'],
+    },
+    tableCrud: {
+      create: res?.[0]?.['create_table'],
+      read: res?.[0]?.['read_table'],
+      update: res?.[0]?.['update_table'],
+      delete: res?.[0]?.['delete_table'],
+    },
     groups 
   };
 };
