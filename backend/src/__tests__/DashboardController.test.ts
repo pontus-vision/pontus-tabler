@@ -171,8 +171,14 @@ describe('dashboardCreatePOST', () => {
       state: {},
     };
 
-    const createBody = {
+    const createBody:AuthGroupCreateReq = {
       name: 'group1',
+      dashboardCrud: {
+        create: true,
+        delete: true,
+        read: true,
+        update: true
+      }
     };
 
     const createUserBody: AuthUserCreateReq = {
@@ -228,6 +234,8 @@ describe('dashboardCreatePOST', () => {
       Authorization: bearerToken,
     })) as AxiosResponse<DashboardCreateReq>;
 
+    expect(createRetVal.status).toBe(200)
+
     const dashboardGroupBody: DashboardGroupAuthCreateReq = {
       authGroups: [
         {
@@ -246,6 +254,7 @@ describe('dashboardCreatePOST', () => {
       'dashboard/group/auth/create',
       dashboardGroupBody,
     )) as AxiosResponse<DashboardGroupAuthCreateRes>;
+    
 
     expect(createRetVal2.status).toBe(200);
 
