@@ -48,8 +48,8 @@ jobs:
 
       - name: Remove delta lake tables and metastore files
         run: |
-          rm -Rf backend/delta-table/work-dir/spark-warehouse/data/*
-          rm -Rf backend/delta-table/data/*
+          sudo rm -Rf backend/delta-table/work-dir/spark-warehouse/data/*
+          sudo rm -Rf backend/delta-table/data/*
           sudo rm -rf ./backend/delta-table/work-dir/metastore_db
           sudo rm -f ./backend/delta-table/work-dir/derby.log    
 
