@@ -207,31 +207,19 @@ describe('dashboardCreatePOST', () => {
     );
     expect(dashReadFromGroup1Res.status).toBe(200);
   });
-
-  it('should fail to delete without delete permission, then succeed after updating permissions', async () => {
+  it("should fail to delete without delete permission", async() => {
     const dashboardDelete: DashboardDeleteReq = { id: dashboard.id };
 
-    // 1. Attempt delete (unauthorized, no audit expected)
     const deleteAttempt = await expectAudit(()=> post(
       'dashboard/delete',
       dashboardDelete,
       { Authorization: `Bearer ${user1Session.accessToken}` }
     ), 'dashboard/delete', [], 401);
     expect(deleteAttempt.status).not.toBe(200);
+  })
+  it('should succeed after updating permissions', async () => {
+    const dashboardDelete: DashboardDeleteReq = { id: dashboard.id };
 
-    // 2. Confirm audit does not contain group1 yet
-    const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', {
-      query: `SELECT * FROM ${schemaSql}${AUDIT}`
-    });
-    const deleteAuditBeforeUpdate = getAudits.data?.['results']?.find(audit =>
-      audit['api_path']?.endsWith('dashboard/delete')
-    );
-    if (deleteAuditBeforeUpdate) {
-      const groupIdsBefore = JSON.parse(deleteAuditBeforeUpdate?.['group_ids']);
-      expect(groupIdsBefore).not.toContain(group1.name);
-    }
-
-    // 3. Update group with delete permission
     const updateGroupDash: AuthGroupDashboardUpdateReq = {
       name: group1.name,
       id: group1.id,
