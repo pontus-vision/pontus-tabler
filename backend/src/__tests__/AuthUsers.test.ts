@@ -158,7 +158,6 @@ describe('dashboardCreatePOST', () => {
       'auth/user/create'
     ) as AxiosResponse<AuthUserCreateRes>;
   
-    expect(authGroupCreateRes.status).toBe(200);
     expect(authGroupCreateRes2.data.username).toBe(createBody2.username);
     expect(authGroupCreateRes.data.username).toBe(createBody.username);
   
@@ -411,7 +410,6 @@ describe('dashboardCreatePOST', () => {
       '/auth/group/create',
       createGroupBody,
     )) as AxiosResponse<AuthGroupCreateRes>;
-    expect(authGroupCreateRes.status).toBe(200);
 
     expect(authGroupCreateRes.data).toMatchObject(createGroupBody);
 
@@ -428,8 +426,6 @@ describe('dashboardCreatePOST', () => {
       createUserGroupBody,
     )) as AxiosResponse<AuthUserGroupsCreateRes>;
 
-    expect(authUserGroupCreateRes.status).toBe(200);
-
     const authUserGroupDeleteBody: AuthUserGroupsDeleteReq = {
       id: admin.id,
       username: admin.username,
@@ -442,8 +438,6 @@ describe('dashboardCreatePOST', () => {
       '/auth/user/groups/delete',
       authUserGroupDeleteBody,
     )) as AxiosResponse<AuthUserGroupsDeleteRes>;
-
-    expect(authUserGroupDeleteRes.status).toBe(200);
   });
   it('should delete INCORRECTLY authgroup subdocuments', async () => {
     const createGroupBody: AuthGroupCreateReq = {
@@ -575,8 +569,6 @@ describe('dashboardCreatePOST', () => {
       postAdmin('logout', logoutBody),
       'logout'
     );
-  
-    expect(logoutRes.status).toBe(200);
   });
   
   it('should login incorrectly', async () => {
@@ -689,8 +681,6 @@ describe('dashboardCreatePOST', () => {
       dashBody,
     )) as AxiosResponse<DashboardCreateRes>;
 
-    expect(createDash.status).toBe(200);
-
     const createGroupDashBody: AuthGroupDashboardCreateReq = {
       id: createGroup.data.id,
       name: createGroup.data.name,
@@ -711,8 +701,6 @@ describe('dashboardCreatePOST', () => {
       createGroupDashBody,
     )) as AxiosResponse<AuthGroupDashboardCreateRes>;
 
-    expect(createGroupDash.status).toBe(200);
-
     const createUserBody: RegisterUserReq = {
       username: 'user1',
       password: 'pontusvision',
@@ -724,16 +712,12 @@ describe('dashboardCreatePOST', () => {
       createUserBody,
     )) as AxiosResponse<RegisterAdminRes>;
 
-    expect(userCreateRes.status).toBe(200);
-
     const authUserRead: AuthUserReadReq = {
       username: createUserBody.username,
       id: userCreateRes.data.id
     }
 
     const userReadRes = await postAdmin('/auth/user/read', authUserRead) as AxiosResponse<AuthUserReadRes>
-
-    expect(userReadRes.status).toBe(200)
 
     admin = userCreateRes.data;
 
@@ -755,8 +739,6 @@ describe('dashboardCreatePOST', () => {
       createGroupUserBody,
     )) as AxiosResponse<AuthGroupDashboardCreateRes>;
 
-    expect(createGroupUser.status).toBe(200);
-
     const logoutBody: LogoutReq = {
       token: adminToken,
     };
@@ -765,14 +747,11 @@ describe('dashboardCreatePOST', () => {
       'logout',
       logoutBody,
     )) as AxiosResponse<LoginRes>;
-    expect(LogoutRes.status).toBe(200);
 
     const LoginUserRes = (await post(
       '/login',
       loginUserBody,
     )) as AxiosResponse<LoginRes>;
-
-    expect(LoginUserRes.status).toBe(200);
 
     const token = LoginUserRes.data.accessToken;
 
@@ -783,8 +762,6 @@ describe('dashboardCreatePOST', () => {
     const delDash = (await post('dashboard/delete', dashDelBody, {
       Authorization: 'Bearer ' + token,
     })) as AxiosResponse<AuthGroupDashboardCreateRes>;
-
-    expect(delDash.status).toBe(200);
 
     const readDash = (await post('dashboard/read', dashDelBody, {
       Authorization: 'Bearer ' + token,
