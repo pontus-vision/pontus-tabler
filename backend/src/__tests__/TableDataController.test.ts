@@ -96,7 +96,6 @@ describe('tabledatacontroller', () => {
       'table/data/create'
     );
   
-    expect(createRetVal.status).toBe(200);
     expect(
       isSubset({ ['column_1']: body.cols.column1 }, createRetVal.data),
     ).toBe(true);
@@ -173,8 +172,6 @@ describe('tabledatacontroller', () => {
       }),
       'table/data/delete'
     );
-  
-    expect(deleteRetVal.status).toBe(200);
   
     const readRetVal4 = await expectAudit(() =>
       postAdmin('table/data/read', {
@@ -289,8 +286,6 @@ describe('tabledatacontroller', () => {
       undefined,
       500 // or other expected code
     );
-  
-    expect(deleteRetVal.status).not.toBe(200);
   });
   
   it('should handle table updates', async () => {
@@ -353,8 +348,6 @@ describe('tabledatacontroller', () => {
       postAdmin('table/data/create', createTableDataBody),
       'table/data/create'
     );
-  
-    expect(createTableDataRetVal.status).toBe(200);
   });
   
 });

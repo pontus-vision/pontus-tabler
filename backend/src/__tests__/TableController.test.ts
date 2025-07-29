@@ -86,7 +86,6 @@ describe('tableControllerTest', () => {
     const resPayload: TableCreateRes = createRetVal.data;
     const id = resPayload.id;
   
-    expect(createRetVal.status).toBe(200);
     expect(resPayload.name).toBe(snakeCase(body.name));
     expect(resPayload.cols[0].name).toBe(snakeCase(body.cols[0].name));
     expect(resPayload.cols[1].name).toBe(snakeCase(body.cols[1].name));
@@ -98,7 +97,6 @@ describe('tableControllerTest', () => {
   
     const resPayload2: TableReadRes = readRetVal.data;
   
-    expect(readRetVal.status).toBe(200);
     expect(resPayload2.name).toBe(snakeCase(body.name));
     expect(resPayload2.cols[0].name).toBe(snakeCase(body.cols[0].name));
     expect(resPayload2.cols[1].name).toBe(snakeCase(body.cols[1].name));
@@ -150,7 +148,6 @@ describe('tableControllerTest', () => {
       'table/delete'
     );
   
-    expect(deleteRetVal.status).toBe(200);
   
     const readRetVal2 = await expectAudit(() =>
       postAdmin('table/read', { id: body3.id }),
@@ -245,7 +242,6 @@ describe('tableControllerTest', () => {
       postAdmin('table/create', body),
       'table/create'
     ) as AxiosResponse<TableCreateRes>;
-    expect(createRetVal.status).toBe(200);
   
     const createRetVal2 = await expectAudit(() =>
       postAdmin('table/create', {
@@ -254,7 +250,6 @@ describe('tableControllerTest', () => {
       }),
       'table/create'
     ) as AxiosResponse<TableCreateRes>;
-    expect(createRetVal2.status).toBe(200);
   
     const readBody = {
       from: 1,
@@ -281,7 +276,6 @@ describe('tableControllerTest', () => {
       }),
       'table/delete'
     );
-    expect(deleteVal.status).toBe(200);
   
     const deleteVal2 = await expectAudit(() =>
       postAdmin('table/delete', {
@@ -290,7 +284,6 @@ describe('tableControllerTest', () => {
       }),
       'table/delete'
     );
-    expect(deleteVal2.status).toBe(200);
   });
   
 });

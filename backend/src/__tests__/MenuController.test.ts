@@ -111,8 +111,6 @@ describe('testing Menu', () => {
       postAdmin('menu/read', data),
       'menu/read'
     );
-  
-    expect(readRes.status).toBe(200);
   });
   
   it('should create a folder under root', async () => {
@@ -158,8 +156,6 @@ describe('testing Menu', () => {
       postAdmin('menu/read', { path: '/' }),
       'menu/read'
     );
-  
-    expect(readMenuRoot.status).toBe(200);
   
     const body: MenuItemTreeRef = {
       path: '/',
