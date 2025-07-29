@@ -8,8 +8,66 @@ import {
   RegisterAdminReq,
   LoginRes,
 } from '../typescript/api';
-import { DELTA_DB, schema, schemaSql } from '../consts';
+import { AUDIT, DELTA_DB, schema, schemaSql } from '../consts';
 import { ExecuteQueryReq, ExecuteQueryRes } from '../../sql-app/src/typescript/api'
+
+export const expectAudit = async (
+  apiCall: () => Promise<AxiosResponse | {data: any, status: number}>,
+  expectedPathEndsWith: string,
+  expectedGroups: string[] = ['Admin'],
+  errorCode?:number 
+): Promise<AxiosResponse| {data: any, status: number}> => {
+  const response = await apiCall();
+
+  let audit
+
+  if(!errorCode) {
+    expect(response.status).toBe(200)
+
+    const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', {
+      query: `SELECT * FROM ${schemaSql}${AUDIT} WHERE error IS NULL`
+    });
+
+    console.log({getAudits: JSON.stringify(getAudits.data)})
+
+    audit = getAudits.data['results'].find(a => a['api_path']?.endsWith(expectedPathEndsWith));
+    console.log({audit})
+    console.log(getAudits.data['results'].findLast(a => a['api_path']?.endsWith(expectedPathEndsWith)));
+
+    expect(audit).toBeTruthy();
+  }
+
+
+  if(errorCode) {
+    expect(response.status).toBe(errorCode)
+    const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', {
+      query: `SELECT * FROM ${schemaSql}${AUDIT} WHERE error IS NOT NULL`
+    });
+    console.log('[AUDITS]', JSON.stringify(getAudits.data))
+
+    audit = getAudits.data['results'].find(a => a['api_path']?.endsWith(expectedPathEndsWith));
+
+    expect(audit).toBeTruthy();
+
+    const error = JSON.parse(audit['error'])
+    expect(error['code']).toBe(errorCode)
+  }
+
+  const groupIds = JSON.parse(audit['group_ids'] || '[]');
+
+  console.log({expectedPathEndsWith})
+  expectedGroups.forEach(group => {
+    expect(groupIds).toContain(group);
+  });
+
+  expect(audit['created_at']).toBeTruthy()
+
+  const deleteAudit = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', {
+      query: `DELETE FROM ${schemaSql}${AUDIT}`
+    });
+
+  return response;
+};
 
 export const post = async (
   endpoint: string,

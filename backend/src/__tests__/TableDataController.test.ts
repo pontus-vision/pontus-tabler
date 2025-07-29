@@ -17,9 +17,10 @@ import {
   LoginReq,
   LoginRes,
   RegisterAdminReq,
+  TableDataUpdateRes,
 } from '../typescript/api';
 
-import { prepareDbAndAuth, isSubset, post, cleanTables, removeDeltaTables } from './test-utils';
+import { prepareDbAndAuth, isSubset, post, cleanTables, removeDeltaTables, expectAudit } from './test-utils';
 import { AxiosResponse } from 'axios';
 import { DELTA_DB, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, GROUPS_DASHBOARDS, TABLES } from '../consts';
 
@@ -79,28 +80,27 @@ describe('tabledatacontroller', () => {
         },
       ],
     };
-
-    const creatTableRetVal = await postAdmin('table/create', table);
-
-    expect(creatTableRetVal.status).toBe(200);
-
-    // Creating our first record.
+  
+    await expectAudit(() =>
+      postAdmin('table/create', table),
+      'table/create'
+    );
+  
     const body: TableDataCreateReq = {
       tableName: 'person-natural',
-      cols: {
-        column1: 'bar',
-      },
+      cols: { column1: 'bar' },
     };
-
-    const createRetVal = await postAdmin('table/data/create', body);
-
+  
+    const createRetVal = await expectAudit(() =>
+      postAdmin('table/data/create', body),
+      'table/data/create'
+    );
+  
     expect(createRetVal.status).toBe(200);
     expect(
       isSubset({ ['column_1']: body.cols.column1 }, createRetVal.data),
     ).toBe(true);
-
-    // Reading accordingly and checking if it will be listed.
-
+  
     const body2: TableDataReadReq = {
       from: 1,
       to: 10,
@@ -113,36 +113,33 @@ describe('tabledatacontroller', () => {
       },
       tableName: body.tableName,
     };
-
-    const readRetVal = (await postAdmin(
-      'table/data/read',
-      body2,
-    )) as AxiosResponse<TableDataReadRes>;
-
+  
+    const readRetVal = await expectAudit(() =>
+      postAdmin('table/data/read', body2),
+      'table/data/read'
+    );
+  
     expect(
       readRetVal.data.rows.some((value) =>
         isSubset({ ['column_1']: body.cols.column1 }, value),
-      ),
+      )
     ).toBe(true);
-
-    // Updating it.
-
+  
     const bodyUpdate: TableDataUpdateReq = {
       tableName: body.tableName,
       rowId: createRetVal.data.id,
-      cols: {
-        column1: 'john',
-      },
+      cols: { column1: 'john' },
     };
-
-    const updateRetVal = await postAdmin('table/data/update', bodyUpdate);
-
+  
+    const updateRetVal = await expectAudit(() =>
+      postAdmin('table/data/update', bodyUpdate),
+      'table/data/update'
+    );
+  
     expect(
       isSubset({ ['column_1']: bodyUpdate.cols.column1 }, updateRetVal.data),
     ).toBe(true);
-
-    // Reading it again
-
+  
     const bodyRead2: TableDataReadReq = {
       from: 1,
       to: 10,
@@ -155,38 +152,45 @@ describe('tabledatacontroller', () => {
       },
       tableName: body.tableName,
     };
-
-    const readRetVal3 = (await postAdmin(
-      'table/data/read',
-      bodyRead2,
-    )) as AxiosResponse<TableDataReadRes>;
-
+  
+    const readRetVal3 = await expectAudit(() =>
+      postAdmin('table/data/read', bodyRead2),
+      'table/data/read'
+    );
+  
     expect(
       readRetVal3.data.rows.some((value) =>
         isSubset({ ['column_1']: bodyUpdate.cols.column1 }, value),
-      ),
+      )
     ).toBe(true);
-
+  
     expect(readRetVal3.data.rowsCount).toBe(1);
-
-    // and finally deleting it.
-
-    const deleteRetVal = await postAdmin('table/data/delete', {
-      rowId: createRetVal.data.id,
-      tableName: body.tableName,
-    });
-
+  
+    const deleteRetVal = await expectAudit(() =>
+      postAdmin('table/data/delete', {
+        rowId: createRetVal.data.id,
+        tableName: body.tableName,
+      }),
+      'table/data/delete'
+    );
+  
     expect(deleteRetVal.status).toBe(200);
-
-    const readRetVal4 = (await postAdmin('table/data/read', {
-      from: 1,
-      to: 10,
-      filters: {},
-      tableName: body.tableName,
-    })) as AxiosResponse<TableDataReadRes>;
-
+  
+    const readRetVal4 = await expectAudit(() =>
+      postAdmin('table/data/read', {
+        from: 1,
+        to: 10,
+        filters: {},
+        tableName: body.tableName,
+      }),
+      'table/data/read',
+      undefined,
+      404
+    );
+  
     expect(readRetVal4.status).toBe(404);
   });
+  
   it('should do the CRUD "sad path"', async () => {
     const table: TableCreateReq = {
       name: 'person-natural',
@@ -203,29 +207,26 @@ describe('tabledatacontroller', () => {
         },
       ],
     };
-
-    const creatTableRetVal = await postAdmin('table/create', table);
-
-    expect(creatTableRetVal.status).toBe(200);
-
-    // Creating our first record.
+  
+    await expectAudit(() =>
+      postAdmin('table/create', table),
+      'table/create'
+    );
+  
     const body: TableDataCreateReq = {
       tableName: 'person-natural',
-      cols: {
-        foo: 'bar',
-      },
+      cols: { foo: 'bar' },
     };
-
-    const createRetVal = await postAdmin('table/data/create', body);
-
-    expect(createRetVal.status).toBe(400);
-
-    expect(createRetVal.data === 'Cols are not defined in table: foo').toBe(
-      true,
+  
+    const createRetVal = await expectAudit(() =>
+      postAdmin('table/data/create', body),
+      'table/data/create',
+      undefined,
+      400
     );
-
-    // Reading accordingly and checking if it will be listed.
-
+  
+    expect(createRetVal.data === 'Cols are not defined in table: foo').toBe(true);
+  
     const body2: TableDataReadReq = {
       from: 1,
       to: 10,
@@ -238,27 +239,25 @@ describe('tabledatacontroller', () => {
       },
       tableName: body.tableName,
     };
-
-    const readRetVal = await postAdmin('table/data/read', body2);
-
-    expect(readRetVal.status).toBe(404);
-
-    // Updating it.
-
+  
+    await expectAudit(() =>
+      postAdmin('table/data/read', body2),
+      'table/data/read',
+      undefined,
+      404
+    );
+  
     const bodyUpdate: TableDataUpdateReq = {
       tableName: body.tableName,
       rowId: createRetVal.data.id,
-      cols: {
-        column: 'john',
-      },
+      cols: { column: 'john' },
     };
+  
+   
+     const tableDataUpdateRes = await postAdmin('table/data/update', bodyUpdate) as AxiosResponse<TableDataUpdateRes>
 
-    const updateRetVal = await postAdmin('table/data/update', bodyUpdate);
-
-    expect(updateRetVal.status).toBe(422);
-
-    // Reading it again
-
+    expect(tableDataUpdateRes.status).toBe(422)
+  
     const bodyRead2: TableDataReadReq = {
       from: 1,
       to: 10,
@@ -271,22 +270,29 @@ describe('tabledatacontroller', () => {
       },
       tableName: body.tableName,
     };
-
-    const readRetVal3 = await postAdmin('table/data/read', bodyRead2);
-
-    expect(readRetVal3.status).toBe(404);
-
-    // and finally deleting it.
-
+  
+    await expectAudit(() =>
+      postAdmin('table/data/read', bodyRead2),
+      'table/data/read',
+      undefined,
+      404
+    );
+  
     const deleteBody: TableDataDeleteReq = {
       rowId: 'someid',
       tableName: 'some_table',
     };
-
-    const deleteRetVal = await postAdmin('table/data/delete', deleteBody);
-
+  
+    const deleteRetVal = await expectAudit(() =>
+      postAdmin('table/data/delete', deleteBody),
+      'table/data/delete',
+      undefined,
+      500 // or other expected code
+    );
+  
     expect(deleteRetVal.status).not.toBe(200);
   });
+  
   it('should handle table updates', async () => {
     const table: TableCreateReq = {
       name: 'person-natural',
@@ -303,15 +309,14 @@ describe('tabledatacontroller', () => {
         },
       ],
     };
-
-    const createTableRetVal = (await postAdmin(
-      'table/create',
-      table,
-    )) as AxiosResponse<TableCreateRes>;
-
+  
+    const createTableRetVal = await expectAudit(() =>
+      postAdmin('table/create', table),
+      'table/create'
+    );
+  
     const createTableData = createTableRetVal.data;
-
-    expect(createTableRetVal.status).toBe(200);
+  
     const tableUpdateBody: TableUpdateReq = {
       id: createTableData.id,
       label: createTableData.label,
@@ -329,30 +334,27 @@ describe('tabledatacontroller', () => {
         },
       ],
     };
-
-    const updateTableRetVal = (await postAdmin(
-      'table/update',
-      tableUpdateBody,
-    )) as AxiosResponse<TableUpdateRes>;
-
-    const updateTableRetData = updateTableRetVal.data;
-
-    expect(updateTableRetVal.status).toBe(200);
-
-    const cols = updateTableRetData.cols;
-
+  
+    const updateTableRetVal = await expectAudit(() =>
+      postAdmin('table/update', tableUpdateBody),
+      'table/update'
+    );
+  
+    const cols = updateTableRetVal.data.cols;
+  
     const createTableDataBody: TableDataCreateReq = {
-      tableName: updateTableRetData.name,
+      tableName: updateTableRetVal.data.name,
       cols: {
         [`${cols[0].name}`]: 'foo',
       },
     };
-
-    const createTableDataRetVal = await postAdmin(
-      'table/data/create',
-      createTableDataBody,
+  
+    const createTableDataRetVal = await expectAudit(() =>
+      postAdmin('table/data/create', createTableDataBody),
+      'table/data/create'
     );
-
+  
     expect(createTableDataRetVal.status).toBe(200);
   });
+  
 });
