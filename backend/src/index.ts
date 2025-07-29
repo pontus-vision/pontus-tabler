@@ -2,8 +2,9 @@ import {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
+  UnauthorizedError,
 } from './generated/api';
-import { PontusService } from './generated/api/resources/pontus/service/PontusService';
+import { PontusService, PontusServiceMethods } from './generated/api/resources/pontus/service/PontusService';
 import {
   createMenuItem,
   deleteMenuItem,
@@ -81,11 +82,13 @@ import {
   setup,
 } from './service/AuthUserService';
 import { createWebhook } from './service/WebhookService';
-import { runQuery } from './db-utils';
+import { isJSONStringable, runQuery } from './db-utils';
+import { AUDIT, AUTH_GROUPS, GROUPS_USERS, schema, schemaSql } from './consts';
+import { getJwtClaims } from './service/delta';
 
 
 
-export default new PontusService({
+const handlers:PontusServiceMethods = {
   sendWebhookPost: async (req, res)=> {
     const response = await createWebhook(req.body)
 
@@ -103,6 +106,16 @@ export default new PontusService({
   },
   loginPost: async (req, res) => {
     const response = await loginUser(req.body);
+
+    const token = response.accessToken
+
+    const jwt = getJwtClaims(token)
+
+    const userId = jwt['userId'] 
+
+    const groupIds = await runQuery(`SELECT g.name FROM ${schemaSql}${GROUPS_USERS} gu JOIN ${schemaSql}${AUTH_GROUPS} g ON g.id=gu.table_from__id WHERE gu.table_to__id = ?`, [userId])
+
+    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, req.body, null, userId, JSON.stringify(groupIds.map(group=>group['name'])), new Date().toISOString().replace("Z", "")])
 
     res.send(response);
   },
@@ -464,4 +477,61 @@ export default new PontusService({
     res.send(response);
   },
   tableDataEdgeDeletePost(req, res) { },
-});
+}
+
+export function withErrorHandler(handler) {
+  return async (req, res, next) => {
+      if(req?.['authError']?.['code'] === 401) {
+        throw new UnauthorizedError(req?.['authError']?.['message'])
+      } else if(req?.['authError']?.['code'] === 400) {
+        throw new BadRequestError(req?.['authError']?.['message'])
+      }
+    try {
+      await handler(req, res);
+    } catch (err) {
+      console.error(`[${req.method} ${req.path}] Error:`, err);
+
+      const token = req.headers['authorization']
+      const userId = req?.['user']?.['userId'] || null;
+      const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || '';
+      const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
+
+      const error = {
+        code: err['errorName'] === 'NotFoundError' ? 404 : 
+              err['errorName'] === 'UnauthorizedError' ? 401 :
+              err['errorName'] === 'ForbiddenError' ? 403 :
+              err['errorName'] === 'BadRequestError' ? 400 :
+              err['errorName'] === 'ConflictEntityError' ? 409 :
+              err['errorName'] === 'TemporaryRedirect' ? 307 : 500,
+        message: err['msg']
+      }
+      
+      await runQuery(
+        `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [token, req.path, body, JSON.stringify(error), userId, groupIds, new Date().toISOString().replace("Z", "")]
+      );
+
+      if (typeof res.status === 'function') {
+        const status = err?.code || 500;
+        // res.status(status).json({ error: err.msg || 'Internal Server Error' });
+      } 
+      throw err
+    }
+  };
+}
+
+function wrapHandlersWithErrorHandling(handlersObj: PontusServiceMethods): PontusServiceMethods {
+  const wrapped = {} as PontusServiceMethods;
+
+  for (const key in handlersObj) {
+    const handler = handlersObj[key];
+    wrapped[key] = typeof handler === 'function'
+      ? withErrorHandler(handler)
+      : handler;
+  }
+
+  return wrapped;
+}
+
+export default new PontusService(wrapHandlersWithErrorHandling(handlers));
