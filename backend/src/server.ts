@@ -16,6 +16,7 @@ import { authenticateToken } from './service/AuthUserService';
 import { AuthUserRef } from './typescript/api';
 import { isJSONParsable, isJSONStringable, runQuery } from './db-utils';
 import axios from 'axios';
+import { NotFoundError, UnauthorizedError } from './generated/api';
 
 export const app = express();
 
@@ -23,21 +24,20 @@ const port = 8080;
 
 app.use(cors());
 
+const replaceSlashes = (str: string) => {
+  return str.replace(/\//g, '');
+};
+
 const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const replaceSlashes = (str: string) => {
-    return str.replace(/\//g, '');
-  };
   const path = replaceSlashes(req.path);
 
   if (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
-    path === replaceSlashes('/PontusTest/1.0.0//login') ||
-    path === replaceSlashes('/PontusTest/1.0.0/logout') ||
     path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
@@ -45,9 +45,14 @@ const authMiddleware = async (
   }
 
   try {
-    const authorization = await authenticateToken(req, res);
+    let authorization;
 
-    const userId = authorization?.['userId']
+    let userId
+
+    if(path !== replaceSlashes('/PontusTest/1.0.0//login')) {
+      authorization = await authenticateToken(req, res);
+      userId = authorization?.['userId']
+    }
 
     req['user'] = { userId };
 
@@ -70,7 +75,7 @@ const authMiddleware = async (
     const permissionsGroups = permissions.groups
       ?.filter(g => {
         if(g['table_from__name'] === ADMIN_GROUP_NAME) return true
-        return  g[`table_from__${crudAction}`] === 'true'
+        return  g?.[`table_from__${crudAction}`] === 'true' || entity === 'dashboard' || entity === 'table' ? g?.[`${crudAction}_${entity}`] : null
       })
       ?.map(g => g['table_from__name']) || [];
 
@@ -78,38 +83,53 @@ const authMiddleware = async (
 
     if (
       path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
-      path === replaceSlashes('/PontusTest/1.0.0//tables/read')
+      path === replaceSlashes('/PontusTest/1.0.0//tables/read') ||
+      path === replaceSlashes('/PontusTest/1.0.0//login') ||
+      path === replaceSlashes('/PontusTest/1.0.0/logout') 
     ) {
       return next();
     }
-    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create') && permissions.dashboardCrud?.create) {
+    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create') && permissions.dashboardCrud?.create
+    ) {
       return next();
     }
 
     if (permissions[crudAction]) {
-      // if (permissions['']) {
-      // await webhookMiddleware(req, res, next)
       next();
     } else {
+      // throw new UnauthorizedError('You do not have this permission')
       throw { code: 401, message: 'You do not have this permission', permissionsGroups };
     }
   } catch (error) {
-    console.log({ error })
     req['authError'] = error;
-    next(error)
+    const token = req.headers['authorization']
+    const userId = req?.['user']?.['userId'] || null;
+    const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || '';
+    const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
+
+    await runQuery(
+      `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [token, req.path, body, JSON.stringify(error), userId, groupIds, new Date().toISOString().replace("Z", "")]
+    );
+    return next()
   }
 };
-
-
 
 const auditMiddleware = async(
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+  const path = replaceSlashes(req.path);
+  if (
+      path === replaceSlashes('/PontusTest/1.0.0//login') 
+  ) {
+    return next();
+  }
   const token = req.headers?.['authorization']
 
-  const error = req?.['authError'] || null
+  const error = JSON.stringify(req?.['authError']) || null
 
   const userId = req?.['user']?.['userId'] || null
 
@@ -118,7 +138,7 @@ const auditMiddleware = async(
   const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null
 
   try {
-    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, body, error, userId, groupIds, new Date()])
+    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, body, error, userId, groupIds, new Date().toISOString().replace("Z", "")])
   } catch (error) {
     console.error({error})
   }
@@ -256,29 +276,6 @@ app.use(authMiddleware);
 
 app.use(auditMiddleware)
 
-app.use(async (err, req, res, next) => {
-  if(!err) return next()
-  req['authError'] = err;
-
-  // Reuse your audit logic or move it to a helper
-  try {
-    const token = req.headers['authorization']
-    const userId = req?.['user']?.['userId'] || null;
-    const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || '';
-    const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
-    
-
-    await runQuery(
-      `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [token, req.path, body, JSON.stringify(req['authError']), userId, groupIds, new Date()]
-    );
-  } catch (logErr) {
-    console.error('Error writing to audit log:', logErr);
-  }
-
-  res.status(err?.code || 500).json({ error: err?.message || 'Internal Server Error' });
-});
 
 app.use(webhookMiddleware)
 
@@ -293,6 +290,31 @@ app.listen(port, '0.0.0.0', () => {
 })
 register(app, { pontus });
 
+// app.use(async (err, req, res, next) => {
+//   console.log({errorHandler: err })
+//   if(!err) return next()
+//   // req['authError'] = err;
+
+//   // Reuse your audit logic or move it to a helper
+//   try {
+//     const token = req.headers['authorization']
+//     const userId = req?.['user']?.['userId'] || null;
+//     const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || '';
+//     const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
+
+//     await runQuery(
+//       `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
+//        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+//       [token, req.path, body, JSON.stringify(err), userId, groupIds, new Date().toISOString().replace("Z", "")]
+//     );
+//   } catch (logErr) {
+//     console.error('Error writing to audit log:', logErr);
+//   }
+//   // throw err
+//   next()
+
+//   // res.status(err?.code || 500).json({ error: err?.message || 'Internal Server Error' });
+// });
 const validate = (_request, _scopes, _schema) => {
   return true;
 };
