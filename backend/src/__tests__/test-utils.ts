@@ -28,11 +28,7 @@ export const expectAudit = async (
       query: `SELECT * FROM ${schemaSql}${AUDIT} WHERE error IS NULL`
     });
 
-    console.log({getAudits: JSON.stringify(getAudits.data)})
-
     audit = getAudits.data['results'].find(a => a['api_path']?.endsWith(expectedPathEndsWith));
-    console.log({audit})
-    console.log(getAudits.data['results'].findLast(a => a['api_path']?.endsWith(expectedPathEndsWith)));
 
     expect(audit).toBeTruthy();
   }
@@ -43,7 +39,6 @@ export const expectAudit = async (
     const getAudits = await axios.post('http://sql-app:3001/PontusTest/1.0.0/test/execute', {
       query: `SELECT * FROM ${schemaSql}${AUDIT} WHERE error IS NOT NULL`
     });
-    console.log('[AUDITS]', JSON.stringify(getAudits.data))
 
     audit = getAudits.data['results'].find(a => a['api_path']?.endsWith(expectedPathEndsWith));
 
@@ -55,7 +50,6 @@ export const expectAudit = async (
 
   const groupIds = JSON.parse(audit['group_ids'] || '[]');
 
-  console.log({expectedPathEndsWith})
   expectedGroups.forEach(group => {
     expect(groupIds).toContain(group);
   });
