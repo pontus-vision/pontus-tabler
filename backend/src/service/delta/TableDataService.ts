@@ -23,7 +23,6 @@ const checkTableCols = async (tableName: string, cols: TableDataRowRef): Promise
   const resTable = res.map((el) => {
     return { ...el, cols: JSON.parse(res[0].cols) };
   });
-  console.log({ resTable })
 
   const colsChecked = [];
 

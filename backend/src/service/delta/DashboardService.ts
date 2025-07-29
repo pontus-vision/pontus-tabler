@@ -31,7 +31,7 @@ import {
 } from './EdgeService';
 
 import * as db from './../../../delta-table/node/index-jdbc';
-import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, schemaSql } from '../../consts';
+import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, schema, schemaSql } from '../../consts';
 
 
 export const createDashboard = async (
@@ -149,7 +149,7 @@ export const readDashboardById = async (dashboardId: string, userId: string) => 
   );
 
   if (sql.length === 0) {
-    throw new NotFoundError('Dashboard not found at id ' + dashboardId);
+    throw new NotFoundError('Dashboard not found at id ' + dashboardId)
   }
 
   return { ...sql[0], state: JSON.parse(sql[0]['state']) };
