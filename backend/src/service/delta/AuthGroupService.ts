@@ -170,7 +170,6 @@ export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGro
     !!dashboardCrud?.delete,
   ];
 
-  console.log({insertQuery, insertParams})
   await runQuery(insertQuery, insertParams);
 
   // Fetch the newly created group
@@ -917,7 +916,6 @@ export const checkPermissions = async (
   const groups = []
 
   for (const group of res) {
-    console.log({group})
     if (group['table_from__name'] === ADMIN_GROUP_NAME) {
       return {
         create: true,
@@ -1006,6 +1004,6 @@ export const checkPermissions = async (
       update: res?.[0]?.['update_table'],
       delete: res?.[0]?.['delete_table'],
     },
-    groups 
+    groups: [res?.[0]]
   };
 };
