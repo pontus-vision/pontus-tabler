@@ -1,4 +1,4 @@
-import { prepareDbAndAuth, isSubset, post, cleanTables } from './test-utils';
+import { prepareDbAndAuth, isSubset, post, cleanTables, expectAudit } from './test-utils';
 import { AxiosResponse } from 'axios';
 import {
   MenuItemTreeRef,
@@ -12,7 +12,7 @@ import {
   DashboardReadRes,
   AuthUserCreateRes,
 } from '../typescript/api';
-import { AUTH_GROUPS, AUTH_USERS, DASHBOARDS, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS, MENU, TABLES } from '../consts';
+import { AUDIT, AUTH_GROUPS, AUTH_USERS, DASHBOARDS, DELTA_DB, GROUPS_DASHBOARDS, GROUPS_USERS, MENU, TABLES } from '../consts';
 
 
 // // Mock the utils.writeJson function
@@ -33,7 +33,7 @@ describe('testing Menu', () => {
 
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
-  let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES];
+  let tables = [AUTH_GROUPS, AUTH_USERS, DASHBOARDS, TABLES, AUDIT];
   beforeEach(async () => {
     if (process.env.DB_SOURCE === DELTA_DB) {
       tables = [...tables, GROUPS_USERS, GROUPS_DASHBOARDS, 'person_natural', MENU];
@@ -97,147 +97,161 @@ describe('testing Menu', () => {
       name: 'foo',
       kind: 'folder',
     };
-
-    const createRes = await postAdmin('menu/create', data2);
+  
+    await expectAudit(() =>
+      postAdmin('menu/create', data2),
+      'menu/create'
+    );
+  
     const data: MenuReadReq = {
       path: '/',
     };
-    const readRes = await postAdmin('menu/read', data);
-
-    expect(readRes.status).toBe(200);
+  
+    const readRes = await expectAudit(() =>
+      postAdmin('menu/read', data),
+      'menu/read'
+    );
   });
+  
   it('should create a folder under root', async () => {
-    const data: MenuReadReq = {
-      path: '/',
-    };
-    const readRes = await postAdmin('menu/read', data);
-
+    const data: MenuReadReq = { path: '/' };
+  
+    await expectAudit(() =>
+      postAdmin('menu/read', data),
+      'menu/read'
+    );
+  
     const data2: MenuCreateReq = {
       path: '/',
       name: 'foo',
       kind: 'folder',
     };
-
-    const createRes = await postAdmin('menu/create', data2);
-
-    const readRes2 = await postAdmin('menu/read', {
-      path: '/',
-    });
-
-    expect(readRes2.status).toBe(200);
-
-    const readRes3 = await postAdmin('menu/read', data);
-
+  
+    await expectAudit(() =>
+      postAdmin('menu/create', data2),
+      'menu/create'
+    );
+  
+    await expectAudit(() =>
+      postAdmin('menu/read', { path: '/' }),
+      'menu/read'
+    );
+  
+    const readRes3 = await expectAudit(() =>
+      postAdmin('menu/read', data),
+      'menu/read'
+    );
+  
     const obj1 = data2;
-
     const obj2 = readRes3.data;
-
-    // expect(isSubset(obj1, obj2)).toBe(true);
-    expect(obj1.path + obj1.name).toBe(obj2.children[0].path)
-    expect(obj1.name).toBe(obj2.children[0].name)
-    expect(obj1.kind).toBe(obj2.children[0].kind)
+  
+    expect(obj1.path + obj1.name).toBe(obj2.children[0].path);
+    expect(obj1.name).toBe(obj2.children[0].name);
+    expect(obj1.kind).toBe(obj2.children[0].kind);
   });
+  
 
   it('should do the CRUD "happy path"', async () => {
-    // Create Menu Item
-
-    const readMenuRoot = await postAdmin('menu/read', {
-      path: '/',
-    });
-
-    expect(readMenuRoot.status).toBe(200)
-
+    const readMenuRoot = await expectAudit(() =>
+      postAdmin('menu/read', { path: '/' }),
+      'menu/read'
+    );
+  
     const body: MenuItemTreeRef = {
       path: '/',
       id: readMenuRoot.data.id,
       name: 'foo',
-      kind: 'folder'
+      kind: 'folder',
     };
-
-    const createRetVal = (await postAdmin(
-      'menu/create',
-      body,
-    )) as AxiosResponse<MenuCreateRes>;
-
-    expect(body.path + body.name).toBe(createRetVal.data.path)
-    expect(body.name).toBe(createRetVal.data.name)
-    expect(body.kind).toBe(createRetVal.data.kind)
-
-    // Read the created Menu Item
-
-    const readRetVal2 = (await postAdmin('menu/read', {
-      path: createRetVal.data.path,
-    })) as AxiosResponse<MenuReadRes>;
-
-
-    expect(body.path + body.name).toBe(readRetVal2.data.path)
-    expect(body.name).toBe(readRetVal2.data.name)
-    expect(body.kind).toBe(readRetVal2.data.kind)
-
+  
+    const createRetVal = await expectAudit(() =>
+      postAdmin('menu/create', body),
+      'menu/create'
+    );
+  
+    expect(body.path + body.name).toBe(createRetVal.data.path);
+    expect(body.name).toBe(createRetVal.data.name);
+    expect(body.kind).toBe(createRetVal.data.kind);
+  
+    const readRetVal2 = await expectAudit(() =>
+      postAdmin('menu/read', { path: createRetVal.data.path }),
+      'menu/read'
+    );
+  
+    expect(body.path + body.name).toBe(readRetVal2.data.path);
+    expect(body.name).toBe(readRetVal2.data.name);
+    expect(body.kind).toBe(readRetVal2.data.kind);
+  
     const body2: MenuUpdateReq = {
       path: createRetVal.data.path,
-      name: 'bar'
+      name: 'bar',
     };
-
-    // Checking if update is correct.
-
-    const updateRetVal = await postAdmin('menu/update', body2);
-
-    let resPayload3: MenuUpdateRes = updateRetVal.data;
-
+  
+    const updateRetVal = await expectAudit(() =>
+      postAdmin('menu/update', body2),
+      'menu/update'
+    );
+  
+    const resPayload3: MenuUpdateRes = updateRetVal.data;
+  
     expect(updateRetVal.data.name).toBe(body2.name);
     expect(updateRetVal.data.path).toBe(body2.path);
     expect(updateRetVal.data.kind).toBe(body.kind);
     expect(updateRetVal.data.children).toStrictEqual([]);
-
-
-
-    // Deleting and checking if the file was indeed deleted.
-
+  
     const body3 = {
       id: resPayload3.id,
       path: resPayload3.path,
     };
-
+  
     const createFileBody: MenuItemTreeRef = {
       path: '/',
       id: readMenuRoot.data.id,
-      name: 'foo'
+      name: 'foo',
     };
-
-    const createFileRetVal = await postAdmin('menu/create', createFileBody);
-
-    expect(createFileRetVal.status).toBe(200);
-
+  
+    await expectAudit(() =>
+      postAdmin('menu/create', createFileBody),
+      'menu/create'
+    );
+  
     const updateFileBody: MenuItemTreeRef = {
       id: readMenuRoot.data.id,
-      path: createFileRetVal.data.path,
+      path: createRetVal.data.path,
       kind: 'folder',
-      name: 'bar'
+      name: 'bar',
     };
-
-    const updateFileRetVal = (await postAdmin(
-      'menu/update',
-      updateFileBody,
-    )) as AxiosResponse<MenuUpdateReq>;
-
-    expect(
-      updateFileRetVal.data.name
-    ).toBe('bar');
-
-    const deleteRetVal = await postAdmin('menu/delete', body3);
-
-    expect(deleteRetVal.status).toBe(200);
-
-    const readRetVal3 = await postAdmin('menu/read', { path: body3.path });
-
+  
+    const updateFileRetVal = await expectAudit(() =>
+      postAdmin('menu/update', updateFileBody),
+      'menu/update'
+    );
+  
+    expect(updateFileRetVal.data.name).toBe('bar');
+  
+    await expectAudit(() =>
+      postAdmin('menu/delete', body3),
+      'menu/delete'
+    );
+  
+    const readRetVal3 = await expectAudit(() =>
+      postAdmin('menu/read', { path: body3.path }),
+      'menu/read',
+      undefined,
+      404
+    );
+  
     expect(readRetVal3.status).toBe(404);
   });
+  
   it('should do the CRUD "sad path"', async () => {
-    const createRetVal = await postAdmin('menu/create', { path: '/foo', id: 'bar' });
-
-    expect(createRetVal.status).toBe(404);
-
+    await expectAudit(() =>
+      postAdmin('menu/create', { path: '/foo', id: 'bar' }),
+      'menu/create',
+      undefined,
+      404
+    );
+  
     const readRetVal = await postAdmin('menu/read', {
       id: 'foo',
       path: 'bar',
@@ -254,26 +268,45 @@ describe('testing Menu', () => {
       id: 'foo',
       name: 'john',
     });
-
-    expect(updateRetVal2.status).toBe(404);
-
-    const updateRetVal3 = await postAdmin('menu/update', {
-      path: 'bar',
-      id: 'foo',
-    });
-
-    expect(updateRetVal3.status).toBe(404);
-
-    const updateRetVal4 = await postAdmin('menu/update', {});
-
-    expect(updateRetVal3.status).toBe(404);
-
+  
+    await expectAudit(() =>
+      postAdmin('menu/update', {
+        path: 'bar',
+        id: 'foo',
+        name: 'john',
+      }),
+      'menu/update',
+      undefined,
+      404
+    );
+  
+    await expectAudit(() =>
+      postAdmin('menu/update', {
+        path: 'bar',
+        id: 'foo',
+      }),
+      'menu/update',
+      undefined,
+      404
+    );
+  
+    await expectAudit(() =>
+      postAdmin('menu/update', {}),
+      'menu/update',
+      undefined,
+      404
+    );
+  
     const deleteRetVal = await postAdmin('menu/delete', { foo: 'bar' });
 
     expect(deleteRetVal.status).toBe(422);
-
-    const deleteRetVal2 = await postAdmin('menu/delete', { path: 'bar', id: 'foo' });
-
-    expect(deleteRetVal2.status).toBe(404);
+  
+    await expectAudit(() =>
+      postAdmin('menu/delete', { path: 'bar', id: 'foo' }),
+      'menu/delete',
+      undefined,
+      404
+    );
   });
+  
 });

@@ -6,7 +6,7 @@ import {
   TableCreateReq,
   AuthUserCreateRes,
 } from '../typescript/api';
-import { prepareDbAndAuth, isSubset, cleanTables } from './test-utils';
+import { prepareDbAndAuth, isSubset, cleanTables, expectAudit } from './test-utils';
 import { AxiosResponse } from 'axios';
 
 
@@ -23,7 +23,7 @@ import { AxiosResponse } from 'axios';
 jest.setTimeout(1000000);
 
 import { snakeCase } from 'lodash';
-import { AUTH_GROUPS, AUTH_USERS, TABLES, DELTA_DB, GROUPS_USERS } from '../consts';
+import { AUTH_GROUPS, AUTH_USERS, TABLES, DELTA_DB, GROUPS_USERS, AUDIT } from '../consts';
 describe('tableControllerTest', () => {
   const OLD_ENV = process.env;
 
@@ -31,7 +31,7 @@ describe('tableControllerTest', () => {
 
   let admin = {} as AuthUserCreateRes;
   let postAdmin;
-  let tables = [AUTH_GROUPS, AUTH_USERS, TABLES];
+  let tables = [AUTH_GROUPS, AUTH_USERS, TABLES, AUDIT];
   if (process.env.DB_SOURCE === DELTA_DB) {
     tables = [...tables, GROUPS_USERS];
   }
@@ -51,7 +51,6 @@ describe('tableControllerTest', () => {
   });
 
   it('should do the CRUD "happy path"', async () => {
-
     const body: TableCreateReq = {
       name: 'person-natural',
       label: 'Person Natural',
@@ -65,7 +64,6 @@ describe('tableControllerTest', () => {
           sortable: true,
           kind: 'text',
           pivotIndex: 1,
-
         },
         {
           field: 'Person_Natural_Customer_ID',
@@ -79,35 +77,34 @@ describe('tableControllerTest', () => {
         },
       ],
     };
-
-    const createRetVal = (await postAdmin(
-      'table/create',
-      body,
-    )) as AxiosResponse<TableCreateRes>;
-
-    let resPayload: TableCreateRes = createRetVal.data;
-    let id = resPayload.id;
-
-    expect(createRetVal.status).toBe(200);
-    expect(createRetVal.data.name).toBe(snakeCase(body.name));
-    expect(createRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name));
-    expect(createRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name));
-
-    const readRetVal = await postAdmin('table/read', {
-      id,
-    });
-
-    let resPayload2: TableReadRes = readRetVal.data;
-
-    expect(readRetVal.status).toBe(200);
-    expect(readRetVal.data.name).toBe(snakeCase(body.name));
-    expect(readRetVal.data.cols[0].name).toBe(snakeCase(body.cols[0].name));
-    expect(readRetVal.data.cols[1].name).toBe(snakeCase(body.cols[1].name));
-
+  
+    const createRetVal = await expectAudit(() =>
+      postAdmin('table/create', body),
+      'table/create'
+    ) as AxiosResponse<TableCreateRes>;
+  
+    const resPayload: TableCreateRes = createRetVal.data;
+    const id = resPayload.id;
+  
+    expect(resPayload.name).toBe(snakeCase(body.name));
+    expect(resPayload.cols[0].name).toBe(snakeCase(body.cols[0].name));
+    expect(resPayload.cols[1].name).toBe(snakeCase(body.cols[1].name));
+  
+    const readRetVal = await expectAudit(() =>
+      postAdmin('table/read', { id }),
+      'table/read'
+    );
+  
+    const resPayload2: TableReadRes = readRetVal.data;
+  
+    expect(resPayload2.name).toBe(snakeCase(body.name));
+    expect(resPayload2.cols[0].name).toBe(snakeCase(body.cols[0].name));
+    expect(resPayload2.cols[1].name).toBe(snakeCase(body.cols[1].name));
+  
     const body2: TableUpdateReq = {
       name: 'person-natural',
       label: 'name 2',
-      id: id,
+      id,
       cols: [
         {
           filter: true,
@@ -131,49 +128,57 @@ describe('tableControllerTest', () => {
         },
       ],
     };
-
-    const updateRetVal = await postAdmin('table/update', body2);
-
-    let resPayload3: TableUpdateReq = updateRetVal.data;
-
+  
+    const updateRetVal = await expectAudit(() =>
+      postAdmin('table/update', body2),
+      'table/update'
+    );
+  
+    const resPayload3: TableUpdateReq = updateRetVal.data;
+  
     expect(isSubset(body2, resPayload3)).toBe(true);
-
+  
     const body3 = {
       id: resPayload3.id,
       name: resPayload3.name,
     };
-
-    const deleteRetVal = await postAdmin('table/delete', body3);
-
-    let resPayload4 = deleteRetVal.data;
-
-    expect(deleteRetVal.status).toBe(200);
-
-    const readRetVal2 = await postAdmin('table/read', { id: body3.id });
-
+  
+    const deleteRetVal = await expectAudit(() =>
+      postAdmin('table/delete', body3),
+      'table/delete'
+    );
+  
+    const readRetVal2 = await expectAudit(() =>
+      postAdmin('table/read', { id: body3.id }),
+      'table/read',
+      undefined,
+      404
+    );
+  
     expect(readRetVal2.status).toBe(404);
   });
+  
   it('should do the CRUD "sad path"', async () => {
-    const createRetVal = await postAdmin('table/create', {});
+    const createRetVal = await postAdmin('table/create', {})
 
     expect(createRetVal.status).toBe(422);
-
-    const readRetVal = await postAdmin('table/read', {
-      id: 'foo',
-    });
-
+  
+    const readRetVal = await expectAudit(() =>
+      postAdmin('table/read', { id: 'foo' }),
+      'table/read',
+      undefined,
+      404
+    );
     expect(readRetVal.status).toBe(404);
-
-    const updateRetVal = await postAdmin('table/update', { foo: 'bar' });
+  
+    const updateRetVal = await postAdmin('table/update', { foo: 'bar' })
 
     expect(updateRetVal.status).toBe(422);
-
-    const deleteRetVal = await postAdmin('table/delete', { foo: 'bar' });
-
-    let resPayload4 = deleteRetVal.data;
+  
+    const deleteRetVal = await postAdmin('table/delete', { foo: 'bar' })
 
     expect(deleteRetVal.status).toBe(422);
-
+  
     const table: TableCreateReq = {
       name: 'mapeamento-de-processos',
       label: 'Mapeamento de Processos',
@@ -189,13 +194,21 @@ describe('tableControllerTest', () => {
         },
       ],
     };
-
-    await postAdmin('table/create', table);
-
-    const createRetVal2 = await postAdmin('table/create', table);
-
+  
+    await expectAudit(() =>
+      postAdmin('table/create', table),
+      'table/create'
+    );
+  
+    const createRetVal2 = await expectAudit(() =>
+      postAdmin('table/create', table),
+      'table/create',
+      undefined,
+      409
+    );
     expect(createRetVal2.status).toBe(409);
   });
+  
   it('should read tables', async () => {
     const body: TableCreateReq = {
       name: 'person-natural',
@@ -223,18 +236,20 @@ describe('tableControllerTest', () => {
         },
       ],
     };
-
-    const createRetVal = await postAdmin('table/create', body) as AxiosResponse<TableCreateRes>;
-
-    expect(createRetVal.status).toBe(200)
-
-    const createRetVal2 = await postAdmin('table/create', {
-      ...body,
-      name: 'person-natural2',
-    }) as AxiosResponse<TableCreateRes>;;
-
-    expect(createRetVal2.status).toBe(200)
-
+  
+    const createRetVal = await expectAudit(() =>
+      postAdmin('table/create', body),
+      'table/create'
+    ) as AxiosResponse<TableCreateRes>;
+  
+    const createRetVal2 = await expectAudit(() =>
+      postAdmin('table/create', {
+        ...body,
+        name: 'person-natural2',
+      }),
+      'table/create'
+    ) as AxiosResponse<TableCreateRes>;
+  
     const readBody = {
       from: 1,
       to: 20,
@@ -246,25 +261,28 @@ describe('tableControllerTest', () => {
         },
       },
     };
-
-    const readRetVal: { data: TablesReadRes } = await postAdmin(
-      'tables/read',
-      readBody,
+  
+    const readRetVal: { data: TablesReadRes } = await expectAudit(() =>
+      postAdmin('tables/read', readBody),
+      'tables/read'
     );
-
     expect(readRetVal.data.totalTables).toBe(2);
-
-    const deleteVal = await postAdmin('table/delete', {
-      id: createRetVal.data.id,
-      name: createRetVal.data.name,
-    });
-
-    expect(deleteVal.status).toBe(200);
-    const deleteVal2 = await postAdmin('table/delete', {
-      id: createRetVal2.data.id,
-      name: createRetVal2.data.name,
-    });
-
-    expect(deleteVal2.status).toBe(200);
+  
+    const deleteVal = await expectAudit(() =>
+      postAdmin('table/delete', {
+        id: createRetVal.data.id,
+        name: createRetVal.data.name,
+      }),
+      'table/delete'
+    );
+  
+    const deleteVal2 = await expectAudit(() =>
+      postAdmin('table/delete', {
+        id: createRetVal2.data.id,
+        name: createRetVal2.data.name,
+      }),
+      'table/delete'
+    );
   });
+  
 });

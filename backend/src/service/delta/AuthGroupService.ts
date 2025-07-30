@@ -138,22 +138,7 @@ const authUserGroupsRead = async (
 export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGroupCreateRes> => {
   const id = data.id || generateUUIDv6();
   const tableMetadata = data.tableMetadataCrud;
-
-  // Create table if not exists — still safe to inline (DDL)
-  await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${schemaSql}${AUTH_GROUPS} (
-      id STRING,
-      name STRING,
-      create_table BOOLEAN,
-      read_table BOOLEAN,
-      update_table BOOLEAN,
-      delete_table BOOLEAN,
-      create_dashboard BOOLEAN,
-      read_dashboard BOOLEAN,
-      update_dashboard BOOLEAN,
-      delete_dashboard BOOLEAN
-    ) USING DELTA LOCATION '/data/${schema}/${AUTH_GROUPS}';`
-  );
+  const dashboardCrud = data.dashboardCrud
 
   // Check if group name already exists
   const checkNameQuery = `SELECT COUNT(*) FROM ${schemaSql}${AUTH_GROUPS} WHERE name = ?`;
@@ -179,10 +164,10 @@ export const createAuthGroup = async (data: AuthGroupCreateReq): Promise<AuthGro
     !!tableMetadata?.read,
     !!tableMetadata?.update,
     !!tableMetadata?.delete,
-    !!tableMetadata?.create,
-    !!tableMetadata?.read,
-    !!tableMetadata?.update,
-    !!tableMetadata?.delete,
+    !!dashboardCrud?.create,
+    !!dashboardCrud?.read,
+    !!dashboardCrud?.update,
+    !!dashboardCrud?.delete,
   ];
 
   await runQuery(insertQuery, insertParams);
@@ -895,22 +880,29 @@ export const checkTableMetadataPermissions = async (
   };
 };
 
+export interface CheckPermissionsRes extends CrudDocumentRef {
+  groups?: Record<string,any>[],
+  dashboardCrud?: CrudDocumentRef,
+  tableCrud?: CrudDocumentRef
+}
 
 export const checkPermissions = async (
   userId: string,
   targetId: string,
   containerId: string,
-): Promise<CrudDocumentRef> => {
-  const res = (await readEdge(
-    {
-      direction: 'from',
-      edgeTable: GROUPS_USERS,
-      tableToName: AUTH_USERS,
-      tableFromName: AUTH_GROUPS,
-      filters: {},
-      rowId: userId,
-    },
-  )) as AuthGroupRef[];
+): Promise<CheckPermissionsRes> => {
+  // const res = (await readEdge(
+  //   {
+  //     direction: 'from',
+  //     edgeTable: GROUPS_USERS,
+  //     tableToName: AUTH_USERS,
+  //     tableFromName: AUTH_GROUPS,
+  //     filters: {},
+  //     rowId: userId,
+  //   },
+  // )) as AuthGroupRef[];
+
+  const res = await runQuery(`SELECT * FROM ${schemaSql}${GROUPS_USERS} gu JOIN ${schemaSql}${AUTH_GROUPS} g ON gu.table_from__id = g.id WHERE table_to__id = ?`, [userId])
 
   if (res.length === 0) {
     throw { code: 404, message: 'There is no group associated with user' };
@@ -920,6 +912,8 @@ export const checkPermissions = async (
   let read = false;
   let update = false;
   let del = false;
+  
+  const groups = []
 
   for (const group of res) {
     if (group['table_from__name'] === ADMIN_GROUP_NAME) {
@@ -928,6 +922,24 @@ export const checkPermissions = async (
         read: true,
         update: true,
         delete: true,
+        groups: [{...group,
+          table_from__create: true,
+          table_from__read: true,
+          table_from__update: true,
+          table_from__delete: true
+        }],
+        dashboardCrud: {
+          create: true,
+          update: true,
+          read: true,
+          delete: true
+        },
+        tableCrud: {
+          create: true,
+          update: true,
+          read: true,
+          delete: true
+        }
       };
     }
     const res = (await readEdge(
@@ -955,6 +967,8 @@ export const checkPermissions = async (
         rowId: group['table_from__id'],
       },
     )) as any[];
+    
+    res?.[0] && groups.push(res?.[0])
 
     if (containerId === DASHBOARDS) {
       for (const dashboard of res) {
@@ -978,5 +992,18 @@ export const checkPermissions = async (
     read,
     update,
     delete: del,
+    dashboardCrud: {
+      create: res?.[0]?.['create_dashboard'],
+      read: res?.[0]?.['read_dashboard'],
+      update: res?.[0]?.['update_dashboard'],
+      delete: res?.[0]?.['delete_dashboard'],
+    },
+    tableCrud: {
+      create: res?.[0]?.['create_table'],
+      read: res?.[0]?.['read_table'],
+      update: res?.[0]?.['update_table'],
+      delete: res?.[0]?.['delete_table'],
+    },
+    groups: [res?.[0]]
   };
 };

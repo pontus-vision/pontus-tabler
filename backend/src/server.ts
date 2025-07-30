@@ -10,12 +10,13 @@ import * as http from 'http';
 import pontus from './index'
 import { register } from './generated';
 // import { authenticateToken } from './service/AuthUserService';
-import { AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
+import { ADMIN_GROUP_NAME, AUDIT, AUTH_GROUPS, DASHBOARDS, GROUPS_DASHBOARDS, GROUPS_TABLES, GROUPS_USERS, schema, schemaSql, TABLES, WEBHOOKS_SUBSCRIPTIONS } from './consts';
 import { checkPermissions } from './service/AuthGroupService';
 import { authenticateToken } from './service/AuthUserService';
 import { AuthUserRef } from './typescript/api';
-import { runQuery } from './db-utils';
+import { isJSONParsable, isJSONStringable, runQuery } from './db-utils';
 import axios from 'axios';
+import { NotFoundError, UnauthorizedError } from './generated/api';
 
 export const app = express();
 
@@ -23,21 +24,20 @@ const port = 8080;
 
 app.use(cors());
 
+const replaceSlashes = (str: string) => {
+  return str.replace(/\//g, '');
+};
+
 const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const replaceSlashes = (str: string) => {
-    return str.replace(/\//g, '');
-  };
   const path = replaceSlashes(req.path);
 
   if (
     path === replaceSlashes('/PontusTest/1.0.0//register/admin') ||
     path === replaceSlashes('/PontusTest/1.0.0//register/user') ||
-    path === replaceSlashes('/PontusTest/1.0.0//login') ||
-    path === replaceSlashes('/PontusTest/1.0.0/logout') ||
     path === replaceSlashes('/PontusTest/1.0.0/test/execute') ||
     path === replaceSlashes('/PontusTest/1.0.0/webhook/create')
   ) {
@@ -45,10 +45,16 @@ const authMiddleware = async (
   }
 
   try {
+    let authorization;
 
-    const authorization = await authenticateToken(req, res);
+    let userId
 
-    const userId = authorization?.['userId']
+    if(path !== replaceSlashes('/PontusTest/1.0.0//login')) {
+      authorization = await authenticateToken(req, res);
+      userId = authorization?.['userId']
+    }
+
+    req['user'] = { userId };
 
     const arr = req.path.split('/');
 
@@ -56,39 +62,89 @@ const authMiddleware = async (
 
     const entity = arr[arr.length - 2];
 
-    const tableName = entity === 'dashboard' || 'dashboards' ? DASHBOARDS : entity;
+    const tableName = (entity === 'dashboard' || entity === 'dashboards') ? DASHBOARDS : entity;
 
     let targetId = '';
-
-    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create')) {
-      return next();
-    }
 
     if (req.path.startsWith('/PontusTest/1.0.0/dashboard/')) {
       targetId = req.body?.['id'];
     }
 
     const permissions = await checkPermissions(userId, targetId, tableName);
+
+    const permissionsGroups = permissions.groups
+      ?.filter(g => {
+        if(g['table_from__name'] === ADMIN_GROUP_NAME) return true
+        return  g?.[`table_from__${crudAction}`] === 'true' || entity === 'dashboard' || entity === 'table' ? g?.[`${crudAction}_${entity}`] : null
+      })
+      ?.map(g => g['table_from__name']) || [];
+
+    req['user']['groupIds'] = permissionsGroups
+
     if (
       path === replaceSlashes('/PontusTest/1.0.0//dashboards/read') ||
-      path === replaceSlashes('/PontusTest/1.0.0//tables/read')
+      path === replaceSlashes('/PontusTest/1.0.0//tables/read') ||
+      path === replaceSlashes('/PontusTest/1.0.0//login') ||
+      path === replaceSlashes('/PontusTest/1.0.0/logout') 
+    ) {
+      return next();
+    }
+    if (path === replaceSlashes('/PontusTest/1.0.0/dashboard/create') && permissions.dashboardCrud?.create
     ) {
       return next();
     }
 
     if (permissions[crudAction]) {
-      // if (permissions['']) {
-      // await webhookMiddleware(req, res, next)
       next();
     } else {
-      throw { code: 401, message: 'You do not have this permission' };
+      // throw new UnauthorizedError('You do not have this permission')
+      throw { code: 401, message: 'You do not have this permission', permissionsGroups };
     }
   } catch (error) {
-    console.log({ error })
-    res.status(error?.code).json(error?.message);
+    req['authError'] = error;
+    const token = req.headers['authorization']
+    const userId = req?.['user']?.['userId'] || null;
+    const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || '';
+    const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
+
+    await runQuery(
+      `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [token, req.path, body, JSON.stringify(error), userId, groupIds, new Date().toISOString().replace("Z", "")]
+    );
+    return next()
   }
 };
 
+const auditMiddleware = async(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const path = replaceSlashes(req.path);
+  if (
+      path === replaceSlashes('/PontusTest/1.0.0//login') 
+  ) {
+    return next();
+  }
+  const token = req.headers?.['authorization']
+
+  const error = JSON.stringify(req?.['authError']) || null
+
+  const userId = req?.['user']?.['userId'] || null
+
+  const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || ''
+
+  const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null
+
+  try {
+    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, body, error, userId, groupIds, new Date().toISOString().replace("Z", "")])
+  } catch (error) {
+    console.error({error})
+  }
+
+  next()
+}
 
 const webhookMiddleware = async (
   req: Request,
@@ -123,7 +179,6 @@ const webhookMiddleware = async (
 
   const operation = entityAndOperation.operation
 
-
   const entity = entityAndOperation.entity
 
   const joinTable = entity === DASHBOARDS ? GROUPS_DASHBOARDS : entity === TABLES ? GROUPS_TABLES : ''
@@ -148,7 +203,6 @@ const webhookMiddleware = async (
   // `);
 
   try {
-
     const subscriptions = await runQuery(`SELECT * FROM ${schemaSql}${WEBHOOKS_SUBSCRIPTIONS} WHERE operation = '${operation}'`)
     for (const subscription of subscriptions) {
       const tableFilter = subscription?.['ws.table_filter']
@@ -211,21 +265,20 @@ export function parsePath(path: string): { entity: string, operation: string } {
 
 }
 
-
-
 function isMatchingFilter(target: string, filter: string) {
   const regex = new RegExp(filter);
   return regex.test(target);
 }
 
-
-
 app.use(express.json());
-
 
 app.use(authMiddleware);
 
+app.use(auditMiddleware)
+
+
 app.use(webhookMiddleware)
+
 
 app.listen(port, '0.0.0.0', () => {
 
@@ -237,6 +290,31 @@ app.listen(port, '0.0.0.0', () => {
 })
 register(app, { pontus });
 
+// app.use(async (err, req, res, next) => {
+//   console.log({errorHandler: err })
+//   if(!err) return next()
+//   // req['authError'] = err;
+
+//   // Reuse your audit logic or move it to a helper
+//   try {
+//     const token = req.headers['authorization']
+//     const userId = req?.['user']?.['userId'] || null;
+//     const groupIds = JSON.stringify(req?.['user']?.['groupIds']) || '';
+//     const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
+
+//     await runQuery(
+//       `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
+//        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+//       [token, req.path, body, JSON.stringify(err), userId, groupIds, new Date().toISOString().replace("Z", "")]
+//     );
+//   } catch (logErr) {
+//     console.error('Error writing to audit log:', logErr);
+//   }
+//   // throw err
+//   next()
+
+//   // res.status(err?.code || 500).json({ error: err?.message || 'Internal Server Error' });
+// });
 const validate = (_request, _scopes, _schema) => {
   return true;
 };

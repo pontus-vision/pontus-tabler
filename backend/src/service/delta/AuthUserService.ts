@@ -576,7 +576,7 @@ function base64UrlDecode(str) {
   return atob(str);
 }
 
-function getJwtClaims(token) {
+export function getJwtClaims(token) {
   // Split the token into parts
   const parts = token.split('.');
 

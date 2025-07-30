@@ -46,6 +46,13 @@ jobs:
             up --build --abort-on-container-exit --exit-code-from app-tests \
             delta-db app app-tests webhook-receiver sql-app
 
+      - name: Remove delta lake tables and metastore files
+        run: |
+          sudo rm -Rf backend/delta-table/work-dir/spark-warehouse/data/*
+          sudo rm -Rf backend/delta-table/data/*
+          sudo rm -rf ./backend/delta-table/work-dir/metastore_db
+          sudo rm -f ./backend/delta-table/work-dir/derby.log    
+
       - name: Run Frontend Tests
         if: success()  # Only runs if previous step (App Tests) succeeded
         run: |
