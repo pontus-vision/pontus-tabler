@@ -2,6 +2,61 @@ service:
   auth: false
   base-path: '/PontusTest/1.0.0'
   endpoints:
+    
+    createJobPOST:
+      path: /jobs/create
+      method: POST
+      request:
+        name: JobCreateReq 
+        body:
+          properties: {}
+          extends:
+            - JobCreateRef
+      response:
+        docs: User logged in successfully
+        type: JobCreateRes 
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-subscription-001
+          request:
+            name: "foo"
+            type: "graphite"
+            query: "SELECT * FROM bar"
+            freq: "0 0 * * *"
+          response:
+            body:
+              id: string
+              name: "foo"
+              type: "graphite"
+              query: "SELECT * FROM bar"
+              freq: "0 0 * * *"
+    readJobPOST:
+      path: /job/read
+      method: POST
+      request:
+        name: JobReadReq 
+        body:
+          properties: 
+            id: string
+      response:
+        docs: User logged in successfully
+        type: JobReadRes 
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-subscription-001
+          request:
+            id: 'foo'
+          response:
+            body:
+              id: "foo"
+              name: "foo"
+              type: "graphite"
+              query: "SELECT * FROM bar"
+              freq: "0 0 * * *"
     sendWebhookPOST:
       path: /webhook/create
       method: POST
@@ -1843,7 +1898,6 @@ service:
     authUserGroupsDeletePost:
       path: /auth/user/groups/delete
       method: POST
-      
       docs: Delete user group(s) by using its id
       display-name: Delete user group(s)
       request:
@@ -1860,6 +1914,22 @@ service:
         - InternalServerError
         - NotFoundError
 types:
+  JobReadRes:
+    properties: 
+      id: string
+    extends: 
+      - JobCreateRef
+  JobCreateRef:
+    properties:
+      name: string
+      type: string
+      query: string
+      freq: string
+  JobCreateRes:
+    properties: 
+      id: string
+    extends: 
+      - JobCreateRef
   ExecuteQueryRes:
     properties:
       results: list<map<string,unknown>>
