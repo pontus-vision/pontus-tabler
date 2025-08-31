@@ -1,4 +1,5 @@
 {
+  "Sql query preview": "Sql query preview",
   "admin-panel": "Admin Panel",
   "add-component": "Add Component",
   "col": "column",
@@ -32,6 +33,7 @@
   "table-name": "Table name",
   "yes": "Yes",
   "Back": "Back",
+  "Search": "Search",
 
   "Select Group": "Select Group",
 
