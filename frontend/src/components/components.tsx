@@ -7,7 +7,7 @@ type SelectProps = {
 };
 
 export const Select: React.FC<SelectProps> = ({ options, onChange, value }) => (
-  <select value={value} className="select" onChange={(e) => onChange && onChange(e.target.value)}>
+  <select value={value} className="select select-cmp" onChange={(e) => onChange && onChange(e.target.value)}>
     {options.map((option) => (
       <option key={option.value} value={option.value}>{option.label}</option>
     ))}
