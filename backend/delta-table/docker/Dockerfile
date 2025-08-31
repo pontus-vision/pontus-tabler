@@ -95,6 +95,8 @@ RUN mkdir /usr/local/share/jupyter/lab/extensions && \
 RUN python3 -m pip install --upgrade pip && \
     pip install ipython-sql databricks-mosaic==0.4.2 azure-storage-blob azure-identity behave coverage mock tabulate msgraph-sdk --quiet
 
+RUN pip install dbl-tempo scipy plotly cron_converter
+
 RUN pip install sparksql-magic  'jupyterlab-lsp' 'python-lsp-server[all]' parquet-cli --quiet && \
     jupyter labextension install @krassowski/jupyterlab-lsp
 
