@@ -513,7 +513,11 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    console.log({ cols })
+    
+    setTimeout(()=>{
+    gridApi?.setGridOption('columnDefs',cols)
+
+    },20)
   }, [cols])
 
   const handleColumnSelect = (cols: Array<string | undefined>) => {
