@@ -29,6 +29,7 @@ import AuthGroupsView from './views/AuthGroupsView';
 import AuthUsersView from './views/AuthUsersView';
 import RegisterView from './views/Register';
 import RegisterUser from './views/users/RegisterUser'
+import IndexJob from './views/jobs/Index'
 import NotificationManager, { MessageRefs } from './components/NotificationManager';
 import SettingsView from './views/SettingsView';
 import { useTranslation } from 'react-i18next';
@@ -67,6 +68,7 @@ function App() {
       <div className="main-view">
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/jobs" element={<IndexJob />} />
           <Route path="/auth/users" element={<AuthUsersView />} />
           <Route path="/table/edges" element={<EdgesView />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
