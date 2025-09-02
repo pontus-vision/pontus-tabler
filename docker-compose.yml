@@ -168,7 +168,6 @@ services:
     command:
       - sh
       - -c
-      # - cat /opt/spark/work-dir/job-scheduler.py
       - /usr/bin/python3 /opt/spark/work-dir/job-scheduler.py
 
 
