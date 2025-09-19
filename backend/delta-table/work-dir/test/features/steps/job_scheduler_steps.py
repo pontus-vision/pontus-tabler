@@ -19,14 +19,6 @@ def step_job_definition(context, name, type, query, frequency, query_output_tabl
         VALUES ('{job_id}', '{name}', '{type}', '{query}', '{frequency}', '{query_output_table}')
     """)
 
-    context.spark.sql(f"""
-        INSERT INTO pv_test.jobs_status (
-            id,
-            job_id,
-            last_run_time,
-            status
-        ) values ('{uuid.uuid4()}', '{job_id}', null, 'pending')
-    """)
 
 @when('run a job {times:d} time(s) with wait {seconds:d}"')
 def step_run_single_job(context, times, seconds):
@@ -48,41 +40,65 @@ def step_check_output_table(context, table_name, record):
     assert count == record, f"Expected {record} rows, got {count}"
 
 
-@then('I expect the table "{table_name}" to have "{expected_json}"')
-def step_check_output_json(context, table_name, expected_json):
+@then('I expect the SQL QUERY "{sql_query}" to have "{expected_json}"')
+def step_check_output_json(context, sql_query, expected_json):
     """
-    Assert that at least one row in the Delta table contains all key-value pairs
-    from the expected JSON (extra columns are allowed).
+    Assert that the last row(s) in the Delta table match the expected JSON(s).
+    - If expected_json is an object, check only the last row.
+    - If expected_json is an array of objects, check the last N rows in order.
+    Extra columns in the table are allowed.
     """
+    # Parse JSON
     try:
-        expected_dict = json.loads(expected_json)
+        parsed_json = json.loads(expected_json)
     except json.JSONDecodeError as e:
         raise AssertionError(f"❌ Invalid JSON in feature file: {expected_json}\nError: {e}")
 
+    df = context.spark.sql(f"{sql_query}")
 
-
-
-    df = context.spark.sql(f"SELECT * FROM delta.`{table_name}` ORDER BY id DESC LIMIT 1")
-    print(f"DATAFRAME: #{df}")
     rows = [row.asDict(recursive=True) for row in df.collect()]
 
-    
-
     print("🔎 Table contents:", rows)
+
     if expected_json == '[]' and len(rows) == 0:
         return True
 
-    match = any(
-        all(row.get(k) == v for k, v in expected_dict.items())
-        for row in rows
-    )
+    if not rows:
+        raise AssertionError(f"❌ No rows found in table {sql_query}")
 
-    if not match:
-        raise AssertionError(
-            f"❌ Expected row not found in table {table_name}.\n"
-            f"Expected (subset): {expected_dict}\n"
-            f"Found: {rows}"
-       )
+    # If parsed_json is a dict → single row check
+    if isinstance(parsed_json, dict):
+        last_row = rows[-1]
+        match = all(last_row.get(k) == v for k, v in parsed_json.items())
+        if not match:
+            raise AssertionError(
+                f"❌ Expected last row in {sql_query} to contain {parsed_json}\n"
+                f"Found: {last_row}"
+            )
+        return True
+
+    # If parsed_json is a list → check last N rows
+    if isinstance(parsed_json, list):
+        expected_count = len(parsed_json)
+        if len(rows) < expected_count:
+            raise AssertionError(
+                f"❌ Not enough rows in {sql_query} to check last {expected_count}\n"
+                f"Found only {len(rows)} rows"
+            )
+
+        last_n_rows = rows[-expected_count:]
+        for i, expected_dict in enumerate(parsed_json):
+            actual_row = last_n_rows[i]
+            match = all(actual_row.get(k) == v for k, v in expected_dict.items())
+            if not match:
+                raise AssertionError(
+                    f"❌ Row {i+1} from the last {expected_count} rows in {sql_query} does not match.\n"
+                    f"Expected: {expected_dict}\n"
+                    f"Found: {actual_row}"
+                )
+        return True
+
+    raise AssertionError(f"❌ Unsupported JSON format: {expected_json}")
 
 @then('the job status for "{job_name}" should be "{status}"')
 def step_check_job_status(context, job_name, status):
