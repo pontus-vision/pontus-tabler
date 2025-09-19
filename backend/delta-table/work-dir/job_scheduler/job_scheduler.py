@@ -53,6 +53,11 @@ class JobScheduler:
     def task(self, job_id: str, query: str, output_table: str):
         print(f"[{datetime.now().isoformat()}] Running job {job_id}")
         status = 'failed'
+        self.spark.sql(f"""
+            INSERT INTO pv_test.jobs_status (id, job_id, last_run_time, status) 
+            VALUES ('{uuid.uuid4()}', '{job_id}', '{datetime.now().replace(microsecond=0)}', 'started')
+        """)
+        run_time = datetime.now().replace(microsecond=0)
         try:
             print(f"PRINTING QUERY: {query}")
             df = self.spark.sql(query)          
@@ -63,14 +68,10 @@ class JobScheduler:
 
         print("BEFORE INSERTING JOB STATUS")
         self.spark.sql(f"""
-            UPDATE pv_test.jobs_status SET 
-            status = '{status}', 
-            last_run_time = '{datetime.now().replace(microsecond=0)}'
-            WHERE job_id = '{job_id}'
+            INSERT INTO pv_test.jobs_status (id, job_id, last_run_time, status) 
+            VALUES ('{uuid.uuid4()}', '{job_id}', '{run_time}', '{status}')
         """)
-        print("AFTER INSERTING JOB STATUS")
         
-        print(self.spark.sql("""SELECT * FROM pv_test.jobs_status""").collect())
 
     def run_single_job(self):
         now = datetime.now().replace(second=0, microsecond=0)
