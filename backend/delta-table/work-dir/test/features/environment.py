@@ -4,6 +4,7 @@ from pyspark.conf import SparkConf
 import uuid
 import sys
 import os
+from delta.tables import DeltaTable
 
 job_scheduler_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, job_scheduler_dir)
@@ -31,36 +32,7 @@ def spark_context(context):
 # Use the fixture in all scenarios
 def before_all(context):
     use_fixture(spark_context, context)
-    context.spark.sql("""
-        CREATE SCHEMA IF NOT EXISTS pv_test
-    """)
-    context.spark.sql("""
-        CREATE TABLE IF NOT EXISTS pv_test.auth_groups (id STRING, name STRING, create_table BOOLEAN, 
-            read_table BOOLEAN, 
-            update_table BOOLEAN, 
-            delete_table BOOLEAN, 
-            create_dashboard BOOLEAN, 
-            read_dashboard BOOLEAN, 
-            update_dashboard BOOLEAN, 
-            delete_dashboard BOOLEAN) USING DELTA LOCATION '/data/pv_test/auth_groups'
-    """)
-    context.spark.sql("""
-        INSERT INTO pv_test.auth_groups (id, name, create_table, 
-            read_table, 
-            update_table, 
-            delete_table, 
-            create_dashboard, 
-            read_dashboard, 
-            update_dashboard, 
-            delete_dashboard) 
-            VALUES
-            ('1', 'foo', true, true, true, true, true, true, true, true)
-    """)
-    df = context.spark.sql("""
-        SELECT * FROM pv_test.auth_groups  
-    """)
-    print('TABLE CREATED')
-    df.write.option("inferSchema", "true").mode('append').format('delta').save("/data/pv_test/jobs_outputs/foo-output")
+    step_clean_db(context)
 
 
 def before_scenario(context, scenario):
@@ -106,9 +78,15 @@ def step_clean_db(context):
     context.spark.sql("""
         DELETE FROM pv_test.jobs_status
     """)
-    context.spark.sql("""
-        DELETE FROM delta.`/data/pv_test/jobs_outputs/foo-output`
-    """)
+
+    path = "/data/pv_test/jobs_outputs/foo-output"
+
+    if DeltaTable.isDeltaTable(context.spark, path):
+        context.spark.sql(f"DELETE FROM delta.`{path}`")
+    else:
+        print(f"⚠️ Table at {path} does not exist")
+
+
     context.spark.sql("""
         INSERT INTO pv_test.auth_groups (id, name, create_table, 
             read_table, 
