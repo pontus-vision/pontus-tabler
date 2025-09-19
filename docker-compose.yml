@@ -168,7 +168,9 @@ services:
     command:
       - sh
       - -c
-      - /usr/bin/python3 /opt/spark/work-dir/job-scheduler.py
+      - |
+        cd test
+        ./run-tests.sh
 
 
   frontend-server:
