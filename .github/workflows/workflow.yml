@@ -59,6 +59,20 @@ jobs:
           docker-compose -f docker-compose.yml \
             up --build --abort-on-container-exit --exit-code-from frontend-tests \
             delta-db app frontend-server frontend-tests webhook-receiver sql-app
+
+      - name: Remove delta lake tables and metastore files
+        run: |
+          sudo rm -Rf backend/delta-table/work-dir/spark-warehouse/data/*
+          sudo rm -Rf backend/delta-table/data/*
+          sudo rm -rf ./backend/delta-table/work-dir/metastore_db
+          sudo rm -f ./backend/delta-table/work-dir/derby.log    
+
+      - name: Job Scheduler Tests
+        if: success()  # Only runs if previous step (App Tests) succeeded
+        run: |
+          docker-compose -f docker-compose.yml \
+            up --build --abort-on-container-exit --exit-code-from delta-db \
+            delta-db 
           #      - name: Checking UID
           #        run: |
           #          docker-compose exec delta-db bash -c "id -u"
