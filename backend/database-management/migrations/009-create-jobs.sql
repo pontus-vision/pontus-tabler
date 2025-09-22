@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.jobs (
     query STRING NOT NULL,
     frequency STRING NOT NULL,
     query_output_table STRING,
-) USING DELTA LOCATION "/data/$SCHEMA_NAME/jobs";
+) USING DELTA LOCATION "/$DATA_DIR/$SCHEMA_NAME/jobs";

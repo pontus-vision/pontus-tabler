@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.groups_users (
     table_to__id STRING, 
     table_to__username STRING, 
     edge_label STRING
-) USING DELTA LOCATION "/data/$SCHEMA_NAME/groups_users";
+) USING DELTA LOCATION "/$DATA_DIR/$SCHEMA_NAME/groups_users";

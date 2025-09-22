@@ -6,6 +6,7 @@ BEELINE_URL="jdbc:hive2://delta-db:10000/default"
 CHANGELOG_DIR="$SCRIPT_DIR/migrations"
 INDEX_FILE="$CHANGELOG_DIR/changelog_index.txt"
 SCHEMA_NAME="pv_${ENVIRONMENT_MODE}"
+DATA_DIR="${DATA_DIR}"
 
 export SCHEMA_NAME
 

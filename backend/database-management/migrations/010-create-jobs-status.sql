@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.jobs_status (
     job_id STRING NOT NULL,
     last_run_time TIMESTAMP,
     status STRING NOT NULL,
-) USING DELTA LOCATION "/data/$SCHEMA_NAME/jobs_status";
+) USING DELTA LOCATION "/$DATA_DIR/$SCHEMA_NAME/jobs_status";

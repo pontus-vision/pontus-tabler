@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.auth_users (
     id STRING,
     username STRING, 
     password STRING
-) USING DELTA LOCATION "/data/$SCHEMA_NAME/auth_users";
+) USING DELTA LOCATION "/$DATA_DIR/$SCHEMA_NAME/auth_users";
