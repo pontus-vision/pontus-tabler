@@ -76,7 +76,6 @@ services:
         echo "Checking if service is up on port 3001..."
         timeout 1000 bash -c 'until nc -z sql-app 3001; do echo "Waiting for port 3001..."; sleep 1; done; echo "Port 3001 is open!"'
         echo "RUNNING INTEGRATION TESTS"
-        sleep 1000000
         ENVIRONMENT_MODE=test SCHEMA_NAME="pv_test" npm run jest
   app:
     build:
@@ -102,6 +101,7 @@ services:
       P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
       FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
       ENVIRONMENT_MODE: test
+      DATA_DIR: data
     volumes:
       - ./backend:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
