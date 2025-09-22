@@ -513,11 +513,11 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    
-    setTimeout(()=>{
-    gridApi?.setGridOption('columnDefs',cols)
+    // grid reset workaround, for when data changes like in new filter applied queries    
+    setTimeout(() => {
+      gridApi?.setGridOption('columnDefs', cols)
 
-    },20)
+    }, 20)
   }, [cols])
 
   const handleColumnSelect = (cols: Array<string | undefined>) => {
