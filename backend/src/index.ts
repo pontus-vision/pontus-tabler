@@ -81,6 +81,7 @@ import {
   registerUser,
   setup,
 } from './service/AuthUserService';
+import { createJob, deleteJob, readJob, updateJob } from './service/JobService';
 import { createWebhook } from './service/WebhookService';
 import { isJSONStringable, runQuery } from './db-utils';
 import { AUDIT, AUTH_GROUPS, GROUPS_USERS, schema, schemaSql } from './consts';
@@ -90,10 +91,24 @@ import { getJwtClaims } from './service/delta';
 
 const handlers: PontusServiceMethods = {
   createJobPost: async (req, res) => {
+    const response = await createJob(req.body)
 
+    res.send(response)
   },
   readJobPost: async (req, res) => {
+    const response = await readJob(req.body)
 
+    res.send(response)
+  },
+  updateJobPost: async(req, res) => {
+    const response = await updateJob(req.body)
+
+    res.send(response)
+  },
+  deleteJobPost: async(req, res) =>  {
+    const response = await deleteJob(req.body)
+
+    res.send(response)
   },
   sendWebhookPost: async (req, res) => {
     const response = await createWebhook(req.body)
