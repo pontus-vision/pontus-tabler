@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.dashboards (
     owner STRING, 
     state STRING, 
     folder STRING
-) USING DELTA LOCATION "/$DATA_DIR/$SCHEMA_NAME/dashboards";
+) USING DELTA LOCATION "$DATA_PREFIX/$SCHEMA_NAME/dashboards";

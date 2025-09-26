@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.auth_groups (
     read_dashboard BOOLEAN, 
     update_dashboard BOOLEAN, 
     delete_dashboard BOOLEAN
-) USING DELTA LOCATION "/$DATA_DIR/$SCHEMA_NAME/auth_groups";
+) USING DELTA LOCATION "$DATA_PREFIX/$SCHEMA_NAME/auth_groups";

@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.jobs (
     type STRING NOT NULL,
     query STRING NOT NULL,
     frequency STRING NOT NULL,
-    query_output_table STRING,
-) USING DELTA LOCATION "/$DATA_DIR/$SCHEMA_NAME/jobs";
+    query_output_table STRING
+) USING DELTA LOCATION "$DATA_PREFIX/$SCHEMA_NAME/jobs";
