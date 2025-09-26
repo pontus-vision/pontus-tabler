@@ -25,6 +25,7 @@ service:
             type: "graphite"
             query: "SELECT * FROM bar"
             freq: "0 0 * * *"
+            queryOutputTable: "/data/foo/bar"
           response:
             body:
               id: string
@@ -32,8 +33,9 @@ service:
               type: "graphite"
               query: "SELECT * FROM bar"
               freq: "0 0 * * *"
+              queryOutputTable: "/data/foo/bar"
     readJobPOST:
-      path: /job/read
+      path: /jobs/read
       method: POST
       request:
         name: JobReadReq 
@@ -57,6 +59,63 @@ service:
               type: "graphite"
               query: "SELECT * FROM bar"
               freq: "0 0 * * *"
+              queryOutputTable: "/data/foo/bar"
+    updateJobPOST:
+      path: /jobs/update
+      method: POST
+      request:
+        name: JobUpdateReq 
+        body:
+          properties:
+            id: string
+            name: optional<string>
+            type: optional<string>
+            query: optional<string>
+            queryOutputTable: optional<string>
+            freq: optional<string>
+      response:
+        docs: User logged in successfully
+        type: JobReadRes 
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-subscription-001
+          request:
+            id: "foobar"
+            name: "foo"
+            type: "graphite"
+            query: "SELECT * FROM bar"
+            freq: "0 0 * * *"
+            queryOutputTable: "/data/foo/bar"
+          response:
+            body:
+              id: "foo"
+              name: "foo"
+              type: "graphite"
+              query: "SELECT * FROM bar"
+              freq: "0 0 * * *"
+              queryOutputTable: "/data/foo/bar"
+    deleteJobPOST:
+      path: /jobs/delete
+      method: POST
+      request:
+        name: JobDeleteReq 
+        body:
+          properties: 
+            id: string
+      response:
+        docs: User logged in successfully
+        type: JobDeleteRes 
+      errors:
+        - BadRequestError
+        - InternalServerError
+      examples:
+        - name: example-subscription-001
+          request:
+            id: 'foo'
+          response:
+            body: 'Job deleted!'
     sendWebhookPOST:
       path: /webhook/create
       method: POST
@@ -1925,11 +1984,19 @@ types:
       type: string
       query: string
       freq: string
+      queryOutputTable: string
   JobCreateRes:
     properties: 
       id: string
     extends: 
       - JobCreateRef
+
+  JobUpdateRes:
+    properties: 
+      id: string
+    extends: 
+      - JobCreateRef
+  JobDeleteRes: string
   ExecuteQueryRes:
     properties:
       results: list<map<string,unknown>>
