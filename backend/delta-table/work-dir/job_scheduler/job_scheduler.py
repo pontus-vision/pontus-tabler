@@ -19,31 +19,6 @@ def next_cron(cron_str, timestamp_now):
     return f"{schedule.isoformat()}"
 
 
-# pv_test_jobs = spark.sql(f"""
-# SELECT *, next_cron(frequency, '{now}') AS next FROM pv_test.jobs 
-# WHERE next_cron(frequency, '{now}') = '{now.isoformat()}'
-# """)
-
-# print(f"JOBS: \n{pv_test_jobs} \n\n JOBS_STATUS: \n{pv_test_jobs_status}")
-
-
-
-
-# while True:
-#     now = datetime.now().replace(second=0, microsecond=0)  # round to minute
-
-#     for job in jobs:
-#         cron = Cron(job["cron"])
-#         schedule = cron.schedule(now).next()
-        
-
-#         print(f"Now: {now}, Job: {job}, schedule: {schedule}")
-#         if schedule <= now:
-#             print(f'Run job {job["name"]}')
-
-#     time.sleep(60)  
-    
-
 class JobScheduler:
     def __init__(self, spark, prefix: str):
         self.spark = spark
@@ -53,11 +28,16 @@ class JobScheduler:
     def task(self, job_id: str, query: str, output_table: str):
         print(f"[{datetime.now().isoformat()}] Running job {job_id}")
         status = 'failed'
+        
+        # Record start time immediately
+        start_time = datetime.now().replace(microsecond=0)
+        
+        # Insert started status
         self.spark.sql(f"""
             INSERT INTO pv_test.jobs_status (id, job_id, last_run_time, status) 
-            VALUES ('{uuid.uuid4()}', '{job_id}', '{datetime.now().replace(microsecond=0)}', 'started')
+            VALUES ('{uuid.uuid4()}', '{job_id}', '{start_time}', 'started')
         """)
-        run_time = datetime.now().replace(microsecond=0)
+        
         try:
             print(f"PRINTING QUERY: {query}")
             df = self.spark.sql(query)          
@@ -66,10 +46,13 @@ class JobScheduler:
         except Exception as e:
             print(f"Job {job_id} failed: {e}")
 
+        # Record completion time
+        end_time = datetime.now().replace(microsecond=0)
+        
         print("BEFORE INSERTING JOB STATUS")
         self.spark.sql(f"""
             INSERT INTO pv_test.jobs_status (id, job_id, last_run_time, status) 
-            VALUES ('{uuid.uuid4()}', '{job_id}', '{run_time}', '{status}')
+            VALUES ('{uuid.uuid4()}', '{job_id}', '{end_time}', '{status}')
         """)
         
 
