@@ -49,8 +49,8 @@ Feature: test jobs
   Scenario: Retry failed jobs
     Given Job def "bad_job", "bar2", "SELECT FROM non_existing_table", "* * * * *", "/data/pv_test/jobs_outputs/foo-output"
     When run a job 1 time(s) with wait 30"
-    Then I expect the SQL QUERY "SELECT * FROM delta.`/data/pv_test/jobs_status` ORDER BY last_run_time ASC LIMIT 2" to have "[{"status":"started"}, {"status":"failed"}]"
+    Then I expect the SQL QUERY "SELECT * FROM delta.`/data/pv_test/jobs_status` ORDER BY last_run_time ASC, status DESC LIMIT 2" to have "[{"status":"started"}, {"status":"failed"}]"
     And I expect the table "/data/pv_test/jobs_status" to have 2 record(s)
     When run a job 1 time(s) with wait 30"
-    Then I expect the SQL QUERY "SELECT * FROM delta.`/data/pv_test/jobs_status` ORDER BY last_run_time ASC LIMIT 2" to have "[{"status":"started"}, {"status":"failed"}]"
+    Then I expect the SQL QUERY "SELECT * FROM delta.`/data/pv_test/jobs_status` ORDER BY last_run_time ASC, status DESC LIMIT 2" to have "[{"status":"started"}, {"status":"failed"}]"
     And I expect the table "/data/pv_test/jobs_status" to have 4 record(s)
