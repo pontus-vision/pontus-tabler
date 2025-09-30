@@ -58,6 +58,10 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.get("[row-index='1'] [col-id='name']").dblclick({ force: true });
 
+    cy.contains("Admin")
+
+    //cy.get("ag-cell.ag-cell-normal-height.ag-cell-value.ag-cell-focus.ag-cell-inline-editing").should('exist')
+
     cy.get("[row-index='1'] [col-id='name']").type('Regular User{enter}');
 
     cy.contains('AuthGroup(s) created!').should('exist')

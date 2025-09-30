@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress';
-import { runQuery} from '../backend/src/db-utils';
+import { runQuery } from '../backend/src/db-utils';
 import * as dotenv from 'dotenv';
 import { schema, schemaSql } from '../backend/src/consts';
 
@@ -8,7 +8,7 @@ dotenv.config();
 const table = (name: string) => `${schemaSql}${name}`;
 
 const createWebhookTable = async () => {
-  console.log({schema, schemaSql})
+  console.log({ schema, schemaSql })
   try {
     await runQuery(`
       CREATE TABLE IF NOT EXISTS ${table('webhook_subscriptions')} (
@@ -31,7 +31,7 @@ const createWebhookTable = async () => {
 
 export default defineConfig({
   e2e: {
-    baseUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
+    baseUrl: process.env.FRONTEND_URL || 'http://172.18.0.3:5173',
     env: {
       nodeAppUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
     },
