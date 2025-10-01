@@ -30,7 +30,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get("[data-cy='tree-view']").should('exist')
 
-      cy.contains('Dashboards').click()
+      cy.get('[data-cy="sidebar-dashboard-btn"]').click()
 
       cy.contains('root').click()
 

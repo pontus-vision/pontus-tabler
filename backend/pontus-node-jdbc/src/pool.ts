@@ -4,7 +4,6 @@ import Jinst from "./jinst";
 import dm from "./drivermanager";
 import Connection from "./connection";
 import Statement from "./statement";
-import { ConnectOpts } from "net";
 
 interface ConnStatus {
   uuid: string; closed: boolean; readonly?: boolean; valid?: boolean

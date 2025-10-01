@@ -18,7 +18,7 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: 'jdbc:hive2://172.18.0.2:10000', // Update the connection URL according to your setup
+  url: 'jdbc:hive2://delta-db:10000', // Update the connection URL according to your setup
   drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
   properties: {
     user: 'NBuser',

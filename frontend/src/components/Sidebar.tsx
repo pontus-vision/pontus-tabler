@@ -196,6 +196,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           <button
             className={`sidebar__btn ${openDashboards ? 'opened' : ''}`}
             type="button"
+            data-cy="sidebar-dashboard-btn"
             onClick={() => {
               setOpenDashboards(true)
               navigate('/dashboards')

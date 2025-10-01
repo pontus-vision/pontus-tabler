@@ -31,7 +31,7 @@ const createWebhookTable = async () => {
 
 export default defineConfig({
   e2e: {
-    baseUrl: process.env.FRONTEND_URL || 'http://172.18.0.3:5173',
+    baseUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
     env: {
       nodeAppUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
     },
