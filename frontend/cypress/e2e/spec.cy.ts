@@ -386,7 +386,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.get("[data-cy='burguer-menu-input']").click()
 
-    cy.contains('Tables').click()
+    cy.contains('Tables').click({ force: true })
 
     cy.get("[data-cy='burguer-menu-input']").click()
 
