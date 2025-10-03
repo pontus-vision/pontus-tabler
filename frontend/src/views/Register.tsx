@@ -36,13 +36,18 @@ const RegisterView = ({ adminRoute }: Props) => {
     };
 
     if (adminRoute) {
-      const res = await registerAdmin(obj);
+      try {
 
-      if (res.status === 200) {
-        handleLogin(username, passwd);
-        setIsRegistered(true)
+        const res = await registerAdmin(obj);
 
-        //       navigate('/tables/read');
+        if (res.status === 200) {
+          handleLogin(username, passwd);
+          setIsRegistered(true)
+
+          //       navigate('/tables/read');
+        }
+      } catch (error) {
+        notificationManagerRef?.current?.addMessage('error', 'Error', JSON.stringify(error));
       }
     } else {
       const res = (await fetchDataAndNavigate(
