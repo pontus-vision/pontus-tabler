@@ -419,8 +419,22 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (!rows) return;
-    console.log({ ROWS: rows, cols: gridApi?.getColumnDefs() })
+
+
+
+
+
     cachedRowParams?.successCallback(rows, totalCount);
+
+
+    //    const colIndex = gridApi?.getColumnDefs().findIndex(col => col.colId === 'update-mode')
+
+
+    if (updateMode) {
+      gridApi?.setColumnVisible('update-mode', true)
+    }
+
+
   }, [rows, filterState, cachedRowParams]);
 
   useEffect(() => {
