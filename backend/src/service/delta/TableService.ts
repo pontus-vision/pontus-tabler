@@ -22,26 +22,6 @@ export const createTable = async (
 ): Promise<TableCreateRes> => {
   const uuid = generateUUIDv6();
 
-  const createQuery = `
-    CREATE TABLE IF NOT EXISTS ${schemaSql}${TABLES} (
-      id STRING,
-      name STRING,
-      label STRING,
-      cols ARRAY<STRUCT<
-        id STRING,
-        name STRING,
-        field STRING,
-        sortable BOOLEAN,
-        header_name STRING,
-        filter BOOLEAN,
-        kind STRING,
-        pivotIndex INTEGER,
-        description STRING,
-        regex STRING>>
-    ) USING DELTA LOCATION '/data/${schema}/${TABLES}';
-  `;
-
-  await runQuery(createQuery);
 
   const sqlCheck = (await runQuery(
     `SELECT * FROM ${schemaSql}${TABLES} WHERE name = ?`,
@@ -62,20 +42,17 @@ export const createTable = async (
 
     if (col.name !== 'id') {
       arr2.push(
-        `${snakeCase(col.name)} ${
-          col.kind === 'integer'
-            ? 'INTEGER'
-            : col.kind === 'checkboxes'
+        `${snakeCase(col.name)} ${col.kind === 'integer'
+          ? 'INTEGER'
+          : col.kind === 'checkboxes'
             ? 'BOOLEAN'
             : 'STRING'
         }`
       );
     }
     for (const prop in col) {
-      !col[prop] ? col[prop] = '' : '' 
+      !col[prop] ? col[prop] = '' : ''
     }
-
-    console.log({col})
 
     cols.push(
       `struct(
@@ -249,7 +226,7 @@ export const readTableById = async (
   const sql = await runQuery(
     `SELECT * FROM ${schemaSql}${TABLES} WHERE id = ?`,
     [data.id]
-  ) as {id: string, [key:string]: any}[]
+  ) as { id: string, [key: string]: any }[]
 
   if (sql.length === 1) {
     const parsed = JSON.parse(sql[0].cols);
@@ -308,7 +285,7 @@ export const deleteTable = async (data: TableDeleteReq) => {
 
     return 'Table deleted!';
   } catch (error) {
-    throw {code: 404}
+    throw { code: 404 }
   }
 };
 
