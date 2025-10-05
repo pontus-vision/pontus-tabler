@@ -49,6 +49,7 @@ function App() {
     i18n.changeLanguage(language)
   }, [])
 
+  const notificationManagerRef = useRef<MessageRefs>(null);
 
   return (
     <AuthProvider>
@@ -65,6 +66,7 @@ function App() {
         />
       }
       <div className="main-view">
+        <NotificationManager ref={notificationManagerRef} />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/auth/users" element={<AuthUsersView />} />
@@ -73,7 +75,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardView />} />
           <Route path="/admin" element={<AdminView />} />
           <Route path="/settings" element={<SettingsView />} />
-          <Route path="/tables/read" element={<TablesReadView />} />
+          <Route path="/tables/read" element={<TablesReadView notificationManagerRef={notificationManagerRef} />} />
           <Route
             path="/table/data/read/:id"
             element={<TableDataReadView />}
@@ -85,10 +87,10 @@ function App() {
 
           <Route path="/user/update/:id" element={<UpdateUser />} />
           <Route path="/register" element={<RegisterView />} />
-          <Route path="/register/user" element={<RegisterUser />} />
+          <Route path="/register/user" element={<RegisterUser notificationManagerRef={notificationManagerRef} />} />
           <Route
             path="/register/admin"
-            element={<RegisterView adminRoute={true} />}
+            element={<RegisterView adminRoute={true} notificationManagerRef={notificationManagerRef} />}
           />
           {/*
             <Route element={<ProtectedLayout allowedRoles={['Admin', 'User']} />}>
