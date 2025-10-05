@@ -150,23 +150,29 @@ const api = axios.create({
 
 // wrapper for every post request. eg. handling errors like Too Many Requests (429), internal server error (500), 503...
 const post = async (url: string, data?: any) => {
-  const accessToken = localStorage.getItem('accessToken') || '';
-  const refreshToken = localStorage.getItem('refreshToken') || '';
-  const baseURL = nodeAppUrl + '/PontusTest/1.0.0';
-  //const baseURL = 'http://node-app:8080' + '/PontusTest/1.0.0';
+  const accessToken = localStorage.getItem("accessToken") || "";
+  console.log({ accessToken })
+  const baseURL = nodeAppUrl + "/PontusTest/1.0.0";
   const headers = {
-    Authorization: `${accessToken}`,
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
+    Authorization: accessToken,
+    Accept: "application/json",
+    "Content-Type": "application/json",
   };
 
+  try {
+    const res = await api.post(baseURL + url, data, { headers });
+    return res;
+  } catch (err: any) {
+    // ✅ handle known cases
+    if (err.response) {
+      console.error("API error:", err.response.status, err.response.data);
+      // you can decide what to return
+      return { error: err.response };
+    }
 
-  const res = await api.post(baseURL + url, data, { headers })
-
-  // const res = await sendHttpRequest(baseURL + url, headers, '', data, 'POST');
-
-  return res;
+    console.error("Network or unknown error:", err.message);
+    return { error: err };
+  }
 };
 
 export const loginUser = async (
