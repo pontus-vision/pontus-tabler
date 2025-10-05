@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const res = await readUserGroups({ id: userId, filters: {} });
 
-      setUserGroups(res?.data.authGroups || []);
+      setUserGroups(res?.data?.authGroups || []);
       if (location.pathname === '/login') {
         navigate('/tables/read');
       }
