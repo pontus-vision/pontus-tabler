@@ -12,6 +12,7 @@ const useApiAndNavigate = () => {
   const fetchDataAndNavigate = async (
     func: (data: any) => Promise<any>,
     data: any,
+    url: string
   ) => {
     setLoading(true);
     setError(null);
@@ -25,6 +26,9 @@ const useApiAndNavigate = () => {
         navigate('/register/admin');
       }
 
+      if (res?.status === 200 && url) {
+        navigate(url)
+      }
 
       return res;
     } catch (error) {
