@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.groups_dashboards (
     table_from__name STRING,
     table_from__create STRING,
     table_from__delete STRING,
-    eable_from__read STRING,
+    table_from__read STRING,
     table_from__update STRING,
     table_to__id STRING,
     table_to__name STRING,
