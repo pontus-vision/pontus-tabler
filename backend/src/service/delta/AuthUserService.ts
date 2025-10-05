@@ -59,20 +59,6 @@ const createAuthGroup = async (data: AuthGroupCreateReq) => {
   const id = data.id || generateUUIDv6();
 
   // Step 1: Ensure table exists (DDL — no params)
-  await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${schemaSql}${AUTH_GROUPS} (
-      id STRING,
-      name STRING,
-      create_table BOOLEAN,
-      read_table BOOLEAN,
-      update_table BOOLEAN,
-      delete_table BOOLEAN,
-      create_dashboard BOOLEAN,
-      read_dashboard BOOLEAN,
-      update_dashboard BOOLEAN,
-      delete_dashboard BOOLEAN
-    ) USING DELTA LOCATION '/data/${schema}/${AUTH_GROUPS}';`
-  );
 
   // Step 2: Check for existing name
   const checkQuery = `SELECT COUNT(*) FROM ${schemaSql}${AUTH_GROUPS} WHERE name = ?`;
