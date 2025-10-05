@@ -75,8 +75,8 @@ const Dashboards = () => {
         );
       }
 
-      const authGroups = error?.data.authGroups;
-      const totalCount = error?.data.totalCount;
+      const authGroups = error?.data?.authGroups;
+      const totalCount = error?.data?.totalCount;
 
       authGroups && setGroups(authGroups);
       totalCount && setTotalGroups(totalCount);
