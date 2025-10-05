@@ -41,8 +41,6 @@ const TablesReadView = ({ rowsTested, notificationManagerRef }: Props) => {
   const { fetchDataAndNavigate } = useApiAndNavigate()
 
   const fetchTables = async () => {
-    console.log('FETCHING AUTH GROUPS')
-
     try {
       if (rowsTested) {
         throw 'No rows';
