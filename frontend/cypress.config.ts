@@ -35,7 +35,7 @@ export default defineConfig({
     env: {
       nodeAppUrl: process.env.FRONTEND_URL || 'http://frontend-server:5173',
     },
-    defaultCommandTimeout: 30000,
+    defaultCommandTimeout: 60000,
     video: false,
     setupNodeEvents(on, config) {
       on('task', {
@@ -106,13 +106,10 @@ export default defineConfig({
           try {
             await createWebhookTable();
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('auth_users')} (id STRING, username STRING, password STRING) USING DELTA LOCATION "data/${schema}/auth_users";`);
             await runQuery(`DELETE FROM ${table('auth_users')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('auth_groups')} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN , create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN) USING DELTA LOCATION "data/${schema}/auth_groups";`);
             await runQuery(`DELETE FROM ${table('auth_groups')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('groups_users')} (id STRING, table_from__id STRING, table_from__name STRING, table_to__id STRING, table_to__username STRING, edge_label STRING) USING DELTA LOCATION "data/${schema}/groups_users";`);
             await runQuery(`DELETE FROM ${table('groups_users')};`);
 
             return { success: true };
@@ -126,25 +123,18 @@ export default defineConfig({
           try {
             await createWebhookTable();
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('auth_users')} (id STRING, username STRING, password STRING) USING DELTA LOCATION "data/${schema}/auth_users";`);
             await runQuery(`DELETE FROM ${table('auth_users')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('auth_groups')} (id STRING, name STRING, create_table BOOLEAN , read_table BOOLEAN , update_table BOOLEAN , delete_table BOOLEAN , create_dashboard BOOLEAN , read_dashboard BOOLEAN , update_dashboard BOOLEAN , delete_dashboard BOOLEAN) USING DELTA LOCATION "data/${schema}/auth_groups";`);
             await runQuery(`DELETE FROM ${table('auth_groups')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('tables')} (id STRING, name STRING, label STRING, cols ARRAY<STRUCT<id STRING, name STRING, field STRING, sortable BOOLEAN, header_name STRING, filter BOOLEAN, kind STRING, pivotIndex INTEGER, description STRING, regex STRING>>) USING DELTA LOCATION "data/${schema}/tables";`);
             await runQuery(`DELETE FROM ${table('tables')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('groups_users')} (id STRING, table_from__id STRING, table_from__name STRING, table_to__id STRING, table_to__username STRING, edge_label STRING) USING DELTA LOCATION "data/${schema}/groups_users";`);
             await runQuery(`DELETE FROM ${table('groups_users')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('menu')} (id STRING, tree_obj_str STRING) USING DELTA LOCATION "data/${schema}/menu";`);
             await runQuery(`DELETE FROM ${table('menu')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('dashboards')} (id STRING, name STRING, owner STRING, state STRING, folder STRING) USING DELTA LOCATION "data/${schema}/dashboards";`);
             await runQuery(`DELETE FROM ${table('dashboards')};`);
 
-            await runQuery(`CREATE TABLE IF NOT EXISTS ${table('groups_dashboards')} (id STRING, table_from__id STRING, table_from__name STRING, table_from__create STRING, table_from__delete STRING, table_from__read STRING, table_from__update STRING, table_to__id STRING, table_to__name STRING, table_to__create STRING, table_to__read STRING, table_to__update STRING, table_to__delete STRING, edge_label STRING) USING DELTA LOCATION "data/${schema}/groups_dashboards"`);
             await runQuery(`DELETE FROM ${table('groups_dashboards')};`);
 
             await runQuery(`INSERT INTO ${table('tables')} (id, name, label, cols) VALUES (
