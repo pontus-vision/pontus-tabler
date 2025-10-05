@@ -19,9 +19,10 @@ import { useTranslation } from 'react-i18next';
 
 type Props = {
   rowsTested?: any[];
+  notificationManagerRef?: React.RefObject<MessageRefs>;
 };
 
-const TablesReadView = ({ rowsTested }: Props) => {
+const TablesReadView = ({ rowsTested, notificationManagerRef }: Props) => {
   const { t } = useTranslation()
   const [cols, setCols] = useState<ColDef[]>([
     { headerName: t('Name'), field: 'label', filter: true },
@@ -36,11 +37,12 @@ const TablesReadView = ({ rowsTested }: Props) => {
   const [to, setTo] = useState<number>(8);
   const [totalCount, setTotalCount] = useState<number>();
   const [isLoading, setIsLoading] = useState(false)
-  const notificationManagerRef = useRef<MessageRefs>();
   const navigate = useNavigate();
   const { fetchDataAndNavigate } = useApiAndNavigate()
 
   const fetchTables = async () => {
+    console.log('FETCHING AUTH GROUPS')
+
     try {
       if (rowsTested) {
         throw 'No rows';
@@ -179,7 +181,6 @@ const TablesReadView = ({ rowsTested }: Props) => {
             readAction: true,
           }}
         />
-        <NotificationManager ref={notificationManagerRef} />
       </div>
       <button style={{ marginTop: '2rem', transform: 'translateX(-50%)', position: 'relative', left: '50%' }} type='button' onClick={e => navigate('/table/edges')}>{t('Create Edges')}</button>
     </>
