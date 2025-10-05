@@ -147,11 +147,8 @@ const api = axios.create({
   },
 });
 
-
-// wrapper for every post request. eg. handling errors like Too Many Requests (429), internal server error (500), 503...
 const post = async (url: string, data?: any) => {
   const accessToken = localStorage.getItem("accessToken") || "";
-  console.log({ accessToken })
   const baseURL = nodeAppUrl + "/PontusTest/1.0.0";
   const headers = {
     Authorization: accessToken,
@@ -163,10 +160,8 @@ const post = async (url: string, data?: any) => {
     const res = await api.post(baseURL + url, data, { headers });
     return res;
   } catch (err: any) {
-    // ✅ handle known cases
     if (err.response) {
       console.error("API error:", err.response.status, err.response.data);
-      // you can decide what to return
       return { error: err.response };
     }
 

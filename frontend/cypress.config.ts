@@ -8,7 +8,6 @@ dotenv.config();
 const table = (name: string) => `${schemaSql}${name}`;
 
 const createWebhookTable = async () => {
-  console.log({ schema, schemaSql })
   try {
     await runQuery(`
       CREATE TABLE IF NOT EXISTS ${table('webhook_subscriptions')} (
