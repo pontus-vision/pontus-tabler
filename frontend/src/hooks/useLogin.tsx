@@ -31,8 +31,7 @@ const useLogin = () => {
         await login(userId);
       }
     } catch (error) {
-      console.log({ error })
-      if (error?.status === 404 || error?.status === 400)
+      if (error?.response?.status === 404 || error?.response?.status === 400)
         setError('Username and/or password is wrong!')
     }
     setLoading(false)
