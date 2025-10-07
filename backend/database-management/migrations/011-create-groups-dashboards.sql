@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.groups_dashboards (
     table_to__update STRING,
     table_to__delete STRING,
     edge_label STRING
-) USING DELTA LOCATION "/$DATA_PREFIX/$SCHEMA_NAME/groups_dashboards";
+) USING DELTA LOCATION "$DATA_PREFIX/$SCHEMA_NAME/groups_dashboards";
