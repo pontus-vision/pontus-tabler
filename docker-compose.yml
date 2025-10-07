@@ -103,7 +103,7 @@ services:
       P_DELTA_TABLE_HIVE_SERVER: jdbc:hive2://delta-db:10000
       FERN_TOKEN: fern_ZD6VQEU7lX3IrebxoIsjYmLuolVUd8-N
       ENVIRONMENT_MODE: test
-      DATA_PREFIX: data
+      DATA_PREFIX: /data
     volumes:
       - ./backend:/usr/src/app
       - /var/run/docker.sock:/var/run/docker.sock
