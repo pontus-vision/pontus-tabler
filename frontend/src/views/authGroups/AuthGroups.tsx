@@ -78,40 +78,50 @@ const AuthGroups = ({
 
   const fetchAuthGroups = async () => {
     setIsLoading1(true);
-    const res = await readAuthGroups({ from: 1, to: 100, filters: {} });
 
-    const authGroups = res?.data.authGroups;
+    try {
+      const res = await readAuthGroups({ from: 1, to: 100, filters: {} });
 
-    if (res?.status === 404) {
-      setAuthGroups([]);
-      setTotalGroups(0);
+      const authGroups = res?.data?.authGroups ?? [];
+
+      if (groupsToFilterOutById) {
+        const filtered = authGroups.filter(
+          (dash1) => !groupsToFilterOutById.some((dash2) => dash1.id === dash2.id)
+        );
+        setAuthGroups(filtered);
+        setTotalGroups(filtered.length);
+      } else {
+        setAuthGroups(authGroups);
+        setTotalGroups(res?.data?.totalGroups ?? authGroups.length);
+      }
+    } catch (err: any) {
+      console.error("Error fetching Auth Groups:", err);
+
+      const status = err.response?.status;
+
+      if (status === 404) {
+        setAuthGroups([]);
+        setTotalGroups(0);
+      } else if (status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          "error",
+          t("Error"),
+          `${t("Something went wrong. Could not fetch")} ${t("Auth Group(s)")}!`
+        );
+        setAuthGroups([]);
+        setTotalGroups(0);
+      } else {
+        notificationManagerRef?.current?.addMessage(
+          "error",
+          t("Network Error"),
+          `${t("Could not fetch")} ${t("Auth Group(s)")}.`
+        );
+        setAuthGroups([]);
+        setTotalGroups(0);
+      }
+    } finally {
       setIsLoading1(false);
-      return;
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        t('Error'),
-        `${t('Something went wrong. Could not fetch')} ${t('Auth Group(s)')}!`,
-      );
-      setAuthGroups([]);
-      setTotalGroups(0);
-      setIsLoading1(false);
-      return;
     }
-
-    if (groupsToFilterOutById) {
-      const filtered = res?.data.authGroups?.filter(
-        (dash1) =>
-          !groupsToFilterOutById.some((dash2) => dash1.id === dash2.id),
-      );
-
-      filtered && setAuthGroups(filtered);
-      setTotalGroups(filtered?.length);
-    } else {
-      authGroups && setAuthGroups(authGroups);
-      setTotalGroups(res?.data.totalGroups);
-    }
-    setIsLoading1(false);
   };
 
   const delAuthGroup = async (arr: AuthGroupRef[]) => {
@@ -140,22 +150,31 @@ const AuthGroups = ({
   const addGroup = async (data: AuthGroupRef) => {
     if (!addMode || data?.id) return;
 
-    const res = await createAuthGroup({ name: data.name });
+    try {
 
-    if (res?.status === 200) {
+      const res = await createAuthGroup({ name: data.name });
       notificationManagerRef?.current?.addMessage(
         'success',
         t('Success'),
         t(`AuthGroup(s) created`) + "!",
       );
-
-      await fetchAuthGroups();
-    } else {
+    } catch (error) {
       notificationManagerRef?.current?.addMessage(
         'error',
         t('Error'),
         `${t('Something went wrong. Could not create')} ${t('Auth Group(s)')}!`,
       );
+    }
+
+    try {
+      await fetchAuthGroups();
+    } catch (error) {
+      notificationManagerRef?.current?.addMessage(
+        'error',
+        t('Error'),
+        `${t('Something went wrong. Could not fetch Auth Group(s)')}`,
+      );
+
     }
 
     return

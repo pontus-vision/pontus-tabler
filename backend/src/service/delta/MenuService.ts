@@ -39,9 +39,6 @@ const findNestedObject = (path: string, obj: any) => {
 }
 
 const createTree = async (item: MenuItemTreeRef, path: string) => {
-  await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${schemaSql}${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/${schema}/${MENU}';`
-  );
 
   let res2 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);
 
@@ -136,9 +133,6 @@ export const updateMenuItem = async (
 export const readMenuTree = async (
   path: string,
 ): Promise<MenuReadRes> => {
-  await runQuery(
-    `CREATE TABLE IF NOT EXISTS ${schemaSql}${MENU} (id STRING, tree_obj_str STRING) USING DELTA LOCATION '/data/${schema}/${MENU}';`
-  );
 
   // Step 2: Query current contents
   let res2 = await runQuery(`SELECT * FROM ${schemaSql}${MENU}`);

@@ -11,6 +11,8 @@ export const DELTA_DB = 'deltadb'
 
 export const classPath = process.env['CLASSPATH']?.split(',');
 
+const deltaDbIpAddress = process.env['DELTA_DB_ADDRESS']
+
 
 if (!Jinst.getInstance().isJvmCreated()) {
   Jinst.getInstance().addOption('-Xrs');
@@ -18,7 +20,7 @@ if (!Jinst.getInstance().isJvmCreated()) {
 }
 
 export const config = {
-  url: 'jdbc:hive2://delta-db:10000', // Update the connection URL according to your setup
+  url: `jdbc:hive2://${deltaDbIpAddress || 'delta-db'}:10000`, // Update the connection URL according to your setup
   drivername: 'org.apache.hive.jdbc.HiveDriver', // Driver class name
   properties: {
     user: 'NBuser',

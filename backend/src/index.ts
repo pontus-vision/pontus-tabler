@@ -81,6 +81,7 @@ import {
   registerUser,
   setup,
 } from './service/AuthUserService';
+import { createJob, deleteJob, readJob, updateJob } from './service/JobService';
 import { createWebhook } from './service/WebhookService';
 import { isJSONStringable, runQuery } from './db-utils';
 import { AUDIT, AUTH_GROUPS, GROUPS_USERS, schema, schemaSql } from './consts';
@@ -88,8 +89,28 @@ import { getJwtClaims } from './service/delta';
 
 
 
-const handlers:PontusServiceMethods = {
-  sendWebhookPost: async (req, res)=> {
+const handlers: PontusServiceMethods = {
+  createJobPost: async (req, res) => {
+    const response = await createJob(req.body)
+
+    res.send(response)
+  },
+  readJobPost: async (req, res) => {
+    const response = await readJob(req.body)
+
+    res.send(response)
+  },
+  updateJobPost: async(req, res) => {
+    const response = await updateJob(req.body)
+
+    res.send(response)
+  },
+  deleteJobPost: async(req, res) =>  {
+    const response = await deleteJob(req.body)
+
+    res.send(response)
+  },
+  sendWebhookPost: async (req, res) => {
     const response = await createWebhook(req.body)
 
     res.send(response)
@@ -111,11 +132,11 @@ const handlers:PontusServiceMethods = {
 
     const jwt = getJwtClaims(token)
 
-    const userId = jwt['userId'] 
+    const userId = jwt['userId']
 
     const groupIds = await runQuery(`SELECT g.name FROM ${schemaSql}${GROUPS_USERS} gu JOIN ${schemaSql}${AUTH_GROUPS} g ON g.id=gu.table_from__id WHERE gu.table_to__id = ?`, [userId])
 
-    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, req.body, null, userId, JSON.stringify(groupIds.map(group=>group['name'])), new Date().toISOString().replace("Z", "")])
+    await runQuery(`INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, [token, req.path, req.body, null, userId, JSON.stringify(groupIds.map(group => group['name'])), new Date().toISOString().replace("Z", "")])
 
     res.send(response);
   },
@@ -481,11 +502,11 @@ const handlers:PontusServiceMethods = {
 
 export function withErrorHandler(handler) {
   return async (req, res, next) => {
-      if(req?.['authError']?.['code'] === 401) {
-        throw new UnauthorizedError(req?.['authError']?.['message'])
-      } else if(req?.['authError']?.['code'] === 400) {
-        throw new BadRequestError(req?.['authError']?.['message'])
-      }
+    if (req?.['authError']?.['code'] === 401) {
+      throw new UnauthorizedError(req?.['authError']?.['message'])
+    } else if (req?.['authError']?.['code'] === 400) {
+      throw new BadRequestError(req?.['authError']?.['message'])
+    }
     try {
       await handler(req, res);
     } catch (err) {
@@ -497,15 +518,15 @@ export function withErrorHandler(handler) {
       const body = isJSONStringable(req.body) ? JSON.stringify(req.body) : null;
 
       const error = {
-        code: err['errorName'] === 'NotFoundError' ? 404 : 
-              err['errorName'] === 'UnauthorizedError' ? 401 :
-              err['errorName'] === 'ForbiddenError' ? 403 :
+        code: err['errorName'] === 'NotFoundError' ? 404 :
+          err['errorName'] === 'UnauthorizedError' ? 401 :
+            err['errorName'] === 'ForbiddenError' ? 403 :
               err['errorName'] === 'BadRequestError' ? 400 :
-              err['errorName'] === 'ConflictEntityError' ? 409 :
-              err['errorName'] === 'TemporaryRedirect' ? 307 : 500,
+                err['errorName'] === 'ConflictEntityError' ? 409 :
+                  err['errorName'] === 'TemporaryRedirect' ? 307 : 500,
         message: err['msg']
       }
-      
+
       await runQuery(
         `INSERT INTO ${schemaSql}${AUDIT} (session_id, api_path, body, error, user_id, group_ids, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -515,7 +536,7 @@ export function withErrorHandler(handler) {
       if (typeof res.status === 'function') {
         const status = err?.code || 500;
         // res.status(status).json({ error: err.msg || 'Internal Server Error' });
-      } 
+      }
       throw err
     }
   };

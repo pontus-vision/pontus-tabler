@@ -74,11 +74,13 @@ const CreateTableView = ({ testId }: Props) => {
         throw t('There is already a table with that Name');
       }
 
-      notificationManagerRef?.current?.addMessage(
-        'success',
-        t('Success'),
-        t('Table created') + "!",
-      );
+      if (createRes?.status === 200) {
+        notificationManagerRef?.current?.addMessage(
+          'success',
+          t('Success'),
+          t('Table created') + "!",
+        );
+      }
     } catch (error: any) {
       console.log({ error })
       notificationManagerRef?.current?.addMessage(

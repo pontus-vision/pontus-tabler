@@ -6,3 +6,6 @@
 006-create-menu.sql
 007-webhook_subscriptions.sql
 008-create-audit.sql
+009-create-jobs.sql
+010-create-jobs-status.sql
+011-create-groups-dashboards.sql

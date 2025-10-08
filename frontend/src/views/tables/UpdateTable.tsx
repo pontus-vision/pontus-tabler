@@ -35,11 +35,15 @@ const UpdateTableView = ({ tableId }: Props) => {
   const notificationManagerRef = useRef<MessageRefs>();
 
   const fetchTable = async (id: string) => {
-    const data = await tableRead({ id });
-    setTable(data?.data);
+    try {
+      const data = await tableRead({ id });
+      setTable(data?.data);
 
-    data?.data.cols && setCols(data?.data.cols.sort((a, b) => a.pivotIndex - b.pivotIndex));
-    data?.data.label && setName(data?.data.label);
+      data?.data.cols && setCols(data?.data.cols.sort((a, b) => a.pivotIndex - b.pivotIndex));
+      data?.data.label && setName(data?.data.label);
+    } catch (error) {
+      notificationManagerRef?.current?.addMessage('error', 'Error', JSON.stringify(error));
+    }
   };
 
   useEffect(() => {

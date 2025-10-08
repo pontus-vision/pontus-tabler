@@ -419,8 +419,22 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (!rows) return;
-    console.log({ ROWS: rows, cols: gridApi?.getColumnDefs() })
+
+
+
+
+
     cachedRowParams?.successCallback(rows, totalCount);
+
+
+    //    const colIndex = gridApi?.getColumnDefs().findIndex(col => col.colId === 'update-mode')
+
+
+    if (updateMode) {
+      gridApi?.setColumnVisible('update-mode', true)
+    }
+
+
   }, [rows, filterState, cachedRowParams]);
 
   useEffect(() => {
@@ -513,7 +527,11 @@ const PVGridWebiny2 = ({
   };
 
   useEffect(() => {
-    console.log({ cols })
+    // grid reset workaround, for when data changes like in new filter applied queries    
+    //  setTimeout(() => {
+    //    gridApi?.setGridOption('columnDefs', cols)
+
+    //  }, 20)
   }, [cols])
 
   const handleColumnSelect = (cols: Array<string | undefined>) => {
@@ -542,9 +560,9 @@ const PVGridWebiny2 = ({
       if (cols[index]?.editable === false) return col
       return { ...col, editable: isNotEditable ? false : !col?.editable }
     }))
-    gridApi.setGridOption("columnDefs", columnDefs)
+    gridApi?.setGridOption("columnDefs", columnDefs)
     if (!val) {
-      gridApi.stopEditing(true)
+      gridApi?.stopEditing(true)
     }
   }
 
@@ -602,7 +620,7 @@ const PVGridWebiny2 = ({
       if (cols[index]?.editable === false) return col
       return { ...col, editable: isNotEditable ? false : !col?.editable }
     }))
-    gridApi.setGridOption("columnDefs", columnDefs)
+    gridApi?.setGridOption("columnDefs", columnDefs)
     console.log({ columnDefs })
     if (!editMode) {
       gridApi.stopEditing(true)

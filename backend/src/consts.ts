@@ -17,5 +17,7 @@ export const DASHBOARDS = 'dashboards';
 export const AUTH_GROUPS = 'auth_groups';
 export const schema = process.env.SCHEMA_NAME
 export const AUDIT = 'audit'
+export const JOBS = 'jobs'
+export const JOBS_STATUS = 'jobs_status'
 
 export const schemaSql = schema ? `${schema}.` : ''

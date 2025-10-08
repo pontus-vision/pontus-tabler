@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.webhook_subscriptions (
           operation STRING NOT NULL,
           endpoint STRING NOT NULL,
           secret_token_link STRING NOT NULL
-) USING DELTA LOCATION "/data/$SCHEMA_NAME/webhook_subscriptions";
+) USING DELTA LOCATION "$DATA_PREFIX/$SCHEMA_NAME/webhook_subscriptions";

@@ -19,7 +19,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.contains('Submit').click()
 
-    //cy.wait(8000)
+    cy.contains('User is registered.').should('be.visible')
 
     cy.get("[data-cy='header']").should('exist')
 
@@ -57,6 +57,10 @@ describe('Test Table (meta-data and data) CRUD', () => {
     cy.contains('Loading...').should('not.exist')
 
     cy.get("[row-index='1'] [col-id='name']").dblclick({ force: true });
+
+    cy.contains("Admin")
+
+    //cy.get("ag-cell.ag-cell-normal-height.ag-cell-value.ag-cell-focus.ag-cell-inline-editing").should('exist')
 
     cy.get("[row-index='1'] [col-id='name']").type('Regular User{enter}');
 
@@ -115,6 +119,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
     cy.contains('Add User(s)').click()
 
     cy.contains('Success').should('exist')
+    cy.contains('User(s) added to Regular User').should('exist')
 
     cy.get('body').click('bottomLeft')
 
@@ -129,7 +134,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.contains('Submit').click()
 
-    cy.wait(11000)
+    cy.get("[data-cy='header']").should('exist')
 
     cy.visit(`/dashboards`)
 

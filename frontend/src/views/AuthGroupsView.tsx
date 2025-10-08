@@ -181,33 +181,46 @@ const DashboardAuthGroupsView = () => {
   const fetchAuthGroups = async () => {
     setIsLoading1(true);
 
-    const res = (await fetchDataAndNavigate(readAuthGroups, {
-      from: 1,
-      to: 100,
-      filters: {},
-    })) as AxiosResponse<AuthGroupsReadRes>;
+    try {
+      const res = (await fetchDataAndNavigate(readAuthGroups, {
+        from: 1,
+        to: 100,
+        filters: {},
+      })) as AxiosResponse<AuthGroupsReadRes>;
 
-    if (res?.status === 404) {
-      setAuthGroups([]);
-      setTotalGroups(0);
+      const authGroups = res.data?.authGroups ?? [];
+      setAuthGroups(authGroups);
+      setTotalGroups(res.data?.totalGroups ?? 0);
+
+    } catch (err: any) {
+      console.error("Error fetching Auth Groups:", err);
+
+      // Axios puts status under err.response?.status
+      const status = err.response?.status;
+
+      if (status === 404) {
+        setAuthGroups([]);
+        setTotalGroups(0);
+      } else if (status === 500) {
+        notificationManagerRef?.current?.addMessage(
+          "error",
+          t("Error"),
+          `${t("Something went wrong. Could not fetch")} Auth Group(s)!`
+        );
+        setAuthGroups([]);
+        setTotalGroups(0);
+      } else {
+        notificationManagerRef?.current?.addMessage(
+          "error",
+          t("Network Error"),
+          `${t("Could not fetch")} Auth Group(s).`
+        );
+        setAuthGroups([]);
+        setTotalGroups(0);
+      }
+    } finally {
       setIsLoading1(false);
-      return;
-    } else if (res?.status === 500) {
-      notificationManagerRef?.current?.addMessage(
-        'error',
-        t('Error'),
-        `${t('Something went wrong. Could not fetch')} Auth Group(s)!`,
-      );
-      setAuthGroups([]);
-      setTotalGroups(0);
-      setIsLoading1(false);
-      return;
     }
-    const authGroups = res?.data.authGroups;
-
-    authGroups && setAuthGroups(authGroups);
-    setTotalGroups(res?.data.totalGroups);
-    setIsLoading1(false);
   };
 
   const updateGroups = async () => {

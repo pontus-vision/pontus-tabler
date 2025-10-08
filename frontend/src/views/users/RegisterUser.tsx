@@ -1,12 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import useApiAndNavigate from '../../hooks/useApi';
 import useLogin from '../../hooks/useLogin';
 import { registerUser } from '../../client';
+import NotificationManager, {
+  MessageRefs,
+} from '../../components/NotificationManager';
 
-const RegisterUser = () => {
+type Props = {
+  rowsTested?: any[];
+  notificationManagerRef?: React.RefObject<MessageRefs>;
+};
+
+const RegisterUser = ({ notificationManagerRef }): Props => {
   const { login, isAuthenticated } = useAuth();
   const [role, setRole] = useState('Admin');
   const [apiKeys, setApiKeys] = useState();
@@ -24,19 +32,23 @@ const RegisterUser = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log({ isAuthenticated })
       navigate('/tables/read')
     }
   }, [])
 
   const loginUser = async (e) => {
     e.preventDefault();
-    if (password2 !== password) return
-    const res = await registerUser({ password, passwordConfirmation: password2, username })
+    try {
 
-    console.log({ res })
+      if (password2 !== password) return
+      const res = await registerUser({ password, passwordConfirmation: password2, username })
 
-    handleLogin(username, password);
+      notificationManagerRef?.current?.addMessage('success', 'Success', 'User is registered.');
+
+      handleLogin(username, password);
+    } catch (error) {
+      notificationManagerRef?.current?.addMessage('error', 'Error', 'Could not register user.');
+    }
   }
 
   if (isAuthenticated) return

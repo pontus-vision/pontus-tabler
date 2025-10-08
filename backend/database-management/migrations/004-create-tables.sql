@@ -19,4 +19,4 @@ CREATE TABLE IF NOT EXISTS $SCHEMA_NAME.tables (
             regex STRING
         >
     >
-) USING DELTA LOCATION "/data/$SCHEMA_NAME/tables";
+) USING DELTA LOCATION "$DATA_PREFIX/$SCHEMA_NAME/tables";

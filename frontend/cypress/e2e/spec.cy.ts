@@ -13,6 +13,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.contains('Register').click();
 
+    cy.contains('Admin is registered.').should('be.visible')
     cy.get("[data-cy='header']").should('exist')
     cy.contains('Logout').click()
   }),
@@ -30,7 +31,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get("[data-cy='tree-view']").should('exist')
 
-      cy.contains('Dashboards').click()
+      cy.get('[data-cy="sidebar-dashboard-btn"]').click()
 
       cy.contains('root').click()
 
@@ -386,7 +387,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.get("[data-cy='burguer-menu-input']").click()
 
-    cy.contains('Tables').click()
+    cy.contains('Tables').click({ force: true })
 
     cy.get("[data-cy='burguer-menu-input']").click()
 

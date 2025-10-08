@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { loginUser, registerAdmin, registerUser } from '../client';
 import useApiAndNavigate from '../hooks/useApi';
 import { useNavigate } from 'react-router-dom';
@@ -9,14 +9,22 @@ import {
 } from '../typescript/api';
 import { AxiosResponse } from 'axios';
 import { useAuth } from '../AuthContext';
-import { getUserIdFromToken } from '../../utils';
+import NotificationManager, {
+  MessageRefs,
+} from '../components/NotificationManager';
+import {
+  TableColumnRef,
+  TableRef,
+  TableUpdateReq,
+} from '../../typescript/api';
 import useLogin from '../hooks/useLogin';
 
 type Props = {
   adminRoute?: boolean;
+  notificationManagerRef?: React.RefObject<MessageRefs>;
 };
 
-const RegisterView = ({ adminRoute }: Props) => {
+const RegisterView = ({ adminRoute, notificationManagerRef }: Props) => {
   const [passwd, setPasswd] = useState('');
   const [passwdConfirmation, setPasswdConfirmation] = useState('');
   const [username, setUsername] = useState('');
@@ -36,18 +44,24 @@ const RegisterView = ({ adminRoute }: Props) => {
     };
 
     if (adminRoute) {
-      const res = await registerAdmin(obj);
+      try {
 
-      if (res.status === 200) {
-        handleLogin(username, passwd);
-        setIsRegistered(true)
+        const res = await registerAdmin(obj);
 
-        //       navigate('/tables/read');
+        if (res.status === 200) {
+          handleLogin(username, passwd);
+          setIsRegistered(true)
+          notificationManagerRef?.current?.addMessage('success', 'Success', 'Admin is registered.');
+          navigate('/tables/read');
+        }
+      } catch (error) {
+        notificationManagerRef?.current?.addMessage('error', 'Error', JSON.stringify(error));
       }
     } else {
       const res = (await fetchDataAndNavigate(
         registerUser,
         obj,
+        '/tables/read'
       )) as AxiosResponse<RegisterUserRes>;
 
       // if (res.status === 200) {
@@ -58,14 +72,6 @@ const RegisterView = ({ adminRoute }: Props) => {
 
 
   };
-
-  useEffect(() => {
-    if (!isRegistered) return
-
-    if (!loading) {
-      navigate('/tables/read');
-    }
-  }, [loading])
   return (
     <div className="container">
       <h2>{adminRoute ? 'Admin' : 'User'} Registration</h2>

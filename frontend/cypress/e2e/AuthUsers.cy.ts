@@ -10,7 +10,7 @@ describe('Test auth user views', () => {
 
     cy.contains('Register').click();
 
-    cy.wait(8000)
+    cy.contains('Admin is registered.').should('be.visible')
 
     cy.get("[data-cy='header']").should('exist')
     cy.contains('Logout').click()

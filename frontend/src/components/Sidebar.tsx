@@ -37,6 +37,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
   const [showForms, setShowForms] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [openDashboards, setOpenDashboards] = useState(false);
+  const [openJobs, setOpenJobs] = useState(false);
   const [openAuthGroups, setOpenAuthGroups] = useState(false);
   const [openAuthUsers, setOpenAuthUsers] = useState(false);
   const dispatch = useDispatch();
@@ -148,6 +149,18 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
             className={`sidebar__btn`}
             type="button"
             onClick={() => {
+              setOpenJobs(!openJobs)
+              navigate('/jobs')
+            }}
+          >
+            {t('Jobs')}
+          </button>
+        </li>
+        <li className="sidebar__admin-options">
+          <button
+            className={`sidebar__btn`}
+            type="button"
+            onClick={() => {
               setOpenAuthGroups(!openAuthGroups)
               navigate('/auth/groups')
             }}
@@ -183,6 +196,7 @@ const Sidebar = ({ openedSidebar, setOpenedSidebar }: Props) => {
           <button
             className={`sidebar__btn ${openDashboards ? 'opened' : ''}`}
             type="button"
+            data-cy="sidebar-dashboard-btn"
             onClick={() => {
               setOpenDashboards(true)
               navigate('/dashboards')
