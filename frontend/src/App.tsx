@@ -32,6 +32,9 @@ import RegisterUser from './views/users/RegisterUser'
 import NotificationManager, { MessageRefs } from './components/NotificationManager';
 import SettingsView from './views/SettingsView';
 import { useTranslation } from 'react-i18next';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community'
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 function App() {
   const [count, setCount] = useState(0);

@@ -7,8 +7,6 @@ import {
   useState,
 } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
   CellClickedEvent,
   CellValueChangedEvent,
@@ -25,9 +23,10 @@ import {
   RowClickedEvent,
   RowEvent,
   SelectionChangedEvent,
+  themeQuartz,
 } from 'ag-grid-community';
 import PVAggridColumnSelector from '../components/PVAggridColumnSelector';
-import { newRowState } from '../store/sliceGridUpdate';
+import { themeBalham } from 'ag-grid-community';
 import { _isClickEvent } from 'chart.js/dist/helpers/helpers.core';
 
 import {
@@ -431,7 +430,9 @@ const PVGridWebiny2 = ({
 
 
     if (updateMode) {
-      gridApi?.setColumnVisible('update-mode', true)
+      gridApi?.applyColumnState({
+        state: [{ colId: 'age', hide: false }],
+      });
     }
 
 
@@ -494,6 +495,7 @@ const PVGridWebiny2 = ({
     rowModelType: 'infinite',
     cacheBlockSize: 100,
     suppressRowClickSelection: true,
+    overlayLoadingTemplate: '<span data-cy="grid-overlay" class="ag-overlay-loading-center">Please wait while data is loading...</span>'
   };
 
   // const defaultColDef = useMemo<ColDef>(() => {
@@ -516,8 +518,8 @@ const PVGridWebiny2 = ({
   }
 
   function onColumnMoved() {
-    if (columnApi) {
-      setColumnState(columnApi.getColumnState());
+    if (gridApi) {
+      setColumnState(gridApi?.getColumnState());
     }
   }
 
@@ -540,11 +542,15 @@ const PVGridWebiny2 = ({
       ?.map((col) => col.colId);
 
     if (hidden) {
-      gridApi?.setColumnsVisible(hidden, false);
+      gridApi?.applyColumnState({
+        state: [{ colId: hidden, hide: true }],
+      });
     }
 
     !cols.some((col) => col === undefined) &&
-      gridApi?.setColumnsVisible(cols as string[], true);
+      gridApi?.applyColumnState({
+        state: [{ colId: hidden, hide: false }],
+      });
   };
 
   const handleEditOnGrid = (val: boolean) => {
@@ -633,9 +639,13 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (deleteMode) {
-      columnApi?.setColumnVisible('delete-mode', true);
+      gridApi?.applyColumnState({
+        state: [{ colId: 'delete-mode', hide: false }],
+      });
     } else {
-      columnApi?.setColumnVisible('delete-mode', false);
+      gridApi?.applyColumnState({
+        state: [{ colId: 'delete-mode', hide: true }],
+      });
 
       selectedRows.forEach((row) => {
         row.setSelected(false);
@@ -645,9 +655,13 @@ const PVGridWebiny2 = ({
 
   useEffect(() => {
     if (updateMode) {
-      columnApi?.setColumnVisible('update-mode', true);
+      gridApi?.applyColumnState({
+        state: [{ colId: 'update-mode', hide: false }],
+      });
     } else {
-      columnApi?.setColumnVisible('update-mode', false);
+      gridApi?.applyColumnState({
+        state: [{ colId: 'update-mode', hide: true }],
+      });
     }
   }, [updateMode]);
 
@@ -657,8 +671,8 @@ const PVGridWebiny2 = ({
 
   // const gridStyle = useMemo(() => ({ height: "25rem", width: "100%" }), []);
   function restoreGridColumnStates() {
-    if (columnApi && lastState) {
-      columnApi.applyColumnState({ state: lastState });
+    if (gridApi && lastState) {
+      gridApi?.applyColumnState({ state: lastState });
     }
   }
 
@@ -667,16 +681,19 @@ const PVGridWebiny2 = ({
     updateGridHeight();
 
     if (selectRowByCell) {
-      columnApi?.setColumnVisible('click', true);
-      gridApi?.setColumnVisible('click', true);
+      gridApi?.applyColumnState({
+        state: [{ colId: 'click', hide: false }],
+      });
     }
 
     if (selection) {
-      columnApi?.setColumnVisible('selection-mode', true);
-      gridApi?.setColumnVisible('selection-mode', true);
-      // gridApi?.setColumnsVisible(['selection-mode'], true);
+      gridApi?.applyColumnState({
+        state: [{ colId: 'selection-mode', hide: false }],
+      });
     } else {
-      columnApi?.setColumnVisible('selection-mode', false);
+      gridApi?.applyColumnState({
+        state: [{ colId: 'selection-mode', hide: true }],
+      });
       // selectedRows.forEach((row) => {
       //   row.setSelected(false);
       // });
@@ -812,6 +829,7 @@ const PVGridWebiny2 = ({
           onEditOnGrid={handleEditOnGrid}
         />
         <AgGridReact
+          theme={themeQuartz}
           data-testid="ag-grid-component"
           gridOptions={gridOptions}
           onRowClicked={(e) => {

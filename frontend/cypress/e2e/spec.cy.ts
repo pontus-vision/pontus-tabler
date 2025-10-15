@@ -177,12 +177,11 @@ describe('Test Table (meta-data and data) CRUD', () => {
       cy.contains('Table 1').should('be.visible')
       cy.contains('Table 2').should('be.visible')
 
-      cy.get("span.ag-icon.ag-icon-menu").click()
+      cy.get("span.ag-icon.ag-icon-filter").click()
 
       cy.get('input.ag-input-field-input.ag-text-field-input[placeholder="Filter..."]').type('Table 1')
 
       cy.contains('Contains').click()
-
 
       cy.get('body').click("bottomLeft")
 
@@ -190,7 +189,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.contains('Table 2').should('not.exist')
 
-      cy.get("span.ag-icon.ag-icon-menu").click()
+      cy.get("span.ag-icon.ag-icon-filter").click()
 
       cy.contains('Contains').click()
 
@@ -200,17 +199,17 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get('body').click("bottomLeft")
 
-      cy.contains('Loading...').should('not.exist')
+      cy.get('[data-cy="grid-overlay"]').should('not.exist')
 
       cy.contains('Table 1').should('be.visible')
 
       cy.contains('Table 2').should('not.exist')
 
-      cy.get("span.ag-icon.ag-icon-menu").click()
+      cy.get("span.ag-icon.ag-icon-filter").click()
 
       cy.get('input.ag-input-field-input.ag-text-field-input[placeholder="Filter..."]').first().clear()
 
-      cy.contains('Loading...').should('not.exist')
+      cy.get('[data-cy="grid-overlay"]').should('not.exist')
 
       cy.get('.ag-header-row.ag-header-row-column[role="row"][aria-rowindex="1"]').find('.ag-header-cell-label[role="presentation"]').click('center')
 
@@ -218,7 +217,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get('.ag-sort-indicator-icon.ag-sort-descending-icon.ag-hidden').should('exist')
 
-      cy.contains('Loading...').should('not.exist')
+      cy.get('[data-cy="grid-overlay"]').should('not.exist')
 
       cy.get('[role="row"][row-index="0"]', { timeout: 15000 }).find('[role="gridcell"]', { timeout: 20000 }).should('contain.text', "Table 1")
 
@@ -226,7 +225,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get('.ag-header-row.ag-header-row-column[role="row"][aria-rowindex="1"]').find('.ag-header-cell-label[role="presentation"]').click('center')
 
-      cy.contains('Loading...').should('not.exist')
+      cy.get('[data-cy="grid-overlay"]').should('not.exist')
 
       cy.get('.ag-sort-indicator-icon.ag-sort-descending-icon').should('exist')
 
@@ -273,7 +272,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.wait(3000)
 
-      cy.contains('Loading...').should('not.exist')
+      cy.get('[data-cy="grid-overlay"]').should('not.exist')
 
       cy.get("[data-cy='edit-on-grid-toggle']").click()
 
@@ -313,7 +312,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
-      cy.contains('Loading...').should('not.exist')
+      cy.get('[data-cy="grid-overlay"]').should('not.exist')
 
       cy.get(`[role="row"][row-index="0"]`).should('exist')
 
@@ -347,7 +346,7 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
       cy.get(`[data-cy="grid-action-refresh-btn"]`).click()
 
-      cy.contains('Loading...').should('not.exist')
+      cy.get('[data-cy="grid-overlay"]').should('not.exist')
 
       cy.get(`[role="row"][row-index="1"]`).should('exist')
 
@@ -395,11 +394,11 @@ describe('Test Table (meta-data and data) CRUD', () => {
 
     cy.get('[data-cy="select-tables-container-1"] select').select('Table 1')
 
-    cy.get('[data-cy="select-tables-container-1"]').contains('Loading...').should('not.exist')
+    cy.get('[data-cy="select-tables-container-1"]').find('[data-cy="grid-overlay"]').should('not.exist')
 
     cy.get('[data-cy="select-tables-container-2"] select').select('Table 1')
 
-    cy.get('[data-cy="select-tables-container-2"]').contains('Loading...').should('not.exist')
+    cy.get('[data-cy="select-tables-container-2"]').find('[data-cy="grid-overlay"]').should('not.exist')
 
     cy.get('[data-cy="table-relationship-preview-col"]').first().find('td').first().contains('Foo2')
 
