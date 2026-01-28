@@ -50,7 +50,7 @@
     "i18next": "^22.5.0",
     "immer": "^9.0.6",
     "isomorphic-fetch": "^3.0.0",
-    "java": "^0.14.0",
+    "java": "^0.18.0",
     "jquery": "^3.6.0",
     "jquery-ui-sortable": "^1.0.0",
     "js-base64": "^3.6.0",
